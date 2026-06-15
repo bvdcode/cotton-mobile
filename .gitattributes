@@ -1,0 +1,9 @@
+* text=auto
+
+*.cs text diff=csharp
+*.xaml text
+*.xml text
+*.json text
+*.plist text
+*.svg text
+*.sh text eol=lf

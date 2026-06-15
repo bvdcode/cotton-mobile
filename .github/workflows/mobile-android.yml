@@ -1,0 +1,180 @@
+name: Mobile Android
+
+env:
+  PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
+  DOTNET_VERSION: 10.0.x
+  JAVA_VERSION: "21"
+  ANDROID_PLATFORM: "platforms;android-36"
+  ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "src/Cotton.Mobile/**"
+      - "src/Directory.Build.props"
+      - "scripts/mobile/**"
+      - ".github/workflows/mobile-android.yml"
+  pull_request:
+    paths:
+      - "src/Cotton.Mobile/**"
+      - "src/Directory.Build.props"
+      - "scripts/mobile/**"
+      - ".github/workflows/mobile-android.yml"
+  workflow_dispatch:
+    inputs:
+      build_signed_release:
+        description: Build signed APK and AAB artifacts.
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  android-debug:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager_bin" ]; then
+            sdkmanager_bin="$(command -v sdkmanager)"
+          fi
+          set +o pipefail
+          yes | "$sdkmanager_bin" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_bin" --install "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS" platform-tools
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Restore mobile project
+        run: dotnet restore "$PROJECT_PATH"
+
+      - name: Build debug APK
+        run: |
+          dotnet build "$PROJECT_PATH" \
+            -f net10.0-android \
+            -c Debug \
+            --no-restore \
+            -p:EmbedAssembliesIntoApk=true
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v5
+        with:
+          name: cotton-mobile-debug-apk
+          path: src/Cotton.Mobile/bin/Debug/net10.0-android/**/*Signed.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  android-signed-release:
+    name: Build Signed Release Artifacts
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.build_signed_release
+    permissions:
+      contents: read
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
+          if [ ! -x "$sdkmanager_bin" ]; then
+            sdkmanager_bin="$(command -v sdkmanager)"
+          fi
+          set +o pipefail
+          yes | "$sdkmanager_bin" --licenses >/dev/null
+          set -o pipefail
+          "$sdkmanager_bin" --install "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS" platform-tools
+
+      - name: Install MAUI Android workload
+        run: dotnet workload install maui-android
+
+      - name: Validate signing secrets
+        run: |
+          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
+            echo "ANDROID_KEYSTORE_BASE64 secret is required." >&2
+            exit 1
+          fi
+          if [ -z "${ANDROID_KEYSTORE_ALIAS:-}" ]; then
+            echo "ANDROID_KEYSTORE_ALIAS secret is required." >&2
+            exit 1
+          fi
+          if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
+            echo "ANDROID_KEYSTORE_PASSWORD secret is required." >&2
+            exit 1
+          fi
+          if [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
+            echo "ANDROID_KEY_PASSWORD is empty; using ANDROID_KEYSTORE_PASSWORD for the key password."
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          fi
+
+      - name: Restore mobile project
+        run: dotnet restore "$PROJECT_PATH"
+
+      - name: Decode upload keystore
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/cotton-upload.keystore"
+          chmod 600 "$RUNNER_TEMP/cotton-upload.keystore"
+
+      - name: Publish signed APK and AAB
+        run: |
+          dotnet publish "$PROJECT_PATH" \
+            -f net10.0-android \
+            -c Release \
+            --no-restore \
+            -p:AndroidPackageFormats=apk%3Baab \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="$RUNNER_TEMP/cotton-upload.keystore" \
+            -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
+            -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
+            -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD"
+
+      - name: Upload signed Android artifacts
+        uses: actions/upload-artifact@v5
+        with:
+          name: cotton-mobile-signed-android
+          path: |
+            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.apk
+            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
+          if-no-files-found: error
+          retention-days: 30

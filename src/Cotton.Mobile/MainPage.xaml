@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="Cotton.Mobile.MainPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+
+    <Grid Padding="24"
+          RowDefinitions="*,Auto">
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="24"
+                                 VerticalOptions="Center"
+                                 MaximumWidthRequest="520">
+                <Image Source="appiconfg.svg"
+                       HeightRequest="92"
+                       WidthRequest="92"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Start"
+                       SemanticProperties.Description="Cotton Cloud" />
+
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Cotton Cloud"
+                           FontSize="32"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                           SemanticProperties.HeadingLevel="Level1" />
+
+                    <Label Text="Sign in to your Cotton instance"
+                           FontSize="16"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout x:Name="LoadingView"
+                                     IsVisible="False"
+                                     Spacing="12">
+                    <ActivityIndicator x:Name="LoadingIndicator"
+                                       IsRunning="False"
+                                       HorizontalOptions="Start" />
+
+                    <Label x:Name="LoadingLabel"
+                           Text="Restoring session..."
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout x:Name="SignInView"
+                                     Spacing="16">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Instance URL"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                StrokeThickness="1"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="12,2"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                            <Entry x:Name="InstanceUrlEntry"
+                                   Text="https://app.cottoncloud.dev"
+                                   Keyboard="Url"
+                                   ReturnType="Go"
+                                   ClearButtonVisibility="WhileEditing"
+                                   Completed="OnConnectClicked"
+                                   SemanticProperties.Hint="Cotton instance URL" />
+                        </Border>
+
+                        <Label x:Name="StatusLabel"
+                               IsVisible="False"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                    </VerticalStackLayout>
+
+                    <Button x:Name="ConnectButton"
+                            Text="Connect"
+                            Clicked="OnConnectClicked"
+                            HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <VerticalStackLayout x:Name="AuthorizationProgressView"
+                                     IsVisible="False"
+                                     Spacing="16">
+                    <ActivityIndicator x:Name="AuthorizationProgressIndicator"
+                                       IsRunning="False"
+                                       HorizontalOptions="Start" />
+
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Waiting for browser approval"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                        <Label x:Name="AuthorizationProgressLabel"
+                               Text="Approve the request in your browser, then return to Cotton Cloud."
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                    </VerticalStackLayout>
+
+                    <Button x:Name="CancelAuthorizationButton"
+                            Text="Cancel"
+                            Clicked="OnCancelAuthorizationClicked"
+                            HorizontalOptions="Fill" />
+                </VerticalStackLayout>
+
+                <Border x:Name="ProfileView"
+                        IsVisible="False"
+                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                        StrokeThickness="1"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="16"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                    <VerticalStackLayout Spacing="16">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Signed in"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                            <Label x:Name="ProfileNameLabel"
+                                   FontSize="22"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                            <Label x:Name="ProfileEmailLabel"
+                                   FontSize="14"
+                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                        </VerticalStackLayout>
+
+                        <Label x:Name="ProfileInstanceLabel"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                        <Button x:Name="LogoutButton"
+                                Text="Log out"
+                                Clicked="OnLogoutClicked"
+                                HorizontalOptions="Fill" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Label Grid.Row="1"
+               Text="Vadim Belov / bvdcode"
+               FontSize="12"
+               HorizontalTextAlignment="Center"
+               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+    </Grid>
+
+</ContentPage>

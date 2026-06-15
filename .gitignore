@@ -2,50 +2,47 @@
 *.*~
 ~*.&
 ~$*
-project.lock.json
 .DS_Store
-*.pyc
-nupkg/
-*.lscache
 
-# Visual Studio Code
-.vscode
-
-# User-specific files
+# IDE/user files
+.idea/
+.vscode/
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
 
-# Build results
-.vs/
+# .NET and MAUI build output
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
 [Dd]ebug/
-[Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
 x64/
 x86/
-build/
-bld/
-[Bb]in/
-[Oo]bj/
-# MSBuild on Linux can create a literal obj\Debug directory for ESProj references.
-[Oo]bj\\*/
-[Oo]ut/
+artifacts/
+TestResults/
+*.trx
 msbuild.log
 msbuild.err
 msbuild.wrn
+
+# Android packaging/signing output
+*.apk
+*.aab
+*.apks
+*.keystore
+*.jks
+*.idsig
+*.key
+.mobile-signing/
+
+# Local app/runtime state
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
-[Tt]est[Rr]esults/
-*.trx
-performance/results/
-BenchmarkDotNet.Artifacts/
-*.key
-data
+data/
 notes/
-sixlabors.lic
-AGENTS.md
-# Local visual-QA scratch (capture scripts + screenshots)
 .qa/
+AGENTS.md

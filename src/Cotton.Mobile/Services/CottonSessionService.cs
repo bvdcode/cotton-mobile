@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Services
                 cancellationToken).ConfigureAwait(false);
 
             bool browserOpened = await MainThread.InvokeOnMainThreadAsync(
-                () => _browser.OpenAsync(session.ApprovalUri, CreateBrowserLaunchOptions()))
+                () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.External()))
                 .ConfigureAwait(false);
             if (!browserOpened)
             {
@@ -190,15 +190,6 @@ namespace Cotton.Mobile.Services
                 default:
                     return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationFailed, instanceUri, poll.Error);
             }
-        }
-
-        private static BrowserLaunchOptions CreateBrowserLaunchOptions()
-        {
-            return new BrowserLaunchOptions
-            {
-                LaunchMode = BrowserLaunchMode.External,
-                TitleMode = BrowserTitleMode.Show,
-            };
         }
 
         private static TimeSpan ResolvePollDelay(AppCodeAuthorizationSession session, AppCodePollResult poll)

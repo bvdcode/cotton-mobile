@@ -1,6 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:Cotton.Mobile"
              x:Class="Cotton.Mobile.MainPage"
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
@@ -56,7 +57,7 @@
                                 Padding="12,2"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                             <Entry x:Name="InstanceUrlEntry"
-                                   Text="https://app.cottoncloud.dev"
+                                   Text="{x:Static local:CottonApplicationLinks.DefaultInstanceUrl}"
                                    Keyboard="Url"
                                    ReturnType="Go"
                                    ClearButtonVisibility="WhileEditing"
@@ -137,11 +138,23 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Label Grid.Row="1"
-               Text="Vadim Belov / bvdcode"
-               FontSize="12"
-               HorizontalTextAlignment="Center"
-               TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+        <HorizontalStackLayout Grid.Row="1"
+                               Spacing="12"
+                               HorizontalOptions="Center"
+                               VerticalOptions="Center">
+            <Label Text="Vadim Belov / bvdcode"
+                   FontSize="12"
+                   VerticalTextAlignment="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+            <Button Text="Privacy"
+                    Clicked="OnPrivacyPolicyClicked"
+                    BackgroundColor="Transparent"
+                    Padding="8,0"
+                    MinimumHeightRequest="32"
+                    MinimumWidthRequest="44"
+                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+        </HorizontalStackLayout>
     </Grid>
 
 </ContentPage>

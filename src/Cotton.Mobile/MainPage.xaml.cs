@@ -7,21 +7,26 @@ namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const string DefaultInstanceUrl = "https://app.cottoncloud.dev";
 		private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
 
 		private readonly ICottonSessionService _sessionService;
+		private readonly IBrowser _browser;
 		private readonly ILogger<MainPage> _logger;
 
 		private CancellationTokenSource? _authorizationCancellation;
 		private bool _didRestoreSession;
 
-		public MainPage(ICottonSessionService sessionService, ILogger<MainPage> logger)
+		public MainPage(
+			ICottonSessionService sessionService,
+			IBrowser browser,
+			ILogger<MainPage> logger)
 		{
 			ArgumentNullException.ThrowIfNull(sessionService);
+			ArgumentNullException.ThrowIfNull(browser);
 			ArgumentNullException.ThrowIfNull(logger);
 
 			_sessionService = sessionService;
+			_browser = browser;
 			_logger = logger;
 			InitializeComponent();
 		}
@@ -54,6 +59,11 @@ namespace Cotton.Mobile
 		private async void OnLogoutClicked(object? sender, EventArgs e)
 		{
 			await LogoutAsync();
+		}
+
+		private async void OnPrivacyPolicyClicked(object? sender, EventArgs e)
+		{
+			await OpenPrivacyPolicyAsync();
 		}
 
 		private async Task RestoreSessionAsync()
@@ -118,13 +128,28 @@ namespace Cotton.Mobile
 			try
 			{
 				await _sessionService.LogoutAsync();
-				InstanceUrlEntry.Text = DefaultInstanceUrl;
+				InstanceUrlEntry.Text = CottonApplicationLinks.DefaultInstanceUrl;
 				ShowSignIn("Signed out.");
 			}
 			catch (Exception exception)
 			{
 				_logger.LogError(exception, "Cotton mobile logout failed.");
 				ShowProfileError("Logout failed. Try again.");
+			}
+		}
+
+		private async Task OpenPrivacyPolicyAsync()
+		{
+			try
+			{
+				await _browser.OpenAsync(
+					new Uri(CottonApplicationLinks.PrivacyPolicyUrl),
+					CottonBrowserLaunchOptions.External());
+			}
+			catch (Exception exception)
+			{
+				_logger.LogWarning(exception, "Failed to open Cotton Cloud privacy policy.");
+				await DisplayAlertAsync("Privacy Policy", "Could not open the privacy policy.", "OK");
 			}
 		}
 

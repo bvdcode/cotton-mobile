@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
         private readonly IScreenReaderService _screenReader;
+        private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
 
@@ -27,6 +28,8 @@ namespace Cotton.Mobile.ViewModels
             CottonMobileOptions options,
             IUserDialogService dialogService,
             IScreenReaderService screenReader,
+            ICottonFileBrowserService fileBrowserService,
+            ILogger<MainPageFileBrowserController> fileBrowserLogger,
             IMainPagePresentationService presentationService,
             ILogger<MainPageViewModel> logger)
         {
@@ -35,6 +38,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(screenReader);
+            ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(fileBrowserLogger);
             ArgumentNullException.ThrowIfNull(presentationService);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -47,10 +52,18 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
 
             Display = new MainPageDisplayState(options.DefaultInstanceUrl);
+            _fileBrowser = new MainPageFileBrowserController(
+                Display,
+                fileBrowserService,
+                dialogService,
+                fileBrowserLogger);
             ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(CancelAuthorizationAsync, () => Display.IsCancelAuthorizationEnabled);
             LogoutCommand = new AsyncCommand(LogoutAsync, () => Display.IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync);
+            RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync);
+            NavigateFilesUpCommand = new AsyncCommand(_fileBrowser.NavigateUpAsync, () => Display.CanNavigateFilesUp);
+            OpenFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.OpenEntryAsync);
         }
 
         public MainPageDisplayState Display { get; }
@@ -62,6 +75,12 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand LogoutCommand { get; }
 
         public AsyncCommand PrivacyPolicyCommand { get; }
+
+        public AsyncCommand RefreshFilesCommand { get; }
+
+        public AsyncCommand NavigateFilesUpCommand { get; }
+
+        public AsyncCommand<CottonFileBrowserEntry> OpenFileBrowserEntryCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -81,7 +100,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonSessionResult result = await _sessionService.RestoreAsync();
-                ApplySessionResult(result, ReadyStatus);
+                await ApplySessionResultAsync(result, ReadyStatus);
             }
             catch (Exception exception)
             {
@@ -110,7 +129,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonSessionResult result = await _sessionService.SignInWithBrowserAsync(
                     instanceUri,
                     authorizationCancellation.Token);
-                ApplySessionResult(result, ReadyStatus);
+                await ApplySessionResultAsync(result, ReadyStatus);
             }
             catch (OperationCanceledException exception) when (authorizationCancellation.IsCancellationRequested)
             {
@@ -146,6 +165,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 await _sessionService.LogoutAsync();
+                _fileBrowser.Clear();
                 Display.InstanceUrl = _options.DefaultInstanceUrl;
                 ShowSignIn("Signed out.");
             }
@@ -187,7 +207,7 @@ namespace Cotton.Mobile.ViewModels
             return instanceUri;
         }
 
-        private void ApplySessionResult(CottonSessionResult result, string unauthenticatedStatus)
+        private async Task ApplySessionResultAsync(CottonSessionResult result, string unauthenticatedStatus)
         {
             if (result.InstanceUri is not null)
             {
@@ -198,9 +218,12 @@ namespace Cotton.Mobile.ViewModels
             {
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 ShowProfile(profile);
+                await _fileBrowser.InitializeAsync(result.InstanceUri);
+                RefreshCommands();
                 return;
             }
 
+            _fileBrowser.Clear();
             ShowSignIn(_presentationService.ResolveStatusMessage(result, unauthenticatedStatus));
         }
 
@@ -244,6 +267,8 @@ namespace Cotton.Mobile.ViewModels
             ConnectCommand.RaiseCanExecuteChanged();
             CancelAuthorizationCommand.RaiseCanExecuteChanged();
             LogoutCommand.RaiseCanExecuteChanged();
+            NavigateFilesUpCommand.RaiseCanExecuteChanged();
+            OpenFileBrowserEntryCommand.RaiseCanExecuteChanged();
         }
 
         private void AnnounceStatus(string? status)

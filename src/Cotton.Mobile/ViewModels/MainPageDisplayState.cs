@@ -1,5 +1,8 @@
 namespace Cotton.Mobile.ViewModels
 {
+    using System.Collections.ObjectModel;
+    using Cotton.Mobile.Services;
+
     public class MainPageDisplayState : ViewModelBase
     {
         private MainPageViewState _state = MainPageViewState.SignIn;
@@ -11,9 +14,13 @@ namespace Cotton.Mobile.ViewModels
         private string _profileEmail = string.Empty;
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
+        private string _filesTitle = "Files";
+        private string? _filesStatus;
         private bool _isInputEnabled = true;
         private bool _isCancelAuthorizationEnabled = true;
         private bool _isLogoutEnabled = true;
+        private bool _isFilesLoading;
+        private bool _canNavigateFilesUp;
 
         public MainPageDisplayState(string defaultInstanceUrl)
         {
@@ -89,6 +96,42 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsProfileStatusVisible => !string.IsNullOrWhiteSpace(ProfileStatus);
 
+        public string FilesTitle
+        {
+            get => _filesTitle;
+            private set => SetProperty(ref _filesTitle, value);
+        }
+
+        public string? FilesStatus
+        {
+            get => _filesStatus;
+            private set
+            {
+                if (SetProperty(ref _filesStatus, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesStatusVisible));
+                }
+            }
+        }
+
+        public bool IsFilesStatusVisible => !string.IsNullOrWhiteSpace(FilesStatus);
+
+        public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
+
+        public bool IsFilesLoading
+        {
+            get => _isFilesLoading;
+            private set => SetProperty(ref _isFilesLoading, value);
+        }
+
+        public bool CanNavigateFilesUp
+        {
+            get => _canNavigateFilesUp;
+            private set => SetProperty(ref _canNavigateFilesUp, value);
+        }
+
+        public bool IsFilesEmptyVisible => !IsFilesLoading && FileEntries.Count == 0;
+
         public bool IsInputEnabled
         {
             get => _isInputEnabled;
@@ -159,6 +202,12 @@ namespace Cotton.Mobile.ViewModels
             ProfileEmail = profile.Email;
             ProfileInstance = profile.Instance;
             ProfileStatus = null;
+            FilesTitle = "Files";
+            FilesStatus = "Loading files...";
+            IsFilesLoading = true;
+            CanNavigateFilesUp = false;
+            FileEntries.Clear();
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
             IsLogoutEnabled = true;
             IsInputEnabled = false;
         }
@@ -168,6 +217,39 @@ namespace Cotton.Mobile.ViewModels
             SetState(MainPageViewState.Profile);
             ProfileStatus = status;
             IsLogoutEnabled = true;
+        }
+
+        public void ShowFilesLoading(string status)
+        {
+            IsFilesLoading = true;
+            FilesStatus = status;
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ShowFiles(CottonFolderContent content, bool canNavigateUp)
+        {
+            ArgumentNullException.ThrowIfNull(content);
+
+            FilesTitle = content.FolderName;
+            FileEntries.Clear();
+            foreach (CottonFileBrowserEntry entry in content.Entries)
+            {
+                FileEntries.Add(entry);
+            }
+
+            IsFilesLoading = false;
+            CanNavigateFilesUp = canNavigateUp;
+            FilesStatus = content.Entries.Count == 0
+                ? "This folder is empty."
+                : $"{content.Entries.Count} item(s)";
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ShowFilesStatus(string status)
+        {
+            IsFilesLoading = false;
+            FilesStatus = status;
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
         private void SetStatus(string? status)

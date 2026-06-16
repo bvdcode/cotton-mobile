@@ -14,25 +14,29 @@ namespace Cotton.Mobile.Services
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly ICottonTokenStore _tokenStore;
         private readonly IBrowser _browser;
+        private readonly IApplicationForegroundService _foregroundService;
 
         public CottonSessionService(
             ICottonClientFactory clientFactory,
             ICottonInstanceStore instanceStore,
             ICottonMobileApplicationMetadata metadata,
             ICottonTokenStore tokenStore,
-            IBrowser browser)
+            IBrowser browser,
+            IApplicationForegroundService foregroundService)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(metadata);
             ArgumentNullException.ThrowIfNull(tokenStore);
             ArgumentNullException.ThrowIfNull(browser);
+            ArgumentNullException.ThrowIfNull(foregroundService);
 
             _clientFactory = clientFactory;
             _instanceStore = instanceStore;
             _metadata = metadata;
             _tokenStore = tokenStore;
             _browser = browser;
+            _foregroundService = foregroundService;
         }
 
         public async Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default)
@@ -83,6 +87,14 @@ namespace Cotton.Mobile.Services
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.BrowserUnavailable, instanceUri);
             }
 
+            bool returnedBeforeExpiration = await WaitForBrowserReturnAsync(
+                session,
+                cancellationToken).ConfigureAwait(false);
+            if (!returnedBeforeExpiration)
+            {
+                return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
+            }
+
             return await PollUntilCompleteAsync(client, session, instanceUri, cancellationToken).ConfigureAwait(false);
         }
 
@@ -129,6 +141,30 @@ namespace Cotton.Mobile.Services
             }
 
             return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
+        }
+
+        private async Task<bool> WaitForBrowserReturnAsync(
+            AppCodeAuthorizationSession session,
+            CancellationToken cancellationToken)
+        {
+            TimeSpan remaining = session.ExpiresAt - DateTime.UtcNow;
+            if (remaining <= TimeSpan.Zero)
+            {
+                return false;
+            }
+
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            timeout.CancelAfter(remaining);
+
+            try
+            {
+                await _foregroundService.WaitForNextResumeAsync(timeout.Token).ConfigureAwait(false);
+                return true;
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
+            {
+                return false;
+            }
         }
 
         private async Task<CottonSessionResult?> TryCreateCompletedResultAsync(

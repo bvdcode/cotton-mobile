@@ -22,6 +22,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);
 			builder.Services.AddSingleton<IBrowser>(Browser.Default);
+			builder.Services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
 			builder.Services.AddSingleton<ICottonMobileApplicationMetadata, CottonMobileApplicationMetadata>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();

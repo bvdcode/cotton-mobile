@@ -1,1 +1,1 @@
-Secure sign-in and profile preview for your Cotton Cloud instance
+Sign in, browse files, and download from your Cotton Cloud instance

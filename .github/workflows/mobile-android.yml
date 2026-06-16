@@ -319,9 +319,11 @@ jobs:
 
       - name: Confirm listing review submission
         run: |
-          if [ "${{ inputs.confirm_store_listing_review_submission }}" != "true" ]; then
+          if [ "${{ inputs.confirm_store_listing_review_submission }}" != "true" ] \
+            && [ "${{ inputs.google_play_changes_not_sent_for_review }}" != "true" ]; then
             echo "Google Play sends store listing changes for review automatically." >&2
             echo "Set confirm_store_listing_review_submission=true to continue." >&2
+            echo "Alternatively, set google_play_changes_not_sent_for_review=true to save changes without review submission." >&2
             exit 1
           fi
 
@@ -342,5 +344,11 @@ jobs:
             exit 1
           fi
 
+          changes_not_sent_flag=()
+          if [ "${{ inputs.google_play_changes_not_sent_for_review }}" = "true" ]; then
+            changes_not_sent_flag+=(--changes-not-sent-for-review)
+          fi
+
           scripts/mobile/upload-google-play-listing.py \
-            --package-name "$GOOGLE_PLAY_PACKAGE_NAME"
+            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
+            "${changes_not_sent_flag[@]}"

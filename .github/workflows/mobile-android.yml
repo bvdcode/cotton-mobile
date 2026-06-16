@@ -32,6 +32,29 @@ on:
         required: true
         type: boolean
         default: false
+      upload_to_google_play:
+        description: Upload signed AAB to Google Play after the release build.
+        required: true
+        type: boolean
+        default: false
+      google_play_track:
+        description: Google Play release track.
+        required: true
+        type: string
+        default: internal
+      google_play_release_status:
+        description: Google Play release status.
+        required: true
+        type: choice
+        options:
+          - completed
+          - draft
+        default: completed
+      google_play_changes_not_sent_for_review:
+        description: Commit the edit without sending changes for review.
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   android-debug:
@@ -98,6 +121,8 @@ jobs:
       ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
     steps:
       - name: Check repository
         uses: actions/checkout@v5
@@ -176,3 +201,43 @@ jobs:
             src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
           if-no-files-found: error
           retention-days: 30
+
+      - name: Setup Python
+        if: inputs.upload_to_google_play
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Google Play upload dependencies
+        if: inputs.upload_to_google_play
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install google-auth requests
+
+      - name: Upload signed AAB to Google Play
+        if: inputs.upload_to_google_play
+        run: |
+          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is required for Google Play upload." >&2
+            exit 1
+          fi
+
+          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
+          if [ -z "$aab_path" ]; then
+            echo "Signed AAB was not found." >&2
+            exit 1
+          fi
+
+          release_name="Cotton Mobile ${GITHUB_RUN_NUMBER}"
+          changes_not_sent_flag=()
+          if [ "${{ inputs.google_play_changes_not_sent_for_review }}" = "true" ]; then
+            changes_not_sent_flag+=(--changes-not-sent-for-review)
+          fi
+
+          python3 scripts/mobile/upload-google-play.py \
+            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
+            --bundle "$aab_path" \
+            --track "${{ inputs.google_play_track }}" \
+            --release-status "${{ inputs.google_play_release_status }}" \
+            --release-name "$release_name" \
+            "${changes_not_sent_flag[@]}"

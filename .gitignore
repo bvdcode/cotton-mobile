@@ -4,6 +4,10 @@
 ~$*
 .DS_Store
 
+# Python helper output
+__pycache__/
+*.pyc
+
 # IDE/user files
 .idea/
 .vscode/

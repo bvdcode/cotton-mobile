@@ -6,7 +6,6 @@ env:
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 defaults:
   run:
@@ -104,7 +103,7 @@ jobs:
             -p:EmbedAssembliesIntoApk=true
 
       - name: Upload debug APK
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: cotton-mobile-debug-apk
           path: src/Cotton.Mobile/bin/Debug/net10.0-android/**/*Signed.apk
@@ -194,7 +193,7 @@ jobs:
             -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD"
 
       - name: Upload signed Android artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: cotton-mobile-signed-android
           path: |

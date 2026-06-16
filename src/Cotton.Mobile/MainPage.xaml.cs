@@ -12,6 +12,7 @@ namespace Cotton.Mobile
 		private readonly ICottonSessionService _sessionService;
 		private readonly IBrowser _browser;
 		private readonly ILogger<MainPage> _logger;
+		private readonly CottonMobileOptions _options;
 
 		private CancellationTokenSource? _authorizationCancellation;
 		private bool _didRestoreSession;
@@ -19,16 +20,20 @@ namespace Cotton.Mobile
 		public MainPage(
 			ICottonSessionService sessionService,
 			IBrowser browser,
+			CottonMobileOptions options,
 			ILogger<MainPage> logger)
 		{
 			ArgumentNullException.ThrowIfNull(sessionService);
 			ArgumentNullException.ThrowIfNull(browser);
+			ArgumentNullException.ThrowIfNull(options);
 			ArgumentNullException.ThrowIfNull(logger);
 
 			_sessionService = sessionService;
 			_browser = browser;
+			_options = options;
 			_logger = logger;
 			InitializeComponent();
+			InstanceUrlEntry.Text = _options.DefaultInstanceUrl;
 		}
 
 		protected override async void OnAppearing()
@@ -128,7 +133,7 @@ namespace Cotton.Mobile
 			try
 			{
 				await _sessionService.LogoutAsync();
-				InstanceUrlEntry.Text = CottonApplicationLinks.DefaultInstanceUrl;
+				InstanceUrlEntry.Text = _options.DefaultInstanceUrl;
 				ShowSignIn("Signed out.");
 			}
 			catch (Exception exception)
@@ -143,7 +148,7 @@ namespace Cotton.Mobile
 			try
 			{
 				await _browser.OpenAsync(
-					new Uri(CottonApplicationLinks.PrivacyPolicyUrl),
+					_options.PrivacyPolicyUri,
 					CottonBrowserLaunchOptions.External());
 			}
 			catch (Exception exception)

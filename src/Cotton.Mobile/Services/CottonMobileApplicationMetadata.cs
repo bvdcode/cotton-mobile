@@ -5,9 +5,15 @@ namespace Cotton.Mobile.Services
 {
     public class CottonMobileApplicationMetadata : ICottonMobileApplicationMetadata
     {
-        private const string DefaultApplicationName = "Cotton Cloud";
+        private readonly CottonMobileOptions _options;
 
-        public string ApplicationName => DefaultApplicationName;
+        public CottonMobileApplicationMetadata(CottonMobileOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            _options = options;
+        }
+
+        public string ApplicationName => _options.ApplicationName;
 
         public string ApplicationVersion => AppInfo.Current.VersionString;
 

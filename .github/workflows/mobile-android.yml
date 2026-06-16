@@ -20,12 +20,14 @@ on:
       - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
       - "scripts/mobile/**"
+      - "store/google-play/**"
       - ".github/workflows/mobile-android.yml"
   pull_request:
     paths:
       - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
       - "scripts/mobile/**"
+      - "store/google-play/**"
       - ".github/workflows/mobile-android.yml"
   workflow_dispatch:
     inputs:
@@ -69,6 +71,26 @@ on:
         default: false
 
 jobs:
+  google-play-store-listing-dry-run:
+    name: Validate Google Play Store Listing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Validate default store listing
+        run: |
+          scripts/mobile/upload-google-play-listing.py \
+            --package-name dev.cottoncloud.app \
+            --dry-run
+
   android-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest

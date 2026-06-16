@@ -142,9 +142,9 @@ if [[ ! -f "$ANDROID_KEYSTORE_PATH" ]]; then
 fi
 
 base64 "$ANDROID_KEYSTORE_PATH" | tr -d '\n' | gh secret set ANDROID_KEYSTORE_BASE64
-printf '%s' "$ANDROID_KEYSTORE_ALIAS" | gh secret set ANDROID_KEYSTORE_ALIAS --body-file -
-printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | gh secret set ANDROID_KEYSTORE_PASSWORD --body-file -
-printf '%s' "$ANDROID_KEY_PASSWORD" | gh secret set ANDROID_KEY_PASSWORD --body-file -
+printf '%s' "$ANDROID_KEYSTORE_ALIAS" | gh secret set ANDROID_KEYSTORE_ALIAS
+printf '%s' "$ANDROID_KEYSTORE_PASSWORD" | gh secret set ANDROID_KEYSTORE_PASSWORD
+printf '%s' "$ANDROID_KEY_PASSWORD" | gh secret set ANDROID_KEY_PASSWORD
 EOF
 
 chmod 600 "$keystore_path" "$secrets_path"

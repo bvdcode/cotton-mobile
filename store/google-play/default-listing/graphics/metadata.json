@@ -1,0 +1,20 @@
+{
+  "appIcon": {
+    "path": "icon.png",
+    "altText": "Cotton Cloud app icon."
+  },
+  "featureGraphic": {
+    "path": "feature-graphic.png",
+    "altText": "Cotton Cloud mobile sign-in with browser approval."
+  },
+  "phoneScreenshots": [
+    {
+      "path": "phone-screenshots/01-sign-in.png",
+      "altText": "Cotton Cloud instance URL sign-in screen."
+    },
+    {
+      "path": "phone-screenshots/02-browser-approval-wait.png",
+      "altText": "Cotton Cloud waiting for browser approval."
+    }
+  ]
+}

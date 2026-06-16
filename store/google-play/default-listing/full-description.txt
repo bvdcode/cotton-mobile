@@ -1,0 +1,12 @@
+Cotton Cloud for Android lets you connect to your Cotton Cloud instance from a native mobile app.
+
+This first mobile release focuses on the foundation for a safe sign-in flow:
+
+- Enter your Cotton Cloud instance URL.
+- Approve access in your browser.
+- Return to the app with your session stored in Android secure storage.
+- Restore your session when the app starts again.
+- Preview the signed-in account and instance.
+- Sign out and clear the local session when needed.
+
+The app is currently prepared for internal testing while the mobile experience grows from sign-in and account preview into richer Cotton Cloud workflows.

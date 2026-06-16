@@ -1,0 +1,3 @@
+Initial internal testing build for Cotton Cloud mobile sign-in.
+
+Includes instance URL entry, browser-based authorization, secure session restore, profile preview, logout, and privacy policy access.

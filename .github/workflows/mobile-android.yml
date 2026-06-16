@@ -132,28 +132,28 @@ jobs:
           fetch-depth: 0
 
       - name: Install GitVersion
-        uses: gittools/actions/gitversion/setup@v3.1.11
+        uses: gittools/actions/gitversion/setup@v4.5.0
         with:
-          versionSpec: 5.x
+          versionSpec: 6.x
 
       - name: Determine version
-        uses: gittools/actions/gitversion/execute@v3.1.11
+        uses: gittools/actions/gitversion/execute@v4.5.0
         id: gitversion
 
       - name: Compute Android version code
         run: |
           android_version_code=$((
-            ${{ steps.gitversion.outputs.Major }} * 1000000 +
-            ${{ steps.gitversion.outputs.Minor }} * 10000 +
-            ${{ steps.gitversion.outputs.Patch }} * 1000 +
-            ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}
+            ${{ steps.gitversion.outputs.major }} * 1000000 +
+            ${{ steps.gitversion.outputs.minor }} * 10000 +
+            ${{ steps.gitversion.outputs.patch }} * 1000 +
+            ${{ steps.gitversion.outputs.versionSourceDistance }}
           ))
           if [ "$android_version_code" -le 1 ]; then
             echo "Computed Android versionCode must be greater than the first published versionCode 1." >&2
             exit 1
           fi
           echo "ANDROID_VERSION_CODE=$android_version_code" >> "$GITHUB_ENV"
-          echo "GitVersion SemVer: ${{ steps.gitversion.outputs.SemVer }}"
+          echo "GitVersion SemVer: ${{ steps.gitversion.outputs.semVer }}"
           echo "Android versionCode: $android_version_code"
 
       - name: Setup .NET

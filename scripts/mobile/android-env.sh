@@ -27,6 +27,10 @@ export COTTON_AVD_NAME="${COTTON_AVD_NAME:-Cotton_API36}"
 export COTTON_ADB_SERIAL="${COTTON_ADB_SERIAL:-emulator-5554}"
 export COTTON_ANDROID_APK="${COTTON_ANDROID_APK:-$COTTON_REPO_ROOT/src/Cotton.Mobile/bin/$COTTON_ANDROID_CONFIGURATION/$COTTON_ANDROID_FRAMEWORK/$COTTON_ANDROID_PACKAGE_ID-Signed.apk}"
 
+if [[ -z "${XAUTHORITY:-}" && -f /home/kasm-user/.Xauthority ]]; then
+  export XAUTHORITY=/home/kasm-user/.Xauthority
+fi
+
 cotton_prepend_path "$ANDROID_HOME/platform-tools"
 cotton_prepend_path "$ANDROID_HOME/emulator"
 cotton_prepend_path "$ANDROID_HOME/cmdline-tools/latest/bin"

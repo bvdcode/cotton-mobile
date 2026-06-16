@@ -13,7 +13,15 @@
       "altText": "Cotton Cloud instance URL sign-in screen."
     },
     {
-      "path": "phone-screenshots/02-browser-approval-wait.png",
+      "path": "phone-screenshots/02-file-browser.png",
+      "altText": "Cotton Cloud authenticated file browser."
+    },
+    {
+      "path": "phone-screenshots/03-download-complete.png",
+      "altText": "Cotton Cloud file download confirmation."
+    },
+    {
+      "path": "phone-screenshots/04-browser-approval-wait.png",
       "altText": "Cotton Cloud waiting for browser approval."
     }
   ]

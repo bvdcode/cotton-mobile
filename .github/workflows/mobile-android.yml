@@ -17,11 +17,13 @@ on:
       - main
       - develop
     paths:
+      - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
       - "scripts/mobile/**"
       - ".github/workflows/mobile-android.yml"
   pull_request:
     paths:
+      - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
       - "scripts/mobile/**"
       - ".github/workflows/mobile-android.yml"
@@ -126,6 +128,33 @@ jobs:
     steps:
       - name: Check repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Install GitVersion
+        uses: gittools/actions/gitversion/setup@v3.1.11
+        with:
+          versionSpec: 5.x
+
+      - name: Determine version
+        uses: gittools/actions/gitversion/execute@v3.1.11
+        id: gitversion
+
+      - name: Compute Android version code
+        run: |
+          android_version_code=$((
+            ${{ steps.gitversion.outputs.Major }} * 1000000 +
+            ${{ steps.gitversion.outputs.Minor }} * 10000 +
+            ${{ steps.gitversion.outputs.Patch }} * 1000 +
+            ${{ steps.gitversion.outputs.CommitsSinceVersionSource }}
+          ))
+          if [ "$android_version_code" -le 1 ]; then
+            echo "Computed Android versionCode must be greater than the first published versionCode 1." >&2
+            exit 1
+          fi
+          echo "ANDROID_VERSION_CODE=$android_version_code" >> "$GITHUB_ENV"
+          echo "GitVersion SemVer: ${{ steps.gitversion.outputs.SemVer }}"
+          echo "Android versionCode: $android_version_code"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -190,7 +219,8 @@ jobs:
             -p:AndroidSigningKeyStore="$RUNNER_TEMP/cotton-upload.keystore" \
             -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
             -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
-            -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD"
+            -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD" \
+            -p:ApplicationVersion="$ANDROID_VERSION_CODE"
 
       - name: Upload signed Android artifacts
         uses: actions/upload-artifact@v7.0.1

@@ -39,6 +39,16 @@ on:
         required: true
         type: boolean
         default: false
+      upload_store_listing:
+        description: Upload default store listing text and graphics to Google Play.
+        required: true
+        type: boolean
+        default: false
+      confirm_store_listing_review_submission:
+        description: Confirm Google Play may automatically send store listing changes for review.
+        required: true
+        type: boolean
+        default: false
       google_play_track:
         description: Google Play release track.
         required: true
@@ -271,3 +281,44 @@ jobs:
             --release-status "${{ inputs.google_play_release_status }}" \
             --release-name "$release_name" \
             "${changes_not_sent_flag[@]}"
+
+  google-play-store-listing:
+    name: Upload Google Play Store Listing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && inputs.upload_store_listing
+    permissions:
+      contents: read
+    env:
+      GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Confirm listing review submission
+        run: |
+          if [ "${{ inputs.confirm_store_listing_review_submission }}" != "true" ]; then
+            echo "Google Play sends store listing changes for review automatically." >&2
+            echo "Set confirm_store_listing_review_submission=true to continue." >&2
+            exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Google Play upload dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install google-auth requests
+
+      - name: Upload default store listing
+        run: |
+          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is required for Google Play listing upload." >&2
+            exit 1
+          fi
+
+          scripts/mobile/upload-google-play-listing.py \
+            --package-name "$GOOGLE_PLAY_PACKAGE_NAME"

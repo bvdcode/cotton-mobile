@@ -30,20 +30,17 @@
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout x:Name="LoadingView"
-                                     IsVisible="False"
+                <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"
                                      Spacing="12">
-                    <ActivityIndicator x:Name="LoadingIndicator"
-                                       IsRunning="False"
+                    <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
                                        HorizontalOptions="Start" />
 
-                    <Label x:Name="LoadingLabel"
-                           Text="Restoring session..."
+                    <Label Text="{Binding Display.LoadingMessage}"
                            FontSize="14"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout x:Name="SignInView"
+                <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
                                      Spacing="16">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Instance URL"
@@ -55,31 +52,30 @@
                                 StrokeShape="RoundRectangle 8"
                                 Padding="12,2"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                            <Entry x:Name="InstanceUrlEntry"
+                            <Entry Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                    Keyboard="Url"
                                    ReturnType="Go"
                                    ClearButtonVisibility="WhileEditing"
-                                   Completed="OnConnectClicked"
+                                   IsEnabled="{Binding Display.IsInputEnabled}"
+                                   ReturnCommand="{Binding ConnectCommand}"
                                    SemanticProperties.Hint="Cotton instance URL" />
                         </Border>
 
-                        <Label x:Name="StatusLabel"
-                               IsVisible="False"
+                        <Label Text="{Binding Display.Status}"
+                               IsVisible="{Binding Display.IsStatusVisible}"
                                FontSize="13"
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                     </VerticalStackLayout>
 
-                    <Button x:Name="ConnectButton"
-                            Text="Connect"
-                            Clicked="OnConnectClicked"
+                    <Button Text="Connect"
+                            Command="{Binding ConnectCommand}"
+                            IsEnabled="{Binding Display.IsInputEnabled}"
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout x:Name="AuthorizationProgressView"
-                                     IsVisible="False"
+                <VerticalStackLayout IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                      Spacing="16">
-                    <ActivityIndicator x:Name="AuthorizationProgressIndicator"
-                                       IsRunning="False"
+                    <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
                                        HorizontalOptions="Start" />
 
                     <VerticalStackLayout Spacing="4">
@@ -88,20 +84,18 @@
                                FontAttributes="Bold"
                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                        <Label x:Name="AuthorizationProgressLabel"
-                               Text="Approve the request in your browser, then return to Cotton Cloud."
+                        <Label Text="{Binding Display.AuthorizationProgressMessage}"
                                FontSize="14"
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                     </VerticalStackLayout>
 
-                    <Button x:Name="CancelAuthorizationButton"
-                            Text="Cancel"
-                            Clicked="OnCancelAuthorizationClicked"
+                    <Button Text="Cancel"
+                            Command="{Binding CancelAuthorizationCommand}"
+                            IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
-                <Border x:Name="ProfileView"
-                        IsVisible="False"
+                <Border IsVisible="{Binding Display.IsProfileVisible}"
                         Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                         StrokeThickness="1"
                         StrokeShape="RoundRectangle 8"
@@ -113,23 +107,28 @@
                                    FontSize="14"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                            <Label x:Name="ProfileNameLabel"
+                            <Label Text="{Binding Display.ProfileName}"
                                    FontSize="22"
                                    FontAttributes="Bold"
                                    TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                            <Label x:Name="ProfileEmailLabel"
+                            <Label Text="{Binding Display.ProfileEmail}"
                                    FontSize="14"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                         </VerticalStackLayout>
 
-                        <Label x:Name="ProfileInstanceLabel"
+                        <Label Text="{Binding Display.ProfileInstance}"
                                FontSize="13"
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                        <Button x:Name="LogoutButton"
-                                Text="Log out"
-                                Clicked="OnLogoutClicked"
+                        <Label Text="{Binding Display.ProfileStatus}"
+                               IsVisible="{Binding Display.IsProfileStatusVisible}"
+                               FontSize="13"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                        <Button Text="Log out"
+                                Command="{Binding LogoutCommand}"
+                                IsEnabled="{Binding Display.IsLogoutEnabled}"
                                 HorizontalOptions="Fill" />
                     </VerticalStackLayout>
                 </Border>
@@ -146,7 +145,7 @@
                    TextColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
 
             <Button Text="Privacy"
-                    Clicked="OnPrivacyPolicyClicked"
+                    Command="{Binding PrivacyPolicyCommand}"
                     BackgroundColor="Transparent"
                     Padding="8,0"
                     MinimumHeightRequest="32"

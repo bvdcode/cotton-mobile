@@ -1,4 +1,5 @@
 ﻿using Cotton.Mobile.Services;
+using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
@@ -29,11 +30,15 @@ namespace Cotton.Mobile
 					new Uri("https://cottoncloud.dev/privacy-policy")));
 			builder.Services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
 			builder.Services.AddSingleton<ICottonMobileApplicationMetadata, CottonMobileApplicationMetadata>();
+			builder.Services.AddSingleton<IUserDialogService, UserDialogService>();
+			builder.Services.AddSingleton<IScreenReaderService, ScreenReaderService>();
+			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
 			builder.Services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
 			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();
 			builder.Services.AddSingleton<AppShell>();
+			builder.Services.AddTransient<MainPageViewModel>();
 			builder.Services.AddTransient<MainPage>();
 
 #if DEBUG

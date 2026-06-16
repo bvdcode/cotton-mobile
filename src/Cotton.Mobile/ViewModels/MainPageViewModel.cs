@@ -1,0 +1,257 @@
+using Cotton.Mobile.Commands;
+using Cotton.Mobile.Services;
+using Cotton.Sdk;
+using Microsoft.Extensions.Logging;
+
+namespace Cotton.Mobile.ViewModels
+{
+    public class MainPageViewModel
+    {
+        private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
+        private const string ReadyStatus = "Ready to connect.";
+
+        private readonly ICottonSessionService _sessionService;
+        private readonly IBrowser _browser;
+        private readonly CottonMobileOptions _options;
+        private readonly IUserDialogService _dialogService;
+        private readonly IScreenReaderService _screenReader;
+        private readonly IMainPagePresentationService _presentationService;
+        private readonly ILogger<MainPageViewModel> _logger;
+
+        private CancellationTokenSource? _authorizationCancellation;
+        private bool _didRestoreSession;
+
+        public MainPageViewModel(
+            ICottonSessionService sessionService,
+            IBrowser browser,
+            CottonMobileOptions options,
+            IUserDialogService dialogService,
+            IScreenReaderService screenReader,
+            IMainPagePresentationService presentationService,
+            ILogger<MainPageViewModel> logger)
+        {
+            ArgumentNullException.ThrowIfNull(sessionService);
+            ArgumentNullException.ThrowIfNull(browser);
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(screenReader);
+            ArgumentNullException.ThrowIfNull(presentationService);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _sessionService = sessionService;
+            _browser = browser;
+            _options = options;
+            _dialogService = dialogService;
+            _screenReader = screenReader;
+            _presentationService = presentationService;
+            _logger = logger;
+
+            Display = new MainPageDisplayState(options.DefaultInstanceUrl);
+            ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
+            CancelAuthorizationCommand = new AsyncCommand(CancelAuthorizationAsync, () => Display.IsCancelAuthorizationEnabled);
+            LogoutCommand = new AsyncCommand(LogoutAsync, () => Display.IsLogoutEnabled);
+            PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync);
+        }
+
+        public MainPageDisplayState Display { get; }
+
+        public AsyncCommand ConnectCommand { get; }
+
+        public AsyncCommand CancelAuthorizationCommand { get; }
+
+        public AsyncCommand LogoutCommand { get; }
+
+        public AsyncCommand PrivacyPolicyCommand { get; }
+
+        public async Task RestoreSessionOnceAsync()
+        {
+            if (_didRestoreSession)
+            {
+                return;
+            }
+
+            _didRestoreSession = true;
+            await RestoreSessionAsync();
+        }
+
+        private async Task RestoreSessionAsync()
+        {
+            ShowLoading("Restoring session...");
+
+            try
+            {
+                CottonSessionResult result = await _sessionService.RestoreAsync();
+                ApplySessionResult(result, ReadyStatus);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to restore Cotton mobile session.");
+                ShowSignIn("Session restore failed. Sign in again.");
+            }
+        }
+
+        private async Task SignInAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                ShowSignIn(InvalidUrlStatus);
+                return;
+            }
+
+            Display.InstanceUrl = instanceUri.AbsoluteUri;
+
+            using var authorizationCancellation = new CancellationTokenSource();
+            _authorizationCancellation = authorizationCancellation;
+            ShowAuthorizationProgress(instanceUri);
+
+            try
+            {
+                CottonSessionResult result = await _sessionService.SignInWithBrowserAsync(
+                    instanceUri,
+                    authorizationCancellation.Token);
+                ApplySessionResult(result, ReadyStatus);
+            }
+            catch (OperationCanceledException exception) when (authorizationCancellation.IsCancellationRequested)
+            {
+                _logger.LogInformation(exception, "Cotton mobile browser authorization was cancelled.");
+                ShowSignIn("Authorization cancelled.");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Cotton mobile browser authorization failed.");
+                ShowSignIn(_presentationService.CreateAuthorizationFailureStatus(exception));
+            }
+            finally
+            {
+                if (ReferenceEquals(_authorizationCancellation, authorizationCancellation))
+                {
+                    _authorizationCancellation = null;
+                }
+            }
+        }
+
+        private Task CancelAuthorizationAsync()
+        {
+            Display.ShowAuthorizationCancelling();
+            RefreshCommands();
+            _authorizationCancellation?.Cancel();
+            return Task.CompletedTask;
+        }
+
+        private async Task LogoutAsync()
+        {
+            ShowLoading("Signing out...");
+
+            try
+            {
+                await _sessionService.LogoutAsync();
+                Display.InstanceUrl = _options.DefaultInstanceUrl;
+                ShowSignIn("Signed out.");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Cotton mobile logout failed.");
+                ShowProfileError("Logout failed. Try again.");
+            }
+        }
+
+        private async Task OpenPrivacyPolicyAsync()
+        {
+            try
+            {
+                await _browser.OpenAsync(
+                    _options.PrivacyPolicyUri,
+                    CottonBrowserLaunchOptions.External());
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton Cloud privacy policy.");
+                await _dialogService.ShowAlertAsync(
+                    "Privacy Policy",
+                    "Could not open the privacy policy.",
+                    "OK");
+            }
+        }
+
+        private Uri? ResolveInstanceUri()
+        {
+            Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.InstanceUrl);
+            if (instanceUri is null
+                || !string.Equals(instanceUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                || string.IsNullOrWhiteSpace(instanceUri.Host))
+            {
+                return null;
+            }
+
+            return instanceUri;
+        }
+
+        private void ApplySessionResult(CottonSessionResult result, string unauthenticatedStatus)
+        {
+            if (result.InstanceUri is not null)
+            {
+                Display.InstanceUrl = result.InstanceUri.AbsoluteUri;
+            }
+
+            if (result.IsAuthenticated && result.InstanceUri is not null && result.User is not null)
+            {
+                MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
+                ShowProfile(profile);
+                return;
+            }
+
+            ShowSignIn(_presentationService.ResolveStatusMessage(result, unauthenticatedStatus));
+        }
+
+        private void ShowLoading(string message)
+        {
+            Display.ShowLoading(message);
+            RefreshCommands();
+            _screenReader.Announce(message);
+        }
+
+        private void ShowSignIn(string? status)
+        {
+            Display.ShowSignIn(status);
+            RefreshCommands();
+            AnnounceStatus(status);
+        }
+
+        private void ShowAuthorizationProgress(Uri instanceUri)
+        {
+            Display.ShowAuthorizationProgress(instanceUri);
+            RefreshCommands();
+            _screenReader.Announce("Waiting for browser approval.");
+        }
+
+        private void ShowProfile(MainPageProfile profile)
+        {
+            Display.ShowProfile(profile);
+            RefreshCommands();
+            _screenReader.Announce("Signed in.");
+        }
+
+        private void ShowProfileError(string status)
+        {
+            Display.ShowProfileError(status);
+            RefreshCommands();
+            _screenReader.Announce(status);
+        }
+
+        private void RefreshCommands()
+        {
+            ConnectCommand.RaiseCanExecuteChanged();
+            CancelAuthorizationCommand.RaiseCanExecuteChanged();
+            LogoutCommand.RaiseCanExecuteChanged();
+        }
+
+        private void AnnounceStatus(string? status)
+        {
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                _screenReader.Announce(status);
+            }
+        }
+    }
+}

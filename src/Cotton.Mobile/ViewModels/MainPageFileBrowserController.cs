@@ -151,7 +151,14 @@ namespace Cotton.Mobile.ViewModels
                 CottonFolderHandle previous = _fileNavigation[previousIndex];
                 _fileNavigation.RemoveAt(previousIndex);
                 _display.ClearFileSearch();
-                await LoadFolderAsync(previous, preserveHistory: true);
+                if (_fileNavigation.Count == 0)
+                {
+                    await LoadRootFilesAsync();
+                }
+                else
+                {
+                    await LoadFolderAsync(previous, preserveHistory: true);
+                }
             }
             finally
             {

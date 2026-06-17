@@ -103,25 +103,35 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="16">
-                        <VerticalStackLayout Spacing="4">
-                            <Label Text="Signed in"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                     Spacing="14">
+                        <Grid ColumnDefinitions="*,Auto"
+                              ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="2"
+                                                 VerticalOptions="Center">
+                                <Label Text="{Binding Display.ProfileName}"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       MaxLines="1"
+                                       LineBreakMode="TailTruncation"
+                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                            <Label Text="{Binding Display.ProfileName}"
-                                   FontSize="22"
-                                   FontAttributes="Bold"
-                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                <Label Text="{Binding Display.ProfileSummary}"
+                                       FontSize="12"
+                                       MaxLines="1"
+                                       LineBreakMode="TailTruncation"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                            </VerticalStackLayout>
 
-                            <Label Text="{Binding Display.ProfileEmail}"
-                                   FontSize="14"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
-                        </VerticalStackLayout>
-
-                        <Label Text="{Binding Display.ProfileInstance}"
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                            <Button Grid.Column="1"
+                                    Text="Log out"
+                                    Command="{Binding LogoutCommand}"
+                                    IsEnabled="{Binding Display.IsLogoutEnabled}"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                    TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                    Padding="10,0"
+                                    MinimumHeightRequest="32"
+                                    MinimumWidthRequest="64" />
+                        </Grid>
 
                         <Label Text="{Binding Display.ProfileStatus}"
                                IsVisible="{Binding Display.IsProfileStatusVisible}"
@@ -389,13 +399,6 @@
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>
                         </VerticalStackLayout>
-
-                        <Button Text="Log out"
-                                Command="{Binding LogoutCommand}"
-                                IsEnabled="{Binding Display.IsLogoutEnabled}"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                HorizontalOptions="Fill" />
                 </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>

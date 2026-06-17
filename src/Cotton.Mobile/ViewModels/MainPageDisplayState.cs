@@ -83,14 +83,28 @@ namespace Cotton.Mobile.ViewModels
         public string ProfileEmail
         {
             get => _profileEmail;
-            private set => SetProperty(ref _profileEmail, value);
+            private set
+            {
+                if (SetProperty(ref _profileEmail, value))
+                {
+                    OnPropertyChanged(nameof(ProfileSummary));
+                }
+            }
         }
 
         public string ProfileInstance
         {
             get => _profileInstance;
-            private set => SetProperty(ref _profileInstance, value);
+            private set
+            {
+                if (SetProperty(ref _profileInstance, value))
+                {
+                    OnPropertyChanged(nameof(ProfileSummary));
+                }
+            }
         }
+
+        public string ProfileSummary => $"{ProfileEmail} · {ProfileInstance}";
 
         public string? ProfileStatus
         {

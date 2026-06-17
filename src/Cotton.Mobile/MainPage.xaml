@@ -310,15 +310,19 @@
                                             </VerticalStackLayout>
 
                                             <Button Grid.Column="2"
-                                                    Text="{Binding ActionLabel}"
+                                                    Text="{Binding ActionButtonText}"
                                                     Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                     CommandParameter="{Binding .}"
                                                     VerticalOptions="Center"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                                     TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                                    Padding="10,0"
+                                                    Padding="0"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
                                                     MinimumHeightRequest="32"
-                                                    MinimumWidthRequest="44" />
+                                                    MinimumWidthRequest="44"
+                                                    WidthRequest="{Binding ActionButtonWidth}"
+                                                    SemanticProperties.Description="{Binding ActionLabel}" />
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -385,14 +389,19 @@
                                                 </VerticalStackLayout>
 
                                                 <Button Grid.Row="2"
-                                                        Text="{Binding ActionLabel}"
+                                                        Text="{Binding ActionButtonText}"
                                                         Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                         CommandParameter="{Binding .}"
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                                        Padding="8,0"
+                                                        Padding="0"
+                                                        FontSize="18"
+                                                        FontAttributes="Bold"
+                                                        HorizontalOptions="End"
                                                         MinimumHeightRequest="30"
-                                                        MinimumWidthRequest="44" />
+                                                        MinimumWidthRequest="44"
+                                                        WidthRequest="{Binding ActionButtonWidth}"
+                                                        SemanticProperties.Description="{Binding ActionLabel}" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>

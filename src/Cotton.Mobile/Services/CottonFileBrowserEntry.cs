@@ -76,6 +76,10 @@ namespace Cotton.Mobile.Services
 
         public string ActionLabel { get; }
 
+        public string ActionButtonText => IsFolder ? ActionLabel : "⋯";
+
+        public double ActionButtonWidth => IsFolder ? 64d : 44d;
+
         public string BadgeText { get; }
 
         public long? SizeBytes { get; }

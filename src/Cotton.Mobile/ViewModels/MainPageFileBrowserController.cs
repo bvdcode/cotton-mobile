@@ -17,7 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<MainPageFileBrowserController> _logger;
-        private readonly Stack<CottonFolderHandle> _fileNavigation = new();
+        private readonly List<CottonFolderHandle> _fileNavigation = [];
 
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
@@ -85,7 +85,9 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CottonFolderHandle previous = _fileNavigation.Pop();
+            int previousIndex = _fileNavigation.Count - 1;
+            CottonFolderHandle previous = _fileNavigation[previousIndex];
+            _fileNavigation.RemoveAt(previousIndex);
             await LoadFolderAsync(previous, preserveHistory: true);
         }
 
@@ -131,7 +133,7 @@ namespace Cotton.Mobile.ViewModels
         {
             if (_currentFolder is not null)
             {
-                _fileNavigation.Push(_currentFolder);
+                _fileNavigation.Add(_currentFolder);
             }
 
             await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
@@ -186,7 +188,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
-                _display.ShowFiles(content, canNavigateUp: false);
+                _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
             }
             catch (Exception exception)
             {
@@ -208,14 +210,14 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
-                _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0);
+                _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile folder {FolderId}.", folder.Id);
                 if (!preserveHistory && _fileNavigation.Count > 0)
                 {
-                    _fileNavigation.Pop();
+                    _fileNavigation.RemoveAt(_fileNavigation.Count - 1);
                 }
 
                 _display.ShowFilesStatus("Could not open folder. Try again.");
@@ -246,6 +248,14 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Download failed. Try again.");
             }
+        }
+
+        private string CreatePath(string currentFolderName)
+        {
+            IEnumerable<string> names = _fileNavigation
+                .Select(folder => folder.Name)
+                .Append(string.IsNullOrWhiteSpace(currentFolderName) ? "Files" : currentFolderName.Trim());
+            return string.Join(" / ", names);
         }
 
         private async Task OpenFileAsync(CottonFileBrowserEntry file)

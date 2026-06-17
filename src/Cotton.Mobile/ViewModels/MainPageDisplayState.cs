@@ -17,6 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
         private string _filesTitle = "Files";
+        private string _filesPath = string.Empty;
         private string? _filesStatus;
         private string _filesEmptyMessage = "No files in this folder.";
         private string _fileSearchText = string.Empty;
@@ -122,6 +123,20 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsFilesStatusVisible => !string.IsNullOrWhiteSpace(FilesStatus);
+
+        public string FilesPath
+        {
+            get => _filesPath;
+            private set
+            {
+                if (SetProperty(ref _filesPath, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesPathVisible));
+                }
+            }
+        }
+
+        public bool IsFilesPathVisible => !string.IsNullOrWhiteSpace(FilesPath);
 
         public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
 
@@ -274,6 +289,7 @@ namespace Cotton.Mobile.ViewModels
             ProfileInstance = profile.Instance;
             ProfileStatus = null;
             FilesTitle = "Files";
+            FilesPath = string.Empty;
             FilesStatus = "Loading files...";
             IsFilesLoading = true;
             IsFilesRefreshing = false;
@@ -300,11 +316,12 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
-        public void ShowFiles(CottonFolderContent content, bool canNavigateUp)
+        public void ShowFiles(CottonFolderContent content, bool canNavigateUp, string path)
         {
             ArgumentNullException.ThrowIfNull(content);
 
             FilesTitle = content.FolderName;
+            FilesPath = path;
             _allFileEntries.Clear();
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {

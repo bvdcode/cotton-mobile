@@ -646,6 +646,10 @@ namespace Cotton.Mobile.ViewModels
                     .OrderBy(entry => entry.IsFolder ? 0 : 1)
                     .ThenBy(entry => entry.Kind, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
+                CottonFileBrowserSortMode.Updated => entries
+                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
+                    .ThenByDescending(entry => entry.UpdatedAtUtc)
+                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
                 CottonFileBrowserSortMode.Size => entries
                     .OrderBy(entry => entry.IsFolder ? 0 : 1)
                     .ThenBy(entry => entry.IsFolder ? entry.Name : string.Empty, StringComparer.OrdinalIgnoreCase)

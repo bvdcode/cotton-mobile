@@ -44,6 +44,7 @@ namespace Cotton.Mobile.Services
             string details,
             string actionLabel,
             string badgeText,
+            DateTime updatedAtUtc,
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
@@ -57,6 +58,7 @@ namespace Cotton.Mobile.Services
             Details = details;
             ActionLabel = actionLabel;
             BadgeText = string.IsNullOrWhiteSpace(badgeText) ? "FILE" : badgeText.Trim();
+            UpdatedAtUtc = updatedAtUtc;
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
@@ -92,6 +94,8 @@ namespace Cotton.Mobile.Services
 
         public string BadgeText { get; }
 
+        public DateTime UpdatedAtUtc { get; }
+
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
@@ -120,6 +124,7 @@ namespace Cotton.Mobile.Services
                 "Folder",
                 "Open",
                 "DIR",
+                node.UpdatedAt,
                 null,
                 null,
                 null,
@@ -142,6 +147,7 @@ namespace Cotton.Mobile.Services
                 $"{FormatSize(file.SizeBytes)} · {kind}",
                 "More",
                 ResolveBadgeText(kind),
+                file.UpdatedAt,
                 file.SizeBytes,
                 contentType,
                 file.PreviewHashEncryptedHex,
@@ -174,6 +180,7 @@ namespace Cotton.Mobile.Services
                 Details,
                 ActionLabel,
                 BadgeText,
+                UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
@@ -193,6 +200,7 @@ namespace Cotton.Mobile.Services
                 Details,
                 ActionLabel,
                 BadgeText,
+                UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
@@ -215,6 +223,7 @@ namespace Cotton.Mobile.Services
                 Details,
                 ActionLabel,
                 BadgeText,
+                UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,

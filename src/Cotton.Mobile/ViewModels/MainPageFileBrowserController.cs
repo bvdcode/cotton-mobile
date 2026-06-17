@@ -14,6 +14,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenAction = "Open";
         private const string ShareAction = "Share";
         private const string SortNameAction = "Name";
+        private const string SortUpdatedAction = "Updated";
         private const string SortSizeAction = "Size";
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
@@ -188,6 +189,7 @@ namespace Cotton.Mobile.ViewModels
                 CancelAction,
                 null,
                 SortNameAction,
+                SortUpdatedAction,
                 SortTypeAction,
                 SortSizeAction);
 
@@ -195,6 +197,9 @@ namespace Cotton.Mobile.ViewModels
             {
                 case SortNameAction:
                     await SetSortModeAsync(CottonFileBrowserSortMode.Name);
+                    break;
+                case SortUpdatedAction:
+                    await SetSortModeAsync(CottonFileBrowserSortMode.Updated);
                     break;
                 case SortTypeAction:
                     await SetSortModeAsync(CottonFileBrowserSortMode.Type);

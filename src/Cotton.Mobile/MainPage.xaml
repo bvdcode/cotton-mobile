@@ -131,6 +131,7 @@
                                         Text="↑"
                                         Command="{Binding NavigateFilesUpCommand}"
                                         IsEnabled="{Binding Display.CanNavigateFilesUp}"
+                                        Opacity="{Binding Display.FileUpButtonOpacity}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="0"

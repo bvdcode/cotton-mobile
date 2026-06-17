@@ -278,8 +278,16 @@ namespace Cotton.Mobile.ViewModels
         public bool CanNavigateFilesUp
         {
             get => _canNavigateFilesUp;
-            private set => SetProperty(ref _canNavigateFilesUp, value);
+            private set
+            {
+                if (SetProperty(ref _canNavigateFilesUp, value))
+                {
+                    OnPropertyChanged(nameof(FileUpButtonOpacity));
+                }
+            }
         }
+
+        public double FileUpButtonOpacity => CanNavigateFilesUp ? 1 : 0.35;
 
         public bool CanCancelFileAction
         {

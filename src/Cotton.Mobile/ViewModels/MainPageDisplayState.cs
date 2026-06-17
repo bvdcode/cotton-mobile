@@ -512,6 +512,27 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public void ClearFileLocalCopies()
+        {
+            bool changed = false;
+            for (int index = 0; index < _allFileEntries.Count; index++)
+            {
+                CottonFileBrowserEntry entry = _allFileEntries[index];
+                if (entry.LocalFile is null)
+                {
+                    continue;
+                }
+
+                _allFileEntries[index] = entry.WithoutLocalFile();
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ApplyFileFilters();
+            }
+        }
+
         public void ApplyFileBrowserPreferences(CottonFileBrowserPreferences preferences)
         {
             ArgumentNullException.ThrowIfNull(preferences);

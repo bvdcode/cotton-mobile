@@ -2,14 +2,12 @@ using Cotton.Files;
 using Cotton.Nodes;
 using Cotton.Sdk;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserService : ICottonFileBrowserService
     {
         private const int PageSize = 100;
-        private const string DownloadDirectoryName = "CottonDownloads";
 
         private readonly ICottonClientFactory _clientFactory;
         private readonly ILogger<CottonFileBrowserService> _logger;
@@ -57,9 +55,9 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Only files can be downloaded.", nameof(file));
             }
 
-            string directory = CreateDownloadDirectory(file);
+            string directory = CottonMobileStoragePaths.CreateDownloadDirectory(file);
             Directory.CreateDirectory(directory);
-            string filePath = CreateDownloadPath(file);
+            string filePath = CottonMobileStoragePaths.CreateDownloadPath(file);
             string tempFilePath = filePath + ".download";
             long sizeBytes = 0;
             bool tempFileReady = false;
@@ -181,33 +179,6 @@ namespace Cotton.Mobile.Services
             return new CottonFolderContent(folderId, folderName, entries);
         }
 
-        private static string CreateSafeFileName(string fileName)
-        {
-            string trimmedName = string.IsNullOrWhiteSpace(fileName) ? "download" : fileName.Trim();
-            char[] invalidChars = Path.GetInvalidFileNameChars();
-            var buffer = new char[trimmedName.Length];
-            for (int index = 0; index < trimmedName.Length; index++)
-            {
-                char character = trimmedName[index];
-                buffer[index] = invalidChars.Contains(character) ? '_' : character;
-            }
-
-            return new string(buffer);
-        }
-
-        private static string CreateDownloadDirectory(CottonFileBrowserEntry file)
-        {
-            return Path.Combine(
-                FileSystem.AppDataDirectory,
-                DownloadDirectoryName,
-                file.Id.ToString("D"));
-        }
-
-        private static string CreateDownloadPath(CottonFileBrowserEntry file)
-        {
-            return Path.Combine(CreateDownloadDirectory(file), CreateSafeFileName(file.Name));
-        }
-
         private static FileInfo? GetLocalDownloadFile(CottonFileBrowserEntry file)
         {
             if (file.Type != CottonFileBrowserEntryType.File)
@@ -215,7 +186,7 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
-            var info = new FileInfo(CreateDownloadPath(file));
+            var info = new FileInfo(CottonMobileStoragePaths.CreateDownloadPath(file));
             return info.Exists ? info : null;
         }
 

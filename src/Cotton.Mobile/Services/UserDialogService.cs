@@ -16,6 +16,18 @@ namespace Cotton.Mobile.Services
 				() => page.DisplayAlertAsync(title, message, cancel));
 		}
 
+        public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
+        {
+            Page? page = Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page is null)
+            {
+                return false;
+            }
+
+            return await MainThread.InvokeOnMainThreadAsync(
+                () => page.DisplayAlertAsync(title, message, accept, cancel));
+        }
+
         public async Task<string?> ShowActionSheetAsync(
             string title,
             string cancel,

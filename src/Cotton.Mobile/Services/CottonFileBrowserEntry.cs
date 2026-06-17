@@ -200,6 +200,28 @@ namespace Cotton.Mobile.Services
                 Thumbnail);
         }
 
+        public CottonFileBrowserEntry WithoutLocalFile()
+        {
+            if (LocalFile is null)
+            {
+                return this;
+            }
+
+            return new CottonFileBrowserEntry(
+                Id,
+                Type,
+                Name,
+                Kind,
+                Details,
+                ActionLabel,
+                BadgeText,
+                SizeBytes,
+                ContentType,
+                PreviewHashEncryptedHex,
+                null,
+                Thumbnail);
+        }
+
         private static string FormatSize(long bytes)
         {
             const long Kilobyte = 1024;

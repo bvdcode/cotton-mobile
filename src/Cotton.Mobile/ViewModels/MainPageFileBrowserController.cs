@@ -112,6 +112,12 @@ namespace Cotton.Mobile.ViewModels
             await LoadFolderAsync(_currentFolder, preserveHistory: true, isRefresh: true);
         }
 
+        public void ClearLocalFileMarkers()
+        {
+            _display.ClearFileLocalCopies();
+            _display.ShowFilesStatus("Cached files cleared.");
+        }
+
         public async Task NavigateUpAsync()
         {
             ClearFileActionRetry();

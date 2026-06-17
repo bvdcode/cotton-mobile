@@ -13,12 +13,17 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
+        private const string AccountStorageAction = "Storage";
+        private const string StorageClearAllTitle = "Clear all cached files";
+        private const string StorageClearDownloadedFilesTitle = "Clear downloaded files";
+        private const string StorageClearThumbnailsTitle = "Clear thumbnails";
 
         private readonly ICottonSessionService _sessionService;
         private readonly IBrowser _browser;
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
         private readonly IFeedbackService _feedbackService;
+        private readonly IStorageManagementService _storageManagementService;
         private readonly IScreenReaderService _screenReader;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
@@ -33,6 +38,7 @@ namespace Cotton.Mobile.ViewModels
             CottonMobileOptions options,
             IUserDialogService dialogService,
             IFeedbackService feedbackService,
+            IStorageManagementService storageManagementService,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
@@ -49,6 +55,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(feedbackService);
+            ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
@@ -65,6 +72,7 @@ namespace Cotton.Mobile.ViewModels
             _options = options;
             _dialogService = dialogService;
             _feedbackService = feedbackService;
+            _storageManagementService = storageManagementService;
             _screenReader = screenReader;
             _presentationService = presentationService;
             _logger = logger;
@@ -251,6 +259,7 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
+                AccountStorageAction,
                 AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
 
@@ -262,6 +271,9 @@ namespace Cotton.Mobile.ViewModels
                 case AccountPrivacyPolicyAction:
                     await OpenPrivacyPolicyAsync();
                     break;
+                case AccountStorageAction:
+                    await ShowStorageActionsAsync();
+                    break;
                 case AccountFeedbackAction:
                     await OpenFeedbackAsync();
                     break;
@@ -272,6 +284,96 @@ namespace Cotton.Mobile.ViewModels
         {
             Display.ToggleFileSearch();
             return Task.CompletedTask;
+        }
+
+        private async Task ShowStorageActionsAsync()
+        {
+            try
+            {
+                CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+                string clearThumbnailsAction = $"Clear thumbs · {FormatStorageSize(summary.ThumbnailCache.SizeBytes)}";
+                string clearDownloadedFilesAction = $"Clear downloads · {FormatStorageSize(summary.DownloadedFiles.SizeBytes)}";
+                string clearAllAction = $"Clear all · {FormatStorageSize(summary.TotalSizeBytes)}";
+                string? action = await _dialogService.ShowActionSheetAsync(
+                    "Storage",
+                    AccountCancelAction,
+                    clearAllAction,
+                    clearThumbnailsAction,
+                    clearDownloadedFilesAction);
+
+                switch (action)
+                {
+                    case string selected when string.Equals(selected, clearThumbnailsAction, StringComparison.Ordinal):
+                        await ClearStorageAsync(
+                            StorageClearThumbnailsTitle,
+                            "Thumbnail previews will reload as you browse.",
+                            _storageManagementService.ClearThumbnailCacheAsync,
+                            clearsDownloadedFiles: false);
+                        break;
+                    case string selected when string.Equals(selected, clearDownloadedFilesAction, StringComparison.Ordinal):
+                        await ClearStorageAsync(
+                            StorageClearDownloadedFilesTitle,
+                            "Files marked On device will need internet to open again.",
+                            _storageManagementService.ClearDownloadedFilesAsync,
+                            clearsDownloadedFiles: true);
+                        break;
+                    case string selected when string.Equals(selected, clearAllAction, StringComparison.Ordinal):
+                        await ClearStorageAsync(
+                            StorageClearAllTitle,
+                            "Thumbnail previews and On device files will be removed from this device.",
+                            _storageManagementService.ClearAllCachedFilesAsync,
+                            clearsDownloadedFiles: true);
+                        break;
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile storage actions.");
+                await _dialogService.ShowAlertAsync(
+                    "Storage",
+                    "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task ClearStorageAsync(
+            string title,
+            string message,
+            Func<CancellationToken, Task> clearAsync,
+            bool clearsDownloadedFiles)
+        {
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                title,
+                message,
+                "Clear",
+                AccountCancelAction);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            try
+            {
+                await clearAsync(CancellationToken.None);
+                if (clearsDownloadedFiles)
+                {
+                    _fileBrowser.ClearLocalFileMarkers();
+                }
+
+                CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+                await _dialogService.ShowAlertAsync(
+                    "Storage",
+                    $"Cleared.{Environment.NewLine}{Environment.NewLine}{CreateStorageDetailsMessage(summary)}",
+                    "OK");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile storage.");
+                await _dialogService.ShowAlertAsync(
+                    "Storage",
+                    "Could not clear app storage.",
+                    "OK");
+            }
         }
 
         private async Task OpenPrivacyPolicyAsync()
@@ -317,6 +419,43 @@ namespace Cotton.Mobile.ViewModels
                 "Feedback",
                 $"Could not open an email app. Send feedback to {_options.SupportEmail}.",
                 "OK");
+        }
+
+        private static string CreateStorageDetailsMessage(CottonStorageSummary summary)
+        {
+            ArgumentNullException.ThrowIfNull(summary);
+
+            return string.Join(
+                Environment.NewLine,
+                "Storage",
+                CreateStorageCategoryMessage(summary.ThumbnailCache),
+                CreateStorageCategoryMessage(summary.DownloadedFiles),
+                $"Total: {FormatStorageSize(summary.TotalSizeBytes)} · {FormatFileCount(summary.TotalFileCount)}");
+        }
+
+        private static string CreateStorageCategoryMessage(CottonStorageCategorySnapshot category)
+        {
+            return $"{category.Name}: {FormatStorageSize(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
+        }
+
+        private static string FormatFileCount(int fileCount)
+        {
+            return fileCount == 1 ? "1 file" : $"{fileCount:N0} files";
+        }
+
+        private static string FormatStorageSize(long bytes)
+        {
+            const long Kilobyte = 1024;
+            const long Megabyte = Kilobyte * 1024;
+            const long Gigabyte = Megabyte * 1024;
+
+            return bytes switch
+            {
+                < Kilobyte => $"{bytes} B",
+                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
+                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
+                _ => $"{bytes / (double)Gigabyte:0.#} GB",
+            };
         }
 
         private Uri? ResolveInstanceUri()

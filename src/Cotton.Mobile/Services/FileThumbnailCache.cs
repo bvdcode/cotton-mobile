@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Storage;
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
 
@@ -210,7 +209,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private string CacheDirectory => Path.Combine(FileSystem.AppDataDirectory, _options.DirectoryName);
+        private string CacheDirectory => CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_options);
 
         private string CreateCachePath(string cacheKey)
         {

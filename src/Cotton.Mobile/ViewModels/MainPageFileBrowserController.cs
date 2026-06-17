@@ -23,6 +23,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ILogger<MainPageFileBrowserController> _logger;
         private readonly List<CottonFolderHandle> _fileNavigation = [];
 
+        private CancellationTokenSource? _fileActionCancellation;
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
 
@@ -66,6 +67,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void Clear()
         {
+            CancelCurrentFileAction();
             _instanceUri = null;
             _currentFolder = null;
             _fileNavigation.Clear();
@@ -137,6 +139,18 @@ namespace Cotton.Mobile.ViewModels
         public Task SortBySizeAsync()
         {
             return SetSortModeAsync(CottonFileBrowserSortMode.Size);
+        }
+
+        public Task CancelFileActionAsync()
+        {
+            if (_fileActionCancellation is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            _display.ShowFileActionCancelling("Cancelling...");
+            _fileActionCancellation.Cancel();
+            return Task.CompletedTask;
         }
 
         private async Task OpenFolderAsync(CottonFileBrowserEntry folder)
@@ -274,14 +288,15 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            _display.ShowFilesLoading($"Downloading {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginFileAction($"Downloading {file.Name}...");
 
             try
             {
                 CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
                     _instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Downloading"));
+                    CreateFileDownloadProgress(file, "Downloading"),
+                    fileActionCancellation.Token);
                 _display.ShowFilesStatus($"Downloaded {result.FileName}.");
                 await _dialogService.ShowAlertAsync(
                     "Downloaded",
@@ -293,10 +308,18 @@ namespace Cotton.Mobile.ViewModels
             {
                 await HandleSessionExpiredAsync(exception);
             }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                _display.ShowFilesStatus("Download cancelled.");
+            }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Download failed. Try again.");
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation);
             }
         }
 
@@ -316,21 +339,22 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            _display.ShowFilesLoading($"Opening {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
 
             try
             {
                 CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
                     _instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Opening"));
+                    CreateFileDownloadProgress(file, "Opening"),
+                    fileActionCancellation.Token);
                 if (_filePreviewService.CanPreview(file))
                 {
-                    await _filePreviewService.OpenAsync(file, result);
+                    await _filePreviewService.OpenAsync(file, result, fileActionCancellation.Token);
                 }
                 else
                 {
-                    await _fileInteractionService.OpenAsync(result);
+                    await _fileInteractionService.OpenAsync(result, fileActionCancellation.Token);
                 }
 
                 _display.ShowFilesStatus($"Opened {result.FileName}.");
@@ -340,10 +364,18 @@ namespace Cotton.Mobile.ViewModels
             {
                 await HandleSessionExpiredAsync(exception);
             }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                _display.ShowFilesStatus("Open cancelled.");
+            }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Open failed. Try again.");
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation);
             }
         }
 
@@ -355,15 +387,16 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            _display.ShowFilesLoading($"Preparing {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginFileAction($"Preparing {file.Name}...");
 
             try
             {
                 CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
                     _instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Preparing"));
-                await _fileInteractionService.ShareAsync(result);
+                    CreateFileDownloadProgress(file, "Preparing"),
+                    fileActionCancellation.Token);
+                await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
                 _display.ShowFilesStatus($"Shared {result.FileName}.");
             }
             catch (Exception exception)
@@ -371,10 +404,18 @@ namespace Cotton.Mobile.ViewModels
             {
                 await HandleSessionExpiredAsync(exception);
             }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                _display.ShowFilesStatus("Share cancelled.");
+            }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Share failed. Try again.");
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation);
             }
         }
 
@@ -406,8 +447,36 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 lastPercent = percent;
-                _display.ShowFilesLoading($"{actionName} {file.Name}... {percent}%");
+                _display.ShowFileActionLoading($"{actionName} {file.Name}... {percent}%");
             });
+        }
+
+        private CancellationTokenSource BeginFileAction(string status)
+        {
+            CancelCurrentFileAction();
+            var cancellation = new CancellationTokenSource();
+            _fileActionCancellation = cancellation;
+            _display.ShowFileActionLoading(status);
+            return cancellation;
+        }
+
+        private void EndFileAction(CancellationTokenSource cancellation)
+        {
+            if (!ReferenceEquals(_fileActionCancellation, cancellation))
+            {
+                cancellation.Dispose();
+                return;
+            }
+
+            _fileActionCancellation = null;
+            cancellation.Dispose();
+        }
+
+        private void CancelCurrentFileAction()
+        {
+            _fileActionCancellation?.Cancel();
+            _fileActionCancellation?.Dispose();
+            _fileActionCancellation = null;
         }
 
         private async Task HandleSessionExpiredAsync(Exception exception)

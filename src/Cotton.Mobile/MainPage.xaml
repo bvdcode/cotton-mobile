@@ -211,9 +211,19 @@
                                         MinimumWidthRequest="60" />
                             </Grid>
 
-                            <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
-                                               IsVisible="{Binding Display.IsFilesLoading}"
-                                               HorizontalOptions="Start" />
+                            <HorizontalStackLayout Spacing="12"
+                                                   IsVisible="{Binding Display.IsFilesLoading}">
+                                <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
+                                                   VerticalOptions="Center" />
+
+                                <Button Text="Cancel"
+                                        Command="{Binding CancelFileActionCommand}"
+                                        IsEnabled="{Binding Display.CanCancelFileAction}"
+                                        IsVisible="{Binding Display.CanCancelFileAction}"
+                                        Padding="10,0"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="64" />
+                            </HorizontalStackLayout>
 
                             <Label Text="{Binding Display.FilesEmptyMessage}"
                                    IsVisible="{Binding Display.IsFilesEmptyVisible}"

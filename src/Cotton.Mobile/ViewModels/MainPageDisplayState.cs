@@ -642,7 +642,7 @@ namespace Cotton.Mobile.ViewModels
             int visibleCount = FileEntries.Count;
             if (totalCount == 0)
             {
-                return "This folder is empty.";
+                return string.Empty;
             }
 
             string count = visibleCount == totalCount

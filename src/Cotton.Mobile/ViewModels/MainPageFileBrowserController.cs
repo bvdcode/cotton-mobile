@@ -301,6 +301,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
                 content = await ApplyThumbnailsAsync(_instanceUri, content);
+                content = ApplyLocalFiles(content);
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
@@ -340,6 +341,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
                 content = await ApplyThumbnailsAsync(_instanceUri, content);
+                content = ApplyLocalFiles(content);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
             }
@@ -382,6 +384,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(file, "Downloading"),
                     fileActionCancellation.Token);
+                ShowLocalFileIfAvailable(file);
                 _display.ShowFilesSummary();
                 await ShowDownloadedFileActionsAsync(file, result, fileActionCancellation.Token);
             }
@@ -434,6 +437,20 @@ namespace Cotton.Mobile.ViewModels
             return new CottonFolderContent(content.FolderId, content.FolderName, entries);
         }
 
+        private CottonFolderContent ApplyLocalFiles(CottonFolderContent content)
+        {
+            ArgumentNullException.ThrowIfNull(content);
+
+            var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
+            foreach (CottonFileBrowserEntry entry in content.Entries)
+            {
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(entry);
+                entries.Add(localFile is null ? entry : entry.WithLocalFile(localFile));
+            }
+
+            return new CottonFolderContent(content.FolderId, content.FolderName, entries);
+        }
+
         private async Task OpenFileAsync(CottonFileBrowserEntry file)
         {
             if (_instanceUri is null)
@@ -451,6 +468,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(file, "Opening"),
                     fileActionCancellation.Token);
+                ShowLocalFileIfAvailable(file);
                 if (_filePreviewService.CanPreview(file))
                 {
                     await _filePreviewService.OpenAsync(file, result, fileActionCancellation.Token);
@@ -501,6 +519,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(file, "Preparing"),
                     fileActionCancellation.Token);
+                ShowLocalFileIfAvailable(file);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
                 _display.ShowFilesSummary();
             }
@@ -629,6 +648,17 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Share failed.");
             }
+        }
+
+        private void ShowLocalFileIfAvailable(CottonFileBrowserEntry file)
+        {
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(file);
+            if (localFile is null)
+            {
+                return;
+            }
+
+            _display.ShowFileLocalCopy(file, localFile);
         }
 
         private IProgress<long>? CreateFileDownloadProgress(CottonFileBrowserEntry file, string actionName)

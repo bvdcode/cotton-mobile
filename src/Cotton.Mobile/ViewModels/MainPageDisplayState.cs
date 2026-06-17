@@ -491,6 +491,27 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
+        public void ShowFileLocalCopy(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(localFile);
+
+            int allIndex = FindEntryIndex(_allFileEntries, file.Id);
+            if (allIndex < 0)
+            {
+                return;
+            }
+
+            CottonFileBrowserEntry updatedEntry = _allFileEntries[allIndex].WithLocalFile(localFile);
+            _allFileEntries[allIndex] = updatedEntry;
+
+            int visibleIndex = FindEntryIndex(FileEntries, file.Id);
+            if (visibleIndex >= 0)
+            {
+                FileEntries[visibleIndex] = updatedEntry;
+            }
+        }
+
         public void ApplyFileBrowserPreferences(CottonFileBrowserPreferences preferences)
         {
             ArgumentNullException.ThrowIfNull(preferences);
@@ -633,6 +654,19 @@ namespace Cotton.Mobile.ViewModels
         private static string FormatItemCount(int count)
         {
             return count == 1 ? "1 item" : $"{count} items";
+        }
+
+        private static int FindEntryIndex(IList<CottonFileBrowserEntry> entries, Guid id)
+        {
+            for (int index = 0; index < entries.Count; index++)
+            {
+                if (entries[index].Id == id)
+                {
+                    return index;
+                }
+            }
+
+            return -1;
         }
 
         private static string CreateProfileInitials(string profileName)

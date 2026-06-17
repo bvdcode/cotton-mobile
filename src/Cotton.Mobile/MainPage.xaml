@@ -300,7 +300,7 @@
                                                        LineBreakMode="TailTruncation"
                                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                                                <Label Text="{Binding Details}"
+                                                <Label Text="{Binding DisplayDetails}"
                                                        FontSize="12"
                                                        MaxLines="1"
                                                        LineBreakMode="TailTruncation"
@@ -405,7 +405,7 @@
                                                            LineBreakMode="TailTruncation"
                                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                                                    <Label Text="{Binding Details}"
+                                                    <Label Text="{Binding DisplayDetails}"
                                                            FontSize="11"
                                                            MaxLines="1"
                                                            LineBreakMode="TailTruncation"

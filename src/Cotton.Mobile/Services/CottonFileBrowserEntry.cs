@@ -47,6 +47,7 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
+            CottonLocalFileSnapshot? localFile = null,
             CottonFileThumbnailSnapshot? thumbnail = null)
         {
             Id = id;
@@ -61,6 +62,7 @@ namespace Cotton.Mobile.Services
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
                 ? null
                 : previewHashEncryptedHex.Trim();
+            LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
         }
 
@@ -73,6 +75,8 @@ namespace Cotton.Mobile.Services
         public string Kind { get; }
 
         public string Details { get; }
+
+        public string DisplayDetails => LocalFile is null ? Details : $"{Details} · On device";
 
         public string ActionLabel { get; }
 
@@ -87,6 +91,8 @@ namespace Cotton.Mobile.Services
         public string? ContentType { get; }
 
         public string? PreviewHashEncryptedHex { get; }
+
+        public CottonLocalFileSnapshot? LocalFile { get; }
 
         public CottonFileThumbnailSnapshot Thumbnail { get; }
 
@@ -110,6 +116,7 @@ namespace Cotton.Mobile.Services
                 "DIR",
                 null,
                 null,
+                null,
                 null);
         }
 
@@ -131,7 +138,8 @@ namespace Cotton.Mobile.Services
                 ResolveBadgeText(kind),
                 file.SizeBytes,
                 contentType,
-                file.PreviewHashEncryptedHex);
+                file.PreviewHashEncryptedHex,
+                null);
         }
 
         public bool Matches(string searchText)
@@ -163,7 +171,27 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                LocalFile,
                 thumbnail);
+        }
+
+        public CottonFileBrowserEntry WithLocalFile(CottonLocalFileSnapshot localFile)
+        {
+            ArgumentNullException.ThrowIfNull(localFile);
+
+            return new CottonFileBrowserEntry(
+                Id,
+                Type,
+                Name,
+                Kind,
+                Details,
+                ActionLabel,
+                BadgeText,
+                SizeBytes,
+                ContentType,
+                PreviewHashEncryptedHex,
+                localFile,
+                Thumbnail);
         }
 
         private static string FormatSize(long bytes)

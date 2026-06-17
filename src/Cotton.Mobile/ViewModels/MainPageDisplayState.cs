@@ -422,6 +422,16 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
+        public void ShowFilesSummary()
+        {
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
+            FilesStatus = CreateFilesStatus();
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
         public void ApplyFileBrowserPreferences(CottonFileBrowserPreferences preferences)
         {
             ArgumentNullException.ThrowIfNull(preferences);

@@ -334,7 +334,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(file, "Downloading"),
                     fileActionCancellation.Token);
-                _display.ShowFilesStatus($"Downloaded {result.FileName}.");
+                _display.ShowFilesSummary();
                 await _dialogService.ShowAlertAsync(
                     "Downloaded",
                     $"{result.FileName} was saved to app storage.",
@@ -415,7 +415,7 @@ namespace Cotton.Mobile.ViewModels
                     await _fileInteractionService.OpenAsync(result, fileActionCancellation.Token);
                 }
 
-                _display.ShowFilesStatus($"Opened {result.FileName}.");
+                _display.ShowFilesSummary();
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -457,7 +457,7 @@ namespace Cotton.Mobile.ViewModels
                     CreateFileDownloadProgress(file, "Preparing"),
                     fileActionCancellation.Token);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
-                _display.ShowFilesStatus($"Shared {result.FileName}.");
+                _display.ShowFilesSummary();
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))

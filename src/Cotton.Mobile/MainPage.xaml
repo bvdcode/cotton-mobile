@@ -104,10 +104,10 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="6"
+                                     Spacing="4"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="6"
+                                             Spacing="4"
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
                                   ColumnSpacing="6">
@@ -184,17 +184,17 @@
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                            <Grid ColumnDefinitions="Auto,Auto,Auto"
+                            <Grid ColumnDefinitions="*,*,*"
                                   ColumnSpacing="6"
-                                  HorizontalOptions="Start">
+                                  HorizontalOptions="Fill">
                                 <Button Text="{Binding Display.FileSearchButtonText}"
                                         Command="{Binding ToggleFileSearchCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="10,0"
                                         FontSize="14"
+                                        HorizontalOptions="Fill"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="72"
                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
                                 <Button Grid.Column="1"
@@ -202,10 +202,10 @@
                                         Command="{Binding ShowFileSortActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="12,0"
+                                        Padding="10,0"
                                         FontSize="14"
+                                        HorizontalOptions="Fill"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="96"
                                         SemanticProperties.Description="Sort files" />
 
                                 <Button Grid.Column="2"
@@ -213,10 +213,10 @@
                                         Command="{Binding ShowFileViewActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="12,0"
+                                        Padding="10,0"
                                         FontSize="14"
+                                        HorizontalOptions="Fill"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="88"
                                         SemanticProperties.Description="Change file view" />
                             </Grid>
 
@@ -343,14 +343,14 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Padding="3,0,3,8">
+                                              Padding="2,0,2,6">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                     StrokeThickness="1"
                                                     StrokeShape="RoundRectangle 8"
-                                                    Padding="4"
+                                                    Padding="2"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                                                <Grid RowSpacing="3">
+                                                <Grid RowSpacing="2">
                                                     <Grid.GestureRecognizers>
                                                         <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                               CommandParameter="{Binding .}" />

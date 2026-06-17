@@ -104,6 +104,10 @@ namespace Cotton.Mobile.Services
 
         public bool IsFolder => Type == CottonFileBrowserEntryType.Folder;
 
+        public bool IsFolderThumbnailVisible => IsFolder && Thumbnail.IsPlaceholderVisible;
+
+        public bool IsPlaceholderTextVisible => !IsFolder && Thumbnail.IsPlaceholderVisible;
+
         public bool IsImage => Type == CottonFileBrowserEntryType.File && Kind == "Image";
 
         public bool IsText => Type == CottonFileBrowserEntryType.File && Kind == "Text";
@@ -119,7 +123,7 @@ namespace Cotton.Mobile.Services
                 "Folder",
                 "Folder",
                 "Open",
-                "📁",
+                "Folder",
                 node.UpdatedAt,
                 null,
                 null,

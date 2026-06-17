@@ -288,13 +288,21 @@
                                                            Aspect="AspectFill"
                                                            IsVisible="{Binding Thumbnail.HasImage}" />
 
+                                                    <Image Source="folder.svg"
+                                                           Aspect="AspectFit"
+                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                           HeightRequest="24"
+                                                           WidthRequest="24"
+                                                           HorizontalOptions="Center"
+                                                           VerticalOptions="Center" />
+
                                                     <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                        IsVisible="{Binding Thumbnail.IsLoading}"
                                                                        HorizontalOptions="Center"
                                                                        VerticalOptions="Center" />
 
                                                     <Label Text="{Binding Thumbnail.PlaceholderText}"
-                                                           IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
+                                                           IsVisible="{Binding IsPlaceholderTextVisible}"
                                                            FontSize="{Binding Thumbnail.PlaceholderFontSize}"
                                                            FontAttributes="Bold"
                                                            HorizontalTextAlignment="Center"
@@ -368,13 +376,21 @@
                                                                    Aspect="AspectFill"
                                                                    IsVisible="{Binding Thumbnail.HasImage}" />
 
+                                                            <Image Source="folder.svg"
+                                                                   Aspect="AspectFit"
+                                                                   IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                                   HeightRequest="62"
+                                                                   WidthRequest="62"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center" />
+
                                                             <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                                IsVisible="{Binding Thumbnail.IsLoading}"
                                                                                HorizontalOptions="Center"
                                                                                VerticalOptions="Center" />
 
                                                             <Label Text="{Binding Thumbnail.PlaceholderText}"
-                                                                   IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
+                                                                   IsVisible="{Binding IsPlaceholderTextVisible}"
                                                                    FontSize="{Binding Thumbnail.PlaceholderFontSize}"
                                                                    FontAttributes="Bold"
                                                                    HorizontalTextAlignment="Center"

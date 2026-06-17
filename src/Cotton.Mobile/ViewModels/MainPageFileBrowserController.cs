@@ -13,6 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
         private const string OpenAction = "Open";
+        private const string OpenWithSystemAppAction = "Open with system app";
         private const string ShareAction = "Share";
         private const string SortNameAction = "Name";
         private const string SortUpdatedAction = "Updated";
@@ -297,20 +298,24 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowFileActionsAsync(CottonFileBrowserEntry file)
         {
+            string openAction = CreateOpenAction(file);
             string? action = await _dialogService.ShowActionSheetAsync(
                 file.Name,
                 CancelAction,
                 null,
-                OpenAction,
+                openAction,
                 DownloadAction,
                 ShareAction,
                 DetailsAction);
 
+            if (string.Equals(action, openAction, StringComparison.Ordinal))
+            {
+                await OpenFileAsync(file);
+                return;
+            }
+
             switch (action)
             {
-                case OpenAction:
-                    await OpenFileAsync(file);
-                    break;
                 case DownloadAction:
                     await DownloadFileAsync(file);
                     break;
@@ -700,22 +705,31 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
+            string openAction = CreateOpenAction(file);
             string? action = await _dialogService.ShowActionSheetAsync(
                 $"Downloaded {downloadedFile.FileName}",
                 DoneAction,
                 null,
-                OpenAction,
+                openAction,
                 ShareAction);
+
+            if (string.Equals(action, openAction, StringComparison.Ordinal))
+            {
+                await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
+                return;
+            }
 
             switch (action)
             {
-                case OpenAction:
-                    await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
-                    break;
                 case ShareAction:
                     await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
                     break;
             }
+        }
+
+        private string CreateOpenAction(CottonFileBrowserEntry file)
+        {
+            return _filePreviewService.CanPreview(file) ? OpenAction : OpenWithSystemAppAction;
         }
 
         private async Task OpenDownloadedFileAsync(

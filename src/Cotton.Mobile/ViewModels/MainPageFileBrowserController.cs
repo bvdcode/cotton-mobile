@@ -17,6 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonFileBrowserService _fileBrowserService;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileInteractionService _fileInteractionService;
+        private readonly IFilePreviewService _filePreviewService;
         private readonly IUserDialogService _dialogService;
         private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
@@ -30,6 +31,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore preferenceStore,
             IFileInteractionService fileInteractionService,
+            IFilePreviewService filePreviewService,
             IUserDialogService dialogService,
             IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
@@ -38,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
+            ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
@@ -46,6 +49,7 @@ namespace Cotton.Mobile.ViewModels
             _fileBrowserService = fileBrowserService;
             _preferenceStore = preferenceStore;
             _fileInteractionService = fileInteractionService;
+            _filePreviewService = filePreviewService;
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
@@ -320,7 +324,15 @@ namespace Cotton.Mobile.ViewModels
                     _instanceUri,
                     file,
                     CreateFileDownloadProgress(file, "Opening"));
-                await _fileInteractionService.OpenAsync(result);
+                if (_filePreviewService.CanPreview(file))
+                {
+                    await _filePreviewService.OpenAsync(file, result);
+                }
+                else
+                {
+                    await _fileInteractionService.OpenAsync(result);
+                }
+
                 _display.ShowFilesStatus($"Opened {result.FileName}.");
             }
             catch (Exception exception)

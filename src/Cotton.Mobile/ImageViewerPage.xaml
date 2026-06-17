@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.ImageViewerPage"
+             x:DataType="viewModels:ImageViewerViewModel"
+             Shell.NavBarIsVisible="True"
+             Title="{Binding Title}"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Share"
+                     Command="{Binding ShareCommand}" />
+        <ToolbarItem Text="Open"
+                     Command="{Binding OpenExternallyCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="*,Auto"
+          BackgroundColor="{StaticResource OffBlack}">
+        <Grid x:Name="ImageSurface"
+              BackgroundColor="{StaticResource OffBlack}">
+            <Image x:Name="PreviewImage"
+                   Source="{Binding ImageSource}"
+                   Aspect="AspectFit"
+                   HorizontalOptions="Fill"
+                   VerticalOptions="Fill">
+                <Image.GestureRecognizers>
+                    <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
+                    <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
+                    <TapGestureRecognizer NumberOfTapsRequired="2"
+                                          Tapped="OnImageDoubleTapped" />
+                </Image.GestureRecognizers>
+            </Image>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              Padding="16,12"
+              ColumnDefinitions="*,Auto"
+              ColumnSpacing="12"
+              BackgroundColor="{StaticResource OffBlack}">
+            <VerticalStackLayout Spacing="2"
+                                 VerticalOptions="Center">
+                <Label Text="{Binding Title}"
+                       FontSize="15"
+                       FontAttributes="Bold"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"
+                       TextColor="{StaticResource White}" />
+
+                <Label Text="{Binding Details}"
+                       FontSize="12"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"
+                       TextColor="{StaticResource Gray200}" />
+
+                <Label Text="{Binding Status}"
+                       IsVisible="{Binding IsStatusVisible}"
+                       FontSize="12"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"
+                       TextColor="{StaticResource Gray200}" />
+            </VerticalStackLayout>
+
+            <Button Grid.Column="1"
+                    Text="Reset"
+                    Clicked="OnResetClicked"
+                    Padding="10,0"
+                    MinimumHeightRequest="32"
+                    MinimumWidthRequest="56"
+                    VerticalOptions="Center" />
+        </Grid>
+    </Grid>
+</ContentPage>

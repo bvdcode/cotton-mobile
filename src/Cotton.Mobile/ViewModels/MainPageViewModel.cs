@@ -31,6 +31,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
             IFileInteractionService fileInteractionService,
+            IFilePreviewService filePreviewService,
             ILogger<MainPageFileBrowserController> fileBrowserLogger,
             IMainPagePresentationService presentationService,
             ILogger<MainPageViewModel> logger)
@@ -43,6 +44,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
+            ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(fileBrowserLogger);
             ArgumentNullException.ThrowIfNull(presentationService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -61,6 +63,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserService,
                 fileBrowserPreferenceStore,
                 fileInteractionService,
+                filePreviewService,
                 dialogService,
                 this,
                 fileBrowserLogger);

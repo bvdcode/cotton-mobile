@@ -41,6 +41,16 @@ on:
         required: true
         type: boolean
         default: false
+      publish_github_release:
+        description: Publish the signed APK to the latest GitHub Release.
+        required: true
+        type: boolean
+        default: false
+      github_release_tag:
+        description: GitHub Release tag used for the stable Android APK download link.
+        required: true
+        type: string
+        default: android-latest
       upload_store_listing:
         description: Upload default store listing text and graphics to Google Play.
         required: true
@@ -149,7 +159,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'workflow_dispatch' && inputs.build_signed_release
     permissions:
-      contents: read
+      contents: write
     env:
       ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
       ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
@@ -263,6 +273,66 @@ jobs:
             src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
           if-no-files-found: error
           retention-days: 30
+
+      - name: Prepare GitHub Release assets
+        if: inputs.publish_github_release
+        run: |
+          release_dir="$RUNNER_TEMP/cotton-mobile-github-release"
+          mkdir -p "$release_dir"
+
+          apk_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.apk' -print -quit)"
+          if [ -z "$apk_path" ]; then
+            echo "Signed APK was not found." >&2
+            exit 1
+          fi
+          cp "$apk_path" "$release_dir/CottonCloud-Android.apk"
+
+          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
+          if [ -n "$aab_path" ]; then
+            cp "$aab_path" "$release_dir/CottonCloud-Android.aab"
+          fi
+
+          {
+            echo "# Cotton Cloud Android"
+            echo
+            echo "- Commit: \`$GITHUB_SHA\`"
+            echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- Android versionCode: $ANDROID_VERSION_CODE"
+            echo
+            echo "Install the APK asset directly on Android devices, or use the Google Play testing link when the tester is opted in."
+          } > "$release_dir/release-notes.md"
+
+          echo "COTTON_GITHUB_RELEASE_DIR=$release_dir" >> "$GITHUB_ENV"
+
+      - name: Publish latest GitHub Release
+        if: inputs.publish_github_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag="${{ inputs.github_release_tag }}"
+          release_dir="$COTTON_GITHUB_RELEASE_DIR"
+
+          git tag -f "$tag" "$GITHUB_SHA"
+          git push --force origin "refs/tags/$tag"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" \
+              --title "Cotton Cloud Android" \
+              --notes-file "$release_dir/release-notes.md" \
+              --latest
+          else
+            gh release create "$tag" \
+              --title "Cotton Cloud Android" \
+              --notes-file "$release_dir/release-notes.md" \
+              --latest \
+              --verify-tag
+          fi
+
+          release_assets=("$release_dir/CottonCloud-Android.apk")
+          if [ -f "$release_dir/CottonCloud-Android.aab" ]; then
+            release_assets+=("$release_dir/CottonCloud-Android.aab")
+          fi
+          gh release upload "$tag" "${release_assets[@]}" --clobber
 
       - name: Setup Python
         if: inputs.upload_to_google_play

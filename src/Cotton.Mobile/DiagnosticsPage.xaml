@@ -21,14 +21,14 @@
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
-                    <Label Text="{Binding HeaderVersionText}"
+                    <Label Text="{Binding HeaderTitleText}"
                            FontSize="28"
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                    <Label Text="{Binding HeaderChannelText}"
+                    <Label Text="{Binding HeaderVersionText}"
                            FontSize="13"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"

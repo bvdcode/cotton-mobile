@@ -14,8 +14,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly IClipboard _clipboard;
         private readonly ILogger<DiagnosticsViewModel> _logger;
         private bool _isBusy;
+        private string _headerTitleText = "Cotton Cloud";
         private string _headerVersionText = "Not available";
-        private string _headerChannelText = "Not available";
         private string? _status;
 
         public DiagnosticsViewModel(
@@ -65,10 +65,10 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _headerVersionText, value);
         }
 
-        public string HeaderChannelText
+        public string HeaderTitleText
         {
-            get => _headerChannelText;
-            private set => SetProperty(ref _headerChannelText, value);
+            get => _headerTitleText;
+            private set => SetProperty(ref _headerTitleText, value);
         }
 
         public string? Status
@@ -137,8 +137,8 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowDiagnostics(CottonStorageSummary? summary)
         {
+            HeaderTitleText = CreateValue(_metadata.ApplicationName);
             HeaderVersionText = CreateVersionText();
-            HeaderChannelText = CreateValue(_metadata.InstallChannel);
             Sections.Clear();
             foreach (DiagnosticsSectionViewModel section in CreateSections(summary))
             {
@@ -153,8 +153,7 @@ namespace Cotton.Mobile.ViewModels
                 new DiagnosticsSectionViewModel(
                     "App",
                     [
-                        CreateItem("Package", _metadata.PackageName),
-                        CreateItem("Channel", _metadata.InstallChannel),
+                        CreateItem("Version", CreateVersionText()),
                         CreateItem("Network", _context.HasInternetAccess ? "Internet available" : "No internet access"),
                     ]),
                 new DiagnosticsSectionViewModel(
@@ -195,7 +194,7 @@ namespace Cotton.Mobile.ViewModels
                 Environment.NewLine,
                 new[]
                 {
-                    $"App: {_metadata.ApplicationName} {CreateVersionText()}",
+                    $"App: {CreateValue(_metadata.ApplicationName)}",
                 }.Concat(sectionLines));
         }
 

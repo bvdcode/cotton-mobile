@@ -28,6 +28,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isLogoutEnabled = true;
         private bool _isFilesLoading;
         private bool _isFilesRefreshing;
+        private bool _isFileSearchOpen;
         private bool _canNavigateFilesUp;
         private bool _canCancelFileAction;
         private bool _canRetryFileAction;
@@ -192,10 +193,13 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _fileSearchText, value ?? string.Empty))
                 {
+                    OnPropertyChanged(nameof(IsFileSearchVisible));
                     ApplyFileFilters();
                 }
             }
         }
+
+        public bool IsFileSearchVisible => _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText);
 
         public CottonFileBrowserViewMode FileViewMode
         {
@@ -472,6 +476,20 @@ namespace Cotton.Mobile.ViewModels
             FileSortMode = sortMode;
             ApplyFileFilters();
             FilesStatus = CreateFilesStatus();
+        }
+
+        public void ToggleFileSearch()
+        {
+            if (_isFileSearchOpen && string.IsNullOrWhiteSpace(FileSearchText))
+            {
+                _isFileSearchOpen = false;
+            }
+            else
+            {
+                _isFileSearchOpen = true;
+            }
+
+            OnPropertyChanged(nameof(IsFileSearchVisible));
         }
 
         private void SetStatus(string? status)

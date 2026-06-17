@@ -463,12 +463,11 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
                     _instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Opening"),
+                    "Opening",
                     fileActionCancellation.Token);
-                ShowLocalFileIfAvailable(file);
                 if (_filePreviewService.CanPreview(file))
                 {
                     await _filePreviewService.OpenAsync(file, result, fileActionCancellation.Token);
@@ -514,12 +513,11 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
                     _instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Preparing"),
+                    "Preparing",
                     fileActionCancellation.Token);
-                ShowLocalFileIfAvailable(file);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
                 _display.ShowFilesSummary();
             }
@@ -552,6 +550,28 @@ namespace Cotton.Mobile.ViewModels
                 file.Name,
                 CreateFileDetailsMessage(file, localFile),
                 "OK");
+        }
+
+        private async Task<CottonFileDownloadResult> PrepareFileForOpenOrShareAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            string actionName,
+            CancellationToken cancellationToken)
+        {
+            CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(file);
+            if (localFile is not null)
+            {
+                ShowLocalFileIfAvailable(file);
+                return localFile;
+            }
+
+            CottonFileDownloadResult downloadedFile = await _fileBrowserService.DownloadAsync(
+                instanceUri,
+                file,
+                CreateFileDownloadProgress(file, actionName),
+                cancellationToken);
+            ShowLocalFileIfAvailable(file);
+            return downloadedFile;
         }
 
         private static string CreateFileDetailsMessage(

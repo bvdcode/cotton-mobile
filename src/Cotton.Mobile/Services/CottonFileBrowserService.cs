@@ -108,19 +108,27 @@ namespace Cotton.Mobile.Services
         public CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file)
         {
             ArgumentNullException.ThrowIfNull(file);
-            if (file.Type != CottonFileBrowserEntryType.File)
+
+            FileInfo? info = GetLocalDownloadFile(file);
+            if (info is null)
             {
                 return null;
             }
 
-            string filePath = CreateDownloadPath(file);
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            var info = new FileInfo(filePath);
             return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
+        }
+
+        public CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+
+            FileInfo? info = GetLocalDownloadFile(file);
+            if (info is null || file.SizeBytes != info.Length)
+            {
+                return null;
+            }
+
+            return new CottonFileDownloadResult(file.Name, info.FullName, info.Length);
         }
 
         private static async Task<CottonFolderContent> LoadFolderAsync(
@@ -173,6 +181,17 @@ namespace Cotton.Mobile.Services
         private static string CreateDownloadPath(CottonFileBrowserEntry file)
         {
             return Path.Combine(CreateDownloadDirectory(file), CreateSafeFileName(file.Name));
+        }
+
+        private static FileInfo? GetLocalDownloadFile(CottonFileBrowserEntry file)
+        {
+            if (file.Type != CottonFileBrowserEntryType.File)
+            {
+                return null;
+            }
+
+            var info = new FileInfo(CreateDownloadPath(file));
+            return info.Exists ? info : null;
         }
 
         private void DeleteTemporaryDownload(string tempFilePath)

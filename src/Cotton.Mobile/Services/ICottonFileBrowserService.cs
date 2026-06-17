@@ -16,5 +16,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken = default);
 
         CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file);
+
+        CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file);
     }
 }

@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
+        private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly IUserDialogService _dialogService;
         private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
@@ -35,6 +36,7 @@ namespace Cotton.Mobile.ViewModels
             IFileBrowserPreferenceStore preferenceStore,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
+            IFileThumbnailProvider thumbnailProvider,
             IUserDialogService dialogService,
             IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
@@ -44,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
+            ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
@@ -53,6 +56,7 @@ namespace Cotton.Mobile.ViewModels
             _preferenceStore = preferenceStore;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
+            _thumbnailProvider = thumbnailProvider;
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
@@ -248,6 +252,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
+                content = await ApplyThumbnailsAsync(content);
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
@@ -286,6 +291,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
+                content = await ApplyThumbnailsAsync(content);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
             }
@@ -362,6 +368,20 @@ namespace Cotton.Mobile.ViewModels
                 .Select(folder => folder.Name)
                 .Append(string.IsNullOrWhiteSpace(currentFolderName) ? "Files" : currentFolderName.Trim());
             return string.Join(" / ", names);
+        }
+
+        private async Task<CottonFolderContent> ApplyThumbnailsAsync(CottonFolderContent content)
+        {
+            ArgumentNullException.ThrowIfNull(content);
+
+            var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
+            foreach (CottonFileBrowserEntry entry in content.Entries)
+            {
+                CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetThumbnailAsync(entry);
+                entries.Add(entry.WithThumbnail(thumbnail));
+            }
+
+            return new CottonFolderContent(content.FolderId, content.FolderName, entries);
         }
 
         private async Task OpenFileAsync(CottonFileBrowserEntry file)

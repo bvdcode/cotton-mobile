@@ -255,12 +255,24 @@
                                                     StrokeShape="RoundRectangle 8"
                                                     Padding="0"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
-                                                <Label Text="{Binding BadgeText}"
-                                                       FontSize="10"
-                                                       FontAttributes="Bold"
-                                                       HorizontalTextAlignment="Center"
-                                                       VerticalTextAlignment="Center"
-                                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                <Grid>
+                                                    <Image Source="{Binding Thumbnail.LocalPath}"
+                                                           Aspect="AspectFill"
+                                                           IsVisible="{Binding Thumbnail.HasImage}" />
+
+                                                    <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
+                                                                       IsVisible="{Binding Thumbnail.IsLoading}"
+                                                                       HorizontalOptions="Center"
+                                                                       VerticalOptions="Center" />
+
+                                                    <Label Text="{Binding Thumbnail.PlaceholderText}"
+                                                           IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
+                                                           FontSize="10"
+                                                           FontAttributes="Bold"
+                                                           HorizontalTextAlignment="Center"
+                                                           VerticalTextAlignment="Center"
+                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                </Grid>
                                             </Border>
 
                                             <VerticalStackLayout Grid.Column="1"
@@ -317,12 +329,24 @@
                                                         StrokeShape="RoundRectangle 8"
                                                         Padding="0"
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
-                                                    <Label Text="{Binding BadgeText}"
-                                                           FontSize="10"
-                                                           FontAttributes="Bold"
-                                                           HorizontalTextAlignment="Center"
-                                                           VerticalTextAlignment="Center"
-                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                    <Grid>
+                                                        <Image Source="{Binding Thumbnail.LocalPath}"
+                                                               Aspect="AspectFill"
+                                                               IsVisible="{Binding Thumbnail.HasImage}" />
+
+                                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
+                                                                           IsVisible="{Binding Thumbnail.IsLoading}"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
+
+                                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
+                                                               IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
+                                                               FontSize="10"
+                                                               FontAttributes="Bold"
+                                                               HorizontalTextAlignment="Center"
+                                                               VerticalTextAlignment="Center"
+                                                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                    </Grid>
                                                 </Border>
 
                                                 <VerticalStackLayout Grid.Row="1"

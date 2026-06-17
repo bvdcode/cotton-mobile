@@ -45,7 +45,8 @@ namespace Cotton.Mobile.Services
             string actionLabel,
             string badgeText,
             long? sizeBytes,
-            string? contentType)
+            string? contentType,
+            CottonFileThumbnailSnapshot? thumbnail = null)
         {
             Id = id;
             Type = type;
@@ -56,6 +57,7 @@ namespace Cotton.Mobile.Services
             BadgeText = string.IsNullOrWhiteSpace(badgeText) ? "FILE" : badgeText.Trim();
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText);
         }
 
         public Guid Id { get; }
@@ -75,6 +77,8 @@ namespace Cotton.Mobile.Services
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
+
+        public CottonFileThumbnailSnapshot Thumbnail { get; }
 
         public bool IsFolder => Type == CottonFileBrowserEntryType.Folder;
 
@@ -130,6 +134,23 @@ namespace Cotton.Mobile.Services
                 || Kind.Contains(query, StringComparison.OrdinalIgnoreCase)
                 || Details.Contains(query, StringComparison.OrdinalIgnoreCase)
                 || (ContentType?.Contains(query, StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+
+        public CottonFileBrowserEntry WithThumbnail(CottonFileThumbnailSnapshot thumbnail)
+        {
+            ArgumentNullException.ThrowIfNull(thumbnail);
+
+            return new CottonFileBrowserEntry(
+                Id,
+                Type,
+                Name,
+                Kind,
+                Details,
+                ActionLabel,
+                BadgeText,
+                SizeBytes,
+                ContentType,
+                thumbnail);
         }
 
         private static string FormatSize(long bytes)

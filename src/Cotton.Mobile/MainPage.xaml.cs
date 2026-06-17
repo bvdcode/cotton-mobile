@@ -5,13 +5,13 @@ namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const double PageHorizontalPadding = 32;
+		private const double PageHorizontalPadding = 24;
 		private const double ContentMaximumWidth = 520;
-		private const double FileTileSlotHorizontalPadding = 4;
+		private const double FileTileSlotHorizontalPadding = 2;
 		private const double FileTileMinimumSlotWidth = 112;
 		private const double FileTileMinimumWidth = 104;
 		private const double FileTilePreviewRatio = 0.66;
-		private const double FileTileVerticalChrome = 56;
+		private const double FileTileVerticalChrome = 50;
 		private const int FileTileMaximumColumnCount = 7;
 
 		private readonly MainPageViewModel _viewModel;
@@ -105,13 +105,13 @@ namespace Cotton.Mobile
 				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
 				2,
 				FileTileMaximumColumnCount);
-			double slotWidth = Math.Floor(contentWidth / columnCount);
+			double slotWidth = contentWidth / columnCount;
 			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 
 			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
 				columnCount--;
-				slotWidth = Math.Floor(contentWidth / columnCount);
+				slotWidth = contentWidth / columnCount;
 				tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 			}
 

@@ -6,7 +6,7 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
-    <Grid Padding="16,10,16,20"
+    <Grid Padding="12,4,12,16"
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
@@ -343,7 +343,7 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Padding="2,0,2,6">
+                                              Padding="1,0,1,5">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                     StrokeThickness="1"

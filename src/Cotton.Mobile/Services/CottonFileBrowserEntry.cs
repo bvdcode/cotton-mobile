@@ -5,6 +5,8 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserEntry
     {
+        private const string LocalCopyStatusText = "Saved";
+
         private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
             ".css",
@@ -78,7 +80,11 @@ namespace Cotton.Mobile.Services
 
         public string Details { get; }
 
-        public string DisplayDetails => LocalFile is null ? Details : $"{Details} · On device";
+        public string DisplayDetails => LocalFile is null ? Details : $"{Details} · {LocalCopyStatusText}";
+
+        public bool HasLocalCopy => LocalFile is not null;
+
+        public string LocalCopyStatus => HasLocalCopy ? LocalCopyStatusText : string.Empty;
 
         public string ActionLabel { get; }
 

@@ -5,6 +5,8 @@ namespace Cotton.Mobile.Services
         private readonly Lock _gate = new();
         private TaskCompletionSource _nextResume = CreateResumeSource();
 
+        public event EventHandler? Resumed;
+
         public Task WaitForNextResumeAsync(CancellationToken cancellationToken)
         {
             Task resumeTask;
@@ -26,6 +28,7 @@ namespace Cotton.Mobile.Services
             }
 
             resume.TrySetResult();
+            Resumed?.Invoke(this, EventArgs.Empty);
         }
 
         private static TaskCompletionSource CreateResumeSource()

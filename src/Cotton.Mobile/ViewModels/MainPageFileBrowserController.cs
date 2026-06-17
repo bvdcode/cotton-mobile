@@ -1,5 +1,6 @@
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Extensions.Logging;
 using System.Net;
 
@@ -31,6 +32,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFilePreviewService _filePreviewService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly INetworkAccessService _networkAccess;
+        private readonly IApplicationForegroundService _foregroundService;
         private readonly IUserDialogService _dialogService;
         private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
@@ -42,6 +44,8 @@ namespace Cotton.Mobile.ViewModels
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
         private bool _isFolderNavigationInProgress;
+        private bool _lastFileLoadFailed;
+        private bool _isRecoveryRefreshInProgress;
 
         public MainPageFileBrowserController(
             MainPageDisplayState display,
@@ -51,6 +55,7 @@ namespace Cotton.Mobile.ViewModels
             IFilePreviewService filePreviewService,
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
+            IApplicationForegroundService foregroundService,
             IUserDialogService dialogService,
             IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
@@ -62,6 +67,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
+            ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
@@ -73,9 +79,12 @@ namespace Cotton.Mobile.ViewModels
             _filePreviewService = filePreviewService;
             _thumbnailProvider = thumbnailProvider;
             _networkAccess = networkAccess;
+            _foregroundService = foregroundService;
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
+            _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
+            _foregroundService.Resumed += ForegroundService_Resumed;
         }
 
         public async Task InitializeAsync(Uri instanceUri)
@@ -93,6 +102,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFileActionRetry();
             _instanceUri = null;
             _currentFolder = null;
+            _lastFileLoadFailed = false;
             _fileNavigation.Clear();
         }
 
@@ -350,6 +360,7 @@ namespace Cotton.Mobile.ViewModels
                 content = ApplyLocalFiles(content);
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
+                _lastFileLoadFailed = false;
                 _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
             }
             catch (Exception exception)
@@ -389,6 +400,7 @@ namespace Cotton.Mobile.ViewModels
                 content = await ApplyThumbnailsAsync(_instanceUri, content);
                 content = ApplyLocalFiles(content);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
+                _lastFileLoadFailed = false;
                 _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
             }
             catch (Exception exception)
@@ -830,7 +842,65 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowFileLoadFailure(string fallbackStatus)
         {
+            _lastFileLoadFailed = true;
             _display.ShowFilesStatus(CreateOfflineAwareStatus(fallbackStatus, OfflineBrowseStatus));
+        }
+
+        private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
+        {
+            QueueFileLoadRecoveryRefresh("internet access restored");
+        }
+
+        private void ForegroundService_Resumed(object? sender, EventArgs e)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return;
+            }
+
+            QueueFileLoadRecoveryRefresh("foreground resume");
+        }
+
+        private void QueueFileLoadRecoveryRefresh(string reason)
+        {
+            if (!CanRunRecoveryRefresh())
+            {
+                return;
+            }
+
+            _ = MainThread.InvokeOnMainThreadAsync(() => RefreshAfterFileLoadRecoveryAsync(reason));
+        }
+
+        private async Task RefreshAfterFileLoadRecoveryAsync(string reason)
+        {
+            if (!CanRunRecoveryRefresh())
+            {
+                return;
+            }
+
+            _isRecoveryRefreshInProgress = true;
+            try
+            {
+                _logger.LogInformation("Refreshing Cotton mobile files after {Reason}.", reason);
+                await RefreshAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to refresh Cotton mobile files after {Reason}.", reason);
+            }
+            finally
+            {
+                _isRecoveryRefreshInProgress = false;
+            }
+        }
+
+        private bool CanRunRecoveryRefresh()
+        {
+            return _lastFileLoadFailed
+                && _instanceUri is not null
+                && !_display.IsFilesLoading
+                && !_display.IsFilesRefreshing
+                && !_isRecoveryRefreshInProgress;
         }
 
         private bool ShowOfflineUnavailableRetryIfNeeded(

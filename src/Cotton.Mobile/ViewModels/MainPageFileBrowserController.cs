@@ -12,6 +12,9 @@ namespace Cotton.Mobile.ViewModels
         private const string DownloadAction = "Download";
         private const string OpenAction = "Open";
         private const string ShareAction = "Share";
+        private const string SortNameAction = "Name";
+        private const string SortSizeAction = "Size";
+        private const string SortTypeAction = "Type";
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -136,19 +139,28 @@ namespace Cotton.Mobile.ViewModels
             return Task.CompletedTask;
         }
 
-        public Task SortByNameAsync()
+        public async Task ShowSortActionsAsync()
         {
-            return SetSortModeAsync(CottonFileBrowserSortMode.Name);
-        }
+            string? action = await _dialogService.ShowActionSheetAsync(
+                $"Sort files by {_display.FileSortMode}",
+                CancelAction,
+                null,
+                SortNameAction,
+                SortTypeAction,
+                SortSizeAction);
 
-        public Task SortByTypeAsync()
-        {
-            return SetSortModeAsync(CottonFileBrowserSortMode.Type);
-        }
-
-        public Task SortBySizeAsync()
-        {
-            return SetSortModeAsync(CottonFileBrowserSortMode.Size);
+            switch (action)
+            {
+                case SortNameAction:
+                    await SetSortModeAsync(CottonFileBrowserSortMode.Name);
+                    break;
+                case SortTypeAction:
+                    await SetSortModeAsync(CottonFileBrowserSortMode.Type);
+                    break;
+                case SortSizeAction:
+                    await SetSortModeAsync(CottonFileBrowserSortMode.Size);
+                    break;
+            }
         }
 
         public Task CancelFileActionAsync()

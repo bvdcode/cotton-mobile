@@ -84,9 +84,7 @@ namespace Cotton.Mobile.ViewModels
             CancelFileActionCommand = new AsyncCommand(_fileBrowser.CancelFileActionAsync, () => Display.CanCancelFileAction);
             RetryFileActionCommand = new AsyncCommand(_fileBrowser.RetryFileActionAsync, () => Display.CanRetryFileAction);
             ToggleFileViewCommand = new AsyncCommand(_fileBrowser.ToggleViewModeAsync);
-            SortFilesByNameCommand = new AsyncCommand(_fileBrowser.SortByNameAsync);
-            SortFilesByTypeCommand = new AsyncCommand(_fileBrowser.SortByTypeAsync);
-            SortFilesBySizeCommand = new AsyncCommand(_fileBrowser.SortBySizeAsync);
+            ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync);
         }
 
         public MainPageDisplayState Display { get; }
@@ -113,11 +111,7 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand ToggleFileViewCommand { get; }
 
-        public AsyncCommand SortFilesByNameCommand { get; }
-
-        public AsyncCommand SortFilesByTypeCommand { get; }
-
-        public AsyncCommand SortFilesBySizeCommand { get; }
+        public AsyncCommand ShowFileSortActionsCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -353,9 +347,7 @@ namespace Cotton.Mobile.ViewModels
             CancelFileActionCommand.RaiseCanExecuteChanged();
             RetryFileActionCommand.RaiseCanExecuteChanged();
             ToggleFileViewCommand.RaiseCanExecuteChanged();
-            SortFilesByNameCommand.RaiseCanExecuteChanged();
-            SortFilesByTypeCommand.RaiseCanExecuteChanged();
-            SortFilesBySizeCommand.RaiseCanExecuteChanged();
+            ShowFileSortActionsCommand.RaiseCanExecuteChanged();
         }
 
         private void AnnounceStatus(string? status)

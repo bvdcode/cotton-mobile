@@ -186,35 +186,18 @@
                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                        PlaceholderColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
 
-                            <Grid ColumnDefinitions="*,*,*,Auto"
+                            <Grid ColumnDefinitions="*,Auto"
                                   ColumnSpacing="8">
-                                <Button Text="{Binding Display.SortByNameText}"
-                                        Command="{Binding SortFilesByNameCommand}"
+                                <Button Text="{Binding Display.FileSortButtonText}"
+                                        Command="{Binding ShowFileSortActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="52" />
+                                        MinimumWidthRequest="96"
+                                        SemanticProperties.Description="Sort files" />
 
                                 <Button Grid.Column="1"
-                                        Text="{Binding Display.SortByTypeText}"
-                                        Command="{Binding SortFilesByTypeCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="8,0"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="52" />
-
-                                <Button Grid.Column="2"
-                                        Text="{Binding Display.SortBySizeText}"
-                                        Command="{Binding SortFilesBySizeCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="8,0"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="52" />
-
-                                <Button Grid.Column="3"
                                         Text="{Binding Display.FileViewToggleText}"
                                         Command="{Binding ToggleFileViewCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"

@@ -218,9 +218,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _fileSortMode, value))
                 {
-                    OnPropertyChanged(nameof(SortByNameText));
-                    OnPropertyChanged(nameof(SortByTypeText));
-                    OnPropertyChanged(nameof(SortBySizeText));
+                    OnPropertyChanged(nameof(FileSortButtonText));
                 }
             }
         }
@@ -231,11 +229,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string FileViewToggleText => FileViewMode == CottonFileBrowserViewMode.List ? "Tiles" : "List";
 
-        public string SortByNameText => CreateSortText(CottonFileBrowserSortMode.Name);
-
-        public string SortByTypeText => CreateSortText(CottonFileBrowserSortMode.Type);
-
-        public string SortBySizeText => CreateSortText(CottonFileBrowserSortMode.Size);
+        public string FileSortButtonText => $"Sort: {FileSortMode}";
 
         public bool IsFilesLoading
         {
@@ -576,11 +570,6 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return "CC";
-        }
-
-        private string CreateSortText(CottonFileBrowserSortMode sortMode)
-        {
-            return FileSortMode == sortMode ? $"{sortMode} ✓" : sortMode.ToString();
         }
 
         private string ResolveFilesEmptyMessage(int visibleCount)

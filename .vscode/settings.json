@@ -1,0 +1,9 @@
+{
+    "dotnet.debug.hotReloadXAML": true,
+    "csharp.experimental.debug.hotReload": true,
+    "csharp.debug.hotReloadOnSave": true,
+    "csharp.debug.hotReloadVerbosity": "minimal",
+    "maui.configuration.useLaunchJsonConfigurations": true,
+    "maui.configuration.debugVerbosity": "minimal",
+    "maui.configuration.logVerbosity": "detailed"
+}

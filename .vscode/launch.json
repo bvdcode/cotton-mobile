@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Cotton Mobile Android Debug",
+            "type": "maui",
+            "request": "launch",
+            "project": "src/Cotton.Mobile/Cotton.Mobile.csproj",
+            "targetFramework": "net10.0-android",
+            "configuration": "Debug",
+            "device": "emulator-5554",
+            "preLaunchTask": "maui: Build"
+        }
+    ]
+}

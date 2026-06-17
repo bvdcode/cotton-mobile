@@ -11,6 +11,10 @@ __pycache__/
 # IDE/user files
 .idea/
 .vscode/
+!.vscode/
+!.vscode/settings.json
+!.vscode/launch.json
+!.vscode/tasks.json
 *.suo
 *.user
 *.userosscache

@@ -6,7 +6,7 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
-    <Grid Padding="24"
+    <Grid Padding="20,16,20,24"
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
@@ -104,10 +104,10 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="12"
+                                     Spacing="8"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="12"
+                                             Spacing="8"
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
                                   ColumnSpacing="8">

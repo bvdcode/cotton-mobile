@@ -325,22 +325,25 @@
                                         BindableLayout.ItemsSource="{Binding Display.FileEntries}"
                                         Wrap="Wrap"
                                         AlignItems="Start"
-                                        JustifyContent="Start">
+                                        JustifyContent="SpaceBetween">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Border WidthRequest="150"
-                                                HeightRequest="164"
-                                                Margin="0,0,8,8"
+                                        <Border WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileWidth}"
+                                                HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
+                                                Margin="0,0,0,12"
                                                 Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                 StrokeThickness="1"
                                                 StrokeShape="RoundRectangle 8"
                                                 Padding="12"
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                                            <Grid RowDefinitions="Auto,64,Auto"
-                                                  RowSpacing="8">
-                                                <Border WidthRequest="44"
-                                                        HeightRequest="30"
-                                                        HorizontalOptions="Start"
+                                            <Grid RowSpacing="8">
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
+                                                    <RowDefinition Height="*" />
+                                                </Grid.RowDefinitions>
+
+                                                <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
+                                                        HorizontalOptions="Fill"
                                                         Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                         StrokeShape="RoundRectangle 8"
                                                         Padding="0"
@@ -365,6 +368,24 @@
                                                     </Grid>
                                                 </Border>
 
+                                                <Button Grid.Row="0"
+                                                        Text="{Binding ActionButtonText}"
+                                                        Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                        CommandParameter="{Binding .}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                                        Padding="0"
+                                                        FontSize="18"
+                                                        FontAttributes="Bold"
+                                                        HorizontalOptions="End"
+                                                        VerticalOptions="End"
+                                                        Margin="0,0,4,4"
+                                                        HeightRequest="30"
+                                                        MinimumHeightRequest="30"
+                                                        MinimumWidthRequest="44"
+                                                        WidthRequest="{Binding ActionButtonWidth}"
+                                                        SemanticProperties.Description="{Binding ActionLabel}" />
+
                                                 <VerticalStackLayout Grid.Row="1"
                                                                      Spacing="2">
                                                     <Label Text="{Binding Name}"
@@ -381,20 +402,6 @@
                                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                                                 </VerticalStackLayout>
 
-                                                <Button Grid.Row="2"
-                                                        Text="{Binding ActionButtonText}"
-                                                        Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                        CommandParameter="{Binding .}"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                                        Padding="0"
-                                                        FontSize="18"
-                                                        FontAttributes="Bold"
-                                                        HorizontalOptions="End"
-                                                        MinimumHeightRequest="30"
-                                                        MinimumWidthRequest="44"
-                                                        WidthRequest="{Binding ActionButtonWidth}"
-                                                        SemanticProperties.Description="{Binding ActionLabel}" />
                                             </Grid>
                                         </Border>
                                     </DataTemplate>

@@ -10,11 +10,15 @@ namespace Cotton.Mobile
 		private const double FileTileMinimumSlotWidth = 180;
 		private const double FileTileMinimumWidth = 172;
 		private const double FileTilePreviewRatio = 0.62;
+		private const double FileTileFolderIconMinimumSize = 62;
+		private const double FileTileFolderIconMaximumSize = 92;
+		private const double FileTileFolderIconWidthRatio = 0.42;
 		private const double FileTileVerticalChrome = 54;
 		private const int FileTileMaximumColumnCount = 6;
 
 		private readonly MainPageViewModel _viewModel;
 		private double _fileTileHeight = 146;
+		private double _fileTileFolderIconSize = FileTileFolderIconMinimumSize;
 		private double _fileTilePreviewHeight = 72;
 		private double _fileTileSlotWidth = 150;
 
@@ -42,6 +46,12 @@ namespace Cotton.Mobile
 		{
 			get => _fileTilePreviewHeight;
 			private set => SetPageProperty(ref _fileTilePreviewHeight, value, nameof(FileTilePreviewHeight));
+		}
+
+		public double FileTileFolderIconSize
+		{
+			get => _fileTileFolderIconSize;
+			private set => SetPageProperty(ref _fileTileFolderIconSize, value, nameof(FileTileFolderIconSize));
 		}
 
 		public double FileTileHeight
@@ -141,6 +151,10 @@ namespace Cotton.Mobile
 
 			FileTileSlotWidth = slotWidth;
 			FileTilePreviewHeight = previewHeight;
+			FileTileFolderIconSize = Math.Clamp(
+				Math.Round(tileWidth * FileTileFolderIconWidthRatio),
+				FileTileFolderIconMinimumSize,
+				FileTileFolderIconMaximumSize);
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
 		}
 

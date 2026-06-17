@@ -291,8 +291,8 @@
                                                     <Image Source="folder.svg"
                                                            Aspect="AspectFit"
                                                            IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                           HeightRequest="24"
-                                                           WidthRequest="24"
+                                                           HeightRequest="28"
+                                                           WidthRequest="28"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
 
@@ -379,8 +379,8 @@
                                                             <Image Source="folder.svg"
                                                                    Aspect="AspectFit"
                                                                    IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                                   HeightRequest="62"
-                                                                   WidthRequest="62"
+                                                                   HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
+                                                                   WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center" />
 

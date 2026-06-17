@@ -1,3 +1,4 @@
+using System.Net;
 using Cotton.Auth;
 using Cotton.Sdk;
 using Cotton.Sdk.Auth;
@@ -54,10 +55,17 @@ namespace Cotton.Mobile.Services
             }
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            await client.Auth.RefreshAsync(tokens.RefreshToken, cancellationToken).ConfigureAwait(false);
-            UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await client.Auth.RefreshAsync(tokens.RefreshToken, cancellationToken).ConfigureAwait(false);
+                UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
 
-            return CottonSessionResult.Authenticated(instanceUri, user);
+                return CottonSessionResult.Authenticated(instanceUri, user);
+            }
+            catch (CottonApiException exception) when (IsAuthorizationFailure(exception))
+            {
+                return CottonSessionResult.FromStatus(CottonSessionResultStatus.SessionExpired, instanceUri);
+            }
         }
 
         public async Task<CottonSessionResult> SignInWithBrowserAsync(
@@ -217,6 +225,11 @@ namespace Cotton.Mobile.Services
 
             TimeSpan effectiveDelay = delay < remaining ? delay : remaining;
             await Task.Delay(effectiveDelay, cancellationToken).ConfigureAwait(false);
+        }
+
+        private static bool IsAuthorizationFailure(CottonApiException exception)
+        {
+            return exception.StatusCode is HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden;
         }
     }
 }

@@ -148,14 +148,7 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task HandleFileBrowserSessionExpiredAsync(Uri? instanceUri)
         {
-            try
-            {
-                await _sessionService.ClearLocalSessionAsync();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to clear expired Cotton mobile session.");
-            }
+            await ClearLocalSessionAndCachedStateAsync("session expiration");
 
             _fileBrowser.Clear();
             Display.InstanceUrl = instanceUri?.AbsoluteUri ?? _options.DefaultInstanceUrl;
@@ -234,7 +227,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 await _sessionService.LogoutAsync();
-                await ClearCachedSensitiveStateAsync();
+                await ClearCachedSensitiveStateAsync("logout");
                 _fileBrowser.Clear();
                 Display.InstanceUrl = _options.DefaultInstanceUrl;
                 ShowSignIn("Signed out.");
@@ -287,7 +280,21 @@ namespace Cotton.Mobile.ViewModels
             return Task.CompletedTask;
         }
 
-        private async Task ClearCachedSensitiveStateAsync()
+        private async Task ClearLocalSessionAndCachedStateAsync(string reason)
+        {
+            try
+            {
+                await _sessionService.ClearLocalSessionAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile local session during {Reason}.", reason);
+            }
+
+            await ClearCachedSensitiveStateAsync(reason);
+        }
+
+        private async Task ClearCachedSensitiveStateAsync(string reason)
         {
             try
             {
@@ -296,7 +303,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile cached files during logout.");
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile cached files during {Reason}.", reason);
             }
         }
 
@@ -501,8 +508,19 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            if (ShouldClearLocalSessionAndCachedState(result))
+            {
+                await ClearLocalSessionAndCachedStateAsync("session invalidation");
+            }
+
             _fileBrowser.Clear();
             ShowSignIn(_presentationService.ResolveStatusMessage(result, unauthenticatedStatus));
+        }
+
+        private static bool ShouldClearLocalSessionAndCachedState(CottonSessionResult result)
+        {
+            return result.Status == CottonSessionResultStatus.SessionExpired
+                || (result.Status == CottonSessionResultStatus.Unauthenticated && result.InstanceUri is not null);
         }
 
         private void ShowLoading(string message)

@@ -9,6 +9,9 @@ namespace Cotton.Mobile.ViewModels
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "Ready to connect.";
+        private const string AccountCancelAction = "Cancel";
+        private const string AccountLogoutAction = "Log out";
+        private const string AccountPrivacyPolicyAction = "Privacy";
 
         private readonly ICottonSessionService _sessionService;
         private readonly IBrowser _browser;
@@ -72,6 +75,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserLogger);
             ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(CancelAuthorizationAsync, () => Display.IsCancelAuthorizationEnabled);
+            AccountCommand = new AsyncCommand(ShowAccountActionsAsync, () => Display.IsProfileVisible);
             LogoutCommand = new AsyncCommand(LogoutAsync, () => Display.IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync);
             RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync);
@@ -90,6 +94,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ConnectCommand { get; }
 
         public AsyncCommand CancelAuthorizationCommand { get; }
+
+        public AsyncCommand AccountCommand { get; }
 
         public AsyncCommand LogoutCommand { get; }
 
@@ -223,6 +229,33 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task ShowAccountActionsAsync()
+        {
+            if (!Display.IsProfileVisible)
+            {
+                return;
+            }
+
+            string accountTitle = string.IsNullOrWhiteSpace(Display.ProfileSummary)
+                ? Display.ProfileName
+                : $"{Display.ProfileName}{Environment.NewLine}{Display.ProfileSummary}";
+            string? action = await _dialogService.ShowActionSheetAsync(
+                accountTitle,
+                AccountCancelAction,
+                AccountLogoutAction,
+                AccountPrivacyPolicyAction);
+
+            switch (action)
+            {
+                case AccountLogoutAction:
+                    await LogoutAsync();
+                    break;
+                case AccountPrivacyPolicyAction:
+                    await OpenPrivacyPolicyAsync();
+                    break;
+            }
+        }
+
         private async Task OpenPrivacyPolicyAsync()
         {
             try
@@ -313,6 +346,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ConnectCommand.RaiseCanExecuteChanged();
             CancelAuthorizationCommand.RaiseCanExecuteChanged();
+            AccountCommand.RaiseCanExecuteChanged();
             LogoutCommand.RaiseCanExecuteChanged();
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             OpenFileBrowserEntryCommand.RaiseCanExecuteChanged();

@@ -77,8 +77,16 @@ namespace Cotton.Mobile.ViewModels
         public string ProfileName
         {
             get => _profileName;
-            private set => SetProperty(ref _profileName, value);
+            private set
+            {
+                if (SetProperty(ref _profileName, value))
+                {
+                    OnPropertyChanged(nameof(ProfileInitials));
+                }
+            }
         }
+
+        public string ProfileInitials => CreateProfileInitials(ProfileName);
 
         public string? ProfileEmail
         {
@@ -412,7 +420,9 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(content);
 
             FilesTitle = content.FolderName;
-            FilesPath = path;
+            FilesPath = string.Equals(path, content.FolderName, StringComparison.OrdinalIgnoreCase)
+                ? string.Empty
+                : path;
             _allFileEntries.Clear();
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
@@ -547,6 +557,25 @@ namespace Cotton.Mobile.ViewModels
         private static string FormatItemCount(int count)
         {
             return count == 1 ? "1 item" : $"{count} items";
+        }
+
+        private static string CreateProfileInitials(string profileName)
+        {
+            string[] parts = profileName
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            if (parts.Length >= 2)
+            {
+                return string.Concat(parts.Take(2).Select(part => char.ToUpperInvariant(part[0])));
+            }
+
+            if (parts.Length == 1)
+            {
+                return parts[0].Length == 1
+                    ? parts[0].ToUpperInvariant()
+                    : parts[0][..2].ToUpperInvariant();
+            }
+
+            return "CC";
         }
 
         private string CreateSortText(CottonFileBrowserSortMode sortMode)

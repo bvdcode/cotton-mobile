@@ -43,7 +43,9 @@ namespace Cotton.Mobile.Services
                 string.Empty,
                 string.Empty,
                 "---",
-                $"App: {_metadata.ApplicationName} {_metadata.ApplicationVersion}",
+                $"App: {_metadata.ApplicationName} {FormatVersion()}",
+                $"Package: {CreateValue(_metadata.PackageName)}",
+                $"Install channel: {CreateValue(_metadata.InstallChannel)}",
                 $"Device: {_metadata.DeviceName}",
                 $"OS: {_metadata.OperatingSystem}",
                 $"Network: {(context.HasInternetAccess ? "Internet available" : "No internet access")}",
@@ -75,6 +77,17 @@ namespace Cotton.Mobile.Services
         private static string CreateValue(string? value)
         {
             return string.IsNullOrWhiteSpace(value) ? "Not available" : value.Trim();
+        }
+
+        private string FormatVersion()
+        {
+            string version = CreateValue(_metadata.ApplicationVersion);
+            if (string.IsNullOrWhiteSpace(_metadata.ApplicationBuild))
+            {
+                return version;
+            }
+
+            return $"{version} ({_metadata.ApplicationBuild.Trim()})";
         }
 
         private static string FormatFileCounts(int visibleFileCount, int totalFileCount)

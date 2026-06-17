@@ -274,6 +274,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsBrandHeaderVisible => _state != MainPageViewState.Profile;
 
+        public bool IsLegalFooterVisible => _state != MainPageViewState.Profile;
+
         public bool IsLoadingIndicatorRunning => _state == MainPageViewState.Loading;
 
         public bool IsAuthorizationProgressIndicatorRunning => _state == MainPageViewState.AuthorizationProgress;
@@ -471,6 +473,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsAuthorizationProgressVisible));
             OnPropertyChanged(nameof(IsProfileVisible));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
+            OnPropertyChanged(nameof(IsLegalFooterVisible));
             OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
             OnPropertyChanged(nameof(IsAuthorizationProgressIndicatorRunning));
         }

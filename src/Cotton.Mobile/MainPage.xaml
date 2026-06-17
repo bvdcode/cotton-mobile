@@ -429,7 +429,8 @@
         <HorizontalStackLayout Grid.Row="1"
                                Spacing="12"
                                HorizontalOptions="Center"
-                               VerticalOptions="Center">
+                               VerticalOptions="Center"
+                               IsVisible="{Binding Display.IsLegalFooterVisible}">
             <Label Text="Vadim Belov / bvdcode"
                    FontSize="12"
                    VerticalTextAlignment="Center"

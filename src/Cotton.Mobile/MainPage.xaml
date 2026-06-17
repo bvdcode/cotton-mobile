@@ -211,7 +211,8 @@
                                         SemanticProperties.Description="Change file view" />
                             </Grid>
 
-                            <SearchBar Text="{Binding Display.FileSearchText, Mode=TwoWay}"
+                            <SearchBar x:Name="FileSearchBar"
+                                       Text="{Binding Display.FileSearchText, Mode=TwoWay}"
                                        IsVisible="{Binding Display.IsFileSearchVisible}"
                                        Placeholder="Search"
                                        HeightRequest="44"

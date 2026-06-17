@@ -1,4 +1,5 @@
-﻿using Cotton.Mobile.ViewModels;
+﻿using System.ComponentModel;
+using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
@@ -12,6 +13,7 @@ namespace Cotton.Mobile
 
 			_viewModel = viewModel;
 			InitializeComponent();
+			FileSearchBar.PropertyChanged += FileSearchBar_PropertyChanged;
 			BindingContext = _viewModel;
 		}
 
@@ -20,6 +22,24 @@ namespace Cotton.Mobile
 			base.OnAppearing();
 
 			await _viewModel.RestoreSessionOnceAsync();
+		}
+
+		private void FileSearchBar_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		{
+			if (!string.Equals(e.PropertyName, nameof(VisualElement.IsVisible), StringComparison.Ordinal))
+			{
+				return;
+			}
+
+			if (FileSearchBar.IsVisible)
+			{
+				Dispatcher.DispatchDelayed(
+					TimeSpan.FromMilliseconds(50),
+					() => FileSearchBar.Focus());
+				return;
+			}
+
+			FileSearchBar.Unfocus();
 		}
 	}
 }

@@ -61,6 +61,7 @@ COTTON_ADB_SERIAL=emulator-5554 scripts/mobile/install-android-debug.sh
 ```
 
 Use the emulator for fast visual checks, then batch real-device smoke tests on the Samsung A53 over ADB when the slice is worth testing on hardware.
+Debug builds install as `dev.cottoncloud.app.debug` / `Cotton Cloud Dev`, so they can live next to the Play/GitHub release package.
 
 ## Repository Checks
 

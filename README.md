@@ -36,6 +36,23 @@ The Android testing build is meant for real dogfooding, not a blank store shell.
 
 The GitHub APK is a stable release asset, so the link does not expire like a workflow artifact.
 
+## Tester Smoke Script
+
+Use this short flow for closed-test invites, Play dogfooding, and release-candidate checks.
+
+1. Install Cotton Cloud from Google Play testing or the GitHub APK.
+2. Sign in to the assigned Cotton Cloud instance and approve the browser request.
+3. Confirm the root file browser loads with the expected account initials.
+4. Switch between tile and list views.
+5. Sort by name, type, and size.
+6. Search for a known file, clear search, then refresh the folder.
+7. Open a folder, confirm its contents or empty state, then go back up.
+8. Open a small text or image file.
+9. Download or share one file, then confirm it is marked `On device` when available.
+10. Send feedback from the account menu with device model, Android version, install channel, and anything confusing or broken.
+
+Optional offline check: after opening a file once, turn on airplane mode and confirm only files marked `On device` still open.
+
 ## Local Android Development
 
 ```bash

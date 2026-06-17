@@ -14,5 +14,7 @@ namespace Cotton.Mobile.Services
             CottonFileBrowserEntry file,
             IProgress<long>? progress = null,
             CancellationToken cancellationToken = default);
+
+        CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file);
     }
 }

@@ -514,22 +514,29 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowFileDetailsAsync(CottonFileBrowserEntry file)
         {
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(file);
             await _dialogService.ShowAlertAsync(
                 file.Name,
-                CreateFileDetailsMessage(file),
+                CreateFileDetailsMessage(file, localFile),
                 "OK");
         }
 
-        private static string CreateFileDetailsMessage(CottonFileBrowserEntry file)
+        private static string CreateFileDetailsMessage(
+            CottonFileBrowserEntry file,
+            CottonLocalFileSnapshot? localFile)
         {
             string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown";
             string contentType = file.ContentType ?? "Unknown";
+            string localCopy = localFile is null
+                ? "Not downloaded"
+                : $"Available ({localFile.SizeBytes:N0} bytes)";
 
             return string.Join(
                 Environment.NewLine,
                 $"Type: {file.Kind}",
                 $"Size: {size}",
                 $"Content type: {contentType}",
+                $"Local copy: {localCopy}",
                 $"File id: {file.Id:D}");
         }
 

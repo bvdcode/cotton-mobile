@@ -56,12 +56,9 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Only files can be downloaded.", nameof(file));
             }
 
-            string directory = Path.Combine(
-                FileSystem.AppDataDirectory,
-                DownloadDirectoryName,
-                file.Id.ToString("D"));
+            string directory = CreateDownloadDirectory(file);
             Directory.CreateDirectory(directory);
-            string filePath = Path.Combine(directory, CreateSafeFileName(file.Name));
+            string filePath = CreateDownloadPath(file);
             string tempFilePath = filePath + ".download";
             long sizeBytes = 0;
             bool tempFileReady = false;
@@ -108,6 +105,24 @@ namespace Cotton.Mobile.Services
             return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
         }
 
+        public CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+            if (file.Type != CottonFileBrowserEntryType.File)
+            {
+                return null;
+            }
+
+            string filePath = CreateDownloadPath(file);
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            var info = new FileInfo(filePath);
+            return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
+        }
+
         private static async Task<CottonFolderContent> LoadFolderAsync(
             ICottonCloudClient client,
             Guid folderId,
@@ -145,6 +160,19 @@ namespace Cotton.Mobile.Services
             }
 
             return new string(buffer);
+        }
+
+        private static string CreateDownloadDirectory(CottonFileBrowserEntry file)
+        {
+            return Path.Combine(
+                FileSystem.AppDataDirectory,
+                DownloadDirectoryName,
+                file.Id.ToString("D"));
+        }
+
+        private static string CreateDownloadPath(CottonFileBrowserEntry file)
+        {
+            return Path.Combine(CreateDownloadDirectory(file), CreateSafeFileName(file.Name));
         }
 
         private void DeleteTemporaryDownload(string tempFilePath)

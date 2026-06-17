@@ -42,6 +42,15 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(tokens);
+            if (string.IsNullOrWhiteSpace(tokens.AccessToken))
+            {
+                throw new ArgumentException("Access token is required.", nameof(tokens));
+            }
+
+            if (string.IsNullOrWhiteSpace(tokens.RefreshToken))
+            {
+                throw new ArgumentException("Refresh token is required.", nameof(tokens));
+            }
 
             await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
             await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);

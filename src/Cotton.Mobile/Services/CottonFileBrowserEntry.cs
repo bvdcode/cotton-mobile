@@ -84,6 +84,12 @@ namespace Cotton.Mobile.Services
 
         public double ActionButtonWidth => IsFolder ? 64d : 44d;
 
+        public bool IsTileActionVisible => !IsFolder;
+
+        public string TileActionButtonText => "⋯";
+
+        public double TileActionButtonWidth => 36d;
+
         public string BadgeText { get; }
 
         public long? SizeBytes { get; }

@@ -335,16 +335,16 @@
                                         Wrap="Wrap"
                                         AlignItems="Start"
                                         HorizontalOptions="Fill"
-                                        JustifyContent="SpaceBetween">
+                                        JustifyContent="Start">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Border WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileWidth}"
                                                 HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                Margin="0,0,0,8"
+                                                Margin="2,0,2,8"
                                                 Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                 StrokeThickness="1"
                                                 StrokeShape="RoundRectangle 8"
-                                                Padding="6"
+                                                Padding="5"
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                                             <Grid RowSpacing="4">
                                                 <Grid.GestureRecognizers>
@@ -384,9 +384,10 @@
                                                 </Border>
 
                                                 <Button Grid.Row="0"
-                                                        Text="{Binding ActionButtonText}"
+                                                        Text="{Binding TileActionButtonText}"
                                                         Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                         CommandParameter="{Binding .}"
+                                                        IsVisible="{Binding IsTileActionVisible}"
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                                         Padding="0"
@@ -395,10 +396,10 @@
                                                         HorizontalOptions="End"
                                                         VerticalOptions="End"
                                                         Margin="0,0,2,2"
-                                                        HeightRequest="30"
-                                                        MinimumHeightRequest="30"
-                                                        MinimumWidthRequest="44"
-                                                        WidthRequest="{Binding ActionButtonWidth}"
+                                                        HeightRequest="28"
+                                                        MinimumHeightRequest="28"
+                                                        MinimumWidthRequest="36"
+                                                        WidthRequest="{Binding TileActionButtonWidth}"
                                                         SemanticProperties.Description="{Binding ActionLabel}" />
 
                                                 <VerticalStackLayout Grid.Row="1"

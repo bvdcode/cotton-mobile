@@ -7,11 +7,11 @@ namespace Cotton.Mobile
 	{
 		private const double PageHorizontalPadding = 40;
 		private const double ContentMaximumWidth = 520;
-		private const double FileTileColumnGap = 8;
-		private const double FileTileMinimumWidth = 128;
-		private const double FileTileMaximumWidth = 220;
-		private const double FileTilePreviewRatio = 0.48;
-		private const double FileTileVerticalChrome = 74;
+		private const double FileTileHorizontalMargin = 4;
+		private const double FileTileMinimumWidth = 112;
+		private const double FileTileMaximumWidth = 180;
+		private const double FileTilePreviewRatio = 0.54;
+		private const double FileTileVerticalChrome = 64;
 
 		private readonly MainPageViewModel _viewModel;
 		private double _fileTileHeight = 146;
@@ -91,29 +91,27 @@ namespace Cotton.Mobile
 
 		private void UpdateFileTileMetrics()
 		{
-			double contentWidth = FileBrowserContent.Width;
+			double contentWidth = Width > PageHorizontalPadding
+				? Width - PageHorizontalPadding
+				: FileBrowserContent.Width;
 			if (contentWidth <= 0)
 			{
-				if (Width <= PageHorizontalPadding)
-				{
-					return;
-				}
-
-				contentWidth = Math.Min(Width - PageHorizontalPadding, ContentMaximumWidth);
+				return;
 			}
 
 			contentWidth = Math.Min(contentWidth, ContentMaximumWidth);
+			double tileHorizontalChrome = FileTileHorizontalMargin * 2;
 			int columnCount = Math.Max(
 				2,
-				(int)Math.Floor((contentWidth + FileTileColumnGap) / (FileTileMinimumWidth + FileTileColumnGap)));
-			double totalColumnGap = FileTileColumnGap * (columnCount - 1);
-			double tileWidth = Math.Floor((contentWidth - totalColumnGap) / columnCount);
+				(int)Math.Floor(contentWidth / (FileTileMinimumWidth + tileHorizontalChrome)));
+			double totalTileHorizontalChrome = tileHorizontalChrome * columnCount;
+			double tileWidth = Math.Floor((contentWidth - totalTileHorizontalChrome) / columnCount);
 
 			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
 				columnCount--;
-				totalColumnGap = FileTileColumnGap * (columnCount - 1);
-				tileWidth = Math.Floor((contentWidth - totalColumnGap) / columnCount);
+				totalTileHorizontalChrome = tileHorizontalChrome * columnCount;
+				tileWidth = Math.Floor((contentWidth - totalTileHorizontalChrome) / columnCount);
 			}
 
 			tileWidth = Math.Clamp(tileWidth, FileTileMinimumWidth, FileTileMaximumWidth);

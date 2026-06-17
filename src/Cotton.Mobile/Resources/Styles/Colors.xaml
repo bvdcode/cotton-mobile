@@ -11,6 +11,7 @@
     <Color x:Key="Secondary">#E8F5B4</Color>
     <Color x:Key="SecondaryDarkText">#415500</Color>
     <Color x:Key="Tertiary">#1F7A5C</Color>
+    <Color x:Key="Danger">#FF6B6B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
@@ -30,6 +31,7 @@
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>
     <SolidColorBrush x:Key="TertiaryBrush" Color="{StaticResource Tertiary}"/>
+    <SolidColorBrush x:Key="DangerBrush" Color="{StaticResource Danger}"/>
     <SolidColorBrush x:Key="WhiteBrush" Color="{StaticResource White}"/>
     <SolidColorBrush x:Key="BlackBrush" Color="{StaticResource Black}"/>
 

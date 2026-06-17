@@ -5,7 +5,7 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserEntry
     {
-        private const string LocalCopyStatusText = "Saved";
+        private const string LocalCopyStatusText = "On device";
 
         private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
@@ -107,6 +107,8 @@ namespace Cotton.Mobile.Services
         public bool IsFolderThumbnailVisible => IsFolder && Thumbnail.IsPlaceholderVisible;
 
         public bool IsPlaceholderTextVisible => !IsFolder && Thumbnail.IsPlaceholderVisible;
+
+        public bool IsPreviewImageVisible => Thumbnail.HasImage && !IsText;
 
         public bool IsImage => Type == CottonFileBrowserEntryType.File && Kind == "Image";
 
@@ -269,6 +271,11 @@ namespace Cotton.Mobile.Services
                 return "Video";
             }
 
+            if (contentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
+            {
+                return "Audio";
+            }
+
             if (contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
                 || TextContentTypes.Contains(contentType)
                 || TextFileExtensions.Contains(Path.GetExtension(name)))
@@ -286,6 +293,7 @@ namespace Cotton.Mobile.Services
                 "Image" => "IMG",
                 "PDF" => "PDF",
                 "Video" => "VID",
+                "Audio" => "AUD",
                 "Text" => "TXT",
                 _ => "FILE",
             };

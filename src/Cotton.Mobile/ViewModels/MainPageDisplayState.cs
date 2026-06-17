@@ -22,6 +22,9 @@ namespace Cotton.Mobile.ViewModels
         private string _filesPath = string.Empty;
         private string? _filesStatus;
         private string _filesEmptyMessage = "No files in this folder.";
+        private string _filesEmptyDetails = string.Empty;
+        private string? _filesNoticeTitle;
+        private string? _filesNoticeMessage;
         private string _fileSearchText = string.Empty;
         private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
         private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
@@ -191,6 +194,48 @@ namespace Cotton.Mobile.ViewModels
             get => _filesEmptyMessage;
             private set => SetProperty(ref _filesEmptyMessage, value);
         }
+
+        public string FilesEmptyDetails
+        {
+            get => _filesEmptyDetails;
+            private set
+            {
+                if (SetProperty(ref _filesEmptyDetails, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesEmptyDetailsVisible));
+                }
+            }
+        }
+
+        public bool IsFilesEmptyDetailsVisible => !string.IsNullOrWhiteSpace(FilesEmptyDetails);
+
+        public string? FilesNoticeTitle
+        {
+            get => _filesNoticeTitle;
+            private set
+            {
+                if (SetProperty(ref _filesNoticeTitle, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesNoticeVisible));
+                }
+            }
+        }
+
+        public string? FilesNoticeMessage
+        {
+            get => _filesNoticeMessage;
+            private set
+            {
+                if (SetProperty(ref _filesNoticeMessage, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesNoticeVisible));
+                }
+            }
+        }
+
+        public bool IsFilesNoticeVisible =>
+            !string.IsNullOrWhiteSpace(FilesNoticeTitle)
+            || !string.IsNullOrWhiteSpace(FilesNoticeMessage);
 
         public string FileSearchText
         {
@@ -393,6 +438,7 @@ namespace Cotton.Mobile.ViewModels
             FilesTitle = RootFilesTitle;
             FilesPath = string.Empty;
             FilesStatus = "Loading files...";
+            ClearFilesNotice();
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             CanCancelFileAction = false;
@@ -418,6 +464,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
+            ClearFilesNotice();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -428,6 +475,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = true;
             CanRetryFileAction = false;
             FilesStatus = status;
+            ClearFilesNotice();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -459,6 +507,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
+            ClearFilesNotice();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -481,6 +530,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             CanNavigateFilesUp = canNavigateUp;
+            ClearFilesNotice();
             ApplyFileFilters();
             FilesStatus = CreateFilesStatus();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
@@ -493,6 +543,19 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
+            ClearFilesNotice();
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ShowOfflineFilesNotice()
+        {
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
+            FilesStatus = CreateFilesStatus();
+            FilesNoticeTitle = "Offline";
+            FilesNoticeMessage = "Files marked On device can still open.";
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -503,6 +566,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
+            ClearFilesNotice();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -641,7 +705,7 @@ namespace Cotton.Mobile.ViewModels
                 FileEntries.Add(entry);
             }
 
-            FilesEmptyMessage = ResolveFilesEmptyMessage(visibleEntries.Count);
+            ResolveFilesEmptyState(visibleEntries.Count);
             FilesStatus = CreateFilesStatus();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
@@ -687,8 +751,18 @@ namespace Cotton.Mobile.ViewModels
 
             string count = visibleCount == totalCount
                 ? FormatItemCount(totalCount)
-                : $"{FormatItemCount(visibleCount)} of {FormatItemCount(totalCount)}";
+                : CreateFilteredCount(visibleCount);
             return $"{count} · {FileSortMode}";
+        }
+
+        private string CreateFilteredCount(int visibleCount)
+        {
+            if (IsFileSearchActive)
+            {
+                return visibleCount == 1 ? "1 match" : $"{visibleCount:N0} matches";
+            }
+
+            return $"{FormatItemCount(visibleCount)} shown";
         }
 
         private static string FormatItemCount(int count)
@@ -728,14 +802,30 @@ namespace Cotton.Mobile.ViewModels
             return "CC";
         }
 
-        private string ResolveFilesEmptyMessage(int visibleCount)
+        private void ResolveFilesEmptyState(int visibleCount)
         {
             if (_allFileEntries.Count == 0)
             {
-                return "This folder is empty.";
+                FilesEmptyMessage = "This folder is empty";
+                FilesEmptyDetails = "Files added here will appear automatically.";
+                return;
             }
 
-            return visibleCount == 0 ? "No matching files." : string.Empty;
+            if (visibleCount == 0)
+            {
+                FilesEmptyMessage = "No matching files";
+                FilesEmptyDetails = "Try another name, type, or extension.";
+                return;
+            }
+
+            FilesEmptyMessage = string.Empty;
+            FilesEmptyDetails = string.Empty;
+        }
+
+        private void ClearFilesNotice()
+        {
+            FilesNoticeTitle = null;
+            FilesNoticeMessage = null;
         }
     }
 }

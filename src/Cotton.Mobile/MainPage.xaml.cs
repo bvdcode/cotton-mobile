@@ -5,12 +5,9 @@ namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const double CompactFileTileLayoutHorizontalInset = 24;
-		private const double WideFileTileLayoutHorizontalInset = 48;
-		private const double WideFileTileLayoutWidth = 600;
 		private const double FileTileSlotHorizontalPadding = 2;
-		private const double FileTileMinimumSlotWidth = 112;
-		private const double FileTileMinimumWidth = 104;
+		private const double FileTileMinimumSlotWidth = 84;
+		private const double FileTileMinimumWidth = 78;
 		private const double FileTilePreviewRatio = 0.66;
 		private const double FileTileVerticalChrome = 50;
 		private const int FileTileMaximumColumnCount = 7;
@@ -102,13 +99,23 @@ namespace Cotton.Mobile
 			double measuredContentWidth = FileBrowserContent.Width > 0
 				? FileBrowserContent.Width
 				: 0;
-			double layoutInset = ResolveFileTileLayoutHorizontalInset(RootLayout.Width);
-			double rootContentWidth = RootLayout.Width > layoutInset
-				? RootLayout.Width - layoutInset
+			double rootWidth = RootLayout.Width > 0
+				? RootLayout.Width
 				: 0;
-			double contentWidth = rootContentWidth > 0
-				? rootContentWidth
-				: measuredContentWidth;
+			double contentWidth = measuredContentWidth > 0
+				? measuredContentWidth
+				: rootWidth;
+			if (contentWidth <= 0)
+			{
+				return;
+			}
+
+			double horizontalPadding = RootLayout.Padding.HorizontalThickness;
+			if (measuredContentWidth <= 0 && rootWidth > horizontalPadding)
+			{
+				contentWidth = rootWidth - horizontalPadding;
+			}
+
 			if (contentWidth <= 0)
 			{
 				return;
@@ -118,13 +125,13 @@ namespace Cotton.Mobile
 				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
 				2,
 				FileTileMaximumColumnCount);
-			double slotWidth = contentWidth / columnCount;
+			double slotWidth = Math.Floor(contentWidth / columnCount);
 			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 
 			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
 				columnCount--;
-				slotWidth = contentWidth / columnCount;
+				slotWidth = Math.Floor(contentWidth / columnCount);
 				tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 			}
 
@@ -134,13 +141,6 @@ namespace Cotton.Mobile
 			FileTileSlotWidth = slotWidth;
 			FileTilePreviewHeight = previewHeight;
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
-		}
-
-		private static double ResolveFileTileLayoutHorizontalInset(double layoutWidth)
-		{
-			return layoutWidth >= WideFileTileLayoutWidth
-				? WideFileTileLayoutHorizontalInset
-				: CompactFileTileLayoutHorizontalInset;
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)

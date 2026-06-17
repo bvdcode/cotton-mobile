@@ -41,6 +41,7 @@ namespace Cotton.Mobile.ViewModels
         private CottonFileBrowserEntry? _retryFileActionEntry;
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
+        private bool _isFolderNavigationInProgress;
 
         public MainPageFileBrowserController(
             MainPageDisplayState display,
@@ -122,16 +123,29 @@ namespace Cotton.Mobile.ViewModels
         public async Task NavigateUpAsync()
         {
             ClearFileActionRetry();
+            if (_isFolderNavigationInProgress)
+            {
+                return;
+            }
+
             if (_fileNavigation.Count == 0)
             {
                 return;
             }
 
-            int previousIndex = _fileNavigation.Count - 1;
-            CottonFolderHandle previous = _fileNavigation[previousIndex];
-            _fileNavigation.RemoveAt(previousIndex);
-            _display.ClearFileSearch();
-            await LoadFolderAsync(previous, preserveHistory: true);
+            _isFolderNavigationInProgress = true;
+            try
+            {
+                int previousIndex = _fileNavigation.Count - 1;
+                CottonFolderHandle previous = _fileNavigation[previousIndex];
+                _fileNavigation.RemoveAt(previousIndex);
+                _display.ClearFileSearch();
+                await LoadFolderAsync(previous, preserveHistory: true);
+            }
+            finally
+            {
+                _isFolderNavigationInProgress = false;
+            }
         }
 
         public async Task ActivateEntryAsync(CottonFileBrowserEntry entry)
@@ -249,13 +263,26 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenFolderAsync(CottonFileBrowserEntry folder)
         {
-            if (_currentFolder is not null)
+            if (_isFolderNavigationInProgress)
             {
-                _fileNavigation.Add(_currentFolder);
+                return;
             }
 
-            _display.ClearFileSearch();
-            await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
+            _isFolderNavigationInProgress = true;
+            try
+            {
+                if (_currentFolder is not null)
+                {
+                    _fileNavigation.Add(_currentFolder);
+                }
+
+                _display.ClearFileSearch();
+                await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
+            }
+            finally
+            {
+                _isFolderNavigationInProgress = false;
+            }
         }
 
         private async Task ShowFileActionsAsync(CottonFileBrowserEntry file)

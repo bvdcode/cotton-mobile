@@ -182,6 +182,10 @@ namespace Cotton.Mobile.ViewModels
 
         public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
 
+        public int TotalFileEntryCount => _allFileEntries.Count;
+
+        public int VisibleFileEntryCount => FileEntries.Count;
+
         public string FilesEmptyMessage
         {
             get => _filesEmptyMessage;
@@ -202,6 +206,8 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsFileSearchVisible => _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText);
+
+        public bool IsFileSearchActive => !string.IsNullOrWhiteSpace(FileSearchText);
 
         public string FileSearchButtonText
         {

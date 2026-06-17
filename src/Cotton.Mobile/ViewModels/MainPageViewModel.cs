@@ -24,6 +24,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly IScreenReaderService _screenReader;
+        private readonly INetworkAccessService _networkAccess;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -78,6 +79,7 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
             _screenReader = screenReader;
+            _networkAccess = networkAccess;
             _presentationService = presentationService;
             _logger = logger;
 
@@ -355,9 +357,8 @@ namespace Cotton.Mobile.ViewModels
         {
             try
             {
-                bool opened = await _feedbackService.OpenFeedbackAsync(
-                    Display.InstanceUrl,
-                    Display.ProfileName);
+                FeedbackContext context = await CreateFeedbackContextAsync();
+                bool opened = await _feedbackService.OpenFeedbackAsync(context);
                 if (!opened)
                 {
                     await ShowFeedbackUnavailableAsync();
@@ -368,6 +369,72 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(exception, "Failed to open Cotton Cloud feedback composer.");
                 await ShowFeedbackUnavailableAsync();
             }
+        }
+
+        private async Task<FeedbackContext> CreateFeedbackContextAsync()
+        {
+            CottonStorageSummary? storageSummary = await TryCreateFeedbackStorageSummaryAsync();
+            return new FeedbackContext(
+                Display.InstanceUrl,
+                Display.ProfileName,
+                CreateFeedbackScreenName(),
+                CreateFeedbackFileLocation(),
+                Display.VisibleFileEntryCount,
+                Display.TotalFileEntryCount,
+                Display.FileViewMode.ToString(),
+                Display.FileSortMode.ToString(),
+                Display.IsFileSearchActive,
+                Display.FilesStatus,
+                _networkAccess.HasInternetAccess,
+                storageSummary);
+        }
+
+        private async Task<CottonStorageSummary?> TryCreateFeedbackStorageSummaryAsync()
+        {
+            try
+            {
+                return await _storageManagementService.GetSummaryAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to collect Cotton mobile storage summary for feedback.");
+                return null;
+            }
+        }
+
+        private string CreateFeedbackScreenName()
+        {
+            if (Display.IsLoadingVisible)
+            {
+                return "Loading";
+            }
+
+            if (Display.IsSignInVisible)
+            {
+                return "Sign in";
+            }
+
+            if (Display.IsAuthorizationProgressVisible)
+            {
+                return "Browser authorization";
+            }
+
+            if (Display.IsProfileVisible)
+            {
+                return "File browser";
+            }
+
+            return "Unknown";
+        }
+
+        private string CreateFeedbackFileLocation()
+        {
+            if (!Display.IsProfileVisible)
+            {
+                return "Not browsing files";
+            }
+
+            return Display.CanNavigateFilesUp ? "Nested folder" : "Root folder";
         }
 
         private Task ShowFeedbackUnavailableAsync()

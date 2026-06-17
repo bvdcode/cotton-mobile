@@ -4,11 +4,11 @@ namespace Cotton.Mobile.Services
 {
 	public static class CottonBrowserLaunchOptions
 	{
-		public static BrowserLaunchOptions External()
+		public static BrowserLaunchOptions SystemPreferred()
 		{
 			return new BrowserLaunchOptions
 			{
-				LaunchMode = BrowserLaunchMode.External,
+				LaunchMode = BrowserLaunchMode.SystemPreferred,
 				TitleMode = BrowserTitleMode.Show,
 			};
 		}

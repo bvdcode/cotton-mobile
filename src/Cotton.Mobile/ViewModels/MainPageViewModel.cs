@@ -229,7 +229,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 await _browser.OpenAsync(
                     _options.PrivacyPolicyUri,
-                    CottonBrowserLaunchOptions.External());
+                    CottonBrowserLaunchOptions.SystemPreferred());
             }
             catch (Exception exception)
             {

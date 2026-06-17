@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Services
                 cancellationToken).ConfigureAwait(false);
 
             bool browserOpened = await MainThread.InvokeOnMainThreadAsync(
-                () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.External()))
+                () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.SystemPreferred()))
                 .ConfigureAwait(false);
             if (!browserOpened)
             {

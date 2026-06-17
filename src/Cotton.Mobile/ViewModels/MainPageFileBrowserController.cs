@@ -24,6 +24,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly List<CottonFolderHandle> _fileNavigation = [];
 
         private CancellationTokenSource? _fileActionCancellation;
+        private MainPageFileAction? _retryFileAction;
+        private CottonFileBrowserEntry? _retryFileActionEntry;
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
 
@@ -68,6 +70,7 @@ namespace Cotton.Mobile.ViewModels
         public void Clear()
         {
             CancelCurrentFileAction();
+            ClearFileActionRetry();
             _instanceUri = null;
             _currentFolder = null;
             _fileNavigation.Clear();
@@ -75,6 +78,7 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task RefreshAsync()
         {
+            ClearFileActionRetry();
             if (_instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to load files.");
@@ -92,6 +96,7 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task NavigateUpAsync()
         {
+            ClearFileActionRetry();
             if (_fileNavigation.Count == 0)
             {
                 return;
@@ -109,6 +114,7 @@ namespace Cotton.Mobile.ViewModels
 
             if (entry.IsFolder)
             {
+                ClearFileActionRetry();
                 await OpenFolderAsync(entry);
                 return;
             }
@@ -151,6 +157,31 @@ namespace Cotton.Mobile.ViewModels
             _display.ShowFileActionCancelling("Cancelling...");
             _fileActionCancellation.Cancel();
             return Task.CompletedTask;
+        }
+
+        public async Task RetryFileActionAsync()
+        {
+            if (_retryFileAction is null || _retryFileActionEntry is null)
+            {
+                return;
+            }
+
+            MainPageFileAction action = _retryFileAction.Value;
+            CottonFileBrowserEntry entry = _retryFileActionEntry;
+            ClearFileActionRetry();
+
+            switch (action)
+            {
+                case MainPageFileAction.Download:
+                    await DownloadFileAsync(entry);
+                    break;
+                case MainPageFileAction.Open:
+                    await OpenFileAsync(entry);
+                    break;
+                case MainPageFileAction.Share:
+                    await ShareFileAsync(entry);
+                    break;
+            }
         }
 
         private async Task OpenFolderAsync(CottonFileBrowserEntry folder)
@@ -306,16 +337,18 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                ClearFileActionRetry();
                 _display.ShowFilesStatus("Download cancelled.");
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
-                _display.ShowFilesStatus("Download failed. Try again.");
+                ShowFileActionRetry(MainPageFileAction.Download, file, "Download failed.");
             }
             finally
             {
@@ -362,16 +395,18 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                ClearFileActionRetry();
                 _display.ShowFilesStatus("Open cancelled.");
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
-                _display.ShowFilesStatus("Open failed. Try again.");
+                ShowFileActionRetry(MainPageFileAction.Open, file, "Open failed.");
             }
             finally
             {
@@ -402,16 +437,18 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                ClearFileActionRetry();
                 _display.ShowFilesStatus("Share cancelled.");
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
-                _display.ShowFilesStatus("Share failed. Try again.");
+                ShowFileActionRetry(MainPageFileAction.Share, file, "Share failed.");
             }
             finally
             {
@@ -454,6 +491,7 @@ namespace Cotton.Mobile.ViewModels
         private CancellationTokenSource BeginFileAction(string status)
         {
             CancelCurrentFileAction();
+            ClearFileActionRetry();
             var cancellation = new CancellationTokenSource();
             _fileActionCancellation = cancellation;
             _display.ShowFileActionLoading(status);
@@ -477,6 +515,23 @@ namespace Cotton.Mobile.ViewModels
             _fileActionCancellation?.Cancel();
             _fileActionCancellation?.Dispose();
             _fileActionCancellation = null;
+        }
+
+        private void ShowFileActionRetry(
+            MainPageFileAction action,
+            CottonFileBrowserEntry entry,
+            string status)
+        {
+            _retryFileAction = action;
+            _retryFileActionEntry = entry;
+            _display.ShowFileActionRetry($"{status} Retry?");
+        }
+
+        private void ClearFileActionRetry()
+        {
+            _retryFileAction = null;
+            _retryFileActionEntry = null;
+            _display.ClearFileActionRetry();
         }
 
         private async Task HandleSessionExpiredAsync(Exception exception)

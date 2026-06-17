@@ -225,6 +225,15 @@
                                         MinimumWidthRequest="64" />
                             </HorizontalStackLayout>
 
+                            <Button Text="Retry"
+                                    Command="{Binding RetryFileActionCommand}"
+                                    IsEnabled="{Binding Display.CanRetryFileAction}"
+                                    IsVisible="{Binding Display.CanRetryFileAction}"
+                                    HorizontalOptions="Start"
+                                    Padding="10,0"
+                                    MinimumHeightRequest="32"
+                                    MinimumWidthRequest="64" />
+
                             <Label Text="{Binding Display.FilesEmptyMessage}"
                                    IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                    FontSize="13"

@@ -75,6 +75,7 @@ namespace Cotton.Mobile.ViewModels
             NavigateFilesUpCommand = new AsyncCommand(_fileBrowser.NavigateUpAsync, () => Display.CanNavigateFilesUp);
             OpenFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.OpenEntryAsync);
             CancelFileActionCommand = new AsyncCommand(_fileBrowser.CancelFileActionAsync, () => Display.CanCancelFileAction);
+            RetryFileActionCommand = new AsyncCommand(_fileBrowser.RetryFileActionAsync, () => Display.CanRetryFileAction);
             ToggleFileViewCommand = new AsyncCommand(_fileBrowser.ToggleViewModeAsync);
             SortFilesByNameCommand = new AsyncCommand(_fileBrowser.SortByNameAsync);
             SortFilesByTypeCommand = new AsyncCommand(_fileBrowser.SortByTypeAsync);
@@ -98,6 +99,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand<CottonFileBrowserEntry> OpenFileBrowserEntryCommand { get; }
 
         public AsyncCommand CancelFileActionCommand { get; }
+
+        public AsyncCommand RetryFileActionCommand { get; }
 
         public AsyncCommand ToggleFileViewCommand { get; }
 
@@ -311,6 +314,7 @@ namespace Cotton.Mobile.ViewModels
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             OpenFileBrowserEntryCommand.RaiseCanExecuteChanged();
             CancelFileActionCommand.RaiseCanExecuteChanged();
+            RetryFileActionCommand.RaiseCanExecuteChanged();
             ToggleFileViewCommand.RaiseCanExecuteChanged();
             SortFilesByNameCommand.RaiseCanExecuteChanged();
             SortFilesByTypeCommand.RaiseCanExecuteChanged();

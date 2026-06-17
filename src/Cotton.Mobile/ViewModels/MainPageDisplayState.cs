@@ -30,6 +30,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isFilesRefreshing;
         private bool _canNavigateFilesUp;
         private bool _canCancelFileAction;
+        private bool _canRetryFileAction;
 
         public MainPageDisplayState(string defaultInstanceUrl)
         {
@@ -223,6 +224,12 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _canCancelFileAction, value);
         }
 
+        public bool CanRetryFileAction
+        {
+            get => _canRetryFileAction;
+            private set => SetProperty(ref _canRetryFileAction, value);
+        }
+
         public bool IsFilesEmptyVisible => !IsFilesLoading && FileEntries.Count == 0;
 
         public bool IsInputEnabled
@@ -301,6 +308,7 @@ namespace Cotton.Mobile.ViewModels
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             CanCancelFileAction = false;
+            CanRetryFileAction = false;
             CanNavigateFilesUp = false;
             _allFileEntries.Clear();
             FileEntries.Clear();
@@ -320,6 +328,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = true;
             CanCancelFileAction = false;
+            CanRetryFileAction = false;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
@@ -329,6 +338,7 @@ namespace Cotton.Mobile.ViewModels
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             CanCancelFileAction = true;
+            CanRetryFileAction = false;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
@@ -339,11 +349,27 @@ namespace Cotton.Mobile.ViewModels
             FilesStatus = status;
         }
 
+        public void ShowFileActionRetry(string status)
+        {
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            CanCancelFileAction = false;
+            CanRetryFileAction = true;
+            FilesStatus = status;
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ClearFileActionRetry()
+        {
+            CanRetryFileAction = false;
+        }
+
         public void ShowFilesRefreshing(string status)
         {
             IsFilesLoading = false;
             IsFilesRefreshing = true;
             CanCancelFileAction = false;
+            CanRetryFileAction = false;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
@@ -363,6 +389,7 @@ namespace Cotton.Mobile.ViewModels
             IsFilesLoading = false;
             IsFilesRefreshing = false;
             CanCancelFileAction = false;
+            CanRetryFileAction = false;
             CanNavigateFilesUp = canNavigateUp;
             ApplyFileFilters();
             FilesStatus = CreateFilesStatus();
@@ -374,6 +401,7 @@ namespace Cotton.Mobile.ViewModels
             IsFilesLoading = false;
             IsFilesRefreshing = false;
             CanCancelFileAction = false;
+            CanRetryFileAction = false;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }

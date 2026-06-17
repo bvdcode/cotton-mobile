@@ -165,19 +165,27 @@
                                 </VerticalStackLayout>
 
                                 <Button Grid.Column="1"
-                                        Text="Up"
+                                        Text="↑"
                                         Command="{Binding NavigateFilesUpCommand}"
                                         IsEnabled="{Binding Display.CanNavigateFilesUp}"
-                                        Padding="10,0"
+                                        Padding="0"
+                                        FontSize="20"
+                                        FontAttributes="Bold"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="44" />
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="52"
+                                        SemanticProperties.Description="Up" />
 
                                 <Button Grid.Column="2"
-                                        Text="Refresh"
+                                        Text="↻"
                                         Command="{Binding RefreshFilesCommand}"
-                                        Padding="10,0"
+                                        Padding="0"
+                                        FontSize="20"
+                                        FontAttributes="Bold"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="44" />
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="52"
+                                        SemanticProperties.Description="Refresh" />
                             </Grid>
 
                             <SearchBar Text="{Binding Display.FileSearchText, Mode=TwoWay}"

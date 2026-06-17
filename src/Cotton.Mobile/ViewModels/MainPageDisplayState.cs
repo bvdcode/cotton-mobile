@@ -13,7 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private string? _status;
         private string _authorizationProgressMessage = "Approve the request in your browser, then return to Cotton Cloud.";
         private string _profileName = string.Empty;
-        private string _profileEmail = string.Empty;
+        private string? _profileEmail;
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
         private string _filesTitle = "Files";
@@ -80,7 +80,7 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _profileName, value);
         }
 
-        public string ProfileEmail
+        public string? ProfileEmail
         {
             get => _profileEmail;
             private set
@@ -104,7 +104,22 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public string ProfileSummary => $"{ProfileEmail} · {ProfileInstance}";
+        public string ProfileSummary
+        {
+            get
+            {
+                string[] parts =
+                [
+                    ProfileEmail ?? string.Empty,
+                    ProfileInstance,
+                ];
+
+                string summary = string.Join(
+                    " · ",
+                    parts.Where(part => !string.IsNullOrWhiteSpace(part)));
+                return string.IsNullOrWhiteSpace(summary) ? "Signed in" : summary;
+            }
+        }
 
         public string? ProfileStatus
         {

@@ -12,7 +12,7 @@ namespace Cotton.Mobile.ViewModels
 
             return new MainPageProfile(
                 CreateDisplayName(user),
-                string.IsNullOrWhiteSpace(user.Email) ? "Email not set" : user.Email.Trim(),
+                string.IsNullOrWhiteSpace(user.Email) ? null : user.Email.Trim(),
                 instanceUri.Host);
         }
 

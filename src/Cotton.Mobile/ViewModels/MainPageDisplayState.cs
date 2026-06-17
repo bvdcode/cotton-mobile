@@ -539,9 +539,14 @@ namespace Cotton.Mobile.ViewModels
             }
 
             string count = visibleCount == totalCount
-                ? $"{totalCount} item(s)"
-                : $"{visibleCount} of {totalCount} item(s)";
+                ? FormatItemCount(totalCount)
+                : $"{FormatItemCount(visibleCount)} of {FormatItemCount(totalCount)}";
             return $"{count} · {FileSortMode}";
+        }
+
+        private static string FormatItemCount(int count)
+        {
+            return count == 1 ? "1 item" : $"{count} items";
         }
 
         private string CreateSortText(CottonFileBrowserSortMode sortMode)

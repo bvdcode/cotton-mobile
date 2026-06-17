@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Services
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
                 ? null
                 : previewHashEncryptedHex.Trim();
-            Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText);
+            Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
         }
 
         public Guid Id { get; }
@@ -175,6 +175,11 @@ namespace Cotton.Mobile.Services
                 < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
                 _ => $"{bytes / (double)Gigabyte:0.#} GB",
             };
+        }
+
+        private string CreateFallbackThumbnailCacheKey()
+        {
+            return $"{Type}:{Id:N}:placeholder";
         }
 
         private static string ResolveFileKind(string name, string contentType)

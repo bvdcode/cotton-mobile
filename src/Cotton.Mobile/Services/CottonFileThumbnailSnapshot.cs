@@ -5,16 +5,25 @@ namespace Cotton.Mobile.Services
         private CottonFileThumbnailSnapshot(
             CottonFileThumbnailState state,
             string placeholderText,
-            string? source)
+            string? source,
+            string cacheKey)
         {
+            if (string.IsNullOrWhiteSpace(cacheKey))
+            {
+                throw new ArgumentException("Thumbnail cache key is required.", nameof(cacheKey));
+            }
+
             State = state;
             PlaceholderText = string.IsNullOrWhiteSpace(placeholderText)
                 ? "FILE"
                 : placeholderText.Trim();
             Source = string.IsNullOrWhiteSpace(source) ? null : source.Trim();
+            CacheKey = cacheKey.Trim();
         }
 
         public CottonFileThumbnailState State { get; }
+
+        public string CacheKey { get; }
 
         public string PlaceholderText { get; }
 
@@ -27,23 +36,25 @@ namespace Cotton.Mobile.Services
 
         public bool IsPlaceholderVisible => !HasImage && !IsLoading;
 
-        public static CottonFileThumbnailSnapshot Placeholder(string placeholderText)
+        public static CottonFileThumbnailSnapshot Placeholder(string placeholderText, string cacheKey)
         {
             return new CottonFileThumbnailSnapshot(
                 CottonFileThumbnailState.Placeholder,
                 placeholderText,
-                null);
+                null,
+                cacheKey);
         }
 
-        public static CottonFileThumbnailSnapshot Loading(string placeholderText)
+        public static CottonFileThumbnailSnapshot Loading(string placeholderText, string cacheKey)
         {
             return new CottonFileThumbnailSnapshot(
                 CottonFileThumbnailState.Loading,
                 placeholderText,
-                null);
+                null,
+                cacheKey);
         }
 
-        public static CottonFileThumbnailSnapshot Ready(string placeholderText, string source)
+        public static CottonFileThumbnailSnapshot Ready(string placeholderText, string source, string cacheKey)
         {
             if (string.IsNullOrWhiteSpace(source))
             {
@@ -53,15 +64,17 @@ namespace Cotton.Mobile.Services
             return new CottonFileThumbnailSnapshot(
                 CottonFileThumbnailState.Ready,
                 placeholderText,
-                source);
+                source,
+                cacheKey);
         }
 
-        public static CottonFileThumbnailSnapshot Failed(string placeholderText)
+        public static CottonFileThumbnailSnapshot Failed(string placeholderText, string cacheKey)
         {
             return new CottonFileThumbnailSnapshot(
                 CottonFileThumbnailState.Failed,
                 placeholderText,
-                null);
+                null,
+                cacheKey);
         }
     }
 }

@@ -21,13 +21,24 @@ namespace Cotton.Mobile.Services
         {
             if (string.IsNullOrWhiteSpace(entry.PreviewHashEncryptedHex))
             {
-                return CottonFileThumbnailSnapshot.Placeholder(entry.BadgeText);
+                return CottonFileThumbnailSnapshot.Placeholder(
+                    entry.BadgeText,
+                    CreateCacheKey(entry, "no-preview"));
             }
 
+            string previewToken = entry.PreviewHashEncryptedHex.Trim();
             Uri previewUri = new(
                 instanceUri,
-                $"{Routes.V1.Previews}/{Uri.EscapeDataString(entry.PreviewHashEncryptedHex)}.webp");
-            return CottonFileThumbnailSnapshot.Ready(entry.BadgeText, previewUri.AbsoluteUri);
+                $"{Routes.V1.Previews}/{Uri.EscapeDataString(previewToken)}.webp");
+            return CottonFileThumbnailSnapshot.Ready(
+                entry.BadgeText,
+                previewUri.AbsoluteUri,
+                CreateCacheKey(entry, previewToken));
+        }
+
+        private static string CreateCacheKey(CottonFileBrowserEntry entry, string version)
+        {
+            return $"{entry.Type}:{entry.Id:N}:{version}";
         }
     }
 }

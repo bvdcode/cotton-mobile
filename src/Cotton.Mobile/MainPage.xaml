@@ -258,6 +258,11 @@
                                               HeightRequest="64"
                                               ColumnDefinitions="44,*,Auto"
                                               ColumnSpacing="12">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                      CommandParameter="{Binding .}" />
+                                            </Grid.GestureRecognizers>
+
                                             <Border WidthRequest="36"
                                                     HeightRequest="36"
                                                     VerticalOptions="Center"
@@ -337,6 +342,11 @@
                                                 Padding="12"
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                                             <Grid RowSpacing="8">
+                                                <Grid.GestureRecognizers>
+                                                    <TapGestureRecognizer Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                          CommandParameter="{Binding .}" />
+                                                </Grid.GestureRecognizers>
+
                                                 <Grid.RowDefinitions>
                                                     <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
                                                     <RowDefinition Height="*" />

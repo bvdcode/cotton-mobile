@@ -1,5 +1,7 @@
 using Cotton.Mobile.Services;
+using Cotton.Sdk;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -16,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IUserDialogService _dialogService;
+        private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
         private readonly List<CottonFolderHandle> _fileNavigation = [];
 
@@ -28,6 +31,7 @@ namespace Cotton.Mobile.ViewModels
             IFileBrowserPreferenceStore preferenceStore,
             IFileInteractionService fileInteractionService,
             IUserDialogService dialogService,
+            IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
         {
             ArgumentNullException.ThrowIfNull(display);
@@ -35,6 +39,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
 
             _display = display;
@@ -42,6 +47,7 @@ namespace Cotton.Mobile.ViewModels
             _preferenceStore = preferenceStore;
             _fileInteractionService = fileInteractionService;
             _dialogService = dialogService;
+            _sessionHandler = sessionHandler;
             _logger = logger;
         }
 
@@ -198,6 +204,11 @@ namespace Cotton.Mobile.ViewModels
                 _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
             }
             catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile root files.");
                 _display.ShowFilesStatus("Could not load files. Try refresh.");
@@ -228,6 +239,16 @@ namespace Cotton.Mobile.ViewModels
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!preserveHistory && _fileNavigation.Count > 0)
+                {
+                    _fileNavigation.RemoveAt(_fileNavigation.Count - 1);
+                }
+
+                await HandleSessionExpiredAsync(exception);
             }
             catch (Exception exception)
             {
@@ -261,6 +282,11 @@ namespace Cotton.Mobile.ViewModels
                     "OK");
             }
             catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Download failed. Try again.");
@@ -292,6 +318,11 @@ namespace Cotton.Mobile.ViewModels
                 _display.ShowFilesStatus($"Opened {result.FileName}.");
             }
             catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Open failed. Try again.");
@@ -315,6 +346,11 @@ namespace Cotton.Mobile.ViewModels
                 _display.ShowFilesStatus($"Shared {result.FileName}.");
             }
             catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Share failed. Try again.");
@@ -329,6 +365,22 @@ namespace Cotton.Mobile.ViewModels
                 file.Name,
                 $"{file.Kind}\n{size}\n{contentType}",
                 "OK");
+        }
+
+        private async Task HandleSessionExpiredAsync(Exception exception)
+        {
+            Uri? expiredInstanceUri = _instanceUri;
+            _logger.LogWarning(exception, "Cotton mobile file browser session expired.");
+            Clear();
+            await _sessionHandler.HandleFileBrowserSessionExpiredAsync(expiredInstanceUri);
+        }
+
+        private static bool IsAuthorizationFailure(Exception exception)
+        {
+            return exception is CottonApiException
+            {
+                StatusCode: HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden,
+            };
         }
     }
 }

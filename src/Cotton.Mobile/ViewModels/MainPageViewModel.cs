@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageViewModel
+    public class MainPageViewModel : IFileBrowserSessionHandler
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "Ready to connect.";
@@ -62,6 +62,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserPreferenceStore,
                 fileInteractionService,
                 dialogService,
+                this,
                 fileBrowserLogger);
             ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(CancelAuthorizationAsync, () => Display.IsCancelAuthorizationEnabled);
@@ -109,6 +110,22 @@ namespace Cotton.Mobile.ViewModels
 
             _didRestoreSession = true;
             await RestoreSessionAsync();
+        }
+
+        public async Task HandleFileBrowserSessionExpiredAsync(Uri? instanceUri)
+        {
+            try
+            {
+                await _sessionService.ClearLocalSessionAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear expired Cotton mobile session.");
+            }
+
+            _fileBrowser.Clear();
+            Display.InstanceUrl = instanceUri?.AbsoluteUri ?? _options.DefaultInstanceUrl;
+            ShowSignIn("Session expired. Sign in again.");
         }
 
         private async Task RestoreSessionAsync()

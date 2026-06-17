@@ -7,5 +7,7 @@ namespace Cotton.Mobile.Services
         Task<CottonSessionResult> SignInWithBrowserAsync(Uri instanceUri, CancellationToken cancellationToken = default);
 
         Task LogoutAsync(CancellationToken cancellationToken = default);
+
+        Task ClearLocalSessionAsync(CancellationToken cancellationToken = default);
     }
 }

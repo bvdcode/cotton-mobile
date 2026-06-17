@@ -1,14 +1,19 @@
-Cotton Cloud for Android lets you connect to your Cotton Cloud instance from a native mobile app.
+Cotton Cloud for Android is a focused native file client for your Cotton Cloud instance.
 
-This first mobile release focuses on a small, useful mobile workflow:
+This testing release is built around one calm workflow: sign in, see your files, open what you need, and share or download without noise.
 
-- Enter your Cotton Cloud instance URL.
-- Approve access in your browser.
-- Return to the app with your session stored in Android secure storage.
-- Restore your session when the app starts again.
-- Preview the signed-in account and instance.
-- Browse folders and files in your Cotton Cloud storage.
-- Download files to app storage from the mobile app.
-- Sign out and clear the local session when needed.
+Current features:
 
-The app is currently prepared for internal testing while the mobile experience grows from secure sign-in and file downloads into richer Cotton Cloud workflows.
+- Connect to a Cotton Cloud instance by entering its URL.
+- Approve access in the browser through the Cotton app-code authorization flow.
+- Restore your secure session when the app starts again.
+- Browse folders and files in list or tile view.
+- Search the current folder, sort by name, type, or size, and refresh file lists.
+- Open supported image and text files inside the app.
+- Use Android open/share flows for downloaded files and unsupported types.
+- Download files into app-private storage and see verified local copies marked as On device.
+- Manage cached storage from the account menu.
+- Send tester feedback from the app with basic device and app context.
+- Sign out and clear local session data when needed.
+
+Cotton Cloud mobile is currently in internal or closed testing. Sync, background uploads, notifications, and advanced document viewing are being developed only when they can stay reliable and simple.

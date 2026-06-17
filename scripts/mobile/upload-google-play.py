@@ -16,6 +16,7 @@ ANDROID_PUBLISHER_API_BASE_URL = "https://androidpublisher.googleapis.com/androi
 ANDROID_PUBLISHER_UPLOAD_BASE_URL = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications"
 DEFAULT_SERVICE_ACCOUNT_ENV = "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
 DEFAULT_TIMEOUT_SECONDS = 120
+DEFAULT_RELEASE_NOTES_LANGUAGE = "en-US"
 
 logger = logging.getLogger("upload-google-play")
 
@@ -31,6 +32,8 @@ class GooglePlayUploadOptions:
     track: str
     release_status: str
     release_name: str | None
+    release_notes: str | None
+    release_notes_language: str
     changes_not_sent_for_review: bool
     service_account_json_env: str
     service_account_json_file: Path | None
@@ -115,6 +118,8 @@ class AndroidPublisherClient:
         version_code: int,
         release_status: str,
         release_name: str | None,
+        release_notes: str | None,
+        release_notes_language: str,
     ) -> None:
         release: dict[str, object] = {
             "versionCodes": [str(version_code)],
@@ -122,6 +127,13 @@ class AndroidPublisherClient:
         }
         if release_name:
             release["name"] = release_name
+        if release_notes:
+            release["releaseNotes"] = [
+                {
+                    "language": release_notes_language,
+                    "text": release_notes,
+                }
+            ]
 
         body: dict[str, object] = {
             "track": track,
@@ -251,6 +263,8 @@ def main() -> int:
             version_code,
             options.release_status,
             options.release_name,
+            options.release_notes,
+            options.release_notes_language,
         )
         client.commit_edit(
             options.package_name,
@@ -278,6 +292,16 @@ def parse_arguments() -> GooglePlayUploadOptions:
         help="Google Play release status.",
     )
     parser.add_argument("--release-name", help="Optional Google Play release name.")
+    parser.add_argument(
+        "--release-notes-file",
+        type=Path,
+        help="Optional text file for Google Play release notes.",
+    )
+    parser.add_argument(
+        "--release-notes-language",
+        default=DEFAULT_RELEASE_NOTES_LANGUAGE,
+        help="BCP-47 language tag for release notes.",
+    )
     parser.add_argument(
         "--changes-not-sent-for-review",
         action="store_true",
@@ -308,17 +332,39 @@ def parse_arguments() -> GooglePlayUploadOptions:
     if args.timeout_seconds <= 0:
         raise GooglePlayUploadError("--timeout-seconds must be a positive integer.")
 
+    release_notes = read_optional_release_notes(args.release_notes_file)
+    release_notes_language = args.release_notes_language.strip()
+    if release_notes and not release_notes_language:
+        raise GooglePlayUploadError("--release-notes-language is required when release notes are provided.")
+
     return GooglePlayUploadOptions(
         package_name=args.package_name,
         bundle_path=bundle_path,
         track=args.track,
         release_status=args.release_status,
         release_name=args.release_name,
+        release_notes=release_notes,
+        release_notes_language=release_notes_language,
         changes_not_sent_for_review=args.changes_not_sent_for_review,
         service_account_json_env=args.service_account_json_env,
         service_account_json_file=args.service_account_json_file,
         timeout_seconds=args.timeout_seconds,
     )
+
+
+def read_optional_release_notes(path: Path | None) -> str | None:
+    if path is None:
+        return None
+
+    release_notes_path = path.expanduser().resolve()
+    if not release_notes_path.is_file():
+        raise GooglePlayUploadError(f"Release notes file does not exist: {release_notes_path}")
+
+    release_notes = release_notes_path.read_text(encoding="utf-8").strip()
+    if not release_notes:
+        raise GooglePlayUploadError(f"Release notes file is empty: {release_notes_path}")
+
+    return release_notes
 
 
 def load_service_account_json(options: GooglePlayUploadOptions) -> str:

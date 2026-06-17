@@ -391,6 +391,7 @@ jobs:
             --track "${{ inputs.google_play_track }}" \
             --release-status "${{ inputs.google_play_release_status }}" \
             --release-name "$release_name" \
+            --release-notes-file store/google-play/default-listing/release-notes.txt \
             "${changes_not_sent_flag[@]}"
 
   google-play-store-listing:

@@ -1,3 +1,3 @@
-Initial internal testing build for Cotton Cloud mobile.
+Internal testing build for Cotton Cloud mobile.
 
-Includes browser-based authorization, secure session restore, profile preview, folder browsing, file downloads, logout, and privacy policy access.
+Includes browser sign-in, secure session restore, list/tile file browsing, folder navigation, search, sort, refresh, open/download/share actions, On device markers for verified local copies, storage management, feedback, and logout cleanup.

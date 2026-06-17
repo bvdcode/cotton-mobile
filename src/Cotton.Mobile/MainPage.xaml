@@ -197,9 +197,8 @@
 
                             <Grid ColumnDefinitions="*,*,*,Auto"
                                   ColumnSpacing="8">
-                                <Button Text="Name"
+                                <Button Text="{Binding Display.SortByNameText}"
                                         Command="{Binding SortFilesByNameCommand}"
-                                        IsEnabled="{Binding Display.CanSortByName}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
@@ -207,9 +206,8 @@
                                         MinimumWidthRequest="52" />
 
                                 <Button Grid.Column="1"
-                                        Text="Type"
+                                        Text="{Binding Display.SortByTypeText}"
                                         Command="{Binding SortFilesByTypeCommand}"
-                                        IsEnabled="{Binding Display.CanSortByType}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
@@ -217,9 +215,8 @@
                                         MinimumWidthRequest="52" />
 
                                 <Button Grid.Column="2"
-                                        Text="Size"
+                                        Text="{Binding Display.SortBySizeText}"
                                         Command="{Binding SortFilesBySizeCommand}"
-                                        IsEnabled="{Binding Display.CanSortBySize}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"

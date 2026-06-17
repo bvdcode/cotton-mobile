@@ -29,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
             IUserDialogService dialogService,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
+            IFileBrowserPreferenceStore fileBrowserPreferenceStore,
             ILogger<MainPageFileBrowserController> fileBrowserLogger,
             IMainPagePresentationService presentationService,
             ILogger<MainPageViewModel> logger)
@@ -39,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
             ArgumentNullException.ThrowIfNull(fileBrowserLogger);
             ArgumentNullException.ThrowIfNull(presentationService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -55,6 +57,7 @@ namespace Cotton.Mobile.ViewModels
             _fileBrowser = new MainPageFileBrowserController(
                 Display,
                 fileBrowserService,
+                fileBrowserPreferenceStore,
                 dialogService,
                 fileBrowserLogger);
             ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
@@ -64,6 +67,10 @@ namespace Cotton.Mobile.ViewModels
             RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync);
             NavigateFilesUpCommand = new AsyncCommand(_fileBrowser.NavigateUpAsync, () => Display.CanNavigateFilesUp);
             OpenFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.OpenEntryAsync);
+            ToggleFileViewCommand = new AsyncCommand(_fileBrowser.ToggleViewModeAsync);
+            SortFilesByNameCommand = new AsyncCommand(_fileBrowser.SortByNameAsync);
+            SortFilesByTypeCommand = new AsyncCommand(_fileBrowser.SortByTypeAsync);
+            SortFilesBySizeCommand = new AsyncCommand(_fileBrowser.SortBySizeAsync);
         }
 
         public MainPageDisplayState Display { get; }
@@ -81,6 +88,14 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand NavigateFilesUpCommand { get; }
 
         public AsyncCommand<CottonFileBrowserEntry> OpenFileBrowserEntryCommand { get; }
+
+        public AsyncCommand ToggleFileViewCommand { get; }
+
+        public AsyncCommand SortFilesByNameCommand { get; }
+
+        public AsyncCommand SortFilesByTypeCommand { get; }
+
+        public AsyncCommand SortFilesBySizeCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -269,6 +284,10 @@ namespace Cotton.Mobile.ViewModels
             LogoutCommand.RaiseCanExecuteChanged();
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             OpenFileBrowserEntryCommand.RaiseCanExecuteChanged();
+            ToggleFileViewCommand.RaiseCanExecuteChanged();
+            SortFilesByNameCommand.RaiseCanExecuteChanged();
+            SortFilesByTypeCommand.RaiseCanExecuteChanged();
+            SortFilesBySizeCommand.RaiseCanExecuteChanged();
         }
 
         private void AnnounceStatus(string? status)

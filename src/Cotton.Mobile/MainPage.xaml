@@ -161,23 +161,79 @@
                                         MinimumWidthRequest="44" />
                             </Grid>
 
+                            <SearchBar Text="{Binding Display.FileSearchText, Mode=TwoWay}"
+                                       Placeholder="Search"
+                                       HeightRequest="44"
+                                       FontSize="14"
+                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                       PlaceholderColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+                            <Grid ColumnDefinitions="*,*,*,Auto"
+                                  ColumnSpacing="8">
+                                <Button Text="Name"
+                                        Command="{Binding SortFilesByNameCommand}"
+                                        IsEnabled="{Binding Display.CanSortByName}"
+                                        Padding="8,0"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="52" />
+
+                                <Button Grid.Column="1"
+                                        Text="Type"
+                                        Command="{Binding SortFilesByTypeCommand}"
+                                        IsEnabled="{Binding Display.CanSortByType}"
+                                        Padding="8,0"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="52" />
+
+                                <Button Grid.Column="2"
+                                        Text="Size"
+                                        Command="{Binding SortFilesBySizeCommand}"
+                                        IsEnabled="{Binding Display.CanSortBySize}"
+                                        Padding="8,0"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="52" />
+
+                                <Button Grid.Column="3"
+                                        Text="{Binding Display.FileViewToggleText}"
+                                        Command="{Binding ToggleFileViewCommand}"
+                                        Padding="8,0"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="60" />
+                            </Grid>
+
                             <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
                                                IsVisible="{Binding Display.IsFilesLoading}"
                                                HorizontalOptions="Start" />
 
-                            <Label Text="No files in this folder."
+                            <Label Text="{Binding Display.FilesEmptyMessage}"
                                    IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                             <VerticalStackLayout Spacing="0"
+                                                 IsVisible="{Binding Display.IsFileListViewVisible}"
                                                  BindableLayout.ItemsSource="{Binding Display.FileEntries}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="0,10"
-                                              ColumnDefinitions="*,Auto"
+                                              ColumnDefinitions="44,*,Auto"
                                               ColumnSpacing="12">
-                                            <VerticalStackLayout Spacing="2">
+                                            <Border WidthRequest="36"
+                                                    HeightRequest="36"
+                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="0"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                <Label Text="{Binding BadgeText}"
+                                                       FontSize="10"
+                                                       FontAttributes="Bold"
+                                                       HorizontalTextAlignment="Center"
+                                                       VerticalTextAlignment="Center"
+                                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                            </Border>
+
+                                            <VerticalStackLayout Grid.Column="1"
+                                                                 Spacing="2">
                                                 <Label Text="{Binding Name}"
                                                        FontSize="15"
                                                        FontAttributes="Bold"
@@ -190,7 +246,7 @@
                                                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                                             </VerticalStackLayout>
 
-                                            <Button Grid.Column="1"
+                                            <Button Grid.Column="2"
                                                     Text="{Binding ActionLabel}"
                                                     Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                     CommandParameter="{Binding .}"
@@ -201,6 +257,67 @@
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
+
+                            <FlexLayout IsVisible="{Binding Display.IsFileTileViewVisible}"
+                                        BindableLayout.ItemsSource="{Binding Display.FileEntries}"
+                                        Wrap="Wrap"
+                                        AlignItems="Start"
+                                        JustifyContent="Start">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border WidthRequest="150"
+                                                HeightRequest="132"
+                                                Margin="0,0,8,8"
+                                                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                StrokeThickness="1"
+                                                StrokeShape="RoundRectangle 8"
+                                                Padding="12"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                                            <Grid RowDefinitions="Auto,*,Auto"
+                                                  RowSpacing="8">
+                                                <Border WidthRequest="44"
+                                                        HeightRequest="30"
+                                                        HorizontalOptions="Start"
+                                                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                        StrokeShape="RoundRectangle 8"
+                                                        Padding="0"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                    <Label Text="{Binding BadgeText}"
+                                                           FontSize="10"
+                                                           FontAttributes="Bold"
+                                                           HorizontalTextAlignment="Center"
+                                                           VerticalTextAlignment="Center"
+                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                </Border>
+
+                                                <VerticalStackLayout Grid.Row="1"
+                                                                     Spacing="2">
+                                                    <Label Text="{Binding Name}"
+                                                           FontSize="14"
+                                                           FontAttributes="Bold"
+                                                           MaxLines="2"
+                                                           LineBreakMode="TailTruncation"
+                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                                    <Label Text="{Binding Details}"
+                                                           FontSize="11"
+                                                           MaxLines="1"
+                                                           LineBreakMode="TailTruncation"
+                                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                </VerticalStackLayout>
+
+                                                <Button Grid.Row="2"
+                                                        Text="{Binding ActionLabel}"
+                                                        Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                        CommandParameter="{Binding .}"
+                                                        Padding="8,0"
+                                                        MinimumHeightRequest="30"
+                                                        MinimumWidthRequest="44" />
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </FlexLayout>
                         </VerticalStackLayout>
 
                         <Button Text="Log out"

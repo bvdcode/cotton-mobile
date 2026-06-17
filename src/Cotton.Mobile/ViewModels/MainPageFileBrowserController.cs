@@ -7,6 +7,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
+        private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<MainPageFileBrowserController> _logger;
         private readonly Stack<CottonFolderHandle> _fileNavigation = new();
@@ -17,16 +18,19 @@ namespace Cotton.Mobile.ViewModels
         public MainPageFileBrowserController(
             MainPageDisplayState display,
             ICottonFileBrowserService fileBrowserService,
+            IFileBrowserPreferenceStore preferenceStore,
             IUserDialogService dialogService,
             ILogger<MainPageFileBrowserController> logger)
         {
             ArgumentNullException.ThrowIfNull(display);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _display = display;
             _fileBrowserService = fileBrowserService;
+            _preferenceStore = preferenceStore;
             _dialogService = dialogService;
             _logger = logger;
         }
@@ -36,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             _instanceUri = instanceUri;
+            _display.ApplyFileBrowserPreferences(_preferenceStore.Get());
             await LoadRootFilesAsync();
         }
 
@@ -87,6 +92,31 @@ namespace Cotton.Mobile.ViewModels
             await DownloadFileAsync(entry);
         }
 
+        public Task ToggleViewModeAsync()
+        {
+            CottonFileBrowserViewMode nextViewMode = _display.FileViewMode == CottonFileBrowserViewMode.List
+                ? CottonFileBrowserViewMode.Tiles
+                : CottonFileBrowserViewMode.List;
+            _preferenceStore.SaveViewMode(nextViewMode);
+            _display.ShowFileViewMode(nextViewMode);
+            return Task.CompletedTask;
+        }
+
+        public Task SortByNameAsync()
+        {
+            return SetSortModeAsync(CottonFileBrowserSortMode.Name);
+        }
+
+        public Task SortByTypeAsync()
+        {
+            return SetSortModeAsync(CottonFileBrowserSortMode.Type);
+        }
+
+        public Task SortBySizeAsync()
+        {
+            return SetSortModeAsync(CottonFileBrowserSortMode.Size);
+        }
+
         private async Task OpenFolderAsync(CottonFileBrowserEntry folder)
         {
             if (_currentFolder is not null)
@@ -95,6 +125,13 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
+        }
+
+        private Task SetSortModeAsync(CottonFileBrowserSortMode sortMode)
+        {
+            _preferenceStore.SaveSortMode(sortMode);
+            _display.ShowFileSortMode(sortMode);
+            return Task.CompletedTask;
         }
 
         private async Task LoadRootFilesAsync()

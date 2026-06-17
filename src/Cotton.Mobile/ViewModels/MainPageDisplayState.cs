@@ -5,6 +5,8 @@ namespace Cotton.Mobile.ViewModels
 
     public class MainPageDisplayState : ViewModelBase
     {
+        private readonly List<CottonFileBrowserEntry> _allFileEntries = [];
+
         private MainPageViewState _state = MainPageViewState.SignIn;
         private string _instanceUrl = string.Empty;
         private string _loadingMessage = "Restoring session...";
@@ -16,10 +18,15 @@ namespace Cotton.Mobile.ViewModels
         private string? _profileStatus;
         private string _filesTitle = "Files";
         private string? _filesStatus;
+        private string _filesEmptyMessage = "No files in this folder.";
+        private string _fileSearchText = string.Empty;
+        private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
+        private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
         private bool _isInputEnabled = true;
         private bool _isCancelAuthorizationEnabled = true;
         private bool _isLogoutEnabled = true;
         private bool _isFilesLoading;
+        private bool _isFilesRefreshing;
         private bool _canNavigateFilesUp;
 
         public MainPageDisplayState(string defaultInstanceUrl)
@@ -118,10 +125,74 @@ namespace Cotton.Mobile.ViewModels
 
         public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
 
+        public string FilesEmptyMessage
+        {
+            get => _filesEmptyMessage;
+            private set => SetProperty(ref _filesEmptyMessage, value);
+        }
+
+        public string FileSearchText
+        {
+            get => _fileSearchText;
+            set
+            {
+                if (SetProperty(ref _fileSearchText, value ?? string.Empty))
+                {
+                    ApplyFileFilters();
+                }
+            }
+        }
+
+        public CottonFileBrowserViewMode FileViewMode
+        {
+            get => _fileViewMode;
+            private set
+            {
+                if (SetProperty(ref _fileViewMode, value))
+                {
+                    OnPropertyChanged(nameof(IsFileListViewVisible));
+                    OnPropertyChanged(nameof(IsFileTileViewVisible));
+                    OnPropertyChanged(nameof(FileViewToggleText));
+                }
+            }
+        }
+
+        public CottonFileBrowserSortMode FileSortMode
+        {
+            get => _fileSortMode;
+            private set
+            {
+                if (SetProperty(ref _fileSortMode, value))
+                {
+                    OnPropertyChanged(nameof(CanSortByName));
+                    OnPropertyChanged(nameof(CanSortByType));
+                    OnPropertyChanged(nameof(CanSortBySize));
+                }
+            }
+        }
+
+        public bool IsFileListViewVisible => FileViewMode == CottonFileBrowserViewMode.List;
+
+        public bool IsFileTileViewVisible => FileViewMode == CottonFileBrowserViewMode.Tiles;
+
+        public string FileViewToggleText => FileViewMode == CottonFileBrowserViewMode.List ? "Tiles" : "List";
+
+        public bool CanSortByName => FileSortMode != CottonFileBrowserSortMode.Name;
+
+        public bool CanSortByType => FileSortMode != CottonFileBrowserSortMode.Type;
+
+        public bool CanSortBySize => FileSortMode != CottonFileBrowserSortMode.Size;
+
         public bool IsFilesLoading
         {
             get => _isFilesLoading;
             private set => SetProperty(ref _isFilesLoading, value);
+        }
+
+        public bool IsFilesRefreshing
+        {
+            get => _isFilesRefreshing;
+            set => SetProperty(ref _isFilesRefreshing, value);
         }
 
         public bool CanNavigateFilesUp
@@ -205,7 +276,9 @@ namespace Cotton.Mobile.ViewModels
             FilesTitle = "Files";
             FilesStatus = "Loading files...";
             IsFilesLoading = true;
+            IsFilesRefreshing = false;
             CanNavigateFilesUp = false;
+            _allFileEntries.Clear();
             FileEntries.Clear();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
             IsLogoutEnabled = true;
@@ -222,6 +295,7 @@ namespace Cotton.Mobile.ViewModels
         public void ShowFilesLoading(string status)
         {
             IsFilesLoading = true;
+            IsFilesRefreshing = true;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
@@ -231,25 +305,47 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(content);
 
             FilesTitle = content.FolderName;
-            FileEntries.Clear();
+            _allFileEntries.Clear();
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                FileEntries.Add(entry);
+                _allFileEntries.Add(entry);
             }
 
             IsFilesLoading = false;
+            IsFilesRefreshing = false;
             CanNavigateFilesUp = canNavigateUp;
-            FilesStatus = content.Entries.Count == 0
-                ? "This folder is empty."
-                : $"{content.Entries.Count} item(s)";
+            ApplyFileFilters();
+            FilesStatus = CreateFilesStatus();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
         public void ShowFilesStatus(string status)
         {
             IsFilesLoading = false;
+            IsFilesRefreshing = false;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ApplyFileBrowserPreferences(CottonFileBrowserPreferences preferences)
+        {
+            ArgumentNullException.ThrowIfNull(preferences);
+
+            FileViewMode = preferences.ViewMode;
+            FileSortMode = preferences.SortMode;
+            ApplyFileFilters();
+        }
+
+        public void ShowFileViewMode(CottonFileBrowserViewMode viewMode)
+        {
+            FileViewMode = viewMode;
+        }
+
+        public void ShowFileSortMode(CottonFileBrowserSortMode sortMode)
+        {
+            FileSortMode = sortMode;
+            ApplyFileFilters();
+            FilesStatus = CreateFilesStatus();
         }
 
         private void SetStatus(string? status)
@@ -271,6 +367,67 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsProfileVisible));
             OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
             OnPropertyChanged(nameof(IsAuthorizationProgressIndicatorRunning));
+        }
+
+        private void ApplyFileFilters()
+        {
+            List<CottonFileBrowserEntry> visibleEntries = SortEntries(
+                    _allFileEntries.Where(entry => entry.Matches(FileSearchText)))
+                .ToList();
+
+            FileEntries.Clear();
+            foreach (CottonFileBrowserEntry entry in visibleEntries)
+            {
+                FileEntries.Add(entry);
+            }
+
+            FilesEmptyMessage = ResolveFilesEmptyMessage(visibleEntries.Count);
+            FilesStatus = CreateFilesStatus();
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        private IEnumerable<CottonFileBrowserEntry> SortEntries(IEnumerable<CottonFileBrowserEntry> entries)
+        {
+            return FileSortMode switch
+            {
+                CottonFileBrowserSortMode.Type => entries
+                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
+                    .ThenBy(entry => entry.Kind, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
+                CottonFileBrowserSortMode.Size => entries
+                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
+                    .ThenBy(entry => entry.IsFolder ? entry.Name : string.Empty, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(entry => entry.SizeBytes ?? 0)
+                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
+                _ => entries
+                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
+                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
+            };
+        }
+
+        private string CreateFilesStatus()
+        {
+            int totalCount = _allFileEntries.Count;
+            int visibleCount = FileEntries.Count;
+            if (totalCount == 0)
+            {
+                return "This folder is empty.";
+            }
+
+            string count = visibleCount == totalCount
+                ? $"{totalCount} item(s)"
+                : $"{visibleCount} of {totalCount} item(s)";
+            return $"{count} · {FileSortMode}";
+        }
+
+        private string ResolveFilesEmptyMessage(int visibleCount)
+        {
+            if (_allFileEntries.Count == 0)
+            {
+                return "This folder is empty.";
+            }
+
+            return visibleCount == 0 ? "No matching files." : string.Empty;
         }
     }
 }

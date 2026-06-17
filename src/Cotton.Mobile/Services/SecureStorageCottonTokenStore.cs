@@ -26,8 +26,14 @@ namespace Cotton.Mobile.Services
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            if (string.IsNullOrWhiteSpace(accessToken) && string.IsNullOrWhiteSpace(refreshToken))
+            {
+                return null;
+            }
+
             if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
             {
+                await ClearAsync(cancellationToken).ConfigureAwait(false);
                 return null;
             }
 

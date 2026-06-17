@@ -238,6 +238,12 @@ jobs:
 
       - name: Compute Android version code
         run: |
+          application_display_version="${{ steps.gitversion.outputs.semVer }}"
+          if [ -z "$application_display_version" ]; then
+            echo "GitVersion SemVer output is required." >&2
+            exit 1
+          fi
+
           android_version_code=$((
             ${{ steps.gitversion.outputs.major }} * 1000000 +
             ${{ steps.gitversion.outputs.minor }} * 10000 +
@@ -248,8 +254,9 @@ jobs:
             echo "Computed Android versionCode must be greater than the first published versionCode 1." >&2
             exit 1
           fi
+          echo "APPLICATION_DISPLAY_VERSION=$application_display_version" >> "$GITHUB_ENV"
           echo "ANDROID_VERSION_CODE=$android_version_code" >> "$GITHUB_ENV"
-          echo "GitVersion SemVer: ${{ steps.gitversion.outputs.semVer }}"
+          echo "GitVersion SemVer: $application_display_version"
           echo "Android versionCode: $android_version_code"
 
       - name: Setup .NET
@@ -316,6 +323,7 @@ jobs:
             -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
             -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
             -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD" \
+            -p:ApplicationDisplayVersion="$APPLICATION_DISPLAY_VERSION" \
             -p:ApplicationVersion="$ANDROID_VERSION_CODE"
 
       - name: Upload signed Android artifacts
@@ -351,6 +359,7 @@ jobs:
             echo
             echo "- Commit: \`$GITHUB_SHA\`"
             echo "- Workflow run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            echo "- App version: $APPLICATION_DISPLAY_VERSION"
             echo "- Android versionCode: $ANDROID_VERSION_CODE"
             echo
             echo "Install the APK asset directly on Android devices, or use the Google Play testing link when the tester is opted in."

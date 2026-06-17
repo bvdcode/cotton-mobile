@@ -10,11 +10,11 @@
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
-                     IsEnabled="{Binding Display.IsProfileVisible}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="24"
-                                 VerticalOptions="Center"
+                                 Padding="0,48,0,24"
+                                 VerticalOptions="Start"
                                  MaximumWidthRequest="520">
                 <Image Source="appiconfg.svg"
                        HeightRequest="92"

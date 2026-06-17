@@ -2,6 +2,7 @@ using System.Net;
 using Cotton.Auth;
 using Cotton.Sdk;
 using Cotton.Sdk.Auth;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.Services
@@ -16,6 +17,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonTokenStore _tokenStore;
         private readonly IBrowser _browser;
         private readonly IApplicationForegroundService _foregroundService;
+        private readonly ILogger<CottonSessionService> _logger;
 
         public CottonSessionService(
             ICottonClientFactory clientFactory,
@@ -23,7 +25,8 @@ namespace Cotton.Mobile.Services
             ICottonMobileApplicationMetadata metadata,
             ICottonTokenStore tokenStore,
             IBrowser browser,
-            IApplicationForegroundService foregroundService)
+            IApplicationForegroundService foregroundService,
+            ILogger<CottonSessionService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
             ArgumentNullException.ThrowIfNull(instanceStore);
@@ -31,6 +34,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(tokenStore);
             ArgumentNullException.ThrowIfNull(browser);
             ArgumentNullException.ThrowIfNull(foregroundService);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
             _instanceStore = instanceStore;
@@ -38,6 +42,7 @@ namespace Cotton.Mobile.Services
             _tokenStore = tokenStore;
             _browser = browser;
             _foregroundService = foregroundService;
+            _logger = logger;
         }
 
         public async Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default)
@@ -118,9 +123,19 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            await client.Auth.LogoutAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-            await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
+            try
+            {
+                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+                await client.Auth.LogoutAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Cotton mobile remote logout failed; clearing local session.");
+            }
+            finally
+            {
+                await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         public async Task ClearLocalSessionAsync(CancellationToken cancellationToken = default)

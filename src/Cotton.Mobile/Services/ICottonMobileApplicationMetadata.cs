@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Services
 
         string DeviceName { get; }
 
+        string OperatingSystem { get; }
+
         string UserAgent { get; }
     }
 }

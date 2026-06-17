@@ -26,6 +26,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);
 			builder.Services.AddSingleton<IBrowser>(Browser.Default);
 			builder.Services.AddSingleton<IClipboard>(Clipboard.Default);
+			builder.Services.AddSingleton<ILauncher>(Launcher.Default);
 			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
@@ -33,12 +34,14 @@ namespace Cotton.Mobile
 				new CottonMobileOptions(
 					"Cotton Cloud",
 					new Uri("https://app.cottoncloud.dev"),
-					new Uri("https://cottoncloud.dev/privacy-policy")));
+					new Uri("https://cottoncloud.dev/privacy-policy"),
+					"cotton-play-market-support@belov.us"));
 			builder.Services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
 			builder.Services.AddSingleton<ICottonMobileApplicationMetadata, CottonMobileApplicationMetadata>();
 			builder.Services.AddSingleton<IUserDialogService, UserDialogService>();
 			builder.Services.AddSingleton<IScreenReaderService, ScreenReaderService>();
 			builder.Services.AddSingleton<INetworkAccessService, NetworkAccessService>();
+			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();

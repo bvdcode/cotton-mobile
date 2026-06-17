@@ -5,11 +5,17 @@ namespace Cotton.Mobile.Services
         public CottonMobileOptions(
             string applicationName,
             Uri defaultInstanceUri,
-            Uri privacyPolicyUri)
+            Uri privacyPolicyUri,
+            string supportEmail)
         {
             if (string.IsNullOrWhiteSpace(applicationName))
             {
                 throw new ArgumentException("Application name is required.", nameof(applicationName));
+            }
+
+            if (string.IsNullOrWhiteSpace(supportEmail) || supportEmail.Contains(' ', StringComparison.Ordinal))
+            {
+                throw new ArgumentException("Support email is required.", nameof(supportEmail));
             }
 
             ArgumentNullException.ThrowIfNull(defaultInstanceUri);
@@ -20,6 +26,7 @@ namespace Cotton.Mobile.Services
             ApplicationName = applicationName.Trim();
             DefaultInstanceUri = defaultInstanceUri;
             PrivacyPolicyUri = privacyPolicyUri;
+            SupportEmail = supportEmail.Trim();
         }
 
         public string ApplicationName { get; }
@@ -27,6 +34,8 @@ namespace Cotton.Mobile.Services
         public Uri DefaultInstanceUri { get; }
 
         public Uri PrivacyPolicyUri { get; }
+
+        public string SupportEmail { get; }
 
         public string DefaultInstanceUrl => DefaultInstanceUri.AbsoluteUri;
 

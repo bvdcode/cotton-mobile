@@ -31,6 +31,8 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public string OperatingSystem => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}".Trim();
+
         public string UserAgent => $"{ApplicationName}/{ApplicationVersion}";
     }
 }

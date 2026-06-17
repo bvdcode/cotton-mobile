@@ -10,6 +10,7 @@ namespace Cotton.Mobile.ViewModels
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
+        private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
 
@@ -17,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IBrowser _browser;
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
+        private readonly IFeedbackService _feedbackService;
         private readonly IScreenReaderService _screenReader;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
@@ -30,6 +32,7 @@ namespace Cotton.Mobile.ViewModels
             IBrowser browser,
             CottonMobileOptions options,
             IUserDialogService dialogService,
+            IFeedbackService feedbackService,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
@@ -45,6 +48,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(browser);
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(feedbackService);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
@@ -60,6 +64,7 @@ namespace Cotton.Mobile.ViewModels
             _browser = browser;
             _options = options;
             _dialogService = dialogService;
+            _feedbackService = feedbackService;
             _screenReader = screenReader;
             _presentationService = presentationService;
             _logger = logger;
@@ -246,6 +251,7 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
+                AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
 
             switch (action)
@@ -255,6 +261,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountPrivacyPolicyAction:
                     await OpenPrivacyPolicyAsync();
+                    break;
+                case AccountFeedbackAction:
+                    await OpenFeedbackAsync();
                     break;
             }
         }
@@ -281,6 +290,33 @@ namespace Cotton.Mobile.ViewModels
                     "Could not open the privacy policy.",
                     "OK");
             }
+        }
+
+        private async Task OpenFeedbackAsync()
+        {
+            try
+            {
+                bool opened = await _feedbackService.OpenFeedbackAsync(
+                    Display.InstanceUrl,
+                    Display.ProfileName);
+                if (!opened)
+                {
+                    await ShowFeedbackUnavailableAsync();
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton Cloud feedback composer.");
+                await ShowFeedbackUnavailableAsync();
+            }
+        }
+
+        private Task ShowFeedbackUnavailableAsync()
+        {
+            return _dialogService.ShowAlertAsync(
+                "Feedback",
+                $"Could not open an email app. Send feedback to {_options.SupportEmail}.",
+                "OK");
         }
 
         private Uri? ResolveInstanceUri()

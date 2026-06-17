@@ -21,6 +21,7 @@ namespace Cotton.Mobile.ViewModels
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
         private const string ViewTilesAction = "Tiles";
+        private const string CurrentActionSuffix = " (current)";
         private const string OfflineBrowseStatus = "Offline. Files marked On device can still open.";
         private const string OfflineDownloadStatus = "Offline. Download needs internet.";
         private const string OfflineOpenStatus = "Offline. This file is not available on device.";
@@ -196,14 +197,20 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task ShowViewActionsAsync()
         {
+            string listAction = CreateCurrentActionLabel(
+                ViewListAction,
+                _display.FileViewMode == CottonFileBrowserViewMode.List);
+            string tilesAction = CreateCurrentActionLabel(
+                ViewTilesAction,
+                _display.FileViewMode == CottonFileBrowserViewMode.Tiles);
             string? action = await _dialogService.ShowActionSheetAsync(
-                $"View files as {_display.FileViewMode}",
+                "View files as",
                 CancelAction,
                 null,
-                ViewListAction,
-                ViewTilesAction);
+                listAction,
+                tilesAction);
 
-            switch (action)
+            switch (NormalizeAction(action))
             {
                 case ViewListAction:
                     SetViewMode(CottonFileBrowserViewMode.List);
@@ -216,16 +223,28 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task ShowSortActionsAsync()
         {
+            string nameAction = CreateCurrentActionLabel(
+                SortNameAction,
+                _display.FileSortMode == CottonFileBrowserSortMode.Name);
+            string updatedAction = CreateCurrentActionLabel(
+                SortUpdatedAction,
+                _display.FileSortMode == CottonFileBrowserSortMode.Updated);
+            string typeAction = CreateCurrentActionLabel(
+                SortTypeAction,
+                _display.FileSortMode == CottonFileBrowserSortMode.Type);
+            string sizeAction = CreateCurrentActionLabel(
+                SortSizeAction,
+                _display.FileSortMode == CottonFileBrowserSortMode.Size);
             string? action = await _dialogService.ShowActionSheetAsync(
-                $"Sort files by {_display.FileSortMode}",
+                "Sort files by",
                 CancelAction,
                 null,
-                SortNameAction,
-                SortUpdatedAction,
-                SortTypeAction,
-                SortSizeAction);
+                nameAction,
+                updatedAction,
+                typeAction,
+                sizeAction);
 
-            switch (action)
+            switch (NormalizeAction(action))
             {
                 case SortNameAction:
                     await SetSortModeAsync(CottonFileBrowserSortMode.Name);
@@ -667,10 +686,10 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             CottonLocalFileSnapshot? localFile)
         {
-            string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown";
+            string size = file.SizeBytes.HasValue ? FormatStorageSize(file.SizeBytes.Value) : "Unknown";
             string contentType = file.ContentType ?? "Unknown";
             string localCopy = CreateLocalCopyDetails(file, localFile);
-            string updated = FormatUtcTimestamp(file.UpdatedAtUtc);
+            string updated = FormatLocalTimestamp(file.UpdatedAtUtc);
 
             return string.Join(
                 Environment.NewLine,
@@ -678,16 +697,15 @@ namespace Cotton.Mobile.ViewModels
                 $"Size: {size}",
                 $"Updated: {updated}",
                 $"Content type: {contentType}",
-                $"Local copy: {localCopy}",
-                $"File id: {file.Id:D}");
+                $"On device: {localCopy}");
         }
 
-        private static string FormatUtcTimestamp(DateTime value)
+        private static string FormatLocalTimestamp(DateTime value)
         {
             DateTime utc = value.Kind == DateTimeKind.Utc
                 ? value
                 : value.ToUniversalTime();
-            return $"{utc:yyyy-MM-dd HH:mm} UTC";
+            return $"{utc.ToLocalTime():yyyy-MM-dd HH:mm}";
         }
 
         private static string CreateLocalCopyDetails(
@@ -696,15 +714,15 @@ namespace Cotton.Mobile.ViewModels
         {
             if (localFile is null)
             {
-                return "Not downloaded";
+                return "No";
             }
 
             if (file.SizeBytes.HasValue && file.SizeBytes.Value != localFile.SizeBytes)
             {
-                return $"Downloaded, refresh needed ({localFile.SizeBytes:N0} bytes)";
+                return $"Needs refresh ({FormatStorageSize(localFile.SizeBytes)})";
             }
 
-            return $"On device ({localFile.SizeBytes:N0} bytes)";
+            return $"Yes ({FormatStorageSize(localFile.SizeBytes)})";
         }
 
         private async Task ShowDownloadedFileActionsAsync(
@@ -868,7 +886,13 @@ namespace Cotton.Mobile.ViewModels
         private void ShowFileLoadFailure(string fallbackStatus)
         {
             _lastFileLoadFailed = true;
-            _display.ShowFilesStatus(CreateOfflineAwareStatus(fallbackStatus, OfflineBrowseStatus));
+            if (_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(fallbackStatus);
+                return;
+            }
+
+            _display.ShowOfflineFilesNotice();
         }
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
@@ -966,6 +990,38 @@ namespace Cotton.Mobile.ViewModels
         private string CreateOfflineAwareStatus(string fallbackStatus, string offlineStatus)
         {
             return _networkAccess.HasInternetAccess ? fallbackStatus : offlineStatus;
+        }
+
+        private static string CreateCurrentActionLabel(string label, bool isCurrent)
+        {
+            return isCurrent ? label + CurrentActionSuffix : label;
+        }
+
+        private static string? NormalizeAction(string? action)
+        {
+            if (action is null)
+            {
+                return null;
+            }
+
+            return action.EndsWith(CurrentActionSuffix, StringComparison.Ordinal)
+                ? action[..^CurrentActionSuffix.Length]
+                : action;
+        }
+
+        private static string FormatStorageSize(long bytes)
+        {
+            const long Kilobyte = 1024;
+            const long Megabyte = Kilobyte * 1024;
+            const long Gigabyte = Megabyte * 1024;
+
+            return bytes switch
+            {
+                < Kilobyte => $"{bytes} B",
+                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
+                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
+                _ => $"{bytes / (double)Gigabyte:0.#} GB",
+            };
         }
 
         private void ClearFileActionRetry()

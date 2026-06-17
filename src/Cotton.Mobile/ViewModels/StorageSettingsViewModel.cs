@@ -7,7 +7,9 @@ namespace Cotton.Mobile.ViewModels
     public class StorageSettingsViewModel : ViewModelBase
     {
         private const string CancelAction = "Cancel";
-        private const string ClearAction = "Clear";
+        private const string ClearAllAction = "Clear all";
+        private const string ClearDownloadedFilesAction = "Clear downloads";
+        private const string ClearThumbnailsAction = "Clear thumbnails";
         private const string ClearAllTitle = "Clear all cached files";
         private const string ClearDownloadedFilesTitle = "Clear downloaded files";
         private const string ClearThumbnailsTitle = "Clear thumbnails";
@@ -129,6 +131,7 @@ namespace Cotton.Mobile.ViewModels
             return ClearAsync(
                 ClearThumbnailsTitle,
                 "Thumbnail previews will reload as you browse.",
+                ClearThumbnailsAction,
                 _storageManagementService.ClearThumbnailCacheAsync,
                 "Thumbnails cleared.");
         }
@@ -138,6 +141,7 @@ namespace Cotton.Mobile.ViewModels
             return ClearAsync(
                 ClearDownloadedFilesTitle,
                 "Saved files will need internet to open again.",
+                ClearDownloadedFilesAction,
                 _storageManagementService.ClearDownloadedFilesAsync,
                 "Downloaded files cleared.");
         }
@@ -147,6 +151,7 @@ namespace Cotton.Mobile.ViewModels
             return ClearAsync(
                 ClearAllTitle,
                 "Thumbnail previews and saved files will be removed from this device.",
+                ClearAllAction,
                 _storageManagementService.ClearAllCachedFilesAsync,
                 "Cached files cleared.");
         }
@@ -154,13 +159,14 @@ namespace Cotton.Mobile.ViewModels
         private async Task ClearAsync(
             string title,
             string message,
+            string acceptAction,
             Func<CancellationToken, Task> clearAsync,
             string successStatus)
         {
             bool confirmed = await _dialogService.ShowConfirmationAsync(
                 title,
                 message,
-                ClearAction,
+                acceptAction,
                 CancelAction);
             if (!confirmed)
             {

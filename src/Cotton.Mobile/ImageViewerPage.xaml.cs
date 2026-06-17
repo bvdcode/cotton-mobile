@@ -35,6 +35,7 @@ namespace Cotton.Mobile
                     }
                     else
                     {
+                        ResetButton.IsVisible = true;
                         ClampImageTranslation();
                     }
 
@@ -80,6 +81,7 @@ namespace Cotton.Mobile
             }
 
             PreviewImage.Scale = DoubleTapScale;
+            ResetButton.IsVisible = true;
             ClampImageTranslation();
         }
 
@@ -93,6 +95,7 @@ namespace Cotton.Mobile
             PreviewImage.Scale = MinimumScale;
             PreviewImage.TranslationX = 0;
             PreviewImage.TranslationY = 0;
+            ResetButton.IsVisible = false;
         }
 
         private void ClampImageTranslation()

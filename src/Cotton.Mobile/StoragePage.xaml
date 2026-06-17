@@ -127,6 +127,7 @@
                         Grid.ColumnSpan="2"
                         Text="Clear all"
                         Command="{Binding ClearAllCommand}"
+                        Style="{StaticResource DestructiveChromeButton}"
                         HeightRequest="44" />
             </Grid>
         </VerticalStackLayout>

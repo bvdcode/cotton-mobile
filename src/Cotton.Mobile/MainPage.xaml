@@ -8,7 +8,7 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <Grid x:Name="RootLayout"
-          Padding="8,0,8,14"
+          Padding="12,0,12,14"
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
@@ -22,6 +22,7 @@
                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
                        HeightRequest="92"
                        WidthRequest="92"
+                       Margin="0,44,0,0"
                        Aspect="AspectFit"
                        HorizontalOptions="Start"
                        SemanticProperties.Description="Cotton Cloud" />
@@ -110,10 +111,10 @@
                                      Spacing="0"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="6"
+                                             Spacing="8"
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="5">
+                                  ColumnSpacing="6">
                                 <Button Grid.Column="0"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="↑"
@@ -125,10 +126,10 @@
                                         FontSize="17"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="36"
-                                        WidthRequest="36"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="Up" />
 
                                 <VerticalStackLayout Grid.Column="1"
@@ -163,10 +164,10 @@
                                         FontSize="15"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="36"
-                                        WidthRequest="36"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
                                 <Button Grid.Column="3"
@@ -177,10 +178,10 @@
                                         FontSize="12"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="52"
-                                        WidthRequest="56"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="Sort files" />
 
                                 <Button Grid.Column="4"
@@ -191,10 +192,10 @@
                                         FontSize="15"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="36"
-                                        WidthRequest="36"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="Change file view" />
 
                                 <Button Grid.Column="5"
@@ -205,10 +206,10 @@
                                         FontSize="17"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="36"
-                                        WidthRequest="36"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="Refresh" />
 
                                 <Button Grid.Column="6"
@@ -219,10 +220,10 @@
                                         FontSize="12"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="34"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="36"
-                                        WidthRequest="36"
+                                        HeightRequest="44"
+                                        MinimumHeightRequest="44"
+                                        MinimumWidthRequest="44"
+                                        WidthRequest="44"
                                         SemanticProperties.Description="Account" />
                             </Grid>
 
@@ -230,6 +231,44 @@
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                            <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
+                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="12"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
+                                <Grid ColumnDefinitions="Auto,*"
+                                      ColumnSpacing="10">
+                                    <Border WidthRequest="28"
+                                            HeightRequest="28"
+                                            Stroke="{StaticResource Danger}"
+                                            StrokeShape="RoundRectangle 14"
+                                            StrokeThickness="1"
+                                            BackgroundColor="Transparent"
+                                            VerticalOptions="Start">
+                                        <Label Text="!"
+                                               FontSize="15"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center"
+                                               TextColor="{StaticResource Danger}" />
+                                    </Border>
+
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="2">
+                                        <Label Text="{Binding Display.FilesNoticeTitle}"
+                                               FontSize="13"
+                                               FontAttributes="Bold"
+                                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                        <Label Text="{Binding Display.FilesNoticeMessage}"
+                                               FontSize="12"
+                                               MaxLines="2"
+                                               LineBreakMode="WordWrap"
+                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                    </VerticalStackLayout>
+                                </Grid>
+                            </Border>
 
                             <SearchBar x:Name="FileSearchBar"
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"
@@ -249,9 +288,10 @@
                                         Command="{Binding CancelFileActionCommand}"
                                         IsEnabled="{Binding Display.CanCancelFileAction}"
                                         IsVisible="{Binding Display.CanCancelFileAction}"
-                                        Padding="10,0"
-                                        MinimumHeightRequest="32"
-                                        MinimumWidthRequest="64" />
+                                        Style="{StaticResource FileChromeButton}"
+                                        Padding="12,0"
+                                        MinimumHeightRequest="36"
+                                        MinimumWidthRequest="72" />
                             </HorizontalStackLayout>
 
                             <Button Text="Retry"
@@ -263,10 +303,29 @@
                                     MinimumHeightRequest="32"
                                     MinimumWidthRequest="64" />
 
-                            <Label Text="{Binding Display.FilesEmptyMessage}"
-                                   IsVisible="{Binding Display.IsFilesEmptyVisible}"
-                                   FontSize="13"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                            <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
+                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="24,34"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                                <VerticalStackLayout Spacing="8"
+                                                     HorizontalOptions="Center"
+                                                     VerticalOptions="Center">
+                                    <Label Text="{Binding Display.FilesEmptyMessage}"
+                                           FontSize="16"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Text="{Binding Display.FilesEmptyDetails}"
+                                           IsVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
+                                           FontSize="12"
+                                           MaxLines="2"
+                                           LineBreakMode="WordWrap"
+                                           HorizontalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                </VerticalStackLayout>
+                            </Border>
 
                             <VerticalStackLayout Spacing="0"
                                                  IsVisible="{Binding Display.IsFileListViewVisible}"
@@ -287,7 +346,7 @@
                                                 <Grid>
                                                     <Image Source="{Binding Thumbnail.Source}"
                                                            Aspect="AspectFill"
-                                                           IsVisible="{Binding Thumbnail.HasImage}" />
+                                                           IsVisible="{Binding IsPreviewImageVisible}" />
 
                                                     <Image Source="folder.svg"
                                                            Aspect="AspectFit"
@@ -375,7 +434,7 @@
                                                         <Grid>
                                                             <Image Source="{Binding Thumbnail.Source}"
                                                                    Aspect="AspectFill"
-                                                                   IsVisible="{Binding Thumbnail.HasImage}" />
+                                                                   IsVisible="{Binding IsPreviewImageVisible}" />
 
                                                             <Image Source="folder.svg"
                                                                    Aspect="AspectFit"
@@ -416,14 +475,19 @@
                                                                    LineBreakMode="TailTruncation"
                                                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                                                            <Label Grid.Column="1"
-                                                                   Text="{Binding LocalCopyStatus}"
-                                                                   IsVisible="{Binding HasLocalCopy}"
-                                                                   FontSize="10"
-                                                                   FontAttributes="Bold"
-                                                                   MaxLines="1"
-                                                                   LineBreakMode="NoWrap"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                            <Border Grid.Column="1"
+                                                                    IsVisible="{Binding HasLocalCopy}"
+                                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                                    StrokeShape="RoundRectangle 8"
+                                                                    Padding="5,1"
+                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                                <Label Text="{Binding LocalCopyStatus}"
+                                                                       FontSize="9"
+                                                                       FontAttributes="Bold"
+                                                                       MaxLines="1"
+                                                                       LineBreakMode="NoWrap"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                            </Border>
                                                         </Grid>
                                                     </VerticalStackLayout>
 

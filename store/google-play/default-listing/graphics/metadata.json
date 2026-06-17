@@ -17,12 +17,12 @@
       "altText": "Cotton Cloud authenticated file browser."
     },
     {
-      "path": "phone-screenshots/03-download-complete.png",
-      "altText": "Cotton Cloud file download confirmation."
+      "path": "phone-screenshots/03-image-viewer.png",
+      "altText": "Cotton Cloud image viewer with share and system-open actions."
     },
     {
-      "path": "phone-screenshots/04-browser-approval-wait.png",
-      "altText": "Cotton Cloud waiting for browser approval."
+      "path": "phone-screenshots/04-file-actions.png",
+      "altText": "Cotton Cloud file actions for opening, downloading, sharing, and viewing details."
     }
   ]
 }

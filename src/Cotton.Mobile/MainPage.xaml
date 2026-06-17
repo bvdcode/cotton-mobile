@@ -181,14 +181,14 @@
 
                             <Grid ColumnDefinitions="Auto,*,Auto"
                                   ColumnSpacing="8">
-                                <Button Text="Search"
+                                <Button Text="{Binding Display.FileSearchButtonText}"
                                         Command="{Binding ToggleFileSearchCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
                                         MinimumWidthRequest="72"
-                                        SemanticProperties.Description="Search files" />
+                                        SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
                                 <Button Grid.Column="1"
                                         Text="{Binding Display.FileSortButtonText}"

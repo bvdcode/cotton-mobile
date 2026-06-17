@@ -194,12 +194,40 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _fileSearchText, value ?? string.Empty))
                 {
                     OnPropertyChanged(nameof(IsFileSearchVisible));
+                    OnPropertyChanged(nameof(FileSearchButtonText));
+                    OnPropertyChanged(nameof(FileSearchButtonDescription));
                     ApplyFileFilters();
                 }
             }
         }
 
         public bool IsFileSearchVisible => _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText);
+
+        public string FileSearchButtonText
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(FileSearchText))
+                {
+                    return "Clear";
+                }
+
+                return _isFileSearchOpen ? "Close" : "Search";
+            }
+        }
+
+        public string FileSearchButtonDescription
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(FileSearchText))
+                {
+                    return "Clear file search";
+                }
+
+                return _isFileSearchOpen ? "Close file search" : "Search files";
+            }
+        }
 
         public CottonFileBrowserViewMode FileViewMode
         {
@@ -480,7 +508,13 @@ namespace Cotton.Mobile.ViewModels
 
         public void ToggleFileSearch()
         {
-            if (_isFileSearchOpen && string.IsNullOrWhiteSpace(FileSearchText))
+            if (!string.IsNullOrWhiteSpace(FileSearchText))
+            {
+                FileSearchText = string.Empty;
+                return;
+            }
+
+            if (_isFileSearchOpen)
             {
                 _isFileSearchOpen = false;
             }
@@ -490,6 +524,8 @@ namespace Cotton.Mobile.ViewModels
             }
 
             OnPropertyChanged(nameof(IsFileSearchVisible));
+            OnPropertyChanged(nameof(FileSearchButtonText));
+            OnPropertyChanged(nameof(FileSearchButtonDescription));
         }
 
         private void SetStatus(string? status)

@@ -19,6 +19,7 @@ on:
     paths:
       - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
+      - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
       - ".github/workflows/mobile-android.yml"
@@ -26,6 +27,7 @@ on:
     paths:
       - "GitVersion.yml"
       - "src/Cotton.Mobile/**"
+      - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
       - ".github/workflows/mobile-android.yml"
@@ -81,6 +83,23 @@ on:
         default: false
 
 jobs:
+  yaml-configs:
+    name: Validate YAML Configs
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+
+      - name: Validate YAML files
+        run: scripts/ci/validate-yaml.rb
+
   google-play-store-listing-dry-run:
     name: Validate Google Play Store Listing
     runs-on: ubuntu-latest

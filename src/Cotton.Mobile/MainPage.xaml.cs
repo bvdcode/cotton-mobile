@@ -9,13 +9,13 @@ namespace Cotton.Mobile
 		private const double ContentMaximumWidth = 520;
 		private const double FileTileColumnGap = 8;
 		private const double FileTileMinimumWidth = 128;
-		private const double FileTileMaximumWidth = 240;
-		private const double FileTilePreviewRatio = 0.6;
-		private const double FileTileVerticalChrome = 84;
+		private const double FileTileMaximumWidth = 220;
+		private const double FileTilePreviewRatio = 0.48;
+		private const double FileTileVerticalChrome = 74;
 
 		private readonly MainPageViewModel _viewModel;
-		private double _fileTileHeight = 179;
-		private double _fileTilePreviewHeight = 81;
+		private double _fileTileHeight = 146;
+		private double _fileTilePreviewHeight = 72;
 		private double _fileTileWidth = 150;
 
 		public MainPage(MainPageViewModel viewModel)
@@ -103,13 +103,15 @@ namespace Cotton.Mobile
 			}
 
 			contentWidth = Math.Min(contentWidth, ContentMaximumWidth);
-			int columnCount = contentWidth >= 480 ? 3 : 2;
+			int columnCount = Math.Max(
+				2,
+				(int)Math.Floor((contentWidth + FileTileColumnGap) / (FileTileMinimumWidth + FileTileColumnGap)));
 			double totalColumnGap = FileTileColumnGap * (columnCount - 1);
 			double tileWidth = Math.Floor((contentWidth - totalColumnGap) / columnCount);
 
-			if (tileWidth < FileTileMinimumWidth && columnCount > 2)
+			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
-				columnCount = 2;
+				columnCount--;
 				totalColumnGap = FileTileColumnGap * (columnCount - 1);
 				tileWidth = Math.Floor((contentWidth - totalColumnGap) / columnCount);
 			}

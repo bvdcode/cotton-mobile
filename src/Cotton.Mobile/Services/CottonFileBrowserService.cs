@@ -10,16 +10,20 @@ namespace Cotton.Mobile.Services
         private const int PageSize = 100;
 
         private readonly ICottonClientFactory _clientFactory;
+        private readonly IFileDownloadCachePruner _downloadCachePruner;
         private readonly ILogger<CottonFileBrowserService> _logger;
 
         public CottonFileBrowserService(
             ICottonClientFactory clientFactory,
+            IFileDownloadCachePruner downloadCachePruner,
             ILogger<CottonFileBrowserService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
+            ArgumentNullException.ThrowIfNull(downloadCachePruner);
             ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
+            _downloadCachePruner = downloadCachePruner;
             _logger = logger;
         }
 
@@ -101,6 +105,8 @@ namespace Cotton.Mobile.Services
                 throw;
             }
 
+            await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
+
             return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
         }
 
@@ -135,6 +141,7 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
+            TouchLocalDownload(info);
             return new CottonFileDownloadResult(file.Name, info.FullName, info.Length);
         }
 
@@ -204,6 +211,18 @@ namespace Cotton.Mobile.Services
         private static CottonLocalFileSnapshot CreateLocalFileSnapshot(FileInfo info)
         {
             return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
+        }
+
+        private void TouchLocalDownload(FileInfo info)
+        {
+            try
+            {
+                info.LastWriteTimeUtc = DateTime.UtcNow;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(exception, "Failed to update Cotton mobile local file timestamp {Path}.", info.FullName);
+            }
         }
 
         private void DeleteTemporaryDownload(string tempFilePath)

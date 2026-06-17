@@ -30,6 +30,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
+			builder.Services.AddSingleton(FileDownloadCacheOptions.Default);
 			builder.Services.AddSingleton(
 				new CottonMobileOptions(
 					"Cotton Cloud",
@@ -43,6 +44,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<INetworkAccessService, NetworkAccessService>();
 			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
+			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();

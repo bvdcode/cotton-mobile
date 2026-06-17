@@ -29,6 +29,8 @@ namespace Cotton.Mobile.Services
 
         public string? Source { get; }
 
+        public double PlaceholderFontSize => PlaceholderText.Length <= 2 ? 28d : 10d;
+
         public bool IsLoading => State == CottonFileThumbnailState.Loading;
 
         public bool HasImage => State == CottonFileThumbnailState.Ready

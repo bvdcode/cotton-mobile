@@ -88,16 +88,6 @@ namespace Cotton.Mobile.Services
 
         public string ActionLabel { get; }
 
-        public string ActionButtonText => IsFolder ? ActionLabel : "⋯";
-
-        public double ActionButtonWidth => IsFolder ? 64d : 44d;
-
-        public bool IsTileActionVisible => true;
-
-        public string TileActionButtonText => IsFolder ? "›" : "⋯";
-
-        public double TileActionButtonWidth => 28d;
-
         public string BadgeText { get; }
 
         public DateTime UpdatedAtUtc { get; }
@@ -129,7 +119,7 @@ namespace Cotton.Mobile.Services
                 "Folder",
                 "Folder",
                 "Open",
-                "DIR",
+                "📁",
                 node.UpdatedAt,
                 null,
                 null,

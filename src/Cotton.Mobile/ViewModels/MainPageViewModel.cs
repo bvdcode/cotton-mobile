@@ -234,6 +234,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 await _sessionService.LogoutAsync();
+                await ClearCachedSensitiveStateAsync();
                 _fileBrowser.Clear();
                 Display.InstanceUrl = _options.DefaultInstanceUrl;
                 ShowSignIn("Signed out.");
@@ -284,6 +285,19 @@ namespace Cotton.Mobile.ViewModels
         {
             Display.ToggleFileSearch();
             return Task.CompletedTask;
+        }
+
+        private async Task ClearCachedSensitiveStateAsync()
+        {
+            try
+            {
+                await _storageManagementService.ClearAllCachedFilesAsync();
+                _fileBrowser.ClearLocalFileMarkers();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile cached files during logout.");
+            }
         }
 
         private async Task ShowStorageActionsAsync()

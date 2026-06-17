@@ -21,6 +21,8 @@ namespace Cotton.Mobile.Services
             _logger = logger;
         }
 
+        public event EventHandler? DownloadedFilesCleared;
+
         public Task<CottonStorageSummary> GetSummaryAsync(CancellationToken cancellationToken = default)
         {
             return Task.Run(
@@ -49,11 +51,12 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
         }
 
-        public Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default)
+        public async Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default)
         {
-            return ClearDirectoryAsync(
+            await ClearDirectoryAsync(
                 CottonMobileStoragePaths.CreateDownloadsDirectory(),
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+            DownloadedFilesCleared?.Invoke(this, EventArgs.Empty);
         }
 
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)

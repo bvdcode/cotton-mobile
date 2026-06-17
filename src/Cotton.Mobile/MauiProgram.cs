@@ -44,6 +44,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<INetworkAccessService, NetworkAccessService>();
 			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
+			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
@@ -59,6 +60,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddTransient<MainPageViewModel>();
 			builder.Services.AddTransient<MainPage>();
+			builder.Services.AddTransient<StorageSettingsViewModel>();
+			builder.Services.AddTransient<StoragePage>();
 
 #if DEBUG
 			builder.Logging.AddDebug();

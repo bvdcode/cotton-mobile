@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Services
 
         CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file);
 
+        CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(CottonFileBrowserEntry file);
+
         CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file);
     }
 }

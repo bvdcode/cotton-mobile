@@ -115,15 +115,23 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
-            return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
+            return CreateLocalFileSnapshot(info);
+        }
+
+        public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(CottonFileBrowserEntry file)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+
+            FileInfo? info = GetReusableLocalDownloadFile(file);
+            return info is null ? null : CreateLocalFileSnapshot(info);
         }
 
         public CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file)
         {
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetLocalDownloadFile(file);
-            if (info is null || file.SizeBytes != info.Length)
+            FileInfo? info = GetReusableLocalDownloadFile(file);
+            if (info is null)
             {
                 return null;
             }
@@ -192,6 +200,22 @@ namespace Cotton.Mobile.Services
 
             var info = new FileInfo(CreateDownloadPath(file));
             return info.Exists ? info : null;
+        }
+
+        private static FileInfo? GetReusableLocalDownloadFile(CottonFileBrowserEntry file)
+        {
+            FileInfo? info = GetLocalDownloadFile(file);
+            if (info is null || file.SizeBytes != info.Length)
+            {
+                return null;
+            }
+
+            return info;
+        }
+
+        private static CottonLocalFileSnapshot CreateLocalFileSnapshot(FileInfo info)
+        {
+            return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
         }
 
         private void DeleteTemporaryDownload(string tempFilePath)

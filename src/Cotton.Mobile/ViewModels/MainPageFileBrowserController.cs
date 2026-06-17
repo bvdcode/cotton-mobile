@@ -384,7 +384,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(file, "Downloading"),
                     fileActionCancellation.Token);
-                ShowLocalFileIfAvailable(file);
+                ShowReusableLocalFileIfAvailable(file);
                 _display.ShowFilesSummary();
                 await ShowDownloadedFileActionsAsync(file, result, fileActionCancellation.Token);
             }
@@ -444,7 +444,7 @@ namespace Cotton.Mobile.ViewModels
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(entry);
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(entry);
                 entries.Add(localFile is null ? entry : entry.WithLocalFile(localFile));
             }
 
@@ -561,7 +561,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(file);
             if (localFile is not null)
             {
-                ShowLocalFileIfAvailable(file);
+                ShowReusableLocalFileIfAvailable(file);
                 return localFile;
             }
 
@@ -570,7 +570,7 @@ namespace Cotton.Mobile.ViewModels
                 file,
                 CreateFileDownloadProgress(file, actionName),
                 cancellationToken);
-            ShowLocalFileIfAvailable(file);
+            ShowReusableLocalFileIfAvailable(file);
             return downloadedFile;
         }
 
@@ -580,9 +580,7 @@ namespace Cotton.Mobile.ViewModels
         {
             string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown";
             string contentType = file.ContentType ?? "Unknown";
-            string localCopy = localFile is null
-                ? "Not downloaded"
-                : $"Available ({localFile.SizeBytes:N0} bytes)";
+            string localCopy = CreateLocalCopyDetails(file, localFile);
 
             return string.Join(
                 Environment.NewLine,
@@ -591,6 +589,23 @@ namespace Cotton.Mobile.ViewModels
                 $"Content type: {contentType}",
                 $"Local copy: {localCopy}",
                 $"File id: {file.Id:D}");
+        }
+
+        private static string CreateLocalCopyDetails(
+            CottonFileBrowserEntry file,
+            CottonLocalFileSnapshot? localFile)
+        {
+            if (localFile is null)
+            {
+                return "Not downloaded";
+            }
+
+            if (file.SizeBytes.HasValue && file.SizeBytes.Value != localFile.SizeBytes)
+            {
+                return $"Downloaded, refresh needed ({localFile.SizeBytes:N0} bytes)";
+            }
+
+            return $"On device ({localFile.SizeBytes:N0} bytes)";
         }
 
         private async Task ShowDownloadedFileActionsAsync(
@@ -670,9 +685,9 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private void ShowLocalFileIfAvailable(CottonFileBrowserEntry file)
+        private void ShowReusableLocalFileIfAvailable(CottonFileBrowserEntry file)
         {
-            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(file);
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(file);
             if (localFile is null)
             {
                 return;

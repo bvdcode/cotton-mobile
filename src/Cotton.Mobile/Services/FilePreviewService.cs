@@ -1,11 +1,14 @@
 using Cotton.Mobile.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.ApplicationModel;
+using System.Text;
 
 namespace Cotton.Mobile.Services
 {
     public class FilePreviewService : IFilePreviewService
     {
+        private const long MaxTextPreviewBytes = 512 * 1024;
+
         private readonly IServiceProvider _serviceProvider;
 
         public FilePreviewService(IServiceProvider serviceProvider)
@@ -20,7 +23,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(file);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && file.ContentType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true;
+                && (file.IsImage || CanPreviewText(file));
         }
 
         public async Task OpenAsync(
@@ -33,15 +36,53 @@ namespace Cotton.Mobile.Services
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            ContentPage page = file.IsImage
+                ? CreateImageViewerPage(file, downloadedFile)
+                : await CreateTextViewerPageAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
+            await MainThread.InvokeOnMainThreadAsync(
+                () => Shell.Current.Navigation.PushAsync(page));
+        }
+
+        private static bool CanPreviewText(CottonFileBrowserEntry file)
+        {
+            return file.IsText && file.SizeBytes is >= 0 and <= MaxTextPreviewBytes;
+        }
+
+        private ImageViewerPage CreateImageViewerPage(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile)
+        {
             string details = CreateDetails(file, downloadedFile);
             var viewModel = ActivatorUtilities.CreateInstance<ImageViewerViewModel>(
                 _serviceProvider,
                 file.Name,
                 details,
                 downloadedFile);
-            var page = ActivatorUtilities.CreateInstance<ImageViewerPage>(_serviceProvider, viewModel);
-            await MainThread.InvokeOnMainThreadAsync(
-                () => Shell.Current.Navigation.PushAsync(page));
+            return ActivatorUtilities.CreateInstance<ImageViewerPage>(_serviceProvider, viewModel);
+        }
+
+        private async Task<TextViewerPage> CreateTextViewerPageAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            if (!CanPreviewText(file))
+            {
+                throw new InvalidOperationException("The selected file cannot be previewed as text.");
+            }
+
+            string content = await File.ReadAllTextAsync(
+                downloadedFile.FilePath,
+                Encoding.UTF8,
+                cancellationToken).ConfigureAwait(false);
+            string details = CreateDetails(file, downloadedFile);
+            var viewModel = ActivatorUtilities.CreateInstance<TextViewerViewModel>(
+                _serviceProvider,
+                file.Name,
+                details,
+                content,
+                downloadedFile);
+            return ActivatorUtilities.CreateInstance<TextViewerPage>(_serviceProvider, viewModel);
         }
 
         private static string CreateDetails(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile)

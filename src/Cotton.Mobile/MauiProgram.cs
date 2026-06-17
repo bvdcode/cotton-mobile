@@ -3,6 +3,7 @@ using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
 using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile
@@ -23,6 +24,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);
 			builder.Services.AddSingleton<IBrowser>(Browser.Default);
+			builder.Services.AddSingleton<IClipboard>(Clipboard.Default);
 			builder.Services.AddSingleton(
 				new CottonMobileOptions(
 					"Cotton Cloud",

@@ -5,6 +5,37 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserEntry
     {
+        private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".css",
+            ".csv",
+            ".htm",
+            ".html",
+            ".js",
+            ".json",
+            ".log",
+            ".markdown",
+            ".md",
+            ".svg",
+            ".text",
+            ".ts",
+            ".txt",
+            ".xml",
+            ".yaml",
+            ".yml",
+        };
+
+        private static readonly HashSet<string> TextContentTypes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "application/javascript",
+            "application/json",
+            "application/markdown",
+            "application/xml",
+            "application/x-yaml",
+            "application/yaml",
+            "image/svg+xml",
+        };
+
         private CottonFileBrowserEntry(
             Guid id,
             CottonFileBrowserEntryType type,
@@ -46,6 +77,10 @@ namespace Cotton.Mobile.Services
         public string? ContentType { get; }
 
         public bool IsFolder => Type == CottonFileBrowserEntryType.Folder;
+
+        public bool IsImage => Type == CottonFileBrowserEntryType.File && Kind == "Image";
+
+        public bool IsText => Type == CottonFileBrowserEntryType.File && Kind == "Text";
 
         public static CottonFileBrowserEntry FromNode(NodeDto node)
         {
@@ -130,7 +165,9 @@ namespace Cotton.Mobile.Services
                 return "Video";
             }
 
-            if (contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase))
+            if (contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
+                || TextContentTypes.Contains(contentType)
+                || TextFileExtensions.Contains(Path.GetExtension(name)))
             {
                 return "Text";
             }

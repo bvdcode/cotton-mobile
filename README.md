@@ -49,7 +49,7 @@ Use this short flow for closed-test invites, Play dogfooding, and release-candid
 7. Open a folder, confirm its contents or empty state, then go back up.
 8. Open a small text or image file.
 9. Download or share one file, then confirm it is marked `On device` when available.
-10. Send feedback from the account menu and describe anything confusing or broken; the draft includes device, Android, package, install channel, and browser context automatically.
+10. Send feedback from the account menu and describe anything confusing or broken; the draft includes device, Android, package, install channel, and browser context automatically. If no email app is available, Cotton copies the same details so they can be pasted into email or chat.
 
 Optional offline check: after opening a file once, turn on airplane mode and confirm only files marked `On device` still open.
 

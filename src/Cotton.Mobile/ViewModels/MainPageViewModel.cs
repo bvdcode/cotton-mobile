@@ -355,18 +355,40 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenFeedbackAsync()
         {
+            FeedbackContext? context = null;
+
             try
             {
-                FeedbackContext context = await CreateFeedbackContextAsync();
-                bool opened = await _feedbackService.OpenFeedbackAsync(context);
-                if (!opened)
+                context = await CreateFeedbackContextAsync();
+                FeedbackDeliveryResult result = await _feedbackService.OpenFeedbackAsync(context);
+                if (result == FeedbackDeliveryResult.CopiedToClipboard)
                 {
-                    await ShowFeedbackUnavailableAsync();
+                    await ShowFeedbackCopiedAsync();
                 }
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to open Cotton Cloud feedback composer.");
+                if (context is null)
+                {
+                    await ShowFeedbackUnavailableAsync();
+                    return;
+                }
+
+                await CopyFeedbackAfterComposerFailureAsync(context);
+            }
+        }
+
+        private async Task CopyFeedbackAfterComposerFailureAsync(FeedbackContext context)
+        {
+            try
+            {
+                await _feedbackService.CopyFeedbackAsync(context);
+                await ShowFeedbackCopiedAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to copy Cotton Cloud feedback details.");
                 await ShowFeedbackUnavailableAsync();
             }
         }
@@ -442,6 +464,14 @@ namespace Cotton.Mobile.ViewModels
             return _dialogService.ShowAlertAsync(
                 "Feedback",
                 $"Could not open an email app. Send feedback to {_options.SupportEmail}.",
+                "OK");
+        }
+
+        private Task ShowFeedbackCopiedAsync()
+        {
+            return _dialogService.ShowAlertAsync(
+                "Feedback",
+                $"Could not open an email app. Feedback details were copied. Send them to {_options.SupportEmail}.",
                 "OK");
         }
 

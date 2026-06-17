@@ -1,4 +1,5 @@
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 namespace Cotton.Mobile.Services
 {
@@ -9,22 +10,28 @@ namespace Cotton.Mobile.Services
         private readonly CottonMobileOptions _options;
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly ILauncher _launcher;
+        private readonly IClipboard _clipboard;
 
         public FeedbackService(
             CottonMobileOptions options,
             ICottonMobileApplicationMetadata metadata,
-            ILauncher launcher)
+            ILauncher launcher,
+            IClipboard clipboard)
         {
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(metadata);
             ArgumentNullException.ThrowIfNull(launcher);
+            ArgumentNullException.ThrowIfNull(clipboard);
 
             _options = options;
             _metadata = metadata;
             _launcher = launcher;
+            _clipboard = clipboard;
         }
 
-        public Task<bool> OpenFeedbackAsync(FeedbackContext context, CancellationToken cancellationToken = default)
+        public async Task<FeedbackDeliveryResult> OpenFeedbackAsync(
+            FeedbackContext context,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(context);
             cancellationToken.ThrowIfCancellationRequested();
@@ -32,7 +39,22 @@ namespace Cotton.Mobile.Services
             string body = CreateFeedbackBody(context);
             var uri = new Uri(
                 $"mailto:{_options.SupportEmail}?subject={Uri.EscapeDataString(FeedbackSubject)}&body={Uri.EscapeDataString(body)}");
-            return _launcher.OpenAsync(uri);
+            if (await _launcher.OpenAsync(uri))
+            {
+                return FeedbackDeliveryResult.ComposerOpened;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            await CopyFeedbackTextAsync(body);
+            return FeedbackDeliveryResult.CopiedToClipboard;
+        }
+
+        public Task CopyFeedbackAsync(FeedbackContext context, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return CopyFeedbackTextAsync(CreateFeedbackBody(context));
         }
 
         private string CreateFeedbackBody(FeedbackContext context)
@@ -72,6 +94,17 @@ namespace Cotton.Mobile.Services
             }
 
             return string.Join(Environment.NewLine, lines);
+        }
+
+        private Task CopyFeedbackTextAsync(string body)
+        {
+            return _clipboard.SetTextAsync(
+                string.Join(
+                    Environment.NewLine,
+                    $"To: {_options.SupportEmail}",
+                    $"Subject: {FeedbackSubject}",
+                    string.Empty,
+                    body));
         }
 
         private static string CreateValue(string? value)

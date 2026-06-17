@@ -18,6 +18,10 @@ namespace Cotton.Mobile.ViewModels
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
         private const string ViewTilesAction = "Tiles";
+        private const string OfflineBrowseStatus = "Offline. Files marked On device can still open.";
+        private const string OfflineDownloadStatus = "Offline. Download needs internet.";
+        private const string OfflineOpenStatus = "Offline. This file is not available on device.";
+        private const string OfflineShareStatus = "Offline. This file is not available on device.";
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -25,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
+        private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
         private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
@@ -43,6 +48,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             IFileThumbnailProvider thumbnailProvider,
+            INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
@@ -53,6 +59,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
+            ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
@@ -63,6 +70,7 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
             _thumbnailProvider = thumbnailProvider;
+            _networkAccess = networkAccess;
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
@@ -314,7 +322,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile root files.");
-                _display.ShowFilesStatus("Could not load files. Try refresh.");
+                ShowFileLoadFailure("Could not load files. Try refresh.");
             }
         }
 
@@ -363,7 +371,7 @@ namespace Cotton.Mobile.ViewModels
                     _fileNavigation.RemoveAt(_fileNavigation.Count - 1);
                 }
 
-                _display.ShowFilesStatus("Could not open folder. Try again.");
+                ShowFileLoadFailure("Could not open folder. Try again.");
             }
         }
 
@@ -402,7 +410,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Download, file, "Download failed.");
+                ShowFileActionRetry(MainPageFileAction.Download, file, CreateFileActionFailureStatus("Download failed.", OfflineDownloadStatus));
             }
             finally
             {
@@ -493,7 +501,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Open, file, "Open failed.");
+                ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
             }
             finally
             {
@@ -535,7 +543,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Share, file, "Share failed.");
+                ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
             }
             finally
             {
@@ -755,6 +763,21 @@ namespace Cotton.Mobile.ViewModels
             _retryFileAction = action;
             _retryFileActionEntry = entry;
             _display.ShowFileActionRetry($"{status} Retry?");
+        }
+
+        private void ShowFileLoadFailure(string fallbackStatus)
+        {
+            _display.ShowFilesStatus(CreateOfflineAwareStatus(fallbackStatus, OfflineBrowseStatus));
+        }
+
+        private string CreateFileActionFailureStatus(string fallbackStatus, string offlineStatus)
+        {
+            return CreateOfflineAwareStatus(fallbackStatus, offlineStatus);
+        }
+
+        private string CreateOfflineAwareStatus(string fallbackStatus, string offlineStatus)
+        {
+            return _networkAccess.HasInternetAccess ? fallbackStatus : offlineStatus;
         }
 
         private void ClearFileActionRetry()

@@ -6,6 +6,7 @@ namespace Cotton.Mobile
 	public partial class MainPage : ContentPage
 	{
 		private const double FileTileSlotHorizontalPadding = 2;
+		private const double FileTileSlotRoundingGuard = 1;
 		private const double FileTileMinimumSlotWidth = 84;
 		private const double FileTileMinimumWidth = 78;
 		private const double FileTilePreviewRatio = 0.66;
@@ -125,13 +126,13 @@ namespace Cotton.Mobile
 				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
 				2,
 				FileTileMaximumColumnCount);
-			double slotWidth = Math.Floor(contentWidth / columnCount);
+			double slotWidth = ResolveFileTileSlotWidth(contentWidth, columnCount);
 			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 
 			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
 				columnCount--;
-				slotWidth = Math.Floor(contentWidth / columnCount);
+				slotWidth = ResolveFileTileSlotWidth(contentWidth, columnCount);
 				tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 			}
 
@@ -141,6 +142,13 @@ namespace Cotton.Mobile
 			FileTileSlotWidth = slotWidth;
 			FileTilePreviewHeight = previewHeight;
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
+		}
+
+		private static double ResolveFileTileSlotWidth(double contentWidth, int columnCount)
+		{
+			return Math.Max(
+				FileTileMinimumWidth,
+				Math.Floor(contentWidth / columnCount) - FileTileSlotRoundingGuard);
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)

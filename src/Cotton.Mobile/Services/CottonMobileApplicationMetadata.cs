@@ -46,7 +46,18 @@ namespace Cotton.Mobile.Services
 
         public string OperatingSystem => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}".Trim();
 
+        public string ScreenDetails => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo);
+
         public string UserAgent => $"{ApplicationName}/{ApplicationVersion}";
+
+        private static string CreateScreenDetails(DisplayInfo displayInfo)
+        {
+            double density = displayInfo.Density <= 0 ? 1 : displayInfo.Density;
+            double widthDp = displayInfo.Width / density;
+            double heightDp = displayInfo.Height / density;
+            return FormattableString.Invariant(
+                $"{displayInfo.Width:0}x{displayInfo.Height:0}px · {widthDp:0}x{heightDp:0}dp · {density:0.##}x · {displayInfo.Orientation}");
+        }
 
         private static string ResolveInstallChannel(string packageName)
         {

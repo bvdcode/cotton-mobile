@@ -16,6 +16,8 @@ namespace Cotton.Mobile.Services
 
         string OperatingSystem { get; }
 
+        string ScreenDetails { get; }
+
         string UserAgent { get; }
     }
 }

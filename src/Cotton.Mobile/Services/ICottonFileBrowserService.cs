@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Services
         Task<CottonFileDownloadResult> DownloadAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,
+            IProgress<long>? progress = null,
             CancellationToken cancellationToken = default);
     }
 }

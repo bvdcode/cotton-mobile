@@ -41,6 +41,7 @@ namespace Cotton.Mobile.Services
         public async Task<CottonFileDownloadResult> DownloadAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,
+            IProgress<long>? progress = null,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(file);
@@ -61,7 +62,10 @@ namespace Cotton.Mobile.Services
                 FileShare.None,
                 bufferSize: 81920,
                 useAsync: true);
-            await client.Files.DownloadContentAsync(file.Id, destination, download: true, cancellationToken: cancellationToken)
+            Stream downloadTarget = progress is null
+                ? destination
+                : new ProgressReportingStream(destination, progress);
+            await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
             return new CottonFileDownloadResult(file.Name, filePath, destination.Length);

@@ -274,7 +274,10 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(_instanceUri, file);
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                    _instanceUri,
+                    file,
+                    CreateFileDownloadProgress(file, "Downloading"));
                 _display.ShowFilesStatus($"Downloaded {result.FileName}.");
                 await _dialogService.ShowAlertAsync(
                     "Downloaded",
@@ -313,7 +316,10 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(_instanceUri, file);
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                    _instanceUri,
+                    file,
+                    CreateFileDownloadProgress(file, "Opening"));
                 await _fileInteractionService.OpenAsync(result);
                 _display.ShowFilesStatus($"Opened {result.FileName}.");
             }
@@ -341,7 +347,10 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(_instanceUri, file);
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                    _instanceUri,
+                    file,
+                    CreateFileDownloadProgress(file, "Preparing"));
                 await _fileInteractionService.ShareAsync(result);
                 _display.ShowFilesStatus($"Shared {result.FileName}.");
             }
@@ -365,6 +374,28 @@ namespace Cotton.Mobile.ViewModels
                 file.Name,
                 $"{file.Kind}\n{size}\n{contentType}",
                 "OK");
+        }
+
+        private IProgress<long>? CreateFileDownloadProgress(CottonFileBrowserEntry file, string actionName)
+        {
+            if (file.SizeBytes is not > 0)
+            {
+                return null;
+            }
+
+            long totalBytes = file.SizeBytes.Value;
+            int lastPercent = -1;
+            return new Progress<long>(downloadedBytes =>
+            {
+                int percent = (int)Math.Min(100d, Math.Floor(downloadedBytes / (double)totalBytes * 100d));
+                if (percent == lastPercent)
+                {
+                    return;
+                }
+
+                lastPercent = percent;
+                _display.ShowFilesLoading($"{actionName} {file.Name}... {percent}%");
+            });
         }
 
         private async Task HandleSessionExpiredAsync(Exception exception)

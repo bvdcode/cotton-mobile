@@ -338,88 +338,89 @@
                                         JustifyContent="Start">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Border WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileWidth}"
-                                                HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                Margin="2,0,2,8"
-                                                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                                StrokeThickness="1"
-                                                StrokeShape="RoundRectangle 8"
-                                                Padding="5"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                                            <Grid RowSpacing="4">
-                                                <Grid.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                          CommandParameter="{Binding .}" />
-                                                </Grid.GestureRecognizers>
+                                        <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
+                                              Padding="3,0,3,8">
+                                            <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
+                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                    StrokeThickness="1"
+                                                    StrokeShape="RoundRectangle 8"
+                                                    Padding="4"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                                                <Grid RowSpacing="3">
+                                                    <Grid.GestureRecognizers>
+                                                        <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                              CommandParameter="{Binding .}" />
+                                                    </Grid.GestureRecognizers>
 
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
-                                                    <RowDefinition Height="*" />
-                                                </Grid.RowDefinitions>
+                                                    <Grid.RowDefinitions>
+                                                        <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
+                                                        <RowDefinition Height="*" />
+                                                    </Grid.RowDefinitions>
 
-                                                <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
-                                                        HorizontalOptions="Fill"
-                                                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                                        StrokeShape="RoundRectangle 8"
-                                                        Padding="0"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
-                                                    <Grid>
-                                                        <Image Source="{Binding Thumbnail.Source}"
-                                                               Aspect="AspectFill"
-                                                               IsVisible="{Binding Thumbnail.HasImage}" />
+                                                    <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
+                                                            HorizontalOptions="Fill"
+                                                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                            StrokeShape="RoundRectangle 8"
+                                                            Padding="0"
+                                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                        <Grid>
+                                                            <Image Source="{Binding Thumbnail.Source}"
+                                                                   Aspect="AspectFill"
+                                                                   IsVisible="{Binding Thumbnail.HasImage}" />
 
-                                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
-                                                                           IsVisible="{Binding Thumbnail.IsLoading}"
-                                                                           HorizontalOptions="Center"
-                                                                           VerticalOptions="Center" />
+                                                            <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
+                                                                               IsVisible="{Binding Thumbnail.IsLoading}"
+                                                                               HorizontalOptions="Center"
+                                                                               VerticalOptions="Center" />
 
-                                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
-                                                               IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
-                                                               FontSize="10"
+                                                            <Label Text="{Binding Thumbnail.PlaceholderText}"
+                                                                   IsVisible="{Binding Thumbnail.IsPlaceholderVisible}"
+                                                                   FontSize="10"
+                                                                   FontAttributes="Bold"
+                                                                   HorizontalTextAlignment="Center"
+                                                                   VerticalTextAlignment="Center"
+                                                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                        </Grid>
+                                                    </Border>
+
+                                                    <Button Grid.Row="0"
+                                                            Text="{Binding TileActionButtonText}"
+                                                            Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsVisible="{Binding IsTileActionVisible}"
+                                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                                            Padding="0"
+                                                            FontSize="15"
+                                                            FontAttributes="Bold"
+                                                            HorizontalOptions="End"
+                                                            VerticalOptions="End"
+                                                            Margin="0,0,2,2"
+                                                            HeightRequest="26"
+                                                            MinimumHeightRequest="26"
+                                                            MinimumWidthRequest="32"
+                                                            WidthRequest="{Binding TileActionButtonWidth}"
+                                                            SemanticProperties.Description="{Binding ActionLabel}" />
+
+                                                    <VerticalStackLayout Grid.Row="1"
+                                                                         Spacing="1">
+                                                        <Label Text="{Binding Name}"
+                                                               FontSize="11"
                                                                FontAttributes="Bold"
-                                                               HorizontalTextAlignment="Center"
-                                                               VerticalTextAlignment="Center"
+                                                               MaxLines="2"
+                                                               LineBreakMode="TailTruncation"
                                                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
-                                                    </Grid>
-                                                </Border>
 
-                                                <Button Grid.Row="0"
-                                                        Text="{Binding TileActionButtonText}"
-                                                        Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                        CommandParameter="{Binding .}"
-                                                        IsVisible="{Binding IsTileActionVisible}"
-                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                                        Padding="0"
-                                                        FontSize="16"
-                                                        FontAttributes="Bold"
-                                                        HorizontalOptions="End"
-                                                        VerticalOptions="End"
-                                                        Margin="0,0,2,2"
-                                                        HeightRequest="28"
-                                                        MinimumHeightRequest="28"
-                                                        MinimumWidthRequest="36"
-                                                        WidthRequest="{Binding TileActionButtonWidth}"
-                                                        SemanticProperties.Description="{Binding ActionLabel}" />
+                                                        <Label Text="{Binding DisplayDetails}"
+                                                               FontSize="10"
+                                                               MaxLines="1"
+                                                               LineBreakMode="TailTruncation"
+                                                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                    </VerticalStackLayout>
 
-                                                <VerticalStackLayout Grid.Row="1"
-                                                                     Spacing="2">
-                                                    <Label Text="{Binding Name}"
-                                                           FontSize="12"
-                                                           FontAttributes="Bold"
-                                                           MaxLines="2"
-                                                           LineBreakMode="TailTruncation"
-                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
-
-                                                    <Label Text="{Binding DisplayDetails}"
-                                                           FontSize="10"
-                                                           MaxLines="1"
-                                                           LineBreakMode="TailTruncation"
-                                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
-                                                </VerticalStackLayout>
-
-                                            </Grid>
-                                        </Border>
+                                                </Grid>
+                                            </Border>
+                                        </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>

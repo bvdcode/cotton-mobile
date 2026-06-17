@@ -88,7 +88,7 @@ namespace Cotton.Mobile.Services
 
         public string TileActionButtonText => "⋯";
 
-        public double TileActionButtonWidth => 36d;
+        public double TileActionButtonWidth => 32d;
 
         public string BadgeText { get; }
 

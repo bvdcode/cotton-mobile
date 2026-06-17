@@ -7,16 +7,17 @@ namespace Cotton.Mobile
 	{
 		private const double PageHorizontalPadding = 40;
 		private const double ContentMaximumWidth = 520;
-		private const double FileTileHorizontalMargin = 4;
-		private const double FileTileMinimumWidth = 112;
-		private const double FileTileMaximumWidth = 180;
-		private const double FileTilePreviewRatio = 0.54;
-		private const double FileTileVerticalChrome = 64;
+		private const double FileTileSlotHorizontalPadding = 6;
+		private const double FileTileMinimumSlotWidth = 90;
+		private const double FileTileMinimumWidth = 84;
+		private const double FileTilePreviewRatio = 0.62;
+		private const double FileTileVerticalChrome = 62;
+		private const int FileTileMaximumColumnCount = 5;
 
 		private readonly MainPageViewModel _viewModel;
 		private double _fileTileHeight = 146;
 		private double _fileTilePreviewHeight = 72;
-		private double _fileTileWidth = 150;
+		private double _fileTileSlotWidth = 150;
 
 		public MainPage(MainPageViewModel viewModel)
 		{
@@ -31,10 +32,10 @@ namespace Cotton.Mobile
 			BindingContext = _viewModel;
 		}
 
-		public double FileTileWidth
+		public double FileTileSlotWidth
 		{
-			get => _fileTileWidth;
-			private set => SetPageProperty(ref _fileTileWidth, value, nameof(FileTileWidth));
+			get => _fileTileSlotWidth;
+			private set => SetPageProperty(ref _fileTileSlotWidth, value, nameof(FileTileSlotWidth));
 		}
 
 		public double FileTilePreviewHeight
@@ -91,33 +92,33 @@ namespace Cotton.Mobile
 
 		private void UpdateFileTileMetrics()
 		{
-			double contentWidth = Width > PageHorizontalPadding
-				? Width - PageHorizontalPadding
-				: FileBrowserContent.Width;
+			double contentWidth = FileBrowserContent.Width > 0
+				? FileBrowserContent.Width
+				: Width - PageHorizontalPadding;
 			if (contentWidth <= 0)
 			{
 				return;
 			}
 
 			contentWidth = Math.Min(contentWidth, ContentMaximumWidth);
-			double tileHorizontalChrome = FileTileHorizontalMargin * 2;
-			int columnCount = Math.Max(
+			int columnCount = Math.Clamp(
+				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
 				2,
-				(int)Math.Floor(contentWidth / (FileTileMinimumWidth + tileHorizontalChrome)));
-			double totalTileHorizontalChrome = tileHorizontalChrome * columnCount;
-			double tileWidth = Math.Floor((contentWidth - totalTileHorizontalChrome) / columnCount);
+				FileTileMaximumColumnCount);
+			double slotWidth = Math.Floor(contentWidth / columnCount);
+			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 
 			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
 			{
 				columnCount--;
-				totalTileHorizontalChrome = tileHorizontalChrome * columnCount;
-				tileWidth = Math.Floor((contentWidth - totalTileHorizontalChrome) / columnCount);
+				slotWidth = Math.Floor(contentWidth / columnCount);
+				tileWidth = slotWidth - FileTileSlotHorizontalPadding;
 			}
 
-			tileWidth = Math.Clamp(tileWidth, FileTileMinimumWidth, FileTileMaximumWidth);
+			tileWidth = Math.Max(tileWidth, FileTileMinimumWidth);
 			double previewHeight = Math.Round(tileWidth * FileTilePreviewRatio);
 
-			FileTileWidth = tileWidth;
+			FileTileSlotWidth = slotWidth;
 			FileTilePreviewHeight = previewHeight;
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
 		}

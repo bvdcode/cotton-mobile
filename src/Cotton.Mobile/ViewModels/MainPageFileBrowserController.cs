@@ -119,7 +119,21 @@ namespace Cotton.Mobile.ViewModels
             await LoadFolderAsync(previous, preserveHistory: true);
         }
 
-        public async Task OpenEntryAsync(CottonFileBrowserEntry entry)
+        public async Task ActivateEntryAsync(CottonFileBrowserEntry entry)
+        {
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (entry.IsFolder)
+            {
+                ClearFileActionRetry();
+                await OpenFolderAsync(entry);
+                return;
+            }
+
+            await OpenFileAsync(entry);
+        }
+
+        public async Task ShowEntryActionsAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
 

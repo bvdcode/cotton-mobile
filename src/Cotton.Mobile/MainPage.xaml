@@ -259,7 +259,7 @@
                                               ColumnDefinitions="44,*,Auto"
                                               ColumnSpacing="12">
                                             <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                       CommandParameter="{Binding .}" />
                                             </Grid.GestureRecognizers>
 
@@ -309,7 +309,7 @@
 
                                             <Button Grid.Column="2"
                                                     Text="{Binding ActionButtonText}"
-                                                    Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                    Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                     CommandParameter="{Binding .}"
                                                     VerticalOptions="Center"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
@@ -343,7 +343,7 @@
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                                             <Grid RowSpacing="8">
                                                 <Grid.GestureRecognizers>
-                                                    <TapGestureRecognizer Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                    <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                           CommandParameter="{Binding .}" />
                                                 </Grid.GestureRecognizers>
 
@@ -380,7 +380,7 @@
 
                                                 <Button Grid.Row="0"
                                                         Text="{Binding ActionButtonText}"
-                                                        Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                        Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                         CommandParameter="{Binding .}"
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"

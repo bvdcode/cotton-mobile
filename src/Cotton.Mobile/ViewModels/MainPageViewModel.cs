@@ -80,7 +80,8 @@ namespace Cotton.Mobile.ViewModels
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync);
             RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync);
             NavigateFilesUpCommand = new AsyncCommand(_fileBrowser.NavigateUpAsync, () => Display.CanNavigateFilesUp);
-            OpenFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.OpenEntryAsync);
+            ActivateFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.ActivateEntryAsync);
+            ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.ShowEntryActionsAsync);
             CancelFileActionCommand = new AsyncCommand(_fileBrowser.CancelFileActionAsync, () => Display.CanCancelFileAction);
             RetryFileActionCommand = new AsyncCommand(_fileBrowser.RetryFileActionAsync, () => Display.CanRetryFileAction);
             ToggleFileSearchCommand = new AsyncCommand(ToggleFileSearchAsync);
@@ -104,7 +105,9 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand NavigateFilesUpCommand { get; }
 
-        public AsyncCommand<CottonFileBrowserEntry> OpenFileBrowserEntryCommand { get; }
+        public AsyncCommand<CottonFileBrowserEntry> ActivateFileBrowserEntryCommand { get; }
+
+        public AsyncCommand<CottonFileBrowserEntry> ShowFileBrowserEntryActionsCommand { get; }
 
         public AsyncCommand CancelFileActionCommand { get; }
 
@@ -352,7 +355,8 @@ namespace Cotton.Mobile.ViewModels
             AccountCommand.RaiseCanExecuteChanged();
             LogoutCommand.RaiseCanExecuteChanged();
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
-            OpenFileBrowserEntryCommand.RaiseCanExecuteChanged();
+            ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
+            ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
             CancelFileActionCommand.RaiseCanExecuteChanged();
             RetryFileActionCommand.RaiseCanExecuteChanged();
             ToggleFileSearchCommand.RaiseCanExecuteChanged();

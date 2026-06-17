@@ -5,7 +5,7 @@ namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const double PageHorizontalPadding = 40;
+		private const double PageHorizontalPadding = 32;
 		private const double ContentMaximumWidth = 520;
 		private const double FileTileSlotHorizontalPadding = 6;
 		private const double FileTileMinimumSlotWidth = 90;

@@ -13,7 +13,7 @@
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="24"
-                                 Padding="0,24,0,24"
+                                 Padding="0,24,0,96"
                                  VerticalOptions="Start"
                                  MaximumWidthRequest="520">
                 <Image Source="appiconfg.svg"
@@ -149,6 +149,8 @@
                                     <Label Text="{Binding Display.FilesStatus}"
                                            IsVisible="{Binding Display.IsFilesStatusVisible}"
                                            FontSize="13"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                                 </VerticalStackLayout>
 
@@ -320,14 +322,14 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Border WidthRequest="150"
-                                                HeightRequest="132"
+                                                HeightRequest="164"
                                                 Margin="0,0,8,8"
                                                 Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                 StrokeThickness="1"
                                                 StrokeShape="RoundRectangle 8"
                                                 Padding="12"
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                                            <Grid RowDefinitions="Auto,*,Auto"
+                                            <Grid RowDefinitions="Auto,64,Auto"
                                                   RowSpacing="8">
                                                 <Border WidthRequest="44"
                                                         HeightRequest="30"

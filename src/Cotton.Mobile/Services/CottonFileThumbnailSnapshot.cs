@@ -5,25 +5,25 @@ namespace Cotton.Mobile.Services
         private CottonFileThumbnailSnapshot(
             CottonFileThumbnailState state,
             string placeholderText,
-            string? localPath)
+            string? source)
         {
             State = state;
             PlaceholderText = string.IsNullOrWhiteSpace(placeholderText)
                 ? "FILE"
                 : placeholderText.Trim();
-            LocalPath = string.IsNullOrWhiteSpace(localPath) ? null : localPath.Trim();
+            Source = string.IsNullOrWhiteSpace(source) ? null : source.Trim();
         }
 
         public CottonFileThumbnailState State { get; }
 
         public string PlaceholderText { get; }
 
-        public string? LocalPath { get; }
+        public string? Source { get; }
 
         public bool IsLoading => State == CottonFileThumbnailState.Loading;
 
         public bool HasImage => State == CottonFileThumbnailState.Ready
-            && !string.IsNullOrWhiteSpace(LocalPath);
+            && !string.IsNullOrWhiteSpace(Source);
 
         public bool IsPlaceholderVisible => !HasImage && !IsLoading;
 
@@ -43,17 +43,17 @@ namespace Cotton.Mobile.Services
                 null);
         }
 
-        public static CottonFileThumbnailSnapshot Ready(string placeholderText, string localPath)
+        public static CottonFileThumbnailSnapshot Ready(string placeholderText, string source)
         {
-            if (string.IsNullOrWhiteSpace(localPath))
+            if (string.IsNullOrWhiteSpace(source))
             {
-                throw new ArgumentException("Thumbnail path is required.", nameof(localPath));
+                throw new ArgumentException("Thumbnail source is required.", nameof(source));
             }
 
             return new CottonFileThumbnailSnapshot(
                 CottonFileThumbnailState.Ready,
                 placeholderText,
-                localPath);
+                source);
         }
 
         public static CottonFileThumbnailSnapshot Failed(string placeholderText)

@@ -252,7 +252,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
-                content = await ApplyThumbnailsAsync(content);
+                content = await ApplyThumbnailsAsync(_instanceUri, content);
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
@@ -291,7 +291,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
-                content = await ApplyThumbnailsAsync(content);
+                content = await ApplyThumbnailsAsync(_instanceUri, content);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
             }
@@ -370,14 +370,19 @@ namespace Cotton.Mobile.ViewModels
             return string.Join(" / ", names);
         }
 
-        private async Task<CottonFolderContent> ApplyThumbnailsAsync(CottonFolderContent content)
+        private async Task<CottonFolderContent> ApplyThumbnailsAsync(
+            Uri instanceUri,
+            CottonFolderContent content)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(content);
 
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetThumbnailAsync(entry);
+                CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetThumbnailAsync(
+                    instanceUri,
+                    entry);
                 entries.Add(entry.WithThumbnail(thumbnail));
             }
 

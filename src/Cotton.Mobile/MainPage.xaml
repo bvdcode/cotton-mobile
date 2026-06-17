@@ -256,7 +256,7 @@
                                                     Padding="0"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
                                                 <Grid>
-                                                    <Image Source="{Binding Thumbnail.LocalPath}"
+                                                    <Image Source="{Binding Thumbnail.Source}"
                                                            Aspect="AspectFill"
                                                            IsVisible="{Binding Thumbnail.HasImage}" />
 
@@ -330,7 +330,7 @@
                                                         Padding="0"
                                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
                                                     <Grid>
-                                                        <Image Source="{Binding Thumbnail.LocalPath}"
+                                                        <Image Source="{Binding Thumbnail.Source}"
                                                                Aspect="AspectFill"
                                                                IsVisible="{Binding Thumbnail.HasImage}" />
 

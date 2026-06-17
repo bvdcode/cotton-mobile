@@ -46,6 +46,7 @@ namespace Cotton.Mobile.Services
             string badgeText,
             long? sizeBytes,
             string? contentType,
+            string? previewHashEncryptedHex,
             CottonFileThumbnailSnapshot? thumbnail = null)
         {
             Id = id;
@@ -57,6 +58,9 @@ namespace Cotton.Mobile.Services
             BadgeText = string.IsNullOrWhiteSpace(badgeText) ? "FILE" : badgeText.Trim();
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
+                ? null
+                : previewHashEncryptedHex.Trim();
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText);
         }
 
@@ -77,6 +81,8 @@ namespace Cotton.Mobile.Services
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
+
+        public string? PreviewHashEncryptedHex { get; }
 
         public CottonFileThumbnailSnapshot Thumbnail { get; }
 
@@ -99,6 +105,7 @@ namespace Cotton.Mobile.Services
                 "Open",
                 "DIR",
                 null,
+                null,
                 null);
         }
 
@@ -119,7 +126,8 @@ namespace Cotton.Mobile.Services
                 "More",
                 ResolveBadgeText(kind),
                 file.SizeBytes,
-                contentType);
+                contentType,
+                file.PreviewHashEncryptedHex);
         }
 
         public bool Matches(string searchText)
@@ -150,6 +158,7 @@ namespace Cotton.Mobile.Services
                 BadgeText,
                 SizeBytes,
                 ContentType,
+                PreviewHashEncryptedHex,
                 thumbnail);
         }
 

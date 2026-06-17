@@ -1,5 +1,6 @@
 using Cotton.Nodes;
 using Cotton.Sdk;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
@@ -10,12 +11,17 @@ namespace Cotton.Mobile.Services
         private const string DownloadDirectoryName = "CottonDownloads";
 
         private readonly ICottonClientFactory _clientFactory;
+        private readonly ILogger<CottonFileBrowserService> _logger;
 
-        public CottonFileBrowserService(ICottonClientFactory clientFactory)
+        public CottonFileBrowserService(
+            ICottonClientFactory clientFactory,
+            ILogger<CottonFileBrowserService> logger)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _clientFactory = clientFactory;
+            _logger = logger;
         }
 
         public async Task<CottonFolderContent> GetRootAsync(
@@ -56,22 +62,50 @@ namespace Cotton.Mobile.Services
                 file.Id.ToString("D"));
             Directory.CreateDirectory(directory);
             string filePath = Path.Combine(directory, CreateSafeFileName(file.Name));
+            string tempFilePath = filePath + ".download";
+            long sizeBytes = 0;
+            bool tempFileReady = false;
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            await using var destination = new FileStream(
-                filePath,
-                FileMode.Create,
-                FileAccess.Write,
-                FileShare.None,
-                bufferSize: 81920,
-                useAsync: true);
-            Stream downloadTarget = progress is null
-                ? destination
-                : new ProgressReportingStream(destination, progress);
-            await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
+            try
+            {
+                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+                await using var destination = new FileStream(
+                    tempFilePath,
+                    FileMode.Create,
+                    FileAccess.Write,
+                    FileShare.None,
+                    bufferSize: 81920,
+                    useAsync: true);
+                Stream downloadTarget = progress is null
+                    ? destination
+                    : new ProgressReportingStream(destination, progress);
+                await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
+                    .ConfigureAwait(false);
+                await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                sizeBytes = destination.Length;
+                tempFileReady = true;
+            }
+            finally
+            {
+                if (!tempFileReady)
+                {
+                    DeleteTemporaryDownload(tempFilePath);
+                }
+            }
 
-            return new CottonFileDownloadResult(file.Name, filePath, destination.Length);
+            try
+            {
+                File.Move(tempFilePath, filePath, overwrite: true);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
+                DeleteTemporaryDownload(tempFilePath);
+                throw;
+            }
+
+            return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
         }
 
         private static async Task<CottonFolderContent> LoadFolderAsync(
@@ -111,6 +145,21 @@ namespace Cotton.Mobile.Services
             }
 
             return new string(buffer);
+        }
+
+        private void DeleteTemporaryDownload(string tempFilePath)
+        {
+            try
+            {
+                if (File.Exists(tempFilePath))
+                {
+                    File.Delete(tempFilePath);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to delete temporary Cotton mobile download file {Path}.", tempFilePath);
+            }
         }
     }
 }

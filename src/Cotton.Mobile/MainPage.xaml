@@ -106,28 +106,28 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="4"
+                                     Spacing="2"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="4"
+                                             Spacing="3"
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
-                                  ColumnSpacing="6">
+                                  ColumnSpacing="4">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{Binding Display.FilesTitle}"
-                                           FontSize="20"
+                                           FontSize="18"
                                            FontAttributes="Bold"
                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
                                     <Label Text="{Binding Display.FilesPath}"
                                            IsVisible="{Binding Display.IsFilesPathVisible}"
-                                           FontSize="11"
+                                           FontSize="10"
                                            LineBreakMode="TailTruncation"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                                     <Label Text="{Binding Display.FilesStatus}"
                                            IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                           FontSize="12"
+                                           FontSize="11"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
@@ -140,13 +140,13 @@
                                         IsEnabled="{Binding Display.CanNavigateFilesUp}"
                                         Opacity="{Binding Display.FileUpButtonOpacity}"
                                         Padding="0"
-                                        FontSize="20"
+                                        FontSize="18"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="38"
+                                        HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="46"
+                                        MinimumWidthRequest="40"
+                                        WidthRequest="42"
                                         SemanticProperties.Description="Up" />
 
                                 <Button Grid.Column="2"
@@ -154,13 +154,13 @@
                                         Text="↻"
                                         Command="{Binding RefreshFilesCommand}"
                                         Padding="0"
-                                        FontSize="20"
+                                        FontSize="18"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="38"
+                                        HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="46"
+                                        MinimumWidthRequest="40"
+                                        WidthRequest="42"
                                         SemanticProperties.Description="Refresh" />
 
                                 <Button Grid.Column="3"
@@ -168,13 +168,13 @@
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"
                                         Padding="0"
-                                        FontSize="14"
+                                        FontSize="13"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="38"
+                                        HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="46"
+                                        MinimumWidthRequest="40"
+                                        WidthRequest="42"
                                         SemanticProperties.Description="Account" />
                             </Grid>
 
@@ -184,23 +184,23 @@
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                             <Grid ColumnDefinitions="Auto,*,Auto"
-                                  ColumnSpacing="6"
+                                  ColumnSpacing="4"
                                   HorizontalOptions="Fill">
                                 <Button Text="{Binding Display.FileSearchButtonText}"
                                         Style="{StaticResource FileChromeButton}"
                                         Command="{Binding ToggleFileSearchCommand}"
-                                        HeightRequest="30"
-                                        MinimumHeightRequest="30"
-                                        WidthRequest="88"
+                                        HeightRequest="28"
+                                        MinimumHeightRequest="28"
+                                        WidthRequest="80"
                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
                                 <Button Grid.Column="1"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.FileSortButtonText}"
                                         Command="{Binding ShowFileSortActionsCommand}"
-                                        HeightRequest="30"
-                                        MinimumHeightRequest="30"
-                                        MinimumWidthRequest="128"
+                                        HeightRequest="28"
+                                        MinimumHeightRequest="28"
+                                        MinimumWidthRequest="120"
                                         HorizontalOptions="Fill"
                                         SemanticProperties.Description="Sort files" />
 
@@ -208,9 +208,9 @@
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.FileViewButtonText}"
                                         Command="{Binding ShowFileViewActionsCommand}"
-                                        HeightRequest="30"
-                                        MinimumHeightRequest="30"
-                                        WidthRequest="118"
+                                        HeightRequest="28"
+                                        MinimumHeightRequest="28"
+                                        WidthRequest="110"
                                         SemanticProperties.Description="Change file view" />
                             </Grid>
 
@@ -218,8 +218,8 @@
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"
                                        IsVisible="{Binding Display.IsFileSearchVisible}"
                                        Placeholder="Search"
-                                       HeightRequest="44"
-                                       FontSize="14"
+                                       HeightRequest="40"
+                                       FontSize="13"
                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                        PlaceholderColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
 

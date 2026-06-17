@@ -115,6 +115,7 @@ namespace Cotton.Mobile.ViewModels
             int previousIndex = _fileNavigation.Count - 1;
             CottonFolderHandle previous = _fileNavigation[previousIndex];
             _fileNavigation.RemoveAt(previousIndex);
+            _display.ClearFileSearch();
             await LoadFolderAsync(previous, preserveHistory: true);
         }
 
@@ -220,6 +221,7 @@ namespace Cotton.Mobile.ViewModels
                 _fileNavigation.Add(_currentFolder);
             }
 
+            _display.ClearFileSearch();
             await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
         }
 
@@ -277,6 +279,7 @@ namespace Cotton.Mobile.ViewModels
             }
             else
             {
+                _display.ClearFileSearch();
                 _display.ShowFilesLoading("Loading files...");
             }
 

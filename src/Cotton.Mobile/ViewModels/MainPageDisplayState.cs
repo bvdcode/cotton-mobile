@@ -193,9 +193,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _fileSearchText, value ?? string.Empty))
                 {
-                    OnPropertyChanged(nameof(IsFileSearchVisible));
-                    OnPropertyChanged(nameof(FileSearchButtonText));
-                    OnPropertyChanged(nameof(FileSearchButtonDescription));
+                    NotifyFileSearchStateChanged();
                     ApplyFileFilters();
                 }
             }
@@ -531,9 +529,24 @@ namespace Cotton.Mobile.ViewModels
                 _isFileSearchOpen = true;
             }
 
-            OnPropertyChanged(nameof(IsFileSearchVisible));
-            OnPropertyChanged(nameof(FileSearchButtonText));
-            OnPropertyChanged(nameof(FileSearchButtonDescription));
+            NotifyFileSearchStateChanged();
+        }
+
+        public void ClearFileSearch()
+        {
+            bool wasFileSearchOpen = _isFileSearchOpen;
+            _isFileSearchOpen = false;
+
+            if (!string.IsNullOrWhiteSpace(FileSearchText))
+            {
+                FileSearchText = string.Empty;
+                return;
+            }
+
+            if (wasFileSearchOpen)
+            {
+                NotifyFileSearchStateChanged();
+            }
         }
 
         private void SetStatus(string? status)
@@ -574,6 +587,13 @@ namespace Cotton.Mobile.ViewModels
             FilesEmptyMessage = ResolveFilesEmptyMessage(visibleEntries.Count);
             FilesStatus = CreateFilesStatus();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        private void NotifyFileSearchStateChanged()
+        {
+            OnPropertyChanged(nameof(IsFileSearchVisible));
+            OnPropertyChanged(nameof(FileSearchButtonText));
+            OnPropertyChanged(nameof(FileSearchButtonDescription));
         }
 
         private IEnumerable<CottonFileBrowserEntry> SortEntries(IEnumerable<CottonFileBrowserEntry> entries)

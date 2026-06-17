@@ -23,6 +23,7 @@ namespace Cotton.Mobile.Services
                 || !Uri.TryCreate(value, UriKind.Absolute, out Uri? instanceUri)
                 || !CottonInstanceUri.IsSupported(instanceUri))
             {
+                _preferences.Remove(InstanceUrlKey);
                 return Task.FromResult<Uri?>(null);
             }
 

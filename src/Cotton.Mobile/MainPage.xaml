@@ -8,7 +8,7 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <Grid x:Name="RootLayout"
-          Padding="8,4,8,16"
+          Padding="8,0,8,14"
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
@@ -113,12 +113,13 @@
                                              Spacing="6"
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="4">
+                                  ColumnSpacing="5">
                                 <Button Grid.Column="0"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="↑"
                                         Command="{Binding NavigateFilesUpCommand}"
                                         IsEnabled="{Binding Display.CanNavigateFilesUp}"
+                                        IsVisible="{Binding Display.IsFileUpButtonVisible}"
                                         Opacity="{Binding Display.FileUpButtonOpacity}"
                                         Padding="0"
                                         FontSize="17"
@@ -352,12 +353,12 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Padding="1,0,1,5">
+                                              Padding="3,3,3,5">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                     StrokeThickness="1"
                                                     StrokeShape="RoundRectangle 8"
-                                                    Padding="2"
+                                                    Padding="3"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                                                 <Grid RowSpacing="2">
                                                     <Grid.RowDefinitions>

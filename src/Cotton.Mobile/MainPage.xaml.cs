@@ -7,14 +7,13 @@ namespace Cotton.Mobile
 	{
 		private const double FileTileSlotHorizontalPadding = 2;
 		private const double FileTileSlotRoundingGuard = 1;
-		private const double FileTileMinimumSlotWidth = 180;
+		private const int FileTileColumnCount = 2;
 		private const double FileTileMinimumWidth = 172;
 		private const double FileTilePreviewRatio = 0.62;
 		private const double FileTileFolderIconMinimumSize = 62;
 		private const double FileTileFolderIconMaximumSize = 92;
 		private const double FileTileFolderIconWidthRatio = 0.42;
 		private const double FileTileVerticalChrome = 54;
-		private const int FileTileMaximumColumnCount = 6;
 
 		private readonly MainPageViewModel _viewModel;
 		private double _fileTileHeight = 146;
@@ -132,19 +131,8 @@ namespace Cotton.Mobile
 				return;
 			}
 
-			int columnCount = Math.Clamp(
-				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
-				2,
-				FileTileMaximumColumnCount);
-			double slotWidth = ResolveFileTileSlotWidth(contentWidth, columnCount);
+			double slotWidth = ResolveFileTileSlotWidth(contentWidth);
 			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
-
-			while (tileWidth < FileTileMinimumWidth && columnCount > 2)
-			{
-				columnCount--;
-				slotWidth = ResolveFileTileSlotWidth(contentWidth, columnCount);
-				tileWidth = slotWidth - FileTileSlotHorizontalPadding;
-			}
 
 			tileWidth = Math.Max(tileWidth, FileTileMinimumWidth);
 			double previewHeight = Math.Round(tileWidth * FileTilePreviewRatio);
@@ -158,11 +146,11 @@ namespace Cotton.Mobile
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
 		}
 
-		private static double ResolveFileTileSlotWidth(double contentWidth, int columnCount)
+		private static double ResolveFileTileSlotWidth(double contentWidth)
 		{
 			return Math.Max(
 				FileTileMinimumWidth,
-				Math.Floor(contentWidth / columnCount) - FileTileSlotRoundingGuard);
+				Math.Floor(contentWidth / FileTileColumnCount) - FileTileSlotRoundingGuard);
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)

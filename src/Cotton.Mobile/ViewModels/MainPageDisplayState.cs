@@ -264,6 +264,8 @@ namespace Cotton.Mobile.ViewModels
 
         public string FileViewButtonText => FileViewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
+        public bool IsFileUpButtonVisible => CanNavigateFilesUp;
+
         public string FileSortButtonText => FileSortMode switch
         {
             CottonFileBrowserSortMode.Name => "A-Z",
@@ -293,6 +295,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _canNavigateFilesUp, value))
                 {
                     OnPropertyChanged(nameof(FileUpButtonOpacity));
+                    OnPropertyChanged(nameof(IsFileUpButtonVisible));
                 }
             }
         }

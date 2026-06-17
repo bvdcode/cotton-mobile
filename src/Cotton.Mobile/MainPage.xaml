@@ -15,6 +15,7 @@
             <VerticalStackLayout Spacing="24"
                                  Padding="0,0,0,96"
                                  VerticalOptions="Start"
+                                 HorizontalOptions="Fill"
                                  MaximumWidthRequest="520">
                 <Image Source="appiconfg.svg"
                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
@@ -103,8 +104,11 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="12">
-                        <VerticalStackLayout Spacing="12">
+                                     Spacing="12"
+                                     HorizontalOptions="Fill">
+                        <VerticalStackLayout x:Name="FileBrowserContent"
+                                             Spacing="12"
+                                             HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
                                   ColumnSpacing="8">
                                 <VerticalStackLayout Spacing="2">
@@ -330,6 +334,7 @@
                                         BindableLayout.ItemsSource="{Binding Display.FileEntries}"
                                         Wrap="Wrap"
                                         AlignItems="Start"
+                                        HorizontalOptions="Fill"
                                         JustifyContent="SpaceBetween">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
@@ -339,9 +344,9 @@
                                                 Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                                 StrokeThickness="1"
                                                 StrokeShape="RoundRectangle 8"
-                                                Padding="12"
+                                                Padding="8"
                                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                                            <Grid RowSpacing="8">
+                                            <Grid RowSpacing="6">
                                                 <Grid.GestureRecognizers>
                                                     <TapGestureRecognizer Command="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                           CommandParameter="{Binding .}" />

@@ -361,7 +361,7 @@ namespace Cotton.Mobile.ViewModels
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
-                _display.ShowFiles(content, canNavigateUp: false, CreatePath(content.FolderName));
+                _display.ShowFiles(content, isRoot: true, canNavigateUp: false, CreatePath(content.FolderName));
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -401,7 +401,11 @@ namespace Cotton.Mobile.ViewModels
                 content = ApplyLocalFiles(content);
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
-                _display.ShowFiles(content, canNavigateUp: _fileNavigation.Count > 0, CreatePath(content.FolderName));
+                _display.ShowFiles(
+                    content,
+                    isRoot: false,
+                    canNavigateUp: _fileNavigation.Count > 0,
+                    CreatePath(content.FolderName));
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -476,7 +480,7 @@ namespace Cotton.Mobile.ViewModels
         private string CreatePath(string currentFolderName)
         {
             IEnumerable<string> names = _fileNavigation
-                .Select(folder => folder.Name)
+                .Select((folder, index) => index == 0 ? MainPageDisplayState.RootFilesTitle : folder.Name)
                 .Append(string.IsNullOrWhiteSpace(currentFolderName) ? "Files" : currentFolderName.Trim());
             return string.Join(" / ", names);
         }

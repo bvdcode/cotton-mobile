@@ -5,6 +5,8 @@ namespace Cotton.Mobile.ViewModels
 
     public class MainPageDisplayState : ViewModelBase
     {
+        public const string RootFilesTitle = "Files";
+
         private readonly List<CottonFileBrowserEntry> _allFileEntries = [];
 
         private MainPageViewState _state = MainPageViewState.SignIn;
@@ -375,7 +377,7 @@ namespace Cotton.Mobile.ViewModels
             ProfileEmail = profile.Email;
             ProfileInstance = profile.Instance;
             ProfileStatus = null;
-            FilesTitle = "Files";
+            FilesTitle = RootFilesTitle;
             FilesPath = string.Empty;
             FilesStatus = "Loading files...";
             IsFilesLoading = true;
@@ -447,12 +449,12 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
-        public void ShowFiles(CottonFolderContent content, bool canNavigateUp, string path)
+        public void ShowFiles(CottonFolderContent content, bool isRoot, bool canNavigateUp, string path)
         {
             ArgumentNullException.ThrowIfNull(content);
 
-            FilesTitle = content.FolderName;
-            FilesPath = string.Equals(path, content.FolderName, StringComparison.OrdinalIgnoreCase)
+            FilesTitle = isRoot ? RootFilesTitle : content.FolderName;
+            FilesPath = isRoot || string.Equals(path, FilesTitle, StringComparison.OrdinalIgnoreCase)
                 ? string.Empty
                 : path;
             _allFileEntries.Clear();

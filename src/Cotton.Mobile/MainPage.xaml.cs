@@ -7,10 +7,10 @@ namespace Cotton.Mobile
 	{
 		private const double FileTileSlotHorizontalPadding = 2;
 		private const double FileTileSlotRoundingGuard = 1;
-		private const double FileTileMinimumSlotWidth = 84;
-		private const double FileTileMinimumWidth = 78;
-		private const double FileTilePreviewRatio = 0.66;
-		private const double FileTileVerticalChrome = 50;
+		private const double FileTileMinimumSlotWidth = 110;
+		private const double FileTileMinimumWidth = 104;
+		private const double FileTilePreviewRatio = 0.58;
+		private const double FileTileVerticalChrome = 70;
 		private const int FileTileMaximumColumnCount = 7;
 
 		private readonly MainPageViewModel _viewModel;

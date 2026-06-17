@@ -5,8 +5,9 @@ namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const double PageHorizontalPadding = 24;
-		private const double ContentMaximumWidth = 520;
+		private const double CompactFileTileLayoutHorizontalInset = 24;
+		private const double WideFileTileLayoutHorizontalInset = 48;
+		private const double WideFileTileLayoutWidth = 600;
 		private const double FileTileSlotHorizontalPadding = 2;
 		private const double FileTileMinimumSlotWidth = 112;
 		private const double FileTileMinimumWidth = 104;
@@ -27,6 +28,7 @@ namespace Cotton.Mobile
 			InitializeComponent();
 			Loaded += MainPage_Loaded;
 			SizeChanged += MainPage_SizeChanged;
+			RootLayout.SizeChanged += RootLayout_SizeChanged;
 			FileBrowserContent.SizeChanged += FileBrowserContent_SizeChanged;
 			FileSearchBar.PropertyChanged += FileSearchBar_PropertyChanged;
 			BindingContext = _viewModel;
@@ -67,6 +69,11 @@ namespace Cotton.Mobile
 			UpdateFileTileMetrics();
 		}
 
+		private void RootLayout_SizeChanged(object? sender, EventArgs e)
+		{
+			UpdateFileTileMetrics();
+		}
+
 		private void FileBrowserContent_SizeChanged(object? sender, EventArgs e)
 		{
 			UpdateFileTileMetrics();
@@ -92,15 +99,21 @@ namespace Cotton.Mobile
 
 		private void UpdateFileTileMetrics()
 		{
-			double contentWidth = FileBrowserContent.Width > 0
+			double measuredContentWidth = FileBrowserContent.Width > 0
 				? FileBrowserContent.Width
-				: Width - PageHorizontalPadding;
+				: 0;
+			double layoutInset = ResolveFileTileLayoutHorizontalInset(RootLayout.Width);
+			double rootContentWidth = RootLayout.Width > layoutInset
+				? RootLayout.Width - layoutInset
+				: 0;
+			double contentWidth = rootContentWidth > 0
+				? rootContentWidth
+				: measuredContentWidth;
 			if (contentWidth <= 0)
 			{
 				return;
 			}
 
-			contentWidth = Math.Min(contentWidth, ContentMaximumWidth);
 			int columnCount = Math.Clamp(
 				(int)Math.Floor(contentWidth / FileTileMinimumSlotWidth),
 				2,
@@ -121,6 +134,13 @@ namespace Cotton.Mobile
 			FileTileSlotWidth = slotWidth;
 			FileTilePreviewHeight = previewHeight;
 			FileTileHeight = previewHeight + FileTileVerticalChrome;
+		}
+
+		private static double ResolveFileTileLayoutHorizontalInset(double layoutWidth)
+		{
+			return layoutWidth >= WideFileTileLayoutWidth
+				? WideFileTileLayoutHorizontalInset
+				: CompactFileTileLayoutHorizontalInset;
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)

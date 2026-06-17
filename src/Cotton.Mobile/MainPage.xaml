@@ -6,7 +6,8 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
-    <Grid Padding="12,4,12,16"
+    <Grid x:Name="RootLayout"
+          Padding="12,4,12,16"
           RowDefinitions="*,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
@@ -15,8 +16,7 @@
             <VerticalStackLayout Spacing="24"
                                  Padding="0,0,0,96"
                                  VerticalOptions="Start"
-                                 HorizontalOptions="Fill"
-                                 MaximumWidthRequest="520">
+                                 HorizontalOptions="Fill">
                 <Image Source="appiconfg.svg"
                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
                        HeightRequest="92"
@@ -49,7 +49,8 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
-                                     Spacing="16">
+                                     Spacing="16"
+                                     MaximumWidthRequest="520">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Instance URL"
                                FontSize="13"
@@ -82,7 +83,8 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                                     Spacing="16">
+                                     Spacing="16"
+                                     MaximumWidthRequest="520">
                     <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
                                        HorizontalOptions="Start" />
 

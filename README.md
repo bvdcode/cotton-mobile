@@ -78,6 +78,7 @@ Signed Android builds are produced by the `Mobile Android` workflow.
 - Use `build_signed_release=true` to produce signed APK/AAB artifacts.
 - Use `publish_github_release=true` to update the stable GitHub APK download.
 - Use `upload_to_google_play=true` only for intentional Play testing uploads.
+- `publish_github_release` and `upload_to_google_play` require `build_signed_release=true`; the workflow fails early if that combination is wrong.
 
 The release flow keeps direct APK testing, Play dogfooding, and store submission separate on purpose.
 

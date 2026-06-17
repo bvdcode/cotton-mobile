@@ -83,6 +83,39 @@ on:
         default: false
 
 jobs:
+  workflow-dispatch-guards:
+    name: Validate Manual Release Inputs
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: read
+    steps:
+      - name: Validate release input combinations
+        run: |
+          if [ "${{ inputs.publish_github_release }}" = "true" ] \
+            && [ "${{ inputs.build_signed_release }}" != "true" ]; then
+            echo "publish_github_release requires build_signed_release=true." >&2
+            exit 1
+          fi
+
+          if [ "${{ inputs.upload_to_google_play }}" = "true" ] \
+            && [ "${{ inputs.build_signed_release }}" != "true" ]; then
+            echo "upload_to_google_play requires build_signed_release=true." >&2
+            exit 1
+          fi
+
+          if [ "${{ inputs.publish_github_release }}" = "true" ] \
+            && [ -z "${{ inputs.github_release_tag }}" ]; then
+            echo "github_release_tag is required when publish_github_release=true." >&2
+            exit 1
+          fi
+
+          if [ "${{ inputs.upload_to_google_play }}" = "true" ] \
+            && [ -z "${{ inputs.google_play_track }}" ]; then
+            echo "google_play_track is required when upload_to_google_play=true." >&2
+            exit 1
+          fi
+
   yaml-configs:
     name: Validate YAML Configs
     runs-on: ubuntu-latest
@@ -176,6 +209,8 @@ jobs:
   android-signed-release:
     name: Build Signed Release Artifacts
     runs-on: ubuntu-latest
+    needs:
+      - workflow-dispatch-guards
     if: github.event_name == 'workflow_dispatch' && inputs.build_signed_release
     permissions:
       contents: write
@@ -397,6 +432,8 @@ jobs:
   google-play-store-listing:
     name: Upload Google Play Store Listing
     runs-on: ubuntu-latest
+    needs:
+      - workflow-dispatch-guards
     if: github.event_name == 'workflow_dispatch' && inputs.upload_store_listing
     permissions:
       contents: read

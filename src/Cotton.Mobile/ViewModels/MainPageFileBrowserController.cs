@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private const string CancelAction = "Cancel";
         private const string DetailsAction = "Details";
+        private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
         private const string OpenAction = "Open";
         private const string ShareAction = "Share";
@@ -365,10 +366,7 @@ namespace Cotton.Mobile.ViewModels
                     CreateFileDownloadProgress(file, "Downloading"),
                     fileActionCancellation.Token);
                 _display.ShowFilesSummary();
-                await _dialogService.ShowAlertAsync(
-                    "Downloaded",
-                    $"{result.FileName} was saved to app storage.",
-                    "OK");
+                await ShowDownloadedFileActionsAsync(file, result, fileActionCancellation.Token);
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -530,6 +528,83 @@ namespace Cotton.Mobile.ViewModels
                 $"Size: {size}",
                 $"Content type: {contentType}",
                 $"File id: {file.Id:D}");
+        }
+
+        private async Task ShowDownloadedFileActionsAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            string? action = await _dialogService.ShowActionSheetAsync(
+                $"Downloaded {downloadedFile.FileName}",
+                DoneAction,
+                null,
+                OpenAction,
+                ShareAction);
+
+            switch (action)
+            {
+                case OpenAction:
+                    await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
+                    break;
+                case ShareAction:
+                    await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
+                    break;
+            }
+        }
+
+        private async Task OpenDownloadedFileAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            _display.ShowFileActionLoading($"Opening {file.Name}...");
+
+            try
+            {
+                if (_filePreviewService.CanPreview(file))
+                {
+                    await _filePreviewService.OpenAsync(file, downloadedFile, cancellationToken);
+                }
+                else
+                {
+                    await _fileInteractionService.OpenAsync(downloadedFile, cancellationToken);
+                }
+
+                _display.ShowFilesSummary();
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
+                _display.ShowFilesStatus("Open failed.");
+            }
+        }
+
+        private async Task ShareDownloadedFileAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            _display.ShowFileActionLoading($"Sharing {file.Name}...");
+
+            try
+            {
+                await _fileInteractionService.ShareAsync(downloadedFile, cancellationToken);
+                _display.ShowFilesSummary();
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
+                _display.ShowFilesStatus("Share failed.");
+            }
         }
 
         private IProgress<long>? CreateFileDownloadProgress(CottonFileBrowserEntry file, string actionName)

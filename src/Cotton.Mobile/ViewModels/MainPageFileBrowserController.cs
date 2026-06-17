@@ -615,14 +615,24 @@ namespace Cotton.Mobile.ViewModels
             string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown";
             string contentType = file.ContentType ?? "Unknown";
             string localCopy = CreateLocalCopyDetails(file, localFile);
+            string updated = FormatUtcTimestamp(file.UpdatedAtUtc);
 
             return string.Join(
                 Environment.NewLine,
                 $"Type: {file.Kind}",
                 $"Size: {size}",
+                $"Updated: {updated}",
                 $"Content type: {contentType}",
                 $"Local copy: {localCopy}",
                 $"File id: {file.Id:D}");
+        }
+
+        private static string FormatUtcTimestamp(DateTime value)
+        {
+            DateTime utc = value.Kind == DateTimeKind.Utc
+                ? value
+                : value.ToUniversalTime();
+            return $"{utc:yyyy-MM-dd HH:mm} UTC";
         }
 
         private static string CreateLocalCopyDetails(

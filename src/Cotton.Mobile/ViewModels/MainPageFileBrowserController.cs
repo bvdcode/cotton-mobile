@@ -383,6 +383,11 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            if (ShowOfflineRetryIfNeeded(MainPageFileAction.Download, file, OfflineDownloadStatus))
+            {
+                return;
+            }
+
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Downloading {file.Name}...");
 
             try
@@ -467,6 +472,11 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            if (ShowOfflineUnavailableRetryIfNeeded(MainPageFileAction.Open, file, OfflineOpenStatus))
+            {
+                return;
+            }
+
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
 
             try
@@ -514,6 +524,11 @@ namespace Cotton.Mobile.ViewModels
             if (_instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to share files.");
+                return;
+            }
+
+            if (ShowOfflineUnavailableRetryIfNeeded(MainPageFileAction.Share, file, OfflineShareStatus))
+            {
                 return;
             }
 
@@ -768,6 +783,36 @@ namespace Cotton.Mobile.ViewModels
         private void ShowFileLoadFailure(string fallbackStatus)
         {
             _display.ShowFilesStatus(CreateOfflineAwareStatus(fallbackStatus, OfflineBrowseStatus));
+        }
+
+        private bool ShowOfflineUnavailableRetryIfNeeded(
+            MainPageFileAction action,
+            CottonFileBrowserEntry file,
+            string offlineStatus)
+        {
+            if (_networkAccess.HasInternetAccess || _fileBrowserService.GetReusableLocalDownload(file) is not null)
+            {
+                return false;
+            }
+
+            ClearFileActionRetry();
+            ShowFileActionRetry(action, file, offlineStatus);
+            return true;
+        }
+
+        private bool ShowOfflineRetryIfNeeded(
+            MainPageFileAction action,
+            CottonFileBrowserEntry file,
+            string offlineStatus)
+        {
+            if (_networkAccess.HasInternetAccess)
+            {
+                return false;
+            }
+
+            ClearFileActionRetry();
+            ShowFileActionRetry(action, file, offlineStatus);
+            return true;
         }
 
         private string CreateFileActionFailureStatus(string fallbackStatus, string offlineStatus)

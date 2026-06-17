@@ -8,7 +8,11 @@
 
     <Grid Padding="24"
           RowDefinitions="*,Auto">
-        <ScrollView Grid.Row="0">
+        <RefreshView Grid.Row="0"
+                     Command="{Binding RefreshFilesCommand}"
+                     IsEnabled="{Binding Display.IsProfileVisible}"
+                     IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
+        <ScrollView>
             <VerticalStackLayout Spacing="24"
                                  VerticalOptions="Center"
                                  MaximumWidthRequest="520">
@@ -334,6 +338,7 @@
                 </Border>
             </VerticalStackLayout>
         </ScrollView>
+        </RefreshView>
 
         <HorizontalStackLayout Grid.Row="1"
                                Spacing="12"

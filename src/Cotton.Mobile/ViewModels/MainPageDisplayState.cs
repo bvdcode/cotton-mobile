@@ -311,6 +311,13 @@ namespace Cotton.Mobile.ViewModels
         public void ShowFilesLoading(string status)
         {
             IsFilesLoading = true;
+            FilesStatus = status;
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+        }
+
+        public void ShowFilesRefreshing(string status)
+        {
+            IsFilesLoading = false;
             IsFilesRefreshing = true;
             FilesStatus = status;
             OnPropertyChanged(nameof(IsFilesEmptyVisible));

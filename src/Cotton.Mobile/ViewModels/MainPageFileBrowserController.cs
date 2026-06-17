@@ -71,11 +71,11 @@ namespace Cotton.Mobile.ViewModels
 
             if (_currentFolder is null)
             {
-                await LoadRootFilesAsync();
+                await LoadRootFilesAsync(isRefresh: true);
                 return;
             }
 
-            await LoadFolderAsync(_currentFolder, preserveHistory: true);
+            await LoadFolderAsync(_currentFolder, preserveHistory: true, isRefresh: true);
         }
 
         public async Task NavigateUpAsync()
@@ -174,14 +174,21 @@ namespace Cotton.Mobile.ViewModels
             return Task.CompletedTask;
         }
 
-        private async Task LoadRootFilesAsync()
+        private async Task LoadRootFilesAsync(bool isRefresh = false)
         {
             if (_instanceUri is null)
             {
                 return;
             }
 
-            _display.ShowFilesLoading("Loading files...");
+            if (isRefresh)
+            {
+                _display.ShowFilesRefreshing("Refreshing files...");
+            }
+            else
+            {
+                _display.ShowFilesLoading("Loading files...");
+            }
 
             try
             {
@@ -197,14 +204,24 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task LoadFolderAsync(CottonFolderHandle folder, bool preserveHistory)
+        private async Task LoadFolderAsync(
+            CottonFolderHandle folder,
+            bool preserveHistory,
+            bool isRefresh = false)
         {
             if (_instanceUri is null)
             {
                 return;
             }
 
-            _display.ShowFilesLoading($"Loading {folder.Name}...");
+            if (isRefresh)
+            {
+                _display.ShowFilesRefreshing($"Refreshing {folder.Name}...");
+            }
+            else
+            {
+                _display.ShowFilesLoading($"Loading {folder.Name}...");
+            }
 
             try
             {

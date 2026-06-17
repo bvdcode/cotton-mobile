@@ -13,17 +13,19 @@
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="24"
-                                 Padding="0,48,0,24"
+                                 Padding="0,24,0,24"
                                  VerticalOptions="Start"
                                  MaximumWidthRequest="520">
                 <Image Source="appiconfg.svg"
+                       IsVisible="{Binding Display.IsBrandHeaderVisible}"
                        HeightRequest="92"
                        WidthRequest="92"
                        Aspect="AspectFit"
                        HorizontalOptions="Start"
                        SemanticProperties.Description="Cotton Cloud" />
 
-                <VerticalStackLayout Spacing="8">
+                <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
+                                     Spacing="8">
                     <Label Text="Cotton Cloud"
                            FontSize="32"
                            FontAttributes="Bold"
@@ -100,13 +102,8 @@
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
-                <Border IsVisible="{Binding Display.IsProfileVisible}"
-                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                        StrokeThickness="1"
-                        StrokeShape="RoundRectangle 8"
-                        Padding="16"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                    <VerticalStackLayout Spacing="16">
+                <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
+                                     Spacing="16">
                         <VerticalStackLayout Spacing="4">
                             <Label Text="Signed in"
                                    FontSize="14"
@@ -183,6 +180,8 @@
                                 <Button Text="Name"
                                         Command="{Binding SortFilesByNameCommand}"
                                         IsEnabled="{Binding Display.CanSortByName}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
                                         MinimumWidthRequest="52" />
@@ -191,6 +190,8 @@
                                         Text="Type"
                                         Command="{Binding SortFilesByTypeCommand}"
                                         IsEnabled="{Binding Display.CanSortByType}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
                                         MinimumWidthRequest="52" />
@@ -199,6 +200,8 @@
                                         Text="Size"
                                         Command="{Binding SortFilesBySizeCommand}"
                                         IsEnabled="{Binding Display.CanSortBySize}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
                                         MinimumWidthRequest="52" />
@@ -206,6 +209,8 @@
                                 <Button Grid.Column="3"
                                         Text="{Binding Display.FileViewToggleText}"
                                         Command="{Binding ToggleFileViewCommand}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
                                         MinimumWidthRequest="60" />
@@ -297,6 +302,8 @@
                                                     Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                     CommandParameter="{Binding .}"
                                                     VerticalOptions="Center"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                                    TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                                     Padding="10,0"
                                                     MinimumHeightRequest="32"
                                                     MinimumWidthRequest="44" />
@@ -369,6 +376,8 @@
                                                         Text="{Binding ActionLabel}"
                                                         Command="{Binding BindingContext.OpenFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                         CommandParameter="{Binding .}"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                                         Padding="8,0"
                                                         MinimumHeightRequest="30"
                                                         MinimumWidthRequest="44" />
@@ -382,9 +391,10 @@
                         <Button Text="Log out"
                                 Command="{Binding LogoutCommand}"
                                 IsEnabled="{Binding Display.IsLogoutEnabled}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                 HorizontalOptions="Fill" />
-                    </VerticalStackLayout>
-                </Border>
+                </VerticalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
         </RefreshView>

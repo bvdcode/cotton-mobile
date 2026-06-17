@@ -483,12 +483,23 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowFileDetailsAsync(CottonFileBrowserEntry file)
         {
-            string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown size";
-            string contentType = file.ContentType ?? "Unknown type";
             await _dialogService.ShowAlertAsync(
                 file.Name,
-                $"{file.Kind}\n{size}\n{contentType}",
+                CreateFileDetailsMessage(file),
                 "OK");
+        }
+
+        private static string CreateFileDetailsMessage(CottonFileBrowserEntry file)
+        {
+            string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown";
+            string contentType = file.ContentType ?? "Unknown";
+
+            return string.Join(
+                Environment.NewLine,
+                $"Type: {file.Kind}",
+                $"Size: {size}",
+                $"Content type: {contentType}",
+                $"File id: {file.Id:D}");
         }
 
         private IProgress<long>? CreateFileDownloadProgress(CottonFileBrowserEntry file, string actionName)

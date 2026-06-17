@@ -62,11 +62,15 @@
             </VerticalStackLayout>
 
             <Button Grid.Column="1"
+                    x:Name="ResetButton"
                     Text="Reset"
                     Clicked="OnResetClicked"
-                    Padding="10,0"
-                    MinimumHeightRequest="32"
-                    MinimumWidthRequest="56"
+                    Style="{StaticResource FileChromeButton}"
+                    IsVisible="False"
+                    Padding="12,0"
+                    HeightRequest="44"
+                    MinimumHeightRequest="44"
+                    MinimumWidthRequest="72"
                     VerticalOptions="Center" />
         </Grid>
     </Grid>

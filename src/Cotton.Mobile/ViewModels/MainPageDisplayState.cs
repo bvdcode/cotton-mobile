@@ -238,7 +238,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsFileListViewVisible));
                     OnPropertyChanged(nameof(IsFileTileViewVisible));
-                    OnPropertyChanged(nameof(FileViewToggleText));
+                    OnPropertyChanged(nameof(FileViewButtonText));
                 }
             }
         }
@@ -259,7 +259,7 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFileTileViewVisible => FileViewMode == CottonFileBrowserViewMode.Tiles;
 
-        public string FileViewToggleText => FileViewMode == CottonFileBrowserViewMode.List ? "Tiles" : "List";
+        public string FileViewButtonText => $"View: {FileViewMode}";
 
         public string FileSortButtonText => $"Sort: {FileSortMode}";
 

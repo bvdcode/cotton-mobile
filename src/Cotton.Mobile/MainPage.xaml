@@ -201,13 +201,14 @@
                                         SemanticProperties.Description="Sort files" />
 
                                 <Button Grid.Column="2"
-                                        Text="{Binding Display.FileViewToggleText}"
-                                        Command="{Binding ToggleFileViewCommand}"
+                                        Text="{Binding Display.FileViewButtonText}"
+                                        Command="{Binding ShowFileViewActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="8,0"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="60" />
+                                        MinimumWidthRequest="88"
+                                        SemanticProperties.Description="Change file view" />
                             </Grid>
 
                             <SearchBar Text="{Binding Display.FileSearchText, Mode=TwoWay}"

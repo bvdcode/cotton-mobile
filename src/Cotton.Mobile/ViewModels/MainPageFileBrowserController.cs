@@ -15,6 +15,8 @@ namespace Cotton.Mobile.ViewModels
         private const string SortNameAction = "Name";
         private const string SortSizeAction = "Size";
         private const string SortTypeAction = "Type";
+        private const string ViewListAction = "List";
+        private const string ViewTilesAction = "Tiles";
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -129,14 +131,24 @@ namespace Cotton.Mobile.ViewModels
             await ShowFileActionsAsync(entry);
         }
 
-        public Task ToggleViewModeAsync()
+        public async Task ShowViewActionsAsync()
         {
-            CottonFileBrowserViewMode nextViewMode = _display.FileViewMode == CottonFileBrowserViewMode.List
-                ? CottonFileBrowserViewMode.Tiles
-                : CottonFileBrowserViewMode.List;
-            _preferenceStore.SaveViewMode(nextViewMode);
-            _display.ShowFileViewMode(nextViewMode);
-            return Task.CompletedTask;
+            string? action = await _dialogService.ShowActionSheetAsync(
+                $"View files as {_display.FileViewMode}",
+                CancelAction,
+                null,
+                ViewListAction,
+                ViewTilesAction);
+
+            switch (action)
+            {
+                case ViewListAction:
+                    SetViewMode(CottonFileBrowserViewMode.List);
+                    break;
+                case ViewTilesAction:
+                    SetViewMode(CottonFileBrowserViewMode.Tiles);
+                    break;
+            }
         }
 
         public async Task ShowSortActionsAsync()
@@ -243,6 +255,12 @@ namespace Cotton.Mobile.ViewModels
             _preferenceStore.SaveSortMode(sortMode);
             _display.ShowFileSortMode(sortMode);
             return Task.CompletedTask;
+        }
+
+        private void SetViewMode(CottonFileBrowserViewMode viewMode)
+        {
+            _preferenceStore.SaveViewMode(viewMode);
+            _display.ShowFileViewMode(viewMode);
         }
 
         private async Task LoadRootFilesAsync(bool isRefresh = false)

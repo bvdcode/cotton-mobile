@@ -57,7 +57,10 @@ namespace Cotton.Mobile.Services
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             try
             {
-                await client.Auth.RefreshAsync(tokens.RefreshToken, cancellationToken).ConfigureAwait(false);
+                TokenPairDto refreshedTokens = await client.Auth
+                    .RefreshAsync(tokens.RefreshToken, cancellationToken)
+                    .ConfigureAwait(false);
+                await _tokenStore.SaveAsync(refreshedTokens, cancellationToken).ConfigureAwait(false);
                 UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
 
                 return CottonSessionResult.Authenticated(instanceUri, user);

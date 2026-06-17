@@ -11,6 +11,7 @@ namespace Cotton.Mobile.ViewModels
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
+        private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
@@ -21,6 +22,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
         private readonly IFeedbackService _feedbackService;
+        private readonly IDiagnosticsPageService _diagnosticsPageService;
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly IScreenReaderService _screenReader;
@@ -38,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             CottonMobileOptions options,
             IUserDialogService dialogService,
             IFeedbackService feedbackService,
+            IDiagnosticsPageService diagnosticsPageService,
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
             IScreenReaderService screenReader,
@@ -57,6 +60,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(feedbackService);
+            ArgumentNullException.ThrowIfNull(diagnosticsPageService);
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(screenReader);
@@ -76,6 +80,7 @@ namespace Cotton.Mobile.ViewModels
             _options = options;
             _dialogService = dialogService;
             _feedbackService = feedbackService;
+            _diagnosticsPageService = diagnosticsPageService;
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
             _screenReader = screenReader;
@@ -262,6 +267,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
+                AccountDiagnosticsAction,
                 AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
 
@@ -275,6 +281,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
+                    break;
+                case AccountDiagnosticsAction:
+                    await OpenDiagnosticsAsync();
                     break;
                 case AccountFeedbackAction:
                     await OpenFeedbackAsync();
@@ -331,6 +340,22 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Storage",
                     "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenDiagnosticsAsync()
+        {
+            try
+            {
+                await _diagnosticsPageService.OpenAsync(CreateDiagnosticsContext());
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile diagnostics page.");
+                await _dialogService.ShowAlertAsync(
+                    "Diagnostics",
+                    "Could not inspect app diagnostics.",
                     "OK");
             }
         }
@@ -395,8 +420,26 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task<FeedbackContext> CreateFeedbackContextAsync()
         {
+            CottonDiagnosticsContext diagnostics = CreateDiagnosticsContext();
             CottonStorageSummary? storageSummary = await TryCreateFeedbackStorageSummaryAsync();
             return new FeedbackContext(
+                diagnostics.InstanceUrl,
+                diagnostics.ProfileName,
+                diagnostics.Screen,
+                diagnostics.FileLocation,
+                diagnostics.VisibleFileCount,
+                diagnostics.TotalFileCount,
+                diagnostics.FileViewMode,
+                diagnostics.FileSortMode,
+                diagnostics.IsFileSearchActive,
+                diagnostics.FilesStatus,
+                diagnostics.HasInternetAccess,
+                storageSummary);
+        }
+
+        private CottonDiagnosticsContext CreateDiagnosticsContext()
+        {
+            return new CottonDiagnosticsContext(
                 Display.InstanceUrl,
                 Display.ProfileName,
                 CreateFeedbackScreenName(),
@@ -407,8 +450,7 @@ namespace Cotton.Mobile.ViewModels
                 Display.FileSortMode.ToString(),
                 Display.IsFileSearchActive,
                 Display.FilesStatus,
-                _networkAccess.HasInternetAccess,
-                storageSummary);
+                _networkAccess.HasInternetAccess);
         }
 
         private async Task<CottonStorageSummary?> TryCreateFeedbackStorageSummaryAsync()

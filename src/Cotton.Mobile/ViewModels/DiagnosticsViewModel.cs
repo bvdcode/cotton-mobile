@@ -1,0 +1,263 @@
+using Cotton.Mobile.Commands;
+using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel.DataTransfer;
+using System.Collections.ObjectModel;
+
+namespace Cotton.Mobile.ViewModels
+{
+    public class DiagnosticsViewModel : ViewModelBase
+    {
+        private readonly CottonDiagnosticsContext _context;
+        private readonly ICottonMobileApplicationMetadata _metadata;
+        private readonly IStorageManagementService _storageManagementService;
+        private readonly IClipboard _clipboard;
+        private readonly ILogger<DiagnosticsViewModel> _logger;
+        private bool _isBusy;
+        private string _headerVersionText = "Not available";
+        private string _headerChannelText = "Not available";
+        private string? _status;
+
+        public DiagnosticsViewModel(
+            CottonDiagnosticsContext context,
+            ICottonMobileApplicationMetadata metadata,
+            IStorageManagementService storageManagementService,
+            IClipboard clipboard,
+            ILogger<DiagnosticsViewModel> logger)
+        {
+            ArgumentNullException.ThrowIfNull(context);
+            ArgumentNullException.ThrowIfNull(metadata);
+            ArgumentNullException.ThrowIfNull(storageManagementService);
+            ArgumentNullException.ThrowIfNull(clipboard);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _context = context;
+            _metadata = metadata;
+            _storageManagementService = storageManagementService;
+            _clipboard = clipboard;
+            _logger = logger;
+            LoadCommand = new AsyncCommand(LoadAsync, () => !IsBusy);
+            CopyCommand = new AsyncCommand(CopyAsync, () => !IsBusy);
+        }
+
+        public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand CopyCommand { get; }
+
+        public ObservableCollection<DiagnosticsSectionViewModel> Sections { get; } = new();
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    LoadCommand.RaiseCanExecuteChanged();
+                    CopyCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string HeaderVersionText
+        {
+            get => _headerVersionText;
+            private set => SetProperty(ref _headerVersionText, value);
+        }
+
+        public string HeaderChannelText
+        {
+            get => _headerChannelText;
+            private set => SetProperty(ref _headerChannelText, value);
+        }
+
+        public string? Status
+        {
+            get => _status;
+            private set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(IsStatusVisible));
+                }
+            }
+        }
+
+        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        private async Task LoadAsync()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+                ShowDiagnostics(summary);
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile diagnostics.");
+                ShowDiagnostics(null);
+                Status = "Could not inspect local cache.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task CopyAsync()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                await _clipboard.SetTextAsync(CreateDiagnosticsText());
+                Status = "Diagnostics copied.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to copy Cotton mobile diagnostics.");
+                Status = "Could not copy diagnostics.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void ShowDiagnostics(CottonStorageSummary? summary)
+        {
+            HeaderVersionText = CreateVersionText();
+            HeaderChannelText = CreateValue(_metadata.InstallChannel);
+            Sections.Clear();
+            foreach (DiagnosticsSectionViewModel section in CreateSections(summary))
+            {
+                Sections.Add(section);
+            }
+        }
+
+        private IReadOnlyList<DiagnosticsSectionViewModel> CreateSections(CottonStorageSummary? summary)
+        {
+            return
+            [
+                new DiagnosticsSectionViewModel(
+                    "App",
+                    [
+                        CreateItem("Package", _metadata.PackageName),
+                        CreateItem("Channel", _metadata.InstallChannel),
+                        CreateItem("Network", _context.HasInternetAccess ? "Internet available" : "No internet access"),
+                    ]),
+                new DiagnosticsSectionViewModel(
+                    "Device",
+                    [
+                        CreateItem("Name", _metadata.DeviceName),
+                        CreateItem("OS", _metadata.OperatingSystem),
+                        CreateItem("Screen", _metadata.ScreenDetails),
+                    ]),
+                new DiagnosticsSectionViewModel(
+                    "Session",
+                    [
+                        CreateItem("Instance", _context.InstanceUrl),
+                        CreateItem("Account", _context.ProfileName),
+                        CreateItem("Screen", _context.Screen),
+                        CreateItem("Files", FormatFileCounts(_context.VisibleFileCount, _context.TotalFileCount)),
+                        CreateItem("Location", _context.FileLocation),
+                        CreateItem("View", _context.FileViewMode),
+                        CreateItem("Sort", _context.FileSortMode),
+                        CreateItem("Search", _context.IsFileSearchActive ? "Active" : "Inactive"),
+                        CreateItem("Status", _context.FilesStatus),
+                    ]),
+                new DiagnosticsSectionViewModel(
+                    "Local cache",
+                    [
+                        CreateItem("Total", summary is null ? null : FormatStorageSummary(summary)),
+                        CreateItem("Thumbnails", summary is null ? null : FormatStorageCategory(summary.ThumbnailCache)),
+                        CreateItem("Downloads", summary is null ? null : FormatStorageCategory(summary.DownloadedFiles)),
+                    ]),
+            ];
+        }
+
+        private string CreateDiagnosticsText()
+        {
+            IEnumerable<string> sectionLines = Sections.SelectMany(
+                section => section.Items.Select(item => $"{item.Label}: {item.Value}"));
+            return string.Join(
+                Environment.NewLine,
+                new[]
+                {
+                    $"App: {_metadata.ApplicationName} {CreateVersionText()}",
+                }.Concat(sectionLines));
+        }
+
+        private DiagnosticsItemViewModel CreateItem(string label, string? value)
+        {
+            return new DiagnosticsItemViewModel(label, CreateValue(value));
+        }
+
+        private string CreateVersionText()
+        {
+            string version = CreateValue(_metadata.ApplicationVersion);
+            if (string.IsNullOrWhiteSpace(_metadata.ApplicationBuild))
+            {
+                return version;
+            }
+
+            return $"{version} ({_metadata.ApplicationBuild.Trim()})";
+        }
+
+        private static string CreateValue(string? value)
+        {
+            return string.IsNullOrWhiteSpace(value) ? "Not available" : value.Trim();
+        }
+
+        private static string FormatFileCounts(int visibleFileCount, int totalFileCount)
+        {
+            if (visibleFileCount == totalFileCount)
+            {
+                return FormatFileCount(totalFileCount);
+            }
+
+            return $"{FormatFileCount(visibleFileCount)} visible of {FormatFileCount(totalFileCount)}";
+        }
+
+        private static string FormatStorageSummary(CottonStorageSummary summary)
+        {
+            return $"{FormatStorageSize(summary.TotalSizeBytes)} · {FormatFileCount(summary.TotalFileCount)}";
+        }
+
+        private static string FormatStorageCategory(CottonStorageCategorySnapshot category)
+        {
+            return $"{FormatStorageSize(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
+        }
+
+        private static string FormatFileCount(int fileCount)
+        {
+            return fileCount == 1 ? "1 file" : $"{fileCount:N0} files";
+        }
+
+        private static string FormatStorageSize(long bytes)
+        {
+            const long Kilobyte = 1024;
+            const long Megabyte = Kilobyte * 1024;
+            const long Gigabyte = Megabyte * 1024;
+
+            return bytes switch
+            {
+                < Kilobyte => $"{bytes} B",
+                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
+                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
+                _ => $"{bytes / (double)Gigabyte:0.#} GB",
+            };
+        }
+    }
+}

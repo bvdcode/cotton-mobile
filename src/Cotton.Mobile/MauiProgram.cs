@@ -43,6 +43,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IScreenReaderService, ScreenReaderService>();
 			builder.Services.AddSingleton<INetworkAccessService, NetworkAccessService>();
 			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
+			builder.Services.AddSingleton<IDiagnosticsPageService, DiagnosticsPageService>();
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();

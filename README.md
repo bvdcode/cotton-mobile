@@ -49,7 +49,7 @@ Use this short flow for closed-test invites, Play dogfooding, and release-candid
 7. Open a folder, confirm its contents or empty state, then go back up.
 8. Open a small text or image file.
 9. Download or share one file, then confirm it is marked `On device` when available.
-10. Send feedback from the account menu and describe anything confusing or broken; the draft includes device, Android, package, install channel, and browser context automatically. If no email app is available, Cotton copies the same details so they can be pasted into email or chat.
+10. Send feedback from the account menu and describe anything confusing or broken; the draft includes app version, device, Android, screen, cache, and browser context automatically. If no email app is available, Cotton copies the same details so they can be pasted into email or chat.
 
 Optional offline check: after opening a file once, turn on airplane mode and confirm only files marked `On device` still open.
 
@@ -61,7 +61,7 @@ COTTON_ADB_SERIAL=emulator-5554 scripts/mobile/install-android-debug.sh
 ```
 
 Use the emulator for fast visual checks, then batch real-device smoke tests on the Samsung A53 over ADB when the slice is worth testing on hardware.
-Debug builds install as `dev.cottoncloud.app.debug` / `Cotton Cloud Dev`, so they can live next to the Play/GitHub release package.
+Debug builds install side by side with the Play/GitHub release package.
 
 ## Repository Checks
 

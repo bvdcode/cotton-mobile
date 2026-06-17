@@ -66,8 +66,6 @@ namespace Cotton.Mobile.Services
                 string.Empty,
                 "---",
                 $"App: {_metadata.ApplicationName} {FormatVersion()}",
-                $"Package: {CreateValue(_metadata.PackageName)}",
-                $"Install channel: {CreateValue(_metadata.InstallChannel)}",
                 $"Device: {_metadata.DeviceName}",
                 $"OS: {_metadata.OperatingSystem}",
                 $"Screen: {CreateValue(_metadata.ScreenDetails)}",

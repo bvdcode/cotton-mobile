@@ -1,5 +1,6 @@
 using Cotton.Auth;
 using Cotton.Sdk.Auth;
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
@@ -10,11 +11,17 @@ namespace Cotton.Mobile.Services
         private const string RefreshTokenKey = "Cotton.Mobile.Auth.RefreshToken";
 
         private readonly ISecureStorage _secureStorage;
+        private readonly ILogger<SecureStorageCottonTokenStore> _logger;
 
-        public SecureStorageCottonTokenStore(ISecureStorage secureStorage)
+        public SecureStorageCottonTokenStore(
+            ISecureStorage secureStorage,
+            ILogger<SecureStorageCottonTokenStore> logger)
         {
             ArgumentNullException.ThrowIfNull(secureStorage);
+            ArgumentNullException.ThrowIfNull(logger);
+
             _secureStorage = secureStorage;
+            _logger = logger;
         }
 
         public async Task<TokenPairDto?> GetAsync(CancellationToken cancellationToken = default)
@@ -58,8 +65,17 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Refresh token is required.", nameof(tokens));
             }
 
-            await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
-            await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);
+            try
+            {
+                await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
+                await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile tokens; clearing local token store.");
+                await ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                throw;
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
         }

@@ -13,7 +13,7 @@
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="24"
-                                 Padding="0,24,0,96"
+                                 Padding="0,0,0,96"
                                  VerticalOptions="Start"
                                  MaximumWidthRequest="520">
                 <Image Source="appiconfg.svg"

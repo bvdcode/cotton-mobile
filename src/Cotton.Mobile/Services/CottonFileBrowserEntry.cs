@@ -77,7 +77,7 @@ namespace Cotton.Mobile.Services
                 file.Name,
                 kind,
                 $"{FormatSize(file.SizeBytes)} · {kind}",
-                "Download",
+                "More",
                 ResolveBadgeText(kind),
                 file.SizeBytes,
                 contentType);

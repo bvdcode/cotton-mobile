@@ -30,6 +30,7 @@ namespace Cotton.Mobile.ViewModels
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
+            IFileInteractionService fileInteractionService,
             ILogger<MainPageFileBrowserController> fileBrowserLogger,
             IMainPagePresentationService presentationService,
             ILogger<MainPageViewModel> logger)
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
+            ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(fileBrowserLogger);
             ArgumentNullException.ThrowIfNull(presentationService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -58,6 +60,7 @@ namespace Cotton.Mobile.ViewModels
                 Display,
                 fileBrowserService,
                 fileBrowserPreferenceStore,
+                fileInteractionService,
                 dialogService,
                 fileBrowserLogger);
             ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);

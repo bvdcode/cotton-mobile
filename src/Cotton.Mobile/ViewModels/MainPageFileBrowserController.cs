@@ -5,9 +5,16 @@ namespace Cotton.Mobile.ViewModels
 {
     public class MainPageFileBrowserController
     {
+        private const string CancelAction = "Cancel";
+        private const string DetailsAction = "Details";
+        private const string DownloadAction = "Download";
+        private const string OpenAction = "Open";
+        private const string ShareAction = "Share";
+
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
+        private readonly IFileInteractionService _fileInteractionService;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<MainPageFileBrowserController> _logger;
         private readonly Stack<CottonFolderHandle> _fileNavigation = new();
@@ -19,18 +26,21 @@ namespace Cotton.Mobile.ViewModels
             MainPageDisplayState display,
             ICottonFileBrowserService fileBrowserService,
             IFileBrowserPreferenceStore preferenceStore,
+            IFileInteractionService fileInteractionService,
             IUserDialogService dialogService,
             ILogger<MainPageFileBrowserController> logger)
         {
             ArgumentNullException.ThrowIfNull(display);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(preferenceStore);
+            ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _display = display;
             _fileBrowserService = fileBrowserService;
             _preferenceStore = preferenceStore;
+            _fileInteractionService = fileInteractionService;
             _dialogService = dialogService;
             _logger = logger;
         }
@@ -89,7 +99,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            await DownloadFileAsync(entry);
+            await ShowFileActionsAsync(entry);
         }
 
         public Task ToggleViewModeAsync()
@@ -125,6 +135,34 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
+        }
+
+        private async Task ShowFileActionsAsync(CottonFileBrowserEntry file)
+        {
+            string? action = await _dialogService.ShowActionSheetAsync(
+                file.Name,
+                CancelAction,
+                null,
+                OpenAction,
+                DownloadAction,
+                ShareAction,
+                DetailsAction);
+
+            switch (action)
+            {
+                case OpenAction:
+                    await OpenFileAsync(file);
+                    break;
+                case DownloadAction:
+                    await DownloadFileAsync(file);
+                    break;
+                case ShareAction:
+                    await ShareFileAsync(file);
+                    break;
+                case DetailsAction:
+                    await ShowFileDetailsAsync(file);
+                    break;
+            }
         }
 
         private Task SetSortModeAsync(CottonFileBrowserSortMode sortMode)
@@ -208,6 +246,62 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Download failed. Try again.");
             }
+        }
+
+        private async Task OpenFileAsync(CottonFileBrowserEntry file)
+        {
+            if (_instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to open files.");
+                return;
+            }
+
+            _display.ShowFilesLoading($"Opening {file.Name}...");
+
+            try
+            {
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(_instanceUri, file);
+                await _fileInteractionService.OpenAsync(result);
+                _display.ShowFilesStatus($"Opened {result.FileName}.");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
+                _display.ShowFilesStatus("Open failed. Try again.");
+            }
+        }
+
+        private async Task ShareFileAsync(CottonFileBrowserEntry file)
+        {
+            if (_instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to share files.");
+                return;
+            }
+
+            _display.ShowFilesLoading($"Preparing {file.Name}...");
+
+            try
+            {
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(_instanceUri, file);
+                await _fileInteractionService.ShareAsync(result);
+                _display.ShowFilesStatus($"Shared {result.FileName}.");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
+                _display.ShowFilesStatus("Share failed. Try again.");
+            }
+        }
+
+        private async Task ShowFileDetailsAsync(CottonFileBrowserEntry file)
+        {
+            string size = file.SizeBytes.HasValue ? $"{file.SizeBytes.Value:N0} bytes" : "Unknown size";
+            string contentType = file.ContentType ?? "Unknown type";
+            await _dialogService.ShowAlertAsync(
+                file.Name,
+                $"{file.Kind}\n{size}\n{contentType}",
+                "OK");
         }
     }
 }

@@ -34,6 +34,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IScreenReaderService, ScreenReaderService>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
+			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();

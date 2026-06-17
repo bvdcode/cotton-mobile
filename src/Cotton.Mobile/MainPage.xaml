@@ -106,17 +106,37 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="2"
+                                     Spacing="0"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="3"
+                                             Spacing="6"
                                              HorizontalOptions="Fill">
-                            <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
                                   ColumnSpacing="4">
-                                <VerticalStackLayout Spacing="2">
+                                <Button Grid.Column="0"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="↑"
+                                        Command="{Binding NavigateFilesUpCommand}"
+                                        IsEnabled="{Binding Display.CanNavigateFilesUp}"
+                                        Opacity="{Binding Display.FileUpButtonOpacity}"
+                                        Padding="0"
+                                        FontSize="17"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="Center"
+                                        HeightRequest="34"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="36"
+                                        WidthRequest="36"
+                                        SemanticProperties.Description="Up" />
+
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Spacing="1"
+                                                     VerticalOptions="Center">
                                     <Label Text="{Binding Display.FilesTitle}"
                                            FontSize="18"
                                            FontAttributes="Bold"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
                                     <Label Text="{Binding Display.FilesPath}"
@@ -133,48 +153,74 @@
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                                 </VerticalStackLayout>
 
-                                <Button Grid.Column="1"
+                                <Button Grid.Column="2"
                                         Style="{StaticResource FileChromeButton}"
-                                        Text="↑"
-                                        Command="{Binding NavigateFilesUpCommand}"
-                                        IsEnabled="{Binding Display.CanNavigateFilesUp}"
-                                        Opacity="{Binding Display.FileUpButtonOpacity}"
+                                        Text="{Binding Display.FileSearchButtonText}"
+                                        Command="{Binding ToggleFileSearchCommand}"
                                         Padding="0"
-                                        FontSize="18"
+                                        FontSize="15"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
                                         HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="40"
-                                        WidthRequest="42"
-                                        SemanticProperties.Description="Up" />
+                                        MinimumWidthRequest="36"
+                                        WidthRequest="36"
+                                        SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
-                                <Button Grid.Column="2"
+                                <Button Grid.Column="3"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="{Binding Display.FileSortButtonText}"
+                                        Command="{Binding ShowFileSortActionsCommand}"
+                                        Padding="0"
+                                        FontSize="12"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="Center"
+                                        HeightRequest="34"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="52"
+                                        WidthRequest="56"
+                                        SemanticProperties.Description="Sort files" />
+
+                                <Button Grid.Column="4"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="{Binding Display.FileViewButtonText}"
+                                        Command="{Binding ShowFileViewActionsCommand}"
+                                        Padding="0"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="Center"
+                                        HeightRequest="34"
+                                        MinimumHeightRequest="32"
+                                        MinimumWidthRequest="36"
+                                        WidthRequest="36"
+                                        SemanticProperties.Description="Change file view" />
+
+                                <Button Grid.Column="5"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="↻"
                                         Command="{Binding RefreshFilesCommand}"
                                         Padding="0"
-                                        FontSize="18"
+                                        FontSize="17"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
                                         HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="40"
-                                        WidthRequest="42"
+                                        MinimumWidthRequest="36"
+                                        WidthRequest="36"
                                         SemanticProperties.Description="Refresh" />
 
-                                <Button Grid.Column="3"
+                                <Button Grid.Column="6"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"
                                         Padding="0"
-                                        FontSize="13"
+                                        FontSize="12"
                                         FontAttributes="Bold"
                                         VerticalOptions="Center"
                                         HeightRequest="34"
                                         MinimumHeightRequest="32"
-                                        MinimumWidthRequest="40"
-                                        WidthRequest="42"
+                                        MinimumWidthRequest="36"
+                                        WidthRequest="36"
                                         SemanticProperties.Description="Account" />
                             </Grid>
 
@@ -182,37 +228,6 @@
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
-
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  ColumnSpacing="4"
-                                  HorizontalOptions="Fill">
-                                <Button Text="{Binding Display.FileSearchButtonText}"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Command="{Binding ToggleFileSearchCommand}"
-                                        HeightRequest="28"
-                                        MinimumHeightRequest="28"
-                                        WidthRequest="80"
-                                        SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
-
-                                <Button Grid.Column="1"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.FileSortButtonText}"
-                                        Command="{Binding ShowFileSortActionsCommand}"
-                                        HeightRequest="28"
-                                        MinimumHeightRequest="28"
-                                        MinimumWidthRequest="120"
-                                        HorizontalOptions="Fill"
-                                        SemanticProperties.Description="Sort files" />
-
-                                <Button Grid.Column="2"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.FileViewButtonText}"
-                                        Command="{Binding ShowFileViewActionsCommand}"
-                                        HeightRequest="28"
-                                        MinimumHeightRequest="28"
-                                        WidthRequest="110"
-                                        SemanticProperties.Description="Change file view" />
-                            </Grid>
 
                             <SearchBar x:Name="FileSearchBar"
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"

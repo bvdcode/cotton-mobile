@@ -207,12 +207,9 @@ namespace Cotton.Mobile.ViewModels
         {
             get
             {
-                if (!string.IsNullOrWhiteSpace(FileSearchText))
-                {
-                    return "Clear";
-                }
-
-                return _isFileSearchOpen ? "Close" : "Search";
+                return _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText)
+                    ? "×"
+                    : "⌕";
             }
         }
 
@@ -259,9 +256,16 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFileTileViewVisible => FileViewMode == CottonFileBrowserViewMode.Tiles;
 
-        public string FileViewButtonText => $"View: {FileViewMode}";
+        public string FileViewButtonText => FileViewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
-        public string FileSortButtonText => $"Sort: {FileSortMode}";
+        public string FileSortButtonText => FileSortMode switch
+        {
+            CottonFileBrowserSortMode.Name => "A-Z",
+            CottonFileBrowserSortMode.Updated => "New",
+            CottonFileBrowserSortMode.Type => "Type",
+            CottonFileBrowserSortMode.Size => "Size",
+            _ => FileSortMode.ToString(),
+        };
 
         public bool IsFilesLoading
         {

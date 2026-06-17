@@ -25,6 +25,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);
 			builder.Services.AddSingleton<IBrowser>(Browser.Default);
 			builder.Services.AddSingleton<IClipboard>(Clipboard.Default);
+			builder.Services.AddSingleton(_ => new HttpClient());
+			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
 			builder.Services.AddSingleton(
 				new CottonMobileOptions(
 					"Cotton Cloud",
@@ -38,6 +40,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
+			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();
 			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();

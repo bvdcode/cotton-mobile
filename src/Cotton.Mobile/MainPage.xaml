@@ -134,12 +134,11 @@
                                 </VerticalStackLayout>
 
                                 <Button Grid.Column="1"
+                                        Style="{StaticResource FileChromeButton}"
                                         Text="↑"
                                         Command="{Binding NavigateFilesUpCommand}"
                                         IsEnabled="{Binding Display.CanNavigateFilesUp}"
                                         Opacity="{Binding Display.FileUpButtonOpacity}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="0"
                                         FontSize="20"
                                         FontAttributes="Bold"
@@ -151,10 +150,9 @@
                                         SemanticProperties.Description="Up" />
 
                                 <Button Grid.Column="2"
+                                        Style="{StaticResource FileChromeButton}"
                                         Text="↻"
                                         Command="{Binding RefreshFilesCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="0"
                                         FontSize="20"
                                         FontAttributes="Bold"
@@ -166,10 +164,9 @@
                                         SemanticProperties.Description="Refresh" />
 
                                 <Button Grid.Column="3"
+                                        Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                                         Padding="0"
                                         FontSize="14"
                                         FontAttributes="Bold"
@@ -190,23 +187,17 @@
                                   ColumnSpacing="6"
                                   HorizontalOptions="Fill">
                                 <Button Text="{Binding Display.FileSearchButtonText}"
+                                        Style="{StaticResource FileChromeButton}"
                                         Command="{Binding ToggleFileSearchCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="8,0"
-                                        FontSize="13"
                                         HeightRequest="30"
                                         MinimumHeightRequest="30"
                                         WidthRequest="88"
                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
                                 <Button Grid.Column="1"
+                                        Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.FileSortButtonText}"
                                         Command="{Binding ShowFileSortActionsCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="8,0"
-                                        FontSize="13"
                                         HeightRequest="30"
                                         MinimumHeightRequest="30"
                                         MinimumWidthRequest="128"
@@ -214,12 +205,9 @@
                                         SemanticProperties.Description="Sort files" />
 
                                 <Button Grid.Column="2"
+                                        Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.FileViewButtonText}"
                                         Command="{Binding ShowFileViewActionsCommand}"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                                        Padding="8,0"
-                                        FontSize="13"
                                         HeightRequest="30"
                                         MinimumHeightRequest="30"
                                         WidthRequest="118"

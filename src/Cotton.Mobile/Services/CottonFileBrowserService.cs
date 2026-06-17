@@ -50,14 +50,17 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Only files can be downloaded.", nameof(file));
             }
 
-            string directory = Path.Combine(FileSystem.AppDataDirectory, DownloadDirectoryName);
+            string directory = Path.Combine(
+                FileSystem.AppDataDirectory,
+                DownloadDirectoryName,
+                file.Id.ToString("D"));
             Directory.CreateDirectory(directory);
-            string filePath = CreateAvailablePath(directory, file.Name);
+            string filePath = Path.Combine(directory, CreateSafeFileName(file.Name));
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
             await using var destination = new FileStream(
                 filePath,
-                FileMode.CreateNew,
+                FileMode.Create,
                 FileAccess.Write,
                 FileShare.None,
                 bufferSize: 81920,
@@ -94,29 +97,6 @@ namespace Cotton.Mobile.Services
                 .ToList();
 
             return new CottonFolderContent(folderId, folderName, entries);
-        }
-
-        private static string CreateAvailablePath(string directory, string fileName)
-        {
-            string safeFileName = CreateSafeFileName(fileName);
-            string candidate = Path.Combine(directory, safeFileName);
-            if (!File.Exists(candidate))
-            {
-                return candidate;
-            }
-
-            string name = Path.GetFileNameWithoutExtension(safeFileName);
-            string extension = Path.GetExtension(safeFileName);
-            for (int index = 1; index < int.MaxValue; index++)
-            {
-                candidate = Path.Combine(directory, $"{name} ({index}){extension}");
-                if (!File.Exists(candidate))
-                {
-                    return candidate;
-                }
-            }
-
-            throw new IOException("Could not create a unique download file name.");
         }
 
         private static string CreateSafeFileName(string fileName)

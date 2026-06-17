@@ -184,8 +184,9 @@
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                            <HorizontalStackLayout Spacing="6"
-                                                   HorizontalOptions="Start">
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="6"
+                                  HorizontalOptions="Fill">
                                 <Button Text="{Binding Display.FileSearchButtonText}"
                                         Command="{Binding ToggleFileSearchCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
@@ -197,7 +198,8 @@
                                         WidthRequest="88"
                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
 
-                                <Button Text="{Binding Display.FileSortButtonText}"
+                                <Button Grid.Column="1"
+                                        Text="{Binding Display.FileSortButtonText}"
                                         Command="{Binding ShowFileSortActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
@@ -205,10 +207,12 @@
                                         FontSize="13"
                                         HeightRequest="30"
                                         MinimumHeightRequest="30"
-                                        WidthRequest="128"
+                                        MinimumWidthRequest="128"
+                                        HorizontalOptions="Fill"
                                         SemanticProperties.Description="Sort files" />
 
-                                <Button Text="{Binding Display.FileViewButtonText}"
+                                <Button Grid.Column="2"
+                                        Text="{Binding Display.FileViewButtonText}"
                                         Command="{Binding ShowFileViewActionsCommand}"
                                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
@@ -218,7 +222,7 @@
                                         MinimumHeightRequest="30"
                                         WidthRequest="118"
                                         SemanticProperties.Description="Change file view" />
-                            </HorizontalStackLayout>
+                            </Grid>
 
                             <SearchBar x:Name="FileSearchBar"
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"

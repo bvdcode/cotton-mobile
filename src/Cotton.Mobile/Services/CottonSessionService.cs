@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly ICottonTokenStore _tokenStore;
+        private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
         private readonly IBrowser _browser;
         private readonly IApplicationForegroundService _foregroundService;
         private readonly ILogger<CottonSessionService> _logger;
@@ -24,6 +25,7 @@ namespace Cotton.Mobile.Services
             ICottonInstanceStore instanceStore,
             ICottonMobileApplicationMetadata metadata,
             ICottonTokenStore tokenStore,
+            ICottonPendingAppCodeSessionStore pendingSessionStore,
             IBrowser browser,
             IApplicationForegroundService foregroundService,
             ILogger<CottonSessionService> logger)
@@ -32,6 +34,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(metadata);
             ArgumentNullException.ThrowIfNull(tokenStore);
+            ArgumentNullException.ThrowIfNull(pendingSessionStore);
             ArgumentNullException.ThrowIfNull(browser);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -40,6 +43,7 @@ namespace Cotton.Mobile.Services
             _instanceStore = instanceStore;
             _metadata = metadata;
             _tokenStore = tokenStore;
+            _pendingSessionStore = pendingSessionStore;
             _browser = browser;
             _foregroundService = foregroundService;
             _logger = logger;
@@ -50,13 +54,14 @@ namespace Cotton.Mobile.Services
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (instanceUri is null)
             {
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated();
             }
 
             TokenPairDto? tokens = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (tokens is null)
             {
-                return CottonSessionResult.Unauthenticated(instanceUri);
+                return await RestorePendingAuthorizationAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             }
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
@@ -67,6 +72,7 @@ namespace Cotton.Mobile.Services
                     .ConfigureAwait(false);
                 await _tokenStore.SaveAsync(refreshedTokens, cancellationToken).ConfigureAwait(false);
                 UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
 
                 return CottonSessionResult.Authenticated(instanceUri, user);
             }
@@ -83,6 +89,7 @@ namespace Cotton.Mobile.Services
             CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
 
             await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
             await _instanceStore.SaveAsync(instanceUri, cancellationToken).ConfigureAwait(false);
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
@@ -94,24 +101,54 @@ namespace Cotton.Mobile.Services
                     DeviceName = _metadata.DeviceName,
                 },
                 cancellationToken).ConfigureAwait(false);
-
-            bool browserOpened = await MainThread.InvokeOnMainThreadAsync(
-                () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.SystemPreferred()))
+            await _pendingSessionStore
+                .SaveAsync(CreatePendingSession(instanceUri, session), cancellationToken)
                 .ConfigureAwait(false);
+
+            bool browserOpened;
+            try
+            {
+                browserOpened = await MainThread.InvokeOnMainThreadAsync(
+                    () => _browser.OpenAsync(session.ApprovalUri, CottonBrowserLaunchOptions.SystemPreferred()))
+                    .ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile app-code authorization browser.");
+                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                throw;
+            }
+
             if (!browserOpened)
             {
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.BrowserUnavailable, instanceUri);
             }
 
-            bool returnedBeforeExpiration = await WaitForBrowserReturnAsync(
-                session,
-                cancellationToken).ConfigureAwait(false);
-            if (!returnedBeforeExpiration)
+            try
             {
-                return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
-            }
+                bool returnedBeforeExpiration = await WaitForBrowserReturnAsync(
+                    session,
+                    cancellationToken).ConfigureAwait(false);
+                if (!returnedBeforeExpiration)
+                {
+                    await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                    return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
+                }
 
-            return await PollUntilCompleteAsync(client, session, instanceUri, cancellationToken).ConfigureAwait(false);
+                CottonSessionResult result = await PollUntilCompleteAsync(
+                    client,
+                    session,
+                    instanceUri,
+                    cancellationToken).ConfigureAwait(false);
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                return result;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                throw;
+            }
         }
 
         public async Task LogoutAsync(CancellationToken cancellationToken = default)
@@ -141,7 +178,70 @@ namespace Cotton.Mobile.Services
         public async Task ClearLocalSessionAsync(CancellationToken cancellationToken = default)
         {
             await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
             await _instanceStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<CottonSessionResult> RestorePendingAuthorizationAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            CottonPendingAppCodeSession? pendingSession = await _pendingSessionStore
+                .GetAsync(cancellationToken)
+                .ConfigureAwait(false);
+            if (pendingSession is null)
+            {
+                return CottonSessionResult.Unauthenticated(instanceUri);
+            }
+
+            if (!Uri.Equals(pendingSession.InstanceUri, instanceUri))
+            {
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                return CottonSessionResult.Unauthenticated(instanceUri);
+            }
+
+            if (pendingSession.ExpiresAt <= DateTime.UtcNow)
+            {
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
+            }
+
+            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+            CottonSessionResult result = await PollUntilCompleteAsync(
+                client,
+                CreateAuthorizationSession(pendingSession),
+                instanceUri,
+                cancellationToken).ConfigureAwait(false);
+            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+            return result;
+        }
+
+        private static CottonPendingAppCodeSession CreatePendingSession(
+            Uri instanceUri,
+            AppCodeAuthorizationSession session)
+        {
+            return new CottonPendingAppCodeSession
+            {
+                InstanceUri = instanceUri,
+                ApprovalId = session.ApprovalId,
+                ApprovalUri = session.ApprovalUri,
+                PollToken = session.PollToken,
+                ExpiresAt = session.ExpiresAt,
+                PollInterval = session.PollInterval,
+            };
+        }
+
+        private static AppCodeAuthorizationSession CreateAuthorizationSession(
+            CottonPendingAppCodeSession pendingSession)
+        {
+            return new AppCodeAuthorizationSession
+            {
+                ApprovalId = pendingSession.ApprovalId,
+                ApprovalUri = pendingSession.ApprovalUri,
+                PollToken = pendingSession.PollToken,
+                ExpiresAt = pendingSession.ExpiresAt,
+                PollInterval = pendingSession.PollInterval,
+            };
         }
 
         private async Task<CottonSessionResult> PollUntilCompleteAsync(

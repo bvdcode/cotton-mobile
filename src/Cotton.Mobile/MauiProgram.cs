@@ -55,6 +55,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
+			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
 			builder.Services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
 			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();

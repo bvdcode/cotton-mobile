@@ -140,7 +140,7 @@ namespace Cotton.Mobile.Services
             string contentType = string.IsNullOrWhiteSpace(file.ContentType)
                 ? string.Empty
                 : file.ContentType.Trim();
-            string kind = ResolveFileKind(file.Name, contentType);
+            string kind = ResolveFileKind(file.Name, CreateContentTypeMediaType(contentType));
             return new CottonFileBrowserEntry(
                 file.Id,
                 CottonFileBrowserEntryType.File,
@@ -289,6 +289,20 @@ namespace Cotton.Mobile.Services
             return contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
                 || TextContentTypes.Contains(contentType)
                 || TextFileExtensions.Contains(Path.GetExtension(name));
+        }
+
+        private static string CreateContentTypeMediaType(string contentType)
+        {
+            if (string.IsNullOrWhiteSpace(contentType))
+            {
+                return string.Empty;
+            }
+
+            int parameterIndex = contentType.IndexOf(';', StringComparison.Ordinal);
+            string mediaType = parameterIndex < 0
+                ? contentType
+                : contentType[..parameterIndex];
+            return mediaType.Trim();
         }
 
         private static string ResolveBadgeText(string kind)

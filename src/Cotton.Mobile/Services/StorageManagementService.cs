@@ -6,6 +6,7 @@ namespace Cotton.Mobile.Services
     {
         private const string ThumbnailCacheName = "Thumbnails";
         private const string DownloadedFilesName = "Downloaded files";
+        private const string TemporaryThumbnailFileExtension = ".tmp";
 
         private readonly FileThumbnailCacheOptions _thumbnailOptions;
         private readonly ILogger<StorageManagementService> _logger;
@@ -34,7 +35,8 @@ namespace Cotton.Mobile.Services
                             ThumbnailCacheName,
                             CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
                             SearchOption.TopDirectoryOnly,
-                            cancellationToken),
+                            cancellationToken,
+                            includeTemporaryThumbnails: false),
                         ScanDirectory(
                             DownloadedFilesName,
                             CottonMobileStoragePaths.CreateDownloadsDirectory(),
@@ -138,6 +140,7 @@ namespace Cotton.Mobile.Services
             string directory,
             SearchOption searchOption,
             CancellationToken cancellationToken,
+            bool includeTemporaryThumbnails = true,
             bool includeTemporaryDownloads = true)
         {
             if (!Directory.Exists(directory))
@@ -155,6 +158,11 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
+                if (!includeTemporaryThumbnails && IsTemporaryThumbnailPath(file))
+                {
+                    continue;
+                }
+
                 var info = new FileInfo(file);
                 if (!info.Exists)
                 {
@@ -166,6 +174,11 @@ namespace Cotton.Mobile.Services
             }
 
             return new CottonStorageCategorySnapshot(name, sizeBytes, fileCount);
+        }
+
+        private static bool IsTemporaryThumbnailPath(string path)
+        {
+            return path.EndsWith(TemporaryThumbnailFileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         private void DeleteFile(string file)

@@ -1,5 +1,6 @@
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
@@ -11,22 +12,26 @@ namespace Cotton.Mobile.Services
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly ILauncher _launcher;
         private readonly IClipboard _clipboard;
+        private readonly ILogger<FeedbackService> _logger;
 
         public FeedbackService(
             CottonMobileOptions options,
             ICottonMobileApplicationMetadata metadata,
             ILauncher launcher,
-            IClipboard clipboard)
+            IClipboard clipboard,
+            ILogger<FeedbackService> logger)
         {
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(metadata);
             ArgumentNullException.ThrowIfNull(launcher);
             ArgumentNullException.ThrowIfNull(clipboard);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _options = options;
             _metadata = metadata;
             _launcher = launcher;
             _clipboard = clipboard;
+            _logger = logger;
         }
 
         public async Task<FeedbackDeliveryResult> OpenFeedbackAsync(
@@ -110,13 +115,25 @@ namespace Cotton.Mobile.Services
             });
         }
 
-        private Task<bool> OpenFeedbackComposerAsync(Uri uri, CancellationToken cancellationToken)
+        private async Task<bool> OpenFeedbackComposerAsync(Uri uri, CancellationToken cancellationToken)
         {
-            return MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                return await _launcher.OpenAsync(uri);
-            });
+                return await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return await _launcher.OpenAsync(uri);
+                });
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton Cloud feedback composer.");
+                return false;
+            }
         }
 
         private static string CreateValue(string? value)

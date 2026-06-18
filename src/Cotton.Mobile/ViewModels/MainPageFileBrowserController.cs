@@ -864,6 +864,7 @@ namespace Cotton.Mobile.ViewModels
                 shouldRunRecoveryRefresh = await ShowDownloadedFileActionsBestEffortAsync(
                     file,
                     result,
+                    () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
             }
             catch (Exception exception)
@@ -1260,6 +1261,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task<bool> ShowDownloadedFileActionsAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
+            Func<bool> canUseAction,
             CancellationToken cancellationToken)
         {
             string openAction = CreateOpenAction(file, downloadedFile);
@@ -1271,16 +1273,20 @@ namespace Cotton.Mobile.ViewModels
                 ShareAction);
 
             cancellationToken.ThrowIfCancellationRequested();
+            if (!canUseAction())
+            {
+                return false;
+            }
 
             if (string.Equals(action, openAction, StringComparison.Ordinal))
             {
-                return await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
+                return await OpenDownloadedFileAsync(file, downloadedFile, canUseAction, cancellationToken);
             }
 
             switch (action)
             {
                 case ShareAction:
-                    return await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
+                    return await ShareDownloadedFileAsync(file, downloadedFile, canUseAction, cancellationToken);
             }
 
             return true;
@@ -1289,11 +1295,12 @@ namespace Cotton.Mobile.ViewModels
         private async Task<bool> ShowDownloadedFileActionsBestEffortAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
+            Func<bool> canUseAction,
             CancellationToken cancellationToken)
         {
             try
             {
-                return await ShowDownloadedFileActionsAsync(file, downloadedFile, cancellationToken);
+                return await ShowDownloadedFileActionsAsync(file, downloadedFile, canUseAction, cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -1301,6 +1308,15 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!canUseAction())
+                {
+                    _logger.LogDebug(
+                        exception,
+                        "Ignored stale Cotton mobile downloaded file actions failure {FileId}.",
+                        file.Id);
+                    return false;
+                }
+
                 _logger.LogWarning(exception, "Failed to show Cotton mobile downloaded file actions {FileId}.", file.Id);
                 _display.ShowFilesStatus("Downloaded. Could not show file actions.");
                 return false;
@@ -1342,9 +1358,15 @@ namespace Cotton.Mobile.ViewModels
         private async Task<bool> OpenDownloadedFileAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
+            Func<bool> canUseAction,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (!canUseAction())
+            {
+                return false;
+            }
+
             _display.ShowFileActionLoading($"Opening {file.Name}...");
 
             try
@@ -1359,6 +1381,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
+                if (!canUseAction())
+                {
+                    return false;
+                }
+
                 _display.ShowFilesSummary();
                 return true;
             }
@@ -1368,6 +1395,15 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!canUseAction())
+                {
+                    _logger.LogDebug(
+                        exception,
+                        "Ignored stale Cotton mobile downloaded file open failure {FileId}.",
+                        file.Id);
+                    return false;
+                }
+
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(
@@ -1381,15 +1417,26 @@ namespace Cotton.Mobile.ViewModels
         private async Task<bool> ShareDownloadedFileAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
+            Func<bool> canUseAction,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (!canUseAction())
+            {
+                return false;
+            }
+
             _display.ShowFileActionLoading($"Sharing {file.Name}...");
 
             try
             {
                 await _fileInteractionService.ShareAsync(downloadedFile, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
+                if (!canUseAction())
+                {
+                    return false;
+                }
+
                 _display.ShowFilesSummary();
                 return true;
             }
@@ -1399,6 +1446,15 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!canUseAction())
+                {
+                    _logger.LogDebug(
+                        exception,
+                        "Ignored stale Cotton mobile downloaded file share failure {FileId}.",
+                        file.Id);
+                    return false;
+                }
+
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(

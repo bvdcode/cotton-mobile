@@ -899,6 +899,12 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 ClearFileActionRetry();
+                if (ShowReusableLocalFileIfAvailable(file))
+                {
+                    _display.ShowFilesSummary();
+                    return;
+                }
+
                 _display.ShowFilesStatus("Open cancelled.");
             }
             catch (Exception exception)
@@ -972,6 +978,12 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 ClearFileActionRetry();
+                if (ShowReusableLocalFileIfAvailable(file))
+                {
+                    _display.ShowFilesSummary();
+                    return;
+                }
+
                 _display.ShowFilesStatus("Share cancelled.");
             }
             catch (Exception exception)

@@ -379,7 +379,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     if (Display.IsProfileVisible)
                     {
-                        _fileBrowser.ClearLocalFileMarkers();
+                        _fileBrowser.RefreshLocalFileMarkersAfterStorageChange();
                     }
                 });
             }

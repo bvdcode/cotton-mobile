@@ -164,12 +164,16 @@ namespace Cotton.Mobile.ViewModels
             await LoadFolderAsync(_currentFolder, preserveHistory: true, isRefresh: true);
         }
 
-        public void ClearLocalFileMarkers()
+        public void RefreshLocalFileMarkersAfterStorageChange()
         {
-            _display.ClearFileLocalCopies();
+            if (_instanceUri is not null)
+            {
+                RefreshLocalFileMarkers(_instanceUri);
+            }
+
             if (!IsFileBrowserBusy())
             {
-                _display.ShowFilesStatus("Cached files cleared.");
+                _display.ShowFilesStatus("On-device files updated.");
             }
         }
 

@@ -565,7 +565,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task DownloadFileAsync(CottonFileBrowserEntry file)
         {
-            if (_instanceUri is null)
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to download files.");
                 return;
@@ -581,7 +582,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
-                    _instanceUri,
+                    instanceUri,
                     file,
                     CreateFileDownloadProgress(file, "Downloading"),
                     fileActionCancellation.Token);
@@ -592,6 +593,12 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile download authorization failure {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
@@ -602,6 +609,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile download failure {FileId}.", file.Id);
+                    return;
+                }
+
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(MainPageFileAction.Download, file, CreateFileActionFailureStatus("Download failed.", OfflineDownloadStatus));
             }
@@ -658,7 +671,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenFileAsync(CottonFileBrowserEntry file)
         {
-            if (_instanceUri is null)
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to open files.");
                 return;
@@ -674,7 +688,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
-                    _instanceUri,
+                    instanceUri,
                     file,
                     "Opening",
                     fileActionCancellation.Token);
@@ -692,6 +706,12 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open authorization failure {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
@@ -702,6 +722,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open failure {FileId}.", file.Id);
+                    return;
+                }
+
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
             }
@@ -713,7 +739,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShareFileAsync(CottonFileBrowserEntry file)
         {
-            if (_instanceUri is null)
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to share files.");
                 return;
@@ -729,7 +756,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
-                    _instanceUri,
+                    instanceUri,
                     file,
                     "Preparing",
                     fileActionCancellation.Token);
@@ -739,6 +766,12 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share authorization failure {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 await HandleSessionExpiredAsync(exception);
             }
@@ -749,6 +782,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share failure {FileId}.", file.Id);
+                    return;
+                }
+
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
             }
@@ -1034,6 +1073,12 @@ namespace Cotton.Mobile.ViewModels
         private bool IsActiveFileLoad(CancellationTokenSource cancellation, Uri instanceUri)
         {
             return ReferenceEquals(_fileLoadCancellation, cancellation)
+                && Uri.Equals(_instanceUri, instanceUri);
+        }
+
+        private bool IsActiveFileAction(CancellationTokenSource cancellation, Uri instanceUri)
+        {
+            return ReferenceEquals(_fileActionCancellation, cancellation)
                 && Uri.Equals(_instanceUri, instanceUri);
         }
 

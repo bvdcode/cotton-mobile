@@ -234,6 +234,12 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task ShowViewActionsAsync()
         {
+            Uri? instanceUri = GetActiveFileBrowserInstance();
+            if (instanceUri is null)
+            {
+                return;
+            }
+
             string listAction = CreateCurrentActionLabel(
                 ViewListAction,
                 _display.FileViewMode == CottonFileBrowserViewMode.List);
@@ -246,6 +252,11 @@ namespace Cotton.Mobile.ViewModels
                 null,
                 listAction,
                 tilesAction);
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
 
             switch (NormalizeAction(action))
             {
@@ -267,6 +278,12 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task ShowSortActionsAsync()
         {
+            Uri? instanceUri = GetActiveFileBrowserInstance();
+            if (instanceUri is null)
+            {
+                return;
+            }
+
             string nameAction = CreateCurrentActionLabel(
                 SortNameAction,
                 _display.FileSortMode == CottonFileBrowserSortMode.Name);
@@ -287,6 +304,11 @@ namespace Cotton.Mobile.ViewModels
                 updatedAction,
                 typeAction,
                 sizeAction);
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
 
             switch (NormalizeAction(action))
             {
@@ -423,10 +445,23 @@ namespace Cotton.Mobile.ViewModels
 
         private bool CanUseVisibleEntry(CottonFileBrowserEntry entry, Uri instanceUri)
         {
+            return CanUseFileBrowserContext(instanceUri)
+                && ContainsVisibleEntry(entry);
+        }
+
+        private Uri? GetActiveFileBrowserInstance()
+        {
+            Uri? instanceUri = _instanceUri;
+            return instanceUri is not null && CanUseFileBrowserContext(instanceUri)
+                ? instanceUri
+                : null;
+        }
+
+        private bool CanUseFileBrowserContext(Uri instanceUri)
+        {
             return Uri.Equals(_instanceUri, instanceUri)
                 && _display.IsProfileVisible
-                && !IsFileBrowserBusy()
-                && ContainsVisibleEntry(entry);
+                && !IsFileBrowserBusy();
         }
 
         private bool ContainsVisibleEntry(CottonFileBrowserEntry entry)

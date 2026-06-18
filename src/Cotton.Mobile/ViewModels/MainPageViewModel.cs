@@ -133,10 +133,12 @@ namespace Cotton.Mobile.ViewModels
                 () => Display.IsFileUpButtonEnabled);
             ActivateFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 _fileBrowser.ActivateEntryAsync,
-                LogUnhandledCommandException);
+                LogUnhandledCommandException,
+                _ => Display.IsFileBrowserChromeEnabled);
             ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 _fileBrowser.ShowEntryActionsAsync,
-                LogUnhandledCommandException);
+                LogUnhandledCommandException,
+                _ => Display.IsFileBrowserChromeEnabled);
             CancelFileActionCommand = new AsyncCommand(
                 _fileBrowser.CancelFileActionAsync,
                 LogUnhandledCommandException,
@@ -859,6 +861,8 @@ namespace Cotton.Mobile.ViewModels
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.IsFileBrowserChromeEnabled):
+                    ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
+                    ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
                     ToggleFileSearchCommand.RaiseCanExecuteChanged();
                     ShowFileViewActionsCommand.RaiseCanExecuteChanged();
                     ShowFileSortActionsCommand.RaiseCanExecuteChanged();

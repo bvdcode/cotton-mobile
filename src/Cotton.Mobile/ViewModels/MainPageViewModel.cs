@@ -685,11 +685,33 @@ namespace Cotton.Mobile.ViewModels
                 CreateFeedbackFileLocation(),
                 Display.VisibleFileEntryCount,
                 Display.TotalFileEntryCount,
-                Display.FileViewMode.ToString(),
-                Display.FileSortMode.ToString(),
+                FormatFileViewMode(Display.FileViewMode),
+                FormatFileSortMode(Display.FileSortMode),
                 Display.IsFileSearchActive,
                 Display.FilesStatus,
                 _networkAccess.HasInternetAccess);
+        }
+
+        private static string FormatFileViewMode(CottonFileBrowserViewMode viewMode)
+        {
+            return viewMode switch
+            {
+                CottonFileBrowserViewMode.List => "List",
+                CottonFileBrowserViewMode.Tiles => "Tiles",
+                _ => viewMode.ToString(),
+            };
+        }
+
+        private static string FormatFileSortMode(CottonFileBrowserSortMode sortMode)
+        {
+            return sortMode switch
+            {
+                CottonFileBrowserSortMode.Name => "A-Z",
+                CottonFileBrowserSortMode.Updated => "Newest",
+                CottonFileBrowserSortMode.Type => "Type",
+                CottonFileBrowserSortMode.Size => "Size",
+                _ => sortMode.ToString(),
+            };
         }
 
         private async Task<CottonStorageSummary?> TryCreateFeedbackStorageSummaryAsync()

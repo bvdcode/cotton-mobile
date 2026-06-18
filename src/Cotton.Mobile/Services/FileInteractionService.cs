@@ -11,6 +11,9 @@ namespace Cotton.Mobile.Services
 
         public FileInteractionService(ILauncher launcher, IShare share)
         {
+            ArgumentNullException.ThrowIfNull(launcher);
+            ArgumentNullException.ThrowIfNull(share);
+
             _launcher = launcher;
             _share = share;
         }

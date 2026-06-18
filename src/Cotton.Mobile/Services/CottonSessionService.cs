@@ -55,8 +55,7 @@ namespace Cotton.Mobile.Services
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (instanceUri is null)
             {
-                await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated();
             }
 
@@ -90,8 +89,7 @@ namespace Cotton.Mobile.Services
         {
             CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
 
-            await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
-            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+            await ClearLocalSessionAsync(cancellationToken).ConfigureAwait(false);
             await _instanceStore.SaveAsync(instanceUri, cancellationToken).ConfigureAwait(false);
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);

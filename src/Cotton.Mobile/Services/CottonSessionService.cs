@@ -55,6 +55,7 @@ namespace Cotton.Mobile.Services
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
             if (instanceUri is null)
             {
+                await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
                 await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated();
             }

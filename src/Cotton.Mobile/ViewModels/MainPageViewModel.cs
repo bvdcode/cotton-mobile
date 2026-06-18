@@ -209,11 +209,13 @@ namespace Cotton.Mobile.ViewModels
             catch (OperationCanceledException exception) when (authorizationCancellation.IsCancellationRequested)
             {
                 _logger.LogInformation(exception, "Cotton mobile browser authorization was cancelled.");
+                await ClearLocalSessionAndCachedStateAsync("authorization cancellation");
                 ShowSignIn("Authorization cancelled.");
             }
             catch (Exception exception)
             {
                 _logger.LogError(exception, "Cotton mobile browser authorization failed.");
+                await ClearLocalSessionAndCachedStateAsync("authorization failure");
                 ShowSignIn(_presentationService.CreateAuthorizationFailureStatus(exception));
             }
             finally
@@ -555,8 +557,15 @@ namespace Cotton.Mobile.ViewModels
 
         private static bool ShouldClearLocalSessionAndCachedState(CottonSessionResult result)
         {
-            return result.Status == CottonSessionResultStatus.SessionExpired
-                || (result.Status == CottonSessionResultStatus.Unauthenticated && result.InstanceUri is not null);
+            return result.InstanceUri is not null
+                && result.Status is CottonSessionResultStatus.Unauthenticated
+                    or CottonSessionResultStatus.AuthorizationDenied
+                    or CottonSessionResultStatus.AuthorizationExpired
+                    or CottonSessionResultStatus.AuthorizationNotFound
+                    or CottonSessionResultStatus.BrowserUnavailable
+                    or CottonSessionResultStatus.TimedOut
+                    or CottonSessionResultStatus.AuthorizationFailed
+                    or CottonSessionResultStatus.SessionExpired;
         }
 
         private void ShowLoading(string message)

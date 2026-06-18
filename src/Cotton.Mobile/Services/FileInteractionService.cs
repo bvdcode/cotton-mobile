@@ -12,9 +12,13 @@ namespace Cotton.Mobile.Services
             EnsureFileExists(file);
 
             cancellationToken.ThrowIfCancellationRequested();
-            bool opened = await MainThread.InvokeOnMainThreadAsync(
-                () => Launcher.Default.OpenAsync(
-                    new OpenFileRequest(file.FileName, new ReadOnlyFile(file.FilePath))));
+            bool opened = await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return await Launcher.Default.OpenAsync(
+                    new OpenFileRequest(file.FileName, new ReadOnlyFile(file.FilePath)));
+            });
+            cancellationToken.ThrowIfCancellationRequested();
             if (!opened)
             {
                 throw new InvalidOperationException("No installed app can open this file.");
@@ -27,9 +31,13 @@ namespace Cotton.Mobile.Services
             EnsureFileExists(file);
 
             cancellationToken.ThrowIfCancellationRequested();
-            await MainThread.InvokeOnMainThreadAsync(
-                () => Share.Default.RequestAsync(
-                    new ShareFileRequest(file.FileName, new ShareFile(file.FilePath))));
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Share.Default.RequestAsync(
+                    new ShareFileRequest(file.FileName, new ShareFile(file.FilePath)));
+            });
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         private static void EnsureFileExists(CottonFileDownloadResult file)

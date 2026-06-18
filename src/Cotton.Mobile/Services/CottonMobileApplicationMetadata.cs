@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 
@@ -11,44 +12,80 @@ namespace Cotton.Mobile.Services
         private const string DebugInstallChannel = "Debug APK";
         private const string ReleaseInstallChannel = "Release package";
         private const string CustomInstallChannel = "Custom package";
+        private const string UnknownValue = "Unknown";
+        private const string UnknownApplicationVersion = "unknown";
 
         private readonly CottonMobileOptions _options;
+        private readonly ILogger<CottonMobileApplicationMetadata> _logger;
 
-        public CottonMobileApplicationMetadata(CottonMobileOptions options)
+        public CottonMobileApplicationMetadata(
+            CottonMobileOptions options,
+            ILogger<CottonMobileApplicationMetadata> logger)
         {
             ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(logger);
+
             _options = options;
+            _logger = logger;
         }
 
         public string ApplicationName => _options.ApplicationName;
 
-        public string ApplicationVersion => AppInfo.Current.VersionString;
+        public string ApplicationVersion => ReadMetadata(
+            "application version",
+            () => AppInfo.Current.VersionString,
+            UnknownApplicationVersion);
 
-        public string ApplicationBuild => AppInfo.Current.BuildString;
+        public string ApplicationBuild => ReadMetadata(
+            "application build",
+            () => AppInfo.Current.BuildString,
+            string.Empty);
 
-        public string PackageName => AppInfo.Current.PackageName;
+        public string PackageName => ReadMetadata(
+            "package name",
+            () => AppInfo.Current.PackageName,
+            string.Empty);
 
         public string InstallChannel => ResolveInstallChannel(PackageName);
 
-        public string DeviceName
-        {
-            get
-            {
-                string deviceName = DeviceInfo.Current.Name;
-                if (!string.IsNullOrWhiteSpace(deviceName))
-                {
-                    return deviceName.Trim();
-                }
+        public string DeviceName => ReadMetadata("device name", CreateDeviceName, UnknownValue);
 
-                return $"{DeviceInfo.Current.Manufacturer} {DeviceInfo.Current.Model}".Trim();
+        public string OperatingSystem => ReadMetadata(
+            "operating system",
+            () => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}",
+            UnknownValue);
+
+        public string ScreenDetails => ReadMetadata(
+            "screen details",
+            () => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo),
+            UnknownValue);
+
+        public string UserAgent => $"{ApplicationName}/{ApplicationVersion}";
+
+        private string ReadMetadata(string name, Func<string> read, string fallback)
+        {
+            try
+            {
+                string value = read();
+                return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Failed to read Cotton mobile {MetadataName}.", name);
+                return fallback;
             }
         }
 
-        public string OperatingSystem => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}".Trim();
+        private static string CreateDeviceName()
+        {
+            string deviceName = DeviceInfo.Current.Name;
+            if (!string.IsNullOrWhiteSpace(deviceName))
+            {
+                return deviceName;
+            }
 
-        public string ScreenDetails => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo);
-
-        public string UserAgent => $"{ApplicationName}/{ApplicationVersion}";
+            return $"{DeviceInfo.Current.Manufacturer} {DeviceInfo.Current.Model}";
+        }
 
         private static string CreateScreenDetails(DisplayInfo displayInfo)
         {

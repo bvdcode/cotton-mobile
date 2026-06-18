@@ -24,18 +24,24 @@ namespace Cotton.Mobile.Services
 
         public event EventHandler? InternetAccessRestored;
 
-        public bool HasInternetAccess => GetCurrentNetworkAccess() == NetworkAccess.Internet;
+        public bool HasInternetAccess => UpdateNetworkAccess(_connectivity.NetworkAccess) == NetworkAccess.Internet;
 
         private void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
         {
+            UpdateNetworkAccess(e.NetworkAccess);
+        }
+
+        private NetworkAccess UpdateNetworkAccess(NetworkAccess currentAccess)
+        {
             NetworkAccess previousAccess = _networkAccess;
-            _networkAccess = e.NetworkAccess;
-            if (previousAccess == NetworkAccess.Internet || _networkAccess != NetworkAccess.Internet)
+            _networkAccess = currentAccess;
+            if (previousAccess == NetworkAccess.Internet || currentAccess != NetworkAccess.Internet)
             {
-                return;
+                return currentAccess;
             }
 
             NotifyInternetAccessRestored();
+            return currentAccess;
         }
 
         private void NotifyInternetAccessRestored()
@@ -57,12 +63,6 @@ namespace Cotton.Mobile.Services
                     _logger.LogWarning(exception, "Cotton mobile internet-restored subscriber failed.");
                 }
             }
-        }
-
-        private NetworkAccess GetCurrentNetworkAccess()
-        {
-            _networkAccess = _connectivity.NetworkAccess;
-            return _networkAccess;
         }
     }
 }

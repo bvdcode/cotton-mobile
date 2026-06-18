@@ -1336,6 +1336,7 @@ namespace Cotton.Mobile.ViewModels
 
             _fileActionCancellation = null;
             cancellation.Dispose();
+            QueueFileLoadRecoveryRefreshAfterFileAction();
         }
 
         private void EndFileLoad(CancellationTokenSource cancellation)
@@ -1438,6 +1439,16 @@ namespace Cotton.Mobile.ViewModels
 
             _isRecoveryRefreshInProgress = true;
             _ = RunQueuedFileLoadRecoveryRefreshAsync(reason);
+        }
+
+        private void QueueFileLoadRecoveryRefreshAfterFileAction()
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return;
+            }
+
+            QueueFileLoadRecoveryRefresh("file action completed");
         }
 
         private async Task RunQueuedFileLoadRecoveryRefreshAsync(string reason)

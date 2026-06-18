@@ -520,9 +520,7 @@ namespace Cotton.Mobile.ViewModels
         private Uri? ResolveInstanceUri()
         {
             Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.InstanceUrl);
-            if (instanceUri is null
-                || !string.Equals(instanceUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
-                || string.IsNullOrWhiteSpace(instanceUri.Host))
+            if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
             {
                 return null;
             }

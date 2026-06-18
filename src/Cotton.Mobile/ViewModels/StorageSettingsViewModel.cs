@@ -184,10 +184,14 @@ namespace Cotton.Mobile.ViewModels
                     ShowSummary(summary);
                     Status = successStatus;
                 },
-                "Could not clear app storage.");
+                "Could not clear app storage.",
+                RefreshSummaryAfterClearFailureAsync);
         }
 
-        private async Task RunStorageActionAsync(Func<Task> actionAsync, string failureStatus)
+        private async Task RunStorageActionAsync(
+            Func<Task> actionAsync,
+            string failureStatus,
+            Func<Task>? failureCallbackAsync = null)
         {
             if (IsBusy)
             {
@@ -202,11 +206,34 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Cotton mobile storage action failed.");
+                if (failureCallbackAsync is not null)
+                {
+                    await RunFailureCallbackAsync(failureCallbackAsync);
+                }
+
                 Status = failureStatus;
             }
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task RefreshSummaryAfterClearFailureAsync()
+        {
+            CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+            ShowSummary(summary);
+        }
+
+        private async Task RunFailureCallbackAsync(Func<Task> failureCallbackAsync)
+        {
+            try
+            {
+                await failureCallbackAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Cotton mobile storage failure callback failed.");
             }
         }
 

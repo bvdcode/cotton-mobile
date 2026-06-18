@@ -436,6 +436,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isFileActionInProgress, value))
                 {
                     OnPropertyChanged(nameof(IsAccountActionEnabled));
+                    NotifyFileBrowserChromeStateChanged();
                 }
             }
         }
@@ -564,6 +565,18 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = true;
             CanRetryFileAction = false;
             FilesStatus = status;
+            ClearFilesNotice();
+            NotifyFilesEmptyStateChanged();
+        }
+
+        public void ShowFileActionAwaitingFollowUp()
+        {
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            IsFileActionInProgress = true;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
+            FilesStatus = CreateFilesStatus();
             ClearFilesNotice();
             NotifyFilesEmptyStateChanged();
         }
@@ -917,7 +930,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
-        private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing;
+        private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing || IsFileActionInProgress;
 
         private IEnumerable<CottonFileBrowserEntry> SortEntries(IEnumerable<CottonFileBrowserEntry> entries)
         {

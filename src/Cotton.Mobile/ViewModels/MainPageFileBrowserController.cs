@@ -860,7 +860,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 RefreshLocalFileMarkers(instanceUri);
-                _display.ShowFilesSummary();
+                _display.ShowFileActionAwaitingFollowUp();
                 shouldRunRecoveryRefresh = await ShowDownloadedFileActionsBestEffortAsync(
                     file,
                     result,
@@ -1289,6 +1289,7 @@ namespace Cotton.Mobile.ViewModels
                     return await ShareDownloadedFileAsync(file, downloadedFile, canUseAction, cancellationToken);
             }
 
+            _display.ShowFilesSummary();
             return true;
         }
 
@@ -1765,6 +1766,7 @@ namespace Cotton.Mobile.ViewModels
         {
             return _isFolderNavigationInProgress
                 || _isFileLoadInProgress
+                || _fileActionCancellation is not null
                 || _display.IsFilesLoading;
         }
 

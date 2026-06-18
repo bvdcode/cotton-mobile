@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Services
     {
         private const string CacheFileExtension = ".webp";
         private const string CacheTempFileSearchPattern = "*.webp.*.tmp";
+        private const string WebPContentType = "image/webp";
 
         private static readonly TimeSpan TemporaryThumbnailGracePeriod = TimeSpan.FromHours(6);
 
@@ -154,6 +155,15 @@ namespace Cotton.Mobile.Services
                     return;
                 }
 
+                if (!IsSupportedThumbnailContentType(response))
+                {
+                    _logger.LogDebug(
+                        "Thumbnail cache warm-up skipped {SourceUri}: unsupported content type {ContentType}.",
+                        sourceUri,
+                        response.Content.Headers.ContentType?.ToString() ?? "unknown");
+                    return;
+                }
+
                 long? contentLength = response.Content.Headers.ContentLength;
                 if (contentLength > _options.MaxEntryBytes)
                 {
@@ -271,6 +281,12 @@ namespace Cotton.Mobile.Services
             string fileName = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(cacheKey)))
                 .ToLowerInvariant();
             return Path.Combine(CacheDirectory, fileName + CacheFileExtension);
+        }
+
+        private static bool IsSupportedThumbnailContentType(HttpResponseMessage response)
+        {
+            string? mediaType = response.Content.Headers.ContentType?.MediaType;
+            return string.Equals(mediaType, WebPContentType, StringComparison.OrdinalIgnoreCase);
         }
 
         private bool TryGetReadyCacheFile(string path, string cacheKey, out FileInfo? file)

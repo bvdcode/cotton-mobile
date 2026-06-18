@@ -1341,7 +1341,20 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _isRecoveryRefreshInProgress = true;
-            _ = MainThread.InvokeOnMainThreadAsync(() => RefreshAfterFileLoadRecoveryAsync(reason));
+            _ = RunQueuedFileLoadRecoveryRefreshAsync(reason);
+        }
+
+        private async Task RunQueuedFileLoadRecoveryRefreshAsync(string reason)
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => RefreshAfterFileLoadRecoveryAsync(reason));
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to queue Cotton mobile files recovery refresh after {Reason}.", reason);
+                _isRecoveryRefreshInProgress = false;
+            }
         }
 
         private async Task RefreshAfterFileLoadRecoveryAsync(string reason)

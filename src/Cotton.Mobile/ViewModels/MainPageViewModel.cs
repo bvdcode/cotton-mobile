@@ -378,7 +378,20 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _isSessionRestoreRetryQueued = true;
-            _ = MainThread.InvokeOnMainThreadAsync(RetrySessionRestoreAfterNetworkAsync);
+            _ = RunQueuedSessionRestoreRetryAsync();
+        }
+
+        private async Task RunQueuedSessionRestoreRetryAsync()
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(RetrySessionRestoreAfterNetworkAsync);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to queue Cotton mobile session restore retry after internet returned.");
+                _isSessionRestoreRetryQueued = false;
+            }
         }
 
         private async Task RetrySessionRestoreAfterNetworkAsync()

@@ -4,6 +4,8 @@ namespace Cotton.Mobile.Services
 {
     public class FileDownloadCachePruner : IFileDownloadCachePruner
     {
+        private static readonly TimeSpan TemporaryDownloadGracePeriod = TimeSpan.FromHours(6);
+
         private readonly FileDownloadCacheOptions _options;
         private readonly ILogger<FileDownloadCachePruner> _logger;
 
@@ -46,6 +48,7 @@ namespace Cotton.Mobile.Services
             }
 
             string? normalizedProtectedPath = NormalizeProtectedPath(protectedPath);
+            DeleteAbandonedTemporaryDownloads(rootDirectory, cancellationToken);
             List<FileInfo> files = Directory
                 .EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories)
                 .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
@@ -73,6 +76,27 @@ namespace Cotton.Mobile.Services
             }
 
             DeleteEmptyDirectories(rootDirectory, cancellationToken);
+        }
+
+        private void DeleteAbandonedTemporaryDownloads(string rootDirectory, CancellationToken cancellationToken)
+        {
+            DateTime cutoffUtc = DateTime.UtcNow - TemporaryDownloadGracePeriod;
+            foreach (string path in Directory.EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
+                {
+                    continue;
+                }
+
+                var file = new FileInfo(path);
+                if (!file.Exists || ResolvePruneTimestamp(file) > cutoffUtc)
+                {
+                    continue;
+                }
+
+                TryDelete(file);
+            }
         }
 
         private static string? NormalizeProtectedPath(string? protectedPath)

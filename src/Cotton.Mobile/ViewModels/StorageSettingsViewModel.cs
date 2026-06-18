@@ -166,19 +166,19 @@ namespace Cotton.Mobile.ViewModels
             Func<CancellationToken, Task> clearAsync,
             string successStatus)
         {
-            bool confirmed = await _dialogService.ShowConfirmationAsync(
-                title,
-                message,
-                acceptAction,
-                CancelAction);
-            if (!confirmed)
-            {
-                return;
-            }
-
             await RunStorageActionAsync(
                 async () =>
                 {
+                    bool confirmed = await _dialogService.ShowConfirmationAsync(
+                        title,
+                        message,
+                        acceptAction,
+                        CancelAction);
+                    if (!confirmed)
+                    {
+                        return;
+                    }
+
                     await clearAsync(CancellationToken.None);
                     CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
                     ShowSummary(summary);

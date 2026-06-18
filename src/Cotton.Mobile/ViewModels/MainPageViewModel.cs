@@ -17,6 +17,9 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountStorageAction = "Storage";
+        private const string LogoutConfirmationTitle = "Log out?";
+        private const string LogoutConfirmationMessage =
+            "You will need to sign in again. Cached files on this device will be removed.";
 
         private readonly ICottonSessionService _sessionService;
         private readonly IBrowser _browser;
@@ -118,7 +121,7 @@ namespace Cotton.Mobile.ViewModels
                 ShowAccountActionsAsync,
                 LogUnhandledCommandException,
                 () => Display.IsAccountActionEnabled);
-            LogoutCommand = new AsyncCommand(LogoutAsync, LogUnhandledCommandException, () => Display.IsLogoutEnabled);
+            LogoutCommand = new AsyncCommand(ConfirmLogoutAsync, LogUnhandledCommandException, () => Display.IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
             RefreshFilesCommand = new AsyncCommand(
                 _fileBrowser.RefreshAsync,
@@ -342,7 +345,7 @@ namespace Cotton.Mobile.ViewModels
             switch (action)
             {
                 case AccountLogoutAction:
-                    await LogoutAsync();
+                    await ConfirmLogoutAsync();
                     break;
                 case AccountPrivacyPolicyAction:
                     await OpenPrivacyPolicyAsync();
@@ -370,6 +373,26 @@ namespace Cotton.Mobile.ViewModels
                 && string.Equals(Display.ProfileEmail, profileEmail, StringComparison.Ordinal)
                 && string.Equals(Display.ProfileInstance, profileInstance, StringComparison.Ordinal)
                 && string.Equals(Display.InstanceUrl, instanceUrl, StringComparison.Ordinal);
+        }
+
+        private async Task ConfirmLogoutAsync()
+        {
+            if (!Display.IsLogoutEnabled)
+            {
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                LogoutConfirmationTitle,
+                LogoutConfirmationMessage,
+                AccountLogoutAction,
+                AccountCancelAction);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            await LogoutAsync();
         }
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)

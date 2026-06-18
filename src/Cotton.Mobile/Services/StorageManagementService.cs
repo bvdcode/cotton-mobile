@@ -51,7 +51,8 @@ namespace Cotton.Mobile.Services
         {
             return ClearDirectoryAsync(
                 CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
-                cancellationToken);
+                cancellationToken,
+                includeTemporaryThumbnails: false);
         }
 
         public async Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default)
@@ -108,6 +109,7 @@ namespace Cotton.Mobile.Services
         private Task ClearDirectoryAsync(
             string directory,
             CancellationToken cancellationToken,
+            bool includeTemporaryThumbnails = true,
             bool includeTemporaryDownloads = true)
         {
             return Task.Run(
@@ -124,6 +126,11 @@ namespace Cotton.Mobile.Services
                     {
                         cancellationToken.ThrowIfCancellationRequested();
                         if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                        {
+                            continue;
+                        }
+
+                        if (!includeTemporaryThumbnails && IsTemporaryThumbnailPath(file))
                         {
                             continue;
                         }

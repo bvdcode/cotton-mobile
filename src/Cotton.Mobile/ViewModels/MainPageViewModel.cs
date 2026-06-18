@@ -10,6 +10,7 @@ namespace Cotton.Mobile.ViewModels
     public class MainPageViewModel : IFileBrowserSessionHandler
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
+        private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
         private const string AccountDiagnosticsAction = "Diagnostics";
@@ -774,7 +775,18 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _fileBrowser.Clear();
-            ShowSignIn(_presentationService.ResolveStatusMessage(result, unauthenticatedStatus));
+            ShowSignIn(ResolveSessionStatusMessage(result, unauthenticatedStatus));
+        }
+
+        private string ResolveSessionStatusMessage(CottonSessionResult result, string unauthenticatedStatus)
+        {
+            if (result.Status == CottonSessionResultStatus.AuthorizationPending
+                && !_networkAccess.HasInternetAccess)
+            {
+                return OfflineAuthorizationPendingStatus;
+            }
+
+            return _presentationService.ResolveStatusMessage(result, unauthenticatedStatus);
         }
 
         private static bool ShouldClearLocalSessionAndCachedState(CottonSessionResult result)

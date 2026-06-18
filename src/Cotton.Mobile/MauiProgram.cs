@@ -27,6 +27,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IBrowser>(Browser.Default);
 			builder.Services.AddSingleton<IClipboard>(Clipboard.Default);
 			builder.Services.AddSingleton<ILauncher>(Launcher.Default);
+			builder.Services.AddSingleton<IShare>(Share.Default);
 			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);

@@ -6,6 +6,15 @@ namespace Cotton.Mobile.Services
 {
     public class FileInteractionService : IFileInteractionService
     {
+        private readonly ILauncher _launcher;
+        private readonly IShare _share;
+
+        public FileInteractionService(ILauncher launcher, IShare share)
+        {
+            _launcher = launcher;
+            _share = share;
+        }
+
         public async Task OpenAsync(CottonFileDownloadResult file, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(file);
@@ -15,7 +24,7 @@ namespace Cotton.Mobile.Services
             bool opened = await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                return await Launcher.Default.OpenAsync(
+                return await _launcher.OpenAsync(
                     new OpenFileRequest(file.FileName, new ReadOnlyFile(file.FilePath)));
             });
             cancellationToken.ThrowIfCancellationRequested();
@@ -34,7 +43,7 @@ namespace Cotton.Mobile.Services
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Share.Default.RequestAsync(
+                await _share.RequestAsync(
                     new ShareFileRequest(file.FileName, new ShareFile(file.FilePath)));
             });
             cancellationToken.ThrowIfCancellationRequested();

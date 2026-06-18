@@ -38,10 +38,13 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _dialogService = dialogService;
             _logger = logger;
-            LoadCommand = new AsyncCommand(LoadAsync, () => !IsBusy);
-            ClearThumbnailsCommand = new AsyncCommand(ClearThumbnailsAsync, () => !IsBusy);
-            ClearDownloadedFilesCommand = new AsyncCommand(ClearDownloadedFilesAsync, () => !IsBusy);
-            ClearAllCommand = new AsyncCommand(ClearAllAsync, () => !IsBusy);
+            LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            ClearThumbnailsCommand = new AsyncCommand(ClearThumbnailsAsync, LogUnhandledCommandException, () => !IsBusy);
+            ClearDownloadedFilesCommand = new AsyncCommand(
+                ClearDownloadedFilesAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy);
+            ClearAllCommand = new AsyncCommand(ClearAllAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -225,6 +228,11 @@ namespace Cotton.Mobile.ViewModels
             ClearThumbnailsCommand.RaiseCanExecuteChanged();
             ClearDownloadedFilesCommand.RaiseCanExecuteChanged();
             ClearAllCommand.RaiseCanExecuteChanged();
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile storage command exception.");
         }
 
         private static string FormatFileCount(int fileCount)

@@ -5,14 +5,20 @@ namespace Cotton.Mobile.Commands
     public class AsyncCommand : ICommand
     {
         private readonly Func<Task> _executeAsync;
+        private readonly Action<Exception> _onUnhandledException;
         private readonly Func<bool>? _canExecute;
         private bool _isExecuting;
 
-        public AsyncCommand(Func<Task> executeAsync, Func<bool>? canExecute = null)
+        public AsyncCommand(
+            Func<Task> executeAsync,
+            Action<Exception> onUnhandledException,
+            Func<bool>? canExecute = null)
         {
             ArgumentNullException.ThrowIfNull(executeAsync);
+            ArgumentNullException.ThrowIfNull(onUnhandledException);
 
             _executeAsync = executeAsync;
+            _onUnhandledException = onUnhandledException;
             _canExecute = canExecute;
         }
 
@@ -20,7 +26,15 @@ namespace Cotton.Mobile.Commands
 
         public bool CanExecute(object? parameter)
         {
-            return !_isExecuting && (_canExecute?.Invoke() ?? true);
+            try
+            {
+                return !_isExecuting && (_canExecute?.Invoke() ?? true);
+            }
+            catch (Exception exception)
+            {
+                _onUnhandledException(exception);
+                return false;
+            }
         }
 
         public async void Execute(object? parameter)
@@ -36,6 +50,10 @@ namespace Cotton.Mobile.Commands
             try
             {
                 await _executeAsync();
+            }
+            catch (Exception exception)
+            {
+                _onUnhandledException(exception);
             }
             finally
             {

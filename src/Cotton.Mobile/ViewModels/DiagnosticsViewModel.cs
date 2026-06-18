@@ -36,8 +36,8 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _clipboard = clipboard;
             _logger = logger;
-            LoadCommand = new AsyncCommand(LoadAsync, () => !IsBusy);
-            CopyCommand = new AsyncCommand(CopyAsync, () => !IsBusy);
+            LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            CopyCommand = new AsyncCommand(CopyAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -212,6 +212,11 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return $"{version} ({_metadata.ApplicationBuild.Trim()})";
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile diagnostics command exception.");
         }
 
         private static string CreateValue(string? value)

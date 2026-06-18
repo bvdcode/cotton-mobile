@@ -37,9 +37,9 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _clipboard = clipboard;
             _logger = logger;
-            CopyCommand = new AsyncCommand(CopyAsync, () => Content.Length > 0);
-            ShareCommand = new AsyncCommand(ShareAsync);
-            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync);
+            CopyCommand = new AsyncCommand(CopyAsync, LogUnhandledCommandException, () => Content.Length > 0);
+            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException);
+            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException);
         }
 
         public string Title { get; }
@@ -114,6 +114,11 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(exception, "Failed to open text viewer file {FilePath}.", _file.FilePath);
                 Status = "Open failed.";
             }
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile text viewer command exception.");
         }
     }
 }

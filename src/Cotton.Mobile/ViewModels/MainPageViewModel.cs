@@ -102,20 +102,39 @@ namespace Cotton.Mobile.ViewModels
                 this,
                 fileBrowserLogger);
             _storageManagementService.DownloadedFilesCleared += StorageManagementService_DownloadedFilesCleared;
-            ConnectCommand = new AsyncCommand(SignInAsync, () => Display.IsInputEnabled);
-            CancelAuthorizationCommand = new AsyncCommand(CancelAuthorizationAsync, () => Display.IsCancelAuthorizationEnabled);
-            AccountCommand = new AsyncCommand(ShowAccountActionsAsync, () => Display.IsProfileVisible);
-            LogoutCommand = new AsyncCommand(LogoutAsync, () => Display.IsLogoutEnabled);
-            PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync);
-            RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync);
-            NavigateFilesUpCommand = new AsyncCommand(_fileBrowser.NavigateUpAsync, () => Display.CanNavigateFilesUp);
-            ActivateFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.ActivateEntryAsync);
-            ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.ShowEntryActionsAsync);
-            CancelFileActionCommand = new AsyncCommand(_fileBrowser.CancelFileActionAsync, () => Display.CanCancelFileAction);
-            RetryFileActionCommand = new AsyncCommand(_fileBrowser.RetryFileActionAsync, () => Display.CanRetryFileAction);
-            ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync);
-            ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync);
-            ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync);
+            ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
+            CancelAuthorizationCommand = new AsyncCommand(
+                CancelAuthorizationAsync,
+                LogUnhandledCommandException,
+                () => Display.IsCancelAuthorizationEnabled);
+            AccountCommand = new AsyncCommand(
+                ShowAccountActionsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
+            LogoutCommand = new AsyncCommand(LogoutAsync, LogUnhandledCommandException, () => Display.IsLogoutEnabled);
+            PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
+            RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync, LogUnhandledCommandException);
+            NavigateFilesUpCommand = new AsyncCommand(
+                _fileBrowser.NavigateUpAsync,
+                LogUnhandledCommandException,
+                () => Display.CanNavigateFilesUp);
+            ActivateFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(
+                _fileBrowser.ActivateEntryAsync,
+                LogUnhandledCommandException);
+            ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(
+                _fileBrowser.ShowEntryActionsAsync,
+                LogUnhandledCommandException);
+            CancelFileActionCommand = new AsyncCommand(
+                _fileBrowser.CancelFileActionAsync,
+                LogUnhandledCommandException,
+                () => Display.CanCancelFileAction);
+            RetryFileActionCommand = new AsyncCommand(
+                _fileBrowser.RetryFileActionAsync,
+                LogUnhandledCommandException,
+                () => Display.CanRetryFileAction);
+            ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync, LogUnhandledCommandException);
+            ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync, LogUnhandledCommandException);
+            ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync, LogUnhandledCommandException);
         }
 
         public MainPageDisplayState Display { get; }
@@ -617,6 +636,11 @@ namespace Cotton.Mobile.ViewModels
             ToggleFileSearchCommand.RaiseCanExecuteChanged();
             ShowFileViewActionsCommand.RaiseCanExecuteChanged();
             ShowFileSortActionsCommand.RaiseCanExecuteChanged();
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile main-page command exception.");
         }
 
         private void AnnounceStatus(string? status)

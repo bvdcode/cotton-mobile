@@ -30,8 +30,8 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _logger = logger;
             ImageSource = ImageSource.FromFile(file.FilePath);
-            ShareCommand = new AsyncCommand(ShareAsync);
-            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync);
+            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException);
+            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException);
         }
 
         public string Title { get; }
@@ -88,6 +88,11 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(exception, "Failed to open image viewer file {FilePath}.", _file.FilePath);
                 Status = "Open failed.";
             }
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile image viewer command exception.");
         }
     }
 }

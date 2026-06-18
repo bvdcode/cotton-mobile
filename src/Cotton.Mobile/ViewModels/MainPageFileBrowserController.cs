@@ -152,7 +152,10 @@ namespace Cotton.Mobile.ViewModels
         public void ClearLocalFileMarkers()
         {
             _display.ClearFileLocalCopies();
-            _display.ShowFilesStatus("Cached files cleared.");
+            if (!IsFileBrowserBusy())
+            {
+                _display.ShowFilesStatus("Cached files cleared.");
+            }
         }
 
         public async Task NavigateUpAsync()

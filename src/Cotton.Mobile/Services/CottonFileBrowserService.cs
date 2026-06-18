@@ -64,6 +64,8 @@ namespace Cotton.Mobile.Services
             string filePath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
             string tempFilePath = filePath + CottonMobileStoragePaths.TemporaryDownloadExtension;
             long sizeBytes = 0;
+            bool finalFileCreated = false;
+            bool finalFileReady = false;
             bool tempFileReady = false;
 
             try
@@ -85,43 +87,52 @@ namespace Cotton.Mobile.Services
                 cancellationToken.ThrowIfCancellationRequested();
                 sizeBytes = destination.Length;
                 tempFileReady = true;
+
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    File.Move(tempFilePath, filePath, overwrite: true);
+                    finalFileCreated = true;
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
+                    throw;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                try
+                {
+                    StampLocalDownload(filePath, file);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Failed to stamp Cotton mobile download file {Path}.", filePath);
+                    throw;
+                }
+
+                cancellationToken.ThrowIfCancellationRequested();
+                TouchLocalDownload(new FileInfo(filePath));
+                DeleteStaleSiblingDownloads(directory, filePath);
+
+                await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
+                cancellationToken.ThrowIfCancellationRequested();
+                finalFileReady = true;
+
+                return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
             }
             finally
             {
-                if (!tempFileReady)
+                if (!tempFileReady || !finalFileReady)
                 {
                     DeleteTemporaryDownload(tempFilePath);
                 }
-            }
 
-            try
-            {
-                File.Move(tempFilePath, filePath, overwrite: true);
+                if (finalFileCreated && !finalFileReady)
+                {
+                    DeleteDownload(filePath);
+                }
             }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
-                DeleteTemporaryDownload(tempFilePath);
-                throw;
-            }
-
-            try
-            {
-                StampLocalDownload(filePath, file);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to stamp Cotton mobile download file {Path}.", filePath);
-                DeleteDownload(filePath);
-                throw;
-            }
-
-            TouchLocalDownload(new FileInfo(filePath));
-            DeleteStaleSiblingDownloads(directory, filePath);
-
-            await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
-
-            return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
         }
 
         public CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)

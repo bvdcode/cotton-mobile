@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Services
 
         public bool IsFolderThumbnailVisible => IsFolder && Thumbnail.IsPlaceholderVisible;
 
-        public bool IsPlaceholderTextVisible => !IsFolder && Thumbnail.IsPlaceholderVisible;
+        public bool IsPlaceholderTextVisible => !IsFolder && (Thumbnail.IsPlaceholderVisible || (IsText && Thumbnail.HasImage));
 
         public bool IsPreviewImageVisible => Thumbnail.HasImage && !IsText;
 

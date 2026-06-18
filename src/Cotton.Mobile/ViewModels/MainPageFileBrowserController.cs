@@ -45,6 +45,7 @@ namespace Cotton.Mobile.ViewModels
         private CottonFileBrowserEntry? _retryFileActionEntry;
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
+        private bool _isFileLoadInProgress;
         private bool _isFolderNavigationInProgress;
         private bool _lastFileLoadFailed;
         private bool _isRecoveryRefreshInProgress;
@@ -105,6 +106,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFileActionRetry();
             _instanceUri = null;
             _currentFolder = null;
+            _isFileLoadInProgress = false;
             _lastFileLoadFailed = false;
             _fileNavigation.Clear();
         }
@@ -114,6 +116,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFileActionRetry();
             if (IsFileBrowserBusy())
             {
+                StopExternalRefreshIfNoLoadInProgress();
                 return;
             }
 
@@ -413,18 +416,19 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (isRefresh)
-            {
-                _display.ShowFilesRefreshing("Refreshing files...");
-            }
-            else
-            {
-                _display.ClearFileSearch();
-                _display.ShowFilesLoading("Loading files...");
-            }
-
+            _isFileLoadInProgress = true;
             try
             {
+                if (isRefresh)
+                {
+                    _display.ShowFilesRefreshing("Refreshing files...");
+                }
+                else
+                {
+                    _display.ClearFileSearch();
+                    _display.ShowFilesLoading("Loading files...");
+                }
+
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
                 content = await ApplyThumbnailsAsync(_instanceUri, content);
                 content = ApplyLocalFiles(content);
@@ -443,6 +447,10 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(exception, "Failed to load Cotton mobile root files.");
                 ShowFileLoadFailure("Could not load files. Try refresh.");
             }
+            finally
+            {
+                _isFileLoadInProgress = false;
+            }
         }
 
         private async Task LoadFolderAsync(
@@ -455,17 +463,18 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (isRefresh)
-            {
-                _display.ShowFilesRefreshing($"Refreshing {folder.Name}...");
-            }
-            else
-            {
-                _display.ShowFilesLoading($"Loading {folder.Name}...");
-            }
-
+            _isFileLoadInProgress = true;
             try
             {
+                if (isRefresh)
+                {
+                    _display.ShowFilesRefreshing($"Refreshing {folder.Name}...");
+                }
+                else
+                {
+                    _display.ShowFilesLoading($"Loading {folder.Name}...");
+                }
+
                 CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
                 content = await ApplyThumbnailsAsync(_instanceUri, content);
                 content = ApplyLocalFiles(content);
@@ -496,6 +505,10 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 ShowFileLoadFailure("Could not open folder. Try again.");
+            }
+            finally
+            {
+                _isFileLoadInProgress = false;
             }
         }
 
@@ -1019,8 +1032,16 @@ namespace Cotton.Mobile.ViewModels
         private bool IsFileBrowserBusy()
         {
             return _isFolderNavigationInProgress
-                || _display.IsFilesLoading
-                || _display.IsFilesRefreshing;
+                || _isFileLoadInProgress
+                || _display.IsFilesLoading;
+        }
+
+        private void StopExternalRefreshIfNoLoadInProgress()
+        {
+            if (!_isFileLoadInProgress && _display.IsFilesRefreshing)
+            {
+                _display.StopFilesRefreshing();
+            }
         }
 
         private bool ShowOfflineUnavailableRetryIfNeeded(

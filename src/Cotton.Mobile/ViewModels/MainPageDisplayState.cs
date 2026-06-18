@@ -518,6 +518,11 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
+        public void StopFilesRefreshing()
+        {
+            IsFilesRefreshing = false;
+        }
+
         public void ShowFiles(CottonFolderContent content, bool isRoot, bool canNavigateUp, string path)
         {
             ArgumentNullException.ThrowIfNull(content);

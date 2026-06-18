@@ -39,13 +39,13 @@ namespace Cotton.Mobile.Services
             string body = CreateFeedbackBody(context);
             var uri = new Uri(
                 $"mailto:{_options.SupportEmail}?subject={Uri.EscapeDataString(FeedbackSubject)}&body={Uri.EscapeDataString(body)}");
-            if (await _launcher.OpenAsync(uri))
+            if (await OpenFeedbackComposerAsync(uri, cancellationToken))
             {
                 return FeedbackDeliveryResult.ComposerOpened;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            await CopyFeedbackTextAsync(body);
+            await CopyFeedbackTextAsync(body, cancellationToken);
             return FeedbackDeliveryResult.CopiedToClipboard;
         }
 
@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(context);
             cancellationToken.ThrowIfCancellationRequested();
 
-            return CopyFeedbackTextAsync(CreateFeedbackBody(context));
+            return CopyFeedbackTextAsync(CreateFeedbackBody(context), cancellationToken);
         }
 
         private string CreateFeedbackBody(FeedbackContext context)
@@ -95,15 +95,28 @@ namespace Cotton.Mobile.Services
             return string.Join(Environment.NewLine, lines);
         }
 
-        private Task CopyFeedbackTextAsync(string body)
+        private Task CopyFeedbackTextAsync(string body, CancellationToken cancellationToken)
         {
-            return _clipboard.SetTextAsync(
-                string.Join(
-                    Environment.NewLine,
-                    $"To: {_options.SupportEmail}",
-                    $"Subject: {FeedbackSubject}",
-                    string.Empty,
-                    body));
+            string text = string.Join(
+                Environment.NewLine,
+                $"To: {_options.SupportEmail}",
+                $"Subject: {FeedbackSubject}",
+                string.Empty,
+                body);
+            return MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await _clipboard.SetTextAsync(text);
+            });
+        }
+
+        private Task<bool> OpenFeedbackComposerAsync(Uri uri, CancellationToken cancellationToken)
+        {
+            return MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return await _launcher.OpenAsync(uri);
+            });
         }
 
         private static string CreateValue(string? value)

@@ -73,7 +73,7 @@ namespace Cotton.Mobile.Services
                     .ConfigureAwait(false);
                 await _tokenStore.SaveAsync(refreshedTokens, cancellationToken).ConfigureAwait(false);
                 UserDto user = await client.Auth.MeAsync(cancellationToken).ConfigureAwait(false);
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("session restore").ConfigureAwait(false);
 
                 return CottonSessionResult.Authenticated(instanceUri, user);
             }
@@ -116,13 +116,13 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to open Cotton mobile app-code authorization browser.");
-                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("browser open failure").ConfigureAwait(false);
                 throw;
             }
 
             if (!browserOpened)
             {
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("browser unavailable").ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.BrowserUnavailable, instanceUri);
             }
 
@@ -134,7 +134,7 @@ namespace Cotton.Mobile.Services
                     cancellationToken).ConfigureAwait(false);
                 if (!returnedBeforeExpiration)
                 {
-                    await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                    await ClearPendingSessionBestEffortAsync("browser return timeout").ConfigureAwait(false);
                     return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
                 }
 
@@ -143,12 +143,12 @@ namespace Cotton.Mobile.Services
                     session,
                     instanceUri,
                     cancellationToken).ConfigureAwait(false);
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("browser authorization completion").ConfigureAwait(false);
                 return result;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
-                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("browser authorization cancellation").ConfigureAwait(false);
                 throw;
             }
         }
@@ -238,13 +238,13 @@ namespace Cotton.Mobile.Services
 
             if (!Uri.Equals(pendingSession.InstanceUri, instanceUri))
             {
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("pending authorization instance mismatch").ConfigureAwait(false);
                 return CottonSessionResult.Unauthenticated(instanceUri);
             }
 
             if (pendingSession.ExpiresAt <= DateTime.UtcNow)
             {
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("pending authorization expiration").ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
             }
 
@@ -259,13 +259,28 @@ namespace Cotton.Mobile.Services
                     CreateAuthorizationSession(pendingSession),
                     instanceUri,
                     restoreTimeout.Token).ConfigureAwait(false);
-                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("pending authorization restore completion").ConfigureAwait(false);
                 return result;
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && restoreTimeout.IsCancellationRequested)
             {
-                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                await ClearPendingSessionBestEffortAsync("pending authorization restore timeout").ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
+            }
+        }
+
+        private async Task ClearPendingSessionBestEffortAsync(string reason)
+        {
+            try
+            {
+                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to clear Cotton mobile pending authorization after {Reason}.",
+                    reason);
             }
         }
 

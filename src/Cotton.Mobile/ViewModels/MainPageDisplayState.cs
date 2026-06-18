@@ -29,8 +29,8 @@ namespace Cotton.Mobile.ViewModels
         private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
         private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
         private bool _isInputEnabled = true;
-        private bool _isCancelAuthorizationEnabled = true;
-        private bool _isLogoutEnabled = true;
+        private bool _isCancelAuthorizationEnabled;
+        private bool _isLogoutEnabled;
         private bool _isFilesLoading;
         private bool _isFilesRefreshing;
         private bool _isFileSearchOpen;
@@ -407,6 +407,10 @@ namespace Cotton.Mobile.ViewModels
             SetState(MainPageViewState.Loading);
             LoadingMessage = message;
             IsInputEnabled = false;
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = false;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
             ProfileStatus = null;
         }
 
@@ -424,6 +428,7 @@ namespace Cotton.Mobile.ViewModels
 
             SetState(MainPageViewState.AuthorizationProgress);
             IsCancelAuthorizationEnabled = true;
+            IsLogoutEnabled = false;
             AuthorizationProgressMessage = $"Approve the request for {instanceUri.Host}, then return to Cotton Cloud.";
             IsInputEnabled = false;
         }
@@ -456,6 +461,7 @@ namespace Cotton.Mobile.ViewModels
             FileEntries.Clear();
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
             IsLogoutEnabled = true;
+            IsCancelAuthorizationEnabled = false;
             IsInputEnabled = false;
         }
 
@@ -489,6 +495,8 @@ namespace Cotton.Mobile.ViewModels
             SetState(MainPageViewState.Profile);
             ProfileStatus = status;
             IsLogoutEnabled = true;
+            IsCancelAuthorizationEnabled = false;
+            IsInputEnabled = false;
         }
 
         public void ShowFilesLoading(string status)

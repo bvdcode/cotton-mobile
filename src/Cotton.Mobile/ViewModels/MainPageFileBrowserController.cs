@@ -712,7 +712,7 @@ namespace Cotton.Mobile.ViewModels
 
                 ShowReusableLocalFileIfAvailable(file);
                 _display.ShowFilesSummary();
-                await ShowDownloadedFileActionsAsync(file, result, fileActionCancellation.Token);
+                await ShowDownloadedFileActionsBestEffortAsync(file, result, fileActionCancellation.Token);
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -1063,6 +1063,26 @@ namespace Cotton.Mobile.ViewModels
                 case ShareAction:
                     await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
                     break;
+            }
+        }
+
+        private async Task ShowDownloadedFileActionsBestEffortAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await ShowDownloadedFileActionsAsync(file, downloadedFile, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile downloaded file actions {FileId}.", file.Id);
+                _display.ShowFilesStatus("Downloaded. Could not show file actions.");
             }
         }
 

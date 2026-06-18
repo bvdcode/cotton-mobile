@@ -221,6 +221,7 @@ namespace Cotton.Mobile.ViewModels
                 if (!_networkAccess.HasInternetAccess)
                 {
                     _shouldRetrySessionRestoreWhenOnline = true;
+                    _shouldRetrySessionRestoreOnResume = true;
                     ShowSignIn("Offline. Reconnect to restore your session.");
                 }
                 else

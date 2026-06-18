@@ -4,8 +4,6 @@ namespace Cotton.Mobile.Services
 {
     public class FileDownloadCachePruner : IFileDownloadCachePruner
     {
-        private const string TemporaryDownloadExtension = ".download";
-
         private readonly FileDownloadCacheOptions _options;
         private readonly ILogger<FileDownloadCachePruner> _logger;
 
@@ -50,7 +48,7 @@ namespace Cotton.Mobile.Services
             string? normalizedProtectedPath = NormalizeProtectedPath(protectedPath);
             List<FileInfo> files = Directory
                 .EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories)
-                .Where(path => !path.EndsWith(TemporaryDownloadExtension, StringComparison.OrdinalIgnoreCase))
+                .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
                 .Select(path => new FileInfo(path))
                 .Where(file => file.Exists)
                 .OrderBy(ResolvePruneTimestamp)

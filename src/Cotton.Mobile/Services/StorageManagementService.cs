@@ -39,7 +39,8 @@ namespace Cotton.Mobile.Services
                             DownloadedFilesName,
                             CottonMobileStoragePaths.CreateDownloadsDirectory(),
                             SearchOption.AllDirectories,
-                            cancellationToken));
+                            cancellationToken,
+                            includeTemporaryDownloads: false));
                 },
                 cancellationToken);
         }
@@ -55,7 +56,8 @@ namespace Cotton.Mobile.Services
         {
             await ClearDirectoryAsync(
                 CottonMobileStoragePaths.CreateDownloadsDirectory(),
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken,
+                includeTemporaryDownloads: false).ConfigureAwait(false);
             DownloadedFilesCleared?.Invoke(this, EventArgs.Empty);
         }
 
@@ -65,7 +67,10 @@ namespace Cotton.Mobile.Services
             await ClearDownloadedFilesAsync(cancellationToken).ConfigureAwait(false);
         }
 
-        private Task ClearDirectoryAsync(string directory, CancellationToken cancellationToken)
+        private Task ClearDirectoryAsync(
+            string directory,
+            CancellationToken cancellationToken,
+            bool includeTemporaryDownloads = true)
         {
             return Task.Run(
                 () =>
@@ -79,6 +84,11 @@ namespace Cotton.Mobile.Services
                     foreach (string file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
+                        if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                        {
+                            continue;
+                        }
+
                         DeleteFile(file);
                     }
 
@@ -91,7 +101,8 @@ namespace Cotton.Mobile.Services
             string name,
             string directory,
             SearchOption searchOption,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            bool includeTemporaryDownloads = true)
         {
             if (!Directory.Exists(directory))
             {
@@ -103,6 +114,11 @@ namespace Cotton.Mobile.Services
             foreach (string file in Directory.EnumerateFiles(directory, "*", searchOption))
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                {
+                    continue;
+                }
+
                 var info = new FileInfo(file);
                 if (!info.Exists)
                 {

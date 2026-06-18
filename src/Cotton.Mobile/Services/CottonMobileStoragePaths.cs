@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Services
     {
         public const string DownloadDirectoryName = "CottonDownloads";
 
+        public const string TemporaryDownloadExtension = ".download";
+
         public static string CreateDownloadsDirectory()
         {
             return Path.Combine(FileSystem.AppDataDirectory, DownloadDirectoryName);
@@ -37,6 +39,11 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(options);
 
             return Path.Combine(FileSystem.AppDataDirectory, options.DirectoryName);
+        }
+
+        public static bool IsTemporaryDownloadPath(string path)
+        {
+            return path.EndsWith(TemporaryDownloadExtension, StringComparison.OrdinalIgnoreCase);
         }
 
         public static string CreateInstanceStorageKey(Uri instanceUri)

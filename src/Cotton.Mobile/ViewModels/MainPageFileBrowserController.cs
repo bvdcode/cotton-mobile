@@ -604,6 +604,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile download cancellation {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 _display.ShowFilesStatus("Download cancelled.");
             }
@@ -717,6 +723,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile open cancellation {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 _display.ShowFilesStatus("Open cancelled.");
             }
@@ -777,6 +789,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
             {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile share cancellation {FileId}.", file.Id);
+                    return;
+                }
+
                 ClearFileActionRetry();
                 _display.ShowFilesStatus("Share cancelled.");
             }
@@ -817,6 +835,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(instanceUri, file);
             if (localFile is not null)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 ShowReusableLocalFileIfAvailable(file);
                 return localFile;
             }
@@ -826,6 +845,7 @@ namespace Cotton.Mobile.ViewModels
                 file,
                 CreateFileDownloadProgress(file, actionName),
                 cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
             ShowReusableLocalFileIfAvailable(file);
             return downloadedFile;
         }

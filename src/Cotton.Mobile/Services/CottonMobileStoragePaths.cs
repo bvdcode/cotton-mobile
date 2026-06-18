@@ -6,6 +6,11 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonMobileStoragePaths
     {
+        private const int MaxSafeFileNameLength = 120;
+        private const int TruncatedFileNameHashLength = 12;
+        private const int MaxSafeFileExtensionLength = 24;
+        private const string DefaultDownloadFileName = "download";
+
         public const string DownloadDirectoryName = "CottonDownloads";
 
         public const string TemporaryDownloadExtension = ".download";
@@ -60,7 +65,7 @@ namespace Cotton.Mobile.Services
 
         private static string CreateSafeFileName(string fileName)
         {
-            string trimmedName = string.IsNullOrWhiteSpace(fileName) ? "download" : fileName.Trim();
+            string trimmedName = string.IsNullOrWhiteSpace(fileName) ? DefaultDownloadFileName : fileName.Trim();
             char[] invalidChars = Path.GetInvalidFileNameChars();
             var buffer = new char[trimmedName.Length];
             for (int index = 0; index < trimmedName.Length; index++)
@@ -69,7 +74,64 @@ namespace Cotton.Mobile.Services
                 buffer[index] = invalidChars.Contains(character) ? '_' : character;
             }
 
-            return new string(buffer);
+            string safeName = new string(buffer).Trim();
+            if (string.IsNullOrWhiteSpace(safeName) || IsReservedPathSegment(safeName))
+            {
+                return DefaultDownloadFileName;
+            }
+
+            return TruncateSafeFileName(safeName);
+        }
+
+        private static string TruncateSafeFileName(string safeName)
+        {
+            if (safeName.Length <= MaxSafeFileNameLength)
+            {
+                return safeName;
+            }
+
+            string extension = Path.GetExtension(safeName);
+            if (extension.Length > MaxSafeFileExtensionLength)
+            {
+                extension = string.Empty;
+            }
+
+            string nameWithoutExtension = Path.GetFileNameWithoutExtension(safeName);
+            if (string.IsNullOrWhiteSpace(nameWithoutExtension) || IsReservedPathSegment(nameWithoutExtension))
+            {
+                nameWithoutExtension = DefaultDownloadFileName;
+            }
+
+            string hash = CreateShortHash(safeName);
+            int maxNameLength = MaxSafeFileNameLength - extension.Length - hash.Length - 1;
+            if (maxNameLength < DefaultDownloadFileName.Length)
+            {
+                maxNameLength = DefaultDownloadFileName.Length;
+                extension = string.Empty;
+            }
+
+            string truncatedName = nameWithoutExtension.Length <= maxNameLength
+                ? nameWithoutExtension
+                : nameWithoutExtension[..maxNameLength].Trim();
+            if (string.IsNullOrWhiteSpace(truncatedName) || IsReservedPathSegment(truncatedName))
+            {
+                truncatedName = DefaultDownloadFileName;
+            }
+
+            return $"{truncatedName}-{hash}{extension}";
+        }
+
+        private static string CreateShortHash(string value)
+        {
+            return Convert
+                .ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(value)))
+                .ToLowerInvariant()[..TruncatedFileNameHashLength];
+        }
+
+        private static bool IsReservedPathSegment(string value)
+        {
+            return string.Equals(value, ".", StringComparison.Ordinal)
+                || string.Equals(value, "..", StringComparison.Ordinal);
         }
 
         private static string NormalizePath(string path)

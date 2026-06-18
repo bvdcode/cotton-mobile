@@ -27,13 +27,14 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(entry);
 
             cancellationToken.ThrowIfCancellationRequested();
-            CottonFileThumbnailSnapshot thumbnail = CreateThumbnail(instanceUri, entry);
+            CottonFileThumbnailSnapshot thumbnail = CreateThumbnail(instanceUri, entry, cancellationToken);
             return ValueTask.FromResult(thumbnail);
         }
 
         private CottonFileThumbnailSnapshot CreateThumbnail(
             Uri instanceUri,
-            CottonFileBrowserEntry entry)
+            CottonFileBrowserEntry entry,
+            CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(entry.PreviewHashEncryptedHex))
             {
@@ -53,23 +54,27 @@ namespace Cotton.Mobile.Services
             Uri previewUri = new(
                 instanceUri,
                 $"{Routes.V1.Previews}/{Uri.EscapeDataString(previewToken)}.webp");
-            WarmCache(cacheKey, previewUri);
+            WarmCache(cacheKey, previewUri, cancellationToken);
             return CottonFileThumbnailSnapshot.Ready(
                 entry.BadgeText,
                 previewUri.AbsoluteUri,
                 cacheKey);
         }
 
-        private void WarmCache(string cacheKey, Uri previewUri)
+        private void WarmCache(string cacheKey, Uri previewUri, CancellationToken cancellationToken)
         {
-            _ = WarmCacheAsync(cacheKey, previewUri);
+            _ = WarmCacheAsync(cacheKey, previewUri, cancellationToken);
         }
 
-        private async Task WarmCacheAsync(string cacheKey, Uri previewUri)
+        private async Task WarmCacheAsync(string cacheKey, Uri previewUri, CancellationToken cancellationToken)
         {
             try
             {
-                await _thumbnailCache.WarmAsync(cacheKey, previewUri).ConfigureAwait(false);
+                await _thumbnailCache.WarmAsync(cacheKey, previewUri, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                _logger.LogDebug("Thumbnail cache warm-up cancelled for {PreviewUri}.", previewUri);
             }
             catch (Exception exception)
             {

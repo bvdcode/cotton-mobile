@@ -97,7 +97,13 @@ namespace Cotton.Mobile
 			{
 				Dispatcher.DispatchDelayed(
 					TimeSpan.FromMilliseconds(50),
-					() => FileSearchBar.Focus());
+					() =>
+					{
+						if (FileSearchBar.IsVisible)
+						{
+							FileSearchBar.Focus();
+						}
+					});
 				return;
 			}
 

@@ -454,10 +454,22 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile root authorization failure.");
+                    return;
+                }
+
                 await HandleSessionExpiredAsync(exception);
             }
             catch (Exception exception)
             {
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile root load failure.");
+                    return;
+                }
+
                 _logger.LogWarning(exception, "Failed to load Cotton mobile root files.");
                 ShowFileLoadFailure("Could not load files. Try refresh.");
             }
@@ -516,6 +528,12 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
             {
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder authorization failure {FolderId}.", folder.Id);
+                    return;
+                }
+
                 if (!preserveHistory && _fileNavigation.Count > 0)
                 {
                     _fileNavigation.RemoveAt(_fileNavigation.Count - 1);
@@ -525,6 +543,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder load failure {FolderId}.", folder.Id);
+                    return;
+                }
+
                 _logger.LogWarning(exception, "Failed to load Cotton mobile folder {FolderId}.", folder.Id);
                 if (!preserveHistory && _fileNavigation.Count > 0)
                 {

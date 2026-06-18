@@ -33,7 +33,7 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
             if (!opened)
             {
-                throw new InvalidOperationException("No installed app can open this file.");
+                throw new FileOpenUnavailableException("No installed app can open this file.");
             }
         }
 

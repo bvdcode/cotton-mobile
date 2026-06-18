@@ -27,6 +27,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineDownloadStatus = "Offline. Download needs internet.";
         private const string OfflineOpenStatus = "Offline. This file is not available on device.";
         private const string OfflineShareStatus = "Offline. This file is not available on device.";
+        private const string OpenUnavailableStatus = "No app can open this file.";
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -903,7 +904,10 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _logger.LogError(exception, "Failed to download Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Download, file, CreateFileActionFailureStatus("Download failed.", OfflineDownloadStatus));
+                ShowFileActionRetry(
+                    MainPageFileAction.Download,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Download failed.", OfflineDownloadStatus));
             }
             finally
             {
@@ -1060,7 +1064,10 @@ namespace Cotton.Mobile.ViewModels
 
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
+                ShowFileActionRetry(
+                    MainPageFileAction.Open,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Open failed.", OfflineOpenStatus));
             }
             finally
             {
@@ -1142,7 +1149,10 @@ namespace Cotton.Mobile.ViewModels
 
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
+                ShowFileActionRetry(
+                    MainPageFileAction.Share,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Share failed.", OfflineShareStatus));
             }
             finally
             {
@@ -1360,7 +1370,10 @@ namespace Cotton.Mobile.ViewModels
             {
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
+                ShowFileActionRetry(
+                    MainPageFileAction.Open,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Open failed.", OfflineOpenStatus));
                 return false;
             }
         }
@@ -1388,7 +1401,10 @@ namespace Cotton.Mobile.ViewModels
             {
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
+                ShowFileActionRetry(
+                    MainPageFileAction.Share,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Share failed.", OfflineShareStatus));
                 return false;
             }
         }
@@ -1744,14 +1760,19 @@ namespace Cotton.Mobile.ViewModels
             return true;
         }
 
-        private string CreateFileActionFailureStatus(string fallbackStatus, string offlineStatus)
+        private string CreateFileActionFailureStatus(
+            Exception exception,
+            string fallbackStatus,
+            string offlineStatus)
         {
-            return CreateOfflineAwareStatus(fallbackStatus, offlineStatus);
-        }
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return offlineStatus;
+            }
 
-        private string CreateOfflineAwareStatus(string fallbackStatus, string offlineStatus)
-        {
-            return _networkAccess.HasInternetAccess ? fallbackStatus : offlineStatus;
+            return exception is FileOpenUnavailableException
+                ? OpenUnavailableStatus
+                : fallbackStatus;
         }
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)

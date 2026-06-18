@@ -12,6 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private const string DetailsAction = "Details";
         private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
+        private const string DownloadAgainAction = "Download again";
         private const string OpenAction = "Open";
         private const string OpenWithSystemAppAction = "Open with system app";
         private const string ShareAction = "Share";
@@ -448,12 +449,13 @@ namespace Cotton.Mobile.ViewModels
             }
 
             string openAction = CreateOpenAction(file, instanceUri);
+            string downloadAction = CreateDownloadAction(file);
             string? action = await _dialogService.ShowActionSheetAsync(
                 file.Name,
                 CancelAction,
                 null,
                 openAction,
-                DownloadAction,
+                downloadAction,
                 ShareAction,
                 DetailsAction);
 
@@ -472,6 +474,7 @@ namespace Cotton.Mobile.ViewModels
             switch (action)
             {
                 case DownloadAction:
+                case DownloadAgainAction:
                     await DownloadFileAsync(currentFile);
                     break;
                 case ShareAction:
@@ -1290,6 +1293,11 @@ namespace Cotton.Mobile.ViewModels
         private string CreateOpenAction(CottonFileBrowserEntry file)
         {
             return _filePreviewService.CanPreview(file) ? OpenAction : OpenWithSystemAppAction;
+        }
+
+        private static string CreateDownloadAction(CottonFileBrowserEntry file)
+        {
+            return file.HasLocalCopy ? DownloadAgainAction : DownloadAction;
         }
 
         private string CreateOpenAction(CottonFileBrowserEntry file, Uri instanceUri)

@@ -134,7 +134,13 @@ namespace Cotton.Mobile.Services
                     stream,
                     SerializerOptions,
                     cancellationToken).ConfigureAwait(false);
-                return CreateFolderContent(cachedContent);
+                CottonFolderContent? folderContent = CreateFolderContent(cachedContent);
+                if (folderContent is null)
+                {
+                    DeleteCacheFile(filePath);
+                }
+
+                return folderContent;
             }
             catch (OperationCanceledException)
             {

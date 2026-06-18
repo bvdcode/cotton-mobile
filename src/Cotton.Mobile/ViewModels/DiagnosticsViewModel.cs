@@ -121,8 +121,18 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
+                bool copiedWithoutCacheDetails = false;
+                if (Sections.Count == 0)
+                {
+                    CottonStorageSummary? summary = await TryLoadStorageSummaryForCopyAsync();
+                    copiedWithoutCacheDetails = summary is null;
+                    ShowDiagnostics(summary);
+                }
+
                 await _clipboard.SetTextAsync(CreateDiagnosticsText());
-                Status = "Diagnostics copied.";
+                Status = copiedWithoutCacheDetails
+                    ? "Diagnostics copied without cache details."
+                    : "Diagnostics copied.";
             }
             catch (Exception exception)
             {
@@ -132,6 +142,19 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task<CottonStorageSummary?> TryLoadStorageSummaryForCopyAsync()
+        {
+            try
+            {
+                return await _storageManagementService.GetSummaryAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile diagnostics before copy.");
+                return null;
             }
         }
 

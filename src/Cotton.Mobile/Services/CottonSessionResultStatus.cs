@@ -11,5 +11,6 @@ namespace Cotton.Mobile.Services
         TimedOut = 6,
         AuthorizationFailed = 7,
         SessionExpired = 8,
+        AuthorizationPending = 9,
     }
 }

@@ -29,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonSessionResultStatus.TimedOut => "Authorization timed out. Try again.",
                 CottonSessionResultStatus.AuthorizationFailed => "Authorization failed. Try again.",
                 CottonSessionResultStatus.SessionExpired => "Session expired. Sign in again.",
+                CottonSessionResultStatus.AuthorizationPending => "Authorization was not completed. Sign in again.",
                 _ => unauthenticatedStatus,
             };
         }

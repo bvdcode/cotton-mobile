@@ -607,7 +607,8 @@ namespace Cotton.Mobile.ViewModels
                     or CottonSessionResultStatus.BrowserUnavailable
                     or CottonSessionResultStatus.TimedOut
                     or CottonSessionResultStatus.AuthorizationFailed
-                    or CottonSessionResultStatus.SessionExpired;
+                    or CottonSessionResultStatus.SessionExpired
+                    or CottonSessionResultStatus.AuthorizationPending;
         }
 
         private void ShowLoading(string message)

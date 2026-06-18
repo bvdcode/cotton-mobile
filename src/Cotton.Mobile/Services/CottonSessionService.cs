@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
     public class CottonSessionService : ICottonSessionService
     {
         private static readonly TimeSpan MinimumPollDelay = TimeSpan.FromSeconds(1);
+        private static readonly TimeSpan PendingAuthorizationRestoreTimeout = TimeSpan.FromSeconds(8);
 
         private readonly ICottonClientFactory _clientFactory;
         private readonly ICottonInstanceStore _instanceStore;
@@ -206,14 +207,25 @@ namespace Cotton.Mobile.Services
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
             }
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            CottonSessionResult result = await PollUntilCompleteAsync(
-                client,
-                CreateAuthorizationSession(pendingSession),
-                instanceUri,
-                cancellationToken).ConfigureAwait(false);
-            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
-            return result;
+            using var restoreTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            restoreTimeout.CancelAfter(PendingAuthorizationRestoreTimeout);
+
+            try
+            {
+                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+                CottonSessionResult result = await PollUntilCompleteAsync(
+                    client,
+                    CreateAuthorizationSession(pendingSession),
+                    instanceUri,
+                    restoreTimeout.Token).ConfigureAwait(false);
+                await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+                return result;
+            }
+            catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && restoreTimeout.IsCancellationRequested)
+            {
+                await _pendingSessionStore.ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
+            }
         }
 
         private static CottonPendingAppCodeSession CreatePendingSession(

@@ -34,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
         private CancellationTokenSource? _authorizationCancellation;
         private bool _didRestoreSession;
         private bool _isSessionRestoreInProgress;
+        private bool _isSessionRestoreRetryQueued;
         private bool _shouldRetrySessionRestoreWhenOnline;
 
         public MainPageViewModel(
@@ -371,24 +372,32 @@ namespace Cotton.Mobile.ViewModels
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
         {
-            if (!_shouldRetrySessionRestoreWhenOnline)
+            if (!_shouldRetrySessionRestoreWhenOnline || _isSessionRestoreRetryQueued)
             {
                 return;
             }
 
+            _isSessionRestoreRetryQueued = true;
             _ = MainThread.InvokeOnMainThreadAsync(RetrySessionRestoreAfterNetworkAsync);
         }
 
         private async Task RetrySessionRestoreAfterNetworkAsync()
         {
-            if (!_shouldRetrySessionRestoreWhenOnline
-                || _isSessionRestoreInProgress
-                || !Display.IsSignInVisible)
+            try
             {
-                return;
-            }
+                if (!_shouldRetrySessionRestoreWhenOnline
+                    || _isSessionRestoreInProgress
+                    || !Display.IsSignInVisible)
+                {
+                    return;
+                }
 
-            await RestoreSessionAsync();
+                await RestoreSessionAsync();
+            }
+            finally
+            {
+                _isSessionRestoreRetryQueued = false;
+            }
         }
 
         private async Task ClearLocalSessionAndCachedStateAsync(string reason)

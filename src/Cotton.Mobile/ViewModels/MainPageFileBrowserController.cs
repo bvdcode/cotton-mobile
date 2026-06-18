@@ -767,6 +767,12 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 ClearFileActionRetry();
+                if (ShowReusableLocalFileIfAvailable(file))
+                {
+                    _display.ShowFilesSummary();
+                    return;
+                }
+
                 _display.ShowFilesStatus("Download cancelled.");
             }
             catch (Exception exception)
@@ -1181,20 +1187,21 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private void ShowReusableLocalFileIfAvailable(CottonFileBrowserEntry file)
+        private bool ShowReusableLocalFileIfAvailable(CottonFileBrowserEntry file)
         {
             if (_instanceUri is null)
             {
-                return;
+                return false;
             }
 
             CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, file);
             if (localFile is null)
             {
-                return;
+                return false;
             }
 
             _display.ShowFileLocalCopy(file, localFile);
+            return true;
         }
 
         private IProgress<long>? CreateFileDownloadProgress(

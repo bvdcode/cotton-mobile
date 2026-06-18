@@ -4,14 +4,31 @@ namespace Cotton.Mobile.Services
     {
         private readonly Lock _gate = new();
         private TaskCompletionSource _nextResume = CreateResumeSource();
+        private long _resumeVersion;
 
         public event EventHandler? Resumed;
 
-        public Task WaitForNextResumeAsync(CancellationToken cancellationToken)
+        public long CurrentResumeVersion
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _resumeVersion;
+                }
+            }
+        }
+
+        public Task WaitForNextResumeAsync(long resumeVersionCheckpoint, CancellationToken cancellationToken)
         {
             Task resumeTask;
             lock (_gate)
             {
+                if (_resumeVersion > resumeVersionCheckpoint)
+                {
+                    return Task.CompletedTask;
+                }
+
                 resumeTask = _nextResume.Task;
             }
 
@@ -25,6 +42,7 @@ namespace Cotton.Mobile.Services
             {
                 resume = _nextResume;
                 _nextResume = CreateResumeSource();
+                _resumeVersion++;
             }
 
             resume.TrySetResult();

@@ -107,6 +107,7 @@ namespace Cotton.Mobile.Services
                 .SaveAsync(CreatePendingSession(instanceUri, session), cancellationToken)
                 .ConfigureAwait(false);
 
+            long resumeVersionCheckpoint = _foregroundService.CurrentResumeVersion;
             bool browserOpened;
             try
             {
@@ -131,6 +132,7 @@ namespace Cotton.Mobile.Services
             {
                 bool returnedBeforeExpiration = await WaitForBrowserReturnAsync(
                     session,
+                    resumeVersionCheckpoint,
                     cancellationToken).ConfigureAwait(false);
                 if (!returnedBeforeExpiration)
                 {
@@ -330,6 +332,7 @@ namespace Cotton.Mobile.Services
 
         private async Task<bool> WaitForBrowserReturnAsync(
             AppCodeAuthorizationSession session,
+            long resumeVersionCheckpoint,
             CancellationToken cancellationToken)
         {
             TimeSpan remaining = session.ExpiresAt - DateTime.UtcNow;
@@ -343,7 +346,9 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                await _foregroundService.WaitForNextResumeAsync(timeout.Token).ConfigureAwait(false);
+                await _foregroundService
+                    .WaitForNextResumeAsync(resumeVersionCheckpoint, timeout.Token)
+                    .ConfigureAwait(false);
                 return true;
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)

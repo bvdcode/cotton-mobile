@@ -4,7 +4,9 @@ namespace Cotton.Mobile.Services
     {
         event EventHandler? Resumed;
 
-        Task WaitForNextResumeAsync(CancellationToken cancellationToken);
+        long CurrentResumeVersion { get; }
+
+        Task WaitForNextResumeAsync(long resumeVersionCheckpoint, CancellationToken cancellationToken);
 
         void NotifyResumed();
     }

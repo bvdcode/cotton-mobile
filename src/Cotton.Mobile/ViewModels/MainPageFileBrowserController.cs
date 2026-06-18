@@ -375,17 +375,22 @@ namespace Cotton.Mobile.ViewModels
             MainPageFileAction action = _retryFileAction.Value;
             CottonFileBrowserEntry entry = _retryFileActionEntry;
             ClearFileActionRetry();
+            CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
+            if (currentEntry is null)
+            {
+                return;
+            }
 
             switch (action)
             {
                 case MainPageFileAction.Download:
-                    await DownloadFileAsync(entry);
+                    await DownloadFileAsync(currentEntry);
                     break;
                 case MainPageFileAction.Open:
-                    await OpenFileAsync(entry);
+                    await OpenFileAsync(currentEntry);
                     break;
                 case MainPageFileAction.Share:
-                    await ShareFileAsync(entry);
+                    await ShareFileAsync(currentEntry);
                     break;
             }
         }

@@ -142,13 +142,14 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetLocalDownloadFile(instanceUri, file);
-            if (info is null)
-            {
-                return null;
-            }
-
-            return CreateLocalFileSnapshot(info);
+            return InspectLocalDownload(
+                file,
+                "local download snapshot",
+                () =>
+                {
+                    FileInfo? info = GetLocalDownloadFile(instanceUri, file);
+                    return info is null ? null : CreateLocalFileSnapshot(info);
+                });
         }
 
         public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(Uri instanceUri, CottonFileBrowserEntry file)
@@ -156,8 +157,14 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
-            return info is null ? null : CreateLocalFileSnapshot(info);
+            return InspectLocalDownload(
+                file,
+                "reusable local download snapshot",
+                () =>
+                {
+                    FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
+                    return info is null ? null : CreateLocalFileSnapshot(info);
+                });
         }
 
         public CottonFileDownloadResult? GetReusableLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
@@ -165,14 +172,20 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
-            if (info is null)
-            {
-                return null;
-            }
+            return InspectLocalDownload(
+                file,
+                "reusable local download",
+                () =>
+                {
+                    FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
+                    if (info is null)
+                    {
+                        return null;
+                    }
 
-            TouchLocalDownload(info);
-            return new CottonFileDownloadResult(file.Name, info.FullName, info.Length);
+                    TouchLocalDownload(info);
+                    return new CottonFileDownloadResult(file.Name, info.FullName, info.Length);
+                });
         }
 
         private static async Task<CottonFolderContent> LoadFolderAsync(
@@ -259,6 +272,27 @@ namespace Cotton.Mobile.Services
         {
             return file.SizeBytes == info.Length
                 && CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc);
+        }
+
+        private T? InspectLocalDownload<T>(
+            CottonFileBrowserEntry file,
+            string operation,
+            Func<T?> inspect)
+            where T : class
+        {
+            try
+            {
+                return inspect();
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile {Operation} for file {FileId}.",
+                    operation,
+                    file.Id);
+                return null;
+            }
         }
 
         private void StampLocalDownload(string filePath, CottonFileBrowserEntry file)

@@ -437,7 +437,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            string openAction = CreateOpenAction(file);
+            string openAction = CreateOpenAction(file, instanceUri);
             string? action = await _dialogService.ShowActionSheetAsync(
                 file.Name,
                 CancelAction,
@@ -1158,6 +1158,21 @@ namespace Cotton.Mobile.ViewModels
         private string CreateOpenAction(CottonFileBrowserEntry file)
         {
             return _filePreviewService.CanPreview(file) ? OpenAction : OpenWithSystemAppAction;
+        }
+
+        private string CreateOpenAction(CottonFileBrowserEntry file, Uri instanceUri)
+        {
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
+            return localFile is null
+                ? CreateOpenAction(file)
+                : CreateOpenAction(file, localFile);
+        }
+
+        private string CreateOpenAction(
+            CottonFileBrowserEntry file,
+            CottonLocalFileSnapshot localFile)
+        {
+            return _filePreviewService.CanPreview(file, localFile) ? OpenAction : OpenWithSystemAppAction;
         }
 
         private string CreateOpenAction(

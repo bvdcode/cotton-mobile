@@ -4,6 +4,8 @@ namespace Cotton.Mobile.Services
     {
         bool CanPreview(CottonFileBrowserEntry file);
 
+        bool CanPreview(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile);
+
         bool CanPreview(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile);
 
         Task OpenAsync(

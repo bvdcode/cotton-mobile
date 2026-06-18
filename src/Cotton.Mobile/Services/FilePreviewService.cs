@@ -32,7 +32,16 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(downloadedFile);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && (file.IsImage || CanPreviewDownloadedText(file, downloadedFile));
+                && (file.IsImage || CanPreviewAvailableText(file, downloadedFile.SizeBytes));
+        }
+
+        public bool CanPreview(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(localFile);
+
+            return file.Type == CottonFileBrowserEntryType.File
+                && (file.IsImage || CanPreviewAvailableText(file, localFile.SizeBytes));
         }
 
         public async Task OpenAsync(
@@ -91,12 +100,10 @@ namespace Cotton.Mobile.Services
                 && (!file.SizeBytes.HasValue || file.SizeBytes.Value is >= 0 and <= MaxTextPreviewBytes);
         }
 
-        private static bool CanPreviewDownloadedText(
-            CottonFileBrowserEntry file,
-            CottonFileDownloadResult downloadedFile)
+        private static bool CanPreviewAvailableText(CottonFileBrowserEntry file, long availableSizeBytes)
         {
             return CanPreviewTextFromMetadata(file)
-                && downloadedFile.SizeBytes is >= 0 and <= MaxTextPreviewBytes;
+                && availableSizeBytes is >= 0 and <= MaxTextPreviewBytes;
         }
 
         private ImageViewerPage CreateImageViewerPage(
@@ -117,7 +124,7 @@ namespace Cotton.Mobile.Services
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
-            if (!CanPreviewDownloadedText(file, downloadedFile))
+            if (!CanPreviewAvailableText(file, downloadedFile.SizeBytes))
             {
                 throw new InvalidOperationException("The selected file cannot be previewed as text.");
             }

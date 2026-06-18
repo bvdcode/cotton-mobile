@@ -263,6 +263,7 @@
                             <SearchBar x:Name="FileSearchBar"
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"
                                        IsVisible="{Binding Display.IsFileSearchVisible}"
+                                       IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                        Placeholder="Search"
                                        HeightRequest="40"
                                        FontSize="13"

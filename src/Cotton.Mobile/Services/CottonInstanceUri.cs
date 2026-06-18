@@ -15,7 +15,10 @@ namespace Cotton.Mobile.Services
         {
             return instanceUri.IsAbsoluteUri
                 && string.Equals(instanceUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
-                && !string.IsNullOrWhiteSpace(instanceUri.Host);
+                && !string.IsNullOrWhiteSpace(instanceUri.Host)
+                && string.IsNullOrWhiteSpace(instanceUri.UserInfo)
+                && string.IsNullOrWhiteSpace(instanceUri.Query)
+                && string.IsNullOrWhiteSpace(instanceUri.Fragment);
         }
     }
 }

@@ -23,6 +23,7 @@ namespace Cotton.Mobile.ViewModels
             "You will need to sign in again. Cached files on this device will be removed.";
 
         private readonly ICottonSessionService _sessionService;
+        private readonly ICottonInstanceStore _instanceStore;
         private readonly IBrowser _browser;
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
@@ -46,6 +47,7 @@ namespace Cotton.Mobile.ViewModels
 
         public MainPageViewModel(
             ICottonSessionService sessionService,
+            ICottonInstanceStore instanceStore,
             IBrowser browser,
             CottonMobileOptions options,
             IUserDialogService dialogService,
@@ -67,6 +69,7 @@ namespace Cotton.Mobile.ViewModels
             ILogger<MainPageViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(sessionService);
+            ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(browser);
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
@@ -88,6 +91,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(logger);
 
             _sessionService = sessionService;
+            _instanceStore = instanceStore;
             _browser = browser;
             _options = options;
             _dialogService = dialogService;
@@ -239,6 +243,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile session.");
+                await RestoreStoredInstanceUrlBestEffortAsync("session restore failure");
                 if (!_networkAccess.HasInternetAccess)
                 {
                     _shouldRetrySessionRestoreWhenOnline = true;
@@ -255,6 +260,22 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 _isSessionRestoreInProgress = false;
+            }
+        }
+
+        private async Task RestoreStoredInstanceUrlBestEffortAsync(string reason)
+        {
+            try
+            {
+                Uri? instanceUri = await _instanceStore.GetAsync();
+                if (instanceUri is not null)
+                {
+                    Display.InstanceUrl = instanceUri.AbsoluteUri;
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to restore Cotton mobile instance URL after {Reason}.", reason);
             }
         }
 

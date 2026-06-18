@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
@@ -141,6 +142,7 @@ namespace Cotton.Mobile.ViewModels
             ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync, LogUnhandledCommandException);
             ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync, LogUnhandledCommandException);
             ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync, LogUnhandledCommandException);
+            Display.PropertyChanged += Display_PropertyChanged;
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
             _foregroundService.Resumed += ForegroundService_Resumed;
         }
@@ -793,6 +795,34 @@ namespace Cotton.Mobile.ViewModels
             ToggleFileSearchCommand.RaiseCanExecuteChanged();
             ShowFileViewActionsCommand.RaiseCanExecuteChanged();
             ShowFileSortActionsCommand.RaiseCanExecuteChanged();
+        }
+
+        private void Display_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            switch (e.PropertyName)
+            {
+                case nameof(MainPageDisplayState.IsInputEnabled):
+                    ConnectCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsCancelAuthorizationEnabled):
+                    CancelAuthorizationCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsAccountActionEnabled):
+                    AccountCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsLogoutEnabled):
+                    LogoutCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.CanNavigateFilesUp):
+                    NavigateFilesUpCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.CanCancelFileAction):
+                    CancelFileActionCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.CanRetryFileAction):
+                    RetryFileActionCommand.RaiseCanExecuteChanged();
+                    break;
+            }
         }
 
         private void LogUnhandledCommandException(Exception exception)

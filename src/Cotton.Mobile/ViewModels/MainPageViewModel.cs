@@ -27,6 +27,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
+        private readonly IApplicationForegroundService _foregroundService;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -36,6 +37,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isSessionRestoreInProgress;
         private bool _isSessionRestoreRetryQueued;
         private bool _shouldRetrySessionRestoreWhenOnline;
+        private bool _shouldRetrySessionRestoreOnResume;
 
         public MainPageViewModel(
             ICottonSessionService sessionService,
@@ -88,6 +90,7 @@ namespace Cotton.Mobile.ViewModels
             _storageSettingsPageService = storageSettingsPageService;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
+            _foregroundService = foregroundService;
             _presentationService = presentationService;
             _logger = logger;
 
@@ -139,6 +142,7 @@ namespace Cotton.Mobile.ViewModels
             ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync, LogUnhandledCommandException);
             ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync, LogUnhandledCommandException);
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
+            _foregroundService.Resumed += ForegroundService_Resumed;
         }
 
         public MainPageDisplayState Display { get; }
@@ -205,6 +209,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 ShowLoading("Restoring session...");
                 _shouldRetrySessionRestoreWhenOnline = false;
+                _shouldRetrySessionRestoreOnResume = false;
                 CottonSessionResult result = await _sessionService.RestoreAsync();
                 await ApplySessionResultAsync(result, ReadyStatus);
             }
@@ -386,39 +391,64 @@ namespace Cotton.Mobile.ViewModels
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
         {
-            if (!_shouldRetrySessionRestoreWhenOnline || _isSessionRestoreRetryQueued)
+            if (!_shouldRetrySessionRestoreWhenOnline && !_shouldRetrySessionRestoreOnResume)
+            {
+                return;
+            }
+
+            QueueSessionRestoreRetry("internet access restored");
+        }
+
+        private void ForegroundService_Resumed(object? sender, EventArgs e)
+        {
+            if (!_shouldRetrySessionRestoreOnResume)
+            {
+                return;
+            }
+
+            QueueSessionRestoreRetry("foreground resume");
+        }
+
+        private void QueueSessionRestoreRetry(string reason)
+        {
+            if (_isSessionRestoreRetryQueued)
             {
                 return;
             }
 
             _isSessionRestoreRetryQueued = true;
-            _ = RunQueuedSessionRestoreRetryAsync();
+            _ = RunQueuedSessionRestoreRetryAsync(reason);
         }
 
-        private async Task RunQueuedSessionRestoreRetryAsync()
+        private async Task RunQueuedSessionRestoreRetryAsync(string reason)
         {
             try
             {
-                await MainThread.InvokeOnMainThreadAsync(RetrySessionRestoreAfterNetworkAsync);
+                await MainThread.InvokeOnMainThreadAsync(() => RetrySessionRestoreAfterSignalAsync(reason));
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to queue Cotton mobile session restore retry after internet returned.");
+                _logger.LogWarning(
+                    exception,
+                    "Failed to queue Cotton mobile session restore retry after {Reason}.",
+                    reason);
                 _isSessionRestoreRetryQueued = false;
             }
         }
 
-        private async Task RetrySessionRestoreAfterNetworkAsync()
+        private async Task RetrySessionRestoreAfterSignalAsync(string reason)
         {
             try
             {
-                if (!_shouldRetrySessionRestoreWhenOnline
+                if ((!_shouldRetrySessionRestoreWhenOnline && !_shouldRetrySessionRestoreOnResume)
                     || _isSessionRestoreInProgress
-                    || !Display.IsSignInVisible)
+                    || !Display.IsSignInVisible
+                    || !_networkAccess.HasInternetAccess)
                 {
                     return;
                 }
 
+                _logger.LogInformation("Retrying Cotton mobile session restore after {Reason}.", reason);
                 await RestoreSessionAsync();
             }
             finally
@@ -430,6 +460,7 @@ namespace Cotton.Mobile.ViewModels
         private void ClearSessionRestoreRetry()
         {
             _shouldRetrySessionRestoreWhenOnline = false;
+            _shouldRetrySessionRestoreOnResume = false;
             _isSessionRestoreRetryQueued = false;
         }
 
@@ -678,11 +709,17 @@ namespace Cotton.Mobile.ViewModels
 
             if (result.IsAuthenticated && result.InstanceUri is not null && result.User is not null)
             {
+                ClearSessionRestoreRetry();
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 ShowProfile(profile);
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 return;
+            }
+
+            if (result.Status == CottonSessionResultStatus.AuthorizationPending)
+            {
+                _shouldRetrySessionRestoreOnResume = true;
             }
 
             if (ShouldClearLocalSessionAndCachedState(result))
@@ -704,8 +741,7 @@ namespace Cotton.Mobile.ViewModels
                     or CottonSessionResultStatus.BrowserUnavailable
                     or CottonSessionResultStatus.TimedOut
                     or CottonSessionResultStatus.AuthorizationFailed
-                    or CottonSessionResultStatus.SessionExpired
-                    or CottonSessionResultStatus.AuthorizationPending;
+                    or CottonSessionResultStatus.SessionExpired;
         }
 
         private void ShowLoading(string message)

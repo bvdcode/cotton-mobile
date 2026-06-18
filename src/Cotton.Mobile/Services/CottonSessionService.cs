@@ -264,7 +264,6 @@ namespace Cotton.Mobile.Services
             }
             catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested && restoreTimeout.IsCancellationRequested)
             {
-                await ClearPendingSessionBestEffortAsync("pending authorization restore timeout").ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
             }
         }

@@ -31,6 +31,19 @@ namespace Cotton.Mobile.Services
             return ValueTask.FromResult(thumbnail);
         }
 
+        public ValueTask<CottonFileThumbnailSnapshot> GetCachedThumbnailAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry entry,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(entry);
+
+            cancellationToken.ThrowIfCancellationRequested();
+            CottonFileThumbnailSnapshot thumbnail = CreateCachedThumbnail(instanceUri, entry);
+            return ValueTask.FromResult(thumbnail);
+        }
+
         private CottonFileThumbnailSnapshot CreateThumbnail(
             Uri instanceUri,
             CottonFileBrowserEntry entry,
@@ -59,6 +72,25 @@ namespace Cotton.Mobile.Services
                 entry.BadgeText,
                 previewUri.AbsoluteUri,
                 cacheKey);
+        }
+
+        private CottonFileThumbnailSnapshot CreateCachedThumbnail(
+            Uri instanceUri,
+            CottonFileBrowserEntry entry)
+        {
+            if (string.IsNullOrWhiteSpace(entry.PreviewHashEncryptedHex))
+            {
+                return CottonFileThumbnailSnapshot.Placeholder(
+                    entry.BadgeText,
+                    CreateCacheKey(instanceUri, entry, "no-preview"));
+            }
+
+            string previewToken = entry.PreviewHashEncryptedHex.Trim();
+            string cacheKey = CreateCacheKey(instanceUri, entry, previewToken);
+            string? cachedSource = _thumbnailCache.GetCachedThumbnailSource(cacheKey);
+            return string.IsNullOrWhiteSpace(cachedSource)
+                ? CottonFileThumbnailSnapshot.Placeholder(entry.BadgeText, cacheKey)
+                : CottonFileThumbnailSnapshot.Ready(entry.BadgeText, cachedSource, cacheKey);
         }
 
         private void WarmCache(string cacheKey, Uri previewUri)

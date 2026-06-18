@@ -6,5 +6,10 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonFileBrowserEntry entry,
             CancellationToken cancellationToken = default);
+
+        ValueTask<CottonFileThumbnailSnapshot> GetCachedThumbnailAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry entry,
+            CancellationToken cancellationToken = default);
     }
 }

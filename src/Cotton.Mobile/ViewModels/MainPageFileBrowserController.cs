@@ -760,6 +760,7 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
+            cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
             _fileNavigation.Clear();
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
@@ -799,6 +800,7 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
+            cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
@@ -920,6 +922,28 @@ namespace Cotton.Mobile.ViewModels
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetThumbnailAsync(
+                    instanceUri,
+                    entry,
+                    cancellationToken);
+                entries.Add(entry.WithThumbnail(thumbnail));
+            }
+
+            return new CottonFolderContent(content.FolderId, content.FolderName, entries);
+        }
+
+        private async Task<CottonFolderContent> ApplyCachedThumbnailsAsync(
+            Uri instanceUri,
+            CottonFolderContent content,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(content);
+
+            var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
+            foreach (CottonFileBrowserEntry entry in content.Entries)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetCachedThumbnailAsync(
                     instanceUri,
                     entry,
                     cancellationToken);

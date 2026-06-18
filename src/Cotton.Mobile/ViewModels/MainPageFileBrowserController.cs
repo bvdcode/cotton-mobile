@@ -1560,10 +1560,12 @@ namespace Cotton.Mobile.ViewModels
 
             _fileActionCancellation = null;
             cancellation.Dispose();
-            if (shouldRunRecoveryRefresh)
+            if (shouldRunRecoveryRefresh && string.IsNullOrWhiteSpace(_fileLoadRecoveryPendingAfterBusyReason))
             {
                 QueueFileLoadRecoveryRefreshAfterFileAction();
             }
+
+            QueuePendingFileLoadRecoveryRefreshAfterBusy();
         }
 
         private void EndFileLoad(CancellationTokenSource cancellation)
@@ -1675,7 +1677,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (IsFileLoadOrNavigationBusy() && _instanceUri is not null)
+            if (IsFileBrowserBusy() && _instanceUri is not null)
             {
                 _fileLoadRecoveryPendingAfterBusyReason = reason;
                 return;
@@ -1742,7 +1744,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void QueuePendingFileLoadRecoveryRefreshAfterBusy()
         {
-            if (IsFileLoadOrNavigationBusy())
+            if (IsFileBrowserBusy())
             {
                 return;
             }
@@ -1768,11 +1770,6 @@ namespace Cotton.Mobile.ViewModels
                 || _isFileLoadInProgress
                 || _fileActionCancellation is not null
                 || _display.IsFilesLoading;
-        }
-
-        private bool IsFileLoadOrNavigationBusy()
-        {
-            return _isFolderNavigationInProgress || _isFileLoadInProgress;
         }
 
         private void StopExternalRefreshIfNoLoadInProgress()

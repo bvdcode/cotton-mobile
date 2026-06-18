@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Services
         private const string CustomInstallChannel = "Custom package";
         private const string UnknownValue = "Unknown";
         private const string UnknownApplicationVersion = "unknown";
+        private const string UserAgentFallbackProduct = "Cotton-Mobile";
 
         private readonly CottonMobileOptions _options;
         private readonly ILogger<CottonMobileApplicationMetadata> _logger;
@@ -60,7 +61,8 @@ namespace Cotton.Mobile.Services
             () => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo),
             UnknownValue);
 
-        public string UserAgent => $"{ApplicationName}/{ApplicationVersion}";
+        public string UserAgent =>
+            $"{CreateUserAgentToken(ApplicationName, UserAgentFallbackProduct)}/{CreateUserAgentToken(ApplicationVersion, UnknownApplicationVersion)}";
 
         private string ReadMetadata(string name, Func<string> read, string fallback)
         {
@@ -94,6 +96,46 @@ namespace Cotton.Mobile.Services
             double heightDp = displayInfo.Height / density;
             return FormattableString.Invariant(
                 $"{displayInfo.Width:0}x{displayInfo.Height:0}px · {widthDp:0}x{heightDp:0}dp · {density:0.##}x · {displayInfo.Orientation}");
+        }
+
+        private static string CreateUserAgentToken(string value, string fallback)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return fallback;
+            }
+
+            var buffer = new char[value.Length];
+            for (int index = 0; index < value.Length; index++)
+            {
+                char character = value[index];
+                buffer[index] = IsHttpTokenCharacter(character) ? character : '-';
+            }
+
+            string token = new string(buffer).Trim('-');
+            return string.IsNullOrWhiteSpace(token) ? fallback : token;
+        }
+
+        private static bool IsHttpTokenCharacter(char character)
+        {
+            return character is >= '0' and <= '9'
+                or >= 'A' and <= 'Z'
+                or >= 'a' and <= 'z'
+                or '!'
+                or '#'
+                or '$'
+                or '%'
+                or '&'
+                or '\''
+                or '*'
+                or '+'
+                or '-'
+                or '.'
+                or '^'
+                or '_'
+                or '`'
+                or '|'
+                or '~';
         }
 
         private static string ResolveInstallChannel(string packageName)

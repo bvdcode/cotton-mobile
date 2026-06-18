@@ -95,22 +95,42 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _secureStorage.Remove(AccessTokenKey);
-            _secureStorage.Remove(RefreshTokenKey);
+            List<Exception> failures = [];
+            RemoveTokenKey(AccessTokenKey, failures);
+            RemoveTokenKey(RefreshTokenKey, failures);
+            if (failures.Count == 1)
+            {
+                throw new InvalidOperationException("Failed to clear one Cotton mobile token.", failures[0]);
+            }
+
+            if (failures.Count > 1)
+            {
+                throw new AggregateException("Failed to clear Cotton mobile tokens.", failures);
+            }
 
             return Task.CompletedTask;
         }
 
         private void ClearBestEffort(string reason)
         {
+            List<Exception> failures = [];
+            RemoveTokenKey(AccessTokenKey, failures);
+            RemoveTokenKey(RefreshTokenKey, failures);
+            foreach (Exception exception in failures)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile tokens after {Reason}.", reason);
+            }
+        }
+
+        private void RemoveTokenKey(string key, List<Exception> failures)
+        {
             try
             {
-                _secureStorage.Remove(AccessTokenKey);
-                _secureStorage.Remove(RefreshTokenKey);
+                _secureStorage.Remove(key);
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile tokens after {Reason}.", reason);
+                failures.Add(exception);
             }
         }
     }

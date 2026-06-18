@@ -153,6 +153,8 @@ namespace Cotton.Mobile.ViewModels
             _isFolderNavigationInProgress = true;
             try
             {
+                CottonFolderHandle? originalFolder = _currentFolder;
+                var originalNavigation = new List<CottonFolderHandle>(_fileNavigation);
                 int previousIndex = _fileNavigation.Count - 1;
                 CottonFolderHandle previous = _fileNavigation[previousIndex];
                 _fileNavigation.RemoveAt(previousIndex);
@@ -164,6 +166,13 @@ namespace Cotton.Mobile.ViewModels
                 else
                 {
                     await LoadFolderAsync(previous, preserveHistory: true);
+                }
+
+                if (_lastFileLoadFailed && _instanceUri is not null)
+                {
+                    _currentFolder = originalFolder;
+                    _fileNavigation.Clear();
+                    _fileNavigation.AddRange(originalNavigation);
                 }
             }
             finally

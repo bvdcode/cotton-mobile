@@ -1,35 +1,60 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.Services
 {
     public class UserDialogService : IUserDialogService
     {
+        private readonly ILogger<UserDialogService> _logger;
+
+        public UserDialogService(ILogger<UserDialogService> logger)
+        {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _logger = logger;
+        }
+
         public async Task ShowAlertAsync(string title, string message, string cancel)
         {
-            await MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                Page? page = GetCurrentPage();
-                if (page is null)
+                await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    return;
-                }
+                    Page? page = GetCurrentPage();
+                    if (page is null)
+                    {
+                        return;
+                    }
 
-                await page.DisplayAlertAsync(title, message, cancel);
-            });
+                    await page.DisplayAlertAsync(title, message, cancel);
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile alert dialog {Title}.", title);
+            }
         }
 
         public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
-            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                Page? page = GetCurrentPage();
-                if (page is null)
+                return await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    return false;
-                }
+                    Page? page = GetCurrentPage();
+                    if (page is null)
+                    {
+                        return false;
+                    }
 
-                return await page.DisplayAlertAsync(title, message, accept, cancel);
-            });
+                    return await page.DisplayAlertAsync(title, message, accept, cancel);
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile confirmation dialog {Title}.", title);
+                return false;
+            }
         }
 
         public async Task<string?> ShowActionSheetAsync(
@@ -38,16 +63,24 @@ namespace Cotton.Mobile.Services
             string? destruction,
             params string[] buttons)
         {
-            return await MainThread.InvokeOnMainThreadAsync(async () =>
+            try
             {
-                Page? page = GetCurrentPage();
-                if (page is null)
+                return await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    return null;
-                }
+                    Page? page = GetCurrentPage();
+                    if (page is null)
+                    {
+                        return null;
+                    }
 
-                return await page.DisplayActionSheetAsync(title, cancel, destruction, buttons);
-            });
+                    return await page.DisplayActionSheetAsync(title, cancel, destruction, buttons);
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile action sheet {Title}.", title);
+                return null;
+            }
         }
 
         private static Page? GetCurrentPage()

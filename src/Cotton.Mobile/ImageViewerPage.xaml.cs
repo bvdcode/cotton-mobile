@@ -18,6 +18,18 @@ namespace Cotton.Mobile
 
             InitializeComponent();
             BindingContext = viewModel;
+            ImageSurface.SizeChanged += ImageSurface_SizeChanged;
+            PreviewImage.SizeChanged += PreviewImage_SizeChanged;
+        }
+
+        private void ImageSurface_SizeChanged(object? sender, EventArgs e)
+        {
+            ClampImageTranslation();
+        }
+
+        private void PreviewImage_SizeChanged(object? sender, EventArgs e)
+        {
+            ClampImageTranslation();
         }
 
         private void OnImagePinchUpdated(object? sender, PinchGestureUpdatedEventArgs e)

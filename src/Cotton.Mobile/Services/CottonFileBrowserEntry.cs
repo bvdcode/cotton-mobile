@@ -138,7 +138,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(file);
 
             string contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? "File"
+                ? string.Empty
                 : file.ContentType.Trim();
             string kind = ResolveFileKind(file.Name, contentType);
             return new CottonFileBrowserEntry(

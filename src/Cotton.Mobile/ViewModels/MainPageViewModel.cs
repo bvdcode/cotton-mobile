@@ -232,6 +232,8 @@ namespace Cotton.Mobile.ViewModels
                 }
                 else
                 {
+                    _shouldRetrySessionRestoreWhenOnline = true;
+                    _shouldRetrySessionRestoreOnResume = true;
                     ShowSignIn("Session restore failed. Sign in again.");
                 }
             }

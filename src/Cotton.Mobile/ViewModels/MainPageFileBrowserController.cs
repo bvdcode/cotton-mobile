@@ -111,7 +111,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task RefreshAsync()
         {
             ClearFileActionRetry();
-            if (_display.IsFilesLoading || _display.IsFilesRefreshing)
+            if (_display.IsFilesLoading)
             {
                 return;
             }

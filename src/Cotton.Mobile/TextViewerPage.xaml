@@ -5,7 +5,7 @@
              x:Class="Cotton.Mobile.TextViewerPage"
              x:DataType="viewModels:TextViewerViewModel"
              Shell.NavBarIsVisible="True"
-             Title="Text"
+             Title="{Binding Title}"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.ToolbarItems>

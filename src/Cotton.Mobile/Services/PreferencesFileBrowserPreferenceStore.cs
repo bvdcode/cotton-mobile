@@ -34,13 +34,18 @@ namespace Cotton.Mobile.Services
         }
 
         private TEnum GetEnum<TEnum>(string key, TEnum defaultValue)
-            where TEnum : struct
+            where TEnum : struct, Enum
         {
             string defaultText = defaultValue.ToString() ?? string.Empty;
             string value = _preferences.Get(key, defaultText) ?? defaultText;
-            return Enum.TryParse(value, ignoreCase: true, out TEnum parsed)
-                ? parsed
-                : defaultValue;
+            if (Enum.TryParse(value, ignoreCase: true, out TEnum parsed)
+                && Enum.IsDefined(typeof(TEnum), parsed))
+            {
+                return parsed;
+            }
+
+            _preferences.Remove(key);
+            return defaultValue;
         }
     }
 }

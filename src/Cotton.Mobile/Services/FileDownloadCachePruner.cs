@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Services
                 .Where(path => !path.EndsWith(TemporaryDownloadExtension, StringComparison.OrdinalIgnoreCase))
                 .Select(path => new FileInfo(path))
                 .Where(file => file.Exists)
-                .OrderBy(file => file.LastWriteTimeUtc)
+                .OrderBy(ResolvePruneTimestamp)
                 .ThenBy(file => file.FullName, StringComparer.Ordinal)
                 .ToList();
 
@@ -88,6 +88,13 @@ namespace Cotton.Mobile.Services
         {
             return normalizedProtectedPath is not null
                 && string.Equals(file.FullName, normalizedProtectedPath, StringComparison.Ordinal);
+        }
+
+        private static DateTime ResolvePruneTimestamp(FileInfo file)
+        {
+            return file.LastAccessTimeUtc > file.LastWriteTimeUtc
+                ? file.LastAccessTimeUtc
+                : file.LastWriteTimeUtc;
         }
 
         private long TryDelete(FileInfo file)

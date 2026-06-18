@@ -105,6 +105,19 @@ namespace Cotton.Mobile.Services
                 throw;
             }
 
+            try
+            {
+                StampLocalDownload(filePath, file);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to stamp Cotton mobile download file {Path}.", filePath);
+                DeleteDownload(filePath);
+                throw;
+            }
+
+            TouchLocalDownload(new FileInfo(filePath));
+
             await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
 
             return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
@@ -203,7 +216,7 @@ namespace Cotton.Mobile.Services
         private static FileInfo? GetReusableLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
         {
             FileInfo? info = GetLocalDownloadFile(instanceUri, file);
-            if (info is null || file.SizeBytes != info.Length)
+            if (info is null || !IsReusableLocalDownload(file, info))
             {
                 return null;
             }
@@ -213,18 +226,53 @@ namespace Cotton.Mobile.Services
 
         private static CottonLocalFileSnapshot CreateLocalFileSnapshot(FileInfo info)
         {
-            return new CottonLocalFileSnapshot(info.Name, info.Length, info.LastWriteTimeUtc);
+            return new CottonLocalFileSnapshot(
+                info.Name,
+                info.Length,
+                CottonLocalFileFreshness.NormalizeUtc(info.LastWriteTimeUtc));
+        }
+
+        private static bool IsReusableLocalDownload(CottonFileBrowserEntry file, FileInfo info)
+        {
+            return file.SizeBytes == info.Length
+                && CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc);
+        }
+
+        private void StampLocalDownload(string filePath, CottonFileBrowserEntry file)
+        {
+            File.SetLastWriteTimeUtc(
+                filePath,
+                CottonLocalFileFreshness.NormalizeUtc(file.UpdatedAtUtc));
         }
 
         private void TouchLocalDownload(FileInfo info)
         {
             try
             {
-                info.LastWriteTimeUtc = DateTime.UtcNow;
+                info.LastAccessTimeUtc = DateTime.UtcNow;
             }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            catch (Exception exception)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or PlatformNotSupportedException
+                    or ArgumentException)
             {
                 _logger.LogDebug(exception, "Failed to update Cotton mobile local file timestamp {Path}.", info.FullName);
+            }
+        }
+
+        private void DeleteDownload(string filePath)
+        {
+            try
+            {
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to delete Cotton mobile download file {Path}.", filePath);
             }
         }
 

@@ -757,6 +757,11 @@ namespace Cotton.Mobile.ViewModels
                 return $"Needs refresh ({FormatStorageSize(localFile.SizeBytes)})";
             }
 
+            if (!CottonLocalFileFreshness.IsFresh(localFile.UpdatedAtUtc, file.UpdatedAtUtc))
+            {
+                return $"Needs refresh ({FormatStorageSize(localFile.SizeBytes)})";
+            }
+
             return $"Yes ({FormatStorageSize(localFile.SizeBytes)})";
         }
 

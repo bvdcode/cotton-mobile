@@ -71,16 +71,37 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
 
             string normalizedCacheKey = cacheKey.Trim();
-            Lazy<Task> warmup = _warmups.GetOrAdd(
-                normalizedCacheKey,
-                _ => new Lazy<Task>(
-                    () => WarmAndRemoveAsync(normalizedCacheKey, sourceUri, cancellationToken),
-                    LazyThreadSafetyMode.ExecutionAndPublication));
-            return warmup.Value;
+            while (true)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                Lazy<Task> warmup = _warmups.GetOrAdd(
+                    normalizedCacheKey,
+                    _ => CreateWarmup(normalizedCacheKey, sourceUri, cancellationToken));
+                Task warmupTask = warmup.Value;
+                if (!warmupTask.IsCanceled)
+                {
+                    return warmupTask;
+                }
+
+                TryRemoveWarmup(normalizedCacheKey, warmup);
+            }
+        }
+
+        private Lazy<Task> CreateWarmup(
+            string cacheKey,
+            Uri sourceUri,
+            CancellationToken cancellationToken)
+        {
+            Lazy<Task>? warmup = null;
+            warmup = new Lazy<Task>(
+                () => WarmAndRemoveAsync(cacheKey, warmup!, sourceUri, cancellationToken),
+                LazyThreadSafetyMode.ExecutionAndPublication);
+            return warmup;
         }
 
         private async Task WarmAndRemoveAsync(
             string cacheKey,
+            Lazy<Task> warmup,
             Uri sourceUri,
             CancellationToken cancellationToken)
         {
@@ -90,8 +111,14 @@ namespace Cotton.Mobile.Services
             }
             finally
             {
-                _warmups.TryRemove(cacheKey, out _);
+                TryRemoveWarmup(cacheKey, warmup);
             }
+        }
+
+        private bool TryRemoveWarmup(string cacheKey, Lazy<Task> warmup)
+        {
+            return ((ICollection<KeyValuePair<string, Lazy<Task>>>)_warmups)
+                .Remove(new KeyValuePair<string, Lazy<Task>>(cacheKey, warmup));
         }
 
         private async Task WarmCoreAsync(

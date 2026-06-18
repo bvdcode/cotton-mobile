@@ -220,7 +220,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _filesNoticeTitle, value))
                 {
                     OnPropertyChanged(nameof(IsFilesNoticeVisible));
-                    OnPropertyChanged(nameof(IsFilesEmptyVisible));
+                    NotifyFilesEmptyStateChanged();
                 }
             }
         }
@@ -233,7 +233,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _filesNoticeMessage, value))
                 {
                     OnPropertyChanged(nameof(IsFilesNoticeVisible));
-                    OnPropertyChanged(nameof(IsFilesEmptyVisible));
+                    NotifyFilesEmptyStateChanged();
                 }
             }
         }
@@ -336,6 +336,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isFilesLoading, value))
                 {
                     NotifyFileBrowserChromeStateChanged();
+                    NotifyFilesEmptyStateChanged();
                 }
             }
         }
@@ -501,7 +502,7 @@ namespace Cotton.Mobile.ViewModels
             CanNavigateFilesUp = false;
             _allFileEntries.Clear();
             FileEntries.Clear();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
             IsLogoutEnabled = true;
             IsCancelAuthorizationEnabled = false;
             IsInputEnabled = false;
@@ -530,7 +531,7 @@ namespace Cotton.Mobile.ViewModels
             _allFileEntries.Clear();
             FileEntries.Clear();
             ClearFileSearch();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowProfileError(string status)
@@ -552,7 +553,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = status;
             ClearFilesNotice();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowFileActionLoading(string status)
@@ -564,7 +565,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = status;
             ClearFilesNotice();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowFileActionCancelling(string status)
@@ -581,7 +582,7 @@ namespace Cotton.Mobile.ViewModels
             CanCancelFileAction = false;
             CanRetryFileAction = true;
             FilesStatus = status;
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ClearFileActionRetry()
@@ -603,7 +604,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = status;
             ClearFilesNotice();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void StopFilesRefreshing()
@@ -634,7 +635,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFilesNotice();
             ApplyFileFilters();
             FilesStatus = CreateFilesStatus();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowFilesStatus(string status)
@@ -646,7 +647,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = status;
             ClearFilesNotice();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowOfflineFilesNotice(bool isCachedListing = false)
@@ -659,7 +660,7 @@ namespace Cotton.Mobile.ViewModels
             FilesStatus = CreateFilesStatus();
             FilesNoticeTitle = "Offline";
             FilesNoticeMessage = CreateOfflineFilesNoticeMessage(isCachedListing);
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowFilesSummary()
@@ -671,7 +672,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
             ClearFilesNotice();
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         public void ShowFileLocalCopy(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile)
@@ -893,7 +894,7 @@ namespace Cotton.Mobile.ViewModels
                 FilesStatus = CreateFilesStatus();
             }
 
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            NotifyFilesEmptyStateChanged();
         }
 
         private void NotifyFileSearchStateChanged()
@@ -909,6 +910,11 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(FileUpButtonOpacity));
+        }
+
+        private void NotifyFilesEmptyStateChanged()
+        {
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
         private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing;

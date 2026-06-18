@@ -65,51 +65,50 @@ namespace Cotton.Mobile.Services
             string filePath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
             string tempFilePath = CottonMobileStoragePaths.CreateTemporaryDownloadPath();
             long sizeBytes = 0;
-            bool finalFileCreated = false;
             bool finalFileReady = false;
-            bool tempFileReady = false;
 
             try
             {
                 await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-                await using var destination = new FileStream(
+                await using (var destination = new FileStream(
                     tempFilePath,
                     FileMode.Create,
                     FileAccess.Write,
                     FileShare.None,
                     bufferSize: 81920,
-                    useAsync: true);
-                Stream downloadTarget = progress is null
-                    ? destination
-                    : new ProgressReportingStream(destination, progress);
-                await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
-                    .ConfigureAwait(false);
-                await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
-                cancellationToken.ThrowIfCancellationRequested();
-                sizeBytes = destination.Length;
-                ValidateDownloadedSize(file, sizeBytes);
-                tempFileReady = true;
+                    useAsync: true))
+                {
+                    Stream downloadTarget = progress is null
+                        ? destination
+                        : new ProgressReportingStream(destination, progress);
+                    await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
+                        .ConfigureAwait(false);
+                    await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    sizeBytes = destination.Length;
+                    ValidateDownloadedSize(file, sizeBytes);
+                }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    File.Move(tempFilePath, filePath, overwrite: true);
-                    finalFileCreated = true;
+                    StampLocalDownload(tempFilePath, file);
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
+                    _logger.LogWarning(exception, "Failed to stamp Cotton mobile temporary download file {Path}.", tempFilePath);
                     throw;
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 try
                 {
-                    StampLocalDownload(filePath, file);
+                    File.Move(tempFilePath, filePath, overwrite: true);
+                    finalFileReady = true;
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Failed to stamp Cotton mobile download file {Path}.", filePath);
+                    _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
                     throw;
                 }
 
@@ -119,20 +118,14 @@ namespace Cotton.Mobile.Services
 
                 await _downloadCachePruner.PruneAsync(filePath, cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
-                finalFileReady = true;
 
                 return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
             }
             finally
             {
-                if (!tempFileReady || !finalFileReady)
+                if (!finalFileReady)
                 {
                     DeleteTemporaryDownload(tempFilePath);
-                }
-
-                if (finalFileCreated && !finalFileReady)
-                {
-                    DeleteDownload(filePath);
                 }
             }
         }

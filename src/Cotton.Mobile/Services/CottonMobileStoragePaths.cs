@@ -10,14 +10,19 @@ namespace Cotton.Mobile.Services
         private const int TruncatedFileNameHashLength = 12;
         private const int MaxSafeFileExtensionLength = 24;
         private const string DefaultDownloadFileName = "download";
+        private const string TemporaryDownloadDirectoryName = ".temp";
+        private const string TemporaryDownloadFileExtension = ".download";
 
         public const string DownloadDirectoryName = "CottonDownloads";
-
-        public const string TemporaryDownloadExtension = ".download";
 
         public static string CreateDownloadsDirectory()
         {
             return Path.Combine(FileSystem.AppDataDirectory, DownloadDirectoryName);
+        }
+
+        public static string CreateTemporaryDownloadsDirectory()
+        {
+            return Path.Combine(CreateDownloadsDirectory(), TemporaryDownloadDirectoryName);
         }
 
         public static string CreateDownloadDirectory(Uri instanceUri, CottonFileBrowserEntry file)
@@ -39,6 +44,11 @@ namespace Cotton.Mobile.Services
             return Path.Combine(CreateDownloadDirectory(instanceUri, file), CreateSafeFileName(file.Name));
         }
 
+        public static string CreateTemporaryDownloadPath()
+        {
+            return Path.Combine(CreateTemporaryDownloadsDirectory(), $"{Guid.NewGuid():N}{TemporaryDownloadFileExtension}");
+        }
+
         public static string CreateThumbnailCacheDirectory(FileThumbnailCacheOptions options)
         {
             ArgumentNullException.ThrowIfNull(options);
@@ -48,7 +58,14 @@ namespace Cotton.Mobile.Services
 
         public static bool IsTemporaryDownloadPath(string path)
         {
-            return path.EndsWith(TemporaryDownloadExtension, StringComparison.OrdinalIgnoreCase);
+            string temporaryDownloadsDirectory = Path.GetFullPath(CreateTemporaryDownloadsDirectory());
+            string fullPath = Path.GetFullPath(path);
+            string relativePath = Path.GetRelativePath(temporaryDownloadsDirectory, fullPath);
+            return !Path.IsPathRooted(relativePath)
+                && !string.Equals(relativePath, ".", StringComparison.Ordinal)
+                && !string.Equals(relativePath, "..", StringComparison.Ordinal)
+                && !relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                && !relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal);
         }
 
         public static string CreateInstanceStorageKey(Uri instanceUri)

@@ -61,8 +61,9 @@ namespace Cotton.Mobile.Services
 
             string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
             Directory.CreateDirectory(directory);
+            Directory.CreateDirectory(CottonMobileStoragePaths.CreateTemporaryDownloadsDirectory());
             string filePath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
-            string tempFilePath = filePath + CottonMobileStoragePaths.TemporaryDownloadExtension;
+            string tempFilePath = CottonMobileStoragePaths.CreateTemporaryDownloadPath();
             long sizeBytes = 0;
             bool finalFileCreated = false;
             bool finalFileReady = false;

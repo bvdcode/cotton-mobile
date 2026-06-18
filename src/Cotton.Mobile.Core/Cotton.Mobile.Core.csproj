@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net10.0</TargetFramework>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<CottonSdkVersion>0.4.31</CottonSdkVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
+	</ItemGroup>
+
+</Project>

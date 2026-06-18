@@ -1,6 +1,6 @@
 namespace Cotton.Mobile.Services
 {
-    internal static class CottonLocalFileFreshness
+    public static class CottonLocalFileFreshness
     {
         private static readonly TimeSpan TimestampTolerance = TimeSpan.FromSeconds(2);
 

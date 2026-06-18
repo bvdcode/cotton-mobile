@@ -2,6 +2,7 @@ name: Mobile Android
 
 env:
   PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
+  TEST_PROJECT_PATH: tests/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
   DOTNET_VERSION: 10.0.x
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
@@ -18,7 +19,9 @@ on:
       - develop
     paths:
       - "GitVersion.yml"
+      - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
+      - "tests/**"
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
@@ -26,7 +29,9 @@ on:
   pull_request:
     paths:
       - "GitVersion.yml"
+      - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
+      - "tests/**"
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
@@ -153,9 +158,31 @@ jobs:
             --package-name dev.cottoncloud.app \
             --dry-run
 
+  mobile-unit-tests:
+    name: Run Mobile Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore test project
+        run: dotnet restore "$TEST_PROJECT_PATH"
+
+      - name: Test mobile core
+        run: dotnet test "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
+
   android-debug:
     name: Build Debug APK
     runs-on: ubuntu-latest
+    needs:
+      - mobile-unit-tests
     permissions:
       contents: read
     steps:
@@ -211,6 +238,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - workflow-dispatch-guards
+      - mobile-unit-tests
     if: github.event_name == 'workflow_dispatch' && inputs.build_signed_release
     permissions:
       contents: write

@@ -489,16 +489,40 @@ namespace Cotton.Mobile.ViewModels
         private Task SetSortModeAsync(CottonFileBrowserSortMode sortMode)
         {
             ClearFileActionRetry();
-            _preferenceStore.SaveSortMode(sortMode);
             _display.ShowFileSortMode(sortMode);
+            SaveSortModePreference(sortMode);
             return Task.CompletedTask;
         }
 
         private void SetViewMode(CottonFileBrowserViewMode viewMode)
         {
             ClearFileActionRetry();
-            _preferenceStore.SaveViewMode(viewMode);
             _display.ShowFileViewMode(viewMode);
+            SaveViewModePreference(viewMode);
+        }
+
+        private void SaveSortModePreference(CottonFileBrowserSortMode sortMode)
+        {
+            try
+            {
+                _preferenceStore.SaveSortMode(sortMode);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile file sort mode preference.");
+            }
+        }
+
+        private void SaveViewModePreference(CottonFileBrowserViewMode viewMode)
+        {
+            try
+            {
+                _preferenceStore.SaveViewMode(viewMode);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile file view mode preference.");
+            }
         }
 
         private async Task LoadRootFilesAsync(bool isRefresh = false)

@@ -263,7 +263,7 @@ namespace Cotton.Mobile.Services
 
         private static bool IsReusableLocalDownload(CottonFileBrowserEntry file, FileInfo info)
         {
-            return file.SizeBytes == info.Length
+            return (!file.SizeBytes.HasValue || file.SizeBytes.Value == info.Length)
                 && CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc);
         }
 

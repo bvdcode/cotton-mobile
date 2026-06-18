@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IClipboard _clipboard;
         private readonly ILogger<DiagnosticsViewModel> _logger;
         private bool _isBusy;
+        private bool _hasCacheDetails;
         private string _headerTitleText = "Cotton Cloud";
         private string _headerVersionText = "Not available";
         private string? _status;
@@ -123,7 +124,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 bool copiedWithoutCacheDetails = false;
-                if (Sections.Count == 0)
+                if (Sections.Count == 0 || !_hasCacheDetails)
                 {
                     CottonStorageSummary? summary = await TryLoadStorageSummaryForCopyAsync();
                     copiedWithoutCacheDetails = summary is null;
@@ -172,6 +173,7 @@ namespace Cotton.Mobile.ViewModels
         {
             HeaderTitleText = CreateValue(_metadata.ApplicationName);
             HeaderVersionText = CreateVersionText();
+            _hasCacheDetails = summary is not null;
             Sections.Clear();
             foreach (DiagnosticsSectionViewModel section in CreateSections(summary))
             {

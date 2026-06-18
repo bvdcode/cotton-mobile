@@ -1305,19 +1305,19 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isRecoveryRefreshInProgress = true;
             _ = MainThread.InvokeOnMainThreadAsync(() => RefreshAfterFileLoadRecoveryAsync(reason));
         }
 
         private async Task RefreshAfterFileLoadRecoveryAsync(string reason)
         {
-            if (!CanRunRecoveryRefresh())
-            {
-                return;
-            }
-
-            _isRecoveryRefreshInProgress = true;
             try
             {
+                if (!CanRunQueuedRecoveryRefresh())
+                {
+                    return;
+                }
+
                 _logger.LogInformation("Refreshing Cotton mobile files after {Reason}.", reason);
                 await RefreshAsync();
             }
@@ -1333,10 +1333,15 @@ namespace Cotton.Mobile.ViewModels
 
         private bool CanRunRecoveryRefresh()
         {
+            return CanRunQueuedRecoveryRefresh()
+                && !_isRecoveryRefreshInProgress;
+        }
+
+        private bool CanRunQueuedRecoveryRefresh()
+        {
             return _lastFileLoadFailed
                 && _instanceUri is not null
-                && !IsFileBrowserBusy()
-                && !_isRecoveryRefreshInProgress;
+                && !IsFileBrowserBusy();
         }
 
         private bool IsFileBrowserBusy()

@@ -208,6 +208,7 @@ namespace Cotton.Mobile.ViewModels
                         CancelAction);
                     if (!confirmed)
                     {
+                        Status = null;
                         return;
                     }
 

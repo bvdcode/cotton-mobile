@@ -761,6 +761,7 @@ namespace Cotton.Mobile.ViewModels
 
             if (result.Status == CottonSessionResultStatus.AuthorizationPending)
             {
+                _shouldRetrySessionRestoreWhenOnline = true;
                 _shouldRetrySessionRestoreOnResume = true;
             }
 

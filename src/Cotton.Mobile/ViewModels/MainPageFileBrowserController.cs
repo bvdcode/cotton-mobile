@@ -166,12 +166,10 @@ namespace Cotton.Mobile.ViewModels
 
         public void RefreshLocalFileMarkersAfterStorageChange()
         {
-            if (_instanceUri is not null)
-            {
-                RefreshLocalFileMarkers(_instanceUri);
-            }
+            bool changed = _instanceUri is not null
+                && RefreshLocalFileMarkers(_instanceUri);
 
-            if (!IsFileBrowserBusy())
+            if (changed && !IsFileBrowserBusy())
             {
                 _display.ShowFilesStatus("On-device files updated.");
             }
@@ -1273,9 +1271,9 @@ namespace Cotton.Mobile.ViewModels
             return true;
         }
 
-        private void RefreshLocalFileMarkers(Uri instanceUri)
+        private bool RefreshLocalFileMarkers(Uri instanceUri)
         {
-            _display.RefreshFileLocalCopies(entry =>
+            return _display.RefreshFileLocalCopies(entry =>
                 _fileBrowserService.GetReusableLocalDownloadSnapshot(
                     instanceUri,
                     entry));

@@ -719,7 +719,7 @@ namespace Cotton.Mobile.ViewModels
             return true;
         }
 
-        public void RefreshFileLocalCopies(Func<CottonFileBrowserEntry, CottonLocalFileSnapshot?> resolveLocalFile)
+        public bool RefreshFileLocalCopies(Func<CottonFileBrowserEntry, CottonLocalFileSnapshot?> resolveLocalFile)
         {
             ArgumentNullException.ThrowIfNull(resolveLocalFile);
 
@@ -748,6 +748,8 @@ namespace Cotton.Mobile.ViewModels
             {
                 ApplyFileFilters();
             }
+
+            return changed;
         }
 
         public void ClearFileLocalCopies()

@@ -110,7 +110,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, failureLogMessage, _file.FilePath);
-                Status = failureStatus;
+                Status = ViewerFileActionFailureStatus.Create(exception, failureStatus);
             }
             finally
             {

@@ -120,7 +120,10 @@ namespace Cotton.Mobile.ViewModels
                 () => Display.IsAccountActionEnabled);
             LogoutCommand = new AsyncCommand(LogoutAsync, LogUnhandledCommandException, () => Display.IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
-            RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync, LogUnhandledCommandException);
+            RefreshFilesCommand = new AsyncCommand(
+                _fileBrowser.RefreshAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
             NavigateFilesUpCommand = new AsyncCommand(
                 _fileBrowser.NavigateUpAsync,
                 LogUnhandledCommandException,
@@ -788,6 +791,7 @@ namespace Cotton.Mobile.ViewModels
             CancelAuthorizationCommand.RaiseCanExecuteChanged();
             AccountCommand.RaiseCanExecuteChanged();
             LogoutCommand.RaiseCanExecuteChanged();
+            RefreshFilesCommand.RaiseCanExecuteChanged();
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
             ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
@@ -813,6 +817,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case nameof(MainPageDisplayState.IsLogoutEnabled):
                     LogoutCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsProfileVisible):
+                    RefreshFilesCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.CanNavigateFilesUp):
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();

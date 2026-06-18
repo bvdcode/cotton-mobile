@@ -6,73 +6,74 @@ using Android.Views;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cotton.Mobile;
-
-[Activity(Theme = "@style/Cotton.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
-public class MainActivity : MauiAppCompatActivity
+namespace Cotton.Mobile
 {
-    protected override void OnCreate(Bundle? savedInstanceState)
+    [Activity(Theme = "@style/Cotton.SplashTheme", MainLauncher = true, LaunchMode = LaunchMode.SingleTop, ConfigurationChanges = ConfigChanges.ScreenSize | ConfigChanges.Orientation | ConfigChanges.UiMode | ConfigChanges.ScreenLayout | ConfigChanges.SmallestScreenSize | ConfigChanges.Density)]
+    public class MainActivity : MauiAppCompatActivity
     {
-        base.OnCreate(savedInstanceState);
-
-        ApplySystemBars();
-    }
-
-    protected override void OnResume()
-    {
-        base.OnResume();
-
-        ApplySystemBars();
-
-        IPlatformApplication.Current?.Services
-            .GetService<IApplicationForegroundService>()
-            ?.NotifyResumed();
-    }
-
-    public override void OnConfigurationChanged(Configuration newConfig)
-    {
-        base.OnConfigurationChanged(newConfig);
-
-        ApplySystemBars();
-    }
-
-    private void ApplySystemBars()
-    {
-        if (Window is null || Resources is null)
+        protected override void OnCreate(Bundle? savedInstanceState)
         {
-            return;
+            base.OnCreate(savedInstanceState);
+
+            ApplySystemBars();
         }
 
-        if (Build.VERSION.SdkInt < BuildVersionCodes.M)
+        protected override void OnResume()
         {
-            return;
+            base.OnResume();
+
+            ApplySystemBars();
+
+            IPlatformApplication.Current?.Services
+                .GetService<IApplicationForegroundService>()
+                ?.NotifyResumed();
         }
 
-        Configuration? configuration = Resources.Configuration;
-        if (configuration is null)
+        public override void OnConfigurationChanged(Configuration newConfig)
         {
-            return;
+            base.OnConfigurationChanged(newConfig);
+
+            ApplySystemBars();
         }
+
+        private void ApplySystemBars()
+        {
+            if (Window is null || Resources is null)
+            {
+                return;
+            }
+
+            if (Build.VERSION.SdkInt < BuildVersionCodes.M)
+            {
+                return;
+            }
+
+            Configuration? configuration = Resources.Configuration;
+            if (configuration is null)
+            {
+                return;
+            }
 
 #pragma warning disable CA1416, CA1422
-        bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
-        if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
-        {
-            int mask = (int)(
-                WindowInsetsControllerAppearance.LightStatusBars
-                | WindowInsetsControllerAppearance.LightNavigationBars);
-            int appearance = isNightMode ? (int)WindowInsetsControllerAppearance.None : mask;
-            Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);
-            return;
-        }
+            bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
+            {
+                int mask = (int)(
+                    WindowInsetsControllerAppearance.LightStatusBars
+                    | WindowInsetsControllerAppearance.LightNavigationBars);
+                int appearance = isNightMode ? (int)WindowInsetsControllerAppearance.None : mask;
+                Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);
+                return;
+            }
 
-        SystemUiFlags flags = isNightMode ? 0 : SystemUiFlags.LightStatusBar;
-        if (!isNightMode && Build.VERSION.SdkInt >= BuildVersionCodes.O)
-        {
-            flags |= SystemUiFlags.LightNavigationBar;
-        }
+            SystemUiFlags flags = isNightMode ? 0 : SystemUiFlags.LightStatusBar;
+            if (!isNightMode && Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            {
+                flags |= SystemUiFlags.LightNavigationBar;
+            }
 
-        Window.DecorView.SystemUiFlags = flags;
+            Window.DecorView.SystemUiFlags = flags;
 #pragma warning restore CA1416, CA1422
+        }
     }
 }

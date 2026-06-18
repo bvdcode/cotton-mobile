@@ -87,6 +87,7 @@ namespace Cotton.Mobile.Services
                 await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
                 sizeBytes = destination.Length;
+                ValidateDownloadedSize(file, sizeBytes);
                 tempFileReady = true;
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -243,6 +244,15 @@ namespace Cotton.Mobile.Services
                 info.Name,
                 info.Length,
                 CottonLocalFileFreshness.NormalizeUtc(info.LastWriteTimeUtc));
+        }
+
+        private static void ValidateDownloadedSize(CottonFileBrowserEntry file, long downloadedSizeBytes)
+        {
+            if (file.SizeBytes.HasValue && downloadedSizeBytes != file.SizeBytes.Value)
+            {
+                throw new IOException(
+                    $"Downloaded file size mismatch for {file.Id}: expected {file.SizeBytes.Value} bytes, got {downloadedSizeBytes} bytes.");
+            }
         }
 
         private static bool IsReusableLocalDownload(CottonFileBrowserEntry file, FileInfo info)

@@ -118,6 +118,7 @@ namespace Cotton.Mobile.Services
                         return;
                     }
 
+                    List<Exception> failures = [];
                     foreach (string file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
@@ -126,10 +127,19 @@ namespace Cotton.Mobile.Services
                             continue;
                         }
 
-                        DeleteFile(file);
+                        DeleteFile(file, failures);
                     }
 
                     DeleteEmptyDirectories(directory, cancellationToken);
+                    if (failures.Count == 1)
+                    {
+                        throw new InvalidOperationException("Failed to delete one Cotton mobile storage file.", failures[0]);
+                    }
+
+                    if (failures.Count > 1)
+                    {
+                        throw new AggregateException("Failed to delete Cotton mobile storage files.", failures);
+                    }
                 },
                 cancellationToken);
         }
@@ -180,7 +190,7 @@ namespace Cotton.Mobile.Services
             return path.EndsWith(TemporaryThumbnailFileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        private void DeleteFile(string file)
+        private void DeleteFile(string file, List<Exception> failures)
         {
             try
             {
@@ -189,6 +199,7 @@ namespace Cotton.Mobile.Services
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
                 _logger.LogWarning(exception, "Failed to delete Cotton mobile storage file {Path}.", file);
+                failures.Add(exception);
             }
         }
 

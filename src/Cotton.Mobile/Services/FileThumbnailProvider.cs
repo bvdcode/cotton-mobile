@@ -39,11 +39,11 @@ namespace Cotton.Mobile.Services
             {
                 return CottonFileThumbnailSnapshot.Placeholder(
                     entry.BadgeText,
-                    CreateCacheKey(entry, "no-preview"));
+                    CreateCacheKey(instanceUri, entry, "no-preview"));
             }
 
             string previewToken = entry.PreviewHashEncryptedHex.Trim();
-            string cacheKey = CreateCacheKey(entry, previewToken);
+            string cacheKey = CreateCacheKey(instanceUri, entry, previewToken);
             string? cachedSource = _thumbnailCache.GetCachedThumbnailSource(cacheKey);
             if (!string.IsNullOrWhiteSpace(cachedSource))
             {
@@ -77,9 +77,10 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static string CreateCacheKey(CottonFileBrowserEntry entry, string version)
+        private static string CreateCacheKey(Uri instanceUri, CottonFileBrowserEntry entry, string version)
         {
-            return $"{entry.Type}:{entry.Id:N}:{version}";
+            string instanceKey = CottonMobileStoragePaths.CreateInstanceStorageKey(instanceUri);
+            return $"{instanceKey}:{entry.Type}:{entry.Id:N}:{version}";
         }
     }
 }

@@ -15,10 +15,10 @@ namespace Cotton.Mobile.Services
             IProgress<long>? progress = null,
             CancellationToken cancellationToken = default);
 
-        CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file);
+        CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file);
 
-        CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(CottonFileBrowserEntry file);
+        CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(Uri instanceUri, CottonFileBrowserEntry file);
 
-        CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file);
+        CottonFileDownloadResult? GetReusableLocalDownload(Uri instanceUri, CottonFileBrowserEntry file);
     }
 }

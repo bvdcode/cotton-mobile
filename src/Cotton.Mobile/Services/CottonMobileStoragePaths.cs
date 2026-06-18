@@ -1,4 +1,6 @@
 using Microsoft.Maui.Storage;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Cotton.Mobile.Services
 {
@@ -11,18 +13,23 @@ namespace Cotton.Mobile.Services
             return Path.Combine(FileSystem.AppDataDirectory, DownloadDirectoryName);
         }
 
-        public static string CreateDownloadDirectory(CottonFileBrowserEntry file)
+        public static string CreateDownloadDirectory(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            return Path.Combine(CreateDownloadsDirectory(), file.Id.ToString("D"));
+            return Path.Combine(
+                CreateDownloadsDirectory(),
+                CreateInstanceStorageKey(instanceUri),
+                file.Id.ToString("D"));
         }
 
-        public static string CreateDownloadPath(CottonFileBrowserEntry file)
+        public static string CreateDownloadPath(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            return Path.Combine(CreateDownloadDirectory(file), CreateSafeFileName(file.Name));
+            return Path.Combine(CreateDownloadDirectory(instanceUri, file), CreateSafeFileName(file.Name));
         }
 
         public static string CreateThumbnailCacheDirectory(FileThumbnailCacheOptions options)
@@ -30,6 +37,18 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(options);
 
             return Path.Combine(FileSystem.AppDataDirectory, options.DirectoryName);
+        }
+
+        public static string CreateInstanceStorageKey(Uri instanceUri)
+        {
+            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
+
+            string scheme = instanceUri.Scheme.ToLowerInvariant();
+            string host = instanceUri.Host.ToLowerInvariant();
+            string authority = instanceUri.IsDefaultPort ? host : $"{host}:{instanceUri.Port}";
+            string path = NormalizePath(instanceUri.AbsolutePath);
+            string scope = $"{scheme}://{authority}{path}";
+            return Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(scope))).ToLowerInvariant();
         }
 
         private static string CreateSafeFileName(string fileName)
@@ -44,6 +63,16 @@ namespace Cotton.Mobile.Services
             }
 
             return new string(buffer);
+        }
+
+        private static string NormalizePath(string path)
+        {
+            if (string.IsNullOrWhiteSpace(path) || string.Equals(path, "/", StringComparison.Ordinal))
+            {
+                return string.Empty;
+            }
+
+            return path.TrimEnd('/');
         }
     }
 }

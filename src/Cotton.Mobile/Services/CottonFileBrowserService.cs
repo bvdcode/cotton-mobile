@@ -59,9 +59,9 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Only files can be downloaded.", nameof(file));
             }
 
-            string directory = CottonMobileStoragePaths.CreateDownloadDirectory(file);
+            string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
             Directory.CreateDirectory(directory);
-            string filePath = CottonMobileStoragePaths.CreateDownloadPath(file);
+            string filePath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
             string tempFilePath = filePath + ".download";
             long sizeBytes = 0;
             bool tempFileReady = false;
@@ -110,11 +110,12 @@ namespace Cotton.Mobile.Services
             return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
         }
 
-        public CottonLocalFileSnapshot? GetLocalDownload(CottonFileBrowserEntry file)
+        public CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetLocalDownloadFile(file);
+            FileInfo? info = GetLocalDownloadFile(instanceUri, file);
             if (info is null)
             {
                 return null;
@@ -123,19 +124,21 @@ namespace Cotton.Mobile.Services
             return CreateLocalFileSnapshot(info);
         }
 
-        public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(CottonFileBrowserEntry file)
+        public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetReusableLocalDownloadFile(file);
+            FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
             return info is null ? null : CreateLocalFileSnapshot(info);
         }
 
-        public CottonFileDownloadResult? GetReusableLocalDownload(CottonFileBrowserEntry file)
+        public CottonFileDownloadResult? GetReusableLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
-            FileInfo? info = GetReusableLocalDownloadFile(file);
+            FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
             if (info is null)
             {
                 return null;
@@ -186,20 +189,20 @@ namespace Cotton.Mobile.Services
             return new CottonFolderContent(folderId, folderName, entries);
         }
 
-        private static FileInfo? GetLocalDownloadFile(CottonFileBrowserEntry file)
+        private static FileInfo? GetLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
         {
             if (file.Type != CottonFileBrowserEntryType.File)
             {
                 return null;
             }
 
-            var info = new FileInfo(CottonMobileStoragePaths.CreateDownloadPath(file));
+            var info = new FileInfo(CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file));
             return info.Exists ? info : null;
         }
 
-        private static FileInfo? GetReusableLocalDownloadFile(CottonFileBrowserEntry file)
+        private static FileInfo? GetReusableLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
         {
-            FileInfo? info = GetLocalDownloadFile(file);
+            FileInfo? info = GetLocalDownloadFile(instanceUri, file);
             if (info is null || file.SizeBytes != info.Length)
             {
                 return null;

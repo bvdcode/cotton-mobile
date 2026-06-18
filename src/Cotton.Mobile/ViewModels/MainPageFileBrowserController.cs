@@ -538,11 +538,15 @@ namespace Cotton.Mobile.ViewModels
         private CottonFolderContent ApplyLocalFiles(CottonFolderContent content)
         {
             ArgumentNullException.ThrowIfNull(content);
+            if (_instanceUri is null)
+            {
+                return content;
+            }
 
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(entry);
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, entry);
                 entries.Add(localFile is null ? entry : entry.WithLocalFile(localFile));
             }
 
@@ -653,7 +657,9 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowFileDetailsAsync(CottonFileBrowserEntry file)
         {
-            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(file);
+            CottonLocalFileSnapshot? localFile = _instanceUri is null
+                ? null
+                : _fileBrowserService.GetLocalDownload(_instanceUri, file);
             await _dialogService.ShowAlertAsync(
                 file.Name,
                 CreateFileDetailsMessage(file, localFile),
@@ -666,7 +672,7 @@ namespace Cotton.Mobile.ViewModels
             string actionName,
             CancellationToken cancellationToken)
         {
-            CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(file);
+            CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(instanceUri, file);
             if (localFile is not null)
             {
                 ShowReusableLocalFileIfAvailable(file);
@@ -813,7 +819,12 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowReusableLocalFileIfAvailable(CottonFileBrowserEntry file)
         {
-            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(file);
+            if (_instanceUri is null)
+            {
+                return;
+            }
+
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, file);
             if (localFile is null)
             {
                 return;
@@ -957,7 +968,12 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             string offlineStatus)
         {
-            if (_networkAccess.HasInternetAccess || _fileBrowserService.GetReusableLocalDownload(file) is not null)
+            if (_networkAccess.HasInternetAccess)
+            {
+                return false;
+            }
+
+            if (_instanceUri is not null && _fileBrowserService.GetReusableLocalDownload(_instanceUri, file) is not null)
             {
                 return false;
             }

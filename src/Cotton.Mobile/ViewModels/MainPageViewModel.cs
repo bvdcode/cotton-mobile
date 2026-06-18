@@ -54,6 +54,7 @@ namespace Cotton.Mobile.ViewModels
             IStorageSettingsPageService storageSettingsPageService,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
+            ICottonFolderContentCache folderContentCache,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
@@ -74,6 +75,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(folderContentCache);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
@@ -102,6 +104,7 @@ namespace Cotton.Mobile.ViewModels
             _fileBrowser = new MainPageFileBrowserController(
                 Display,
                 fileBrowserService,
+                folderContentCache,
                 fileBrowserPreferenceStore,
                 fileInteractionService,
                 filePreviewService,

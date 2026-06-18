@@ -29,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
+        private readonly ICottonFolderContentCache _folderContentCache;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
@@ -55,6 +56,7 @@ namespace Cotton.Mobile.ViewModels
         public MainPageFileBrowserController(
             MainPageDisplayState display,
             ICottonFileBrowserService fileBrowserService,
+            ICottonFolderContentCache folderContentCache,
             IFileBrowserPreferenceStore preferenceStore,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
@@ -67,6 +69,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(display);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(folderContentCache);
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
@@ -79,6 +82,7 @@ namespace Cotton.Mobile.ViewModels
 
             _display = display;
             _fileBrowserService = fileBrowserService;
+            _folderContentCache = folderContentCache;
             _preferenceStore = preferenceStore;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
@@ -588,6 +592,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonFolderContent content = await _fileBrowserService.GetRootAsync(
                     instanceUri,
                     fileLoadCancellation.Token);
+                await _folderContentCache.SaveRootAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = ApplyLocalFiles(instanceUri, content);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
@@ -624,6 +629,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _logger.LogWarning(exception, "Failed to load Cotton mobile root files.");
+                if (await ShowCachedRootFilesIfOfflineAsync(instanceUri, fileLoadCancellation))
+                {
+                    return;
+                }
+
                 ShowFileLoadFailure("Could not load files. Try refresh.");
             }
             finally
@@ -659,6 +669,7 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     folder,
                     fileLoadCancellation.Token);
+                await _folderContentCache.SaveFolderAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = ApplyLocalFiles(instanceUri, content);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
@@ -703,6 +714,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _logger.LogWarning(exception, "Failed to load Cotton mobile folder {FolderId}.", folder.Id);
+                if (await ShowCachedFolderFilesIfOfflineAsync(instanceUri, folder, fileLoadCancellation))
+                {
+                    return;
+                }
+
                 if (!preserveHistory && _fileNavigation.Count > 0)
                 {
                     _fileNavigation.RemoveAt(_fileNavigation.Count - 1);
@@ -714,6 +730,79 @@ namespace Cotton.Mobile.ViewModels
             {
                 EndFileLoad(fileLoadCancellation);
             }
+        }
+
+        private async Task<bool> ShowCachedRootFilesIfOfflineAsync(
+            Uri instanceUri,
+            CancellationTokenSource fileLoadCancellation)
+        {
+            if (_networkAccess.HasInternetAccess)
+            {
+                return false;
+            }
+
+            CottonFolderContent? cachedContent = await _folderContentCache.LoadRootAsync(
+                instanceUri,
+                fileLoadCancellation.Token);
+            fileLoadCancellation.Token.ThrowIfCancellationRequested();
+            if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+            {
+                return true;
+            }
+
+            if (cachedContent is null)
+            {
+                return false;
+            }
+
+            cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
+            _fileNavigation.Clear();
+            _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
+            _lastFileLoadFailed = true;
+            _display.ShowFiles(
+                cachedContent,
+                isRoot: true,
+                canNavigateUp: false,
+                CreatePath(cachedContent.FolderName));
+            _display.ShowOfflineFilesNotice();
+            return true;
+        }
+
+        private async Task<bool> ShowCachedFolderFilesIfOfflineAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            CancellationTokenSource fileLoadCancellation)
+        {
+            if (_networkAccess.HasInternetAccess)
+            {
+                return false;
+            }
+
+            CottonFolderContent? cachedContent = await _folderContentCache.LoadFolderAsync(
+                instanceUri,
+                folder,
+                fileLoadCancellation.Token);
+            fileLoadCancellation.Token.ThrowIfCancellationRequested();
+            if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+            {
+                return true;
+            }
+
+            if (cachedContent is null)
+            {
+                return false;
+            }
+
+            cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
+            _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
+            _lastFileLoadFailed = true;
+            _display.ShowFiles(
+                cachedContent,
+                isRoot: false,
+                canNavigateUp: _fileNavigation.Count > 0,
+                CreatePath(cachedContent.FolderName));
+            _display.ShowOfflineFilesNotice();
+            return true;
         }
 
         private async Task DownloadFileAsync(CottonFileBrowserEntry file)

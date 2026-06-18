@@ -5,6 +5,7 @@ namespace Cotton.Mobile.Services
     public class StorageManagementService : IStorageManagementService
     {
         private const string ThumbnailCacheName = "Thumbnails";
+        private const string FolderListingsName = "Folder listings";
         private const string DownloadedFilesName = "Downloaded files";
         private const string TemporaryThumbnailFileExtension = ".tmp";
 
@@ -38,6 +39,11 @@ namespace Cotton.Mobile.Services
                             cancellationToken,
                             includeTemporaryThumbnails: false),
                         ScanDirectory(
+                            FolderListingsName,
+                            CottonMobileStoragePaths.CreateFolderContentCacheRootDirectory(),
+                            SearchOption.AllDirectories,
+                            cancellationToken),
+                        ScanDirectory(
                             DownloadedFilesName,
                             CottonMobileStoragePaths.CreateDownloadsDirectory(),
                             SearchOption.AllDirectories,
@@ -53,6 +59,13 @@ namespace Cotton.Mobile.Services
                 CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
                 cancellationToken,
                 includeTemporaryThumbnails: false);
+        }
+
+        public Task ClearFolderListingsCacheAsync(CancellationToken cancellationToken = default)
+        {
+            return ClearDirectoryAsync(
+                CottonMobileStoragePaths.CreateFolderContentCacheRootDirectory(),
+                cancellationToken);
         }
 
         public async Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default)
@@ -87,6 +100,11 @@ namespace Cotton.Mobile.Services
             await TryClearCacheAreaAsync(
                 ClearThumbnailCacheAsync,
                 "thumbnail cache",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearCacheAreaAsync(
+                ClearFolderListingsCacheAsync,
+                "folder listings",
                 failures,
                 cancellationToken).ConfigureAwait(false);
             await TryClearCacheAreaAsync(

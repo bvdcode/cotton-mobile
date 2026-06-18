@@ -48,6 +48,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
+			builder.Services.AddSingleton<ICottonFolderContentCache, FileSystemCottonFolderContentCache>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();

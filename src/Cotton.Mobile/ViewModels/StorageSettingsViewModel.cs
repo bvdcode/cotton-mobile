@@ -9,9 +9,11 @@ namespace Cotton.Mobile.ViewModels
         private const string CancelAction = "Cancel";
         private const string ClearAllAction = "Clear all";
         private const string ClearDownloadedFilesAction = "Clear downloads";
+        private const string ClearFolderListingsAction = "Clear lists";
         private const string ClearThumbnailsAction = "Clear thumbnails";
         private const string ClearAllTitle = "Clear all cached files";
         private const string ClearDownloadedFilesTitle = "Clear downloaded files";
+        private const string ClearFolderListingsTitle = "Clear offline folder lists";
         private const string ClearThumbnailsTitle = "Clear thumbnails";
 
         private readonly IStorageManagementService _storageManagementService;
@@ -22,6 +24,8 @@ namespace Cotton.Mobile.ViewModels
         private string _totalFileCountText = "0 files";
         private string _thumbnailSizeText = "0 B";
         private string _thumbnailFileCountText = "0 files";
+        private string _folderListingSizeText = "0 B";
+        private string _folderListingFileCountText = "0 files";
         private string _downloadedSizeText = "0 B";
         private string _downloadedFileCountText = "0 files";
         private string? _status;
@@ -40,6 +44,10 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             ClearThumbnailsCommand = new AsyncCommand(ClearThumbnailsAsync, LogUnhandledCommandException, () => !IsBusy);
+            ClearFolderListingsCommand = new AsyncCommand(
+                ClearFolderListingsAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy);
             ClearDownloadedFilesCommand = new AsyncCommand(
                 ClearDownloadedFilesAsync,
                 LogUnhandledCommandException,
@@ -50,6 +58,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand ClearThumbnailsCommand { get; }
+
+        public AsyncCommand ClearFolderListingsCommand { get; }
 
         public AsyncCommand ClearDownloadedFilesCommand { get; }
 
@@ -89,6 +99,18 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _thumbnailFileCountText;
             private set => SetProperty(ref _thumbnailFileCountText, value);
+        }
+
+        public string FolderListingSizeText
+        {
+            get => _folderListingSizeText;
+            private set => SetProperty(ref _folderListingSizeText, value);
+        }
+
+        public string FolderListingFileCountText
+        {
+            get => _folderListingFileCountText;
+            private set => SetProperty(ref _folderListingFileCountText, value);
         }
 
         public string DownloadedSizeText
@@ -149,11 +171,21 @@ namespace Cotton.Mobile.ViewModels
                 "Downloaded files cleared.");
         }
 
+        private Task ClearFolderListingsAsync()
+        {
+            return ClearAsync(
+                ClearFolderListingsTitle,
+                "Folder lists will reload from your Cotton instance when you browse.",
+                ClearFolderListingsAction,
+                _storageManagementService.ClearFolderListingsCacheAsync,
+                "Offline folder lists cleared.");
+        }
+
         private Task ClearAllAsync()
         {
             return ClearAsync(
                 ClearAllTitle,
-                "Thumbnail previews and files marked On device will be removed from this device.",
+                "Thumbnail previews, offline folder lists, and files marked On device will be removed from this device.",
                 ClearAllAction,
                 _storageManagementService.ClearAllCachedFilesAsync,
                 "Cached files cleared.");
@@ -245,6 +277,8 @@ namespace Cotton.Mobile.ViewModels
             TotalFileCountText = FormatFileCount(summary.TotalFileCount);
             ThumbnailSizeText = CottonFileSizeFormatter.Format(summary.ThumbnailCache.SizeBytes);
             ThumbnailFileCountText = FormatFileCount(summary.ThumbnailCache.FileCount);
+            FolderListingSizeText = CottonFileSizeFormatter.Format(summary.FolderListings.SizeBytes);
+            FolderListingFileCountText = FormatFileCount(summary.FolderListings.FileCount);
             DownloadedSizeText = CottonFileSizeFormatter.Format(summary.DownloadedFiles.SizeBytes);
             DownloadedFileCountText = FormatFileCount(summary.DownloadedFiles.FileCount);
         }
@@ -253,6 +287,7 @@ namespace Cotton.Mobile.ViewModels
         {
             LoadCommand.RaiseCanExecuteChanged();
             ClearThumbnailsCommand.RaiseCanExecuteChanged();
+            ClearFolderListingsCommand.RaiseCanExecuteChanged();
             ClearDownloadedFilesCommand.RaiseCanExecuteChanged();
             ClearAllCommand.RaiseCanExecuteChanged();
         }

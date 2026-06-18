@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
         private const int TruncatedFileNameHashLength = 12;
         private const int MaxSafeFileExtensionLength = 24;
         private const string DefaultDownloadFileName = "download";
+        private const string FolderContentCacheDirectoryName = "CottonFolderListings";
         private const string TemporaryDownloadDirectoryName = ".temp";
         private const string TemporaryDownloadFileExtension = ".download";
 
@@ -23,6 +24,18 @@ namespace Cotton.Mobile.Services
         public static string CreateTemporaryDownloadsDirectory()
         {
             return Path.Combine(CreateDownloadsDirectory(), TemporaryDownloadDirectoryName);
+        }
+
+        public static string CreateFolderContentCacheRootDirectory()
+        {
+            return Path.Combine(FileSystem.AppDataDirectory, FolderContentCacheDirectoryName);
+        }
+
+        public static string CreateFolderContentCacheDirectory(Uri instanceUri)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            return Path.Combine(CreateFolderContentCacheRootDirectory(), CreateInstanceStorageKey(instanceUri));
         }
 
         public static string CreateDownloadDirectory(Uri instanceUri, CottonFileBrowserEntry file)

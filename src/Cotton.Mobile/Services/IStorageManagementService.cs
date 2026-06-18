@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Services
 
         Task ClearThumbnailCacheAsync(CancellationToken cancellationToken = default);
 
+        Task ClearFolderListingsCacheAsync(CancellationToken cancellationToken = default);
+
         Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default);
 
         Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default);

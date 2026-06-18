@@ -156,6 +156,34 @@ namespace Cotton.Mobile.Services
                 null);
         }
 
+        public static CottonFileBrowserEntry CreateCached(
+            Guid id,
+            CottonFileBrowserEntryType type,
+            string name,
+            string kind,
+            string details,
+            string actionLabel,
+            string badgeText,
+            DateTime updatedAtUtc,
+            long? sizeBytes,
+            string? contentType,
+            string? previewHashEncryptedHex)
+        {
+            return new CottonFileBrowserEntry(
+                id,
+                type,
+                name,
+                kind,
+                details,
+                actionLabel,
+                badgeText,
+                updatedAtUtc,
+                sizeBytes,
+                contentType,
+                previewHashEncryptedHex,
+                null);
+        }
+
         public bool Matches(string searchText)
         {
             if (string.IsNullOrWhiteSpace(searchText))

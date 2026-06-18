@@ -216,6 +216,7 @@ namespace Cotton.Mobile.ViewModels
                     [
                         CreateItem("Total", summary is null ? null : FormatStorageSummary(summary)),
                         CreateItem("Thumbnails", summary is null ? null : FormatStorageCategory(summary.ThumbnailCache)),
+                        CreateItem("Folder lists", summary is null ? null : FormatStorageCategory(summary.FolderListings)),
                         CreateItem("Downloads", summary is null ? null : FormatStorageCategory(summary.DownloadedFiles)),
                     ]),
             ];

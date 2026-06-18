@@ -96,6 +96,7 @@ namespace Cotton.Mobile.Services
             {
                 lines.Add($"Local cache: {FormatStorageSummary(context.StorageSummary)}");
                 lines.Add($"Thumbnail cache: {FormatStorageCategory(context.StorageSummary.ThumbnailCache)}");
+                lines.Add($"Folder listings: {FormatStorageCategory(context.StorageSummary.FolderListings)}");
                 lines.Add($"Downloaded files: {FormatStorageCategory(context.StorageSummary.DownloadedFiles)}");
             }
 

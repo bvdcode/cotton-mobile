@@ -777,7 +777,11 @@ namespace Cotton.Mobile.ViewModels
             }
 
             ResolveFilesEmptyState(visibleEntries.Count);
-            FilesStatus = CreateFilesStatus();
+            if (!IsFileBrowserBusy)
+            {
+                FilesStatus = CreateFilesStatus();
+            }
+
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -788,6 +792,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
         }
+
+        private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing;
 
         private IEnumerable<CottonFileBrowserEntry> SortEntries(IEnumerable<CottonFileBrowserEntry> entries)
         {

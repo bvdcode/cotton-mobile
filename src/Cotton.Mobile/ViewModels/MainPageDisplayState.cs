@@ -564,7 +564,12 @@ namespace Cotton.Mobile.ViewModels
 
         public void ClearFileActionRetry()
         {
+            bool wasRetryVisible = CanRetryFileAction;
             CanRetryFileAction = false;
+            if (wasRetryVisible && !IsFileBrowserBusy)
+            {
+                FilesStatus = CreateFilesStatus();
+            }
         }
 
         public void ShowFilesRefreshing(string status)

@@ -117,6 +117,7 @@ namespace Cotton.Mobile.Services
             }
 
             TouchLocalDownload(new FileInfo(filePath));
+            DeleteStaleSiblingDownloads(directory, filePath);
 
             await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
 
@@ -258,6 +259,28 @@ namespace Cotton.Mobile.Services
                     or ArgumentException)
             {
                 _logger.LogDebug(exception, "Failed to update Cotton mobile local file timestamp {Path}.", info.FullName);
+            }
+        }
+
+        private void DeleteStaleSiblingDownloads(string directory, string protectedPath)
+        {
+            string normalizedProtectedPath = Path.GetFullPath(protectedPath);
+            try
+            {
+                foreach (string path in Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly))
+                {
+                    if (CottonMobileStoragePaths.IsTemporaryDownloadPath(path)
+                        || string.Equals(Path.GetFullPath(path), normalizedProtectedPath, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    DeleteDownload(path);
+                }
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(exception, "Failed to inspect stale Cotton mobile download files in {Directory}.", directory);
             }
         }
 

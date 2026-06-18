@@ -122,9 +122,15 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (_currentFolder is null)
+            if (_fileNavigation.Count == 0)
             {
                 await LoadRootFilesAsync(isRefresh: true);
+                return;
+            }
+
+            if (_currentFolder is null)
+            {
+                _display.ShowFilesStatus("Could not refresh this folder. Go up and try again.");
                 return;
             }
 

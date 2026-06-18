@@ -361,13 +361,25 @@ namespace Cotton.Mobile.ViewModels
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)
         {
-            MainThread.BeginInvokeOnMainThread(() =>
+            _ = RunDownloadedFilesClearedAsync();
+        }
+
+        private async Task RunDownloadedFilesClearedAsync()
+        {
+            try
             {
-                if (Display.IsProfileVisible)
+                await MainThread.InvokeOnMainThreadAsync(() =>
                 {
-                    _fileBrowser.ClearLocalFileMarkers();
-                }
-            });
+                    if (Display.IsProfileVisible)
+                    {
+                        _fileBrowser.ClearLocalFileMarkers();
+                    }
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile local file markers after storage cleanup.");
+            }
         }
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)

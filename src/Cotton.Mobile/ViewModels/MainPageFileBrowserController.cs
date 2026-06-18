@@ -728,6 +728,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Downloading {file.Name}...");
+            bool shouldRunRecoveryRefresh = false;
 
             try
             {
@@ -748,7 +749,10 @@ namespace Cotton.Mobile.ViewModels
 
                 RefreshLocalFileMarkers(instanceUri);
                 _display.ShowFilesSummary();
-                await ShowDownloadedFileActionsBestEffortAsync(file, result, fileActionCancellation.Token);
+                shouldRunRecoveryRefresh = await ShowDownloadedFileActionsBestEffortAsync(
+                    file,
+                    result,
+                    fileActionCancellation.Token);
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -792,7 +796,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                EndFileAction(fileActionCancellation);
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
             }
         }
 
@@ -856,6 +860,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
+            bool shouldRunRecoveryRefresh = false;
 
             try
             {
@@ -881,6 +886,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _display.ShowFilesSummary();
+                shouldRunRecoveryRefresh = true;
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -925,7 +931,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                EndFileAction(fileActionCancellation);
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
             }
         }
 
@@ -944,6 +950,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Preparing {file.Name}...");
+            bool shouldRunRecoveryRefresh = false;
 
             try
             {
@@ -961,6 +968,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _display.ShowFilesSummary();
+                shouldRunRecoveryRefresh = true;
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -1005,7 +1013,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                EndFileAction(fileActionCancellation);
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
             }
         }
 
@@ -1106,7 +1114,7 @@ namespace Cotton.Mobile.ViewModels
                 && CottonLocalFileFreshness.IsFresh(localFile.UpdatedAtUtc, file.UpdatedAtUtc);
         }
 
-        private async Task ShowDownloadedFileActionsAsync(
+        private async Task<bool> ShowDownloadedFileActionsAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
@@ -1123,26 +1131,26 @@ namespace Cotton.Mobile.ViewModels
 
             if (string.Equals(action, openAction, StringComparison.Ordinal))
             {
-                await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
-                return;
+                return await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
             }
 
             switch (action)
             {
                 case ShareAction:
-                    await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
-                    break;
+                    return await ShareDownloadedFileAsync(file, downloadedFile, cancellationToken);
             }
+
+            return true;
         }
 
-        private async Task ShowDownloadedFileActionsBestEffortAsync(
+        private async Task<bool> ShowDownloadedFileActionsBestEffortAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
             try
             {
-                await ShowDownloadedFileActionsAsync(file, downloadedFile, cancellationToken);
+                return await ShowDownloadedFileActionsAsync(file, downloadedFile, cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -1152,6 +1160,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to show Cotton mobile downloaded file actions {FileId}.", file.Id);
                 _display.ShowFilesStatus("Downloaded. Could not show file actions.");
+                return false;
             }
         }
 
@@ -1182,7 +1191,7 @@ namespace Cotton.Mobile.ViewModels
             return _filePreviewService.CanPreview(file, downloadedFile) ? OpenAction : OpenWithSystemAppAction;
         }
 
-        private async Task OpenDownloadedFileAsync(
+        private async Task<bool> OpenDownloadedFileAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
@@ -1203,6 +1212,7 @@ namespace Cotton.Mobile.ViewModels
 
                 cancellationToken.ThrowIfCancellationRequested();
                 _display.ShowFilesSummary();
+                return true;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -1213,10 +1223,11 @@ namespace Cotton.Mobile.ViewModels
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Open failed.");
+                return false;
             }
         }
 
-        private async Task ShareDownloadedFileAsync(
+        private async Task<bool> ShareDownloadedFileAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
@@ -1229,6 +1240,7 @@ namespace Cotton.Mobile.ViewModels
                 await _fileInteractionService.ShareAsync(downloadedFile, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 _display.ShowFilesSummary();
+                return true;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -1239,6 +1251,7 @@ namespace Cotton.Mobile.ViewModels
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Share failed.");
+                return false;
             }
         }
 
@@ -1326,7 +1339,7 @@ namespace Cotton.Mobile.ViewModels
             return cancellation;
         }
 
-        private void EndFileAction(CancellationTokenSource cancellation)
+        private void EndFileAction(CancellationTokenSource cancellation, bool shouldRunRecoveryRefresh)
         {
             if (!ReferenceEquals(_fileActionCancellation, cancellation))
             {
@@ -1336,7 +1349,10 @@ namespace Cotton.Mobile.ViewModels
 
             _fileActionCancellation = null;
             cancellation.Dispose();
-            QueueFileLoadRecoveryRefreshAfterFileAction();
+            if (shouldRunRecoveryRefresh)
+            {
+                QueueFileLoadRecoveryRefreshAfterFileAction();
+            }
         }
 
         private void EndFileLoad(CancellationTokenSource cancellation)

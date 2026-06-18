@@ -18,7 +18,7 @@ namespace Cotton.Mobile.Services
 
         public event EventHandler? InternetAccessRestored;
 
-        public bool HasInternetAccess => _networkAccess == NetworkAccess.Internet;
+        public bool HasInternetAccess => GetCurrentNetworkAccess() == NetworkAccess.Internet;
 
         private void Connectivity_ConnectivityChanged(object? sender, ConnectivityChangedEventArgs e)
         {
@@ -30,6 +30,12 @@ namespace Cotton.Mobile.Services
             }
 
             InternetAccessRestored?.Invoke(this, EventArgs.Empty);
+        }
+
+        private NetworkAccess GetCurrentNetworkAccess()
+        {
+            _networkAccess = _connectivity.NetworkAccess;
+            return _networkAccess;
         }
     }
 }

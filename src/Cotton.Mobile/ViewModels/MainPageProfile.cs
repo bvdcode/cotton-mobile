@@ -4,9 +4,9 @@ namespace Cotton.Mobile.ViewModels
     {
         public MainPageProfile(string name, string? email, string instance)
         {
-            Name = string.IsNullOrWhiteSpace(name) ? throw new ArgumentException("Profile name is required.", nameof(name)) : name;
+            Name = string.IsNullOrWhiteSpace(name) ? throw new ArgumentException("Profile name is required.", nameof(name)) : name.Trim();
             Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
-            Instance = string.IsNullOrWhiteSpace(instance) ? throw new ArgumentException("Profile instance is required.", nameof(instance)) : instance;
+            Instance = string.IsNullOrWhiteSpace(instance) ? throw new ArgumentException("Profile instance is required.", nameof(instance)) : instance.Trim();
         }
 
         public string Name { get; }

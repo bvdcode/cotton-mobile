@@ -52,7 +52,22 @@ namespace Cotton.Mobile.ViewModels
                 new[] { user.FirstName, user.LastName }
                     .Where(part => !string.IsNullOrWhiteSpace(part))
                     .Select(part => part!.Trim()));
-            return string.IsNullOrWhiteSpace(fullName) ? user.Username : fullName;
+            if (!string.IsNullOrWhiteSpace(fullName))
+            {
+                return fullName;
+            }
+
+            if (!string.IsNullOrWhiteSpace(user.Username))
+            {
+                return user.Username.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(user.Email))
+            {
+                return user.Email.Trim();
+            }
+
+            return "Cotton user";
         }
     }
 }

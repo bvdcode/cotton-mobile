@@ -187,6 +187,7 @@ namespace Cotton.Mobile.ViewModels
                     "App",
                     [
                         CreateItem("Version", CreateVersionText()),
+                        CreateItem("Install", _metadata.InstallChannel),
                         CreateItem("Network", _context.HasInternetAccess ? "Internet available" : "No internet access"),
                     ]),
                 new DiagnosticsSectionViewModel(

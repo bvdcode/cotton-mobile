@@ -908,9 +908,14 @@ namespace Cotton.Mobile.ViewModels
 
         private void CancelCurrentFileAction()
         {
-            _fileActionCancellation?.Cancel();
-            _fileActionCancellation?.Dispose();
+            CancellationTokenSource? cancellation = _fileActionCancellation;
+            if (cancellation is null)
+            {
+                return;
+            }
+
             _fileActionCancellation = null;
+            cancellation.Cancel();
         }
 
         private void ShowFileActionRetry(

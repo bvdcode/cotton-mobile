@@ -13,7 +13,7 @@ namespace Cotton.Mobile.ViewModels
             return new MainPageProfile(
                 CreateDisplayName(user),
                 string.IsNullOrWhiteSpace(user.Email) ? null : user.Email.Trim(),
-                instanceUri.Host);
+                CreateInstanceDisplayName(instanceUri));
         }
 
         public string ResolveStatusMessage(CottonSessionResult result, string unauthenticatedStatus)
@@ -64,6 +64,17 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return "Cotton user";
+        }
+
+        private static string CreateInstanceDisplayName(Uri instanceUri)
+        {
+            string authority = instanceUri.IsDefaultPort
+                ? instanceUri.Host
+                : instanceUri.Authority;
+            string path = instanceUri.AbsolutePath.TrimEnd('/');
+            return string.IsNullOrWhiteSpace(path) || string.Equals(path, "/", StringComparison.Ordinal)
+                ? authority
+                : $"{authority}{path}";
         }
     }
 }

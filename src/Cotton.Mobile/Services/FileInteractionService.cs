@@ -21,9 +21,9 @@ namespace Cotton.Mobile.Services
         public async Task OpenAsync(CottonFileDownloadResult file, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(file);
+            cancellationToken.ThrowIfCancellationRequested();
             EnsureFileExists(file);
 
-            cancellationToken.ThrowIfCancellationRequested();
             bool opened = await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -40,9 +40,9 @@ namespace Cotton.Mobile.Services
         public async Task ShareAsync(CottonFileDownloadResult file, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(file);
+            cancellationToken.ThrowIfCancellationRequested();
             EnsureFileExists(file);
 
-            cancellationToken.ThrowIfCancellationRequested();
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();

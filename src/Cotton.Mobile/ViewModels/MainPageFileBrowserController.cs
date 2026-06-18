@@ -911,6 +911,8 @@ namespace Cotton.Mobile.ViewModels
                 openAction,
                 ShareAction);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             if (string.Equals(action, openAction, StringComparison.Ordinal))
             {
                 await OpenDownloadedFileAsync(file, downloadedFile, cancellationToken);
@@ -935,6 +937,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             _display.ShowFileActionLoading($"Opening {file.Name}...");
 
             try
@@ -948,6 +951,7 @@ namespace Cotton.Mobile.ViewModels
                     await _fileInteractionService.OpenAsync(downloadedFile, cancellationToken);
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
                 _display.ShowFilesSummary();
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -966,11 +970,13 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             _display.ShowFileActionLoading($"Sharing {file.Name}...");
 
             try
             {
                 await _fileInteractionService.ShareAsync(downloadedFile, cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
                 _display.ShowFilesSummary();
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

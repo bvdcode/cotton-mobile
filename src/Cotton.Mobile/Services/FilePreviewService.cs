@@ -39,8 +39,13 @@ namespace Cotton.Mobile.Services
             ContentPage page = file.IsImage
                 ? CreateImageViewerPage(file, downloadedFile)
                 : await CreateTextViewerPageAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
-            await MainThread.InvokeOnMainThreadAsync(
-                () => Shell.Current.Navigation.PushAsync(page));
+            cancellationToken.ThrowIfCancellationRequested();
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
         private static bool CanPreviewText(CottonFileBrowserEntry file)

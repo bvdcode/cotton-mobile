@@ -915,6 +915,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
             }
@@ -994,6 +995,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share Cotton mobile file {FileId}.", file.Id);
                 ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
             }
@@ -1008,6 +1010,11 @@ namespace Cotton.Mobile.ViewModels
             CottonLocalFileSnapshot? localFile = _instanceUri is null
                 ? null
                 : _fileBrowserService.GetLocalDownload(_instanceUri, file);
+            if (localFile is null)
+            {
+                _display.ClearFileLocalCopy(file);
+            }
+
             await _dialogService.ShowAlertAsync(
                 file.Name,
                 CreateFileDetailsMessage(file, localFile),
@@ -1169,6 +1176,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Open failed.");
             }
@@ -1194,6 +1202,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
+                ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
                 _display.ShowFilesStatus("Share failed.");
             }
@@ -1209,11 +1218,20 @@ namespace Cotton.Mobile.ViewModels
             CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, file);
             if (localFile is null)
             {
+                _display.ClearFileLocalCopy(file);
                 return false;
             }
 
             _display.ShowFileLocalCopy(file, localFile);
             return true;
+        }
+
+        private void ClearLocalFileMarkerIfFileMissing(Exception exception, CottonFileBrowserEntry file)
+        {
+            if (exception is FileNotFoundException)
+            {
+                _display.ClearFileLocalCopy(file);
+            }
         }
 
         private IProgress<long>? CreateFileDownloadProgress(
@@ -1453,7 +1471,7 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
-            if (_instanceUri is not null && _fileBrowserService.GetReusableLocalDownload(_instanceUri, file) is not null)
+            if (ShowReusableLocalFileIfAvailable(file))
             {
                 return false;
             }

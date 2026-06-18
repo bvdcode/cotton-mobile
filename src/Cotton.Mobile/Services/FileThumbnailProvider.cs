@@ -54,27 +54,23 @@ namespace Cotton.Mobile.Services
             Uri previewUri = new(
                 instanceUri,
                 $"{Routes.V1.Previews}/{Uri.EscapeDataString(previewToken)}.webp");
-            WarmCache(cacheKey, previewUri, cancellationToken);
+            WarmCache(cacheKey, previewUri);
             return CottonFileThumbnailSnapshot.Ready(
                 entry.BadgeText,
                 previewUri.AbsoluteUri,
                 cacheKey);
         }
 
-        private void WarmCache(string cacheKey, Uri previewUri, CancellationToken cancellationToken)
+        private void WarmCache(string cacheKey, Uri previewUri)
         {
-            _ = WarmCacheAsync(cacheKey, previewUri, cancellationToken);
+            _ = WarmCacheAsync(cacheKey, previewUri);
         }
 
-        private async Task WarmCacheAsync(string cacheKey, Uri previewUri, CancellationToken cancellationToken)
+        private async Task WarmCacheAsync(string cacheKey, Uri previewUri)
         {
             try
             {
-                await _thumbnailCache.WarmAsync(cacheKey, previewUri, cancellationToken).ConfigureAwait(false);
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                _logger.LogDebug("Thumbnail cache warm-up cancelled for {PreviewUri}.", previewUri);
+                await _thumbnailCache.WarmAsync(cacheKey, previewUri, CancellationToken.None).ConfigureAwait(false);
             }
             catch (Exception exception)
             {

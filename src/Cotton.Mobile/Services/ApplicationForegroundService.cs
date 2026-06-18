@@ -1,10 +1,20 @@
+using Microsoft.Extensions.Logging;
+
 namespace Cotton.Mobile.Services
 {
     public class ApplicationForegroundService : IApplicationForegroundService
     {
         private readonly Lock _gate = new();
+        private readonly ILogger<ApplicationForegroundService> _logger;
         private TaskCompletionSource _nextResume = CreateResumeSource();
         private long _resumeVersion;
+
+        public ApplicationForegroundService(ILogger<ApplicationForegroundService> logger)
+        {
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _logger = logger;
+        }
 
         public event EventHandler? Resumed;
 
@@ -46,7 +56,28 @@ namespace Cotton.Mobile.Services
             }
 
             resume.TrySetResult();
-            Resumed?.Invoke(this, EventArgs.Empty);
+            NotifyResumedSubscribers();
+        }
+
+        private void NotifyResumedSubscribers()
+        {
+            EventHandler? handlers = Resumed;
+            if (handlers is null)
+            {
+                return;
+            }
+
+            foreach (EventHandler handler in handlers.GetInvocationList().Cast<EventHandler>())
+            {
+                try
+                {
+                    handler.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Cotton mobile foreground subscriber failed.");
+                }
+            }
         }
 
         private static TaskCompletionSource CreateResumeSource()

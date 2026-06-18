@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Networking;
 
 namespace Cotton.Mobile.Services
@@ -5,13 +6,18 @@ namespace Cotton.Mobile.Services
     public class NetworkAccessService : INetworkAccessService
     {
         private readonly IConnectivity _connectivity;
+        private readonly ILogger<NetworkAccessService> _logger;
         private NetworkAccess _networkAccess;
 
-        public NetworkAccessService(IConnectivity connectivity)
+        public NetworkAccessService(
+            IConnectivity connectivity,
+            ILogger<NetworkAccessService> logger)
         {
             ArgumentNullException.ThrowIfNull(connectivity);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _connectivity = connectivity;
+            _logger = logger;
             _networkAccess = connectivity.NetworkAccess;
             _connectivity.ConnectivityChanged += Connectivity_ConnectivityChanged;
         }
@@ -29,7 +35,28 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
-            InternetAccessRestored?.Invoke(this, EventArgs.Empty);
+            NotifyInternetAccessRestored();
+        }
+
+        private void NotifyInternetAccessRestored()
+        {
+            EventHandler? handlers = InternetAccessRestored;
+            if (handlers is null)
+            {
+                return;
+            }
+
+            foreach (EventHandler handler in handlers.GetInvocationList().Cast<EventHandler>())
+            {
+                try
+                {
+                    handler.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Cotton mobile internet-restored subscriber failed.");
+                }
+            }
         }
 
         private NetworkAccess GetCurrentNetworkAccess()

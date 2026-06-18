@@ -85,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
+            _display.FileSearchTextChanged += Display_FileSearchTextChanged;
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
             _foregroundService.Resumed += ForegroundService_Resumed;
         }
@@ -244,6 +245,13 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public Task ToggleFileSearchAsync()
+        {
+            ClearFileActionRetry();
+            _display.ToggleFileSearch();
+            return Task.CompletedTask;
+        }
+
         public async Task ShowSortActionsAsync()
         {
             string nameAction = CreateCurrentActionLabel(
@@ -385,6 +393,7 @@ namespace Cotton.Mobile.ViewModels
 
         private Task SetSortModeAsync(CottonFileBrowserSortMode sortMode)
         {
+            ClearFileActionRetry();
             _preferenceStore.SaveSortMode(sortMode);
             _display.ShowFileSortMode(sortMode);
             return Task.CompletedTask;
@@ -392,6 +401,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void SetViewMode(CottonFileBrowserViewMode viewMode)
         {
+            ClearFileActionRetry();
             _preferenceStore.SaveViewMode(viewMode);
             _display.ShowFileViewMode(viewMode);
         }
@@ -948,6 +958,11 @@ namespace Cotton.Mobile.ViewModels
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
         {
             QueueFileLoadRecoveryRefresh("internet access restored");
+        }
+
+        private void Display_FileSearchTextChanged(object? sender, EventArgs e)
+        {
+            ClearFileActionRetry();
         }
 
         private void ForegroundService_Resumed(object? sender, EventArgs e)

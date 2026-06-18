@@ -113,7 +113,7 @@ namespace Cotton.Mobile.ViewModels
             ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(_fileBrowser.ShowEntryActionsAsync);
             CancelFileActionCommand = new AsyncCommand(_fileBrowser.CancelFileActionAsync, () => Display.CanCancelFileAction);
             RetryFileActionCommand = new AsyncCommand(_fileBrowser.RetryFileActionAsync, () => Display.CanRetryFileAction);
-            ToggleFileSearchCommand = new AsyncCommand(ToggleFileSearchAsync);
+            ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync);
             ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync);
             ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync);
         }
@@ -291,12 +291,6 @@ namespace Cotton.Mobile.ViewModels
                     await OpenFeedbackAsync();
                     break;
             }
-        }
-
-        private Task ToggleFileSearchAsync()
-        {
-            Display.ToggleFileSearch();
-            return Task.CompletedTask;
         }
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)

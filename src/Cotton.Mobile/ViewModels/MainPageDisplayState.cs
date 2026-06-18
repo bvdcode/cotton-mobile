@@ -48,6 +48,8 @@ namespace Cotton.Mobile.ViewModels
             InstanceUrl = defaultInstanceUrl;
         }
 
+        public event EventHandler? FileSearchTextChanged;
+
         public string InstanceUrl
         {
             get => _instanceUrl;
@@ -247,6 +249,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _fileSearchText, value ?? string.Empty))
                 {
                     NotifyFileSearchStateChanged();
+                    FileSearchTextChanged?.Invoke(this, EventArgs.Empty);
                     ApplyFileFilters();
                 }
             }

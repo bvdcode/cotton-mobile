@@ -50,6 +50,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isFileLoadInProgress;
         private bool _isFolderNavigationInProgress;
         private bool _lastFileLoadFailed;
+        private bool _lastFileLoadDisplayedCachedContent;
         private bool _isRecoveryRefreshInProgress;
         private string? _fileLoadRecoveryPendingAfterBusyReason;
 
@@ -127,6 +128,7 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = null;
             _currentFolder = null;
             _lastFileLoadFailed = false;
+            _lastFileLoadDisplayedCachedContent = false;
             _fileLoadRecoveryPendingAfterBusyReason = null;
             _fileNavigation.Clear();
         }
@@ -138,6 +140,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFileActionRetry();
             _isFileLoadInProgress = false;
             _isFolderNavigationInProgress = false;
+            _lastFileLoadDisplayedCachedContent = false;
             _fileLoadRecoveryPendingAfterBusyReason = null;
         }
 
@@ -215,7 +218,7 @@ namespace Cotton.Mobile.ViewModels
                     await LoadFolderAsync(previous, preserveHistory: true);
                 }
 
-                if (_lastFileLoadFailed && _instanceUri is not null)
+                if (ShouldRestoreNavigationAfterFileLoadFailure())
                 {
                     _currentFolder = originalFolder;
                     _fileNavigation.Clear();
@@ -424,7 +427,7 @@ namespace Cotton.Mobile.ViewModels
 
                 _display.ClearFileSearch();
                 await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
-                if (_lastFileLoadFailed && _instanceUri is not null)
+                if (ShouldRestoreNavigationAfterFileLoadFailure())
                 {
                     _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
                 }
@@ -603,6 +606,7 @@ namespace Cotton.Mobile.ViewModels
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
+                _lastFileLoadDisplayedCachedContent = false;
                 _display.ShowFiles(content, isRoot: true, canNavigateUp: false, CreatePath(content.FolderName));
             }
             catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
@@ -679,6 +683,7 @@ namespace Cotton.Mobile.ViewModels
 
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
+                _lastFileLoadDisplayedCachedContent = false;
                 _display.ShowFiles(
                     content,
                     isRoot: false,
@@ -759,6 +764,7 @@ namespace Cotton.Mobile.ViewModels
             _fileNavigation.Clear();
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
+            _lastFileLoadDisplayedCachedContent = true;
             _display.ShowFiles(
                 cachedContent,
                 isRoot: true,
@@ -796,6 +802,7 @@ namespace Cotton.Mobile.ViewModels
             cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
+            _lastFileLoadDisplayedCachedContent = true;
             _display.ShowFiles(
                 cachedContent,
                 isRoot: false,
@@ -1510,6 +1517,7 @@ namespace Cotton.Mobile.ViewModels
         private void ShowFileLoadFailure(string fallbackStatus)
         {
             _lastFileLoadFailed = true;
+            _lastFileLoadDisplayedCachedContent = false;
             if (_networkAccess.HasInternetAccess)
             {
                 _display.ShowFilesStatus(fallbackStatus);
@@ -1517,6 +1525,13 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _display.ShowOfflineFilesNotice();
+        }
+
+        private bool ShouldRestoreNavigationAfterFileLoadFailure()
+        {
+            return _lastFileLoadFailed
+                && !_lastFileLoadDisplayedCachedContent
+                && _instanceUri is not null;
         }
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)

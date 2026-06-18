@@ -1222,7 +1222,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to open downloaded Cotton mobile file {FileId}.", file.Id);
-                _display.ShowFilesStatus("Open failed.");
+                ShowFileActionRetry(MainPageFileAction.Open, file, CreateFileActionFailureStatus("Open failed.", OfflineOpenStatus));
                 return false;
             }
         }
@@ -1250,7 +1250,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 ClearLocalFileMarkerIfFileMissing(exception, file);
                 _logger.LogError(exception, "Failed to share downloaded Cotton mobile file {FileId}.", file.Id);
-                _display.ShowFilesStatus("Share failed.");
+                ShowFileActionRetry(MainPageFileAction.Share, file, CreateFileActionFailureStatus("Share failed.", OfflineShareStatus));
                 return false;
             }
         }

@@ -1,0 +1,221 @@
+using Cotton.Mobile.Services;
+using Cotton.Mobile.ViewModels;
+using Xunit;
+
+namespace Cotton.Mobile.Tests
+{
+    public class MainPageDisplayStateTests
+    {
+        private static readonly DateTime Older = new(2026, 6, 1, 10, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime Newer = new(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc);
+
+        [Fact]
+        public void Show_files_sorts_by_name_with_folders_first()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+
+            display.ShowFiles(
+                CreateContent(
+                    CreateFile("zeta.txt", "Text", 10, Older),
+                    CreateFolder("Projects"),
+                    CreateFile("alpha.png", "Image", 200, Newer)),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+
+            Assert.Equal(["Projects", "alpha.png", "zeta.txt"], VisibleNames(display));
+            Assert.Equal("3 items · A-Z", display.FilesStatus);
+            Assert.False(display.IsFilesPathVisible);
+            Assert.False(display.IsFileUpButtonVisible);
+        }
+
+        [Fact]
+        public void Sort_modes_keep_folder_grouping_and_update_status()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ShowFileSortMode(CottonFileBrowserSortMode.Updated);
+
+            Assert.Equal(["Projects", "alpha.png", "archive.zip", "zeta.txt"], VisibleNames(display));
+            Assert.Equal("4 items · Newest", display.FilesStatus);
+            Assert.Equal("New", display.FileSortButtonText);
+
+            display.ShowFileSortMode(CottonFileBrowserSortMode.Type);
+
+            Assert.Equal(["Projects", "archive.zip", "alpha.png", "zeta.txt"], VisibleNames(display));
+            Assert.Equal("4 items · Type", display.FilesStatus);
+
+            display.ShowFileSortMode(CottonFileBrowserSortMode.Size);
+
+            Assert.Equal(["Projects", "alpha.png", "zeta.txt", "archive.zip"], VisibleNames(display));
+            Assert.Equal("4 items · Size", display.FilesStatus);
+        }
+
+        [Fact]
+        public void Search_filters_current_folder_and_reports_matches()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.FileSearchText = "png";
+
+            Assert.Equal(["alpha.png"], VisibleNames(display));
+            Assert.True(display.IsFileSearchVisible);
+            Assert.True(display.IsFileSearchActive);
+            Assert.Equal("1 match · A-Z", display.FilesStatus);
+            Assert.False(display.IsFilesEmptyVisible);
+
+            display.FileSearchText = "missing";
+
+            Assert.Empty(display.FileEntries);
+            Assert.Equal("No matching files", display.FilesEmptyMessage);
+            Assert.Equal("Try another name, type, or extension.", display.FilesEmptyDetails);
+            Assert.True(display.IsFilesEmptyVisible);
+            Assert.Equal("0 matches · A-Z", display.FilesStatus);
+        }
+
+        [Fact]
+        public void Empty_folder_has_stable_empty_state()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+
+            display.ShowFiles(CreateContent(), isRoot: false, canNavigateUp: true, path: "Files / Empty");
+
+            Assert.Empty(display.FileEntries);
+            Assert.Equal("Empty", display.FilesTitle);
+            Assert.Equal("Files / Empty", display.FilesPath);
+            Assert.True(display.IsFilesPathVisible);
+            Assert.True(display.IsFileUpButtonEnabled);
+            Assert.Equal("This folder is empty", display.FilesEmptyMessage);
+            Assert.Equal("Files added here will appear automatically.", display.FilesEmptyDetails);
+            Assert.True(display.IsFilesEmptyVisible);
+            Assert.False(display.IsFilesStatusVisible);
+        }
+
+        [Fact]
+        public void Busy_file_action_preserves_status_and_disables_browser_chrome()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ShowFileActionLoading("Downloading zeta.txt... 50%");
+            display.FileSearchText = "alpha";
+
+            Assert.Equal(["alpha.png"], VisibleNames(display));
+            Assert.Equal("Downloading zeta.txt... 50%", display.FilesStatus);
+            Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.False(display.IsAccountActionEnabled);
+            Assert.True(display.CanCancelFileAction);
+
+            display.ShowFilesSummary();
+
+            Assert.Equal("1 match · A-Z", display.FilesStatus);
+            Assert.True(display.IsFileBrowserChromeEnabled);
+            Assert.True(display.IsAccountActionEnabled);
+        }
+
+        [Fact]
+        public void Local_file_markers_update_visible_and_backing_entries()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            CottonFileBrowserEntry file = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            var localFile = new CottonLocalFileSnapshot("zeta.txt", 10, Older);
+
+            display.ShowFileLocalCopy(file, localFile);
+
+            CottonFileBrowserEntry marked = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            Assert.True(marked.HasLocalCopy);
+            Assert.Equal("On device", marked.LocalCopyStatus);
+            Assert.Equal("10 B · Text · On device", marked.DisplayDetails);
+
+            bool unchanged = display.RefreshFileLocalCopies(entry => entry.Id == file.Id ? localFile : null);
+            Assert.False(unchanged);
+
+            bool changed = display.RefreshFileLocalCopies(_ => null);
+            Assert.True(changed);
+            Assert.False(display.FileEntries.Single(entry => entry.Name == "zeta.txt").HasLocalCopy);
+        }
+
+        [Fact]
+        public void Preferences_apply_view_mode_and_sort_mode()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ApplyFileBrowserPreferences(
+                new CottonFileBrowserPreferences(
+                    CottonFileBrowserViewMode.Tiles,
+                    CottonFileBrowserSortMode.Size));
+
+            Assert.Equal(CottonFileBrowserViewMode.Tiles, display.FileViewMode);
+            Assert.True(display.IsFileTileViewVisible);
+            Assert.False(display.IsFileListViewVisible);
+            Assert.Equal("Size", display.FileSortButtonText);
+            Assert.Equal(["Projects", "alpha.png", "zeta.txt", "archive.zip"], VisibleNames(display));
+        }
+
+        private static MainPageDisplayState CreateDisplayWithMixedFiles()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            display.ShowFiles(
+                CreateContent(
+                    CreateFile("zeta.txt", "Text", 10, Older),
+                    CreateFolder("Projects"),
+                    CreateFile("archive.zip", "File", null, Older),
+                    CreateFile("alpha.png", "Image", 200, Newer)),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+            return display;
+        }
+
+        private static MainPageDisplayState CreateSignedInDisplay()
+        {
+            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
+            display.ShowProfile(new MainPageProfile("Mobile Demo", null, "app.cottoncloud.dev"));
+            return display;
+        }
+
+        private static CottonFolderContent CreateContent(params CottonFileBrowserEntry[] entries)
+        {
+            return new CottonFolderContent(Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"), "Empty", entries);
+        }
+
+        private static CottonFileBrowserEntry CreateFolder(string name)
+        {
+            return CottonFileBrowserEntry.CreateCached(
+                Guid.NewGuid(),
+                CottonFileBrowserEntryType.Folder,
+                name,
+                "Folder",
+                "Folder",
+                "Open",
+                "Folder",
+                Newer,
+                null,
+                null,
+                null);
+        }
+
+        private static CottonFileBrowserEntry CreateFile(string name, string kind, long? sizeBytes, DateTime updatedAtUtc)
+        {
+            string details = sizeBytes.HasValue
+                ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {kind}"
+                : $"Unknown · {kind}";
+            return CottonFileBrowserEntry.CreateCached(
+                Guid.NewGuid(),
+                CottonFileBrowserEntryType.File,
+                name,
+                kind,
+                details,
+                "More",
+                kind.ToUpperInvariant(),
+                updatedAtUtc,
+                sizeBytes,
+                null,
+                null);
+        }
+
+        private static string[] VisibleNames(MainPageDisplayState display)
+        {
+            return display.FileEntries.Select(entry => entry.Name).ToArray();
+        }
+    }
+}

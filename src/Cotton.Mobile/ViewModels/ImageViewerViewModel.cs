@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly CottonFileDownloadResult _file;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly ILogger<ImageViewerViewModel> _logger;
+        private bool _isBusy;
         private string? _status;
 
         public ImageViewerViewModel(
@@ -30,8 +31,8 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _logger = logger;
             ImageSource = ImageSource.FromFile(file.FilePath);
-            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException);
-            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException);
+            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException, () => !IsBusy);
+            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public string Title { get; }
@@ -43,6 +44,18 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ShareCommand { get; }
 
         public AsyncCommand OpenExternallyCommand { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    RaiseCommandStatesChanged();
+                }
+            }
+        }
 
         public string? Status
         {
@@ -60,34 +73,55 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShareAsync()
         {
-            Status = "Preparing share...";
-
-            try
-            {
-                await _fileInteractionService.ShareAsync(_file);
-                Status = null;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to share image viewer file {FilePath}.", _file.FilePath);
-                Status = "Share failed.";
-            }
+            await RunViewerActionAsync(
+                "Preparing share...",
+                () => _fileInteractionService.ShareAsync(_file),
+                "Share failed.",
+                "Failed to share image viewer file {FilePath}.");
         }
 
         private async Task OpenExternallyAsync()
         {
-            Status = "Opening...";
+            await RunViewerActionAsync(
+                "Opening...",
+                () => _fileInteractionService.OpenAsync(_file),
+                "Open failed.",
+                "Failed to open image viewer file {FilePath}.");
+        }
 
+        private async Task RunViewerActionAsync(
+            string busyStatus,
+            Func<Task> actionAsync,
+            string failureStatus,
+            string failureLogMessage)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            Status = busyStatus;
             try
             {
-                await _fileInteractionService.OpenAsync(_file);
+                await actionAsync();
                 Status = null;
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to open image viewer file {FilePath}.", _file.FilePath);
-                Status = "Open failed.";
+                _logger.LogWarning(exception, failureLogMessage, _file.FilePath);
+                Status = failureStatus;
             }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void RaiseCommandStatesChanged()
+        {
+            ShareCommand.RaiseCanExecuteChanged();
+            OpenExternallyCommand.RaiseCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

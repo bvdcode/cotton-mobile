@@ -11,6 +11,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IClipboard _clipboard;
         private readonly ILogger<TextViewerViewModel> _logger;
+        private bool _isBusy;
         private string? _status;
 
         public TextViewerViewModel(
@@ -37,9 +38,9 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _clipboard = clipboard;
             _logger = logger;
-            CopyCommand = new AsyncCommand(CopyAsync, LogUnhandledCommandException, () => Content.Length > 0);
-            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException);
-            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException);
+            CopyCommand = new AsyncCommand(CopyAsync, LogUnhandledCommandException, () => !IsBusy && Content.Length > 0);
+            ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException, () => !IsBusy);
+            OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public string Title { get; }
@@ -53,6 +54,18 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ShareCommand { get; }
 
         public AsyncCommand OpenExternallyCommand { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    RaiseCommandStatesChanged();
+                }
+            }
+        }
 
         public string? Status
         {
@@ -70,50 +83,76 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task CopyAsync()
         {
-            Status = "Copying...";
-
-            try
-            {
-                await _clipboard.SetTextAsync(Content);
-                Status = "Copied.";
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to copy text viewer content for {FilePath}.", _file.FilePath);
-                Status = "Copy failed.";
-            }
+            await RunViewerActionAsync(
+                "Copying...",
+                async () =>
+                {
+                    await _clipboard.SetTextAsync(Content);
+                    Status = "Copied.";
+                },
+                "Copy failed.",
+                "Failed to copy text viewer content for {FilePath}.");
         }
 
         private async Task ShareAsync()
         {
-            Status = "Preparing share...";
-
-            try
-            {
-                await _fileInteractionService.ShareAsync(_file);
-                Status = null;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to share text viewer file {FilePath}.", _file.FilePath);
-                Status = "Share failed.";
-            }
+            await RunViewerActionAsync(
+                "Preparing share...",
+                async () =>
+                {
+                    await _fileInteractionService.ShareAsync(_file);
+                    Status = null;
+                },
+                "Share failed.",
+                "Failed to share text viewer file {FilePath}.");
         }
 
         private async Task OpenExternallyAsync()
         {
-            Status = "Opening...";
+            await RunViewerActionAsync(
+                "Opening...",
+                async () =>
+                {
+                    await _fileInteractionService.OpenAsync(_file);
+                    Status = null;
+                },
+                "Open failed.",
+                "Failed to open text viewer file {FilePath}.");
+        }
 
+        private async Task RunViewerActionAsync(
+            string busyStatus,
+            Func<Task> actionAsync,
+            string failureStatus,
+            string failureLogMessage)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            Status = busyStatus;
             try
             {
-                await _fileInteractionService.OpenAsync(_file);
-                Status = null;
+                await actionAsync();
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to open text viewer file {FilePath}.", _file.FilePath);
-                Status = "Open failed.";
+                _logger.LogWarning(exception, failureLogMessage, _file.FilePath);
+                Status = failureStatus;
             }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void RaiseCommandStatesChanged()
+        {
+            CopyCommand.RaiseCanExecuteChanged();
+            ShareCommand.RaiseCanExecuteChanged();
+            OpenExternallyCommand.RaiseCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

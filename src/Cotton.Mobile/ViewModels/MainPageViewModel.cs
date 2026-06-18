@@ -33,6 +33,8 @@ namespace Cotton.Mobile.ViewModels
 
         private CancellationTokenSource? _authorizationCancellation;
         private bool _didRestoreSession;
+        private bool _isSessionRestoreInProgress;
+        private bool _shouldRetrySessionRestoreWhenOnline;
 
         public MainPageViewModel(
             ICottonSessionService sessionService,
@@ -135,6 +137,7 @@ namespace Cotton.Mobile.ViewModels
             ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync, LogUnhandledCommandException);
             ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync, LogUnhandledCommandException);
             ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync, LogUnhandledCommandException);
+            _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
         }
 
         public MainPageDisplayState Display { get; }
@@ -189,22 +192,42 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task RestoreSessionAsync()
         {
+            if (_isSessionRestoreInProgress)
+            {
+                return;
+            }
+
+            _isSessionRestoreInProgress = true;
             ShowLoading("Restoring session...");
 
             try
             {
+                _shouldRetrySessionRestoreWhenOnline = false;
                 CottonSessionResult result = await _sessionService.RestoreAsync();
                 await ApplySessionResultAsync(result, ReadyStatus);
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile session.");
-                ShowSignIn("Session restore failed. Sign in again.");
+                if (!_networkAccess.HasInternetAccess)
+                {
+                    _shouldRetrySessionRestoreWhenOnline = true;
+                    ShowSignIn("Offline. Reconnect to restore your session.");
+                }
+                else
+                {
+                    ShowSignIn("Session restore failed. Sign in again.");
+                }
+            }
+            finally
+            {
+                _isSessionRestoreInProgress = false;
             }
         }
 
         private async Task SignInAsync()
         {
+            _shouldRetrySessionRestoreWhenOnline = false;
             Uri? instanceUri = ResolveInstanceUri();
             if (instanceUri is null)
             {
@@ -344,6 +367,28 @@ namespace Cotton.Mobile.ViewModels
                     _fileBrowser.ClearLocalFileMarkers();
                 }
             });
+        }
+
+        private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
+        {
+            if (!_shouldRetrySessionRestoreWhenOnline)
+            {
+                return;
+            }
+
+            _ = MainThread.InvokeOnMainThreadAsync(RetrySessionRestoreAfterNetworkAsync);
+        }
+
+        private async Task RetrySessionRestoreAfterNetworkAsync()
+        {
+            if (!_shouldRetrySessionRestoreWhenOnline
+                || _isSessionRestoreInProgress
+                || !Display.IsSignInVisible)
+            {
+                return;
+            }
+
+            await RestoreSessionAsync();
         }
 
         private async Task ClearLocalSessionAndCachedStateAsync(string reason)

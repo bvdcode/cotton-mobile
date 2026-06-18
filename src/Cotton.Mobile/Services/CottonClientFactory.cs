@@ -35,7 +35,9 @@ namespace Cotton.Mobile.Services
                 UserAgent = _metadata.UserAgent,
             };
 
-            return new CottonCloudClient(new HttpClient(), _tokenStore, options, _loggerFactory);
+            var httpClient = new HttpClient();
+            ICottonCloudClient client = new CottonCloudClient(httpClient, _tokenStore, options, _loggerFactory);
+            return new OwnedCottonCloudClient(client, httpClient);
         }
     }
 }

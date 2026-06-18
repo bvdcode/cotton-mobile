@@ -7,6 +7,9 @@ namespace Cotton.Mobile.Services
     public class FileThumbnailCache : IFileThumbnailCache
     {
         private const string CacheFileExtension = ".webp";
+        private const string CacheTempFileSearchPattern = "*.webp.*.tmp";
+
+        private static readonly TimeSpan TemporaryThumbnailGracePeriod = TimeSpan.FromHours(6);
 
         private readonly HttpClient _httpClient;
         private readonly FileThumbnailCacheOptions _options;
@@ -180,6 +183,7 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
+            DeleteAbandonedTempFiles(cancellationToken);
             List<FileInfo> files = Directory
                 .EnumerateFiles(CacheDirectory, "*" + CacheFileExtension, SearchOption.TopDirectoryOnly)
                 .Select(path => new FileInfo(path))
@@ -206,6 +210,25 @@ namespace Cotton.Mobile.Services
                 {
                     _logger.LogDebug(exception, "Could not delete thumbnail cache file {Path}.", file.FullName);
                 }
+            }
+        }
+
+        private void DeleteAbandonedTempFiles(CancellationToken cancellationToken)
+        {
+            DateTime cutoffUtc = DateTime.UtcNow - TemporaryThumbnailGracePeriod;
+            foreach (string path in Directory.EnumerateFiles(
+                CacheDirectory,
+                CacheTempFileSearchPattern,
+                SearchOption.TopDirectoryOnly))
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var file = new FileInfo(path);
+                if (!file.Exists || file.LastWriteTimeUtc > cutoffUtc)
+                {
+                    continue;
+                }
+
+                DeleteTempFile(path);
             }
         }
 

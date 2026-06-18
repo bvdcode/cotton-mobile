@@ -844,7 +844,8 @@ namespace Cotton.Mobile.ViewModels
                 CottonFileBrowserSortMode.Size => entries
                     .OrderBy(entry => entry.IsFolder ? 0 : 1)
                     .ThenBy(entry => entry.IsFolder ? entry.Name : string.Empty, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(entry => entry.SizeBytes ?? 0)
+                    .ThenBy(entry => entry.SizeBytes.HasValue ? 0 : 1)
+                    .ThenByDescending(entry => entry.SizeBytes ?? 0)
                     .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
                 _ => entries
                     .OrderBy(entry => entry.IsFolder ? 0 : 1)

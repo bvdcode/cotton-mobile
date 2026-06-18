@@ -199,6 +199,10 @@ namespace Cotton.Mobile.ViewModels
         public async Task ActivateEntryAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
+            if (!CanUseVisibleEntry(entry))
+            {
+                return;
+            }
 
             if (entry.IsFolder)
             {
@@ -213,6 +217,10 @@ namespace Cotton.Mobile.ViewModels
         public async Task ShowEntryActionsAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
+            if (!CanUseVisibleEntry(entry))
+            {
+                return;
+            }
 
             if (entry.IsFolder)
             {
@@ -366,6 +374,12 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowFileActionsAsync(CottonFileBrowserEntry file)
         {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null || !CanUseVisibleEntry(file, instanceUri))
+            {
+                return;
+            }
+
             string openAction = CreateOpenAction(file);
             string? action = await _dialogService.ShowActionSheetAsync(
                 file.Name,
@@ -375,6 +389,11 @@ namespace Cotton.Mobile.ViewModels
                 DownloadAction,
                 ShareAction,
                 DetailsAction);
+
+            if (!CanUseVisibleEntry(file, instanceUri))
+            {
+                return;
+            }
 
             if (string.Equals(action, openAction, StringComparison.Ordinal))
             {
@@ -394,6 +413,33 @@ namespace Cotton.Mobile.ViewModels
                     await ShowFileDetailsAsync(file);
                     break;
             }
+        }
+
+        private bool CanUseVisibleEntry(CottonFileBrowserEntry entry)
+        {
+            Uri? instanceUri = _instanceUri;
+            return instanceUri is not null && CanUseVisibleEntry(entry, instanceUri);
+        }
+
+        private bool CanUseVisibleEntry(CottonFileBrowserEntry entry, Uri instanceUri)
+        {
+            return Uri.Equals(_instanceUri, instanceUri)
+                && _display.IsProfileVisible
+                && !IsFileBrowserBusy()
+                && ContainsVisibleEntry(entry);
+        }
+
+        private bool ContainsVisibleEntry(CottonFileBrowserEntry entry)
+        {
+            foreach (CottonFileBrowserEntry visibleEntry in _display.FileEntries)
+            {
+                if (visibleEntry.Id == entry.Id)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private Task SetSortModeAsync(CottonFileBrowserSortMode sortMode)

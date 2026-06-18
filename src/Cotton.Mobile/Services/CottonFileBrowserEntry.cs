@@ -255,6 +255,11 @@ namespace Cotton.Mobile.Services
 
         private static string ResolveFileKind(string name, string contentType)
         {
+            if (IsTextFile(name, contentType))
+            {
+                return "Text";
+            }
+
             if (contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             {
                 return "Image";
@@ -276,14 +281,14 @@ namespace Cotton.Mobile.Services
                 return "Audio";
             }
 
-            if (contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
-                || TextContentTypes.Contains(contentType)
-                || TextFileExtensions.Contains(Path.GetExtension(name)))
-            {
-                return "Text";
-            }
-
             return "File";
+        }
+
+        private static bool IsTextFile(string name, string contentType)
+        {
+            return contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
+                || TextContentTypes.Contains(contentType)
+                || TextFileExtensions.Contains(Path.GetExtension(name));
         }
 
         private static string ResolveBadgeText(string kind)

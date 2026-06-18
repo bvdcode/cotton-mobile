@@ -951,7 +951,7 @@ namespace Cotton.Mobile.ViewModels
             string count = visibleCount == totalCount
                 ? FormatItemCount(totalCount)
                 : CreateFilteredCount(visibleCount);
-            return $"{count} · {FileSortMode}";
+            return $"{count} · {FormatSortStatus(FileSortMode)}";
         }
 
         private string CreateFilteredCount(int visibleCount)
@@ -967,6 +967,18 @@ namespace Cotton.Mobile.ViewModels
         private static string FormatItemCount(int count)
         {
             return count == 1 ? "1 item" : $"{count} items";
+        }
+
+        private static string FormatSortStatus(CottonFileBrowserSortMode sortMode)
+        {
+            return sortMode switch
+            {
+                CottonFileBrowserSortMode.Name => "A-Z",
+                CottonFileBrowserSortMode.Updated => "Newest",
+                CottonFileBrowserSortMode.Type => "Type",
+                CottonFileBrowserSortMode.Size => "Size",
+                _ => sortMode.ToString(),
+            };
         }
 
         private static bool HasSameLocalFile(CottonLocalFileSnapshot? current, CottonLocalFileSnapshot? next)

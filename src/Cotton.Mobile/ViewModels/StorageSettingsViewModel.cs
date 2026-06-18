@@ -241,11 +241,11 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(summary);
 
-            TotalSizeText = FormatStorageSize(summary.TotalSizeBytes);
+            TotalSizeText = CottonFileSizeFormatter.Format(summary.TotalSizeBytes);
             TotalFileCountText = FormatFileCount(summary.TotalFileCount);
-            ThumbnailSizeText = FormatStorageSize(summary.ThumbnailCache.SizeBytes);
+            ThumbnailSizeText = CottonFileSizeFormatter.Format(summary.ThumbnailCache.SizeBytes);
             ThumbnailFileCountText = FormatFileCount(summary.ThumbnailCache.FileCount);
-            DownloadedSizeText = FormatStorageSize(summary.DownloadedFiles.SizeBytes);
+            DownloadedSizeText = CottonFileSizeFormatter.Format(summary.DownloadedFiles.SizeBytes);
             DownloadedFileCountText = FormatFileCount(summary.DownloadedFiles.FileCount);
         }
 
@@ -267,19 +267,5 @@ namespace Cotton.Mobile.ViewModels
             return fileCount == 1 ? "1 file" : $"{fileCount:N0} files";
         }
 
-        private static string FormatStorageSize(long bytes)
-        {
-            const long Kilobyte = 1024;
-            const long Megabyte = Kilobyte * 1024;
-            const long Gigabyte = Megabyte * 1024;
-
-            return bytes switch
-            {
-                < Kilobyte => $"{bytes} B",
-                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
-                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
-            };
-        }
     }
 }

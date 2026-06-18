@@ -146,7 +146,7 @@ namespace Cotton.Mobile.Services
                 CottonFileBrowserEntryType.File,
                 file.Name,
                 kind,
-                $"{FormatSize(file.SizeBytes)} · {kind}",
+                $"{CottonFileSizeFormatter.Format(file.SizeBytes)} · {kind}",
                 "More",
                 ResolveBadgeText(kind),
                 file.UpdatedAt,
@@ -231,21 +231,6 @@ namespace Cotton.Mobile.Services
                 PreviewHashEncryptedHex,
                 null,
                 Thumbnail);
-        }
-
-        private static string FormatSize(long bytes)
-        {
-            const long Kilobyte = 1024;
-            const long Megabyte = Kilobyte * 1024;
-            const long Gigabyte = Megabyte * 1024;
-
-            return bytes switch
-            {
-                < Kilobyte => $"{bytes} B",
-                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
-                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
-            };
         }
 
         private string CreateFallbackThumbnailCacheKey()

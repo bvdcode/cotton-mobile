@@ -1065,7 +1065,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             CottonLocalFileSnapshot? localFile)
         {
-            string size = file.SizeBytes.HasValue ? FormatStorageSize(file.SizeBytes.Value) : "Unknown";
+            string size = file.SizeBytes.HasValue ? CottonFileSizeFormatter.Format(file.SizeBytes.Value) : "Unknown";
             string contentType = file.ContentType ?? "Unknown";
             string localCopy = CreateLocalCopyDetails(file, localFile);
             string updated = FormatLocalTimestamp(file.UpdatedAtUtc);
@@ -1098,15 +1098,15 @@ namespace Cotton.Mobile.ViewModels
 
             if (file.SizeBytes.HasValue && file.SizeBytes.Value != localFile.SizeBytes)
             {
-                return $"Needs refresh ({FormatStorageSize(localFile.SizeBytes)})";
+                return $"Needs refresh ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
             }
 
             if (!CottonLocalFileFreshness.IsFresh(localFile.UpdatedAtUtc, file.UpdatedAtUtc))
             {
-                return $"Needs refresh ({FormatStorageSize(localFile.SizeBytes)})";
+                return $"Needs refresh ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
             }
 
-            return $"Yes ({FormatStorageSize(localFile.SizeBytes)})";
+            return $"Yes ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
         }
 
         private static bool IsReusableLocalFile(
@@ -1626,21 +1626,6 @@ namespace Cotton.Mobile.ViewModels
             return action.EndsWith(CurrentActionSuffix, StringComparison.Ordinal)
                 ? action[..^CurrentActionSuffix.Length]
                 : action;
-        }
-
-        private static string FormatStorageSize(long bytes)
-        {
-            const long Kilobyte = 1024;
-            const long Megabyte = Kilobyte * 1024;
-            const long Gigabyte = Megabyte * 1024;
-
-            return bytes switch
-            {
-                < Kilobyte => $"{bytes} B",
-                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
-                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
-            };
         }
 
         private void ClearFileActionRetry()

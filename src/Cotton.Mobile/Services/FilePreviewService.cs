@@ -152,23 +152,8 @@ namespace Cotton.Mobile.Services
 
         private static string CreateDetails(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile)
         {
-            string size = FormatSize(downloadedFile.SizeBytes);
+            string size = CottonFileSizeFormatter.Format(downloadedFile.SizeBytes);
             return $"{file.Kind} · {size}";
-        }
-
-        private static string FormatSize(long bytes)
-        {
-            const long Kilobyte = 1024;
-            const long Megabyte = Kilobyte * 1024;
-            const long Gigabyte = Megabyte * 1024;
-
-            return bytes switch
-            {
-                < Kilobyte => $"{bytes} B",
-                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
-                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
-            };
         }
 
         private static void EnsureFileExists(CottonFileDownloadResult file)

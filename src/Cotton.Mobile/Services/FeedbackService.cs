@@ -166,12 +166,12 @@ namespace Cotton.Mobile.Services
 
         private static string FormatStorageSummary(CottonStorageSummary summary)
         {
-            return $"{FormatStorageSize(summary.TotalSizeBytes)} · {FormatFileCount(summary.TotalFileCount)}";
+            return $"{CottonFileSizeFormatter.Format(summary.TotalSizeBytes)} · {FormatFileCount(summary.TotalFileCount)}";
         }
 
         private static string FormatStorageCategory(CottonStorageCategorySnapshot category)
         {
-            return $"{FormatStorageSize(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
+            return $"{CottonFileSizeFormatter.Format(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
         }
 
         private static string FormatFileCount(int fileCount)
@@ -179,19 +179,5 @@ namespace Cotton.Mobile.Services
             return fileCount == 1 ? "1 file" : $"{fileCount:N0} files";
         }
 
-        private static string FormatStorageSize(long bytes)
-        {
-            const long Kilobyte = 1024;
-            const long Megabyte = Kilobyte * 1024;
-            const long Gigabyte = Megabyte * 1024;
-
-            return bytes switch
-            {
-                < Kilobyte => $"{bytes} B",
-                < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
-                < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
-            };
-        }
     }
 }

@@ -57,11 +57,28 @@ namespace Cotton.Mobile.Services
 
         public async Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default)
         {
-            await ClearDirectoryAsync(
-                CottonMobileStoragePaths.CreateDownloadsDirectory(),
-                cancellationToken,
-                includeTemporaryDownloads: false).ConfigureAwait(false);
-            NotifyDownloadedFilesCleared();
+            bool deletedFile = false;
+            try
+            {
+                await ClearDirectoryAsync(
+                    CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                    cancellationToken,
+                    includeTemporaryDownloads: false,
+                    onFileDeleted: () => deletedFile = true).ConfigureAwait(false);
+                NotifyDownloadedFilesCleared();
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                if (deletedFile)
+                {
+                    _logger.LogDebug(
+                        exception,
+                        "Cotton mobile downloaded-file cleanup deleted files before failing.");
+                    NotifyDownloadedFilesCleared();
+                }
+
+                throw;
+            }
         }
 
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)
@@ -110,7 +127,8 @@ namespace Cotton.Mobile.Services
             string directory,
             CancellationToken cancellationToken,
             bool includeTemporaryThumbnails = true,
-            bool includeTemporaryDownloads = true)
+            bool includeTemporaryDownloads = true,
+            Action? onFileDeleted = null)
         {
             return Task.Run(
                 () =>
@@ -135,7 +153,10 @@ namespace Cotton.Mobile.Services
                             continue;
                         }
 
-                        DeleteFile(file, failures);
+                        if (DeleteFile(file, failures))
+                        {
+                            onFileDeleted?.Invoke();
+                        }
                     }
 
                     DeleteEmptyDirectories(directory, cancellationToken);
@@ -233,16 +254,18 @@ namespace Cotton.Mobile.Services
             return path.EndsWith(TemporaryThumbnailFileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
-        private void DeleteFile(string file, List<Exception> failures)
+        private bool DeleteFile(string file, List<Exception> failures)
         {
             try
             {
                 File.Delete(file);
+                return true;
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
                 _logger.LogWarning(exception, "Failed to delete Cotton mobile storage file {Path}.", file);
                 failures.Add(exception);
+                return false;
             }
         }
 

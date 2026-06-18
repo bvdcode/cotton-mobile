@@ -110,7 +110,9 @@ namespace Cotton.Mobile.Services
 
         private static bool IsValid(CottonPendingAppCodeSession session)
         {
-            return CottonInstanceUri.IsSupported(session.InstanceUri)
+            return session.InstanceUri is not null
+                && session.ApprovalUri is not null
+                && CottonInstanceUri.IsSupported(session.InstanceUri)
                 && session.ApprovalId != Guid.Empty
                 && session.ApprovalUri.IsAbsoluteUri
                 && string.Equals(session.ApprovalUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)

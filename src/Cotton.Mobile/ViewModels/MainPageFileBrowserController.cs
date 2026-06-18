@@ -155,6 +155,8 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonFolderHandle? originalFolder = _currentFolder;
                 var originalNavigation = new List<CottonFolderHandle>(_fileNavigation);
+                string originalSearchText = _display.FileSearchText;
+                bool originalSearchOpen = _display.IsFileSearchOpen;
                 int previousIndex = _fileNavigation.Count - 1;
                 CottonFolderHandle previous = _fileNavigation[previousIndex];
                 _fileNavigation.RemoveAt(previousIndex);
@@ -173,6 +175,7 @@ namespace Cotton.Mobile.ViewModels
                     _currentFolder = originalFolder;
                     _fileNavigation.Clear();
                     _fileNavigation.AddRange(originalNavigation);
+                    _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
                 }
             }
             finally
@@ -322,6 +325,8 @@ namespace Cotton.Mobile.ViewModels
             _isFolderNavigationInProgress = true;
             try
             {
+                string originalSearchText = _display.FileSearchText;
+                bool originalSearchOpen = _display.IsFileSearchOpen;
                 if (_currentFolder is not null)
                 {
                     _fileNavigation.Add(_currentFolder);
@@ -329,6 +334,10 @@ namespace Cotton.Mobile.ViewModels
 
                 _display.ClearFileSearch();
                 await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
+                if (_lastFileLoadFailed && _instanceUri is not null)
+                {
+                    _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
+                }
             }
             finally
             {

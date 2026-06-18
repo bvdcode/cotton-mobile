@@ -254,6 +254,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFileSearchVisible => _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText);
 
+        public bool IsFileSearchOpen => _isFileSearchOpen;
+
         public bool IsFileSearchActive => !string.IsNullOrWhiteSpace(FileSearchText);
 
         public string FileSearchButtonText
@@ -674,6 +676,26 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public void RestoreFileSearch(string? searchText, bool isOpen)
+        {
+            string? previousFilesStatus = FilesStatus;
+            bool wasFileSearchOpen = _isFileSearchOpen;
+            _isFileSearchOpen = isOpen;
+
+            string normalizedSearchText = searchText ?? string.Empty;
+            if (!string.Equals(FileSearchText, normalizedSearchText, StringComparison.Ordinal))
+            {
+                FileSearchText = normalizedSearchText;
+                FilesStatus = previousFilesStatus;
+                return;
+            }
+
+            if (wasFileSearchOpen != isOpen)
+            {
+                NotifyFileSearchStateChanged();
+            }
+        }
+
         private void SetStatus(string? status)
         {
             Status = status;
@@ -717,6 +739,7 @@ namespace Cotton.Mobile.ViewModels
         private void NotifyFileSearchStateChanged()
         {
             OnPropertyChanged(nameof(IsFileSearchVisible));
+            OnPropertyChanged(nameof(IsFileSearchOpen));
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
         }

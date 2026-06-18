@@ -184,6 +184,7 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task HandleFileBrowserSessionExpiredAsync(Uri? instanceUri)
         {
+            ClearSessionRestoreRetry();
             await ClearLocalSessionAndCachedStateAsync("session expiration");
 
             _fileBrowser.Clear();
@@ -228,7 +229,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task SignInAsync()
         {
-            _shouldRetrySessionRestoreWhenOnline = false;
+            ClearSessionRestoreRetry();
             Uri? instanceUri = ResolveInstanceUri();
             if (instanceUri is null)
             {
@@ -280,6 +281,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task LogoutAsync()
         {
+            ClearSessionRestoreRetry();
             _fileBrowser.CancelActiveWork();
             ShowLoading("Signing out...");
 
@@ -423,6 +425,12 @@ namespace Cotton.Mobile.ViewModels
             {
                 _isSessionRestoreRetryQueued = false;
             }
+        }
+
+        private void ClearSessionRestoreRetry()
+        {
+            _shouldRetrySessionRestoreWhenOnline = false;
+            _isSessionRestoreRetryQueued = false;
         }
 
         private async Task ClearLocalSessionAndCachedStateAsync(string reason)

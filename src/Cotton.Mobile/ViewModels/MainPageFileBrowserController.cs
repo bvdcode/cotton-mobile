@@ -220,12 +220,10 @@ namespace Cotton.Mobile.ViewModels
                     await LoadFolderAsync(previous, preserveHistory: true);
                 }
 
-                if (ShouldRestoreNavigationAfterFileLoadFailure())
+                if (ShouldRestoreNavigationAfterFileLoadFailure()
+                    || ShouldRestoreNavigationAfterUnchangedFolder(originalFolder, originalNavigation))
                 {
-                    _currentFolder = originalFolder;
-                    _fileNavigation.Clear();
-                    _fileNavigation.AddRange(originalNavigation);
-                    _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
+                    RestoreNavigation(originalFolder, originalNavigation, originalSearchText, originalSearchOpen);
                 }
             }
             finally
@@ -420,6 +418,8 @@ namespace Cotton.Mobile.ViewModels
             _isFolderNavigationInProgress = true;
             try
             {
+                CottonFolderHandle? originalFolder = _currentFolder;
+                var originalNavigation = new List<CottonFolderHandle>(_fileNavigation);
                 string originalSearchText = _display.FileSearchText;
                 bool originalSearchOpen = _display.IsFileSearchOpen;
                 if (_currentFolder is not null)
@@ -432,6 +432,10 @@ namespace Cotton.Mobile.ViewModels
                 if (ShouldRestoreNavigationAfterFileLoadFailure())
                 {
                     _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
+                }
+                else if (ShouldRestoreNavigationAfterUnchangedFolder(originalFolder, originalNavigation))
+                {
+                    RestoreNavigation(originalFolder, originalNavigation, originalSearchText, originalSearchOpen);
                 }
             }
             finally
@@ -1646,6 +1650,55 @@ namespace Cotton.Mobile.ViewModels
             return _lastFileLoadFailed
                 && !_lastFileLoadDisplayedCachedContent
                 && _instanceUri is not null;
+        }
+
+        private bool ShouldRestoreNavigationAfterUnchangedFolder(
+            CottonFolderHandle? originalFolder,
+            IReadOnlyList<CottonFolderHandle> originalNavigation)
+        {
+            return _instanceUri is not null
+                && HasSameFolder(_currentFolder, originalFolder)
+                && !HasSameNavigation(originalNavigation);
+        }
+
+        private void RestoreNavigation(
+            CottonFolderHandle? originalFolder,
+            IEnumerable<CottonFolderHandle> originalNavigation,
+            string originalSearchText,
+            bool originalSearchOpen)
+        {
+            _currentFolder = originalFolder;
+            _fileNavigation.Clear();
+            _fileNavigation.AddRange(originalNavigation);
+            _display.RestoreFileSearch(originalSearchText, originalSearchOpen);
+        }
+
+        private static bool HasSameFolder(CottonFolderHandle? current, CottonFolderHandle? expected)
+        {
+            if (current is null || expected is null)
+            {
+                return current is null && expected is null;
+            }
+
+            return current.Id == expected.Id;
+        }
+
+        private bool HasSameNavigation(IReadOnlyList<CottonFolderHandle> expectedNavigation)
+        {
+            if (_fileNavigation.Count != expectedNavigation.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < _fileNavigation.Count; index++)
+            {
+                if (_fileNavigation[index].Id != expectedNavigation[index].Id)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)

@@ -116,7 +116,7 @@ namespace Cotton.Mobile.Services
                 TouchLocalDownload(new FileInfo(filePath));
                 DeleteStaleSiblingDownloads(directory, filePath);
 
-                await _downloadCachePruner.PruneAsync(filePath, CancellationToken.None).ConfigureAwait(false);
+                await _downloadCachePruner.PruneAsync(filePath, cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
                 finalFileReady = true;
 

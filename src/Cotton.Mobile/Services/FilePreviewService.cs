@@ -35,6 +35,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(downloadedFile);
 
             cancellationToken.ThrowIfCancellationRequested();
+            EnsureFileExists(downloadedFile);
 
             if (file.IsImage)
             {
@@ -143,6 +144,14 @@ namespace Cotton.Mobile.Services
                 < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
                 _ => $"{bytes / (double)Gigabyte:0.#} GB",
             };
+        }
+
+        private static void EnsureFileExists(CottonFileDownloadResult file)
+        {
+            if (!File.Exists(file.FilePath))
+            {
+                throw new FileNotFoundException("The local preview file is no longer available.", file.FilePath);
+            }
         }
     }
 }

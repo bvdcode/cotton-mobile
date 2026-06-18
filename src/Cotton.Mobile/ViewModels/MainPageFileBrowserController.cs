@@ -771,7 +771,7 @@ namespace Cotton.Mobile.ViewModels
                 isRoot: true,
                 canNavigateUp: false,
                 CreatePath(cachedContent.FolderName));
-            _display.ShowOfflineFilesNotice();
+            _display.ShowOfflineFilesNotice(isCachedListing: true);
             return true;
         }
 
@@ -810,7 +810,7 @@ namespace Cotton.Mobile.ViewModels
                 isRoot: false,
                 canNavigateUp: _fileNavigation.Count > 0,
                 CreatePath(cachedContent.FolderName));
-            _display.ShowOfflineFilesNotice();
+            _display.ShowOfflineFilesNotice(isCachedListing: true);
             return true;
         }
 

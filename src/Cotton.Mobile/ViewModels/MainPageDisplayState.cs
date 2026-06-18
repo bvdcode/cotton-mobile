@@ -649,7 +649,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
-        public void ShowOfflineFilesNotice()
+        public void ShowOfflineFilesNotice(bool isCachedListing = false)
         {
             IsFilesLoading = false;
             IsFilesRefreshing = false;
@@ -658,9 +658,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
             FilesNoticeTitle = "Offline";
-            FilesNoticeMessage = _allFileEntries.Count == 0
-                ? "Reconnect to load this folder."
-                : "Files marked On device can still open.";
+            FilesNoticeMessage = CreateOfflineFilesNoticeMessage(isCachedListing);
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
@@ -979,6 +977,18 @@ namespace Cotton.Mobile.ViewModels
                 CottonFileBrowserSortMode.Size => "Size",
                 _ => sortMode.ToString(),
             };
+        }
+
+        private string CreateOfflineFilesNoticeMessage(bool isCachedListing)
+        {
+            if (_allFileEntries.Count > 0)
+            {
+                return "Files marked On device can still open.";
+            }
+
+            return isCachedListing
+                ? "Saved folder list is empty. Reconnect to refresh."
+                : "Reconnect to load this folder.";
         }
 
         private static bool HasSameLocalFile(CottonLocalFileSnapshot? current, CottonLocalFileSnapshot? next)

@@ -280,6 +280,10 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            string profileName = Display.ProfileName;
+            string? profileEmail = Display.ProfileEmail;
+            string profileInstance = Display.ProfileInstance;
+            string instanceUrl = Display.InstanceUrl;
             string accountTitle = string.IsNullOrWhiteSpace(Display.ProfileSummary)
                 ? Display.ProfileName
                 : $"{Display.ProfileName}{Environment.NewLine}{Display.ProfileSummary}";
@@ -291,6 +295,11 @@ namespace Cotton.Mobile.ViewModels
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
+
+            if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+            {
+                return;
+            }
 
             switch (action)
             {
@@ -310,6 +319,19 @@ namespace Cotton.Mobile.ViewModels
                     await OpenFeedbackAsync();
                     break;
             }
+        }
+
+        private bool IsSameProfileContext(
+            string profileName,
+            string? profileEmail,
+            string profileInstance,
+            string instanceUrl)
+        {
+            return Display.IsProfileVisible
+                && string.Equals(Display.ProfileName, profileName, StringComparison.Ordinal)
+                && string.Equals(Display.ProfileEmail, profileEmail, StringComparison.Ordinal)
+                && string.Equals(Display.ProfileInstance, profileInstance, StringComparison.Ordinal)
+                && string.Equals(Display.InstanceUrl, instanceUrl, StringComparison.Ordinal);
         }
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)

@@ -200,10 +200,10 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _isSessionRestoreInProgress = true;
-            ShowLoading("Restoring session...");
 
             try
             {
+                ShowLoading("Restoring session...");
                 _shouldRetrySessionRestoreWhenOnline = false;
                 CottonSessionResult result = await _sessionService.RestoreAsync();
                 await ApplySessionResultAsync(result, ReadyStatus);

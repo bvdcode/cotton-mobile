@@ -113,7 +113,7 @@
                         <VerticalStackLayout x:Name="FileBrowserContent"
                                              Spacing="8"
                                              HorizontalOptions="Fill">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto"
+                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto"
                                   ColumnSpacing="6">
                                 <Button Grid.Column="0"
                                         Style="{StaticResource FileChromeButton}"
@@ -199,20 +199,6 @@
                                         SemanticProperties.Description="Change file view" />
 
                                 <Button Grid.Column="5"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="↻"
-                                        Command="{Binding RefreshFilesCommand}"
-                                        Padding="0"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
-                                        SemanticProperties.Description="Refresh" />
-
-                                <Button Grid.Column="6"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"

@@ -216,6 +216,7 @@
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"
+                                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
                                         Padding="0"
                                         FontSize="12"
                                         FontAttributes="Bold"

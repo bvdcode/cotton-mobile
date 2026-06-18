@@ -110,7 +110,7 @@ namespace Cotton.Mobile.ViewModels
             AccountCommand = new AsyncCommand(
                 ShowAccountActionsAsync,
                 LogUnhandledCommandException,
-                () => Display.IsProfileVisible);
+                () => Display.IsAccountActionEnabled);
             LogoutCommand = new AsyncCommand(LogoutAsync, LogUnhandledCommandException, () => Display.IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
             RefreshFilesCommand = new AsyncCommand(_fileBrowser.RefreshAsync, LogUnhandledCommandException);
@@ -276,7 +276,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ShowAccountActionsAsync()
         {
-            if (!Display.IsProfileVisible)
+            if (!Display.IsAccountActionEnabled)
             {
                 return;
             }

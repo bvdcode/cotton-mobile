@@ -33,6 +33,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isLogoutEnabled;
         private bool _isFilesLoading;
         private bool _isFilesRefreshing;
+        private bool _isFileActionInProgress;
         private bool _isFileSearchOpen;
         private bool _canNavigateFilesUp;
         private bool _canCancelFileAction;
@@ -394,6 +395,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsProfileVisible => _state == MainPageViewState.Profile;
 
+        public bool IsAccountActionEnabled => IsProfileVisible && !IsFileActionInProgress;
+
         public bool IsBrandHeaderVisible => _state != MainPageViewState.Profile;
 
         public bool IsLegalFooterVisible => _state != MainPageViewState.Profile;
@@ -401,6 +404,18 @@ namespace Cotton.Mobile.ViewModels
         public bool IsLoadingIndicatorRunning => _state == MainPageViewState.Loading;
 
         public bool IsAuthorizationProgressIndicatorRunning => _state == MainPageViewState.AuthorizationProgress;
+
+        private bool IsFileActionInProgress
+        {
+            get => _isFileActionInProgress;
+            set
+            {
+                if (SetProperty(ref _isFileActionInProgress, value))
+                {
+                    OnPropertyChanged(nameof(IsAccountActionEnabled));
+                }
+            }
+        }
 
         public void ShowLoading(string message)
         {
@@ -411,6 +426,7 @@ namespace Cotton.Mobile.ViewModels
             IsLogoutEnabled = false;
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             ProfileStatus = null;
@@ -431,6 +447,7 @@ namespace Cotton.Mobile.ViewModels
             SetState(MainPageViewState.AuthorizationProgress);
             IsCancelAuthorizationEnabled = true;
             IsLogoutEnabled = false;
+            IsFileActionInProgress = false;
             AuthorizationProgressMessage = $"Approve the request for {instanceUri.Host}, then return to Cotton Cloud.";
             IsInputEnabled = false;
         }
@@ -456,6 +473,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFilesNotice();
             IsFilesLoading = true;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             CanNavigateFilesUp = false;
@@ -481,6 +499,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFilesNotice();
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             CanNavigateFilesUp = false;
@@ -498,6 +517,7 @@ namespace Cotton.Mobile.ViewModels
             ProfileStatus = status;
             IsLogoutEnabled = true;
             IsCancelAuthorizationEnabled = false;
+            IsFileActionInProgress = false;
             IsInputEnabled = false;
         }
 
@@ -505,6 +525,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = true;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
@@ -516,6 +537,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = true;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = true;
             CanCancelFileAction = true;
             CanRetryFileAction = false;
             FilesStatus = status;
@@ -533,6 +555,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = true;
             FilesStatus = status;
@@ -548,6 +571,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = false;
             IsFilesRefreshing = true;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
@@ -576,6 +600,7 @@ namespace Cotton.Mobile.ViewModels
 
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             CanNavigateFilesUp = canNavigateUp;
@@ -589,6 +614,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;
@@ -600,6 +626,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
@@ -614,6 +641,7 @@ namespace Cotton.Mobile.ViewModels
         {
             IsFilesLoading = false;
             IsFilesRefreshing = false;
+            IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
@@ -758,6 +786,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsSignInVisible));
             OnPropertyChanged(nameof(IsAuthorizationProgressVisible));
             OnPropertyChanged(nameof(IsProfileVisible));
+            OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
             OnPropertyChanged(nameof(IsLoadingIndicatorRunning));

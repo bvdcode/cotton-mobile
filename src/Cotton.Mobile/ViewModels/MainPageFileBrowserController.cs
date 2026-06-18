@@ -97,8 +97,23 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             _instanceUri = instanceUri;
-            _display.ApplyFileBrowserPreferences(_preferenceStore.Get());
+            _display.ApplyFileBrowserPreferences(LoadFileBrowserPreferences());
             await LoadRootFilesAsync();
+        }
+
+        private CottonFileBrowserPreferences LoadFileBrowserPreferences()
+        {
+            try
+            {
+                return _preferenceStore.Get();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile file browser preferences.");
+                return new CottonFileBrowserPreferences(
+                    CottonFileBrowserViewMode.List,
+                    CottonFileBrowserSortMode.Name);
+            }
         }
 
         public void Clear()

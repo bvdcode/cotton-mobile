@@ -38,11 +38,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(exception);
 
-#if DEBUG
-            return $"Authorization failed: {exception.GetType().Name}: {exception.Message}";
-#else
             return "Authorization failed. Check the instance URL and try again.";
-#endif
         }
 
         private static string CreateDisplayName(UserDto user)

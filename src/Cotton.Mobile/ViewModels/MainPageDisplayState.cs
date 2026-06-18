@@ -409,6 +409,8 @@ namespace Cotton.Mobile.ViewModels
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             ProfileStatus = null;

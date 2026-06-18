@@ -256,6 +256,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task LogoutAsync()
         {
+            _fileBrowser.CancelActiveWork();
             ShowLoading("Signing out...");
 
             try

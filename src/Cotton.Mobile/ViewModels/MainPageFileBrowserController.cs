@@ -103,14 +103,20 @@ namespace Cotton.Mobile.ViewModels
 
         public void Clear()
         {
+            CancelActiveWork();
+            _instanceUri = null;
+            _currentFolder = null;
+            _lastFileLoadFailed = false;
+            _fileNavigation.Clear();
+        }
+
+        public void CancelActiveWork()
+        {
             CancelCurrentFileLoad();
             CancelCurrentFileAction();
             ClearFileActionRetry();
-            _instanceUri = null;
-            _currentFolder = null;
             _isFileLoadInProgress = false;
-            _lastFileLoadFailed = false;
-            _fileNavigation.Clear();
+            _isFolderNavigationInProgress = false;
         }
 
         public async Task RefreshAsync()

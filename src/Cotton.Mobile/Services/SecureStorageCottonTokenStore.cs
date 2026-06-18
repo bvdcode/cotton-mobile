@@ -28,8 +28,19 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            string? accessToken = await _secureStorage.GetAsync(AccessTokenKey).ConfigureAwait(false);
-            string? refreshToken = await _secureStorage.GetAsync(RefreshTokenKey).ConfigureAwait(false);
+            string? accessToken;
+            string? refreshToken;
+            try
+            {
+                accessToken = await _secureStorage.GetAsync(AccessTokenKey).ConfigureAwait(false);
+                refreshToken = await _secureStorage.GetAsync(RefreshTokenKey).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Failed to read Cotton mobile tokens; clearing local token store.");
+                ClearBestEffort("token read failure");
+                return null;
+            }
 
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -40,7 +51,7 @@ namespace Cotton.Mobile.Services
 
             if (string.IsNullOrWhiteSpace(accessToken) || string.IsNullOrWhiteSpace(refreshToken))
             {
-                await ClearAsync(cancellationToken).ConfigureAwait(false);
+                ClearBestEffort("partial token pair");
                 return null;
             }
 
@@ -73,7 +84,7 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to save Cotton mobile tokens; clearing local token store.");
-                await ClearAsync(CancellationToken.None).ConfigureAwait(false);
+                ClearBestEffort("token save failure");
                 throw;
             }
 
@@ -88,6 +99,19 @@ namespace Cotton.Mobile.Services
             _secureStorage.Remove(RefreshTokenKey);
 
             return Task.CompletedTask;
+        }
+
+        private void ClearBestEffort(string reason)
+        {
+            try
+            {
+                _secureStorage.Remove(AccessTokenKey);
+                _secureStorage.Remove(RefreshTokenKey);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile tokens after {Reason}.", reason);
+            }
         }
     }
 }

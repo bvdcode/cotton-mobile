@@ -23,7 +23,16 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(file);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && (file.IsImage || CanPreviewText(file));
+                && (file.IsImage || CanPreviewTextFromMetadata(file));
+        }
+
+        public bool CanPreview(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile)
+        {
+            ArgumentNullException.ThrowIfNull(file);
+            ArgumentNullException.ThrowIfNull(downloadedFile);
+
+            return file.Type == CottonFileBrowserEntryType.File
+                && (file.IsImage || CanPreviewDownloadedText(file, downloadedFile));
         }
 
         public async Task OpenAsync(
@@ -76,9 +85,18 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
         }
 
-        private static bool CanPreviewText(CottonFileBrowserEntry file)
+        private static bool CanPreviewTextFromMetadata(CottonFileBrowserEntry file)
         {
-            return file.IsText && file.SizeBytes is >= 0 and <= MaxTextPreviewBytes;
+            return file.IsText
+                && (!file.SizeBytes.HasValue || file.SizeBytes.Value is >= 0 and <= MaxTextPreviewBytes);
+        }
+
+        private static bool CanPreviewDownloadedText(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile)
+        {
+            return CanPreviewTextFromMetadata(file)
+                && downloadedFile.SizeBytes is >= 0 and <= MaxTextPreviewBytes;
         }
 
         private ImageViewerPage CreateImageViewerPage(
@@ -99,7 +117,7 @@ namespace Cotton.Mobile.Services
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
-            if (!CanPreviewText(file))
+            if (!CanPreviewDownloadedText(file, downloadedFile))
             {
                 throw new InvalidOperationException("The selected file cannot be previewed as text.");
             }

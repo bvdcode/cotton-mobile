@@ -865,7 +865,7 @@ namespace Cotton.Mobile.ViewModels
                     "Opening",
                     () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
-                if (_filePreviewService.CanPreview(file))
+                if (_filePreviewService.CanPreview(file, result))
                 {
                     await _filePreviewService.OpenAsync(file, result, fileActionCancellation.Token);
                 }
@@ -1111,7 +1111,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
-            string openAction = CreateOpenAction(file);
+            string openAction = CreateOpenAction(file, downloadedFile);
             string? action = await _dialogService.ShowActionSheetAsync(
                 $"Downloaded {downloadedFile.FileName}",
                 DoneAction,
@@ -1160,6 +1160,13 @@ namespace Cotton.Mobile.ViewModels
             return _filePreviewService.CanPreview(file) ? OpenAction : OpenWithSystemAppAction;
         }
 
+        private string CreateOpenAction(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile)
+        {
+            return _filePreviewService.CanPreview(file, downloadedFile) ? OpenAction : OpenWithSystemAppAction;
+        }
+
         private async Task OpenDownloadedFileAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
@@ -1170,7 +1177,7 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                if (_filePreviewService.CanPreview(file))
+                if (_filePreviewService.CanPreview(file, downloadedFile))
                 {
                     await _filePreviewService.OpenAsync(file, downloadedFile, cancellationToken);
                 }

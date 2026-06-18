@@ -179,9 +179,49 @@ namespace Cotton.Mobile.Services
 
         public async Task ClearLocalSessionAsync(CancellationToken cancellationToken = default)
         {
-            await _tokenStore.ClearAsync(cancellationToken).ConfigureAwait(false);
-            await _pendingSessionStore.ClearAsync(cancellationToken).ConfigureAwait(false);
-            await _instanceStore.ClearAsync(cancellationToken).ConfigureAwait(false);
+            List<Exception> failures = [];
+            await TryClearLocalSessionAreaAsync(
+                _tokenStore.ClearAsync,
+                "tokens",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearLocalSessionAreaAsync(
+                _pendingSessionStore.ClearAsync,
+                "pending authorization",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearLocalSessionAreaAsync(
+                _instanceStore.ClearAsync,
+                "instance",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+
+            if (failures.Count == 1)
+            {
+                throw new InvalidOperationException("Failed to clear one Cotton mobile session area.", failures[0]);
+            }
+
+            if (failures.Count > 1)
+            {
+                throw new AggregateException("Failed to clear Cotton mobile local session.", failures);
+            }
+        }
+
+        private async Task TryClearLocalSessionAreaAsync(
+            Func<CancellationToken, Task> clearAsync,
+            string sessionAreaName,
+            List<Exception> failures,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await clearAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile {SessionAreaName}.", sessionAreaName);
+                failures.Add(exception);
+            }
         }
 
         private async Task<CottonSessionResult> RestorePendingAuthorizationAsync(

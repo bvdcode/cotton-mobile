@@ -671,8 +671,18 @@ namespace Cotton.Mobile.ViewModels
                 CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
                     instanceUri,
                     file,
-                    CreateFileDownloadProgress(file, "Downloading"),
+                    CreateFileDownloadProgress(
+                        file,
+                        "Downloading",
+                        () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                        fileActionCancellation.Token),
                     fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
                 ShowReusableLocalFileIfAvailable(file);
                 _display.ShowFilesSummary();
                 await ShowDownloadedFileActionsAsync(file, result, fileActionCancellation.Token);
@@ -784,6 +794,7 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     file,
                     "Opening",
+                    () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 if (_filePreviewService.CanPreview(file))
                 {
@@ -792,6 +803,12 @@ namespace Cotton.Mobile.ViewModels
                 else
                 {
                     await _fileInteractionService.OpenAsync(result, fileActionCancellation.Token);
+                }
+
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
                 }
 
                 _display.ShowFilesSummary();
@@ -858,8 +875,15 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     file,
                     "Preparing",
+                    () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
                 _display.ShowFilesSummary();
             }
             catch (Exception exception)
@@ -917,6 +941,7 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonFileBrowserEntry file,
             string actionName,
+            Func<bool> canUpdateProgress,
             CancellationToken cancellationToken)
         {
             CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(instanceUri, file);
@@ -930,7 +955,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile = await _fileBrowserService.DownloadAsync(
                 instanceUri,
                 file,
-                CreateFileDownloadProgress(file, actionName),
+                CreateFileDownloadProgress(file, actionName, canUpdateProgress, cancellationToken),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             ShowReusableLocalFileIfAvailable(file);
@@ -1093,7 +1118,11 @@ namespace Cotton.Mobile.ViewModels
             _display.ShowFileLocalCopy(file, localFile);
         }
 
-        private IProgress<long>? CreateFileDownloadProgress(CottonFileBrowserEntry file, string actionName)
+        private IProgress<long>? CreateFileDownloadProgress(
+            CottonFileBrowserEntry file,
+            string actionName,
+            Func<bool> canUpdateProgress,
+            CancellationToken cancellationToken)
         {
             if (file.SizeBytes is not > 0)
             {
@@ -1104,6 +1133,11 @@ namespace Cotton.Mobile.ViewModels
             int lastPercent = -1;
             return new Progress<long>(downloadedBytes =>
             {
+                if (cancellationToken.IsCancellationRequested || !canUpdateProgress())
+                {
+                    return;
+                }
+
                 int percent = (int)Math.Min(100d, Math.Floor(downloadedBytes / (double)totalBytes * 100d));
                 if (percent == lastPercent)
                 {

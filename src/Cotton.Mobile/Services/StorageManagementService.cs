@@ -63,8 +63,44 @@ namespace Cotton.Mobile.Services
 
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)
         {
-            await ClearThumbnailCacheAsync(cancellationToken).ConfigureAwait(false);
-            await ClearDownloadedFilesAsync(cancellationToken).ConfigureAwait(false);
+            List<Exception> failures = [];
+            await TryClearCacheAreaAsync(
+                ClearThumbnailCacheAsync,
+                "thumbnail cache",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearCacheAreaAsync(
+                ClearDownloadedFilesAsync,
+                "downloaded files",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+
+            if (failures.Count == 1)
+            {
+                throw new InvalidOperationException("Failed to clear one Cotton mobile cache area.", failures[0]);
+            }
+
+            if (failures.Count > 1)
+            {
+                throw new AggregateException("Failed to clear Cotton mobile cached files.", failures);
+            }
+        }
+
+        private async Task TryClearCacheAreaAsync(
+            Func<CancellationToken, Task> clearAsync,
+            string cacheAreaName,
+            List<Exception> failures,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                await clearAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile {CacheAreaName}.", cacheAreaName);
+                failures.Add(exception);
+            }
         }
 
         private Task ClearDirectoryAsync(

@@ -144,7 +144,7 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
         }
 
-        private static CottonStorageCategorySnapshot ScanDirectory(
+        private CottonStorageCategorySnapshot ScanDirectory(
             string name,
             string directory,
             SearchOption searchOption,
@@ -159,30 +159,65 @@ namespace Cotton.Mobile.Services
 
             long sizeBytes = 0;
             int fileCount = 0;
-            foreach (string file in Directory.EnumerateFiles(directory, "*", searchOption))
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                foreach (string file in Directory.EnumerateFiles(directory, "*", searchOption))
                 {
-                    continue;
-                }
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                    {
+                        continue;
+                    }
 
-                if (!includeTemporaryThumbnails && IsTemporaryThumbnailPath(file))
-                {
-                    continue;
-                }
+                    if (!includeTemporaryThumbnails && IsTemporaryThumbnailPath(file))
+                    {
+                        continue;
+                    }
 
-                var info = new FileInfo(file);
-                if (!info.Exists)
-                {
-                    continue;
+                    if (TryReadStorageFile(name, file, out long fileSizeBytes))
+                    {
+                        sizeBytes += fileSizeBytes;
+                        fileCount++;
+                    }
                 }
-
-                sizeBytes += info.Length;
-                fileCount++;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to finish scanning Cotton mobile {StorageCategoryName} storage directory {Directory}.",
+                    name,
+                    directory);
             }
 
             return new CottonStorageCategorySnapshot(name, sizeBytes, fileCount);
+        }
+
+        private bool TryReadStorageFile(string storageCategoryName, string file, out long sizeBytes)
+        {
+            sizeBytes = 0;
+
+            try
+            {
+                var info = new FileInfo(file);
+                if (!info.Exists)
+                {
+                    return false;
+                }
+
+                sizeBytes = info.Length;
+                return true;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile {StorageCategoryName} storage file {Path}.",
+                    storageCategoryName,
+                    file);
+
+                return false;
+            }
         }
 
         private static bool IsTemporaryThumbnailPath(string path)

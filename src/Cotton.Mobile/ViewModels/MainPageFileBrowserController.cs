@@ -448,10 +448,17 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            string openAction = CreateOpenAction(file, instanceUri);
-            string downloadAction = CreateDownloadAction(file);
+            RefreshLocalFileMarkers(instanceUri);
+            CottonFileBrowserEntry? refreshedFile = GetCurrentVisibleEntry(file, instanceUri);
+            if (refreshedFile is null)
+            {
+                return;
+            }
+
+            string openAction = CreateOpenAction(refreshedFile, instanceUri);
+            string downloadAction = CreateDownloadAction(refreshedFile);
             string? action = await _dialogService.ShowActionSheetAsync(
-                file.Name,
+                refreshedFile.Name,
                 CancelAction,
                 null,
                 openAction,
@@ -459,7 +466,7 @@ namespace Cotton.Mobile.ViewModels
                 ShareAction,
                 DetailsAction);
 
-            CottonFileBrowserEntry? currentFile = GetCurrentVisibleEntry(file, instanceUri);
+            CottonFileBrowserEntry? currentFile = GetCurrentVisibleEntry(refreshedFile, instanceUri);
             if (currentFile is null)
             {
                 return;

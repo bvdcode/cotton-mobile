@@ -295,7 +295,13 @@ namespace Cotton.Mobile.ViewModels
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)
         {
-            MainThread.BeginInvokeOnMainThread(_fileBrowser.ClearLocalFileMarkers);
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                if (Display.IsProfileVisible)
+                {
+                    _fileBrowser.ClearLocalFileMarkers();
+                }
+            });
         }
 
         private async Task ClearLocalSessionAndCachedStateAsync(string reason)

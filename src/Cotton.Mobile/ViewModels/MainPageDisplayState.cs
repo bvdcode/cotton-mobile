@@ -412,6 +412,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowSignIn(string? status)
         {
+            ClearSignedOutPresentationState();
             SetState(MainPageViewState.SignIn);
             IsInputEnabled = true;
             SetStatus(status);
@@ -456,6 +457,31 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
             IsLogoutEnabled = true;
             IsInputEnabled = false;
+        }
+
+        private void ClearSignedOutPresentationState()
+        {
+            ProfileName = string.Empty;
+            ProfileEmail = null;
+            ProfileInstance = string.Empty;
+            ProfileStatus = null;
+            FilesTitle = RootFilesTitle;
+            FilesPath = string.Empty;
+            FilesStatus = null;
+            FilesEmptyMessage = "No files in this folder.";
+            FilesEmptyDetails = string.Empty;
+            ClearFilesNotice();
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
+            CanNavigateFilesUp = false;
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = false;
+            _allFileEntries.Clear();
+            FileEntries.Clear();
+            ClearFileSearch();
+            OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 
         public void ShowProfileError(string status)

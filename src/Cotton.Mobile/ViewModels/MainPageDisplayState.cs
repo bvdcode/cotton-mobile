@@ -337,7 +337,14 @@ namespace Cotton.Mobile.ViewModels
         public bool IsFilesRefreshing
         {
             get => _isFilesRefreshing;
-            set => SetProperty(ref _isFilesRefreshing, value);
+            set
+            {
+                bool nextValue = value && IsProfileVisible;
+                if (!SetProperty(ref _isFilesRefreshing, nextValue) && value != nextValue)
+                {
+                    OnPropertyChanged(nameof(IsFilesRefreshing));
+                }
+            }
         }
 
         public bool CanNavigateFilesUp

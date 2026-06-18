@@ -81,7 +81,7 @@ namespace Cotton.Mobile.Services
                 await _secureStorage.SetAsync(AccessTokenKey, tokens.AccessToken).ConfigureAwait(false);
                 await _secureStorage.SetAsync(RefreshTokenKey, tokens.RefreshToken).ConfigureAwait(false);
             }
-            catch (Exception exception)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 _logger.LogWarning(exception, "Failed to save Cotton mobile tokens; clearing local token store.");
                 ClearBestEffort("token save failure");

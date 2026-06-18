@@ -103,7 +103,7 @@ namespace Cotton.Mobile.Services
                 string value = JsonSerializer.Serialize(sessionToSave, SerializerOptions);
                 await _secureStorage.SetAsync(PendingSessionKey, value).ConfigureAwait(false);
             }
-            catch (Exception exception)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 _logger.LogWarning(exception, "Failed to save Cotton mobile app-code authorization session; clearing it.");
                 ClearBestEffort("pending authorization save failure");

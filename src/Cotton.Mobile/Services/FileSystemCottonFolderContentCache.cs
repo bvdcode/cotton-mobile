@@ -67,7 +67,7 @@ namespace Cotton.Mobile.Services
 
             string directory = CottonMobileStoragePaths.CreateFolderContentCacheDirectory(instanceUri);
             string filePath = Path.Combine(directory, fileName);
-            string temporaryFilePath = filePath + TemporaryCacheFileExtension;
+            string temporaryFilePath = CreateTemporaryCacheFilePath(filePath);
 
             try
             {
@@ -226,6 +226,11 @@ namespace Cotton.Mobile.Services
         private static string CreateFolderCacheFileName(Guid folderId)
         {
             return $"{folderId:N}{FolderCacheFileExtension}";
+        }
+
+        private static string CreateTemporaryCacheFilePath(string filePath)
+        {
+            return $"{filePath}.{Guid.NewGuid():N}{TemporaryCacheFileExtension}";
         }
 
         private void DeleteTemporaryFile(string filePath)

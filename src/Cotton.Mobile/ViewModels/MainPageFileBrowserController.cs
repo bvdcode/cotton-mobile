@@ -1010,7 +1010,7 @@ namespace Cotton.Mobile.ViewModels
             CottonLocalFileSnapshot? localFile = _instanceUri is null
                 ? null
                 : _fileBrowserService.GetLocalDownload(_instanceUri, file);
-            if (localFile is null)
+            if (localFile is null || !IsReusableLocalFile(file, localFile))
             {
                 _display.ClearFileLocalCopy(file);
             }
@@ -1092,6 +1092,14 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return $"Yes ({FormatStorageSize(localFile.SizeBytes)})";
+        }
+
+        private static bool IsReusableLocalFile(
+            CottonFileBrowserEntry file,
+            CottonLocalFileSnapshot localFile)
+        {
+            return (!file.SizeBytes.HasValue || file.SizeBytes.Value == localFile.SizeBytes)
+                && CottonLocalFileFreshness.IsFresh(localFile.UpdatedAtUtc, file.UpdatedAtUtc);
         }
 
         private async Task ShowDownloadedFileActionsAsync(

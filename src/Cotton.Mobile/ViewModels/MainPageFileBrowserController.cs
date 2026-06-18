@@ -112,7 +112,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task RefreshAsync()
         {
             ClearFileActionRetry();
-            if (_display.IsFilesLoading)
+            if (IsFileBrowserBusy())
             {
                 return;
             }
@@ -147,7 +147,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task NavigateUpAsync()
         {
             ClearFileActionRetry();
-            if (_isFolderNavigationInProgress)
+            if (IsFileBrowserBusy())
             {
                 return;
             }
@@ -331,7 +331,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenFolderAsync(CottonFileBrowserEntry folder)
         {
-            if (_isFolderNavigationInProgress)
+            if (IsFileBrowserBusy())
             {
                 return;
             }
@@ -1012,9 +1012,15 @@ namespace Cotton.Mobile.ViewModels
         {
             return _lastFileLoadFailed
                 && _instanceUri is not null
-                && !_display.IsFilesLoading
-                && !_display.IsFilesRefreshing
+                && !IsFileBrowserBusy()
                 && !_isRecoveryRefreshInProgress;
+        }
+
+        private bool IsFileBrowserBusy()
+        {
+            return _isFolderNavigationInProgress
+                || _display.IsFilesLoading
+                || _display.IsFilesRefreshing;
         }
 
         private bool ShowOfflineUnavailableRetryIfNeeded(

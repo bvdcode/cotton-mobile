@@ -130,7 +130,7 @@ namespace Cotton.Mobile.ViewModels
             NavigateFilesUpCommand = new AsyncCommand(
                 _fileBrowser.NavigateUpAsync,
                 LogUnhandledCommandException,
-                () => Display.CanNavigateFilesUp);
+                () => Display.IsFileUpButtonEnabled);
             ActivateFileBrowserEntryCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 _fileBrowser.ActivateEntryAsync,
                 LogUnhandledCommandException);
@@ -145,9 +145,18 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowser.RetryFileActionAsync,
                 LogUnhandledCommandException,
                 () => Display.CanRetryFileAction);
-            ToggleFileSearchCommand = new AsyncCommand(_fileBrowser.ToggleFileSearchAsync, LogUnhandledCommandException);
-            ShowFileViewActionsCommand = new AsyncCommand(_fileBrowser.ShowViewActionsAsync, LogUnhandledCommandException);
-            ShowFileSortActionsCommand = new AsyncCommand(_fileBrowser.ShowSortActionsAsync, LogUnhandledCommandException);
+            ToggleFileSearchCommand = new AsyncCommand(
+                _fileBrowser.ToggleFileSearchAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileBrowserChromeEnabled);
+            ShowFileViewActionsCommand = new AsyncCommand(
+                _fileBrowser.ShowViewActionsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileBrowserChromeEnabled);
+            ShowFileSortActionsCommand = new AsyncCommand(
+                _fileBrowser.ShowSortActionsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileBrowserChromeEnabled);
             Display.PropertyChanged += Display_PropertyChanged;
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
             _foregroundService.Resumed += ForegroundService_Resumed;
@@ -846,8 +855,13 @@ namespace Cotton.Mobile.ViewModels
                 case nameof(MainPageDisplayState.IsProfileVisible):
                     RefreshFilesCommand.RaiseCanExecuteChanged();
                     break;
-                case nameof(MainPageDisplayState.CanNavigateFilesUp):
+                case nameof(MainPageDisplayState.IsFileUpButtonEnabled):
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsFileBrowserChromeEnabled):
+                    ToggleFileSearchCommand.RaiseCanExecuteChanged();
+                    ShowFileViewActionsCommand.RaiseCanExecuteChanged();
+                    ShowFileSortActionsCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.CanCancelFileAction):
                     CancelFileActionCommand.RaiseCanExecuteChanged();

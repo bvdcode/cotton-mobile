@@ -331,7 +331,13 @@ namespace Cotton.Mobile.ViewModels
         public bool IsFilesLoading
         {
             get => _isFilesLoading;
-            private set => SetProperty(ref _isFilesLoading, value);
+            private set
+            {
+                if (SetProperty(ref _isFilesLoading, value))
+                {
+                    NotifyFileBrowserChromeStateChanged();
+                }
+            }
         }
 
         public bool IsFilesRefreshing
@@ -340,7 +346,11 @@ namespace Cotton.Mobile.ViewModels
             set
             {
                 bool nextValue = value && IsProfileVisible;
-                if (!SetProperty(ref _isFilesRefreshing, nextValue) && value != nextValue)
+                if (SetProperty(ref _isFilesRefreshing, nextValue))
+                {
+                    NotifyFileBrowserChromeStateChanged();
+                }
+                else if (value != nextValue)
                 {
                     OnPropertyChanged(nameof(IsFilesRefreshing));
                 }
@@ -356,11 +366,14 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(FileUpButtonOpacity));
                     OnPropertyChanged(nameof(IsFileUpButtonVisible));
+                    OnPropertyChanged(nameof(IsFileUpButtonEnabled));
                 }
             }
         }
 
-        public double FileUpButtonOpacity => CanNavigateFilesUp ? 1 : 0.35;
+        public bool IsFileUpButtonEnabled => CanNavigateFilesUp && IsFileBrowserChromeEnabled;
+
+        public double FileUpButtonOpacity => IsFileUpButtonEnabled ? 1 : 0.35;
 
         public bool CanCancelFileAction
         {
@@ -403,6 +416,8 @@ namespace Cotton.Mobile.ViewModels
         public bool IsProfileVisible => _state == MainPageViewState.Profile;
 
         public bool IsAccountActionEnabled => IsProfileVisible && !IsFileActionInProgress;
+
+        public bool IsFileBrowserChromeEnabled => IsProfileVisible && !IsFileBrowserBusy;
 
         public bool IsBrandHeaderVisible => _state != MainPageViewState.Profile;
 
@@ -852,6 +867,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsAuthorizationProgressVisible));
             OnPropertyChanged(nameof(IsProfileVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
+            OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
             OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
@@ -885,6 +902,13 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileSearchOpen));
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
+        }
+
+        private void NotifyFileBrowserChromeStateChanged()
+        {
+            OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(IsFileUpButtonEnabled));
+            OnPropertyChanged(nameof(FileUpButtonOpacity));
         }
 
         private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing;

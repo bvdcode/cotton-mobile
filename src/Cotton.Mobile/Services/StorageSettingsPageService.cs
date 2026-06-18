@@ -15,13 +15,17 @@ namespace Cotton.Mobile.Services
             _serviceProvider = serviceProvider;
         }
 
-        public Task OpenAsync(CancellationToken cancellationToken = default)
+        public async Task OpenAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var page = ActivatorUtilities.CreateInstance<StoragePage>(_serviceProvider);
-            return MainThread.InvokeOnMainThreadAsync(
-                () => Shell.Current.Navigation.PushAsync(page));
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var page = ActivatorUtilities.CreateInstance<StoragePage>(_serviceProvider);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
         }
     }
 }

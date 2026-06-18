@@ -16,19 +16,23 @@ namespace Cotton.Mobile.Services
             _serviceProvider = serviceProvider;
         }
 
-        public Task OpenAsync(CottonDiagnosticsContext context, CancellationToken cancellationToken = default)
+        public async Task OpenAsync(CottonDiagnosticsContext context, CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(context);
             cancellationToken.ThrowIfCancellationRequested();
 
-            var viewModel = ActivatorUtilities.CreateInstance<DiagnosticsViewModel>(
-                _serviceProvider,
-                context);
-            var page = ActivatorUtilities.CreateInstance<DiagnosticsPage>(
-                _serviceProvider,
-                viewModel);
-            return MainThread.InvokeOnMainThreadAsync(
-                () => Shell.Current.Navigation.PushAsync(page));
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var viewModel = ActivatorUtilities.CreateInstance<DiagnosticsViewModel>(
+                    _serviceProvider,
+                    context);
+                var page = ActivatorUtilities.CreateInstance<DiagnosticsPage>(
+                    _serviceProvider,
+                    viewModel);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
         }
     }
 }

@@ -111,6 +111,11 @@ namespace Cotton.Mobile.ViewModels
         public async Task RefreshAsync()
         {
             ClearFileActionRetry();
+            if (_display.IsFilesLoading || _display.IsFilesRefreshing)
+            {
+                return;
+            }
+
             if (_instanceUri is null)
             {
                 _display.ShowFilesStatus("Sign in to load files.");

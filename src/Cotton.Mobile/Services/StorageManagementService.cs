@@ -59,7 +59,7 @@ namespace Cotton.Mobile.Services
             await ClearDirectoryAsync(
                 CottonMobileStoragePaths.CreateDownloadsDirectory(),
                 cancellationToken).ConfigureAwait(false);
-            DownloadedFilesCleared?.Invoke(this, EventArgs.Empty);
+            NotifyDownloadedFilesCleared();
         }
 
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)
@@ -261,6 +261,27 @@ namespace Cotton.Mobile.Services
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
                 _logger.LogDebug(exception, "Failed to delete empty Cotton mobile storage directory {Path}.", directory);
+            }
+        }
+
+        private void NotifyDownloadedFilesCleared()
+        {
+            EventHandler? handlers = DownloadedFilesCleared;
+            if (handlers is null)
+            {
+                return;
+            }
+
+            foreach (EventHandler handler in handlers.GetInvocationList().Cast<EventHandler>())
+            {
+                try
+                {
+                    handler.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Cotton mobile downloaded-files-cleared subscriber failed.");
+                }
             }
         }
     }

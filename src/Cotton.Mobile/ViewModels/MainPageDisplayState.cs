@@ -217,6 +217,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _filesNoticeTitle, value))
                 {
                     OnPropertyChanged(nameof(IsFilesNoticeVisible));
+                    OnPropertyChanged(nameof(IsFilesEmptyVisible));
                 }
             }
         }
@@ -229,6 +230,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _filesNoticeMessage, value))
                 {
                     OnPropertyChanged(nameof(IsFilesNoticeVisible));
+                    OnPropertyChanged(nameof(IsFilesEmptyVisible));
                 }
             }
         }
@@ -359,7 +361,7 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _canRetryFileAction, value);
         }
 
-        public bool IsFilesEmptyVisible => !IsFilesLoading && FileEntries.Count == 0;
+        public bool IsFilesEmptyVisible => !IsFilesLoading && !IsFilesNoticeVisible && FileEntries.Count == 0;
 
         public bool IsInputEnabled
         {
@@ -555,7 +557,9 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
             FilesNoticeTitle = "Offline";
-            FilesNoticeMessage = "Files marked On device can still open.";
+            FilesNoticeMessage = _allFileEntries.Count == 0
+                ? "Reconnect to load this folder."
+                : "Files marked On device can still open.";
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
         }
 

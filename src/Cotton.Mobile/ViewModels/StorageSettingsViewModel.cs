@@ -140,7 +140,7 @@ namespace Cotton.Mobile.ViewModels
         {
             return ClearAsync(
                 ClearDownloadedFilesTitle,
-                "Saved files will need internet to open again.",
+                "Files marked On device will need internet to open again.",
                 ClearDownloadedFilesAction,
                 _storageManagementService.ClearDownloadedFilesAsync,
                 "Downloaded files cleared.");
@@ -150,7 +150,7 @@ namespace Cotton.Mobile.ViewModels
         {
             return ClearAsync(
                 ClearAllTitle,
-                "Thumbnail previews and saved files will be removed from this device.",
+                "Thumbnail previews and files marked On device will be removed from this device.",
                 ClearAllAction,
                 _storageManagementService.ClearAllCachedFilesAsync,
                 "Cached files cleared.");

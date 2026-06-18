@@ -6,26 +6,30 @@ namespace Cotton.Mobile.Services
     {
         public async Task ShowAlertAsync(string title, string message, string cancel)
         {
-            Page? page = Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (page is null)
+            await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                return;
-            }
+                Page? page = GetCurrentPage();
+                if (page is null)
+                {
+                    return;
+                }
 
-			await MainThread.InvokeOnMainThreadAsync(
-				() => page.DisplayAlertAsync(title, message, cancel));
-		}
+                await page.DisplayAlertAsync(title, message, cancel);
+            });
+        }
 
         public async Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel)
         {
-            Page? page = Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (page is null)
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                return false;
-            }
+                Page? page = GetCurrentPage();
+                if (page is null)
+                {
+                    return false;
+                }
 
-            return await MainThread.InvokeOnMainThreadAsync(
-                () => page.DisplayAlertAsync(title, message, accept, cancel));
+                return await page.DisplayAlertAsync(title, message, accept, cancel);
+            });
         }
 
         public async Task<string?> ShowActionSheetAsync(
@@ -34,14 +38,21 @@ namespace Cotton.Mobile.Services
             string? destruction,
             params string[] buttons)
         {
-            Page? page = Application.Current?.Windows.FirstOrDefault()?.Page;
-            if (page is null)
+            return await MainThread.InvokeOnMainThreadAsync(async () =>
             {
-                return null;
-            }
+                Page? page = GetCurrentPage();
+                if (page is null)
+                {
+                    return null;
+                }
 
-            return await MainThread.InvokeOnMainThreadAsync(
-                () => page.DisplayActionSheetAsync(title, cancel, destruction, buttons));
+                return await page.DisplayActionSheetAsync(title, cancel, destruction, buttons);
+            });
         }
-	}
+
+        private static Page? GetCurrentPage()
+        {
+            return Application.Current?.Windows.FirstOrDefault()?.Page;
+        }
+    }
 }

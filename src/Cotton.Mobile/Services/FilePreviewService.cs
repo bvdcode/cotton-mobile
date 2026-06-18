@@ -36,13 +36,40 @@ namespace Cotton.Mobile.Services
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            ContentPage page = file.IsImage
-                ? CreateImageViewerPage(file, downloadedFile)
-                : await CreateTextViewerPageAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
-            cancellationToken.ThrowIfCancellationRequested();
+            if (file.IsImage)
+            {
+                await OpenImagePreviewAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            string textContent = await ReadTextPreviewAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
+            await OpenTextPreviewAsync(file, downloadedFile, textContent, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task OpenImagePreviewAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                ContentPage page = CreateImageViewerPage(file, downloadedFile);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        private async Task OpenTextPreviewAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            string content,
+            CancellationToken cancellationToken)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ContentPage page = CreateTextViewerPage(file, downloadedFile, content);
                 await Shell.Current.Navigation.PushAsync(page);
             });
             cancellationToken.ThrowIfCancellationRequested();
@@ -66,7 +93,7 @@ namespace Cotton.Mobile.Services
             return ActivatorUtilities.CreateInstance<ImageViewerPage>(_serviceProvider, viewModel);
         }
 
-        private async Task<TextViewerPage> CreateTextViewerPageAsync(
+        private async Task<string> ReadTextPreviewAsync(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
@@ -76,10 +103,17 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("The selected file cannot be previewed as text.");
             }
 
-            string content = await File.ReadAllTextAsync(
+            return await File.ReadAllTextAsync(
                 downloadedFile.FilePath,
                 Encoding.UTF8,
                 cancellationToken).ConfigureAwait(false);
+        }
+
+        private TextViewerPage CreateTextViewerPage(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            string content)
+        {
             string details = CreateDetails(file, downloadedFile);
             var viewModel = ActivatorUtilities.CreateInstance<TextViewerViewModel>(
                 _serviceProvider,

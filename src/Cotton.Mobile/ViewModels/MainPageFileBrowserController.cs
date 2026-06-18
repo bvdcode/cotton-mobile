@@ -742,7 +742,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                ShowReusableLocalFileIfAvailable(file);
+                RefreshVisibleLocalFileMarkers(instanceUri);
                 _display.ShowFilesSummary();
                 await ShowDownloadedFileActionsBestEffortAsync(file, result, fileActionCancellation.Token);
             }
@@ -1042,7 +1042,7 @@ namespace Cotton.Mobile.ViewModels
                 CreateFileDownloadProgress(file, actionName, canUpdateProgress, cancellationToken),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            ShowReusableLocalFileIfAvailable(file);
+            RefreshVisibleLocalFileMarkers(instanceUri);
             return downloadedFile;
         }
 
@@ -1224,6 +1224,28 @@ namespace Cotton.Mobile.ViewModels
 
             _display.ShowFileLocalCopy(file, localFile);
             return true;
+        }
+
+        private void RefreshVisibleLocalFileMarkers(Uri instanceUri)
+        {
+            foreach (CottonFileBrowserEntry entry in _display.FileEntries.ToList())
+            {
+                if (entry.Type != CottonFileBrowserEntryType.File)
+                {
+                    continue;
+                }
+
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(
+                    instanceUri,
+                    entry);
+                if (localFile is null)
+                {
+                    _display.ClearFileLocalCopy(entry);
+                    continue;
+                }
+
+                _display.ShowFileLocalCopy(entry, localFile);
+            }
         }
 
         private void ClearLocalFileMarkerIfFileMissing(Exception exception, CottonFileBrowserEntry file)

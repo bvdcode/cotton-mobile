@@ -40,14 +40,14 @@ namespace Cotton.Mobile.Services
             }
 
             string path = CreateCachePath(cacheKey);
-            if (!File.Exists(path))
+            if (!TryGetReadyCacheFile(path, cacheKey, out FileInfo? file) || file is null)
             {
                 return null;
             }
 
             try
             {
-                File.SetLastWriteTimeUtc(path, DateTime.UtcNow);
+                file.LastWriteTimeUtc = DateTime.UtcNow;
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
@@ -100,7 +100,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken)
         {
             string targetPath = CreateCachePath(cacheKey);
-            if (File.Exists(targetPath))
+            if (TryGetReadyCacheFile(targetPath, cacheKey, out _))
             {
                 return;
             }
@@ -108,7 +108,7 @@ namespace Cotton.Mobile.Services
             await _downloadGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                if (File.Exists(targetPath))
+                if (TryGetReadyCacheFile(targetPath, cacheKey, out _))
                 {
                     return;
                 }
@@ -153,6 +153,11 @@ namespace Cotton.Mobile.Services
                         useAsync: true);
                     await CopyWithLimitAsync(source, destination, _options.MaxEntryBytes, cancellationToken)
                         .ConfigureAwait(false);
+                    if (destination.Length == 0)
+                    {
+                        throw new IOException("Thumbnail cache entry was empty.");
+                    }
+
                     File.Move(tempPath, targetPath, overwrite: true);
                 }
                 finally
@@ -239,6 +244,46 @@ namespace Cotton.Mobile.Services
             string fileName = Convert.ToHexString(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(cacheKey)))
                 .ToLowerInvariant();
             return Path.Combine(CacheDirectory, fileName + CacheFileExtension);
+        }
+
+        private bool TryGetReadyCacheFile(string path, string cacheKey, out FileInfo? file)
+        {
+            file = null;
+
+            try
+            {
+                var info = new FileInfo(path);
+                if (!info.Exists)
+                {
+                    return false;
+                }
+
+                if (info.Length > 0)
+                {
+                    file = info;
+                    return true;
+                }
+
+                DeleteEmptyCacheFile(path, cacheKey);
+                return false;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(exception, "Could not inspect thumbnail cache file for {CacheKey}.", cacheKey);
+                return false;
+            }
+        }
+
+        private void DeleteEmptyCacheFile(string path, string cacheKey)
+        {
+            try
+            {
+                File.Delete(path);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(exception, "Could not delete empty thumbnail cache file for {CacheKey}.", cacheKey);
+            }
         }
 
         private static async Task CopyWithLimitAsync(

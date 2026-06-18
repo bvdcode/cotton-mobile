@@ -266,6 +266,13 @@ namespace Cotton.Mobile.Services
             {
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
             }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to restore Cotton mobile pending app-code authorization; keeping it for retry.");
+                return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
+            }
         }
 
         private async Task ClearPendingSessionBestEffortAsync(string reason)

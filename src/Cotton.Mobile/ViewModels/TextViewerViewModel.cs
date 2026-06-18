@@ -1,6 +1,7 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 
 namespace Cotton.Mobile.ViewModels
@@ -87,11 +88,19 @@ namespace Cotton.Mobile.ViewModels
                 "Copying...",
                 async () =>
                 {
-                    await _clipboard.SetTextAsync(Content);
+                    await CopyTextAsync();
                     Status = "Copied.";
                 },
                 "Copy failed.",
                 "Failed to copy text viewer content for {FilePath}.");
+        }
+
+        private Task CopyTextAsync()
+        {
+            return MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await _clipboard.SetTextAsync(Content);
+            });
         }
 
         private async Task ShareAsync()

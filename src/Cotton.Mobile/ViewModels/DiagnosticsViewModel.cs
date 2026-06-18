@@ -1,6 +1,7 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
 using System.Collections.ObjectModel;
 
@@ -129,7 +130,7 @@ namespace Cotton.Mobile.ViewModels
                     ShowDiagnostics(summary);
                 }
 
-                await _clipboard.SetTextAsync(CreateDiagnosticsText());
+                await CopyDiagnosticsTextAsync();
                 Status = copiedWithoutCacheDetails
                     ? "Diagnostics copied without cache details."
                     : "Diagnostics copied.";
@@ -143,6 +144,15 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        private Task CopyDiagnosticsTextAsync()
+        {
+            string diagnosticsText = CreateDiagnosticsText();
+            return MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await _clipboard.SetTextAsync(diagnosticsText);
+            });
         }
 
         private async Task<CottonStorageSummary?> TryLoadStorageSummaryForCopyAsync()

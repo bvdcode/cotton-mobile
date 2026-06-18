@@ -453,18 +453,28 @@ namespace Cotton.Mobile.ViewModels
         {
             try
             {
-                await _browser.OpenAsync(
-                    _options.PrivacyPolicyUri,
-                    CottonBrowserLaunchOptions.SystemPreferred());
+                bool opened = await MainThread.InvokeOnMainThreadAsync(
+                    () => _browser.OpenAsync(
+                        _options.PrivacyPolicyUri,
+                        CottonBrowserLaunchOptions.SystemPreferred()));
+                if (!opened)
+                {
+                    await ShowPrivacyPolicyUnavailableAsync();
+                }
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to open Cotton Cloud privacy policy.");
-                await _dialogService.ShowAlertAsync(
-                    "Privacy Policy",
-                    "Could not open the privacy policy.",
-                    "OK");
+                await ShowPrivacyPolicyUnavailableAsync();
             }
+        }
+
+        private Task ShowPrivacyPolicyUnavailableAsync()
+        {
+            return _dialogService.ShowAlertAsync(
+                "Privacy Policy",
+                "Could not open the privacy policy.",
+                "OK");
         }
 
         private async Task OpenFeedbackAsync()

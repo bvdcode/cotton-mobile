@@ -10,8 +10,6 @@ namespace Cotton.Mobile.Services
         private const string CacheTempFileSearchPattern = "*.webp.*.tmp";
         private const string WebPContentType = "image/webp";
 
-        private static readonly TimeSpan TemporaryThumbnailGracePeriod = TimeSpan.FromHours(6);
-
         private readonly HttpClient _httpClient;
         private readonly FileThumbnailCacheOptions _options;
         private readonly ILogger<FileThumbnailCache> _logger;
@@ -257,7 +255,7 @@ namespace Cotton.Mobile.Services
 
         private void DeleteAbandonedTempFiles(CancellationToken cancellationToken)
         {
-            DateTime cutoffUtc = DateTime.UtcNow - TemporaryThumbnailGracePeriod;
+            DateTime utcNow = DateTime.UtcNow;
             foreach (string path in Directory.EnumerateFiles(
                 CacheDirectory,
                 CacheTempFileSearchPattern,
@@ -265,7 +263,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var file = new FileInfo(path);
-                if (!file.Exists || file.LastWriteTimeUtc > cutoffUtc)
+                if (!file.Exists || !CottonTemporaryFilePolicy.IsAbandoned(file, utcNow))
                 {
                     continue;
                 }

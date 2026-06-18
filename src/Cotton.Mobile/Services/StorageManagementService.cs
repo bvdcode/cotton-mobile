@@ -158,15 +158,20 @@ namespace Cotton.Mobile.Services
                     }
 
                     List<Exception> failures = [];
+                    DateTime utcNow = DateTime.UtcNow;
                     foreach (string file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
-                        if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                        if (!includeTemporaryDownloads
+                            && CottonMobileStoragePaths.IsTemporaryDownloadPath(file)
+                            && !IsAbandonedTemporaryStorageFile(file, utcNow))
                         {
                             continue;
                         }
 
-                        if (!includeTemporaryThumbnails && IsTemporaryThumbnailPath(file))
+                        if (!includeTemporaryThumbnails
+                            && IsTemporaryThumbnailPath(file)
+                            && !IsAbandonedTemporaryStorageFile(file, utcNow))
                         {
                             continue;
                         }
@@ -270,6 +275,20 @@ namespace Cotton.Mobile.Services
         private static bool IsTemporaryThumbnailPath(string path)
         {
             return path.EndsWith(TemporaryThumbnailFileExtension, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private bool IsAbandonedTemporaryStorageFile(string file, DateTime utcNow)
+        {
+            try
+            {
+                var info = new FileInfo(file);
+                return info.Exists && CottonTemporaryFilePolicy.IsAbandoned(info, utcNow);
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(exception, "Failed to inspect Cotton mobile temporary storage file {Path}.", file);
+                return false;
+            }
         }
 
         private bool DeleteFile(string file, List<Exception> failures)

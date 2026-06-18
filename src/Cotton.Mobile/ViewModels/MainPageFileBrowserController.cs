@@ -1411,7 +1411,7 @@ namespace Cotton.Mobile.ViewModels
         {
             _retryFileAction = action;
             _retryFileActionEntry = entry;
-            _display.ShowFileActionRetry($"{status} Retry?");
+            _display.ShowFileActionRetry(status);
         }
 
         private void ShowFileLoadFailure(string fallbackStatus)

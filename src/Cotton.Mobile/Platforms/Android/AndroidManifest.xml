@@ -19,6 +19,14 @@
 			<action android:name="android.intent.action.VIEW" />
 			<data android:scheme="mailto" />
 		</intent>
+		<intent>
+			<action android:name="android.intent.action.VIEW" />
+			<data android:mimeType="*/*" />
+		</intent>
+		<intent>
+			<action android:name="android.intent.action.SEND" />
+			<data android:mimeType="*/*" />
+		</intent>
 	</queries>
 	<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 	<uses-permission android:name="android.permission.INTERNET" />

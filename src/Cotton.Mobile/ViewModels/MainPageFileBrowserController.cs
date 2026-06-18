@@ -41,6 +41,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly List<CottonFolderHandle> _fileNavigation = [];
 
         private CancellationTokenSource? _fileActionCancellation;
+        private CancellationTokenSource? _fileLoadCancellation;
         private MainPageFileAction? _retryFileAction;
         private CottonFileBrowserEntry? _retryFileActionEntry;
         private CottonFolderHandle? _currentFolder;
@@ -102,6 +103,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void Clear()
         {
+            CancelCurrentFileLoad();
             CancelCurrentFileAction();
             ClearFileActionRetry();
             _instanceUri = null;
@@ -411,12 +413,13 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task LoadRootFilesAsync(bool isRefresh = false)
         {
-            if (_instanceUri is null)
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
                 return;
             }
 
-            _isFileLoadInProgress = true;
+            CancellationTokenSource fileLoadCancellation = BeginFileLoad();
             try
             {
                 if (isRefresh)
@@ -429,13 +432,24 @@ namespace Cotton.Mobile.ViewModels
                     _display.ShowFilesLoading("Loading files...");
                 }
 
-                CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
-                content = await ApplyThumbnailsAsync(_instanceUri, content);
-                content = ApplyLocalFiles(content);
+                CottonFolderContent content = await _fileBrowserService.GetRootAsync(
+                    instanceUri,
+                    fileLoadCancellation.Token);
+                content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
+                content = ApplyLocalFiles(instanceUri, content);
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    return;
+                }
+
                 _fileNavigation.Clear();
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
                 _display.ShowFiles(content, isRoot: true, canNavigateUp: false, CreatePath(content.FolderName));
+            }
+            catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
+            {
+                _logger.LogDebug("Cotton mobile root file load was cancelled.");
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -449,7 +463,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                _isFileLoadInProgress = false;
+                EndFileLoad(fileLoadCancellation);
             }
         }
 
@@ -458,12 +472,13 @@ namespace Cotton.Mobile.ViewModels
             bool preserveHistory,
             bool isRefresh = false)
         {
-            if (_instanceUri is null)
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
                 return;
             }
 
-            _isFileLoadInProgress = true;
+            CancellationTokenSource fileLoadCancellation = BeginFileLoad();
             try
             {
                 if (isRefresh)
@@ -475,9 +490,17 @@ namespace Cotton.Mobile.ViewModels
                     _display.ShowFilesLoading($"Loading {folder.Name}...");
                 }
 
-                CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
-                content = await ApplyThumbnailsAsync(_instanceUri, content);
-                content = ApplyLocalFiles(content);
+                CottonFolderContent content = await _fileBrowserService.GetFolderAsync(
+                    instanceUri,
+                    folder,
+                    fileLoadCancellation.Token);
+                content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
+                content = ApplyLocalFiles(instanceUri, content);
+                if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+                {
+                    return;
+                }
+
                 _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 _lastFileLoadFailed = false;
                 _display.ShowFiles(
@@ -485,6 +508,10 @@ namespace Cotton.Mobile.ViewModels
                     isRoot: false,
                     canNavigateUp: _fileNavigation.Count > 0,
                     CreatePath(content.FolderName));
+            }
+            catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
+            {
+                _logger.LogDebug("Cotton mobile folder file load {FolderId} was cancelled.", folder.Id);
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -508,7 +535,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                _isFileLoadInProgress = false;
+                EndFileLoad(fileLoadCancellation);
             }
         }
 
@@ -570,7 +597,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task<CottonFolderContent> ApplyThumbnailsAsync(
             Uri instanceUri,
-            CottonFolderContent content)
+            CottonFolderContent content,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(content);
@@ -578,27 +606,26 @@ namespace Cotton.Mobile.ViewModels
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 CottonFileThumbnailSnapshot thumbnail = await _thumbnailProvider.GetThumbnailAsync(
                     instanceUri,
-                    entry);
+                    entry,
+                    cancellationToken);
                 entries.Add(entry.WithThumbnail(thumbnail));
             }
 
             return new CottonFolderContent(content.FolderId, content.FolderName, entries);
         }
 
-        private CottonFolderContent ApplyLocalFiles(CottonFolderContent content)
+        private CottonFolderContent ApplyLocalFiles(Uri instanceUri, CottonFolderContent content)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(content);
-            if (_instanceUri is null)
-            {
-                return content;
-            }
 
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, entry);
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, entry);
                 entries.Add(localFile is null ? entry : entry.WithLocalFile(localFile));
             }
 
@@ -922,6 +949,15 @@ namespace Cotton.Mobile.ViewModels
             return cancellation;
         }
 
+        private CancellationTokenSource BeginFileLoad()
+        {
+            CancelCurrentFileLoad();
+            var cancellation = new CancellationTokenSource();
+            _fileLoadCancellation = cancellation;
+            _isFileLoadInProgress = true;
+            return cancellation;
+        }
+
         private void EndFileAction(CancellationTokenSource cancellation)
         {
             if (!ReferenceEquals(_fileActionCancellation, cancellation))
@@ -931,6 +967,19 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _fileActionCancellation = null;
+            cancellation.Dispose();
+        }
+
+        private void EndFileLoad(CancellationTokenSource cancellation)
+        {
+            if (!ReferenceEquals(_fileLoadCancellation, cancellation))
+            {
+                cancellation.Dispose();
+                return;
+            }
+
+            _fileLoadCancellation = null;
+            _isFileLoadInProgress = false;
             cancellation.Dispose();
         }
 
@@ -944,6 +993,24 @@ namespace Cotton.Mobile.ViewModels
 
             _fileActionCancellation = null;
             cancellation.Cancel();
+        }
+
+        private void CancelCurrentFileLoad()
+        {
+            CancellationTokenSource? cancellation = _fileLoadCancellation;
+            if (cancellation is null)
+            {
+                return;
+            }
+
+            _fileLoadCancellation = null;
+            cancellation.Cancel();
+        }
+
+        private bool IsActiveFileLoad(CancellationTokenSource cancellation, Uri instanceUri)
+        {
+            return ReferenceEquals(_fileLoadCancellation, cancellation)
+                && Uri.Equals(_instanceUri, instanceUri);
         }
 
         private void ShowFileActionRetry(

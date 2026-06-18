@@ -58,8 +58,7 @@ namespace Cotton.Mobile.Services
         {
             await ClearDirectoryAsync(
                 CottonMobileStoragePaths.CreateDownloadsDirectory(),
-                cancellationToken,
-                includeTemporaryDownloads: false).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
             DownloadedFilesCleared?.Invoke(this, EventArgs.Empty);
         }
 

@@ -502,6 +502,7 @@ namespace Cotton.Mobile.ViewModels
         public void ShowFilesLoading(string status)
         {
             IsFilesLoading = true;
+            IsFilesRefreshing = false;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = status;

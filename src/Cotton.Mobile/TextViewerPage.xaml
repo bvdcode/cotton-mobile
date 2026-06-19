@@ -46,7 +46,7 @@
                 Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                 StrokeShape="RoundRectangle 8"
                 StrokeThickness="1"
-                Padding="14"
+                Padding="14,18,14,14"
                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
             <Editor Text="{Binding Content}"
                     IsReadOnly="True"

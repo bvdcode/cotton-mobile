@@ -70,6 +70,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("No matching files", display.FilesEmptyMessage);
             Assert.Equal("Try another name, type, or extension.", display.FilesEmptyDetails);
             Assert.True(display.IsFilesEmptyVisible);
+            Assert.False(display.IsFilesEmptyAddActionVisible);
             Assert.Equal("0 matches · A-Z", display.FilesStatus);
         }
 
@@ -88,6 +89,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("This folder is empty", display.FilesEmptyMessage);
             Assert.Equal("Files added here will appear automatically.", display.FilesEmptyDetails);
             Assert.True(display.IsFilesEmptyVisible);
+            Assert.True(display.IsFilesEmptyAddActionVisible);
             Assert.False(display.IsFilesStatusVisible);
         }
 

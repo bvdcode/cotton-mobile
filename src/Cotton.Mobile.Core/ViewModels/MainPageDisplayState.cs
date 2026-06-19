@@ -424,6 +424,9 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFilesEmptyVisible => !IsFilesLoading && !IsFilesNoticeVisible && FileEntries.Count == 0;
 
+        public bool IsFilesEmptyAddActionVisible =>
+            IsFilesEmptyVisible && !IsFileSearchActive && IsFileBrowserChromeEnabled;
+
         public bool IsInputEnabled
         {
             get => _isInputEnabled;
@@ -1013,8 +1016,10 @@ namespace Cotton.Mobile.ViewModels
         {
             OnPropertyChanged(nameof(IsFileSearchVisible));
             OnPropertyChanged(nameof(IsFileSearchOpen));
+            OnPropertyChanged(nameof(IsFileSearchActive));
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
+            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
         }
 
         private void NotifyFileBrowserChromeStateChanged()
@@ -1022,11 +1027,13 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(FileUpButtonOpacity));
+            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
         }
 
         private void NotifyFilesEmptyStateChanged()
         {
             OnPropertyChanged(nameof(IsFilesEmptyVisible));
+            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
         }
 
         private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing || IsFileActionInProgress;

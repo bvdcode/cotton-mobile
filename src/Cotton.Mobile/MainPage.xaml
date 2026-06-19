@@ -430,6 +430,14 @@
                                            LineBreakMode="WordWrap"
                                            HorizontalTextAlignment="Center"
                                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                                    <Button Text="Add files"
+                                            Command="{Binding ShowFileAddActionsCommand}"
+                                            IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
+                                            Padding="14,0"
+                                            HeightRequest="40"
+                                            MinimumHeightRequest="40"
+                                            HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
 

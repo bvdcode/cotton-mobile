@@ -2,6 +2,7 @@ namespace Cotton.Mobile.ViewModels
 {
     public enum MainPageFileAction
     {
+        CopyLink,
         Download,
         KeepFolderOffline,
         KeepOffline,
@@ -9,5 +10,6 @@ namespace Cotton.Mobile.ViewModels
         RefreshOffline,
         RemoveOffline,
         Share,
+        ShareLink,
     }
 }

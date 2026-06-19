@@ -129,6 +129,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IUploadDestinationPickerPageService, UploadDestinationPickerPageService>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
+			builder.Services.AddSingleton<ICloudShareLinkInteractionService, CloudShareLinkInteractionService>();
 			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();
 			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();

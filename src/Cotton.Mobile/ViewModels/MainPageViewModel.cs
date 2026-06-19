@@ -95,6 +95,8 @@ namespace Cotton.Mobile.ViewModels
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
+            ICottonCloudShareLinkService cloudShareLinkService,
+            ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
@@ -133,6 +135,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
+            ArgumentNullException.ThrowIfNull(cloudShareLinkService);
+            ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
@@ -179,6 +183,8 @@ namespace Cotton.Mobile.ViewModels
                 uploadDestinationPickerPageService,
                 fileInteractionService,
                 filePreviewService,
+                cloudShareLinkService,
+                cloudShareLinkInteractionService,
                 thumbnailProvider,
                 networkAccess,
                 foregroundService,

@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
     public class MainPageFileBrowserController
     {
         private const string CancelAction = "Cancel";
+        private const string CopyLinkAction = "Copy link";
         private const string DetailsAction = "Details";
         private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
@@ -17,7 +18,8 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenAction = CottonFileOpenRouter.OpenActionLabel;
         private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
-        private const string ShareAction = "Share";
+        private const string ShareFileAction = "Share file";
+        private const string ShareLinkAction = "Share link";
         private const string UploadPhotoAction = "Upload photo";
         private const string UploadPhotoToFolderAction = "Upload photo to folder";
         private const string UploadVideoAction = "Upload video";
@@ -51,6 +53,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
+        private readonly ICottonCloudShareLinkService _cloudShareLinkService;
+        private readonly ICloudShareLinkInteractionService _cloudShareLinkInteractionService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
@@ -85,6 +89,8 @@ namespace Cotton.Mobile.ViewModels
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
+            ICottonCloudShareLinkService cloudShareLinkService,
+            ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
@@ -104,6 +110,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
+            ArgumentNullException.ThrowIfNull(cloudShareLinkService);
+            ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
@@ -123,6 +131,8 @@ namespace Cotton.Mobile.ViewModels
             _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
+            _cloudShareLinkService = cloudShareLinkService;
+            _cloudShareLinkInteractionService = cloudShareLinkInteractionService;
             _thumbnailProvider = thumbnailProvider;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
@@ -559,6 +569,9 @@ namespace Cotton.Mobile.ViewModels
 
             switch (action)
             {
+                case MainPageFileAction.CopyLink:
+                    await CopyCloudShareLinkAsync(currentEntry);
+                    break;
                 case MainPageFileAction.Download:
                     await DownloadFileAsync(currentEntry);
                     break;
@@ -580,6 +593,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.Share:
                     await ShareFileAsync(currentEntry);
                     break;
+                case MainPageFileAction.ShareLink:
+                    await ShareCloudShareLinkAsync(currentEntry);
+                    break;
             }
         }
 
@@ -596,6 +612,8 @@ namespace Cotton.Mobile.ViewModels
                 CancelAction,
                 null,
                 OpenAction,
+                CopyLinkAction,
+                ShareLinkAction,
                 KeepOfflineAction);
 
             CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
@@ -608,6 +626,12 @@ namespace Cotton.Mobile.ViewModels
             {
                 case OpenAction:
                     await OpenFolderAsync(currentFolder);
+                    break;
+                case CopyLinkAction:
+                    await CopyCloudShareLinkAsync(currentFolder);
+                    break;
+                case ShareLinkAction:
+                    await ShareCloudShareLinkAsync(currentFolder);
                     break;
                 case KeepOfflineAction:
                     await PlanFolderOfflineAsync(currentFolder);
@@ -685,7 +709,9 @@ namespace Cotton.Mobile.ViewModels
                 actions.Add(RemoveOfflineAction);
             }
 
-            actions.Add(ShareAction);
+            actions.Add(CopyLinkAction);
+            actions.Add(ShareLinkAction);
+            actions.Add(ShareFileAction);
             actions.Add(DetailsAction);
 
             string? action = await _dialogService.ShowActionSheetAsync(
@@ -721,7 +747,13 @@ namespace Cotton.Mobile.ViewModels
                 case RemoveOfflineAction:
                     await RemoveFileOfflineAsync(currentFile);
                     break;
-                case ShareAction:
+                case CopyLinkAction:
+                    await CopyCloudShareLinkAsync(currentFile);
+                    break;
+                case ShareLinkAction:
+                    await ShareCloudShareLinkAsync(currentFile);
+                    break;
+                case ShareFileAction:
                     await ShareFileAsync(currentFile);
                     break;
                 case DetailsAction:
@@ -2275,6 +2307,128 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private Task CopyCloudShareLinkAsync(CottonFileBrowserEntry entry)
+        {
+            return CreateCloudShareLinkAsync(
+                entry,
+                MainPageFileAction.CopyLink,
+                async (snapshot, cancellationToken) =>
+                {
+                    _display.ShowFileActionLoading(
+                        CottonCloudShareLinkStatusText.CreateCopyingStatus(entry.Name));
+                    await _cloudShareLinkInteractionService.CopyAsync(snapshot, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CreateCopiedStatus(entry.Name));
+                },
+                CottonCloudShareLinkStatusText.CopyFailedStatus);
+        }
+
+        private Task ShareCloudShareLinkAsync(CottonFileBrowserEntry entry)
+        {
+            return CreateCloudShareLinkAsync(
+                entry,
+                MainPageFileAction.ShareLink,
+                async (snapshot, cancellationToken) =>
+                {
+                    _display.ShowFileActionLoading(
+                        CottonCloudShareLinkStatusText.CreateSharingStatus(entry.Name));
+                    await _cloudShareLinkInteractionService.ShareAsync(
+                        snapshot,
+                        CreateCloudShareLinkShareTitle(entry),
+                        cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _display.ShowFilesSummary();
+                },
+                CottonCloudShareLinkStatusText.ShareFailedStatus);
+        }
+
+        private async Task CreateCloudShareLinkAsync(
+            CottonFileBrowserEntry entry,
+            MainPageFileAction retryAction,
+            Func<CottonCloudShareLinkSnapshot, CancellationToken, Task> useLinkAsync,
+            string interactionFailureStatus)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to create links.");
+                return;
+            }
+
+            if (ShowOfflineRetryIfNeeded(
+                retryAction,
+                entry,
+                CottonCloudShareLinkStatusText.OfflineUnavailableStatus))
+            {
+                return;
+            }
+
+            CottonCloudShareLinkTargetKind targetKind = CreateCloudShareLinkTargetKind(entry);
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonCloudShareLinkStatusText.CreateCreatingStatus(entry.Name));
+            bool didCreateLink = false;
+
+            try
+            {
+                CottonCloudShareLinkSnapshot snapshot = await _cloudShareLinkService.CreateAsync(
+                    instanceUri,
+                    CreateCloudShareLinkRequest(entry),
+                    fileActionCancellation.Token);
+                didCreateLink = true;
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await useLinkAsync(snapshot, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share-link authorization failure {EntryId}.", entry.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile share-link cancellation {EntryId}.", entry.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share-link failure {EntryId}.", entry.Id);
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to create or use Cotton mobile share link {EntryId}.", entry.Id);
+                ShowFileActionRetry(
+                    retryAction,
+                    entry,
+                    didCreateLink
+                        ? interactionFailureStatus
+                        : CreateCloudShareLinkCreationFailureStatus(targetKind, exception));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
         private async Task ShowFileDetailsAsync(CottonFileBrowserEntry file)
         {
             CottonLocalFileSnapshot? localFile = _instanceUri is null
@@ -2341,7 +2495,7 @@ namespace Cotton.Mobile.ViewModels
                 DoneAction,
                 null,
                 openAction,
-                ShareAction);
+                ShareFileAction);
 
             cancellationToken.ThrowIfCancellationRequested();
             if (!canUseAction())
@@ -2356,7 +2510,7 @@ namespace Cotton.Mobile.ViewModels
 
             switch (action)
             {
-                case ShareAction:
+                case ShareFileAction:
                     return await ShareDownloadedFileAsync(file, downloadedFile, canUseAction, cancellationToken);
             }
 
@@ -2398,6 +2552,39 @@ namespace Cotton.Mobile.ViewModels
         private string CreateOpenAction(CottonFileBrowserEntry file)
         {
             return CottonFileOpenRouter.CreateRoute(file).ActionLabel;
+        }
+
+        private static CottonCloudShareLinkRequest CreateCloudShareLinkRequest(CottonFileBrowserEntry entry)
+        {
+            return entry.IsFolder
+                ? CottonCloudShareLinkRequest.ForFolder(entry.Id)
+                : CottonCloudShareLinkRequest.ForFile(entry.Id);
+        }
+
+        private static CottonCloudShareLinkTargetKind CreateCloudShareLinkTargetKind(CottonFileBrowserEntry entry)
+        {
+            return entry.IsFolder
+                ? CottonCloudShareLinkTargetKind.Folder
+                : CottonCloudShareLinkTargetKind.File;
+        }
+
+        private static string CreateCloudShareLinkShareTitle(CottonFileBrowserEntry entry)
+        {
+            return $"Share link to {entry.Name}";
+        }
+
+        private string CreateCloudShareLinkCreationFailureStatus(
+            CottonCloudShareLinkTargetKind targetKind,
+            Exception exception)
+        {
+            HttpStatusCode? statusCode = exception is CottonApiException apiException
+                ? apiException.StatusCode
+                : null;
+
+            return CottonCloudShareLinkStatusText.CreateCreationFailedStatus(
+                targetKind,
+                statusCode,
+                _networkAccess.HasInternetAccess);
         }
 
         private static string CreateDownloadAction(CottonFileBrowserEntry file)

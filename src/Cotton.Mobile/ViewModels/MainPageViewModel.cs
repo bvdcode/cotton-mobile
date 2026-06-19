@@ -13,6 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
+        private const string AccountCaptureInboxAction = "Capture Inbox";
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
@@ -33,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
+        private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
@@ -59,6 +61,7 @@ namespace Cotton.Mobile.ViewModels
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
             ITransfersPageService transfersPageService,
+            ICaptureInboxPageService captureInboxPageService,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
@@ -85,6 +88,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
+            ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
@@ -111,6 +115,7 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
             _transfersPageService = transfersPageService;
+            _captureInboxPageService = captureInboxPageService;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
@@ -397,6 +402,7 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
+                AccountCaptureInboxAction,
                 AccountTransfersAction,
                 AccountStorageAction,
                 AccountDiagnosticsAction,
@@ -418,6 +424,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountTransfersAction:
                     await OpenTransfersAsync();
+                    break;
+                case AccountCaptureInboxAction:
+                    await OpenCaptureInboxAsync();
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
@@ -626,6 +635,22 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Transfers",
                     "Could not inspect transfers.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenCaptureInboxAsync()
+        {
+            try
+            {
+                await _captureInboxPageService.OpenAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile capture inbox page.");
+                await _dialogService.ShowAlertAsync(
+                    "Capture Inbox",
+                    "Could not inspect captured items.",
                     "OK");
             }
         }

@@ -20,5 +20,10 @@ namespace Cotton.Mobile.Services
         CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(Uri instanceUri, CottonFileBrowserEntry file);
 
         CottonFileDownloadResult? GetReusableLocalDownload(Uri instanceUri, CottonFileBrowserEntry file);
+
+        Task<bool> DeleteLocalDownloadAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CancellationToken cancellationToken = default);
     }
 }

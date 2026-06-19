@@ -5,6 +5,7 @@ namespace Cotton.Mobile.ViewModels
         Download,
         KeepOffline,
         Open,
+        RemoveOffline,
         Share,
     }
 }

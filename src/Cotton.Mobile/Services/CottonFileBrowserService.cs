@@ -181,6 +181,30 @@ namespace Cotton.Mobile.Services
                 });
         }
 
+        public Task<bool> DeleteLocalDownloadAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(file);
+
+            return Task.Run(
+                () =>
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
+                    if (!Directory.Exists(directory))
+                    {
+                        return false;
+                    }
+
+                    Directory.Delete(directory, recursive: true);
+                    return true;
+                },
+                cancellationToken);
+        }
+
         private static async Task<CottonFolderContent> LoadFolderAsync(
             ICottonCloudClient client,
             Guid folderId,

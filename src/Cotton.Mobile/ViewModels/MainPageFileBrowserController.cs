@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private const string KeepOfflineAction = "Keep offline";
         private const string OpenAction = "Open";
         private const string OpenWithSystemAppAction = "Open with system app";
+        private const string RemoveOfflineAction = "Remove offline";
         private const string ShareAction = "Share";
         private const string UploadPhotoAction = "Upload photo";
         private const string UploadPhotoToFolderAction = "Upload photo to folder";
@@ -506,6 +507,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.Open:
                     await OpenFileAsync(currentEntry);
                     break;
+                case MainPageFileAction.RemoveOffline:
+                    await RemoveFileOfflineAsync(currentEntry);
+                    break;
                 case MainPageFileAction.Share:
                     await ShareFileAsync(currentEntry);
                     break;
@@ -566,15 +570,25 @@ namespace Cotton.Mobile.ViewModels
 
             string openAction = CreateOpenAction(refreshedFile, instanceUri);
             string downloadAction = CreateDownloadAction(refreshedFile);
+            var actions = new List<string>
+            {
+                openAction,
+                downloadAction,
+                KeepOfflineAction,
+            };
+            if (refreshedFile.HasLocalCopy)
+            {
+                actions.Add(RemoveOfflineAction);
+            }
+
+            actions.Add(ShareAction);
+            actions.Add(DetailsAction);
+
             string? action = await _dialogService.ShowActionSheetAsync(
                 refreshedFile.Name,
                 CancelAction,
                 null,
-                openAction,
-                downloadAction,
-                KeepOfflineAction,
-                ShareAction,
-                DetailsAction);
+                actions.ToArray());
 
             CottonFileBrowserEntry? currentFile = GetCurrentVisibleEntry(refreshedFile, instanceUri);
             if (currentFile is null)
@@ -596,6 +610,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case KeepOfflineAction:
                     await KeepFileOfflineAsync(currentFile);
+                    break;
+                case RemoveOfflineAction:
+                    await RemoveFileOfflineAsync(currentFile);
                     break;
                 case ShareAction:
                     await ShareFileAsync(currentFile);
@@ -1128,6 +1145,76 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task RemoveFileOfflineAsync(CottonFileBrowserEntry file)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to remove offline files.");
+                return;
+            }
+
+            CottonLocalFileSnapshot? reusableLocalFile =
+                _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
+            if (reusableLocalFile is null)
+            {
+                _display.ClearFileLocalCopy(file);
+                _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateNotOnDeviceStatus(file.Name));
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction($"Removing {file.Name} from this device...");
+
+            try
+            {
+                bool deleted = await _fileBrowserService.DeleteLocalDownloadAsync(
+                    instanceUri,
+                    file,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                _display.ClearFileLocalCopy(file);
+                _display.ShowFilesStatus(
+                    deleted
+                        ? CottonOfflineFileStatusText.CreateRemovedStatus(file.Name)
+                        : CottonOfflineFileStatusText.CreateNotOnDeviceStatus(file.Name));
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile remove-offline cancellation {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonOfflineFileStatusText.RemoveCancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile remove-offline failure {FileId}.", file.Id);
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to remove Cotton mobile offline file {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.RemoveOffline,
+                    file,
+                    CottonOfflineFileStatusText.RemoveFailedStatus);
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
             }
         }
 

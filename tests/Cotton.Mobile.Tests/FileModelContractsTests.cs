@@ -165,10 +165,18 @@ namespace Cotton.Mobile.Tests
                 "notes.txt is available offline.",
                 CottonOfflineFileStatusText.CreateAvailableStatus("notes.txt"));
             Assert.Equal(
+                "notes.txt removed from this device.",
+                CottonOfflineFileStatusText.CreateRemovedStatus("notes.txt"));
+            Assert.Equal(
+                "notes.txt is not on this device.",
+                CottonOfflineFileStatusText.CreateNotOnDeviceStatus("notes.txt"));
+            Assert.Equal(
                 "Offline. Keep offline needs internet.",
                 CottonOfflineFileStatusText.OfflineUnavailableStatus);
             Assert.Equal("Keep offline cancelled.", CottonOfflineFileStatusText.CancelledStatus);
             Assert.Equal("Keep offline failed.", CottonOfflineFileStatusText.FailedStatus);
+            Assert.Equal("Remove offline cancelled.", CottonOfflineFileStatusText.RemoveCancelledStatus);
+            Assert.Equal("Remove offline failed.", CottonOfflineFileStatusText.RemoveFailedStatus);
         }
 
         private static NodeFileManifestDto CreateFile(

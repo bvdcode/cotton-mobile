@@ -70,6 +70,54 @@ namespace Cotton.Mobile.Services
                     null);
             }
 
+            return await ExecuteAtIndexAsync(instanceUri, queue, transferIndex, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<CottonQueuedUploadExecutionResult> ExecuteAsync(
+            Uri instanceUri,
+            Guid transferId,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            if (transferId == Guid.Empty)
+            {
+                throw new ArgumentException("Transfer id cannot be empty.", nameof(transferId));
+            }
+
+            List<CottonTransferQueueItem> queue = (await _metadataStore
+                    .LoadAsync(instanceUri, cancellationToken)
+                    .ConfigureAwait(false))
+                .ToList();
+            int transferIndex = queue.FindIndex(item => item.Id == transferId);
+            if (transferIndex < 0)
+            {
+                return new CottonQueuedUploadExecutionResult(
+                    CottonQueuedUploadExecutionStatus.TransferNotFound,
+                    null,
+                    "Upload transfer is no longer in the queue.");
+            }
+
+            CottonTransferQueueItem transfer = queue[transferIndex];
+            if (transfer.Kind != CottonTransferKind.Upload
+                || transfer.Status != CottonTransferStatus.Queued)
+            {
+                return new CottonQueuedUploadExecutionResult(
+                    CottonQueuedUploadExecutionStatus.TransferNotQueued,
+                    transfer,
+                    "Upload transfer is not waiting to run.");
+            }
+
+            return await ExecuteAtIndexAsync(instanceUri, queue, transferIndex, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<CottonQueuedUploadExecutionResult> ExecuteAtIndexAsync(
+            Uri instanceUri,
+            List<CottonTransferQueueItem> queue,
+            int transferIndex,
+            CancellationToken cancellationToken)
+        {
             CottonTransferQueueItem transfer = queue[transferIndex];
             if (transfer.Destination is null)
             {

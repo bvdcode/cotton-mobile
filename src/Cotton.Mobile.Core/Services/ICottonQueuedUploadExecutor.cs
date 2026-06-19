@@ -5,5 +5,10 @@ namespace Cotton.Mobile.Services
         Task<CottonQueuedUploadExecutionResult> ExecuteNextAsync(
             Uri instanceUri,
             CancellationToken cancellationToken = default);
+
+        Task<CottonQueuedUploadExecutionResult> ExecuteAsync(
+            Uri instanceUri,
+            Guid transferId,
+            CancellationToken cancellationToken = default);
     }
 }

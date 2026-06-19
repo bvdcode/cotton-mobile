@@ -50,6 +50,88 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Execute_runs_requested_queued_upload_without_running_earlier_waiting_upload()
+        {
+            Guid firstTransferId = Guid.Parse("99999999-aaaa-bbbb-cccc-dddddddddddd");
+            CottonTransferQueueItem firstQueued = CottonTransferQueueItem.CreateUpload(
+                firstTransferId,
+                "first.bin",
+                50,
+                CreatedAt,
+                new CottonTransferDestinationSnapshot(
+                    DestinationFolderId,
+                    "Default",
+                    "Default"));
+            CottonTransferQueueItem requestedQueued = CreateQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([firstQueued, requestedQueued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient);
+
+            CottonQueuedUploadExecutionResult result =
+                await executor.ExecuteAsync(InstanceUri, TransferId);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.Completed, result.Status);
+            Assert.Equal(TransferId, uploadClient.UploadedTransferIds.Single());
+            Assert.Equal(CottonTransferStatus.Queued, metadataStore.Items.Single(item => item.Id == firstTransferId).Status);
+            Assert.Equal(CottonTransferStatus.Completed, metadataStore.Items.Single(item => item.Id == TransferId).Status);
+            Assert.DoesNotContain(
+                metadataStore.SaveSnapshots,
+                snapshot => snapshot.Any(item => item.Id == firstTransferId && item.Status != CottonTransferStatus.Queued));
+        }
+
+        [Fact]
+        public async Task Execute_returns_not_found_without_saving_when_scheduled_transfer_is_missing()
+        {
+            CottonTransferQueueItem queued = CreateQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([queued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient);
+
+            CottonQueuedUploadExecutionResult result =
+                await executor.ExecuteAsync(
+                    InstanceUri,
+                    Guid.Parse("aaaaaaaa-0000-1111-2222-bbbbbbbbbbbb"));
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.TransferNotFound, result.Status);
+            Assert.Null(result.Transfer);
+            Assert.Equal("Upload transfer is no longer in the queue.", result.FailureMessage);
+            Assert.Empty(uploadClient.UploadedTransferIds);
+            Assert.Empty(metadataStore.SaveSnapshots);
+        }
+
+        [Fact]
+        public async Task Execute_returns_not_queued_without_saving_when_scheduled_transfer_is_already_terminal()
+        {
+            CottonTransferQueueItem completed = CreateQueuedUpload()
+                .Start(CreatedAt.AddSeconds(1))
+                .Complete(CreatedAt.AddSeconds(2));
+            var metadataStore = new FakeTransferMetadataStore([completed]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient);
+
+            CottonQueuedUploadExecutionResult result =
+                await executor.ExecuteAsync(InstanceUri, TransferId);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.TransferNotQueued, result.Status);
+            Assert.Equal(CottonTransferStatus.Completed, result.Transfer?.Status);
+            Assert.Equal("Upload transfer is not waiting to run.", result.FailureMessage);
+            Assert.Empty(uploadClient.UploadedTransferIds);
+            Assert.Empty(metadataStore.SaveSnapshots);
+        }
+
+        [Fact]
         public async Task ExecuteNext_records_camera_backup_upload_after_completed_upload()
         {
             CottonTransferQueueItem queued = CreateCameraBackupQueuedUpload();

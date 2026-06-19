@@ -7,5 +7,7 @@ namespace Cotton.Mobile.Services
         MissingStagedFile = 2,
         Completed = 3,
         Failed = 4,
+        TransferNotFound = 5,
+        TransferNotQueued = 6,
     }
 }

@@ -9,5 +9,6 @@ namespace Cotton.Mobile.Services
         PushPayloadPrivacyFiltering = 4,
         StaleTokenCleanup = 5,
         UserNotificationPreferences = 6,
+        ProviderDeliveryService = 7,
     }
 }

@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
             CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
             CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
             CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
+            CottonRemotePushServerCapabilityKind.ProviderDeliveryService,
         };
 
         private static readonly CottonRemotePushServerCapabilityKind[] CurrentBackendCapabilities =
@@ -21,6 +22,7 @@ namespace Cotton.Mobile.Services
             CottonRemotePushServerCapabilityKind.ServerEventCategories,
             CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
             CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
+            CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
         };
 
         private static readonly CottonRemotePushEventCategorySnapshot[] EventCategories =

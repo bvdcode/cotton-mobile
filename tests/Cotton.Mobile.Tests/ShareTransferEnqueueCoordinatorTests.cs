@@ -53,6 +53,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("text/plain", transfer.ContentType);
             Assert.Equal(DestinationFolderId, transfer.Destination?.FolderId);
             Assert.Equal("Default", transfer.Destination?.Path);
+            Assert.Equal(CottonTransferSourceKind.ShareInbox, transfer.Source?.Kind);
+            Assert.Equal(ItemId.ToString("D"), transfer.Source?.SourceId);
+            Assert.Equal(13, transfer.Source?.SizeBytes);
+            Assert.Equal(CreatedAt, transfer.Source?.CapturedAtUtc);
 
             CottonTransferStagedFileSnapshot stagedTransfer =
                 Assert.Single(await _transferStagingStore.ListAsync(InstanceUri));

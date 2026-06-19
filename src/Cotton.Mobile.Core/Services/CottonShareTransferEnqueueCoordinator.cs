@@ -82,7 +82,11 @@ namespace Cotton.Mobile.Services
                             candidate.Snapshot.Destination!.FolderId,
                             candidate.Snapshot.Destination.FolderName,
                             candidate.Snapshot.Destination.Path),
-                        candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType));
+                        candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType,
+                        CottonTransferSourceSnapshot.CreateShareInbox(
+                            candidate.Item.Id,
+                            candidate.Snapshot.ReceivedAtUtc,
+                            stagedFile.SizeBytes)));
             }
 
             IReadOnlySet<Guid> enqueuedItemIds = candidates

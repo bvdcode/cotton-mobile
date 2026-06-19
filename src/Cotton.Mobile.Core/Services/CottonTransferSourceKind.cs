@@ -4,5 +4,6 @@ namespace Cotton.Mobile.Services
     {
         Unknown = 0,
         CameraBackup = 1,
+        ShareInbox = 2,
     }
 }

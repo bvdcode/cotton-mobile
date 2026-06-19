@@ -53,6 +53,24 @@ namespace Cotton.Mobile.Services
                 candidate.CapturedAtUtc);
         }
 
+        public static CottonTransferSourceSnapshot CreateShareInbox(
+            Guid itemId,
+            DateTime receivedAtUtc,
+            long sizeBytes)
+        {
+            if (itemId == Guid.Empty)
+            {
+                throw new ArgumentException("Share inbox item id cannot be empty.", nameof(itemId));
+            }
+
+            return new CottonTransferSourceSnapshot(
+                CottonTransferSourceKind.ShareInbox,
+                itemId.ToString("D"),
+                lastModifiedUtc: null,
+                sizeBytes,
+                receivedAtUtc);
+        }
+
         public bool MatchesCameraBackupIdentity(CottonCameraBackupMediaIdentity identity)
         {
             ArgumentNullException.ThrowIfNull(identity);

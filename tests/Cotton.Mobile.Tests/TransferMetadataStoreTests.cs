@@ -82,6 +82,35 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_and_load_preserves_transfer_source()
+        {
+            Guid shareItemId = Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff");
+            DateTime receivedAtUtc = CreatedAt.AddMinutes(-10);
+            CottonTransferSourceSnapshot source =
+                CottonTransferSourceSnapshot.CreateShareInbox(
+                    shareItemId,
+                    receivedAtUtc,
+                    sizeBytes: 321);
+            CottonTransferQueueItem transfer = CottonTransferQueueItem.CreateUpload(
+                UploadId,
+                "shared.bin",
+                321,
+                CreatedAt,
+                destination: null,
+                "application/octet-stream",
+                source);
+
+            await _store.SaveAsync(InstanceUri, [transfer]);
+
+            CottonTransferQueueItem loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            Assert.Equal(CottonTransferSourceKind.ShareInbox, loaded.Source?.Kind);
+            Assert.Equal(shareItemId.ToString("D"), loaded.Source?.SourceId);
+            Assert.Null(loaded.Source?.LastModifiedUtc);
+            Assert.Equal(321, loaded.Source?.SizeBytes);
+            Assert.Equal(receivedAtUtc, loaded.Source?.CapturedAtUtc);
+        }
+
+        [Fact]
         public async Task Load_defaults_older_transfer_metadata_without_content_type()
         {
             Directory.CreateDirectory(_directory);

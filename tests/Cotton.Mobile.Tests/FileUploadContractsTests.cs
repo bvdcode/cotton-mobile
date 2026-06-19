@@ -56,15 +56,47 @@ namespace Cotton.Mobile.Tests
                 200,
                 new Dictionary<string, string>
                 {
-                    [" cottonMobileSource "] = " picked-photo ",
-                    ["cottonMobileOriginalLastModifiedUtc"] = " 2026-06-19T10:00:00.0000000Z ",
+                    [$" {CottonFileUploadMetadataKeys.Source} "] = " picked-photo ",
+                    [CottonFileUploadMetadataKeys.OriginalLastModifiedUtc] = " 2026-06-19T10:00:00.0000000Z ",
                     [" "] = "ignored",
                     ["ignored"] = " ",
                 });
 
-            Assert.Equal("picked-photo", snapshot.Metadata["cottonMobileSource"]);
-            Assert.Equal("2026-06-19T10:00:00.0000000Z", snapshot.Metadata["cottonMobileOriginalLastModifiedUtc"]);
+            Assert.Equal("picked-photo", snapshot.Metadata[CottonFileUploadMetadataKeys.Source]);
+            Assert.Equal(
+                "2026-06-19T10:00:00.0000000Z",
+                snapshot.Metadata[CottonFileUploadMetadataKeys.OriginalLastModifiedUtc]);
             Assert.DoesNotContain("ignored", snapshot.Metadata.Keys);
+        }
+
+        [Fact]
+        public void Upload_source_snapshot_records_selected_media_quality_policy()
+        {
+            var photoSnapshot = new CottonFileUploadSourceSnapshot(
+                "photo.jpg",
+                "image/jpeg",
+                200,
+                new Dictionary<string, string>
+                {
+                    [CottonFileUploadMetadataKeys.Source] = "picked-photo",
+                    [CottonFileUploadMetadataKeys.QualityPolicy] = "original-preferred",
+                    [CottonFileUploadMetadataKeys.CompressionQuality] = "100",
+                    [CottonFileUploadMetadataKeys.PreserveMetadata] = "true",
+                });
+            var videoSnapshot = new CottonFileUploadSourceSnapshot(
+                "video.mp4",
+                "video/mp4",
+                400,
+                new Dictionary<string, string>
+                {
+                    [CottonFileUploadMetadataKeys.Source] = "picked-video",
+                    [CottonFileUploadMetadataKeys.QualityPolicy] = "original",
+                });
+
+            Assert.Equal("original-preferred", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
+            Assert.Equal("100", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.CompressionQuality]);
+            Assert.Equal("true", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.PreserveMetadata]);
+            Assert.Equal("original", videoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
         }
 
         [Fact]
@@ -76,13 +108,13 @@ namespace Cotton.Mobile.Tests
                 200,
                 new Dictionary<string, string>
                 {
-                    ["cottonMobileSource"] = "picked-photo",
+                    [CottonFileUploadMetadataKeys.Source] = "picked-photo",
                 });
 
             CottonFileUploadSourceSnapshot renamed = snapshot.WithName("photo (1).jpg");
 
             Assert.Equal("photo (1).jpg", renamed.Name);
-            Assert.Equal("picked-photo", renamed.Metadata["cottonMobileSource"]);
+            Assert.Equal("picked-photo", renamed.Metadata[CottonFileUploadMetadataKeys.Source]);
         }
 
         [Fact]

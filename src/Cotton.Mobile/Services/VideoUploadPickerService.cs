@@ -1,28 +1,27 @@
-using Microsoft.Maui.Storage;
+using Microsoft.Maui.Media;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileUploadPickerService : IFileUploadPickerService
+    public class VideoUploadPickerService : IVideoUploadPickerService
     {
-        private const string PickerTitle = "Upload file";
+        private readonly IMediaPicker _mediaPicker;
 
-        private readonly IFilePicker _filePicker;
-
-        public FileUploadPickerService(IFilePicker filePicker)
+        public VideoUploadPickerService(IMediaPicker mediaPicker)
         {
-            ArgumentNullException.ThrowIfNull(filePicker);
+            ArgumentNullException.ThrowIfNull(mediaPicker);
 
-            _filePicker = filePicker;
+            _mediaPicker = mediaPicker;
         }
 
-        public async Task<CottonFileUploadSource?> PickFileAsync(CancellationToken cancellationToken = default)
+        public async Task<CottonFileUploadSource?> PickVideoAsync(CancellationToken cancellationToken = default)
         {
-            FileResult? result = await _filePicker.PickAsync(
-                new PickOptions
+            IReadOnlyList<FileResult> results = await _mediaPicker.PickVideosAsync(
+                new MediaPickerOptions
                 {
-                    PickerTitle = PickerTitle,
+                    SelectionLimit = 1,
                 });
             cancellationToken.ThrowIfCancellationRequested();
+            FileResult? result = results.FirstOrDefault();
             if (result is null)
             {
                 return null;
@@ -32,7 +31,7 @@ namespace Cotton.Mobile.Services
                 result.FileName,
                 result.ContentType,
                 TryGetFileSize(result.FullPath),
-                CreateUploadMetadata(result.FullPath, "picked-file"));
+                CreateUploadMetadata(result.FullPath));
             return new CottonFileUploadSource(
                 snapshot,
                 async token =>
@@ -53,11 +52,12 @@ namespace Cotton.Mobile.Services
             return new FileInfo(path).Length;
         }
 
-        private static IReadOnlyDictionary<string, string> CreateUploadMetadata(string? path, string source)
+        private static IReadOnlyDictionary<string, string> CreateUploadMetadata(string? path)
         {
             var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                [CottonFileUploadMetadataKeys.Source] = source,
+                [CottonFileUploadMetadataKeys.Source] = "picked-video",
+                [CottonFileUploadMetadataKeys.QualityPolicy] = "original",
             };
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))

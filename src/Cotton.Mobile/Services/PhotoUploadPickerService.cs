@@ -19,6 +19,8 @@ namespace Cotton.Mobile.Services
                 new MediaPickerOptions
                 {
                     CompressionQuality = 100,
+                    PreserveMetaData = true,
+                    RotateImage = false,
                     SelectionLimit = 1,
                 });
             cancellationToken.ThrowIfCancellationRequested();
@@ -57,12 +59,15 @@ namespace Cotton.Mobile.Services
         {
             var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                ["cottonMobileSource"] = "picked-photo",
+                [CottonFileUploadMetadataKeys.Source] = "picked-photo",
+                [CottonFileUploadMetadataKeys.QualityPolicy] = "original-preferred",
+                [CottonFileUploadMetadataKeys.CompressionQuality] = "100",
+                [CottonFileUploadMetadataKeys.PreserveMetadata] = "true",
             };
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
             {
-                metadata["cottonMobileOriginalLastModifiedUtc"] =
+                metadata[CottonFileUploadMetadataKeys.OriginalLastModifiedUtc] =
                     File.GetLastWriteTimeUtc(path).ToString("O", System.Globalization.CultureInfo.InvariantCulture);
             }
 

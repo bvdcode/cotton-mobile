@@ -18,6 +18,8 @@ namespace Cotton.Mobile.ViewModels
         private const string ShareAction = "Share";
         private const string UploadPhotoAction = "Upload photo";
         private const string UploadPhotoToFolderAction = "Upload photo to folder";
+        private const string UploadVideoAction = "Upload video";
+        private const string UploadVideoToFolderAction = "Upload video to folder";
         private const string UploadFileAction = "Upload file";
         private const string SortNameAction = "Name";
         private const string SortUpdatedAction = "Updated";
@@ -42,6 +44,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileUploadPickerService _fileUploadPickerService;
         private readonly IPhotoUploadPickerService _photoUploadPickerService;
+        private readonly IVideoUploadPickerService _videoUploadPickerService;
         private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
@@ -74,6 +77,7 @@ namespace Cotton.Mobile.ViewModels
             IFileBrowserPreferenceStore preferenceStore,
             IFileUploadPickerService fileUploadPickerService,
             IPhotoUploadPickerService photoUploadPickerService,
+            IVideoUploadPickerService videoUploadPickerService,
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
@@ -91,6 +95,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
+            ArgumentNullException.ThrowIfNull(videoUploadPickerService);
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
@@ -108,6 +113,7 @@ namespace Cotton.Mobile.ViewModels
             _preferenceStore = preferenceStore;
             _fileUploadPickerService = fileUploadPickerService;
             _photoUploadPickerService = photoUploadPickerService;
+            _videoUploadPickerService = videoUploadPickerService;
             _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
@@ -353,7 +359,9 @@ namespace Cotton.Mobile.ViewModels
                 CancelAction,
                 null,
                 UploadPhotoAction,
+                UploadVideoAction,
                 UploadPhotoToFolderAction,
+                UploadVideoToFolderAction,
                 UploadFileAction);
 
             if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
@@ -373,7 +381,28 @@ namespace Cotton.Mobile.ViewModels
             }
             else if (normalizedAction == UploadPhotoToFolderAction)
             {
-                await UploadPhotoToDestinationAsync(instanceUri);
+                await UploadPickedSourceToDestinationAsync(
+                    instanceUri,
+                    _photoUploadPickerService.PickPhotoAsync,
+                    "photo",
+                    "Could not choose photo.");
+            }
+            else if (normalizedAction == UploadVideoAction)
+            {
+                await UploadPickedSourceAsync(
+                    instanceUri,
+                    folder,
+                    _videoUploadPickerService.PickVideoAsync,
+                    "video",
+                    "Could not choose video.");
+            }
+            else if (normalizedAction == UploadVideoToFolderAction)
+            {
+                await UploadPickedSourceToDestinationAsync(
+                    instanceUri,
+                    _videoUploadPickerService.PickVideoAsync,
+                    "video",
+                    "Could not choose video.");
             }
             else if (normalizedAction == UploadFileAction)
             {
@@ -1027,7 +1056,11 @@ namespace Cotton.Mobile.ViewModels
                 refreshCurrentFolderAfterUpload: true);
         }
 
-        private async Task UploadPhotoToDestinationAsync(Uri instanceUri)
+        private async Task UploadPickedSourceToDestinationAsync(
+            Uri instanceUri,
+            Func<CancellationToken, Task<CottonFileUploadSource?>> pickSourceAsync,
+            string sourceKind,
+            string pickFailureStatus)
         {
             if (!_networkAccess.HasInternetAccess)
             {
@@ -1086,9 +1119,9 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CottonFileUploadSource? source = await PickUploadSourceAsync(
-                _photoUploadPickerService.PickPhotoAsync,
-                "photo",
-                "Could not choose photo.");
+                pickSourceAsync,
+                sourceKind,
+                pickFailureStatus);
             if (source is null)
             {
                 return;

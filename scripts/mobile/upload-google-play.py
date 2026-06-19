@@ -17,6 +17,7 @@ ANDROID_PUBLISHER_UPLOAD_BASE_URL = "https://androidpublisher.googleapis.com/upl
 DEFAULT_SERVICE_ACCOUNT_ENV = "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
 DEFAULT_TIMEOUT_SECONDS = 120
 DEFAULT_RELEASE_NOTES_LANGUAGE = "en-US"
+MAX_RELEASE_NOTES_LENGTH = 500
 
 logger = logging.getLogger("upload-google-play")
 
@@ -363,6 +364,11 @@ def read_optional_release_notes(path: Path | None) -> str | None:
     release_notes = release_notes_path.read_text(encoding="utf-8").strip()
     if not release_notes:
         raise GooglePlayUploadError(f"Release notes file is empty: {release_notes_path}")
+    if len(release_notes) > MAX_RELEASE_NOTES_LENGTH:
+        raise GooglePlayUploadError(
+            f"Release notes file is {len(release_notes)} characters; "
+            f"Google Play allows at most {MAX_RELEASE_NOTES_LENGTH}: {release_notes_path}"
+        )
 
     return release_notes
 

@@ -4,6 +4,7 @@ using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
+using Microsoft.Maui.Media;
 using Microsoft.Maui.Networking;
 using Microsoft.Maui.Storage;
 
@@ -30,6 +31,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IShare>(Share.Default);
 			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
 			builder.Services.AddSingleton<IFilePicker>(FilePicker.Default);
+			builder.Services.AddSingleton<IMediaPicker>(MediaPicker.Default);
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
 			builder.Services.AddSingleton(FileDownloadCacheOptions.Default);
@@ -70,6 +72,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileUploadPickerService, FileUploadPickerService>();
+			builder.Services.AddSingleton<IPhotoUploadPickerService, PhotoUploadPickerService>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
 			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();

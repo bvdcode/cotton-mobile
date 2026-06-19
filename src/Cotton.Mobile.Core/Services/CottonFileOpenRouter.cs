@@ -6,6 +6,12 @@ namespace Cotton.Mobile.Services
         public const string OpenActionLabel = "Open";
         public const string OpenWithSystemAppActionLabel = "Open with system app";
         public const string OpenUnavailableStatus = "No app can open this file.";
+        public const string PdfOpenUnavailableStatus = "No PDF app can open this file.";
+        public const string DocumentOpenUnavailableStatus = "No document app can open this file.";
+        public const string AudioOpenUnavailableStatus = "No audio app can open this file.";
+        public const string VideoOpenUnavailableStatus = "No video app can open this file.";
+        public const string ArchiveOpenUnavailableStatus = "No archive app can open this file.";
+        public const string UnknownOpenUnavailableStatus = "No app can open this file type.";
 
         private static readonly Dictionary<string, string> ExtensionContentTypes =
             new(StringComparer.OrdinalIgnoreCase)
@@ -100,12 +106,13 @@ namespace Cotton.Mobile.Services
                     contentType);
             }
 
+            CottonSystemFileOpenKind systemKind = ResolveSystemKind(file, contentType);
             return new CottonFileOpenRoute(
                 CottonFileOpenTarget.SystemApp,
                 CottonFilePreviewKind.None,
-                ResolveSystemKind(file, contentType),
+                systemKind,
                 OpenWithSystemAppActionLabel,
-                OpenUnavailableStatus,
+                CreateUnavailableStatus(systemKind),
                 contentType);
         }
 
@@ -160,6 +167,20 @@ namespace Cotton.Mobile.Services
                 _ when mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Image,
                 _ => CottonSystemFileOpenKind.File,
+            };
+        }
+
+        private static string CreateUnavailableStatus(CottonSystemFileOpenKind kind)
+        {
+            return kind switch
+            {
+                CottonSystemFileOpenKind.Pdf => PdfOpenUnavailableStatus,
+                CottonSystemFileOpenKind.Document => DocumentOpenUnavailableStatus,
+                CottonSystemFileOpenKind.Audio => AudioOpenUnavailableStatus,
+                CottonSystemFileOpenKind.Video => VideoOpenUnavailableStatus,
+                CottonSystemFileOpenKind.Archive => ArchiveOpenUnavailableStatus,
+                CottonSystemFileOpenKind.File => UnknownOpenUnavailableStatus,
+                _ => OpenUnavailableStatus,
             };
         }
     }

@@ -2182,7 +2182,7 @@ namespace Cotton.Mobile.ViewModels
                 ShowFileActionRetry(
                     MainPageFileAction.Open,
                     file,
-                    CreateFileActionFailureStatus(exception, "Open failed.", OfflineOpenStatus));
+                    CreateOpenFileActionFailureStatus(file, exception));
             }
             finally
             {
@@ -2524,7 +2524,7 @@ namespace Cotton.Mobile.ViewModels
                 ShowFileActionRetry(
                     MainPageFileAction.Open,
                     file,
-                    CreateFileActionFailureStatus(exception, "Open failed.", OfflineOpenStatus));
+                    CreateOpenFileActionFailureStatus(file, exception));
                 return false;
             }
         }
@@ -3038,6 +3038,20 @@ namespace Cotton.Mobile.ViewModels
             return exception is FileOpenUnavailableException
                 ? OpenUnavailableStatus
                 : fallbackStatus;
+        }
+
+        private string CreateOpenFileActionFailureStatus(
+            CottonFileBrowserEntry file,
+            Exception exception)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return OfflineOpenStatus;
+            }
+
+            return exception is FileOpenUnavailableException
+                ? CottonFileOpenRouter.CreateRoute(file).UnavailableStatus
+                : "Open failed.";
         }
 
         private string CreateUploadFailureStatus(Exception exception)

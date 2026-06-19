@@ -52,18 +52,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData("report.pdf", "", CottonSystemFileOpenKind.Pdf, "application/pdf")]
-        [InlineData("song.mp3", "audio/mpeg", CottonSystemFileOpenKind.Audio, "audio/mpeg")]
-        [InlineData("movie.mp4", "", CottonSystemFileOpenKind.Video, "video/mp4")]
-        [InlineData("brief.docx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.wordprocessingml.document")]
-        [InlineData("slides.pptx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.presentationml.presentation")]
-        [InlineData("archive.zip", "", CottonSystemFileOpenKind.Archive, "application/zip")]
-        [InlineData("unknown.bin", "", CottonSystemFileOpenKind.File, null)]
+        [InlineData("report.pdf", "", CottonSystemFileOpenKind.Pdf, "application/pdf", "No PDF app can open this file.")]
+        [InlineData("song.mp3", "audio/mpeg", CottonSystemFileOpenKind.Audio, "audio/mpeg", "No audio app can open this file.")]
+        [InlineData("movie.mp4", "", CottonSystemFileOpenKind.Video, "video/mp4", "No video app can open this file.")]
+        [InlineData("brief.docx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "No document app can open this file.")]
+        [InlineData("slides.pptx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "No document app can open this file.")]
+        [InlineData("archive.zip", "", CottonSystemFileOpenKind.Archive, "application/zip", "No archive app can open this file.")]
+        [InlineData("unknown.bin", "", CottonSystemFileOpenKind.File, null, "No app can open this file type.")]
         public void Non_preview_types_route_to_system_open(
             string name,
             string contentType,
             CottonSystemFileOpenKind expectedSystemKind,
-            string? expectedContentType)
+            string? expectedContentType,
+            string expectedUnavailableStatus)
         {
             CottonFileOpenRoute route = CottonFileOpenRouter.CreateRoute(
                 CreateEntry(name, contentType, sizeBytes: 1024));
@@ -74,7 +75,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonFilePreviewKind.None, route.PreviewKind);
             Assert.Equal(expectedSystemKind, route.SystemKind);
             Assert.Equal("Open with system app", route.ActionLabel);
-            Assert.Equal("No app can open this file.", route.UnavailableStatus);
+            Assert.Equal(expectedUnavailableStatus, route.UnavailableStatus);
             Assert.Equal(expectedContentType, route.ContentType);
         }
 

@@ -60,6 +60,7 @@ namespace Cotton.Mobile.Services
             TransferId = transferId;
             DisplayName = displayName.Trim();
             Strategy = strategy;
+            ScheduleIdentity = CottonAndroidBackgroundTransferScheduleIdentity.Create(instanceUri, transferId);
             EstimatedUploadBytes = estimatedUploadBytes;
             RequiresNetwork = requiresNetwork;
             RequiresUnmeteredNetwork = requiresUnmeteredNetwork;
@@ -73,6 +74,8 @@ namespace Cotton.Mobile.Services
         public string DisplayName { get; }
 
         public CottonAndroidTransferExecutionStrategy Strategy { get; }
+
+        public CottonAndroidBackgroundTransferScheduleIdentity ScheduleIdentity { get; }
 
         public long? EstimatedUploadBytes { get; }
 

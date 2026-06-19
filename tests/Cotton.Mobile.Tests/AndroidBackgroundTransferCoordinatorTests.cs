@@ -33,6 +33,14 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonAndroidTransferExecutionHost.UserInitiatedDataTransfer, request.Host);
             Assert.Equal(TransferId, request.TransferId);
             Assert.Equal("upload.bin", request.DisplayName);
+            Assert.Equal(1239595930, request.ScheduleIdentity.JobId);
+            Assert.Equal(
+                "cotton-transfer-d20f82574bbbb5a5-aaaaaaaabbbbccccddddeeeeeeeeeeee",
+                request.ScheduleIdentity.UniqueWorkName);
+            Assert.Equal(
+                "cotton-transfer-aaaaaaaabbbbccccddddeeeeeeeeeeee",
+                request.ScheduleIdentity.TransferTag);
+            Assert.DoesNotContain("app.cottoncloud.dev", request.ScheduleIdentity.UniqueWorkName);
             Assert.Equal(123, request.EstimatedUploadBytes);
             Assert.True(request.RequiresNetwork);
             Assert.False(request.RequiresUnmeteredNetwork);
@@ -74,6 +82,26 @@ namespace Cotton.Mobile.Tests
             Assert.True(request.RequiresNetwork);
             Assert.True(request.RequiresUnmeteredNetwork);
             Assert.True(request.RequiresCharging);
+        }
+
+        [Fact]
+        public void Schedule_identity_is_stable_and_transfer_scoped()
+        {
+            CottonAndroidBackgroundTransferScheduleIdentity first =
+                CottonAndroidBackgroundTransferScheduleIdentity.Create(InstanceUri, TransferId);
+            CottonAndroidBackgroundTransferScheduleIdentity second =
+                CottonAndroidBackgroundTransferScheduleIdentity.Create(InstanceUri, TransferId);
+            CottonAndroidBackgroundTransferScheduleIdentity otherTransfer =
+                CottonAndroidBackgroundTransferScheduleIdentity.Create(
+                    InstanceUri,
+                    Guid.Parse("cccccccc-dddd-eeee-ffff-000000000000"));
+
+            Assert.Equal(first.JobId, second.JobId);
+            Assert.Equal(first.UniqueWorkName, second.UniqueWorkName);
+            Assert.Equal(first.TransferTag, second.TransferTag);
+            Assert.NotEqual(first.JobId, otherTransfer.JobId);
+            Assert.NotEqual(first.UniqueWorkName, otherTransfer.UniqueWorkName);
+            Assert.True(first.JobId > 0);
         }
 
         [Fact]

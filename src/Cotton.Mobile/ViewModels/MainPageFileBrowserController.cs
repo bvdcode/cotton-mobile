@@ -2285,9 +2285,14 @@ namespace Cotton.Mobile.ViewModels
                 _display.ClearFileLocalCopy(file);
             }
 
+            CottonFileDetailsDisplayState details = CottonFileDetailsDisplayState.Create(
+                file,
+                localFile,
+                TimeZoneInfo.Local);
+
             await _dialogService.ShowAlertAsync(
-                file.Name,
-                CreateFileDetailsMessage(file, localFile),
+                details.Title,
+                details.Message,
                 "OK");
         }
 
@@ -2314,54 +2319,6 @@ namespace Cotton.Mobile.ViewModels
             cancellationToken.ThrowIfCancellationRequested();
             await RefreshLocalFileStateAsync(instanceUri, cancellationToken);
             return downloadedFile;
-        }
-
-        private static string CreateFileDetailsMessage(
-            CottonFileBrowserEntry file,
-            CottonLocalFileSnapshot? localFile)
-        {
-            string size = file.SizeBytes.HasValue ? CottonFileSizeFormatter.Format(file.SizeBytes.Value) : "Unknown";
-            string contentType = file.ContentType ?? "Unknown";
-            string localCopy = CreateLocalCopyDetails(file, localFile);
-            string updated = FormatLocalTimestamp(file.UpdatedAtUtc);
-
-            return string.Join(
-                Environment.NewLine,
-                $"Type: {file.Kind}",
-                $"Size: {size}",
-                $"Updated: {updated}",
-                $"Content type: {contentType}",
-                $"On device: {localCopy}");
-        }
-
-        private static string FormatLocalTimestamp(DateTime value)
-        {
-            DateTime utc = value.Kind == DateTimeKind.Utc
-                ? value
-                : value.ToUniversalTime();
-            return $"{utc.ToLocalTime():yyyy-MM-dd HH:mm}";
-        }
-
-        private static string CreateLocalCopyDetails(
-            CottonFileBrowserEntry file,
-            CottonLocalFileSnapshot? localFile)
-        {
-            if (localFile is null)
-            {
-                return "No";
-            }
-
-            if (file.SizeBytes.HasValue && file.SizeBytes.Value != localFile.SizeBytes)
-            {
-                return $"Needs refresh ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
-            }
-
-            if (!CottonLocalFileFreshness.IsFresh(localFile.UpdatedAtUtc, file.UpdatedAtUtc))
-            {
-                return $"Needs refresh ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
-            }
-
-            return $"Yes ({CottonFileSizeFormatter.Format(localFile.SizeBytes)})";
         }
 
         private static bool IsReusableLocalFile(

@@ -155,6 +155,22 @@ namespace Cotton.Mobile.Tests
             Assert.Throws<ArgumentException>(() => new CottonLocalFileSnapshot(" ", 1, UpdatedAt));
         }
 
+        [Fact]
+        public void Offline_file_status_text_keeps_user_copy_explicit()
+        {
+            Assert.Equal(
+                "Keeping notes.txt offline...",
+                CottonOfflineFileStatusText.CreateStartingStatus(" notes.txt "));
+            Assert.Equal(
+                "notes.txt is available offline.",
+                CottonOfflineFileStatusText.CreateAvailableStatus("notes.txt"));
+            Assert.Equal(
+                "Offline. Keep offline needs internet.",
+                CottonOfflineFileStatusText.OfflineUnavailableStatus);
+            Assert.Equal("Keep offline cancelled.", CottonOfflineFileStatusText.CancelledStatus);
+            Assert.Equal("Keep offline failed.", CottonOfflineFileStatusText.FailedStatus);
+        }
+
         private static NodeFileManifestDto CreateFile(
             string name,
             string contentType,

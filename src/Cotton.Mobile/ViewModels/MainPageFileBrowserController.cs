@@ -13,6 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
         private const string DownloadAgainAction = "Download again";
+        private const string KeepOfflineAction = "Keep offline";
         private const string OpenAction = "Open";
         private const string OpenWithSystemAppAction = "Open with system app";
         private const string ShareAction = "Share";
@@ -499,6 +500,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.Download:
                     await DownloadFileAsync(currentEntry);
                     break;
+                case MainPageFileAction.KeepOffline:
+                    await KeepFileOfflineAsync(currentEntry);
+                    break;
                 case MainPageFileAction.Open:
                     await OpenFileAsync(currentEntry);
                     break;
@@ -568,6 +572,7 @@ namespace Cotton.Mobile.ViewModels
                 null,
                 openAction,
                 downloadAction,
+                KeepOfflineAction,
                 ShareAction,
                 DetailsAction);
 
@@ -588,6 +593,9 @@ namespace Cotton.Mobile.ViewModels
                 case DownloadAction:
                 case DownloadAgainAction:
                     await DownloadFileAsync(currentFile);
+                    break;
+                case KeepOfflineAction:
+                    await KeepFileOfflineAsync(currentFile);
                     break;
                 case ShareAction:
                     await ShareFileAsync(currentFile);
@@ -1013,6 +1021,109 @@ namespace Cotton.Mobile.ViewModels
                     MainPageFileAction.Download,
                     file,
                     CreateFileActionFailureStatus(exception, "Download failed.", OfflineDownloadStatus));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task KeepFileOfflineAsync(CottonFileBrowserEntry file)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to keep files offline.");
+                return;
+            }
+
+            CottonLocalFileSnapshot? reusableLocalFile =
+                _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
+            if (reusableLocalFile is not null)
+            {
+                _display.ShowFileLocalCopy(file, reusableLocalFile);
+                _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(file.Name));
+                return;
+            }
+
+            if (ShowOfflineRetryIfNeeded(
+                    MainPageFileAction.KeepOffline,
+                    file,
+                    CottonOfflineFileStatusText.OfflineUnavailableStatus))
+            {
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction(CottonOfflineFileStatusText.CreateStartingStatus(file.Name));
+            bool shouldRunRecoveryRefresh = false;
+
+            try
+            {
+                CottonFileDownloadResult result = await _fileBrowserService.DownloadAsync(
+                    instanceUri,
+                    file,
+                    CreateFileDownloadProgress(
+                        file,
+                        "Saving",
+                        () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                        fileActionCancellation.Token),
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                RefreshLocalFileMarkers(instanceUri);
+                _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(result.FileName));
+                shouldRunRecoveryRefresh = true;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile keep-offline authorization failure {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile keep-offline cancellation {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                if (ShowReusableLocalFileIfAvailable(file))
+                {
+                    _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(file.Name));
+                    return;
+                }
+
+                _display.ShowFilesStatus(CottonOfflineFileStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile keep-offline failure {FileId}.", file.Id);
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to keep Cotton mobile file offline {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.KeepOffline,
+                    file,
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonOfflineFileStatusText.FailedStatus,
+                        CottonOfflineFileStatusText.OfflineUnavailableStatus));
             }
             finally
             {

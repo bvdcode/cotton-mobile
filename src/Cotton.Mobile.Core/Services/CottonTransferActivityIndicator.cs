@@ -138,7 +138,7 @@ namespace Cotton.Mobile.Services
 
             if (FailedCount > 0)
             {
-                return "Tap to review";
+                return CreateFailedDetails();
             }
 
             if (RunningCount > 0 && QueuedCount > 0)
@@ -157,6 +157,26 @@ namespace Cotton.Mobile.Services
         private static string FormatCount(int count, string singular, string plural)
         {
             return count == 1 ? $"1 {singular}" : $"{count:N0} {plural}";
+        }
+
+        private string CreateFailedDetails()
+        {
+            if (RunningCount > 0)
+            {
+                return FormatCount(RunningCount, "running", "running");
+            }
+
+            if (QueuedCount > 0)
+            {
+                return FormatCount(QueuedCount, "waiting", "waiting");
+            }
+
+            if (PausedCount > 0)
+            {
+                return FormatCount(PausedCount, "paused", "paused");
+            }
+
+            return "Tap to review";
         }
     }
 }

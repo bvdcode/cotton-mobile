@@ -136,13 +136,32 @@ namespace Cotton.Mobile.Tests
             Assert.True(failedIndicator.IsVisible);
             Assert.True(failedIndicator.HasFailures);
             Assert.Equal("1 failed transfer", failedIndicator.Text);
-            Assert.Equal("Tap to review", failedIndicator.Details);
+            Assert.Equal("1 running", failedIndicator.Details);
 
             Assert.Equal("Uploading 1 item", runningIndicator.Text);
             Assert.Equal("1 running, 1 queued", runningIndicator.Details);
 
             Assert.Equal("1 transfer waiting", waitingIndicator.Text);
             Assert.Equal("Tap for details", waitingIndicator.Details);
+        }
+
+        [Fact]
+        public void Activity_indicator_surfaces_waiting_work_next_to_failed_work()
+        {
+            CottonTransferQueueItem queued = CreateUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "queued.jpg");
+            CottonTransferQueueItem failed = CreateUpload(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    "failed.jpg")
+                .Start(CreatedAt.AddSeconds(1))
+                .Fail("Offline", CreatedAt.AddSeconds(2));
+
+            CottonTransferActivityIndicator indicator = CottonTransferActivityIndicator.Create([queued, failed]);
+
+            Assert.Equal(2, indicator.ActiveCount);
+            Assert.Equal("1 failed transfer", indicator.Text);
+            Assert.Equal("1 waiting", indicator.Details);
         }
 
         private static CottonTransferListItem Find(

@@ -48,6 +48,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IDiagnosticsPageService, DiagnosticsPageService>();
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
+			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
 			builder.Services.AddSingleton<ICottonFolderContentCache, FileSystemCottonFolderContentCache>();
 			builder.Services.AddSingleton<ICottonTransferMetadataPathProvider, CottonTransferMetadataPathProvider>();
@@ -74,6 +75,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<MainPage>();
 			builder.Services.AddTransient<StorageSettingsViewModel>();
 			builder.Services.AddTransient<StoragePage>();
+			builder.Services.AddTransient<TransfersViewModel>();
+			builder.Services.AddTransient<TransfersPage>();
 
 #if DEBUG
 			builder.Logging.AddDebug();

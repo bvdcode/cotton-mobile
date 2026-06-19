@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountStorageAction = "Storage";
+        private const string AccountTransfersAction = "Transfers";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
@@ -31,6 +32,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IDiagnosticsPageService _diagnosticsPageService;
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
+        private readonly ITransfersPageService _transfersPageService;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
@@ -56,6 +58,7 @@ namespace Cotton.Mobile.ViewModels
             IDiagnosticsPageService diagnosticsPageService,
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
+            ITransfersPageService transfersPageService,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
@@ -81,6 +84,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(diagnosticsPageService);
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
+            ArgumentNullException.ThrowIfNull(transfersPageService);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
@@ -106,6 +110,7 @@ namespace Cotton.Mobile.ViewModels
             _diagnosticsPageService = diagnosticsPageService;
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
+            _transfersPageService = transfersPageService;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
@@ -386,6 +391,7 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
+                AccountTransfersAction,
                 AccountStorageAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -403,6 +409,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountPrivacyPolicyAction:
                     await OpenPrivacyPolicyAsync();
+                    break;
+                case AccountTransfersAction:
+                    await OpenTransfersAsync();
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
@@ -585,6 +594,32 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Storage",
                     "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenTransfersAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Transfers",
+                    "Could not open transfers for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _transfersPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile transfers page.");
+                await _dialogService.ShowAlertAsync(
+                    "Transfers",
+                    "Could not inspect transfers.",
                     "OK");
             }
         }

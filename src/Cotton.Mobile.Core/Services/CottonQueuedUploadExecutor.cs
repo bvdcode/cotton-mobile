@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonQueuedUploadClient _uploadClient;
         private readonly ICottonCameraBackupUploadedMediaStore _cameraBackupUploadedMediaStore;
         private readonly ICottonLocalNotificationService _localNotificationService;
+        private readonly ICottonTransferActivitySignal? _transferActivitySignal;
         private readonly TimeProvider _timeProvider;
 
         public CottonQueuedUploadExecutor(
@@ -24,7 +25,8 @@ namespace Cotton.Mobile.Services
                 uploadClient,
                 cameraBackupUploadedMediaStore,
                 null,
-                timeProvider)
+                timeProvider,
+                null)
         {
         }
 
@@ -34,7 +36,8 @@ namespace Cotton.Mobile.Services
             ICottonQueuedUploadClient uploadClient,
             ICottonCameraBackupUploadedMediaStore cameraBackupUploadedMediaStore,
             ICottonLocalNotificationService? localNotificationService = null,
-            TimeProvider? timeProvider = null)
+            TimeProvider? timeProvider = null,
+            ICottonTransferActivitySignal? transferActivitySignal = null)
         {
             ArgumentNullException.ThrowIfNull(metadataStore);
             ArgumentNullException.ThrowIfNull(stagingStore);
@@ -46,6 +49,7 @@ namespace Cotton.Mobile.Services
             _uploadClient = uploadClient;
             _cameraBackupUploadedMediaStore = cameraBackupUploadedMediaStore;
             _localNotificationService = localNotificationService ?? NullCottonLocalNotificationService.Instance;
+            _transferActivitySignal = transferActivitySignal;
             _timeProvider = timeProvider ?? TimeProvider.System;
         }
 
@@ -221,6 +225,7 @@ namespace Cotton.Mobile.Services
         {
             queue[transferIndex] = transfer;
             await _metadataStore.SaveAsync(instanceUri, queue, cancellationToken).ConfigureAwait(false);
+            _transferActivitySignal?.NotifyTransferActivityChanged();
         }
 
         private DateTime GetUtcNow()

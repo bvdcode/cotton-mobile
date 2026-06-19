@@ -94,7 +94,15 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferCoordinator, CottonAndroidBackgroundTransferCoordinator>();
 			builder.Services.AddSingleton<ICottonQueuedUploadClient, CottonQueuedUploadClient>();
-			builder.Services.AddSingleton<ICottonQueuedUploadExecutor, CottonQueuedUploadExecutor>();
+			builder.Services.AddSingleton<ICottonQueuedUploadExecutor>(
+				services => new CottonQueuedUploadExecutor(
+					services.GetRequiredService<ICottonTransferMetadataStore>(),
+					services.GetRequiredService<ICottonTransferStagingStore>(),
+					services.GetRequiredService<ICottonQueuedUploadClient>(),
+					services.GetRequiredService<ICottonCameraBackupUploadedMediaStore>(),
+					services.GetRequiredService<ICottonLocalNotificationService>(),
+					timeProvider: null,
+					transferActivitySignal: services.GetRequiredService<ICottonTransferActivitySignal>()));
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferJobRunner, CottonAndroidBackgroundTransferJobRunner>();
 			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
 			builder.Services.AddSingleton<ICottonShareLaunchState, CottonShareLaunchState>();

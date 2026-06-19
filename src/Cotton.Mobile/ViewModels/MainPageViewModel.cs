@@ -39,6 +39,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
+        private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
+        private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
         private readonly ICottonTransferActivitySignal _transferActivitySignal;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
@@ -70,6 +72,8 @@ namespace Cotton.Mobile.ViewModels
             ICaptureInboxPageService captureInboxPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
+            ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
+            IAndroidApiLevelProvider androidApiLevelProvider,
             ICottonTransferActivitySignal transferActivitySignal,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
@@ -103,6 +107,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
+            ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
+            ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
             ArgumentNullException.ThrowIfNull(transferActivitySignal);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
@@ -136,6 +142,8 @@ namespace Cotton.Mobile.ViewModels
             _captureInboxPageService = captureInboxPageService;
             _shareLaunchState = shareLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
+            _backgroundTransferCoordinator = backgroundTransferCoordinator;
+            _androidApiLevelProvider = androidApiLevelProvider;
             _transferActivitySignal = transferActivitySignal;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
@@ -1061,6 +1069,7 @@ namespace Cotton.Mobile.ViewModels
                 IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
                     await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
                 Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
+                await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");
@@ -1116,6 +1125,28 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile transfer queue.");
                 return [];
+            }
+        }
+
+        private async Task ResumeQueuedBackgroundTransferBestEffortAsync(Uri instanceUri)
+        {
+            try
+            {
+                CottonAndroidBackgroundTransferScheduleResult result =
+                    await _backgroundTransferCoordinator.ScheduleNextQueuedUploadAsync(
+                        instanceUri,
+                        _androidApiLevelProvider.CurrentApiLevel);
+                if (result.IsScheduled)
+                {
+                    _logger.LogInformation(
+                        "Rescheduled Cotton mobile queued upload {TransferId} with Android background host {Host}.",
+                        result.Request?.TransferId,
+                        result.Request?.Host);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to resume Cotton mobile queued background upload.");
             }
         }
 

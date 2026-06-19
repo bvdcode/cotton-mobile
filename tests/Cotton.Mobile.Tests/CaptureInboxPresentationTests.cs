@@ -128,6 +128,42 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Snapshot_flattens_multiple_staged_files_with_shared_destination()
+        {
+            Guid intakeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            CottonShareIntakeSnapshot stagedFiles = CottonShareIntakeSnapshot
+                .CreatePending(
+                    intakeId,
+                    CottonShareIntakeKind.SendMultiple,
+                    "text/plain",
+                    [
+                        CreateStagedItem(intakeId, "first.txt", 12),
+                        CreateStagedItem(intakeId, "second.txt", 14),
+                    ],
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Default",
+                        "Default"));
+
+            CottonCaptureInboxListSnapshot snapshot =
+                CottonCaptureInboxListSnapshot.Create([stagedFiles]);
+
+            Assert.Equal("2 captured items", snapshot.SummaryText);
+            Assert.Equal(["first.txt", "second.txt"], snapshot.Items.Select(item => item.DisplayName).ToArray());
+            Assert.All(snapshot.Items, item =>
+            {
+                Assert.Equal("Ready", item.StatusText);
+                Assert.Equal("Copied to this device", item.DetailText);
+                Assert.Equal("Destination: Default", item.DestinationText);
+                Assert.True(item.CanSelectDestination);
+                Assert.True(item.CanRename);
+                Assert.True(item.CanEnqueue);
+            });
+        }
+
+        [Fact]
         public void Snapshot_uses_upload_display_name_for_renamed_staged_files()
         {
             CottonShareIntakeSnapshot stagedFile = CreatePending(
@@ -156,26 +192,33 @@ namespace Cotton.Mobile.Tests
 
         private static CottonShareIntakeSnapshot CreatePending(Guid id, string displayName, DateTime receivedAtUtc)
         {
+            return CottonShareIntakeSnapshot.CreatePending(
+                id,
+                CottonShareIntakeKind.Send,
+                "text/plain",
+                [CreateStagedItem(id, displayName, 12)],
+                receivedAtUtc);
+        }
+
+        private static CottonShareIntakeItemSnapshot CreateStagedItem(
+            Guid intakeId,
+            string displayName,
+            long sizeBytes)
+        {
             Guid itemId = Guid.NewGuid();
             var staged = new CottonShareStagedContentSnapshot(
-                id,
+                intakeId,
                 itemId,
                 displayName,
                 $"/tmp/{displayName}",
-                12);
-            var item = new CottonShareIntakeItemSnapshot(
+                sizeBytes);
+            return new CottonShareIntakeItemSnapshot(
                     itemId,
                     CottonShareIntakeItemType.Uri,
                     $"content://shared/{displayName}",
                     displayName,
                     "text/plain")
                 .WithStagedContent(staged);
-            return CottonShareIntakeSnapshot.CreatePending(
-                id,
-                CottonShareIntakeKind.Send,
-                "text/plain",
-                [item],
-                receivedAtUtc);
         }
 
         private static CottonCaptureInboxListItem Find(

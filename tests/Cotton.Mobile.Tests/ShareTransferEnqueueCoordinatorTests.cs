@@ -10,6 +10,8 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid IntakeId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
         private static readonly Guid ItemId = Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff");
         private static readonly Guid TransferId = Guid.Parse("cccccccc-dddd-eeee-ffff-000000000000");
+        private static readonly Guid SecondItemId = Guid.Parse("dddddddd-eeee-ffff-0000-111111111111");
+        private static readonly Guid SecondTransferId = Guid.Parse("eeeeeeee-ffff-0000-1111-222222222222");
         private static readonly Guid DestinationFolderId = Guid.Parse("11111111-2222-3333-4444-555555555555");
         private static readonly DateTime CreatedAt = new(2026, 6, 19, 18, 0, 0, DateTimeKind.Utc);
 
@@ -57,6 +59,57 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("queued-capture.txt", stagedTransfer.FileName);
             Assert.Equal("hello capture", await File.ReadAllTextAsync(stagedTransfer.Path));
 
+            Assert.Empty(await _shareIntakeStore.LoadAsync());
+            Assert.Empty(await _shareStagingStore.ListAsync());
+        }
+
+        [Fact]
+        public async Task Enqueue_copies_multiple_destination_ready_share_files_into_transfer_queue()
+        {
+            await SaveDestinationReadyShareAsync(
+                [
+                    new ShareFileSeed(ItemId, "first-capture.txt", "first-upload.txt", "first capture"),
+                    new ShareFileSeed(SecondItemId, "second-capture.txt", "second-upload.txt", "second capture"),
+                ]);
+
+            CottonShareTransferEnqueueResult result = await CreateCoordinator(
+                TransferId,
+                SecondTransferId).EnqueueAsync(InstanceUri);
+
+            Assert.True(result.HasQueuedTransfers);
+            Assert.Equal(2, result.QueuedCount);
+            Assert.Equal(0, result.RemainingCaptureCount);
+            Assert.Equal([TransferId, SecondTransferId], result.QueuedTransfers.Select(item => item.Id).ToArray());
+
+            IReadOnlyList<CottonTransferQueueItem> transfers =
+                await _transferMetadataStore.LoadAsync(InstanceUri);
+            Assert.Equal(2, transfers.Count);
+            Assert.Contains(
+                transfers,
+                item => item.Id == TransferId
+                    && item.DisplayName == "first-upload.txt"
+                    && item.Progress.TotalBytes == 13
+                    && item.Destination?.FolderId == DestinationFolderId);
+            Assert.Contains(
+                transfers,
+                item => item.Id == SecondTransferId
+                    && item.DisplayName == "second-upload.txt"
+                    && item.Progress.TotalBytes == 14
+                    && item.Destination?.Path == "Default");
+
+            IReadOnlyList<CottonTransferStagedFileSnapshot> stagedTransfers =
+                await _transferStagingStore.ListAsync(InstanceUri);
+            Assert.Equal(
+                ["first-upload.txt", "second-upload.txt"],
+                stagedTransfers.Select(item => item.FileName).OrderBy(item => item, StringComparer.Ordinal).ToArray());
+            Assert.Contains(
+                stagedTransfers,
+                item => item.TransferId == TransferId
+                    && File.ReadAllText(item.Path) == "first capture");
+            Assert.Contains(
+                stagedTransfers,
+                item => item.TransferId == SecondTransferId
+                    && File.ReadAllText(item.Path) == "second capture");
             Assert.Empty(await _shareIntakeStore.LoadAsync());
             Assert.Empty(await _shareStagingStore.ListAsync());
         }
@@ -112,25 +165,37 @@ namespace Cotton.Mobile.Tests
             string uploadName,
             string content)
         {
-            CottonShareStagedContentSnapshot staged = await _shareStagingStore.StageAsync(
-                IntakeId,
-                ItemId,
-                stagedName,
-                new MemoryStream(Encoding.UTF8.GetBytes(content)));
-            CottonShareIntakeItemSnapshot item = new CottonShareIntakeItemSnapshot(
-                    ItemId,
-                    CottonShareIntakeItemType.Uri,
-                    "content://capture",
-                    stagedName,
-                    "text/plain")
-                .WithStagedContent(staged)
-                .WithUploadDisplayName(uploadName);
+            await SaveDestinationReadyShareAsync(
+                [new ShareFileSeed(ItemId, stagedName, uploadName, content)]);
+        }
+
+        private async Task SaveDestinationReadyShareAsync(IReadOnlyList<ShareFileSeed> files)
+        {
+            var items = new List<CottonShareIntakeItemSnapshot>();
+            foreach (ShareFileSeed file in files)
+            {
+                CottonShareStagedContentSnapshot staged = await _shareStagingStore.StageAsync(
+                    IntakeId,
+                    file.ItemId,
+                    file.StagedName,
+                    new MemoryStream(Encoding.UTF8.GetBytes(file.Content)));
+                CottonShareIntakeItemSnapshot item = new CottonShareIntakeItemSnapshot(
+                        file.ItemId,
+                        CottonShareIntakeItemType.Uri,
+                        $"content://capture/{file.StagedName}",
+                        file.StagedName,
+                        "text/plain")
+                    .WithStagedContent(staged)
+                    .WithUploadDisplayName(file.UploadName);
+                items.Add(item);
+            }
+
             CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot
                 .CreatePending(
                     IntakeId,
-                    CottonShareIntakeKind.Send,
+                    files.Count == 1 ? CottonShareIntakeKind.Send : CottonShareIntakeKind.SendMultiple,
                     "text/plain",
-                    [item],
+                    items,
                     CreatedAt)
                 .WithDestination(
                     new CottonShareDestinationSnapshot(
@@ -142,14 +207,22 @@ namespace Cotton.Mobile.Tests
 
         private CottonShareTransferEnqueueCoordinator CreateCoordinator()
         {
+            return CreateCoordinator(TransferId);
+        }
+
+        private CottonShareTransferEnqueueCoordinator CreateCoordinator(params Guid[] transferIds)
+        {
+            var queuedTransferIds = new Queue<Guid>(transferIds);
             return new CottonShareTransferEnqueueCoordinator(
                 _shareIntakeStore,
                 _shareStagingStore,
                 _transferMetadataStore,
                 _transferStagingStore,
                 new FixedTimeProvider(CreatedAt),
-                () => TransferId);
+                () => queuedTransferIds.Dequeue());
         }
+
+        private sealed record ShareFileSeed(Guid ItemId, string StagedName, string UploadName, string Content);
 
         private class FixedShareIntakePathProvider : ICottonShareIntakePathProvider
         {

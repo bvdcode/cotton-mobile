@@ -26,6 +26,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(200, item.Progress.TotalBytes);
             Assert.Equal(0, item.AttemptCount);
             Assert.Null(item.Destination);
+            Assert.Equal(CottonFileUploadSourceSnapshot.DefaultContentType, item.ContentType);
             Assert.False(item.IsTerminal);
             Assert.True(item.CanCancel);
             Assert.False(item.CanRetry);
@@ -44,12 +45,15 @@ namespace Cotton.Mobile.Tests
                 "photo.jpg",
                 200,
                 CreatedAt,
-                destination);
+                destination,
+                " image/jpeg ");
 
             Assert.Equal(destination.FolderId, item.Destination?.FolderId);
             Assert.Equal("Camera Uploads", item.Destination?.FolderName);
             Assert.Equal("Files / Camera Uploads", item.Destination?.Path);
+            Assert.Equal("image/jpeg", item.ContentType);
             Assert.Equal(destination.FolderId, item.Start(Later).Destination?.FolderId);
+            Assert.Equal("image/jpeg", item.Start(Later).ContentType);
         }
 
         [Fact]

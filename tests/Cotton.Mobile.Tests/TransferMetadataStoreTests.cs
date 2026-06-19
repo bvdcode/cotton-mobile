@@ -69,7 +69,8 @@ namespace Cotton.Mobile.Tests
                 "photo.jpg",
                 200,
                 CreatedAt,
-                destination);
+                destination,
+                "image/jpeg");
 
             await _store.SaveAsync(InstanceUri, [transfer]);
 
@@ -77,6 +78,39 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(destination.FolderId, loaded.Destination?.FolderId);
             Assert.Equal("Camera Uploads", loaded.Destination?.FolderName);
             Assert.Equal("Files / Camera Uploads", loaded.Destination?.Path);
+            Assert.Equal("image/jpeg", loaded.ContentType);
+        }
+
+        [Fact]
+        public async Task Load_defaults_older_transfer_metadata_without_content_type()
+        {
+            Directory.CreateDirectory(_directory);
+            await File.WriteAllTextAsync(
+                CreateMetadataPath(),
+                """
+                {
+                  "schemaVersion": 1,
+                  "savedAtUtc": "2026-06-19T12:00:00Z",
+                  "items": [
+                    {
+                      "id": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                      "kind": 0,
+                      "displayName": "old-queue.bin",
+                      "status": 0,
+                      "transferredBytes": 0,
+                      "totalBytes": 100,
+                      "attemptCount": 0,
+                      "createdAtUtc": "2026-06-19T12:00:00Z",
+                      "updatedAtUtc": "2026-06-19T12:00:00Z"
+                    }
+                  ]
+                }
+                """);
+
+            CottonTransferQueueItem loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+
+            Assert.Equal("old-queue.bin", loaded.DisplayName);
+            Assert.Equal(CottonFileUploadSourceSnapshot.DefaultContentType, loaded.ContentType);
         }
 
         [Fact]

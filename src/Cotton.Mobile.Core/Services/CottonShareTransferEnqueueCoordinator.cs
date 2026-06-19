@@ -81,7 +81,8 @@ namespace Cotton.Mobile.Services
                         new CottonTransferDestinationSnapshot(
                             candidate.Snapshot.Destination!.FolderId,
                             candidate.Snapshot.Destination.FolderName,
-                            candidate.Snapshot.Destination.Path)));
+                            candidate.Snapshot.Destination.Path),
+                        candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType));
             }
 
             IReadOnlySet<Guid> enqueuedItemIds = candidates

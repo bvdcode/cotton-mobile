@@ -9,11 +9,12 @@ instance_uri="https://app.cottoncloud.dev"
 destination_name="Mobile smoke folder"
 upload_name="queued-run-smoke.txt"
 upload_body="queued upload foreground smoke"
+content_type="text/plain"
 launch_app=1
 
 usage() {
   cat <<EOF
-Usage: $(basename "$0") [--instance URI] [--destination NAME] [--name FILE] [--body TEXT] [--no-launch]
+Usage: $(basename "$0") [--instance URI] [--destination NAME] [--name FILE] [--body TEXT] [--content-type MIME] [--no-launch]
 
 Seeds app-private transfer metadata for one destination-backed queued upload.
 The destination folder id is read from the app's cached root listing, so open Files
@@ -53,6 +54,14 @@ while [[ $# -gt 0 ]]; do
         exit 64
       fi
       upload_body="$2"
+      shift 2
+      ;;
+    --content-type)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --content-type.\n' >&2
+        exit 64
+      fi
+      content_type="$2"
       shift 2
       ;;
     --no-launch)
@@ -135,6 +144,7 @@ cat > "$queue_json" <<EOF
       "id": "$transfer_id",
       "kind": 0,
       "displayName": "$upload_name",
+      "contentType": "$content_type",
       "destination": {
         "folderId": "$destination_id",
         "folderName": "$destination_folder_name",
@@ -175,6 +185,7 @@ printf 'Seeded queued upload smoke for %s (%s).\n' "$instance_uri" "$instance_ke
 printf 'Transfer:    %s\n' "$transfer_id"
 printf 'Destination: %s (%s)\n' "$destination_folder_name" "$destination_id"
 printf 'File:        %s (%s bytes)\n' "$upload_name" "$upload_size"
+printf 'ContentType: %s\n' "$content_type"
 
 if [[ "$launch_app" -eq 1 ]]; then
   adb -s "$COTTON_ADB_SERIAL" shell am start -n "$COTTON_ANDROID_PACKAGE_ID/crc647f4f3c52a3509f5a.MainActivity"

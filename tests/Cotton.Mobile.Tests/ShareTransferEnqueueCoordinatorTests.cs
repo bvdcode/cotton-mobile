@@ -50,6 +50,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("queued-capture.txt", transfer.DisplayName);
             Assert.Equal(CottonTransferStatus.Queued, transfer.Status);
             Assert.Equal(13, transfer.Progress.TotalBytes);
+            Assert.Equal("text/plain", transfer.ContentType);
             Assert.Equal(DestinationFolderId, transfer.Destination?.FolderId);
             Assert.Equal("Default", transfer.Destination?.Path);
 
@@ -89,12 +90,14 @@ namespace Cotton.Mobile.Tests
                 item => item.Id == TransferId
                     && item.DisplayName == "first-upload.txt"
                     && item.Progress.TotalBytes == 13
+                    && item.ContentType == "text/plain"
                     && item.Destination?.FolderId == DestinationFolderId);
             Assert.Contains(
                 transfers,
                 item => item.Id == SecondTransferId
                     && item.DisplayName == "second-upload.txt"
                     && item.Progress.TotalBytes == 14
+                    && item.ContentType == "text/plain"
                     && item.Destination?.Path == "Default");
 
             IReadOnlyList<CottonTransferStagedFileSnapshot> stagedTransfers =

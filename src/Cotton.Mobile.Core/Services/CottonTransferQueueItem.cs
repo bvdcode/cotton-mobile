@@ -12,7 +12,8 @@ namespace Cotton.Mobile.Services
             string? failureMessage,
             DateTime createdAtUtc,
             DateTime updatedAtUtc,
-            CottonTransferDestinationSnapshot? destination)
+            CottonTransferDestinationSnapshot? destination,
+            string? contentType)
         {
             if (id == Guid.Empty)
             {
@@ -51,6 +52,7 @@ namespace Cotton.Mobile.Services
             CreatedAtUtc = NormalizeUtc(createdAtUtc);
             UpdatedAtUtc = NormalizeUtc(updatedAtUtc);
             Destination = destination;
+            ContentType = NormalizeContentType(contentType);
         }
 
         public Guid Id { get; }
@@ -72,6 +74,8 @@ namespace Cotton.Mobile.Services
         public DateTime UpdatedAtUtc { get; }
 
         public CottonTransferDestinationSnapshot? Destination { get; }
+
+        public string ContentType { get; }
 
         public bool IsTerminal => Status is CottonTransferStatus.Completed or CottonTransferStatus.Cancelled;
 
@@ -95,6 +99,23 @@ namespace Cotton.Mobile.Services
             DateTime createdAtUtc,
             CottonTransferDestinationSnapshot? destination)
         {
+            return CreateUpload(
+                id,
+                displayName,
+                totalBytes,
+                createdAtUtc,
+                destination,
+                contentType: null);
+        }
+
+        public static CottonTransferQueueItem CreateUpload(
+            Guid id,
+            string displayName,
+            long? totalBytes,
+            DateTime createdAtUtc,
+            CottonTransferDestinationSnapshot? destination,
+            string? contentType)
+        {
             return new CottonTransferQueueItem(
                 id,
                 CottonTransferKind.Upload,
@@ -105,7 +126,8 @@ namespace Cotton.Mobile.Services
                 null,
                 createdAtUtc,
                 createdAtUtc,
-                destination);
+                destination,
+                contentType);
         }
 
         public static CottonTransferQueueItem Restore(
@@ -147,6 +169,35 @@ namespace Cotton.Mobile.Services
             DateTime updatedAtUtc,
             CottonTransferDestinationSnapshot? destination)
         {
+            return Restore(
+                id,
+                kind,
+                displayName,
+                status,
+                transferredBytes,
+                totalBytes,
+                attemptCount,
+                failureMessage,
+                createdAtUtc,
+                updatedAtUtc,
+                destination,
+                contentType: null);
+        }
+
+        public static CottonTransferQueueItem Restore(
+            Guid id,
+            CottonTransferKind kind,
+            string displayName,
+            CottonTransferStatus status,
+            long transferredBytes,
+            long? totalBytes,
+            int attemptCount,
+            string? failureMessage,
+            DateTime createdAtUtc,
+            DateTime updatedAtUtc,
+            CottonTransferDestinationSnapshot? destination,
+            string? contentType)
+        {
             return new CottonTransferQueueItem(
                 id,
                 kind,
@@ -157,7 +208,8 @@ namespace Cotton.Mobile.Services
                 failureMessage,
                 createdAtUtc,
                 updatedAtUtc,
-                destination);
+                destination,
+                contentType);
         }
 
         public CottonTransferQueueItem Start(DateTime updatedAtUtc)
@@ -262,7 +314,8 @@ namespace Cotton.Mobile.Services
                 failureMessage,
                 CreatedAtUtc,
                 updatedAtUtc,
-                Destination);
+                Destination,
+                ContentType);
         }
 
         private void EnsureStatus(CottonTransferStatus[] allowedStatuses, string operationName)
@@ -278,6 +331,13 @@ namespace Cotton.Mobile.Services
             return value.Kind == DateTimeKind.Utc
                 ? value
                 : DateTime.SpecifyKind(value, DateTimeKind.Utc);
+        }
+
+        private static string NormalizeContentType(string? contentType)
+        {
+            return string.IsNullOrWhiteSpace(contentType)
+                ? CottonFileUploadSourceSnapshot.DefaultContentType
+                : contentType.Trim();
         }
     }
 }

@@ -152,6 +152,7 @@ namespace Cotton.Mobile.Services
                 Id = item.Id,
                 Kind = item.Kind,
                 DisplayName = item.DisplayName,
+                ContentType = item.ContentType,
                 Destination = CreateStoredDestination(item.Destination),
                 Status = item.Status,
                 TransferredBytes = item.Progress.TransferredBytes,
@@ -178,7 +179,8 @@ namespace Cotton.Mobile.Services
                     item.FailureMessage,
                     item.CreatedAtUtc,
                     item.UpdatedAtUtc,
-                    TryCreateDestination(item.Destination));
+                    TryCreateDestination(item.Destination),
+                    item.ContentType);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException or InvalidOperationException)
@@ -256,6 +258,8 @@ namespace Cotton.Mobile.Services
             public CottonTransferKind Kind { get; set; }
 
             public string? DisplayName { get; set; }
+
+            public string? ContentType { get; set; }
 
             public CottonStoredTransferDestination? Destination { get; set; }
 

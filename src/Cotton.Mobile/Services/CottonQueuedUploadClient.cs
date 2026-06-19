@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Services
             var source = new CottonFileUploadSource(
                 new CottonFileUploadSourceSnapshot(
                     transfer.DisplayName,
-                    CottonFileUploadSourceSnapshot.DefaultContentType,
+                    transfer.ContentType,
                     stagedFile.SizeBytes,
                     new Dictionary<string, string>(StringComparer.Ordinal)
                     {

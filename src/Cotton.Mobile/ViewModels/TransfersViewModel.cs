@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonTransferMetadataStore _metadataStore;
+        private readonly ICottonQueuedUploadExecutor _queuedUploadExecutor;
         private readonly ILogger<TransfersViewModel> _logger;
 
         private bool _isBusy;
@@ -20,22 +21,28 @@ namespace Cotton.Mobile.ViewModels
         public TransfersViewModel(
             Uri instanceUri,
             ICottonTransferMetadataStore metadataStore,
+            ICottonQueuedUploadExecutor queuedUploadExecutor,
             ILogger<TransfersViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(metadataStore);
+            ArgumentNullException.ThrowIfNull(queuedUploadExecutor);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _metadataStore = metadataStore;
+            _queuedUploadExecutor = queuedUploadExecutor;
             _logger = logger;
             Items = [];
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            RunWaitingCommand = new AsyncCommand(RunWaitingAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public ObservableCollection<CottonTransferListItem> Items { get; }
 
         public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand RunWaitingCommand { get; }
 
         public bool IsBusy
         {
@@ -46,6 +53,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsEmpty));
                     LoadCommand.RaiseCanExecuteChanged();
+                    RunWaitingCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -113,6 +121,38 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RunWaitingAsync()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            Status = "Running next waiting upload...";
+            try
+            {
+                CottonQueuedUploadExecutionResult result =
+                    await _queuedUploadExecutor.ExecuteNextAsync(_instanceUri);
+                IReadOnlyList<CottonTransferQueueItem> transfers = await _metadataStore.LoadAsync(_instanceUri);
+                ShowSnapshot(CottonTransferListSnapshot.Create(transfers));
+                Status = CreateExecutionStatusText(result);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile queued upload execution failed.");
+                Status = "Could not run waiting upload.";
+                IReadOnlyList<CottonTransferQueueItem> transfers = await _metadataStore.LoadAsync(_instanceUri);
+                ShowSnapshot(CottonTransferListSnapshot.Create(transfers));
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+            }
+        }
+
         private void ShowSnapshot(CottonTransferListSnapshot snapshot)
         {
             Items.Clear();
@@ -131,6 +171,19 @@ namespace Cotton.Mobile.ViewModels
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled Cotton mobile transfers command exception.");
+        }
+
+        private static string CreateExecutionStatusText(CottonQueuedUploadExecutionResult result)
+        {
+            return result.Status switch
+            {
+                CottonQueuedUploadExecutionStatus.NoQueuedUpload => "No waiting uploads.",
+                CottonQueuedUploadExecutionStatus.Completed => $"Uploaded {result.Transfer?.DisplayName ?? "upload"}.",
+                CottonQueuedUploadExecutionStatus.MissingDestination => result.FailureMessage ?? "Upload destination is missing.",
+                CottonQueuedUploadExecutionStatus.MissingStagedFile => result.FailureMessage ?? "Upload file is no longer available.",
+                CottonQueuedUploadExecutionStatus.Failed => result.FailureMessage ?? "Upload failed.",
+                _ => "Transfer updated.",
+            };
         }
     }
 }

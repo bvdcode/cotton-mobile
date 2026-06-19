@@ -10,6 +10,8 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Run"
+                     Command="{Binding RunWaitingCommand}" />
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
     </ContentPage.ToolbarItems>

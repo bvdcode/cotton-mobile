@@ -60,6 +60,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTransferStagingPathProvider, CottonTransferStagingPathProvider>();
 			builder.Services.AddSingleton<ICottonTransferStagingStore, FileSystemCottonTransferStagingStore>();
 			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();
+			builder.Services.AddSingleton<ICottonQueuedUploadClient, CottonQueuedUploadClient>();
+			builder.Services.AddSingleton<ICottonQueuedUploadExecutor, CottonQueuedUploadExecutor>();
 			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
 			builder.Services.AddSingleton<ICottonShareLaunchState, CottonShareLaunchState>();
 			builder.Services.AddSingleton<ICottonShareIntakeStore, FileSystemCottonShareIntakeStore>();

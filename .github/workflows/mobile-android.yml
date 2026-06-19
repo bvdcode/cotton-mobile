@@ -266,9 +266,13 @@ jobs:
 
       - name: Compute Android version code
         run: |
-          application_display_version="${{ steps.gitversion.outputs.semVer }}"
+          application_display_version="${{ steps.gitversion.outputs.majorMinorPatch }}"
           if [ -z "$application_display_version" ]; then
-            echo "GitVersion SemVer output is required." >&2
+            echo "GitVersion MajorMinorPatch output is required." >&2
+            exit 1
+          fi
+          if [[ "$application_display_version" == *-* || "$application_display_version" == *+* ]]; then
+            echo "Google Play display version must not include prerelease or metadata labels." >&2
             exit 1
           fi
 
@@ -284,7 +288,7 @@ jobs:
           fi
           echo "APPLICATION_DISPLAY_VERSION=$application_display_version" >> "$GITHUB_ENV"
           echo "ANDROID_VERSION_CODE=$android_version_code" >> "$GITHUB_ENV"
-          echo "GitVersion SemVer: $application_display_version"
+          echo "GitVersion display version: $application_display_version"
           echo "Android versionCode: $android_version_code"
 
       - name: Setup .NET

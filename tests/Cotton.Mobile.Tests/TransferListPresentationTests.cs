@@ -90,6 +90,61 @@ namespace Cotton.Mobile.Tests
             Assert.False(cancelledItem.IsProgressVisible);
         }
 
+        [Fact]
+        public void Activity_indicator_hides_completed_and_cancelled_transfers()
+        {
+            CottonTransferQueueItem completed = CreateUpload(
+                    Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    "done.jpg")
+                .Start(CreatedAt.AddSeconds(1))
+                .Complete(CreatedAt.AddSeconds(2));
+            CottonTransferQueueItem cancelled = CreateUpload(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    "cancelled.jpg")
+                .Cancel(CreatedAt.AddSeconds(3));
+
+            CottonTransferActivityIndicator indicator = CottonTransferActivityIndicator.Create([completed, cancelled]);
+
+            Assert.False(indicator.IsVisible);
+            Assert.Equal(0, indicator.ActiveCount);
+            Assert.Equal(string.Empty, indicator.Text);
+        }
+
+        [Fact]
+        public void Activity_indicator_prioritizes_failed_then_running_then_waiting_state()
+        {
+            CottonTransferQueueItem queued = CreateUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "queued.jpg");
+            CottonTransferQueueItem running = CreateUpload(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    "running.jpg")
+                .Start(CreatedAt.AddSeconds(1));
+            CottonTransferQueueItem failed = CreateUpload(
+                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    "failed.jpg")
+                .Start(CreatedAt.AddSeconds(2))
+                .Fail("Offline", CreatedAt.AddSeconds(3));
+
+            CottonTransferActivityIndicator failedIndicator =
+                CottonTransferActivityIndicator.Create([queued, running, failed]);
+            CottonTransferActivityIndicator runningIndicator =
+                CottonTransferActivityIndicator.Create([queued, running]);
+            CottonTransferActivityIndicator waitingIndicator =
+                CottonTransferActivityIndicator.Create([queued]);
+
+            Assert.True(failedIndicator.IsVisible);
+            Assert.True(failedIndicator.HasFailures);
+            Assert.Equal("1 failed transfer", failedIndicator.Text);
+            Assert.Equal("Tap to review", failedIndicator.Details);
+
+            Assert.Equal("Uploading 1 item", runningIndicator.Text);
+            Assert.Equal("1 running, 1 queued", runningIndicator.Details);
+
+            Assert.Equal("1 transfer waiting", waitingIndicator.Text);
+            Assert.Equal("Tap for details", waitingIndicator.Details);
+        }
+
         private static CottonTransferListItem Find(
             CottonTransferListSnapshot snapshot,
             string displayName,

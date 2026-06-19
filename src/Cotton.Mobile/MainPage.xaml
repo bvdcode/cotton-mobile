@@ -222,6 +222,44 @@
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
+                            <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
+                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="10,6"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"
+                                    SemanticProperties.Description="{Binding Display.TransferActivityIndicator.AccessibilityText}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenTransfersCommand}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="8"
+                                      HeightRequest="28">
+                                    <Label Text="↕"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Display.TransferActivityIndicator.Text}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Display.TransferActivityIndicator.Details}"
+                                           FontSize="11"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                </Grid>
+                            </Border>
+
                             <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                     StrokeShape="RoundRectangle 8"

@@ -186,6 +186,10 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowser.ShowSortActionsAsync,
                 LogUnhandledCommandException,
                 () => Display.IsFileBrowserChromeEnabled);
+            OpenTransfersCommand = new AsyncCommand(
+                OpenTransfersAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
             Display.PropertyChanged += Display_PropertyChanged;
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
             _foregroundService.Resumed += ForegroundService_Resumed;
@@ -222,6 +226,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ShowFileViewActionsCommand { get; }
 
         public AsyncCommand ShowFileSortActionsCommand { get; }
+
+        public AsyncCommand OpenTransfersCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -852,7 +858,9 @@ namespace Cotton.Mobile.ViewModels
                 ClearSessionRestoreRetry();
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 ShowProfile(profile);
-                await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
+                IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
+                    await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
+                Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 return;
@@ -897,15 +905,16 @@ namespace Cotton.Mobile.ViewModels
                     or CottonSessionResultStatus.SessionExpired;
         }
 
-        private async Task RestoreTransferQueueBestEffortAsync(Uri instanceUri)
+        private async Task<IReadOnlyList<CottonTransferQueueItem>> RestoreTransferQueueBestEffortAsync(Uri instanceUri)
         {
             try
             {
-                await _transferQueueRestoreCoordinator.RestoreAsync(instanceUri);
+                return await _transferQueueRestoreCoordinator.RestoreAsync(instanceUri);
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile transfer queue.");
+                return [];
             }
         }
 
@@ -960,6 +969,7 @@ namespace Cotton.Mobile.ViewModels
             ToggleFileSearchCommand.RaiseCanExecuteChanged();
             ShowFileViewActionsCommand.RaiseCanExecuteChanged();
             ShowFileSortActionsCommand.RaiseCanExecuteChanged();
+            OpenTransfersCommand.RaiseCanExecuteChanged();
         }
 
         private void Display_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -980,6 +990,7 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case nameof(MainPageDisplayState.IsProfileVisible):
                     RefreshFilesCommand.RaiseCanExecuteChanged();
+                    OpenTransfersCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.IsFileUpButtonEnabled):
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();

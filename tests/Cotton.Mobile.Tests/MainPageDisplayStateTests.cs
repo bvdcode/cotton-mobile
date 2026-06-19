@@ -113,6 +113,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Transfer_activity_indicator_is_visible_only_for_signed_in_active_work()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            CottonTransferActivityIndicator indicator = CottonTransferActivityIndicator.Create(
+                [
+                    CottonTransferQueueItem.CreateUpload(
+                        Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                        "photo.jpg",
+                        100,
+                        Older),
+                ]);
+
+            display.ShowTransferActivity(indicator);
+
+            Assert.True(display.IsTransferActivityIndicatorVisible);
+            Assert.Equal("1 transfer waiting", display.TransferActivityIndicator.Text);
+
+            display.ShowSignIn("Signed out.");
+
+            Assert.False(display.IsTransferActivityIndicatorVisible);
+            Assert.False(display.TransferActivityIndicator.IsVisible);
+        }
+
+        [Fact]
         public void Local_file_markers_update_visible_and_backing_entries()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

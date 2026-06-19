@@ -81,6 +81,10 @@
 		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.0" />
+		<PackageReference
+			Include="Xamarin.AndroidX.Work.Runtime"
+			Version="2.10.3"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
 	</ItemGroup>
 
 </Project>

@@ -4,6 +4,9 @@ using Android.App.Job;
 using Android.Content;
 using Android.OS;
 using Android.Util;
+using AndroidX.Work;
+using WorkNetworkType = AndroidX.Work.NetworkType;
+using JobNetworkType = Android.App.Job.NetworkType;
 
 namespace Cotton.Mobile.Services
 {
@@ -24,9 +27,7 @@ namespace Cotton.Mobile.Services
                 CottonAndroidTransferExecutionHost.UserInitiatedDataTransfer =>
                     Task.FromResult(ScheduleUserInitiatedDataTransfer(request)),
                 CottonAndroidTransferExecutionHost.WorkManagerConstrained =>
-                    Task.FromResult(CottonAndroidBackgroundTransferScheduleResult.Unsupported(
-                        request,
-                        "Android WorkManager transfer host is not wired yet.")),
+                    Task.FromResult(ScheduleWorkManagerTransfer(request)),
                 _ => Task.FromResult(CottonAndroidBackgroundTransferScheduleResult.ForegroundRequired(
                     request,
                     request.Strategy.StatusText)),
@@ -84,8 +85,8 @@ namespace Cotton.Mobile.Services
             builder.SetExtras(AndroidBackgroundTransferJobExtras.Create(request));
             builder.SetRequiredNetworkType(
                 request.RequiresUnmeteredNetwork
-                    ? NetworkType.Unmetered
-                    : NetworkType.Any);
+                    ? JobNetworkType.Unmetered
+                    : JobNetworkType.Any);
             builder.SetUserInitiated(true);
 
             if (request.EstimatedUploadBytes is long estimatedUploadBytes)
@@ -101,6 +102,70 @@ namespace Cotton.Mobile.Services
             return builder.Build()
                 ?? throw new InvalidOperationException("Android JobInfo builder returned no job.");
 #pragma warning restore CA1416
+        }
+
+        private static CottonAndroidBackgroundTransferScheduleResult ScheduleWorkManagerTransfer(
+            CottonAndroidBackgroundTransferRequest request)
+        {
+            Context context = Android.App.Application.Context;
+            WorkManager workManager = WorkManager.GetInstance(context)
+                ?? throw new InvalidOperationException("Android WorkManager is unavailable.");
+
+            OneTimeWorkRequest workRequest = CreateWorkManagerRequest(request);
+            ExistingWorkPolicy keepExisting = ExistingWorkPolicy.Keep
+                ?? throw new InvalidOperationException("Android WorkManager KEEP policy is unavailable.");
+            _ = workManager.EnqueueUniqueWork(
+                request.ScheduleIdentity.UniqueWorkName,
+                keepExisting,
+                workRequest);
+
+            Log.Info(
+                LogTag,
+                $"Scheduled Android WorkManager request {request.ScheduleIdentity.UniqueWorkName} for transfer {request.TransferId}.");
+            return CottonAndroidBackgroundTransferScheduleResult.Scheduled(
+                request,
+                $"Scheduled constrained Android background upload for {request.DisplayName}.");
+        }
+
+        private static OneTimeWorkRequest CreateWorkManagerRequest(
+            CottonAndroidBackgroundTransferRequest request)
+        {
+            Java.Lang.Class workerClass = Java.Lang.Class.FromType(
+                    typeof(AndroidWorkManagerTransferWorker))
+                ?? throw new InvalidOperationException("Android WorkManager transfer worker type is unavailable.");
+            Constraints constraints = CreateWorkManagerConstraints(request);
+            Data input = AndroidBackgroundTransferWorkData.Create(request);
+
+            return new OneTimeWorkRequest.Builder(workerClass)
+                .SetInputData(input)
+                .SetConstraints(constraints)
+                .AddTag(request.ScheduleIdentity.TransferTag)
+                .Build()
+                ?? throw new InvalidOperationException("Android WorkManager request builder returned no request.");
+        }
+
+        private static Constraints CreateWorkManagerConstraints(
+            CottonAndroidBackgroundTransferRequest request)
+        {
+            var builder = new Constraints.Builder();
+            builder.SetRequiredNetworkType(ResolveWorkManagerNetworkType(request));
+            if (request.RequiresCharging)
+            {
+                builder.SetRequiresCharging(true);
+            }
+
+            return builder.Build()
+                ?? throw new InvalidOperationException("Android WorkManager constraints builder returned no constraints.");
+        }
+
+        private static WorkNetworkType ResolveWorkManagerNetworkType(
+            CottonAndroidBackgroundTransferRequest request)
+        {
+            WorkNetworkType? networkType = request.RequiresUnmeteredNetwork
+                ? WorkNetworkType.Unmetered
+                : WorkNetworkType.Connected;
+            return networkType
+                ?? throw new InvalidOperationException("Android WorkManager network type is unavailable.");
         }
     }
 }

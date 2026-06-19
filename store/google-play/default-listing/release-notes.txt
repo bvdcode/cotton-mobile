@@ -1,7 +1,7 @@
 Closed testing build for Cotton Cloud mobile.
 
-Adds cached offline cold start: after a previous online session, Files can reopen saved folder listings instead of returning to sign-in.
+Adds safer file opening: text/images preview in app, while PDF, media, Office, archives, and unknown files hand off to Android with clearer fallback messages.
 
-Keeps recent offline folder fixes: On device markers, cached listing age, first-level Up navigation, folder download progress, and Storage budget summaries.
+Keeps cached offline start, folder navigation, On device markers, Storage summaries, feedback, and logout cleanup.
 
-Manual uploads, Capture Inbox, Camera Backup setup, alerts, and background transfers remain in testing. True sync is still in progress.
+Manual uploads, Capture Inbox, Camera Backup, alerts, background transfer, and true sync remain in progress.

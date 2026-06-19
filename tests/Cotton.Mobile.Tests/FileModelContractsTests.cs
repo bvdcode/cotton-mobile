@@ -14,7 +14,8 @@ namespace Cotton.Mobile.Tests
         [InlineData("data.json", "application/json", "Text", "TXT", true, false)]
         [InlineData("Program.cs", "", "Text", "TXT", true, false)]
         [InlineData("Dockerfile", "", "Text", "TXT", true, false)]
-        [InlineData("diagram.svg", "", "Text", "TXT", true, false)]
+        [InlineData("diagram.svg", "", "SVG", "SVG", false, false)]
+        [InlineData("icon.svg", "image/svg+xml; charset=utf-8", "SVG", "SVG", false, false)]
         [InlineData("photo.webp", "image/webp", "Image", "IMG", false, true)]
         [InlineData("report.pdf", "", "PDF", "PDF", false, false)]
         [InlineData("brief.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Document", "DOC", false, false)]
@@ -42,6 +43,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1536, entry.SizeBytes);
             Assert.Equal(expectedText, entry.IsText);
             Assert.Equal(expectedImage, entry.IsImage);
+            Assert.Equal(expectedKind == "SVG", entry.IsSvg);
             Assert.False(entry.HasLocalCopy);
             Assert.True(entry.Thumbnail.IsPlaceholderVisible);
         }

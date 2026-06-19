@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("build.gradle", "", 256, CottonFilePreviewKind.Text, "text/plain")]
         [InlineData("script.py", "", 256, CottonFilePreviewKind.Text, "text/x-python")]
         [InlineData("diagram.svg", "", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
+        [InlineData("inline-svg", "image/svg+xml", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
         [InlineData("photo.webp", "image/webp", 8_192, CottonFilePreviewKind.Image, "image/webp")]
         [InlineData("song.mp3", "audio/mpeg", 4_096, CottonFilePreviewKind.Audio, "audio/mpeg")]
         [InlineData("voice.m4a", "", 4_096, CottonFilePreviewKind.Audio, "audio/mp4")]
@@ -82,6 +83,22 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Open with system app", route.ActionLabel);
             Assert.Equal(expectedUnavailableStatus, route.UnavailableStatus);
             Assert.Equal(expectedContentType, route.ContentType);
+        }
+
+        [Fact]
+        public void Oversized_svg_routes_to_system_open_with_svg_copy()
+        {
+            CottonFileOpenRoute route = CottonFileOpenRouter.CreateRoute(
+                CreateEntry(
+                    "large.svg",
+                    contentType: "",
+                    sizeBytes: CottonFileOpenRouter.MaxTextPreviewBytes + 1));
+
+            Assert.Equal(CottonFileOpenTarget.SystemApp, route.Target);
+            Assert.True(route.OpensWithSystemApp);
+            Assert.Equal(CottonSystemFileOpenKind.Svg, route.SystemKind);
+            Assert.Equal("image/svg+xml", route.ContentType);
+            Assert.Equal("No SVG app can open this file.", route.UnavailableStatus);
         }
 
         [Fact]

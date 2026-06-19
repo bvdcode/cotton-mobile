@@ -180,6 +180,7 @@ write_checklist() {
 ## Seeded Files
 
 - `cotton-open-text.txt`
+- `cotton-open-vector.svg`
 - `cotton-open-image.png`
 - `cotton-open-doc.pdf`
 - `cotton-open-audio.wav`
@@ -197,6 +198,7 @@ write_checklist() {
 ## Open Pass
 
 - [ ] Text opens in Cotton text viewer.
+- [ ] SVG appears as `SVG` and opens in Cotton text viewer without using WebView.
 - [ ] Image opens in Cotton image viewer.
 - [ ] PDF action label says `Open with system app` and launches/handles system PDF flow or honest no-app fallback.
 - [ ] Audio opens in Cotton media viewer with playback controls.
@@ -214,13 +216,14 @@ write_checklist() {
 - `20-files-ready.png` / `20-files-ready.xml`
 - `30-files-uploaded.png` / `30-files-uploaded.xml`
 - `40-text-open.png` / `40-text-open.xml`
-- `41-image-open.png` / `41-image-open.xml`
-- `42-pdf-open.png` / `42-pdf-open.xml`
-- `43-audio-open.png` / `43-audio-open.xml`
-- `44-video-open.png` / `44-video-open.xml`
-- `45-office-open.png` / `45-office-open.xml`
-- `46-archive-open.png` / `46-archive-open.xml`
-- `47-unknown-open.png` / `47-unknown-open.xml`
+- `41-svg-open.png` / `41-svg-open.xml`
+- `42-image-open.png` / `42-image-open.xml`
+- `43-pdf-open.png` / `43-pdf-open.xml`
+- `44-audio-open.png` / `44-audio-open.xml`
+- `45-video-open.png` / `45-video-open.xml`
+- `46-office-open.png` / `46-office-open.xml`
+- `47-archive-open.png` / `47-archive-open.xml`
+- `48-unknown-open.png` / `48-unknown-open.xml`
 - `90-logcat.txt`
 EOF
 }
@@ -277,6 +280,15 @@ root.mkdir(parents=True, exist_ok=True)
 
 (root / "cotton-open-text.txt").write_text(
     "Cotton text open routing smoke.\nThis file should open inside Cotton.\n",
+    encoding="utf-8",
+)
+
+(root / "cotton-open-vector.svg").write_text(
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="80" viewBox="0 0 120 80">\n'
+    '  <rect width="120" height="80" rx="12" fill="#132126"/>\n'
+    '  <circle cx="40" cy="40" r="18" fill="#c6ff00"/>\n'
+    '  <path d="M64 24 L94 40 L64 56 Z" fill="#ffffff"/>\n'
+    "</svg>\n",
     encoding="utf-8",
 )
 
@@ -487,13 +499,14 @@ fi
 prompt_capture "Open Cotton Files. Sign in if needed, then navigate to a dedicated smoke folder." "20-files-ready"
 prompt_capture "Upload all seeded cotton-open-* files from Android Downloads and verify they appear in Cotton." "30-files-uploaded"
 prompt_capture "Open cotton-open-text.txt and verify Cotton text viewer." "40-text-open"
-prompt_capture "Return to Files, open cotton-open-image.png, and verify Cotton image viewer." "41-image-open"
-prompt_capture "Return to Files, open cotton-open-doc.pdf, and verify system PDF flow or honest no-app fallback." "42-pdf-open"
-prompt_capture "Return to Files, open cotton-open-audio.wav, and verify Cotton media viewer with playback controls." "43-audio-open"
-prompt_capture "Return to Files, open cotton-open-video.mp4, and verify Cotton media viewer with playback controls." "44-video-open"
-prompt_capture "Return to Files, open cotton-open-office.docx, and verify system Office flow or honest no-app fallback." "45-office-open"
-prompt_capture "Return to Files, open cotton-open-archive.zip, and verify system archive flow or honest no-app fallback." "46-archive-open"
-prompt_capture "Return to Files, open cotton-open-unknown.bin, and verify honest no-app fallback if no handler exists." "47-unknown-open"
+prompt_capture "Return to Files, open cotton-open-vector.svg, and verify Cotton text viewer with SVG details." "41-svg-open"
+prompt_capture "Return to Files, open cotton-open-image.png, and verify Cotton image viewer." "42-image-open"
+prompt_capture "Return to Files, open cotton-open-doc.pdf, and verify system PDF flow or honest no-app fallback." "43-pdf-open"
+prompt_capture "Return to Files, open cotton-open-audio.wav, and verify Cotton media viewer with playback controls." "44-audio-open"
+prompt_capture "Return to Files, open cotton-open-video.mp4, and verify Cotton media viewer with playback controls." "45-video-open"
+prompt_capture "Return to Files, open cotton-open-office.docx, and verify system Office flow or honest no-app fallback." "46-office-open"
+prompt_capture "Return to Files, open cotton-open-archive.zip, and verify system archive flow or honest no-app fallback." "47-archive-open"
+prompt_capture "Return to Files, open cotton-open-unknown.bin, and verify honest no-app fallback if no handler exists." "48-unknown-open"
 
 capture_text "90-logcat.txt" adb_device logcat -d -v threadtime
 

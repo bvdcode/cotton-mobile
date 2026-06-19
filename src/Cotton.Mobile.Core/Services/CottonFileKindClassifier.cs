@@ -38,7 +38,6 @@ namespace Cotton.Mobile.Services
             ".rs",
             ".sh",
             ".sln",
-            ".svg",
             ".swift",
             ".targets",
             ".text",
@@ -76,7 +75,6 @@ namespace Cotton.Mobile.Services
             "application/x-typescript",
             "application/x-yaml",
             "application/yaml",
-            "image/svg+xml",
             "text/x-c",
             "text/x-csharp",
             "text/x-java-source",
@@ -116,6 +114,11 @@ namespace Cotton.Mobile.Services
         {
             string normalizedName = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
             string mediaType = CreateContentTypeMediaType(contentType);
+            if (IsSvgFile(normalizedName, mediaType))
+            {
+                return "SVG";
+            }
+
             if (IsTextFile(normalizedName, mediaType))
             {
                 return "Text";
@@ -172,6 +175,12 @@ namespace Cotton.Mobile.Services
                 || TextContentTypes.Contains(contentType)
                 || TextFileExtensions.Contains(Path.GetExtension(name))
                 || TextFileNames.Contains(name);
+        }
+
+        private static bool IsSvgFile(string name, string contentType)
+        {
+            return contentType.Equals("image/svg+xml", StringComparison.OrdinalIgnoreCase)
+                || Path.GetExtension(name).Equals(".svg", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

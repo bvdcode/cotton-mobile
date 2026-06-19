@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Services
         Audio,
         Video,
         Archive,
+        Svg,
         Image,
         File,
     }

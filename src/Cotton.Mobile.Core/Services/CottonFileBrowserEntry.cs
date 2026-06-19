@@ -104,6 +104,8 @@ namespace Cotton.Mobile.Services
 
         public bool IsText => Type == CottonFileBrowserEntryType.File && Kind == "Text";
 
+        public bool IsSvg => Type == CottonFileBrowserEntryType.File && Kind == "SVG";
+
         public static CottonFileBrowserEntry FromNode(NodeDto node)
         {
             ArgumentNullException.ThrowIfNull(node);
@@ -292,6 +294,7 @@ namespace Cotton.Mobile.Services
                 "Document" => "DOC",
                 "Video" => "VID",
                 "Audio" => "AUD",
+                "SVG" => "SVG",
                 "Text" => "TXT",
                 _ => "FILE",
             };

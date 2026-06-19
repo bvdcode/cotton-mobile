@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
         public const string AudioOpenUnavailableStatus = "No audio app can open this file.";
         public const string VideoOpenUnavailableStatus = "No video app can open this file.";
         public const string ArchiveOpenUnavailableStatus = "No archive app can open this file.";
+        public const string SvgOpenUnavailableStatus = "No SVG app can open this file.";
         public const string UnknownOpenUnavailableStatus = "No app can open this file type.";
 
         private static readonly Dictionary<string, string> ExtensionContentTypes =
@@ -124,7 +125,7 @@ namespace Cotton.Mobile.Services
                     contentType);
             }
 
-            if (file.IsText && CanPreviewText(file, availableSizeBytes))
+            if (CanPreviewAsText(file, availableSizeBytes))
             {
                 return new CottonFileOpenRoute(
                     CottonFileOpenTarget.InAppPreview,
@@ -194,6 +195,11 @@ namespace Cotton.Mobile.Services
             return !sizeBytes.HasValue || sizeBytes.Value is >= 0 and <= MaxTextPreviewBytes;
         }
 
+        private static bool CanPreviewAsText(CottonFileBrowserEntry file, long? availableSizeBytes)
+        {
+            return (file.IsText || file.IsSvg) && CanPreviewText(file, availableSizeBytes);
+        }
+
         private static bool IsAudioPreview(CottonFileBrowserEntry file, string? contentType)
         {
             return string.Equals(file.Kind, "Audio", StringComparison.OrdinalIgnoreCase)
@@ -219,6 +225,7 @@ namespace Cotton.Mobile.Services
                 "Document" => CottonSystemFileOpenKind.Document,
                 "Audio" => CottonSystemFileOpenKind.Audio,
                 "Video" => CottonSystemFileOpenKind.Video,
+                "SVG" => CottonSystemFileOpenKind.Svg,
                 "Image" => CottonSystemFileOpenKind.Image,
                 _ when ArchiveFileExtensions.Contains(extension) => CottonSystemFileOpenKind.Archive,
                 _ when string.Equals(mediaType, "application/pdf", StringComparison.OrdinalIgnoreCase) =>
@@ -242,6 +249,7 @@ namespace Cotton.Mobile.Services
                 CottonSystemFileOpenKind.Audio => AudioOpenUnavailableStatus,
                 CottonSystemFileOpenKind.Video => VideoOpenUnavailableStatus,
                 CottonSystemFileOpenKind.Archive => ArchiveOpenUnavailableStatus,
+                CottonSystemFileOpenKind.Svg => SvgOpenUnavailableStatus,
                 CottonSystemFileOpenKind.File => UnknownOpenUnavailableStatus,
                 _ => OpenUnavailableStatus,
             };

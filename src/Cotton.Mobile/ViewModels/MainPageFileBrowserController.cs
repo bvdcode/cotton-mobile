@@ -864,6 +864,10 @@ namespace Cotton.Mobile.ViewModels
                 if (isRefresh)
                 {
                     _display.ShowFilesRefreshing("Refreshing files...");
+                    if (ShowCurrentOfflineNoticeIfNeeded())
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -942,6 +946,10 @@ namespace Cotton.Mobile.ViewModels
                 if (isRefresh)
                 {
                     _display.ShowFilesRefreshing($"Refreshing {folder.Name}...");
+                    if (ShowCurrentOfflineNoticeIfNeeded())
+                    {
+                        return;
+                    }
                 }
                 else
                 {
@@ -2944,6 +2952,19 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _display.ShowOfflineFilesNotice();
+        }
+
+        private bool ShowCurrentOfflineNoticeIfNeeded()
+        {
+            if (_networkAccess.HasInternetAccess || _display.TotalFileEntryCount == 0)
+            {
+                return false;
+            }
+
+            _lastFileLoadFailed = true;
+            _lastFileLoadDisplayedCachedContent = false;
+            _display.ShowOfflineFilesNotice();
+            return true;
         }
 
         private bool ShouldRestoreNavigationAfterFileLoadFailure()

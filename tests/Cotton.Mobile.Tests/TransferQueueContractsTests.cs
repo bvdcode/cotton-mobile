@@ -137,6 +137,18 @@ namespace Cotton.Mobile.Tests
                 CottonTransferQueueItem.CreateUpload(TransferId, " ", 1, CreatedAt));
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 CottonTransferQueueItem.CreateUpload(TransferId, "photo.jpg", -1, CreatedAt));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CottonTransferQueueItem.Restore(
+                    TransferId,
+                    (CottonTransferKind)99,
+                    "photo.jpg",
+                    CottonTransferStatus.Queued,
+                    0,
+                    1,
+                    0,
+                    null,
+                    CreatedAt,
+                    CreatedAt));
         }
 
         private static CottonTransferQueueItem CreateUpload(long? totalBytes)

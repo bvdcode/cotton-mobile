@@ -28,6 +28,16 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(attemptCount), "Attempt count cannot be negative.");
             }
 
+            if (!Enum.IsDefined(kind))
+            {
+                throw new ArgumentOutOfRangeException(nameof(kind), "Transfer kind is not supported.");
+            }
+
+            if (!Enum.IsDefined(status))
+            {
+                throw new ArgumentOutOfRangeException(nameof(status), "Transfer status is not supported.");
+            }
+
             ArgumentNullException.ThrowIfNull(progress);
 
             Id = id;
@@ -81,6 +91,30 @@ namespace Cotton.Mobile.Services
                 null,
                 createdAtUtc,
                 createdAtUtc);
+        }
+
+        public static CottonTransferQueueItem Restore(
+            Guid id,
+            CottonTransferKind kind,
+            string displayName,
+            CottonTransferStatus status,
+            long transferredBytes,
+            long? totalBytes,
+            int attemptCount,
+            string? failureMessage,
+            DateTime createdAtUtc,
+            DateTime updatedAtUtc)
+        {
+            return new CottonTransferQueueItem(
+                id,
+                kind,
+                displayName,
+                status,
+                new CottonTransferProgressSnapshot(transferredBytes, totalBytes),
+                attemptCount,
+                failureMessage,
+                createdAtUtc,
+                updatedAtUtc);
         }
 
         public CottonTransferQueueItem Start(DateTime updatedAtUtc)

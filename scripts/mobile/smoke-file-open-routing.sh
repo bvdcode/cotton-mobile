@@ -27,7 +27,7 @@ Options:
   --package ID              Android package id to test. Defaults to COTTON_ANDROID_PACKAGE_ID.
   --serial SERIAL           ADB serial to use. Defaults to COTTON_ADB_SERIAL.
   --evidence-dir DIR        Evidence directory. Defaults to a timestamped directory under $evidence_root.
-  --install-debug           Install the current debug APK with -r before launch, preserving app data.
+  --install-debug           Install the current embedded debug APK with -r before launch, preserving app data.
   --expected-version-code N Require the installed package to have this Android versionCode.
   --expected-version-name V Require the installed package to have this versionName.
   --preflight-only          Capture device/package/version state and exit without manual prompts.
@@ -38,6 +38,8 @@ Options:
 
 The script is intentionally manual: upload/open the seeded files in Cotton while
 it captures screenshots, UIAutomator XML, package state, and logcat output.
+Build the debug APK with scripts/mobile/build-android-debug.sh before using
+--install-debug so assemblies are embedded in the APK.
 EOF
 }
 
@@ -168,6 +170,7 @@ write_checklist() {
 ## Preconditions
 
 - [ ] Package/version in `05-package-version.txt` matches the build under test.
+- [ ] `--install-debug` uses an APK built by `scripts/mobile/build-android-debug.sh`.
 - [ ] Seeded files are visible in Android Downloads or uploaded to Cotton already.
 - [ ] Signed-in Cotton session is restored without clearing app data.
 - [ ] A dedicated smoke folder is open in Files.
@@ -205,6 +208,7 @@ write_checklist() {
 - `00-device.txt`
 - `05-package-version.txt`
 - `10-preflight.png` / `10-preflight.xml`
+- `11-launch-logcat.txt`
 - `20-files-ready.png` / `20-files-ready.xml`
 - `30-files-uploaded.png` / `30-files-uploaded.xml`
 - `40-text-open.png` / `40-text-open.xml`
@@ -305,11 +309,42 @@ with wave.open(str(root / "cotton-open-audio.wav"), "wb") as wav:
         frames.extend(struct.pack("<h", sample))
     wav.writeframes(bytes(frames))
 
-mp4_hex = (
-    "00000018667479706d7034320000000069736f6d6d703432"
-    "00000008667265650000001d6d646174000000000000000000000000000000000000000000"
+mp4 = (
+    "AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjMW1wNDEAAAOIbW9vdgAAAGxtdmhkAAAAAAAAAAAA"
+    "AAAAAAAD6AAAA+gAAQAAAQAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA"
+    "AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAArJ0cmFrAAAAXHRraGQAAAADAAAA"
+    "AAAAAAAAAAABAAAAAAAAA+gAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAABAAAAAAAA"
+    "AAAAAAAAAABAAAAAAEAAAABAAAAAAAAkZWR0cwAAABxlbHN0AAAAAAAAAAEAAAPoAAAAAAABAAAA"
+    "AAIqbWRpYQAAACBtZGhkAAAAAAAAAAAAAAAAAAAyAAAAMgBVxAAAAAAALWhkbHIAAAAAAAAAAHZp"
+    "ZGUAAAAAAAAAAAAAAABWaWRlb0hhbmRsZXIAAAAB1W1pbmYAAAAUdm1oZAAAAAEAAAAAAAAAAAAA"
+    "ACRkaW5mAAAAHGRyZWYAAAAAAAAAAQAAAAx1cmwgAAAAAQAAAZVzdGJsAAAAuXN0c2QAAAAAAAAA"
+    "AQAAAKlhdmMxAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAEAAQABIAAAASAAAAAAAAAABFUxhdmM2"
+    "MC4zMS4xMDIgbGlieDI2NAAAAAAAAAAAAAAAGP//AAAAL2F2Y0MBQsAe/+EAF2dCwB7ZBCbARAAA"
+    "AwAEAAADAMg8WLkgAQAFaMuDyyAAAAAQcGFzcAAAAAEAAAABAAAAFGJ0cnQAAAAAAAAcQAAAHEAA"
+    "AAAYc3R0cwAAAAAAAAABAAAAGQAAAgAAAAAUc3RzcwAAAAAAAAABAAAAAQAAABxzdHNjAAAAAAAA"
+    "AAEAAAABAAAAGQAAAAEAAAB4c3RzegAAAAAAAAAAAAAAGQAAApgAAAAKAAAACgAAAAoAAAAKAAAA"
+    "CgAAAAoAAAAKAAAACgAAAAoAAAAKAAAACgAAAAoAAAAKAAAACgAAAAoAAAAKAAAACgAAAAoAAAAK"
+    "AAAACgAAAAoAAAAKAAAACgAAAAoAAAAUc3RjbwAAAAAAAAABAAADuAAAAGJ1ZHRhAAAAWm1ldGEA"
+    "AAAAAAAAIWhkbHIAAAAAAAAAAG1kaXJhcHBsAAAAAAAAAAAAAAAALWlsc3QAAAAlqXRvbwAAAB1k"
+    "YXRhAAAAAQAAAABMYXZmNjAuMTYuMTAwAAAACGZyZWUAAAOQbWRhdAAAAnEGBf//bdxF6b3m2Ui3"
+    "lizYINkj7u94MjY0IC0gY29yZSAxNjQgcjMxMDggMzFlMTlmOSAtIEguMjY0L01QRUctNCBBVkMg"
+    "Y29kZWMgLSBDb3B5bGVmdCAyMDAzLTIwMjMgLSBodHRwOi8vd3d3LnZpZGVvbGFuLm9yZy94MjY0"
+    "Lmh0bWwgLSBvcHRpb25zOiBjYWJhYz0wIHJlZj0zIGRlYmxvY2s9MTowOjAgYW5hbHlzZT0weDE6"
+    "MHgxMTEgbWU9aGV4IHN1Ym1lPTcgcHN5PTEgcHN5X3JkPTEuMDA6MC4wMCBtaXhlZF9yZWY9MSBt"
+    "ZV9yYW5nZT0xNiBjaHJvbWFfbWU9MSB0cmVsbGlzPTEgOHg4ZGN0PTAgY3FtPTAgZGVhZHpvbmU9"
+    "MjEsMTEgZmFzdF9wc2tpcD0xIGNocm9tYV9xcF9vZmZzZXQ9LTIgdGhyZWFkcz0yIGxvb2thaGVh"
+    "ZF90aHJlYWRzPTEgc2xpY2VkX3RocmVhZHM9MCBucj0wIGRlY2ltYXRlPTEgaW50ZXJsYWNlZD0w"
+    "IGJsdXJheV9jb21wYXQ9MCBjb25zdHJhaW5lZF9pbnRyYT0wIGJmcmFtZXM9MCB3ZWlnaHRwPTAg"
+    "a2V5aW50PTI1MCBrZXlpbnRfbWluPTI1IHNjZW5lY3V0PTQwIGludHJhX3JlZnJlc2g9MCByY19s"
+    "b29rYWhlYWQ9NDAgcmM9Y3JmIG1idHJlZT0xIGNyZj0yMy4wIHFjb21wPTAuNjAgcXBtaW49MCBx"
+    "cG1heD02OSBxcHN0ZXA9NCBpcF9yYXRpbz0xLjQwIGFxPTE6MS4wMACAAAAAH2WIhAzxGKAAIRMc"
+    "AAR/o4AAiyycnJ1111111111114AAAAGQZo4GeEYAAAABkGaVAZ4RgAAAAZBmmAzwjAAAAAGQZqA"
+    "M8IwAAAABkGaoDPCMAAAAAZBmsAzwjAAAAAGQZrgM8IwAAAABkGbADPCMAAAAAZBmyAzwjAAAAAG"
+    "QZtAM8IwAAAABkGbYDPCMAAAAAZBm4AzwjAAAAAGQZugM8IwAAAABkGbwDPCMAAAAAZBm+AzwjAA"
+    "AAAGQZoAM8IwAAAABkGaIDPCMAAAAAZBmkAzwjAAAAAGQZpgM8IwAAAABkGagDPCMAAAAAZBmqAz"
+    "wjAAAAAGQZrAL8IwAAAABkGa4C/CMAAAAAZBmwArwjA="
 )
-(root / "cotton-open-video.mp4").write_bytes(bytes.fromhex(mp4_hex))
+(root / "cotton-open-video.mp4").write_bytes(base64.b64decode(mp4))
 
 with zipfile.ZipFile(root / "cotton-open-office.docx", "w", zipfile.ZIP_DEFLATED) as docx:
     docx.writestr(
@@ -436,6 +471,7 @@ if [[ "$launch_app" -eq 1 ]]; then
 fi
 
 capture_device_state "10-preflight"
+capture_text "11-launch-logcat.txt" adb_device logcat -d -v threadtime
 
 if [[ "$preflight_only" -eq 1 || "$seed_only" -eq 1 ]]; then
   if [[ "$seed_only" -eq 1 ]]; then

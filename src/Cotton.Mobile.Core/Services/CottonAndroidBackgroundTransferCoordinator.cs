@@ -26,13 +26,42 @@ namespace Cotton.Mobile.Services
             int androidApiLevel,
             CancellationToken cancellationToken = default)
         {
+            return await ScheduleNextQueuedUploadAsync(
+                    instanceUri,
+                    androidApiLevel,
+                    static _ => true,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<CottonAndroidBackgroundTransferScheduleResult> ScheduleNextQueuedCameraBackupUploadAsync(
+            Uri instanceUri,
+            int androidApiLevel,
+            CancellationToken cancellationToken = default)
+        {
+            return await ScheduleNextQueuedUploadAsync(
+                    instanceUri,
+                    androidApiLevel,
+                    static item => item.Source?.Kind == CottonTransferSourceKind.CameraBackup,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<CottonAndroidBackgroundTransferScheduleResult> ScheduleNextQueuedUploadAsync(
+            Uri instanceUri,
+            int androidApiLevel,
+            Func<CottonTransferQueueItem, bool> transferFilter,
+            CancellationToken cancellationToken)
+        {
             ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(transferFilter);
 
             IReadOnlyList<CottonTransferQueueItem> queue =
                 await _metadataStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonTransferQueueItem? transfer = queue.FirstOrDefault(
                 item => item.Kind == CottonTransferKind.Upload
-                    && item.Status == CottonTransferStatus.Queued);
+                    && item.Status == CottonTransferStatus.Queued
+                    && transferFilter(item));
             if (transfer is null)
             {
                 return CottonAndroidBackgroundTransferScheduleResult.NoQueuedTransfer();

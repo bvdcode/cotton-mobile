@@ -11,6 +11,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCameraBackupPlanningService _planningService;
         private readonly ICottonCameraBackupTransferEnqueueCoordinator _transferEnqueueCoordinator;
         private readonly ICottonTransferActivitySignal _transferActivitySignal;
+        private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
+        private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
         private readonly ICottonLocalNotificationService _localNotificationService;
         private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
@@ -42,6 +44,8 @@ namespace Cotton.Mobile.ViewModels
             ICottonCameraBackupPlanningService planningService,
             ICottonCameraBackupTransferEnqueueCoordinator transferEnqueueCoordinator,
             ICottonTransferActivitySignal transferActivitySignal,
+            ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
+            IAndroidApiLevelProvider androidApiLevelProvider,
             ICottonLocalNotificationService localNotificationService,
             ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
@@ -52,6 +56,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(planningService);
             ArgumentNullException.ThrowIfNull(transferEnqueueCoordinator);
             ArgumentNullException.ThrowIfNull(transferActivitySignal);
+            ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
+            ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
             ArgumentNullException.ThrowIfNull(localNotificationService);
             ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
@@ -62,6 +68,8 @@ namespace Cotton.Mobile.ViewModels
             _planningService = planningService;
             _transferEnqueueCoordinator = transferEnqueueCoordinator;
             _transferActivitySignal = transferActivitySignal;
+            _backgroundTransferCoordinator = backgroundTransferCoordinator;
+            _androidApiLevelProvider = androidApiLevelProvider;
             _localNotificationService = localNotificationService;
             _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
@@ -371,10 +379,64 @@ namespace Cotton.Mobile.ViewModels
                         _transferActivitySignal.NotifyTransferActivityChanged();
                     }
 
+                    CottonAndroidBackgroundTransferScheduleResult? scheduleResult =
+                        await ScheduleQueuedCameraBackupBestEffortAsync(result);
                     await LoadPlanningHealthAsync();
-                    Status = CottonCameraBackupQueueStatusText.CreateResultStatus(result);
+                    Status = CreateQueueStatusText(result, scheduleResult);
                 },
                 "Could not queue camera backup uploads.");
+        }
+
+        private async Task<CottonAndroidBackgroundTransferScheduleResult?> ScheduleQueuedCameraBackupBestEffortAsync(
+            CottonCameraBackupTransferEnqueueResult result)
+        {
+            if (result.QueuedCount <= 0 && result.SkippedExistingTransferCount <= 0)
+            {
+                return null;
+            }
+
+            try
+            {
+                return await _backgroundTransferCoordinator
+                    .ScheduleNextQueuedCameraBackupUploadAsync(
+                        _instanceUri,
+                        _androidApiLevelProvider.CurrentApiLevel)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile camera backup background schedule failed.");
+                return null;
+            }
+        }
+
+        private static string CreateQueueStatusText(
+            CottonCameraBackupTransferEnqueueResult enqueueResult,
+            CottonAndroidBackgroundTransferScheduleResult? scheduleResult)
+        {
+            string queueStatus = CottonCameraBackupQueueStatusText.CreateResultStatus(enqueueResult);
+            if (scheduleResult is null
+                || scheduleResult.Status == CottonAndroidBackgroundTransferScheduleStatus.NoQueuedTransfer)
+            {
+                return queueStatus;
+            }
+
+            if (scheduleResult.IsScheduled)
+            {
+                return $"{queueStatus} Android will run backup when constraints allow.";
+            }
+
+            if (scheduleResult.Status == CottonAndroidBackgroundTransferScheduleStatus.ForegroundRequired)
+            {
+                return $"{queueStatus} Open Transfers to run waiting uploads.";
+            }
+
+            if (scheduleResult.Status == CottonAndroidBackgroundTransferScheduleStatus.Unsupported)
+            {
+                return $"{queueStatus} Background backup is not available on this device yet.";
+            }
+
+            return queueStatus;
         }
 
         private CottonCameraBackupSettings CreateSettingsFromUi()

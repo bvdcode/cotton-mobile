@@ -85,6 +85,36 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Camera_backup_scheduler_skips_manual_uploads()
+        {
+            Guid cameraTransferId = Guid.Parse("cccccccc-dddd-eeee-ffff-000000000000");
+            CottonTransferQueueItem manualTransfer = CreateQueuedUpload(
+                TransferId,
+                source: null);
+            CottonTransferQueueItem cameraTransfer = CreateQueuedUpload(
+                cameraTransferId,
+                source: new CottonTransferSourceSnapshot(
+                    CottonTransferSourceKind.CameraBackup,
+                    "content://media/external/images/media/42",
+                    CreatedAt.AddMinutes(-5),
+                    sizeBytes: 456,
+                    capturedAtUtc: CreatedAt.AddMinutes(-10)));
+            var host = new FakeBackgroundTransferHost();
+            CottonAndroidBackgroundTransferCoordinator coordinator = CreateCoordinator(
+                [manualTransfer, cameraTransfer],
+                host);
+
+            CottonAndroidBackgroundTransferScheduleResult result =
+                await coordinator.ScheduleNextQueuedCameraBackupUploadAsync(InstanceUri, androidApiLevel: 36);
+
+            Assert.True(result.IsScheduled);
+            CottonAndroidBackgroundTransferRequest request = Assert.Single(host.Requests);
+            Assert.Equal(cameraTransferId, request.TransferId);
+            Assert.Equal(CottonAndroidTransferWorkKind.CameraBackupUpload, request.WorkKind);
+            Assert.Equal(CottonAndroidTransferExecutionHost.WorkManagerConstrained, request.Host);
+        }
+
+        [Fact]
         public void Schedule_identity_is_stable_and_transfer_scoped()
         {
             CottonAndroidBackgroundTransferScheduleIdentity first =
@@ -174,8 +204,15 @@ namespace Cotton.Mobile.Tests
 
         private static CottonTransferQueueItem CreateQueuedUpload(CottonTransferSourceSnapshot? source)
         {
+            return CreateQueuedUpload(TransferId, source);
+        }
+
+        private static CottonTransferQueueItem CreateQueuedUpload(
+            Guid transferId,
+            CottonTransferSourceSnapshot? source)
+        {
             return CottonTransferQueueItem.CreateUpload(
-                TransferId,
+                transferId,
                 "upload.bin",
                 totalBytes: source?.SizeBytes ?? 100,
                 CreatedAt,

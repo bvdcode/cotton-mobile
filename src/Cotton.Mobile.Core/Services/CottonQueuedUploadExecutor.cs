@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonTransferStagingStore _stagingStore;
         private readonly ICottonQueuedUploadClient _uploadClient;
         private readonly ICottonCameraBackupUploadedMediaStore _cameraBackupUploadedMediaStore;
+        private readonly ICottonLocalNotificationService _localNotificationService;
         private readonly TimeProvider _timeProvider;
 
         public CottonQueuedUploadExecutor(
@@ -16,6 +17,23 @@ namespace Cotton.Mobile.Services
             ICottonTransferStagingStore stagingStore,
             ICottonQueuedUploadClient uploadClient,
             ICottonCameraBackupUploadedMediaStore cameraBackupUploadedMediaStore,
+            TimeProvider? timeProvider)
+            : this(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                cameraBackupUploadedMediaStore,
+                null,
+                timeProvider)
+        {
+        }
+
+        public CottonQueuedUploadExecutor(
+            ICottonTransferMetadataStore metadataStore,
+            ICottonTransferStagingStore stagingStore,
+            ICottonQueuedUploadClient uploadClient,
+            ICottonCameraBackupUploadedMediaStore cameraBackupUploadedMediaStore,
+            ICottonLocalNotificationService? localNotificationService = null,
             TimeProvider? timeProvider = null)
         {
             ArgumentNullException.ThrowIfNull(metadataStore);
@@ -27,6 +45,7 @@ namespace Cotton.Mobile.Services
             _stagingStore = stagingStore;
             _uploadClient = uploadClient;
             _cameraBackupUploadedMediaStore = cameraBackupUploadedMediaStore;
+            _localNotificationService = localNotificationService ?? NullCottonLocalNotificationService.Instance;
             _timeProvider = timeProvider ?? TimeProvider.System;
         }
 
@@ -111,6 +130,8 @@ namespace Cotton.Mobile.Services
                         uploadResult,
                         cancellationToken)
                     .ConfigureAwait(false);
+                await ShowCompletedNotificationAsync(completed, cancellationToken)
+                    .ConfigureAwait(false);
                 await _stagingStore.DeleteAsync(instanceUri, completed.Id, cancellationToken)
                     .ConfigureAwait(false);
                 return new CottonQueuedUploadExecutionResult(
@@ -176,6 +197,24 @@ namespace Cotton.Mobile.Services
             await _cameraBackupUploadedMediaStore
                 .AddOrReplaceAsync(instanceUri, uploaded, cancellationToken)
                 .ConfigureAwait(false);
+        }
+
+        private async Task ShowCompletedNotificationAsync(
+            CottonTransferQueueItem completed,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                CottonLocalNotificationSnapshot notification =
+                    CottonTransferNotificationFactory.CreateCompletedUpload(completed);
+                await _localNotificationService
+                    .ShowAsync(notification, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                // Notification delivery must never turn a completed upload into a failed transfer.
+            }
         }
 
         private static string CreateFailureMessage(Exception exception)

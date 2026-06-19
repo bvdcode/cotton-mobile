@@ -64,6 +64,7 @@ namespace Cotton.Mobile
 #if ANDROID
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
+			builder.Services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
@@ -73,6 +74,7 @@ namespace Cotton.Mobile
 #else
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, DisabledCottonNotificationPermissionService>();
+			builder.Services.AddSingleton<ICottonLocalNotificationService>(_ => NullCottonLocalNotificationService.Instance);
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(

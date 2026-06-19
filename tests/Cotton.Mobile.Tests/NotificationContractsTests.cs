@@ -128,5 +128,31 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsActionVisible);
             Assert.False(display.NeedsAttention);
         }
+
+        [Fact]
+        public void Transfer_completed_notification_uses_transfer_channel_and_destination_copy()
+        {
+            var transfer = CottonTransferQueueItem
+                .CreateUpload(
+                    Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                    "report.pdf",
+                    120,
+                    new DateTime(2026, 6, 19, 21, 0, 0, DateTimeKind.Utc),
+                    new CottonTransferDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
+                        "Default",
+                        "Files / Reports"))
+                .Start(new DateTime(2026, 6, 19, 21, 1, 0, DateTimeKind.Utc))
+                .Complete(new DateTime(2026, 6, 19, 21, 2, 0, DateTimeKind.Utc));
+
+            CottonLocalNotificationSnapshot notification =
+                CottonTransferNotificationFactory.CreateCompletedUpload(transfer);
+
+            Assert.Equal(CottonLocalNotificationKind.TransferCompleted, notification.Kind);
+            Assert.Equal(CottonNotificationChannelKind.Transfers, notification.ChannelKind);
+            Assert.Equal("Upload complete", notification.Title);
+            Assert.Equal("report.pdf uploaded to Files / Reports.", notification.Message);
+            Assert.True(notification.Id > 0);
+        }
     }
 }

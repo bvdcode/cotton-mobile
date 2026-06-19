@@ -21,7 +21,12 @@ namespace Cotton.Mobile.Tests
             var metadataStore = new FakeTransferMetadataStore([queued]);
             var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
             var uploadClient = new FakeQueuedUploadClient([40, 100]);
-            CottonQueuedUploadExecutor executor = CreateExecutor(metadataStore, stagingStore, uploadClient);
+            var notificationService = new FakeLocalNotificationService();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                notificationService);
 
             CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
 
@@ -31,6 +36,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, result.Transfer?.AttemptCount);
             Assert.Equal(TransferId, uploadClient.UploadedTransferIds.Single());
             Assert.Equal(TransferId, stagingStore.DeletedTransferIds.Single());
+            CottonLocalNotificationSnapshot notification = Assert.Single(notificationService.Notifications);
+            Assert.Equal(CottonLocalNotificationKind.TransferCompleted, notification.Kind);
+            Assert.Equal(CottonNotificationChannelKind.Transfers, notification.ChannelKind);
+            Assert.Equal("upload.bin uploaded to Default.", notification.Message);
             Assert.Contains(
                 metadataStore.SaveSnapshots,
                 snapshot => snapshot.Single().Status == CottonTransferStatus.Running);
@@ -64,6 +73,27 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(ExecutedAt, uploaded.UploadedAtUtc);
             Assert.Equal(RemoteFileId, uploaded.RemoteFileId);
             Assert.Equal("remote-upload.bin", uploaded.RemoteFileName);
+        }
+
+        [Fact]
+        public async Task ExecuteNext_keeps_completed_upload_when_notification_delivery_fails()
+        {
+            CottonTransferQueueItem queued = CreateQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([queued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            var notificationService = new FakeLocalNotificationService(new InvalidOperationException("No notification permission"));
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                notificationService);
+
+            CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.Completed, result.Status);
+            Assert.Equal(CottonTransferStatus.Completed, metadataStore.Items.Single().Status);
+            Assert.Equal(TransferId, stagingStore.DeletedTransferIds.Single());
         }
 
         [Fact]
@@ -177,13 +207,29 @@ namespace Cotton.Mobile.Tests
             FakeTransferMetadataStore metadataStore,
             FakeTransferStagingStore stagingStore,
             FakeQueuedUploadClient uploadClient,
-            FakeCameraBackupUploadedMediaStore uploadedMediaStore)
+            FakeLocalNotificationService notificationService)
+        {
+            return CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                new FakeCameraBackupUploadedMediaStore(),
+                notificationService);
+        }
+
+        private static CottonQueuedUploadExecutor CreateExecutor(
+            FakeTransferMetadataStore metadataStore,
+            FakeTransferStagingStore stagingStore,
+            FakeQueuedUploadClient uploadClient,
+            FakeCameraBackupUploadedMediaStore uploadedMediaStore,
+            FakeLocalNotificationService? notificationService = null)
         {
             return new CottonQueuedUploadExecutor(
                 metadataStore,
                 stagingStore,
                 uploadClient,
                 uploadedMediaStore,
+                notificationService,
                 new FixedTimeProvider(ExecutedAt));
         }
 
@@ -392,6 +438,31 @@ namespace Cotton.Mobile.Tests
             {
                 Items = [];
                 return Task.CompletedTask;
+            }
+        }
+
+        private sealed class FakeLocalNotificationService : ICottonLocalNotificationService
+        {
+            private readonly Exception? _exception;
+
+            public FakeLocalNotificationService(Exception? exception = null)
+            {
+                _exception = exception;
+            }
+
+            public IReadOnlyList<CottonLocalNotificationSnapshot> Notifications { get; private set; } = [];
+
+            public Task<CottonLocalNotificationDeliveryResult> ShowAsync(
+                CottonLocalNotificationSnapshot notification,
+                CancellationToken cancellationToken = default)
+            {
+                if (_exception is not null)
+                {
+                    throw _exception;
+                }
+
+                Notifications = Notifications.Concat([notification]).ToList();
+                return Task.FromResult(CottonLocalNotificationDeliveryResult.Posted);
             }
         }
 

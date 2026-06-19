@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Services
             string detailText,
             string actionText,
             bool canReadMedia,
+            bool canScanFullLibrary,
             bool needsAttention,
             bool shouldOpenSettings)
         {
@@ -16,6 +17,7 @@ namespace Cotton.Mobile.Services
             DetailText = detailText;
             ActionText = actionText;
             CanReadMedia = canReadMedia;
+            CanScanFullLibrary = canScanFullLibrary;
             NeedsAttention = needsAttention;
             ShouldOpenSettings = shouldOpenSettings;
         }
@@ -32,6 +34,8 @@ namespace Cotton.Mobile.Services
 
         public bool CanReadMedia { get; }
 
+        public bool CanScanFullLibrary { get; }
+
         public bool NeedsAttention { get; }
 
         public bool ShouldOpenSettings { get; }
@@ -47,15 +51,17 @@ namespace Cotton.Mobile.Services
                     "Cotton can scan photos and videos after backup execution is enabled.",
                     actionText: string.Empty,
                     canReadMedia: true,
+                    canScanFullLibrary: true,
                     needsAttention: false,
                     shouldOpenSettings: false),
                 CottonCameraBackupMediaAccessState.Limited => new CottonCameraBackupMediaAccessDisplayState(
                     "Media Access",
                     "Selected media only",
-                    "Cotton can use only the media you select until broader access is allowed.",
+                    "Automatic camera backup needs access to all photos and videos.",
                     actionText: "Settings",
                     canReadMedia: true,
-                    needsAttention: false,
+                    canScanFullLibrary: false,
+                    needsAttention: true,
                     shouldOpenSettings: true),
                 CottonCameraBackupMediaAccessState.Denied => new CottonCameraBackupMediaAccessDisplayState(
                     "Media Access",
@@ -63,6 +69,7 @@ namespace Cotton.Mobile.Services
                     "Allow photo access in Android settings before camera backup can scan media.",
                     actionText: "Settings",
                     canReadMedia: false,
+                    canScanFullLibrary: false,
                     needsAttention: true,
                     shouldOpenSettings: true),
                 CottonCameraBackupMediaAccessState.Unavailable => new CottonCameraBackupMediaAccessDisplayState(
@@ -71,6 +78,7 @@ namespace Cotton.Mobile.Services
                     "Media library access is not available on this device.",
                     actionText: string.Empty,
                     canReadMedia: false,
+                    canScanFullLibrary: false,
                     needsAttention: true,
                     shouldOpenSettings: false),
                 _ => new CottonCameraBackupMediaAccessDisplayState(
@@ -79,6 +87,7 @@ namespace Cotton.Mobile.Services
                     "Cotton will ask before scanning photos or videos.",
                     actionText: "Allow",
                     canReadMedia: false,
+                    canScanFullLibrary: false,
                     needsAttention: false,
                     shouldOpenSettings: false),
             };

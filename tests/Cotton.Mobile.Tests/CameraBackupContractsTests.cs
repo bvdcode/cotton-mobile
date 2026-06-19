@@ -85,16 +85,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Not requested", "Allow", false, false, false)]
-        [InlineData(CottonCameraBackupMediaAccessState.Allowed, "Allowed", "", true, false, false)]
-        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Selected media only", "Settings", true, false, true)]
-        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Denied", "Settings", false, true, true)]
-        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, "Unavailable", "", false, true, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Not requested", "Allow", false, false, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Allowed, "Allowed", "", true, true, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Selected media only", "Settings", true, false, true, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Denied", "Settings", false, false, true, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, "Unavailable", "", false, false, true, false)]
         public void Camera_backup_media_access_display_keeps_permission_state_explicit(
             CottonCameraBackupMediaAccessState state,
             string statusText,
             string actionText,
             bool canReadMedia,
+            bool canScanFullLibrary,
             bool needsAttention,
             bool shouldOpenSettings)
         {
@@ -106,9 +107,25 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(actionText, display.ActionText);
             Assert.Equal(!string.IsNullOrWhiteSpace(actionText), display.IsActionVisible);
             Assert.Equal(canReadMedia, display.CanReadMedia);
+            Assert.Equal(canScanFullLibrary, display.CanScanFullLibrary);
             Assert.Equal(needsAttention, display.NeedsAttention);
             Assert.Equal(shouldOpenSettings, display.ShouldOpenSettings);
             Assert.False(string.IsNullOrWhiteSpace(display.DetailText));
+        }
+
+        [Theory]
+        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Allowed, true, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Limited, true, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Denied, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, false, false)]
+        public void Camera_backup_media_access_rules_keep_partial_access_from_full_backup(
+            CottonCameraBackupMediaAccessState state,
+            bool canReadAnyMedia,
+            bool canScanFullLibrary)
+        {
+            Assert.Equal(canReadAnyMedia, CottonCameraBackupMediaAccessRules.CanReadAnyMedia(state));
+            Assert.Equal(canScanFullLibrary, CottonCameraBackupMediaAccessRules.CanScanFullLibrary(state));
         }
 
         [Fact]

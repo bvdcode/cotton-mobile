@@ -15,7 +15,9 @@ namespace Cotton.Mobile.Services
         public async Task<IReadOnlyList<CottonCameraBackupCandidate>> ListCandidatesAsync(
             CancellationToken cancellationToken = default)
         {
-            if (!await _accessPolicy.CanReadMediaAsync(cancellationToken).ConfigureAwait(false))
+            CottonCameraBackupMediaAccessState accessState =
+                await _accessPolicy.GetAccessStateAsync(cancellationToken).ConfigureAwait(false);
+            if (!CottonCameraBackupMediaAccessRules.CanScanFullLibrary(accessState))
             {
                 return Array.Empty<CottonCameraBackupCandidate>();
             }

@@ -315,10 +315,10 @@ namespace Cotton.Mobile.ViewModels
 
                     CottonCameraBackupMediaAccessState state =
                         await _mediaAccessPolicy.RequestAccessAsync();
-                    ShowMediaAccess(state);
-                    Status = CottonCameraBackupMediaAccessDisplayState.Create(state).CanReadMedia
+                    CottonCameraBackupMediaAccessDisplayState display = ShowMediaAccess(state);
+                    Status = display.CanScanFullLibrary
                         ? "Media access updated."
-                        : "Media access is not available yet.";
+                        : "Automatic camera backup needs full media access.";
                 },
                 "Could not update media access.");
         }
@@ -388,10 +388,10 @@ namespace Cotton.Mobile.ViewModels
         {
             CottonCameraBackupMediaAccessState state =
                 await _mediaAccessPolicy.GetAccessStateAsync();
-            ShowMediaAccess(state);
+            _ = ShowMediaAccess(state);
         }
 
-        private void ShowMediaAccess(CottonCameraBackupMediaAccessState state)
+        private CottonCameraBackupMediaAccessDisplayState ShowMediaAccess(CottonCameraBackupMediaAccessState state)
         {
             CottonCameraBackupMediaAccessDisplayState display =
                 CottonCameraBackupMediaAccessDisplayState.Create(state);
@@ -401,6 +401,7 @@ namespace Cotton.Mobile.ViewModels
             MediaAccessActionText = display.ActionText;
             IsMediaAccessActionVisible = display.IsActionVisible;
             _mediaAccessShouldOpenSettings = display.ShouldOpenSettings;
+            return display;
         }
 
         private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)

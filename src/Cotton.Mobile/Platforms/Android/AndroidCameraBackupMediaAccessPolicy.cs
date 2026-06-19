@@ -60,9 +60,7 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             CottonCameraBackupMediaAccessState state = GetCurrentAccessState();
-            return Task.FromResult(
-                state is CottonCameraBackupMediaAccessState.Allowed
-                    or CottonCameraBackupMediaAccessState.Limited);
+            return Task.FromResult(CottonCameraBackupMediaAccessRules.CanReadAnyMedia(state));
         }
 
         private CottonCameraBackupMediaAccessState GetCurrentAccessState()

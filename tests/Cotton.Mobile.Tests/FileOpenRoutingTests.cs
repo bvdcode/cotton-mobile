@@ -16,6 +16,10 @@ namespace Cotton.Mobile.Tests
         [InlineData("script.py", "", 256, CottonFilePreviewKind.Text, "text/x-python")]
         [InlineData("diagram.svg", "", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
         [InlineData("photo.webp", "image/webp", 8_192, CottonFilePreviewKind.Image, "image/webp")]
+        [InlineData("song.mp3", "audio/mpeg", 4_096, CottonFilePreviewKind.Audio, "audio/mpeg")]
+        [InlineData("voice.m4a", "", 4_096, CottonFilePreviewKind.Audio, "audio/mp4")]
+        [InlineData("movie.mp4", "", 16_384, CottonFilePreviewKind.Video, "video/mp4")]
+        [InlineData("clip.webm", "video/webm; codecs=vp9", 16_384, CottonFilePreviewKind.Video, "video/webm")]
         public void Known_in_app_preview_types_route_to_open(
             string name,
             string contentType,
@@ -56,8 +60,6 @@ namespace Cotton.Mobile.Tests
 
         [Theory]
         [InlineData("report.pdf", "", CottonSystemFileOpenKind.Pdf, "application/pdf", "No PDF app can open this file.")]
-        [InlineData("song.mp3", "audio/mpeg", CottonSystemFileOpenKind.Audio, "audio/mpeg", "No audio app can open this file.")]
-        [InlineData("movie.mp4", "", CottonSystemFileOpenKind.Video, "video/mp4", "No video app can open this file.")]
         [InlineData("brief.docx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "No document app can open this file.")]
         [InlineData("slides.pptx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "No document app can open this file.")]
         [InlineData("archive.zip", "", CottonSystemFileOpenKind.Archive, "application/zip", "No archive app can open this file.")]

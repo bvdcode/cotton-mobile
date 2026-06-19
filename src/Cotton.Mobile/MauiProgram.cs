@@ -1,4 +1,5 @@
-﻿using Cotton.Mobile.Services;
+﻿using CommunityToolkit.Maui;
+using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace Cotton.Mobile
 			var builder = MauiApp.CreateBuilder();
 			builder
 				.UseMauiApp<App>()
+				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
 				.ConfigureFonts(fonts =>
 				{
 					fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -151,6 +153,7 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<CaptureInboxPage>();
 			builder.Services.AddTransient<CaptureDestinationPickerViewModel>();
 			builder.Services.AddTransient<CaptureDestinationPickerPage>();
+			builder.Services.AddTransient<MediaViewerPage>();
 
 #if DEBUG
 			builder.Logging.AddDebug();

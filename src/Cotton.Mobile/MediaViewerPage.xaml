@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.MediaViewerPage"
+             x:DataType="viewModels:MediaViewerViewModel"
+             Shell.NavBarIsVisible="True"
+             Title="{Binding Title}"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Share"
+                     Command="{Binding ShareCommand}" />
+        <ToolbarItem Text="Open"
+                     Command="{Binding OpenExternallyCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="*,Auto"
+          BackgroundColor="{StaticResource OffBlack}">
+        <Grid BackgroundColor="{StaticResource OffBlack}">
+            <toolkit:MediaElement x:Name="MediaPlayer"
+                                  Source="{Binding MediaSourcePath}"
+                                  Aspect="AspectFit"
+                                  ShouldAutoPlay="False"
+                                  ShouldLoopPlayback="False"
+                                  ShouldShowPlaybackControls="True"
+                                  HorizontalOptions="Fill"
+                                  VerticalOptions="Fill" />
+
+            <VerticalStackLayout IsVisible="{Binding IsAudioPreview}"
+                                 InputTransparent="True"
+                                 Spacing="8"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 Padding="32,24">
+                <Label Text="{Binding MediaLabel}"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{StaticResource White}" />
+
+                <Label Text="{Binding Details}"
+                       FontSize="13"
+                       HorizontalTextAlignment="Center"
+                       TextColor="{StaticResource Gray200}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="1"
+                             Padding="16,12"
+                             Spacing="2"
+                             BackgroundColor="{StaticResource OffBlack}">
+            <Label Text="{Binding Title}"
+                   FontSize="15"
+                   FontAttributes="Bold"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource White}" />
+
+            <Label Text="{Binding Details}"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource Gray200}" />
+
+            <Label Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource Gray200}" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

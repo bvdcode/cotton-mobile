@@ -135,6 +135,28 @@ namespace Cotton.Mobile.Services
                     contentType);
             }
 
+            if (IsAudioPreview(file, contentType))
+            {
+                return new CottonFileOpenRoute(
+                    CottonFileOpenTarget.InAppPreview,
+                    CottonFilePreviewKind.Audio,
+                    CottonSystemFileOpenKind.None,
+                    OpenActionLabel,
+                    AudioOpenUnavailableStatus,
+                    contentType);
+            }
+
+            if (IsVideoPreview(file, contentType))
+            {
+                return new CottonFileOpenRoute(
+                    CottonFileOpenTarget.InAppPreview,
+                    CottonFilePreviewKind.Video,
+                    CottonSystemFileOpenKind.None,
+                    OpenActionLabel,
+                    VideoOpenUnavailableStatus,
+                    contentType);
+            }
+
             CottonSystemFileOpenKind systemKind = ResolveSystemKind(file, contentType);
             return new CottonFileOpenRoute(
                 CottonFileOpenTarget.SystemApp,
@@ -170,6 +192,18 @@ namespace Cotton.Mobile.Services
         {
             long? sizeBytes = availableSizeBytes ?? file.SizeBytes;
             return !sizeBytes.HasValue || sizeBytes.Value is >= 0 and <= MaxTextPreviewBytes;
+        }
+
+        private static bool IsAudioPreview(CottonFileBrowserEntry file, string? contentType)
+        {
+            return string.Equals(file.Kind, "Audio", StringComparison.OrdinalIgnoreCase)
+                || (contentType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ?? false);
+        }
+
+        private static bool IsVideoPreview(CottonFileBrowserEntry file, string? contentType)
+        {
+            return string.Equals(file.Kind, "Video", StringComparison.OrdinalIgnoreCase)
+                || (contentType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         private static CottonSystemFileOpenKind ResolveSystemKind(

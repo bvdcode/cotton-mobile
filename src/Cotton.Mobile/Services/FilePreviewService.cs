@@ -60,6 +60,13 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
+            if (route.PreviewKind is CottonFilePreviewKind.Audio or CottonFilePreviewKind.Video)
+            {
+                await OpenMediaPreviewAsync(file, downloadedFile, route.PreviewKind, cancellationToken)
+                    .ConfigureAwait(false);
+                return;
+            }
+
             if (route.PreviewKind != CottonFilePreviewKind.Text)
             {
                 throw new InvalidOperationException("The selected file cannot be previewed inside Cotton.");
@@ -78,6 +85,21 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreateImageViewerPage(file, downloadedFile);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        private async Task OpenMediaPreviewAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CottonFilePreviewKind previewKind,
+            CancellationToken cancellationToken)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ContentPage page = CreateMediaViewerPage(file, downloadedFile, previewKind);
                 await Shell.Current.Navigation.PushAsync(page);
             });
             cancellationToken.ThrowIfCancellationRequested();
@@ -109,6 +131,21 @@ namespace Cotton.Mobile.Services
                 details,
                 downloadedFile);
             return ActivatorUtilities.CreateInstance<ImageViewerPage>(_serviceProvider, viewModel);
+        }
+
+        private MediaViewerPage CreateMediaViewerPage(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CottonFilePreviewKind previewKind)
+        {
+            string details = CreateDetails(file, downloadedFile);
+            var viewModel = ActivatorUtilities.CreateInstance<MediaViewerViewModel>(
+                _serviceProvider,
+                file.Name,
+                details,
+                previewKind,
+                downloadedFile);
+            return ActivatorUtilities.CreateInstance<MediaViewerPage>(_serviceProvider, viewModel);
         }
 
         private async Task<string> ReadTextPreviewAsync(

@@ -5,5 +5,7 @@ namespace Cotton.Mobile.Services
         None,
         Text,
         Image,
+        Audio,
+        Video,
     }
 }

@@ -157,8 +157,10 @@ write_metadata() {
     printf 'expected_version_code=%s\n' "$expected_version_code"
     printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'maui_launcher_docs=https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/appmodel/launcher?view=net-maui-10.0\n'
+    printf 'maui_mediaelement_docs=https://learn.microsoft.com/en-us/dotnet/communitytoolkit/maui/views/mediaelement\n'
     printf 'maui_open_file_request_docs=https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.openfilerequest?view=net-maui-10.0\n'
     printf 'android_intent_docs=https://developer.android.com/reference/android/content/Intent\n'
+    printf 'android_exoplayer_supported_formats_docs=https://developer.android.com/media/media3/exoplayer/supported-formats\n'
     printf 'android_pdf_renderer_docs=https://developer.android.com/reference/android/graphics/pdf/PdfRenderer\n'
   } > "$evidence_dir/metadata.env"
 }
@@ -197,8 +199,8 @@ write_checklist() {
 - [ ] Text opens in Cotton text viewer.
 - [ ] Image opens in Cotton image viewer.
 - [ ] PDF action label says `Open with system app` and launches/handles system PDF flow or honest no-app fallback.
-- [ ] Audio action label says `Open with system app` and launches/handles system audio flow or honest no-app fallback.
-- [ ] Video action label says `Open with system app` and launches/handles system video flow or honest no-app fallback.
+- [ ] Audio opens in Cotton media viewer with playback controls.
+- [ ] Video opens in Cotton media viewer with playback controls.
 - [ ] Office document action label says `Open with system app` and launches/handles system document flow or honest no-app fallback.
 - [ ] Archive action label says `Open with system app` and launches/handles system archive flow or honest no-app fallback.
 - [ ] Unknown file action label says `Open with system app` and shows honest no-app fallback if no handler exists.
@@ -487,8 +489,8 @@ prompt_capture "Upload all seeded cotton-open-* files from Android Downloads and
 prompt_capture "Open cotton-open-text.txt and verify Cotton text viewer." "40-text-open"
 prompt_capture "Return to Files, open cotton-open-image.png, and verify Cotton image viewer." "41-image-open"
 prompt_capture "Return to Files, open cotton-open-doc.pdf, and verify system PDF flow or honest no-app fallback." "42-pdf-open"
-prompt_capture "Return to Files, open cotton-open-audio.wav, and verify system audio flow or honest no-app fallback." "43-audio-open"
-prompt_capture "Return to Files, open cotton-open-video.mp4, and verify system video flow or honest no-app fallback." "44-video-open"
+prompt_capture "Return to Files, open cotton-open-audio.wav, and verify Cotton media viewer with playback controls." "43-audio-open"
+prompt_capture "Return to Files, open cotton-open-video.mp4, and verify Cotton media viewer with playback controls." "44-video-open"
 prompt_capture "Return to Files, open cotton-open-office.docx, and verify system Office flow or honest no-app fallback." "45-office-open"
 prompt_capture "Return to Files, open cotton-open-archive.zip, and verify system archive flow or honest no-app fallback." "46-archive-open"
 prompt_capture "Return to Files, open cotton-open-unknown.bin, and verify honest no-app fallback if no handler exists." "47-unknown-open"

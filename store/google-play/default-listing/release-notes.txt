@@ -1,6 +1,6 @@
 Closed testing build for Cotton Cloud mobile.
 
-Adds the first Android WorkManager path for queued Camera Backup uploads after session restore or Queue now.
+Adds in-app audio/video preview, richer text/code details, and the first Android WorkManager path for queued Camera Backup uploads after session restore or Queue now.
 
 Keeps safer file opening, cached offline start, folder navigation, On device markers, transfer notifications, Storage, feedback, and logout cleanup.
 

@@ -348,6 +348,46 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.HasActivity);
         }
 
+        [Theory]
+        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Allow media access before queueing camera backup.")]
+        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Automatic camera backup needs full media access.")]
+        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Allow media access before queueing camera backup.")]
+        public void Camera_backup_queue_status_keeps_permission_blocks_honest(
+            CottonCameraBackupMediaAccessState accessState,
+            string expectedStatus)
+        {
+            CottonCameraBackupMediaAccessDisplayState display =
+                CottonCameraBackupMediaAccessDisplayState.Create(accessState);
+
+            Assert.Equal(expectedStatus, CottonCameraBackupQueueStatusText.CreateBlockedAccessStatus(display));
+        }
+
+        [Theory]
+        [InlineData(0, 0, 0, true, "Choose a folder before queueing camera backup.")]
+        [InlineData(1, 0, 0, false, "Queued 1 camera backup upload.")]
+        [InlineData(2, 0, 0, false, "Queued 2 camera backup uploads.")]
+        [InlineData(0, 0, 1, false, "Could not read 1 camera item.")]
+        [InlineData(0, 0, 2, false, "Could not read 2 camera items.")]
+        [InlineData(0, 1, 0, false, "Camera backup uploads are already queued.")]
+        [InlineData(0, 0, 0, false, "No new camera backup items to queue.")]
+        public void Camera_backup_queue_status_summarizes_enqueue_results(
+            int queuedCount,
+            int skippedExisting,
+            int missingStreams,
+            bool missingDestination,
+            string expectedStatus)
+        {
+            var result = new CottonCameraBackupTransferEnqueueResult(
+                scannedCount: queuedCount + skippedExisting + missingStreams,
+                queuedCount,
+                skippedExisting,
+                missingStreams,
+                missingDestination,
+                queuedTransfers: []);
+
+            Assert.Equal(expectedStatus, CottonCameraBackupQueueStatusText.CreateResultStatus(result));
+        }
+
         private static CottonUploadDestinationSnapshot CreateDestination()
         {
             return new CottonUploadDestinationSnapshot(

@@ -132,8 +132,8 @@
                     StrokeShape="RoundRectangle 8"
                     Padding="14"
                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                <Grid RowDefinitions="Auto,Auto,Auto"
-                      RowSpacing="6">
+                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
+                      RowSpacing="8">
                     <Label Text="{Binding HealthTitle}"
                            FontSize="15"
                            FontAttributes="Bold"
@@ -154,6 +154,13 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                    <Button Grid.Row="3"
+                            Text="Queue now"
+                            Command="{Binding QueueNowCommand}"
+                            Style="{StaticResource FileChromeButton}"
+                            HeightRequest="40"
+                            HorizontalOptions="Start" />
                 </Grid>
             </Border>
 

@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly Uri _instanceUri;
         private readonly ICottonCameraBackupSettingsStore _settingsStore;
         private readonly ICottonCameraBackupPlanningService _planningService;
+        private readonly ICottonCameraBackupTransferEnqueueCoordinator _transferEnqueueCoordinator;
         private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<BackupSetupViewModel> _logger;
@@ -37,6 +38,7 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             ICottonCameraBackupSettingsStore settingsStore,
             ICottonCameraBackupPlanningService planningService,
+            ICottonCameraBackupTransferEnqueueCoordinator transferEnqueueCoordinator,
             ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
             ILogger<BackupSetupViewModel> logger)
@@ -44,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(planningService);
+            ArgumentNullException.ThrowIfNull(transferEnqueueCoordinator);
             ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -51,6 +54,7 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = instanceUri;
             _settingsStore = settingsStore;
             _planningService = planningService;
+            _transferEnqueueCoordinator = transferEnqueueCoordinator;
             _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
@@ -64,6 +68,7 @@ namespace Cotton.Mobile.ViewModels
                 RunMediaAccessActionAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy && IsMediaAccessActionVisible);
+            QueueNowCommand = new AsyncCommand(QueueNowAsync, LogUnhandledCommandException, () => !IsBusy);
             SaveCommand = new AsyncCommand(SaveAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
@@ -72,6 +77,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ChooseDestinationCommand { get; }
 
         public AsyncCommand MediaAccessActionCommand { get; }
+
+        public AsyncCommand QueueNowCommand { get; }
 
         public AsyncCommand SaveCommand { get; }
 
@@ -323,6 +330,38 @@ namespace Cotton.Mobile.ViewModels
                 "Could not update media access.");
         }
 
+        public async Task QueueNowAsync()
+        {
+            await RunBackupActionAsync(
+                async () =>
+                {
+                    _settings = CreateSettingsFromUi();
+                    if (!_settings.HasDestination)
+                    {
+                        ShowSettings(_settings);
+                        Status = "Choose a folder before queueing camera backup.";
+                        return;
+                    }
+
+                    await _settingsStore.SaveAsync(_instanceUri, _settings);
+                    CottonCameraBackupMediaAccessState accessState =
+                        await _mediaAccessPolicy.GetAccessStateAsync();
+                    CottonCameraBackupMediaAccessDisplayState mediaDisplay = ShowMediaAccess(accessState);
+                    if (!mediaDisplay.CanScanFullLibrary)
+                    {
+                        Status = CottonCameraBackupQueueStatusText.CreateBlockedAccessStatus(mediaDisplay);
+                        await LoadPlanningHealthAsync();
+                        return;
+                    }
+
+                    CottonCameraBackupTransferEnqueueResult result =
+                        await _transferEnqueueCoordinator.EnqueueAsync(_instanceUri, _settings);
+                    await LoadPlanningHealthAsync();
+                    Status = CottonCameraBackupQueueStatusText.CreateResultStatus(result);
+                },
+                "Could not queue camera backup uploads.");
+        }
+
         private CottonCameraBackupSettings CreateSettingsFromUi()
         {
             return _settings
@@ -428,6 +467,7 @@ namespace Cotton.Mobile.ViewModels
             LoadCommand.RaiseCanExecuteChanged();
             ChooseDestinationCommand.RaiseCanExecuteChanged();
             MediaAccessActionCommand.RaiseCanExecuteChanged();
+            QueueNowCommand.RaiseCanExecuteChanged();
             SaveCommand.RaiseCanExecuteChanged();
         }
 

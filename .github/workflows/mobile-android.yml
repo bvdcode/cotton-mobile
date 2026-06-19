@@ -7,6 +7,8 @@ env:
   JAVA_VERSION: "21"
   ANDROID_PLATFORM: "platforms;android-36"
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
+  ANDROID_VERSION_CODE_BASE: "1001000"
+  ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
 
 defaults:
   run:
@@ -276,14 +278,32 @@ jobs:
             exit 1
           fi
 
-          android_version_code=$((
-            ${{ steps.gitversion.outputs.major }} * 1000000 +
-            ${{ steps.gitversion.outputs.minor }} * 10000 +
-            ${{ steps.gitversion.outputs.patch }} * 1000 +
-            ${{ steps.gitversion.outputs.versionSourceDistance }}
-          ))
-          if [ "$android_version_code" -le 1 ]; then
-            echo "Computed Android versionCode must be greater than the first published versionCode 1." >&2
+          run_number="${GITHUB_RUN_NUMBER:-}"
+          run_attempt="${GITHUB_RUN_ATTEMPT:-1}"
+          if ! [[ "$run_number" =~ ^[0-9]+$ ]]; then
+            echo "GITHUB_RUN_NUMBER must be numeric for Android versionCode." >&2
+            exit 1
+          fi
+          if ! [[ "$run_attempt" =~ ^[0-9]+$ ]]; then
+            echo "GITHUB_RUN_ATTEMPT must be numeric for Android versionCode." >&2
+            exit 1
+          fi
+          if ! [[ "$ANDROID_VERSION_CODE_BASE" =~ ^[0-9]+$ ]]; then
+            echo "ANDROID_VERSION_CODE_BASE must be numeric." >&2
+            exit 1
+          fi
+          if ! [[ "$ANDROID_VERSION_CODE_PUBLISHED_FLOOR" =~ ^[0-9]+$ ]]; then
+            echo "ANDROID_VERSION_CODE_PUBLISHED_FLOOR must be numeric." >&2
+            exit 1
+          fi
+
+          android_version_code=$((ANDROID_VERSION_CODE_BASE + run_number * 1000 + run_attempt))
+          if [ "$android_version_code" -le "$ANDROID_VERSION_CODE_PUBLISHED_FLOOR" ]; then
+            echo "Computed Android versionCode must be greater than the latest published floor $ANDROID_VERSION_CODE_PUBLISHED_FLOOR." >&2
+            exit 1
+          fi
+          if [ "$android_version_code" -gt 2100000000 ]; then
+            echo "Computed Android versionCode must not exceed the Google Play maximum 2100000000." >&2
             exit 1
           fi
           echo "APPLICATION_DISPLAY_VERSION=$application_display_version" >> "$GITHUB_ENV"

@@ -63,6 +63,7 @@ namespace Cotton.Mobile.Services
                 [CottonFileUploadMetadataKeys.QualityPolicy] = "original-preferred",
                 [CottonFileUploadMetadataKeys.CompressionQuality] = "100",
                 [CottonFileUploadMetadataKeys.PreserveMetadata] = "true",
+                [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
             };
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))

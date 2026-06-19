@@ -82,6 +82,7 @@ namespace Cotton.Mobile.Tests
                     [CottonFileUploadMetadataKeys.QualityPolicy] = "original-preferred",
                     [CottonFileUploadMetadataKeys.CompressionQuality] = "100",
                     [CottonFileUploadMetadataKeys.PreserveMetadata] = "true",
+                    [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
                 });
             var videoSnapshot = new CottonFileUploadSourceSnapshot(
                 "video.mp4",
@@ -91,12 +92,33 @@ namespace Cotton.Mobile.Tests
                 {
                     [CottonFileUploadMetadataKeys.Source] = "picked-video",
                     [CottonFileUploadMetadataKeys.QualityPolicy] = "original",
+                    [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
                 });
 
             Assert.Equal("original-preferred", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
             Assert.Equal("100", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.CompressionQuality]);
             Assert.Equal("true", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.PreserveMetadata]);
+            Assert.Equal(
+                CottonSelectedMediaTransferPolicy.DirectForegroundMetadataValue,
+                photoSnapshot.Metadata[CottonFileUploadMetadataKeys.TransferPolicy]);
             Assert.Equal("original", videoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
+            Assert.Equal(
+                CottonSelectedMediaTransferPolicy.DirectForegroundMetadataValue,
+                videoSnapshot.Metadata[CottonFileUploadMetadataKeys.TransferPolicy]);
+        }
+
+        [Fact]
+        public void Selected_media_transfer_policy_records_foreground_import_risk()
+        {
+            Assert.Equal(
+                CottonSelectedMediaTransferPolicy.DirectForegroundMetadataValue,
+                CottonSelectedMediaTransferPolicy.CurrentMetadataValue);
+            Assert.False(CottonSelectedMediaTransferPolicy.UsesDurableQueue);
+            Assert.True(CottonSelectedMediaTransferPolicy.RequiresDurableQueueBeforeCameraBackup);
+            Assert.Contains(
+                "Durable queued retry/background upload is required before camera backup",
+                CottonSelectedMediaTransferPolicy.ReleaseRiskText,
+                StringComparison.Ordinal);
         }
 
         [Fact]

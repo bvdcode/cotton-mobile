@@ -58,6 +58,7 @@ namespace Cotton.Mobile.Services
             {
                 [CottonFileUploadMetadataKeys.Source] = "picked-video",
                 [CottonFileUploadMetadataKeys.QualityPolicy] = "original",
+                [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
             };
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))

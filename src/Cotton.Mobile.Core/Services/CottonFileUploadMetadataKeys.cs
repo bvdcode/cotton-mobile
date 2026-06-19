@@ -7,5 +7,6 @@ namespace Cotton.Mobile.Services
         public const string QualityPolicy = "cottonMobileQualityPolicy";
         public const string CompressionQuality = "cottonMobileCompressionQuality";
         public const string PreserveMetadata = "cottonMobilePreserveMetadata";
+        public const string TransferPolicy = "cottonMobileTransferPolicy";
     }
 }

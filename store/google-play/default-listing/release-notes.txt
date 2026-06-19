@@ -1,7 +1,7 @@
 Closed testing build for Cotton Cloud mobile.
 
-Adds safer file opening: text/images preview in app, while PDF, media, Office, archives, and unknown files hand off to Android with clearer fallback messages.
+Adds the first Android WorkManager path for queued Camera Backup uploads after session restore or Queue now.
 
-Keeps cached offline start, folder navigation, On device markers, Storage summaries, feedback, and logout cleanup.
+Keeps safer file opening, cached offline start, folder navigation, On device markers, transfer notifications, Storage, feedback, and logout cleanup.
 
-Manual uploads, Capture Inbox, Camera Backup, alerts, background transfer, and true sync remain in progress.
+Full automatic backup, remote push notifications, and true sync remain in progress.

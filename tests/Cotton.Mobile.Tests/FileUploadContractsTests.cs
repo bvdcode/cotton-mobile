@@ -56,14 +56,14 @@ namespace Cotton.Mobile.Tests
                 200,
                 new Dictionary<string, string>
                 {
-                    [" cotton.mobile.source "] = " picked-photo ",
-                    ["cotton.mobile.originalLastModifiedUtc"] = " 2026-06-19T10:00:00.0000000Z ",
+                    [" cottonMobileSource "] = " picked-photo ",
+                    ["cottonMobileOriginalLastModifiedUtc"] = " 2026-06-19T10:00:00.0000000Z ",
                     [" "] = "ignored",
                     ["ignored"] = " ",
                 });
 
-            Assert.Equal("picked-photo", snapshot.Metadata["cotton.mobile.source"]);
-            Assert.Equal("2026-06-19T10:00:00.0000000Z", snapshot.Metadata["cotton.mobile.originalLastModifiedUtc"]);
+            Assert.Equal("picked-photo", snapshot.Metadata["cottonMobileSource"]);
+            Assert.Equal("2026-06-19T10:00:00.0000000Z", snapshot.Metadata["cottonMobileOriginalLastModifiedUtc"]);
             Assert.DoesNotContain("ignored", snapshot.Metadata.Keys);
         }
 
@@ -76,13 +76,13 @@ namespace Cotton.Mobile.Tests
                 200,
                 new Dictionary<string, string>
                 {
-                    ["cotton.mobile.source"] = "picked-photo",
+                    ["cottonMobileSource"] = "picked-photo",
                 });
 
             CottonFileUploadSourceSnapshot renamed = snapshot.WithName("photo (1).jpg");
 
             Assert.Equal("photo (1).jpg", renamed.Name);
-            Assert.Equal("picked-photo", renamed.Metadata["cotton.mobile.source"]);
+            Assert.Equal("picked-photo", renamed.Metadata["cottonMobileSource"]);
         }
 
         [Fact]
@@ -161,6 +161,24 @@ namespace Cotton.Mobile.Tests
                 ["screenshot"]);
 
             Assert.Equal("Screenshot (1)", name);
+        }
+
+        [Fact]
+        public void Upload_destination_snapshot_normalizes_folder_copy()
+        {
+            Guid folderId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+            var destination = new CottonUploadDestinationSnapshot(
+                folderId,
+                " Camera Uploads ",
+                " Files / Camera Uploads ");
+
+            CottonFolderHandle folder = destination.ToFolderHandle();
+
+            Assert.Equal(folderId, destination.FolderId);
+            Assert.Equal("Camera Uploads", destination.FolderName);
+            Assert.Equal("Files / Camera Uploads", destination.Path);
+            Assert.Equal(folderId, folder.Id);
+            Assert.Equal("Camera Uploads", folder.Name);
         }
     }
 }

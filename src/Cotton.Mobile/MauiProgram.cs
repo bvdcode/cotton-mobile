@@ -73,6 +73,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileUploadPickerService, FileUploadPickerService>();
 			builder.Services.AddSingleton<IPhotoUploadPickerService, PhotoUploadPickerService>();
+			builder.Services.AddSingleton<IUploadDestinationPickerPageService, UploadDestinationPickerPageService>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
 			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();

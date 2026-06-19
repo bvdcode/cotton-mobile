@@ -17,6 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenWithSystemAppAction = "Open with system app";
         private const string ShareAction = "Share";
         private const string UploadPhotoAction = "Upload photo";
+        private const string UploadPhotoToFolderAction = "Upload photo to folder";
         private const string UploadFileAction = "Upload file";
         private const string SortNameAction = "Name";
         private const string SortUpdatedAction = "Updated";
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileUploadPickerService _fileUploadPickerService;
         private readonly IPhotoUploadPickerService _photoUploadPickerService;
+        private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
@@ -72,6 +74,7 @@ namespace Cotton.Mobile.ViewModels
             IFileBrowserPreferenceStore preferenceStore,
             IFileUploadPickerService fileUploadPickerService,
             IPhotoUploadPickerService photoUploadPickerService,
+            IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             IFileThumbnailProvider thumbnailProvider,
@@ -88,6 +91,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
+            ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
@@ -104,6 +108,7 @@ namespace Cotton.Mobile.ViewModels
             _preferenceStore = preferenceStore;
             _fileUploadPickerService = fileUploadPickerService;
             _photoUploadPickerService = photoUploadPickerService;
+            _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
             _thumbnailProvider = thumbnailProvider;
@@ -348,6 +353,7 @@ namespace Cotton.Mobile.ViewModels
                 CancelAction,
                 null,
                 UploadPhotoAction,
+                UploadPhotoToFolderAction,
                 UploadFileAction);
 
             if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
@@ -364,6 +370,10 @@ namespace Cotton.Mobile.ViewModels
                     _photoUploadPickerService.PickPhotoAsync,
                     "photo",
                     "Could not choose photo.");
+            }
+            else if (normalizedAction == UploadPhotoToFolderAction)
+            {
+                await UploadPhotoToDestinationAsync(instanceUri);
             }
             else if (normalizedAction == UploadFileAction)
             {
@@ -994,22 +1004,10 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CottonFileUploadSource? source;
-            try
-            {
-                source = await pickSourceAsync(CancellationToken.None);
-            }
-            catch (TaskCanceledException)
-            {
-                return;
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload {SourceKind}.", sourceKind);
-                _display.ShowFilesStatus(pickFailureStatus);
-                return;
-            }
-
+            CottonFileUploadSource? source = await PickUploadSourceAsync(
+                pickSourceAsync,
+                sourceKind,
+                pickFailureStatus);
             if (source is null)
             {
                 return;
@@ -1021,6 +1019,124 @@ namespace Cotton.Mobile.ViewModels
             }
 
             source = ResolveUniqueUploadSource(source);
+            await UploadSourceToFolderAsync(
+                instanceUri,
+                folder,
+                source,
+                destinationPath: null,
+                refreshCurrentFolderAfterUpload: true);
+        }
+
+        private async Task UploadPhotoToDestinationAsync(Uri instanceUri)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(OfflineUploadStatus);
+                return;
+            }
+
+            CottonUploadDestinationSnapshot? destination;
+            try
+            {
+                destination = await _uploadDestinationPickerPageService.PickAsync(instanceUri);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload destination.");
+                _display.ShowFilesStatus("Could not choose destination.");
+                return;
+            }
+
+            if (destination is null)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
+
+            CottonFolderHandle destinationFolder = destination.ToFolderHandle();
+            IReadOnlyList<CottonFileBrowserEntry> destinationEntries;
+            try
+            {
+                destinationEntries = HasSameFolder(_currentFolder, destinationFolder)
+                    ? _display.AllFileEntries
+                    : (await _fileBrowserService.GetFolderAsync(instanceUri, destinationFolder)).Entries;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to load Cotton mobile upload destination {FolderId}.",
+                    destinationFolder.Id);
+                _display.ShowFilesStatus("Could not load destination.");
+                return;
+            }
+
+            CottonFileUploadSource? source = await PickUploadSourceAsync(
+                _photoUploadPickerService.PickPhotoAsync,
+                "photo",
+                "Could not choose photo.");
+            if (source is null)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
+
+            source = ResolveUniqueUploadSource(source, destinationEntries);
+            bool refreshCurrentFolderAfterUpload = HasSameFolder(_currentFolder, destinationFolder);
+            await UploadSourceToFolderAsync(
+                instanceUri,
+                destinationFolder,
+                source,
+                destination.Path,
+                refreshCurrentFolderAfterUpload);
+        }
+
+        private async Task<CottonFileUploadSource?> PickUploadSourceAsync(
+            Func<CancellationToken, Task<CottonFileUploadSource?>> pickSourceAsync,
+            string sourceKind,
+            string pickFailureStatus)
+        {
+            try
+            {
+                return await pickSourceAsync(CancellationToken.None);
+            }
+            catch (TaskCanceledException)
+            {
+                return null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload {SourceKind}.", sourceKind);
+                _display.ShowFilesStatus(pickFailureStatus);
+                return null;
+            }
+        }
+
+        private async Task UploadSourceToFolderAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            CottonFileUploadSource source,
+            string? destinationPath,
+            bool refreshCurrentFolderAfterUpload)
+        {
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Uploading {source.Snapshot.Name}...");
 
             try
@@ -1040,11 +1156,19 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                await RefreshAfterUploadAsync(
-                    instanceUri,
-                    folder,
-                    source.Snapshot.Name,
-                    fileActionCancellation);
+                if (refreshCurrentFolderAfterUpload)
+                {
+                    await RefreshAfterUploadAsync(
+                        instanceUri,
+                        folder,
+                        source.Snapshot.Name,
+                        fileActionCancellation);
+                }
+                else
+                {
+                    string target = string.IsNullOrWhiteSpace(destinationPath) ? folder.Name : destinationPath;
+                    _display.ShowFilesStatus($"Uploaded {source.Snapshot.Name} to {target}.");
+                }
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -1089,7 +1213,14 @@ namespace Cotton.Mobile.ViewModels
 
         private CottonFileUploadSource ResolveUniqueUploadSource(CottonFileUploadSource source)
         {
-            IReadOnlyList<string> existingFileNames = _display.AllFileEntries
+            return ResolveUniqueUploadSource(source, _display.AllFileEntries);
+        }
+
+        private static CottonFileUploadSource ResolveUniqueUploadSource(
+            CottonFileUploadSource source,
+            IEnumerable<CottonFileBrowserEntry> entries)
+        {
+            IReadOnlyList<string> existingFileNames = entries
                 .Where(entry => entry.Type == CottonFileBrowserEntryType.File)
                 .Select(entry => entry.Name)
                 .ToArray();

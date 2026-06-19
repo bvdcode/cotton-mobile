@@ -9,8 +9,10 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonFileBrowserService _fileBrowserService;
-        private readonly ICottonShareIntakeStore _intakeStore;
         private readonly ILogger<CaptureDestinationPickerViewModel> _logger;
+        private readonly Func<CottonUploadDestinationSnapshot, Task<bool>> _chooseDestinationAsync;
+        private readonly string _emptySelectionStatus;
+        private readonly Func<CottonUploadDestinationSnapshot, string> _successStatusFactory;
         private readonly List<CottonFolderHandle> _path = [];
 
         private bool _isBusy;
@@ -25,16 +27,38 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileBrowserService fileBrowserService,
             ICottonShareIntakeStore intakeStore,
             ILogger<CaptureDestinationPickerViewModel> logger)
+            : this(
+                instanceUri,
+                fileBrowserService,
+                logger,
+                destination => SaveCaptureDestinationAsync(intakeStore, destination),
+                "No staged files need a destination.",
+                destination => $"Destination set to {destination.Path}.")
+        {
+            ArgumentNullException.ThrowIfNull(intakeStore);
+        }
+
+        public CaptureDestinationPickerViewModel(
+            Uri instanceUri,
+            ICottonFileBrowserService fileBrowserService,
+            ILogger<CaptureDestinationPickerViewModel> logger,
+            Func<CottonUploadDestinationSnapshot, Task<bool>> chooseDestinationAsync,
+            string emptySelectionStatus,
+            Func<CottonUploadDestinationSnapshot, string> successStatusFactory)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
-            ArgumentNullException.ThrowIfNull(intakeStore);
             ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(chooseDestinationAsync);
+            ArgumentException.ThrowIfNullOrWhiteSpace(emptySelectionStatus);
+            ArgumentNullException.ThrowIfNull(successStatusFactory);
 
             _instanceUri = instanceUri;
             _fileBrowserService = fileBrowserService;
-            _intakeStore = intakeStore;
             _logger = logger;
+            _chooseDestinationAsync = chooseDestinationAsync;
+            _emptySelectionStatus = emptySelectionStatus.Trim();
+            _successStatusFactory = successStatusFactory;
             Folders = [];
             LoadCommand = new AsyncCommand(LoadCurrentAsync, LogUnhandledCommandException, () => !IsBusy);
             UpCommand = new AsyncCommand(NavigateUpAsync, LogUnhandledCommandException, () => !IsBusy && CanNavigateUp);
@@ -225,27 +249,18 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                var destination = new CottonShareDestinationSnapshot(
+                var destination = new CottonUploadDestinationSnapshot(
                     _currentFolder.Id,
                     _currentFolder.Name,
                     PathText);
-                IReadOnlyList<CottonShareIntakeSnapshot> snapshots = await _intakeStore.LoadAsync();
-                List<CottonShareIntakeSnapshot> updatedSnapshots = snapshots
-                    .Select(snapshot => snapshot.CanSelectCaptureDestination
-                        ? snapshot.WithDestination(destination)
-                        : snapshot)
-                    .ToList();
-                int updatedCount = updatedSnapshots.Count(snapshot =>
-                    snapshot.Destination?.FolderId == destination.FolderId
-                    && snapshot.CanSelectCaptureDestination);
-                if (updatedCount == 0)
+                bool didChoose = await _chooseDestinationAsync(destination);
+                if (!didChoose)
                 {
-                    Status = "No staged files need a destination.";
+                    Status = _emptySelectionStatus;
                     return;
                 }
 
-                await _intakeStore.SaveAsync(updatedSnapshots);
-                Status = $"Destination set to {destination.Path}.";
+                Status = _successStatusFactory(destination);
                 await Shell.Current.Navigation.PopAsync();
             }
             catch (Exception exception)
@@ -316,6 +331,35 @@ namespace Cotton.Mobile.ViewModels
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled Cotton mobile capture destination command exception.");
+        }
+
+        private static async Task<bool> SaveCaptureDestinationAsync(
+            ICottonShareIntakeStore intakeStore,
+            CottonUploadDestinationSnapshot uploadDestination)
+        {
+            ArgumentNullException.ThrowIfNull(intakeStore);
+            ArgumentNullException.ThrowIfNull(uploadDestination);
+
+            var destination = new CottonShareDestinationSnapshot(
+                uploadDestination.FolderId,
+                uploadDestination.FolderName,
+                uploadDestination.Path);
+            IReadOnlyList<CottonShareIntakeSnapshot> snapshots = await intakeStore.LoadAsync();
+            List<CottonShareIntakeSnapshot> updatedSnapshots = snapshots
+                .Select(snapshot => snapshot.CanSelectCaptureDestination
+                    ? snapshot.WithDestination(destination)
+                    : snapshot)
+                .ToList();
+            int updatedCount = updatedSnapshots.Count(snapshot =>
+                snapshot.Destination?.FolderId == destination.FolderId
+                && snapshot.CanSelectCaptureDestination);
+            if (updatedCount == 0)
+            {
+                return false;
+            }
+
+            await intakeStore.SaveAsync(updatedSnapshots);
+            return true;
         }
     }
 }

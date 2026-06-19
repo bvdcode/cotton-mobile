@@ -57,12 +57,12 @@ namespace Cotton.Mobile.Services
         {
             var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
             {
-                ["cotton.mobile.source"] = source,
+                ["cottonMobileSource"] = source,
             };
 
             if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
             {
-                metadata["cotton.mobile.originalLastModifiedUtc"] =
+                metadata["cottonMobileOriginalLastModifiedUtc"] =
                     File.GetLastWriteTimeUtc(path).ToString("O", System.Globalization.CultureInfo.InvariantCulture);
             }
 

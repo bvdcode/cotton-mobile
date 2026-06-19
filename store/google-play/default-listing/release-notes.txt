@@ -1,3 +1,5 @@
-Internal testing build for Cotton Cloud mobile.
+Closed testing build for Cotton Cloud mobile.
 
-Includes browser sign-in, secure session restore, list/tile file browsing, folder navigation, search, sort, refresh, open/download/share actions, On device markers for verified local copies, storage management, feedback, and logout cleanup.
+Adds the mobile upload foundation: file upload, selected photo/video import, share-to-Cotton Capture Inbox, durable transfer queue records, foreground queued upload execution, transfer status, and restart restore.
+
+Adds early Camera Backup setup with destination/policy controls, media permission handling, selected-media-only safeguards, read-only Android MediaStore scan planning, and honest health/status copy. Background backup, sync, and notifications remain in progress.

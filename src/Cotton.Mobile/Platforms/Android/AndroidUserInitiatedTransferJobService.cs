@@ -70,17 +70,17 @@ namespace Cotton.Mobile.Services
             bool needsReschedule = false;
             try
             {
-                ICottonQueuedUploadExecutor? executor = IPlatformApplication.Current?.Services
-                    .GetService<ICottonQueuedUploadExecutor>();
-                if (executor is null)
+                ICottonAndroidBackgroundTransferJobRunner? runner = IPlatformApplication.Current?.Services
+                    .GetService<ICottonAndroidBackgroundTransferJobRunner>();
+                if (runner is null)
                 {
-                    Log.Warn(LogTag, "Android UIDT job could not resolve Cotton queued upload executor.");
+                    Log.Warn(LogTag, "Android UIDT job could not resolve Cotton background transfer runner.");
                     needsReschedule = true;
                     return;
                 }
 
-                CottonQueuedUploadExecutionResult result = await executor
-                    .ExecuteAsync(instanceUri, transferId, cancellationTokenSource.Token)
+                CottonQueuedUploadExecutionResult result = await runner
+                    .RunAsync(instanceUri, transferId, cancellationTokenSource.Token)
                     .ConfigureAwait(false);
                 Log.Info(
                     LogTag,

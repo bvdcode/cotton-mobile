@@ -2,4 +2,4 @@ Closed testing build for Cotton Cloud mobile.
 
 Adds mobile upload foundations: file upload, selected photo/video import, share-to-Cotton Capture Inbox, durable transfer queue, foreground queued uploads, transfer status, and restart restore.
 
-Adds early Camera Backup setup with destination/policy controls, media permission handling, selected-media safeguards, Android MediaStore scan planning, and clear health/status copy. Background backup, sync, and notifications remain in progress.
+Adds early Camera Backup setup with destination/policy controls, media permission handling, selected-media safeguards, and clear health/status copy. Full-library backup, sync, and notifications remain in progress.

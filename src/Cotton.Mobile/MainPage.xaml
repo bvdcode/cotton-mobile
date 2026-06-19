@@ -8,14 +8,14 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <Grid x:Name="RootLayout"
-          Padding="12,0,12,14"
-          RowDefinitions="*,Auto">
+          Padding="12,0,16,14"
+          RowDefinitions="*,Auto,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="24"
-                                 Padding="0,0,0,96"
+                                 Padding="0,0,0,16"
                                  VerticalOptions="Start"
                                  HorizontalOptions="Fill">
                 <Image Source="appiconfg.svg"
@@ -221,6 +221,49 @@
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                            <Grid ColumnDefinitions="*,*,*,*"
+                                  ColumnSpacing="8">
+                                <Button Grid.Column="0"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="Transfers"
+                                        Command="{Binding OpenTransfersCommand}"
+                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                        Padding="4,0"
+                                        FontSize="11"
+                                        HeightRequest="40"
+                                        MinimumHeightRequest="40" />
+
+                                <Button Grid.Column="1"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="Inbox"
+                                        Command="{Binding OpenCaptureInboxCommand}"
+                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                        Padding="4,0"
+                                        FontSize="11"
+                                        HeightRequest="40"
+                                        MinimumHeightRequest="40" />
+
+                                <Button Grid.Column="2"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="Backup"
+                                        Command="{Binding OpenBackupSetupCommand}"
+                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                        Padding="4,0"
+                                        FontSize="11"
+                                        HeightRequest="40"
+                                        MinimumHeightRequest="40" />
+
+                                <Button Grid.Column="3"
+                                        Style="{StaticResource FileChromeButton}"
+                                        Text="Alerts"
+                                        Command="{Binding OpenNotificationsCommand}"
+                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                        Padding="4,0"
+                                        FontSize="11"
+                                        HeightRequest="40"
+                                        MinimumHeightRequest="40" />
+                            </Grid>
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
@@ -620,7 +663,7 @@
         </ScrollView>
         </RefreshView>
 
-        <Button Grid.Row="0"
+        <Button Grid.Row="1"
                 Text="+"
                 Command="{Binding ShowFileAddActionsCommand}"
                 IsVisible="{Binding Display.IsProfileVisible}"
@@ -638,7 +681,7 @@
                 CornerRadius="26"
                 SemanticProperties.Description="Add files" />
 
-        <HorizontalStackLayout Grid.Row="1"
+        <HorizontalStackLayout Grid.Row="2"
                                Spacing="12"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"

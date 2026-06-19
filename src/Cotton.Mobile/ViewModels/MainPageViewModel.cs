@@ -15,15 +15,11 @@ namespace Cotton.Mobile.ViewModels
             "Offline. Showing saved files until your session can refresh.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
-        private const string AccountBackupAction = "Camera Backup";
-        private const string AccountCaptureInboxAction = "Capture Inbox";
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
-        private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountStorageAction = "Storage";
-        private const string AccountTransfersAction = "Transfers";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
@@ -249,6 +245,18 @@ namespace Cotton.Mobile.ViewModels
                 OpenTransfersAsync,
                 LogUnhandledCommandException,
                 () => Display.IsProfileVisible);
+            OpenCaptureInboxCommand = new AsyncCommand(
+                OpenCaptureInboxAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
+            OpenBackupSetupCommand = new AsyncCommand(
+                OpenBackupSetupAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
+            OpenNotificationsCommand = new AsyncCommand(
+                OpenNotificationsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
             Display.PropertyChanged += Display_PropertyChanged;
             _networkAccess.InternetAccessRestored += NetworkAccess_InternetAccessRestored;
             _foregroundService.Resumed += ForegroundService_Resumed;
@@ -287,6 +295,12 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ShowFileSortActionsCommand { get; }
 
         public AsyncCommand OpenTransfersCommand { get; }
+
+        public AsyncCommand OpenCaptureInboxCommand { get; }
+
+        public AsyncCommand OpenBackupSetupCommand { get; }
+
+        public AsyncCommand OpenNotificationsCommand { get; }
 
         public async Task<bool> RestoreSessionOnceAsync()
         {
@@ -549,10 +563,6 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
-                AccountBackupAction,
-                AccountCaptureInboxAction,
-                AccountTransfersAction,
-                AccountNotificationsAction,
                 AccountStorageAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -570,18 +580,6 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountPrivacyPolicyAction:
                     await OpenPrivacyPolicyAsync();
-                    break;
-                case AccountTransfersAction:
-                    await OpenTransfersAsync();
-                    break;
-                case AccountNotificationsAction:
-                    await OpenNotificationsAsync();
-                    break;
-                case AccountBackupAction:
-                    await OpenBackupSetupAsync();
-                    break;
-                case AccountCaptureInboxAction:
-                    await OpenCaptureInboxAsync();
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
@@ -1329,6 +1327,9 @@ namespace Cotton.Mobile.ViewModels
             ShowFileViewActionsCommand.RaiseCanExecuteChanged();
             ShowFileSortActionsCommand.RaiseCanExecuteChanged();
             OpenTransfersCommand.RaiseCanExecuteChanged();
+            OpenCaptureInboxCommand.RaiseCanExecuteChanged();
+            OpenBackupSetupCommand.RaiseCanExecuteChanged();
+            OpenNotificationsCommand.RaiseCanExecuteChanged();
         }
 
         private void Display_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -1350,6 +1351,9 @@ namespace Cotton.Mobile.ViewModels
                 case nameof(MainPageDisplayState.IsProfileVisible):
                     RefreshFilesCommand.RaiseCanExecuteChanged();
                     OpenTransfersCommand.RaiseCanExecuteChanged();
+                    OpenCaptureInboxCommand.RaiseCanExecuteChanged();
+                    OpenBackupSetupCommand.RaiseCanExecuteChanged();
+                    OpenNotificationsCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.IsFileUpButtonEnabled):
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();

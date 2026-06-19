@@ -196,7 +196,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (_fileNavigation.Count == 0)
+            if (IsDisplayingRootFolder())
             {
                 await LoadRootFilesAsync(isRefresh: true);
                 return;
@@ -590,10 +590,13 @@ namespace Cotton.Mobile.ViewModels
                 var originalNavigation = new List<CottonFolderHandle>(_fileNavigation);
                 string originalSearchText = _display.FileSearchText;
                 bool originalSearchOpen = _display.IsFileSearchOpen;
-                if (_currentFolder is not null)
-                {
-                    _fileNavigation.Add(_currentFolder);
-                }
+                IReadOnlyList<CottonFolderHandle> navigationAfterOpen =
+                    CottonFileNavigationPlanner.CreateNavigationAfterOpenFolder(
+                        _currentFolder,
+                        _fileNavigation,
+                        IsDisplayingRootFolder());
+                _fileNavigation.Clear();
+                _fileNavigation.AddRange(navigationAfterOpen);
 
                 _display.ClearFileSearch();
                 await LoadFolderAsync(new CottonFolderHandle(folder.Id, folder.Name), preserveHistory: false);
@@ -892,7 +895,7 @@ namespace Cotton.Mobile.ViewModels
                 _display.ShowFiles(
                     content,
                     isRoot: false,
-                    canNavigateUp: _fileNavigation.Count > 0,
+                    canNavigateUp: true,
                     CreatePath(content.FolderName));
             }
             catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
@@ -1019,7 +1022,7 @@ namespace Cotton.Mobile.ViewModels
             _display.ShowFiles(
                 cachedContent,
                 isRoot: false,
-                canNavigateUp: _fileNavigation.Count > 0,
+                canNavigateUp: true,
                 CreatePath(cachedContent.FolderName));
             _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
             return true;
@@ -1902,7 +1905,7 @@ namespace Cotton.Mobile.ViewModels
             string sourceKind,
             CancellationTokenSource fileActionCancellation)
         {
-            if (_fileNavigation.Count == 0)
+            if (IsDisplayingRootFolder())
             {
                 await LoadRootFilesAsync(isRefresh: true);
             }
@@ -1921,10 +1924,22 @@ namespace Cotton.Mobile.ViewModels
 
         private string CreatePath(string currentFolderName)
         {
-            IEnumerable<string> names = _fileNavigation
-                .Select((folder, index) => index == 0 ? MainPageDisplayState.RootFilesTitle : folder.Name)
-                .Append(string.IsNullOrWhiteSpace(currentFolderName) ? "Files" : currentFolderName.Trim());
-            return string.Join(" / ", names);
+            return string.Join(
+                " / ",
+                CottonFileNavigationPlanner.CreatePathSegments(
+                    MainPageDisplayState.RootFilesTitle,
+                    _fileNavigation,
+                    currentFolderName));
+        }
+
+        private bool IsDisplayingRootFolder()
+        {
+            return !_display.CanNavigateFilesUp
+                && string.Equals(
+                    _display.FilesTitle,
+                    MainPageDisplayState.RootFilesTitle,
+                    StringComparison.Ordinal)
+                && !_display.IsFilesPathVisible;
         }
 
         private async Task<CottonFolderContent> ApplyThumbnailsAsync(

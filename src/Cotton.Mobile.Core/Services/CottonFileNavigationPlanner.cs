@@ -20,5 +20,38 @@ namespace Cotton.Mobile.Services
                 navigation[navigation.Count - 1],
                 remainingNavigation);
         }
+
+        public static IReadOnlyList<CottonFolderHandle> CreateNavigationAfterOpenFolder(
+            CottonFolderHandle? currentFolder,
+            IReadOnlyList<CottonFolderHandle> navigation,
+            bool isCurrentRoot)
+        {
+            ArgumentNullException.ThrowIfNull(navigation);
+
+            if (currentFolder is null || isCurrentRoot)
+            {
+                return navigation.ToArray();
+            }
+
+            return navigation.Append(currentFolder).ToArray();
+        }
+
+        public static IReadOnlyList<string> CreatePathSegments(
+            string rootName,
+            IReadOnlyList<CottonFolderHandle> navigation,
+            string currentFolderName)
+        {
+            ArgumentNullException.ThrowIfNull(navigation);
+
+            string normalizedRootName = string.IsNullOrWhiteSpace(rootName) ? "Files" : rootName.Trim();
+            string normalizedCurrentFolderName = string.IsNullOrWhiteSpace(currentFolderName)
+                ? normalizedRootName
+                : currentFolderName.Trim();
+
+            return new[] { normalizedRootName }
+                .Concat(navigation.Select(folder => folder.Name))
+                .Append(normalizedCurrentFolderName)
+                .ToArray();
+        }
     }
 }

@@ -63,6 +63,49 @@ namespace Cotton.Mobile.Tests
             Assert.Same(ancestor, remaining);
         }
 
+        [Fact]
+        public void CreateNavigationAfterOpenFolder_FromRoot_DoesNotPushRoot()
+        {
+            CottonFolderHandle root = CreateFolder("Files");
+
+            IReadOnlyList<CottonFolderHandle> navigation =
+                CottonFileNavigationPlanner.CreateNavigationAfterOpenFolder(
+                    root,
+                    Array.Empty<CottonFolderHandle>(),
+                    isCurrentRoot: true);
+
+            Assert.Empty(navigation);
+        }
+
+        [Fact]
+        public void CreateNavigationAfterOpenFolder_FromFolder_PushesCurrentFolder()
+        {
+            CottonFolderHandle parent = CreateFolder("Parent");
+
+            IReadOnlyList<CottonFolderHandle> navigation =
+                CottonFileNavigationPlanner.CreateNavigationAfterOpenFolder(
+                    parent,
+                    Array.Empty<CottonFolderHandle>(),
+                    isCurrentRoot: false);
+
+            CottonFolderHandle pushed = Assert.Single(navigation);
+            Assert.Same(parent, pushed);
+        }
+
+        [Fact]
+        public void CreatePathSegments_PrependsRootWithoutStoringRootInNavigation()
+        {
+            CottonFolderHandle parent = CreateFolder("Parent");
+
+            IReadOnlyList<string> segments =
+                CottonFileNavigationPlanner.CreatePathSegments(
+                    "Files",
+                    new[] { parent },
+                    "Child");
+
+            Assert.Equal(["Files", "Parent", "Child"], segments);
+        }
+
         private static CottonFolderHandle CreateFolder(string name)
         {
             return new CottonFolderHandle(Guid.NewGuid(), name);

@@ -16,7 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ILogger<DiagnosticsViewModel> _logger;
         private bool _isBusy;
         private bool _hasCacheDetails;
-        private string _headerTitleText = "Cotton Cloud";
+        private string _headerTitleText = "Diagnostics";
         private string _headerVersionText = "Not available";
         private string? _status;
 
@@ -171,8 +171,8 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowDiagnostics(CottonStorageSummary? summary)
         {
-            HeaderTitleText = CreateValue(_metadata.ApplicationName);
-            HeaderVersionText = CreateVersionText();
+            HeaderTitleText = "Diagnostics";
+            HeaderVersionText = CreateHeaderVersionText();
             _hasCacheDetails = summary is not null;
             Sections.Clear();
             foreach (DiagnosticsSectionViewModel section in CreateSections(summary))
@@ -250,6 +250,11 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return $"{version} ({_metadata.ApplicationBuild.Trim()})";
+        }
+
+        private string CreateHeaderVersionText()
+        {
+            return $"{CreateValue(_metadata.ApplicationName)} · {CreateVersionText()}";
         }
 
         private void LogUnhandledCommandException(Exception exception)

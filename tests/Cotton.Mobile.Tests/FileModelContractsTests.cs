@@ -15,6 +15,8 @@ namespace Cotton.Mobile.Tests
         [InlineData("diagram.svg", "", "Text", "TXT", true, false)]
         [InlineData("photo.webp", "image/webp", "Image", "IMG", false, true)]
         [InlineData("report.pdf", "", "PDF", "PDF", false, false)]
+        [InlineData("brief.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Document", "DOC", false, false)]
+        [InlineData("notes.rtf", "", "Document", "DOC", false, false)]
         [InlineData("movie.mp4", "video/mp4", "Video", "VID", false, false)]
         [InlineData("song.mp3", "audio/mpeg", "Audio", "AUD", false, false)]
         [InlineData("archive.zip", "application/zip", "File", "FILE", false, false)]

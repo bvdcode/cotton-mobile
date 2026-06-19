@@ -164,6 +164,49 @@ namespace Cotton.Mobile.Tests
             Assert.True(imageItem.CanEnqueue);
         }
 
+        [Theory]
+        [InlineData("report.pdf", "application/pdf", "PDF", 389)]
+        [InlineData("brief.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Document", 512)]
+        public void Snapshot_classifies_staged_document_shares_from_mime_type(
+            string displayName,
+            string mimeType,
+            string expectedKind,
+            long sizeBytes)
+        {
+            CottonShareIntakeSnapshot documentShare = CottonShareIntakeSnapshot
+                .CreatePending(
+                    Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    CottonShareIntakeKind.Send,
+                    mimeType,
+                    [
+                        CreateStagedItem(
+                            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                            displayName,
+                            sizeBytes,
+                            mimeType),
+                    ],
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Default",
+                        "Default"));
+
+            CottonCaptureInboxListItem documentItem =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([documentShare]).Items);
+
+            Assert.Equal(displayName, documentItem.DisplayName);
+            Assert.Equal(expectedKind, documentItem.KindText);
+            Assert.Equal("Ready", documentItem.StatusText);
+            Assert.Equal("Copied to this device", documentItem.DetailText);
+            Assert.Equal("Destination: Default", documentItem.DestinationText);
+            Assert.Contains(CottonFileSizeFormatter.Format(sizeBytes), documentItem.MetadataText, StringComparison.Ordinal);
+            Assert.Contains(mimeType, documentItem.MetadataText, StringComparison.Ordinal);
+            Assert.True(documentItem.CanSelectDestination);
+            Assert.True(documentItem.CanRename);
+            Assert.True(documentItem.CanEnqueue);
+        }
+
         [Fact]
         public void Snapshot_flattens_multiple_staged_files_with_shared_destination()
         {

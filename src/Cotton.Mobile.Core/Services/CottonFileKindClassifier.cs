@@ -33,6 +33,34 @@ namespace Cotton.Mobile.Services
             "image/svg+xml",
         };
 
+        private static readonly HashSet<string> DocumentFileExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".doc",
+            ".docx",
+            ".odp",
+            ".ods",
+            ".odt",
+            ".ppt",
+            ".pptx",
+            ".rtf",
+            ".xls",
+            ".xlsx",
+        };
+
+        private static readonly HashSet<string> DocumentContentTypes = new(StringComparer.OrdinalIgnoreCase)
+        {
+            "application/msword",
+            "application/rtf",
+            "application/vnd.ms-excel",
+            "application/vnd.ms-powerpoint",
+            "application/vnd.oasis.opendocument.presentation",
+            "application/vnd.oasis.opendocument.spreadsheet",
+            "application/vnd.oasis.opendocument.text",
+            "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        };
+
         public static string ResolveKind(string? name, string? contentType)
         {
             string normalizedName = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
@@ -51,6 +79,12 @@ namespace Cotton.Mobile.Services
                 || Path.GetExtension(normalizedName).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
                 return "PDF";
+            }
+
+            if (DocumentContentTypes.Contains(mediaType)
+                || DocumentFileExtensions.Contains(Path.GetExtension(normalizedName)))
+            {
+                return "Document";
             }
 
             if (mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))

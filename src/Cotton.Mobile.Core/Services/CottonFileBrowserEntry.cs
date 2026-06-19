@@ -241,6 +241,7 @@ namespace Cotton.Mobile.Services
             {
                 "Image" => "IMG",
                 "PDF" => "PDF",
+                "Document" => "DOC",
                 "Video" => "VID",
                 "Audio" => "AUD",
                 "Text" => "TXT",

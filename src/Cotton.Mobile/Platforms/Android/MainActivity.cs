@@ -22,14 +22,14 @@ namespace Cotton.Mobile
             base.OnCreate(savedInstanceState);
 
             ApplySystemBars();
-            DeferShareIntent(Intent);
+            StageShareIntent(Intent);
         }
 
         protected override void OnNewIntent(Intent? intent)
         {
             base.OnNewIntent(intent);
 
-            DeferShareIntent(intent);
+            StageShareIntent(intent);
         }
 
         protected override void OnResume()
@@ -50,18 +50,47 @@ namespace Cotton.Mobile
             ApplySystemBars();
         }
 
-        private static void DeferShareIntent(Intent? intent)
+        private void StageShareIntent(Intent? intent)
         {
             if (intent?.Action is not Intent.ActionSend and not Intent.ActionSendMultiple)
             {
                 return;
             }
 
-            string action = intent.Action ?? "unknown";
-            string mimeType = intent.Type ?? "unknown";
-            Log.Info(
-                ShareIntentLogTag,
-                $"Deferred Android share intent until Capture Inbox is available. Action={action}; MimeType={mimeType}.");
+            IAndroidShareIntentStagingService? stagingService = IPlatformApplication.Current?.Services
+                .GetService<IAndroidShareIntentStagingService>();
+            if (stagingService is null)
+            {
+                Log.Info(
+                    ShareIntentLogTag,
+                    "Deferred Android share intent until Capture Inbox is available; staging service is unavailable.");
+                return;
+            }
+
+            _ = StageShareIntentAsync(stagingService, intent);
+        }
+
+        private async Task StageShareIntentAsync(
+            IAndroidShareIntentStagingService stagingService,
+            Intent intent)
+        {
+            try
+            {
+                CottonShareIntakeSnapshot? snapshot =
+                    await stagingService.StageAsync(intent, ContentResolver).ConfigureAwait(false);
+                if (snapshot is null)
+                {
+                    return;
+                }
+
+                Log.Info(
+                    ShareIntentLogTag,
+                    $"Staged Android share intent for Capture Inbox. Id={snapshot.Id}; Status={snapshot.Status}; Items={snapshot.ItemCount}.");
+            }
+            catch (Exception exception)
+            {
+                Log.Warn(ShareIntentLogTag, $"Failed to stage Android share intent. {exception}");
+            }
         }
 
         private void ApplySystemBars()

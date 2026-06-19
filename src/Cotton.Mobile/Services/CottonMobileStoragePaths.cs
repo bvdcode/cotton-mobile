@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Services
         private const string FolderContentCacheDirectoryName = "CottonFolderListings";
         private const string TransferMetadataDirectoryName = "CottonTransfers";
         private const string TransferStagingDirectoryName = "Staged";
+        private const string ShareIntakeDirectoryName = "CottonShareInbox";
         private const string TemporaryDownloadDirectoryName = ".temp";
         private const string TemporaryDownloadFileExtension = ".download";
 
@@ -57,6 +58,11 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             return Path.Combine(CreateTransferMetadataDirectory(instanceUri), TransferStagingDirectoryName);
+        }
+
+        public static string CreateShareIntakeDirectory()
+        {
+            return Path.Combine(FileSystem.AppDataDirectory, ShareIntakeDirectoryName);
         }
 
         public static string CreateDownloadDirectory(Uri instanceUri, CottonFileBrowserEntry file)

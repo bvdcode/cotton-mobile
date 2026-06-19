@@ -1338,7 +1338,17 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                ShowFolderOfflinePlanStatus(content, isCachedEstimate: false);
+                CottonOfflineFolderPlanSnapshot plan = ShowFolderOfflinePlanStatus(
+                    content,
+                    isCachedEstimate: false);
+                if (plan.CanQueueDirectFiles)
+                {
+                    await DownloadFolderDirectFilesOfflineAsync(
+                        instanceUri,
+                        folder,
+                        content,
+                        fileActionCancellation);
+                }
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -1411,12 +1421,110 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private void ShowFolderOfflinePlanStatus(
+        private async Task DownloadFolderDirectFilesOfflineAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry folder,
+            CottonFolderContent content,
+            CancellationTokenSource fileActionCancellation)
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(content);
+            _display.ShowFileActionLoading(CottonOfflineDownloadQueueStatusText.CreateQueuedStatus(queue));
+
+            int completedCount = 0;
+            try
+            {
+                foreach (CottonOfflineDownloadQueueItem item in queue.Items)
+                {
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    CottonFileBrowserEntry file = content.Entries.Single(entry => entry.Id == item.FileId);
+                    CottonLocalFileSnapshot? reusableLocalFile =
+                        _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
+                    if (reusableLocalFile is not null)
+                    {
+                        await _offlineFilePinStore.AddOrReplaceAsync(
+                            instanceUri,
+                            item.CreatePin(DateTime.UtcNow),
+                            CancellationToken.None);
+                        _display.ShowFileLocalCopy(file, reusableLocalFile);
+                        completedCount++;
+                        continue;
+                    }
+
+                    _display.ShowFileActionLoading(
+                        CottonOfflineDownloadQueueStatusText.CreateStartingItemStatus(item, queue.TotalCount));
+                    await _fileBrowserService.DownloadAsync(
+                        instanceUri,
+                        file,
+                        CreateFileDownloadProgress(
+                            file,
+                            $"Saving {item.Position} of {queue.TotalCount}",
+                            () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                            fileActionCancellation.Token),
+                        fileActionCancellation.Token);
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    await _offlineFilePinStore.AddOrReplaceAsync(
+                        instanceUri,
+                        item.CreatePin(DateTime.UtcNow),
+                        CancellationToken.None);
+                    completedCount++;
+                    RefreshLocalFileMarkers(instanceUri);
+                }
+
+                _display.ShowFilesStatus(CottonOfflineDownloadQueueStatusText.CreateCompletedStatus(queue));
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                throw;
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(
+                    CottonOfflineDownloadQueueStatusText.CreateCancelledStatus(
+                        completedCount,
+                        queue.TotalCount));
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder offline download failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to keep Cotton mobile folder offline {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.KeepFolderOffline,
+                    folder,
+                    CottonOfflineDownloadQueueStatusText.CreateFailedStatus(
+                        completedCount,
+                        queue.TotalCount));
+            }
+        }
+
+        private CottonOfflineFolderPlanSnapshot ShowFolderOfflinePlanStatus(
             CottonFolderContent content,
             bool isCachedEstimate)
         {
             CottonOfflineFolderPlanSnapshot plan = CottonOfflineFolderPlanSnapshot.Create(content);
             _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(plan, isCachedEstimate));
+            return plan;
         }
 
         private async Task UploadPickedSourceAsync(

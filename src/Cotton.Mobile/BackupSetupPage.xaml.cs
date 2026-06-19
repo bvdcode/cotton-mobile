@@ -17,7 +17,12 @@ namespace Cotton.Mobile
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            if (_didLoad || BindingContext is not BackupSetupViewModel viewModel)
+            if (BindingContext is not BackupSetupViewModel viewModel)
+            {
+                return;
+            }
+
+            if (_didLoad && !viewModel.ConsumeReloadOnAppearing())
             {
                 return;
             }

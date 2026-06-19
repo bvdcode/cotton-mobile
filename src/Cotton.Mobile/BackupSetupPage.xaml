@@ -90,7 +90,7 @@
                     StrokeShape="RoundRectangle 8"
                     Padding="14"
                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                <Grid RowDefinitions="Auto,Auto"
+                <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="6"
                       ColumnSpacing="12">
@@ -116,6 +116,15 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                    <Button Grid.Row="2"
+                            Grid.ColumnSpan="2"
+                            Text="{Binding MediaAccessActionText}"
+                            IsVisible="{Binding IsMediaAccessActionVisible}"
+                            Command="{Binding MediaAccessActionCommand}"
+                            Style="{StaticResource FileChromeButton}"
+                            HeightRequest="40"
+                            HorizontalOptions="Start" />
                 </Grid>
             </Border>
 

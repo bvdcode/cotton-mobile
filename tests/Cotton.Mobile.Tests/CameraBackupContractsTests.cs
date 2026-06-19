@@ -85,24 +85,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Not requested", false, false)]
-        [InlineData(CottonCameraBackupMediaAccessState.Allowed, "Allowed", true, false)]
-        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Selected media only", true, false)]
-        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Denied", false, true)]
-        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, "Unavailable", false, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Not requested", "Allow", false, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Allowed, "Allowed", "", true, false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Selected media only", "Settings", true, false, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Denied", "Settings", false, true, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, "Unavailable", "", false, true, false)]
         public void Camera_backup_media_access_display_keeps_permission_state_explicit(
             CottonCameraBackupMediaAccessState state,
             string statusText,
+            string actionText,
             bool canReadMedia,
-            bool needsAttention)
+            bool needsAttention,
+            bool shouldOpenSettings)
         {
             CottonCameraBackupMediaAccessDisplayState display =
                 CottonCameraBackupMediaAccessDisplayState.Create(state);
 
             Assert.Equal("Media Access", display.Title);
             Assert.Equal(statusText, display.StatusText);
+            Assert.Equal(actionText, display.ActionText);
+            Assert.Equal(!string.IsNullOrWhiteSpace(actionText), display.IsActionVisible);
             Assert.Equal(canReadMedia, display.CanReadMedia);
             Assert.Equal(needsAttention, display.NeedsAttention);
+            Assert.Equal(shouldOpenSettings, display.ShouldOpenSettings);
             Assert.False(string.IsNullOrWhiteSpace(display.DetailText));
         }
 

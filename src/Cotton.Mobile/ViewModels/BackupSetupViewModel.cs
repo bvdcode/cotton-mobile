@@ -27,6 +27,10 @@ namespace Cotton.Mobile.ViewModels
         private string _mediaAccessTitle = "Media Access";
         private string _mediaAccessStatusText = "Not requested";
         private string _mediaAccessDetailText = "Cotton will ask before scanning photos or videos.";
+        private string _mediaAccessActionText = "Allow";
+        private bool _isMediaAccessActionVisible = true;
+        private bool _mediaAccessShouldOpenSettings;
+        private bool _reloadOnNextAppearing;
         private string? _status;
 
         public BackupSetupViewModel(
@@ -56,12 +60,18 @@ namespace Cotton.Mobile.ViewModels
                 ChooseDestinationAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy);
+            MediaAccessActionCommand = new AsyncCommand(
+                RunMediaAccessActionAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && IsMediaAccessActionVisible);
             SaveCommand = new AsyncCommand(SaveAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand ChooseDestinationCommand { get; }
+
+        public AsyncCommand MediaAccessActionCommand { get; }
 
         public AsyncCommand SaveCommand { get; }
 
@@ -195,6 +205,24 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _mediaAccessDetailText, value);
         }
 
+        public string MediaAccessActionText
+        {
+            get => _mediaAccessActionText;
+            private set => SetProperty(ref _mediaAccessActionText, value);
+        }
+
+        public bool IsMediaAccessActionVisible
+        {
+            get => _isMediaAccessActionVisible;
+            private set
+            {
+                if (SetProperty(ref _isMediaAccessActionVisible, value))
+                {
+                    MediaAccessActionCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
         public string? Status
         {
             get => _status;
@@ -208,6 +236,17 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public bool ConsumeReloadOnAppearing()
+        {
+            if (!_reloadOnNextAppearing)
+            {
+                return false;
+            }
+
+            _reloadOnNextAppearing = false;
+            return true;
+        }
 
         private async Task LoadAsync()
         {
@@ -258,6 +297,30 @@ namespace Cotton.Mobile.ViewModels
                     Status = "Camera backup setup saved.";
                 },
                 "Could not save camera backup setup.");
+        }
+
+        private async Task RunMediaAccessActionAsync()
+        {
+            await RunBackupActionAsync(
+                async () =>
+                {
+                    if (_mediaAccessShouldOpenSettings)
+                    {
+                        _reloadOnNextAppearing = true;
+                        await _mediaAccessPolicy.OpenSettingsAsync();
+                        await LoadMediaAccessAsync();
+                        Status = "Android settings opened.";
+                        return;
+                    }
+
+                    CottonCameraBackupMediaAccessState state =
+                        await _mediaAccessPolicy.RequestAccessAsync();
+                    ShowMediaAccess(state);
+                    Status = CottonCameraBackupMediaAccessDisplayState.Create(state).CanReadMedia
+                        ? "Media access updated."
+                        : "Media access is not available yet.";
+                },
+                "Could not update media access.");
         }
 
         private CottonCameraBackupSettings CreateSettingsFromUi()
@@ -325,11 +388,19 @@ namespace Cotton.Mobile.ViewModels
         {
             CottonCameraBackupMediaAccessState state =
                 await _mediaAccessPolicy.GetAccessStateAsync();
+            ShowMediaAccess(state);
+        }
+
+        private void ShowMediaAccess(CottonCameraBackupMediaAccessState state)
+        {
             CottonCameraBackupMediaAccessDisplayState display =
                 CottonCameraBackupMediaAccessDisplayState.Create(state);
             MediaAccessTitle = display.Title;
             MediaAccessStatusText = display.StatusText;
             MediaAccessDetailText = display.DetailText;
+            MediaAccessActionText = display.ActionText;
+            IsMediaAccessActionVisible = display.IsActionVisible;
+            _mediaAccessShouldOpenSettings = display.ShouldOpenSettings;
         }
 
         private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)
@@ -359,6 +430,7 @@ namespace Cotton.Mobile.ViewModels
         {
             LoadCommand.RaiseCanExecuteChanged();
             ChooseDestinationCommand.RaiseCanExecuteChanged();
+            MediaAccessActionCommand.RaiseCanExecuteChanged();
             SaveCommand.RaiseCanExecuteChanged();
         }
 

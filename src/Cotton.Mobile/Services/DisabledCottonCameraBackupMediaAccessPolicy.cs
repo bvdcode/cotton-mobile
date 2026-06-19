@@ -9,6 +9,19 @@ namespace Cotton.Mobile.Services
             return Task.FromResult(CottonCameraBackupMediaAccessState.NotRequested);
         }
 
+        public Task<CottonCameraBackupMediaAccessState> RequestAccessAsync(
+            CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(CottonCameraBackupMediaAccessState.Unavailable);
+        }
+
+        public Task OpenSettingsAsync(CancellationToken cancellationToken = default)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.CompletedTask;
+        }
+
         public Task<bool> CanReadMediaAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();

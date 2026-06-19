@@ -97,12 +97,157 @@ namespace Cotton.Mobile.Tests
                     chargingOnly: false));
         }
 
+        [Fact]
+        public void Camera_backup_media_identity_is_stable_until_source_version_changes()
+        {
+            var identity = new CottonCameraBackupMediaIdentity(
+                " media://photo/1 ",
+                new DateTime(2026, 6, 19, 12, 0, 0, DateTimeKind.Utc),
+                2048);
+            var sameIdentity = new CottonCameraBackupMediaIdentity(
+                "media://photo/1",
+                new DateTime(2026, 6, 19, 12, 0, 0, DateTimeKind.Unspecified),
+                2048);
+            var changedIdentity = new CottonCameraBackupMediaIdentity(
+                "media://photo/1",
+                new DateTime(2026, 6, 19, 12, 1, 0, DateTimeKind.Utc),
+                2048);
+
+            Assert.Equal(identity, sameIdentity);
+            Assert.NotEqual(identity, changedIdentity);
+            Assert.Equal(DateTimeKind.Utc, identity.LastModifiedUtc?.Kind);
+            Assert.Throws<ArgumentException>(() => new CottonCameraBackupMediaIdentity(" ", null, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonCameraBackupMediaIdentity("media://photo/2", null, -1));
+        }
+
+        [Fact]
+        public void Camera_backup_candidate_normalizes_display_and_content_type()
+        {
+            var photo = new CottonCameraBackupCandidate(
+                new CottonCameraBackupMediaIdentity("media://photo/1", null, 100),
+                CottonCameraBackupMediaKind.Photo,
+                " /storage/emulated/0/DCIM/photo.jpg ",
+                " image/jpeg ",
+                new DateTime(2026, 6, 19, 10, 0, 0, DateTimeKind.Unspecified));
+            var video = new CottonCameraBackupCandidate(
+                new CottonCameraBackupMediaIdentity("media://video/1", null, 200),
+                CottonCameraBackupMediaKind.Video,
+                " ",
+                null,
+                null);
+
+            Assert.Equal("photo.jpg", photo.DisplayName);
+            Assert.Equal("image/jpeg", photo.ContentType);
+            Assert.Equal(DateTimeKind.Utc, photo.CapturedAtUtc?.Kind);
+            Assert.Equal("video.mp4", video.DisplayName);
+            Assert.Equal("video/mp4", video.ContentType);
+        }
+
+        [Fact]
+        public async Task Camera_backup_scanner_filters_photos_only_and_suppresses_known_media()
+        {
+            CottonCameraBackupCandidate photo = CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo);
+            CottonCameraBackupCandidate duplicatePhoto = CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo);
+            CottonCameraBackupCandidate video = CreateCandidate("media://video/1", CottonCameraBackupMediaKind.Video);
+            CottonCameraBackupCandidate uploadedPhoto = CreateCandidate("media://photo/2", CottonCameraBackupMediaKind.Photo);
+            var scanner = new CottonCameraBackupScanner(
+                new StubCameraBackupMediaSource(photo, duplicatePhoto, video, uploadedPhoto));
+            var uploaded = new[]
+            {
+                new CottonCameraBackupUploadedMediaSnapshot(
+                    uploadedPhoto.Identity,
+                    new DateTime(2026, 6, 19, 12, 0, 0, DateTimeKind.Utc),
+                    Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                    "photo-2.jpg"),
+            };
+
+            CottonCameraBackupScanResult result =
+                await scanner.ScanAsync(CottonCameraBackupSettings.Default, uploaded);
+
+            Assert.Equal(4, result.ScannedCount);
+            Assert.Equal(2, result.SkippedAlreadyTrackedCount);
+            Assert.Equal(1, result.SkippedByPolicyCount);
+            CottonCameraBackupCandidate candidate = Assert.Single(result.Candidates);
+            Assert.Equal("media://photo/1", candidate.Identity.SourceId);
+        }
+
+        [Fact]
+        public async Task Camera_backup_scanner_includes_videos_when_policy_allows_them()
+        {
+            var scanner = new CottonCameraBackupScanner(
+                new StubCameraBackupMediaSource(
+                    CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo),
+                    CreateCandidate("media://video/1", CottonCameraBackupMediaKind.Video)));
+            CottonCameraBackupSettings settings = CottonCameraBackupSettings.Default.WithPhotosOnly(false);
+
+            CottonCameraBackupScanResult result =
+                await scanner.ScanAsync(settings, Array.Empty<CottonCameraBackupUploadedMediaSnapshot>());
+
+            Assert.Equal(2, result.Candidates.Count);
+            Assert.Contains(result.Candidates, item => item.IsPhoto);
+            Assert.Contains(result.Candidates, item => item.IsVideo);
+            Assert.Equal(0, result.SkippedByPolicyCount);
+        }
+
+        [Fact]
+        public void Camera_backup_health_display_stays_honest_while_backup_cannot_run()
+        {
+            CottonCameraBackupHealthDisplayState display =
+                CottonCameraBackupHealthDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    CottonCameraBackupHealthSnapshot.Empty);
+
+            Assert.Equal("Backup Health", display.Title);
+            Assert.Equal(
+                "Backup health will appear after background backup is available.",
+                display.StatusText);
+            Assert.Equal("Pending 0 · Uploaded 0 · Failed 0 · Blocked 0", display.CountsText);
+            Assert.True(display.IsBlocked);
+            Assert.False(display.HasActivity);
+        }
+
         private static CottonUploadDestinationSnapshot CreateDestination()
         {
             return new CottonUploadDestinationSnapshot(
                 DestinationId,
                 "Camera",
                 "Files / Camera");
+        }
+
+        private static CottonCameraBackupCandidate CreateCandidate(
+            string sourceId,
+            CottonCameraBackupMediaKind kind)
+        {
+            string fileName = kind == CottonCameraBackupMediaKind.Photo ? "photo.jpg" : "video.mp4";
+            string contentType = kind == CottonCameraBackupMediaKind.Photo ? "image/jpeg" : "video/mp4";
+            long sizeBytes = kind == CottonCameraBackupMediaKind.Photo ? 1024 : 4096;
+            return new CottonCameraBackupCandidate(
+                new CottonCameraBackupMediaIdentity(
+                    sourceId,
+                    new DateTime(2026, 6, 19, 9, 0, 0, DateTimeKind.Utc),
+                    sizeBytes),
+                kind,
+                fileName,
+                contentType,
+                new DateTime(2026, 6, 19, 8, 0, 0, DateTimeKind.Utc));
+        }
+
+        private sealed class StubCameraBackupMediaSource : ICottonCameraBackupMediaSource
+        {
+            private readonly IReadOnlyList<CottonCameraBackupCandidate> _candidates;
+
+            public StubCameraBackupMediaSource(params CottonCameraBackupCandidate[] candidates)
+            {
+                _candidates = candidates;
+            }
+
+            public Task<IReadOnlyList<CottonCameraBackupCandidate>> ListCandidatesAsync(
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return Task.FromResult(_candidates);
+            }
         }
     }
 }

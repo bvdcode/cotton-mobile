@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace Cotton.Mobile.Services
 {
     public static class CottonRemotePushCapabilityCatalog
@@ -12,6 +10,13 @@ namespace Cotton.Mobile.Services
             CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
             CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
             CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
+        };
+
+        private static readonly CottonRemotePushServerCapabilityKind[] CurrentBackendCapabilities =
+        {
+            CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
+            CottonRemotePushServerCapabilityKind.DeviceTokenRefreshUpsert,
+            CottonRemotePushServerCapabilityKind.LogoutTokenRevocation,
         };
 
         private static readonly CottonRemotePushEventCategorySnapshot[] EventCategories =
@@ -43,7 +48,7 @@ namespace Cotton.Mobile.Services
                 CottonRemotePushProviderKind.FirebaseCloudMessaging,
                 CottonRemotePushMobilePlatform.Android,
                 RequiredServerCapabilities,
-                availableServerCapabilities: new List<CottonRemotePushServerCapabilityKind>(),
+                CurrentBackendCapabilities,
                 EventCategories,
                 CottonRemotePushPayloadPrivacyPolicy.GenericVisiblePayloads,
                 requiresAndroidPostNotificationsPermissionForVisibleAlerts: true);

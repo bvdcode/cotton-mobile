@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class RemotePushContractsTests
     {
         [Fact]
-        public void Android_closed_testing_path_uses_fcm_and_keeps_backend_gap_explicit()
+        public void Android_closed_testing_path_uses_fcm_and_keeps_delivery_gap_explicit()
         {
             CottonRemotePushCapabilitySnapshot capability =
                 CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend;
@@ -15,16 +15,25 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonRemotePushProviderKind.FirebaseCloudMessaging, capability.Provider);
             Assert.Equal(CottonRemotePushMobilePlatform.Android, capability.Platform);
             Assert.True(capability.RequiresAndroidPostNotificationsPermissionForVisibleAlerts);
-            Assert.False(capability.CanRegisterDeviceToken);
+            Assert.True(capability.CanRegisterDeviceToken);
             Assert.False(capability.CanDeliverRemotePush);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
-                capability.MissingServerCapabilities);
+                capability.AvailableServerCapabilities);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.DeviceTokenRefreshUpsert,
-                capability.MissingServerCapabilities);
+                capability.AvailableServerCapabilities);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.LogoutTokenRevocation,
+                capability.AvailableServerCapabilities);
+            Assert.DoesNotContain(
+                CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
+                capability.MissingServerCapabilities);
+            Assert.Contains(
+                CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
+                capability.MissingServerCapabilities);
+            Assert.Contains(
+                CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
                 capability.MissingServerCapabilities);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,

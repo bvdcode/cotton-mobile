@@ -475,7 +475,7 @@ jobs:
             exit 1
           fi
 
-          release_name="Cotton Mobile ${GITHUB_RUN_NUMBER}"
+          release_name="Cotton Mobile ${APPLICATION_DISPLAY_VERSION} (${ANDROID_VERSION_CODE})"
           changes_not_sent_flag=()
           if [ "${{ inputs.google_play_changes_not_sent_for_review }}" = "true" ]; then
             changes_not_sent_flag+=(--changes-not-sent-for-review)

@@ -57,6 +57,40 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public async Task<string?> ShowPromptAsync(
+            string title,
+            string message,
+            string accept,
+            string cancel,
+            string? initialValue = null,
+            int maxLength = -1)
+        {
+            try
+            {
+                return await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    Page? page = GetCurrentPage();
+                    if (page is null)
+                    {
+                        return null;
+                    }
+
+                    return await page.DisplayPromptAsync(
+                        title,
+                        message,
+                        accept,
+                        cancel,
+                        initialValue: initialValue,
+                        maxLength: maxLength);
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile prompt dialog {Title}.", title);
+                return null;
+            }
+        }
+
         public async Task<string?> ShowActionSheetAsync(
             string title,
             string cancel,

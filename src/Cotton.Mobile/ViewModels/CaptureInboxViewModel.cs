@@ -11,6 +11,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonShareIntakeStore _intakeStore;
         private readonly ICottonShareContentStagingStore _contentStagingStore;
         private readonly ICaptureDestinationPickerPageService _destinationPickerPageService;
+        private readonly IUserDialogService _dialogService;
         private readonly ILogger<CaptureInboxViewModel> _logger;
 
         private bool _isBusy;
@@ -24,18 +25,21 @@ namespace Cotton.Mobile.ViewModels
             ICottonShareIntakeStore intakeStore,
             ICottonShareContentStagingStore contentStagingStore,
             ICaptureDestinationPickerPageService destinationPickerPageService,
+            IUserDialogService dialogService,
             ILogger<CaptureInboxViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(intakeStore);
             ArgumentNullException.ThrowIfNull(contentStagingStore);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _intakeStore = intakeStore;
             _contentStagingStore = contentStagingStore;
             _destinationPickerPageService = destinationPickerPageService;
+            _dialogService = dialogService;
             _logger = logger;
             Items = [];
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
@@ -43,6 +47,10 @@ namespace Cotton.Mobile.ViewModels
                 OpenDestinationPickerAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy && Items.Any(item => item.CanSelectDestination));
+            RenameCommand = new AsyncCommand(
+                RenameCapturedFileAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && Items.Any(item => item.CanRename));
             ClearCommand = new AsyncCommand(ClearAsync, LogUnhandledCommandException, () => !IsBusy && Items.Count > 0);
         }
 
@@ -51,6 +59,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand DestinationCommand { get; }
+
+        public AsyncCommand RenameCommand { get; }
 
         public AsyncCommand ClearCommand { get; }
 
@@ -64,6 +74,7 @@ namespace Cotton.Mobile.ViewModels
                     OnPropertyChanged(nameof(IsEmpty));
                     LoadCommand.RaiseCanExecuteChanged();
                     DestinationCommand.RaiseCanExecuteChanged();
+                    RenameCommand.RaiseCanExecuteChanged();
                     ClearCommand.RaiseCanExecuteChanged();
                 }
             }
@@ -106,6 +117,8 @@ namespace Cotton.Mobile.ViewModels
         public bool IsListVisible => Items.Count > 0;
 
         public bool CanChooseDestination => Items.Any(item => item.CanSelectDestination);
+
+        public bool CanRenameCapturedFiles => Items.Any(item => item.CanRename);
 
         private async Task LoadAsync()
         {
@@ -178,6 +191,155 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RenameCapturedFileAsync()
+        {
+            if (IsBusy || !CanRenameCapturedFiles)
+            {
+                return;
+            }
+
+            CottonCaptureInboxListItem? selectedItem = await SelectRenameItemAsync();
+            if (selectedItem is null)
+            {
+                return;
+            }
+
+            string? requestedName = await _dialogService.ShowPromptAsync(
+                "Rename captured file",
+                "Choose the upload file name.",
+                "Save",
+                "Cancel",
+                selectedItem.DisplayName,
+                maxLength: 160);
+            if (requestedName is null)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                IReadOnlyList<CottonShareIntakeSnapshot> snapshots = await _intakeStore.LoadAsync();
+                CottonShareIntakeSnapshot? targetSnapshot = snapshots
+                    .FirstOrDefault(snapshot => snapshot.Id == selectedItem.IntakeId);
+                CottonShareIntakeItemSnapshot? targetItem = targetSnapshot?.Items
+                    .FirstOrDefault(item => item.Id == selectedItem.ItemId);
+                if (targetSnapshot is null || targetItem is null || !CanRename(targetSnapshot, targetItem))
+                {
+                    Status = "Captured file is no longer available.";
+                    ShowSnapshot(CottonCaptureInboxListSnapshot.Create(snapshots));
+                    return;
+                }
+
+                IReadOnlyList<string> otherUploadNames = snapshots
+                    .SelectMany(snapshot => snapshot.Items.Select(item => new { Snapshot = snapshot, Item = item }))
+                    .Where(entry => entry.Item.Id != selectedItem.ItemId && CanRename(entry.Snapshot, entry.Item))
+                    .Select(entry => entry.Item.EffectiveUploadDisplayName)
+                    .ToList();
+                if (!CottonShareUploadNameValidator.TryNormalize(
+                        requestedName,
+                        otherUploadNames,
+                        out string normalizedName,
+                        out string errorMessage))
+                {
+                    Status = errorMessage;
+                    return;
+                }
+
+                if (string.Equals(
+                        normalizedName,
+                        targetItem.EffectiveUploadDisplayName,
+                        StringComparison.Ordinal))
+                {
+                    Status = "Upload name unchanged.";
+                    return;
+                }
+
+                List<CottonShareIntakeSnapshot> updatedSnapshots = snapshots
+                    .Select(snapshot => snapshot.Id == selectedItem.IntakeId
+                        ? ReplaceItem(snapshot, targetItem.WithUploadDisplayName(normalizedName))
+                        : snapshot)
+                    .ToList();
+                await _intakeStore.SaveAsync(updatedSnapshots);
+                ShowSnapshot(CottonCaptureInboxListSnapshot.Create(updatedSnapshots));
+                Status = $"Renamed to {normalizedName}.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture inbox rename failed.");
+                Status = "Could not rename captured file.";
+            }
+            finally
+            {
+                IsBusy = false;
+                RaiseListStateChanged();
+            }
+        }
+
+        private async Task<CottonCaptureInboxListItem?> SelectRenameItemAsync()
+        {
+            List<CottonCaptureInboxListItem> renameItems = Items
+                .Where(item => item.CanRename)
+                .ToList();
+            if (renameItems.Count == 0)
+            {
+                return null;
+            }
+
+            if (renameItems.Count == 1)
+            {
+                return renameItems[0];
+            }
+
+            var actionMap = new Dictionary<string, CottonCaptureInboxListItem>(StringComparer.Ordinal);
+            for (int index = 0; index < renameItems.Count; index++)
+            {
+                string action = CreateRenameActionLabel(renameItems[index], index);
+                actionMap[action] = renameItems[index];
+            }
+
+            string? selectedAction = await _dialogService.ShowActionSheetAsync(
+                "Rename captured file",
+                "Cancel",
+                null,
+                actionMap.Keys.ToArray());
+            return selectedAction is not null && actionMap.TryGetValue(selectedAction, out CottonCaptureInboxListItem? item)
+                ? item
+                : null;
+        }
+
+        private static string CreateRenameActionLabel(CottonCaptureInboxListItem item, int index)
+        {
+            string suffix = item.ItemId.ToString("N")[..6];
+            return $"{index + 1}. {item.DisplayName} · {suffix}";
+        }
+
+        private static bool CanRename(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            return snapshot.Status == CottonShareIntakeStatus.Pending
+                && item.Type == CottonShareIntakeItemType.Uri
+                && item.HasStagedContent;
+        }
+
+        private static CottonShareIntakeSnapshot ReplaceItem(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot updatedItem)
+        {
+            return new CottonShareIntakeSnapshot(
+                snapshot.Id,
+                snapshot.Kind,
+                snapshot.Status,
+                snapshot.SourceMimeType,
+                snapshot.Items
+                    .Select(item => item.Id == updatedItem.Id ? updatedItem : item)
+                    .ToList(),
+                snapshot.FailureMessage,
+                snapshot.ReceivedAtUtc,
+                snapshot.Destination);
+        }
+
         private void ShowSnapshot(CottonCaptureInboxListSnapshot snapshot)
         {
             Items.Clear();
@@ -197,7 +359,9 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanChooseDestination));
+            OnPropertyChanged(nameof(CanRenameCapturedFiles));
             DestinationCommand.RaiseCanExecuteChanged();
+            RenameCommand.RaiseCanExecuteChanged();
             ClearCommand.RaiseCanExecuteChanged();
         }
 

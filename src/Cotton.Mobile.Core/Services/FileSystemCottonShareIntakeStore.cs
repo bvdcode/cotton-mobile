@@ -193,6 +193,7 @@ namespace Cotton.Mobile.Services
                 StagedFileName = item.StagedFileName,
                 StagedPath = item.StagedPath,
                 StagedSizeBytes = item.StagedSizeBytes,
+                UploadDisplayName = item.UploadDisplayName,
             };
         }
 
@@ -260,7 +261,8 @@ namespace Cotton.Mobile.Services
                     item.MimeType,
                     item.StagedFileName,
                     item.StagedPath,
-                    item.StagedSizeBytes);
+                    item.StagedSizeBytes,
+                    item.UploadDisplayName);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException)
@@ -342,6 +344,8 @@ namespace Cotton.Mobile.Services
             public string? StagedPath { get; set; }
 
             public long? StagedSizeBytes { get; set; }
+
+            public string? UploadDisplayName { get; set; }
         }
     }
 }

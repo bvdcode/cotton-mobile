@@ -16,7 +16,8 @@ namespace Cotton.Mobile.Services
                 mimeType,
                 stagedFileName: null,
                 stagedPath: null,
-                stagedSizeBytes: null)
+                stagedSizeBytes: null,
+                uploadDisplayName: null)
         {
         }
 
@@ -29,6 +30,29 @@ namespace Cotton.Mobile.Services
             string? stagedFileName,
             string? stagedPath,
             long? stagedSizeBytes)
+            : this(
+                id,
+                type,
+                value,
+                displayName,
+                mimeType,
+                stagedFileName,
+                stagedPath,
+                stagedSizeBytes,
+                uploadDisplayName: null)
+        {
+        }
+
+        public CottonShareIntakeItemSnapshot(
+            Guid id,
+            CottonShareIntakeItemType type,
+            string value,
+            string? displayName,
+            string? mimeType,
+            string? stagedFileName,
+            string? stagedPath,
+            long? stagedSizeBytes,
+            string? uploadDisplayName)
         {
             if (id == Guid.Empty)
             {
@@ -53,6 +77,7 @@ namespace Cotton.Mobile.Services
             StagedFileName = NormalizeOptional(stagedFileName);
             StagedPath = NormalizeOptional(stagedPath);
             StagedSizeBytes = stagedSizeBytes;
+            UploadDisplayName = NormalizeOptional(uploadDisplayName);
 
             if (StagedSizeBytes < 0)
             {
@@ -82,6 +107,13 @@ namespace Cotton.Mobile.Services
 
         public long? StagedSizeBytes { get; }
 
+        public string? UploadDisplayName { get; }
+
+        public string EffectiveUploadDisplayName => UploadDisplayName
+            ?? DisplayName
+            ?? StagedFileName
+            ?? "Shared file";
+
         public bool HasStagedContent => StagedPath is not null;
 
         public CottonShareIntakeItemSnapshot WithStagedContent(CottonShareStagedContentSnapshot stagedContent)
@@ -100,7 +132,31 @@ namespace Cotton.Mobile.Services
                 MimeType,
                 stagedContent.FileName,
                 stagedContent.Path,
-                stagedContent.SizeBytes);
+                stagedContent.SizeBytes,
+                UploadDisplayName);
+        }
+
+        public CottonShareIntakeItemSnapshot WithUploadDisplayName(string uploadDisplayName)
+        {
+            if (!CottonShareUploadNameValidator.TryNormalize(
+                    uploadDisplayName,
+                    [],
+                    out string normalizedName,
+                    out string errorMessage))
+            {
+                throw new ArgumentException(errorMessage, nameof(uploadDisplayName));
+            }
+
+            return new CottonShareIntakeItemSnapshot(
+                Id,
+                Type,
+                Value,
+                DisplayName,
+                MimeType,
+                StagedFileName,
+                StagedPath,
+                StagedSizeBytes,
+                normalizedName);
         }
 
         private static string? NormalizeOptional(string? value)

@@ -92,6 +92,70 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_and_load_preserves_upload_display_name_without_renaming_staged_file()
+        {
+            var item = new CottonShareIntakeItemSnapshot(
+                    ItemId,
+                    CottonShareIntakeItemType.Uri,
+                    "content://media/external/images/media/42",
+                    "photo.jpg",
+                    "image/jpeg",
+                    "photo.jpg",
+                    "/tmp/cotton-share/photo.jpg",
+                    123)
+                .WithUploadDisplayName("Trip to Paris.jpg");
+            CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot.CreatePending(
+                IntakeId,
+                CottonShareIntakeKind.Send,
+                "image/jpeg",
+                [item],
+                ReceivedAt);
+
+            await _store.SaveAsync([snapshot]);
+
+            CottonShareIntakeItemSnapshot loadedItem =
+                Assert.Single(Assert.Single(await _store.LoadAsync()).Items);
+            Assert.Equal("Trip to Paris.jpg", loadedItem.UploadDisplayName);
+            Assert.Equal("Trip to Paris.jpg", loadedItem.EffectiveUploadDisplayName);
+            Assert.Equal("photo.jpg", loadedItem.StagedFileName);
+            Assert.Equal("/tmp/cotton-share/photo.jpg", loadedItem.StagedPath);
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("   ")]
+        [InlineData("../photo.jpg")]
+        [InlineData("folder/photo.jpg")]
+        [InlineData("folder\\photo.jpg")]
+        [InlineData("photo?.jpg")]
+        public void Upload_name_validator_rejects_empty_paths_and_reserved_characters(string value)
+        {
+            bool result = CottonShareUploadNameValidator.TryNormalize(
+                value,
+                [],
+                out string normalizedName,
+                out string errorMessage);
+
+            Assert.False(result);
+            Assert.Equal(string.Empty, normalizedName);
+            Assert.False(string.IsNullOrWhiteSpace(errorMessage));
+        }
+
+        [Fact]
+        public void Upload_name_validator_rejects_duplicate_looking_names()
+        {
+            bool result = CottonShareUploadNameValidator.TryNormalize(
+                "photo.jpg",
+                ["PHOTO.jpg"],
+                out string normalizedName,
+                out string errorMessage);
+
+            Assert.False(result);
+            Assert.Equal(string.Empty, normalizedName);
+            Assert.Contains("already uses", errorMessage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public async Task Save_orders_loaded_snapshots_by_received_time()
         {
             CottonShareIntakeSnapshot later = CreateTextShare(

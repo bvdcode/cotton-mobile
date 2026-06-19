@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Services
                     FormatDestination(snapshot, item),
                     IsDestinationVisible(snapshot, item),
                     CanSelectDestination(snapshot, item),
+                    CanRename(snapshot, item),
                     IsFailureVisible(snapshot, item),
                     FormatFailure(snapshot, item));
             }
@@ -60,6 +61,11 @@ namespace Cotton.Mobile.Services
 
         private static string FormatDisplayName(CottonShareIntakeItemSnapshot item)
         {
+            if (item.Type == CottonShareIntakeItemType.Uri && item.HasStagedContent)
+            {
+                return item.EffectiveUploadDisplayName;
+            }
+
             if (!string.IsNullOrWhiteSpace(item.DisplayName))
             {
                 return item.DisplayName;
@@ -182,6 +188,15 @@ namespace Cotton.Mobile.Services
             CottonShareIntakeItemSnapshot item)
         {
             return IsDestinationVisible(snapshot, item);
+        }
+
+        private static bool CanRename(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            return snapshot.Status == CottonShareIntakeStatus.Pending
+                && item.Type == CottonShareIntakeItemType.Uri
+                && item.HasStagedContent;
         }
 
         private static bool IsFailureVisible(

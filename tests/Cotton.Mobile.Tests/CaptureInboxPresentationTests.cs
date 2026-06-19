@@ -125,6 +125,33 @@ namespace Cotton.Mobile.Tests
             Assert.True(fileItem.CanSelectDestination);
         }
 
+        [Fact]
+        public void Snapshot_uses_upload_display_name_for_renamed_staged_files()
+        {
+            CottonShareIntakeSnapshot stagedFile = CreatePending(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "photo.jpg",
+                NewReceivedAt);
+            CottonShareIntakeItemSnapshot renamedItem = Assert
+                .Single(stagedFile.Items)
+                .WithUploadDisplayName("Trip to Paris.jpg");
+            stagedFile = new CottonShareIntakeSnapshot(
+                stagedFile.Id,
+                stagedFile.Kind,
+                stagedFile.Status,
+                stagedFile.SourceMimeType,
+                [renamedItem],
+                stagedFile.FailureMessage,
+                stagedFile.ReceivedAtUtc,
+                stagedFile.Destination);
+
+            CottonCaptureInboxListItem fileItem =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([stagedFile]).Items);
+
+            Assert.Equal("Trip to Paris.jpg", fileItem.DisplayName);
+            Assert.True(fileItem.CanRename);
+        }
+
         private static CottonShareIntakeSnapshot CreatePending(Guid id, string displayName, DateTime receivedAtUtc)
         {
             Guid itemId = Guid.NewGuid();

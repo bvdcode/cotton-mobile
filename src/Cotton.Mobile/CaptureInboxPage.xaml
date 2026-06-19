@@ -10,8 +10,6 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Destination"
-                     Command="{Binding DestinationCommand}" />
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
         <ToolbarItem Text="Clear"
@@ -50,6 +48,26 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+            <Grid ColumnDefinitions="*,*"
+                  ColumnSpacing="10">
+                <Button Text="Destination"
+                        Command="{Binding DestinationCommand}"
+                        FontAttributes="Bold"
+                        HeightRequest="42"
+                        CornerRadius="8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                <Button Grid.Column="1"
+                        Text="Rename"
+                        Command="{Binding RenameCommand}"
+                        FontAttributes="Bold"
+                        HeightRequest="42"
+                        CornerRadius="8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+            </Grid>
 
             <Border IsVisible="{Binding IsEmpty}"
                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"

@@ -6,6 +6,14 @@ namespace Cotton.Mobile.Services
 
         Task<bool> ShowConfirmationAsync(string title, string message, string accept, string cancel);
 
+        Task<string?> ShowPromptAsync(
+            string title,
+            string message,
+            string accept,
+            string cancel,
+            string? initialValue = null,
+            int maxLength = -1);
+
         Task<string?> ShowActionSheetAsync(
             string title,
             string cancel,

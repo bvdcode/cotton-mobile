@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Services
             string? destinationText,
             bool isDestinationVisible,
             bool canSelectDestination,
+            bool canRename,
             bool isFailureVisible,
             string? failureMessage)
         {
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.Services
             DestinationText = string.IsNullOrWhiteSpace(destinationText) ? string.Empty : destinationText.Trim();
             IsDestinationVisible = isDestinationVisible && DestinationText.Length > 0;
             CanSelectDestination = canSelectDestination;
+            CanRename = canRename;
             IsFailureVisible = isFailureVisible && !string.IsNullOrWhiteSpace(failureMessage);
             FailureMessage = IsFailureVisible ? failureMessage!.Trim() : null;
         }
@@ -64,6 +66,8 @@ namespace Cotton.Mobile.Services
         public bool IsDestinationVisible { get; }
 
         public bool CanSelectDestination { get; }
+
+        public bool CanRename { get; }
 
         public bool IsFailureVisible { get; }
 

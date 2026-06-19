@@ -1,7 +1,7 @@
 Closed testing build for Cotton Cloud mobile.
 
-Improves uploads: file/photo/video import, share-to-Cotton Capture Inbox, durable queued transfers, restart restore, exact queued execution, and Android user-initiated background transfer jobs.
+Adds a Notifications settings page that checks permission without prompting and asks only after tapping Allow.
 
-Adds Camera Backup setup with destination/policy controls, media permission handling, upload tracking, and clearer status copy.
+Improves queued upload restore after sign-in, so restored waiting transfers can be scheduled again and Files transfer status refreshes after background queue changes.
 
-Full-library backup and true sync remain in progress.
+Manual uploads, Capture Inbox, Camera Backup setup, local transfer alerts, and Android background-transfer foundations remain in testing. True sync is still in progress.

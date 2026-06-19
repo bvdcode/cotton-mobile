@@ -8,7 +8,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonCameraBackupSettingsStore _settingsStore;
-        private readonly ICottonCameraBackupUploadedMediaStore _uploadedMediaStore;
+        private readonly ICottonCameraBackupPlanningService _planningService;
         private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<BackupSetupViewModel> _logger;
@@ -36,21 +36,21 @@ namespace Cotton.Mobile.ViewModels
         public BackupSetupViewModel(
             Uri instanceUri,
             ICottonCameraBackupSettingsStore settingsStore,
-            ICottonCameraBackupUploadedMediaStore uploadedMediaStore,
+            ICottonCameraBackupPlanningService planningService,
             ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
             ILogger<BackupSetupViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(settingsStore);
-            ArgumentNullException.ThrowIfNull(uploadedMediaStore);
+            ArgumentNullException.ThrowIfNull(planningService);
             ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _settingsStore = settingsStore;
-            _uploadedMediaStore = uploadedMediaStore;
+            _planningService = planningService;
             _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
@@ -255,7 +255,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     _settings = await _settingsStore.GetAsync(_instanceUri);
                     ShowSettings(_settings);
-                    await LoadStoredHealthAsync();
+                    await LoadPlanningHealthAsync();
                     await LoadMediaAccessAsync();
                     Status = null;
                 },
@@ -277,7 +277,7 @@ namespace Cotton.Mobile.ViewModels
                     _settings = CreateSettingsFromUi().WithDestination(destination);
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
-                    await LoadStoredHealthAsync();
+                    await LoadPlanningHealthAsync();
                     await LoadMediaAccessAsync();
                     Status = "Camera backup setup saved.";
                 },
@@ -292,7 +292,7 @@ namespace Cotton.Mobile.ViewModels
                     _settings = CreateSettingsFromUi();
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
-                    await LoadStoredHealthAsync();
+                    await LoadPlanningHealthAsync();
                     await LoadMediaAccessAsync();
                     Status = "Camera backup setup saved.";
                 },
@@ -367,18 +367,14 @@ namespace Cotton.Mobile.ViewModels
             HealthCountsText = health.CountsText;
         }
 
-        private async Task LoadStoredHealthAsync()
+        private async Task LoadPlanningHealthAsync()
         {
-            IReadOnlyList<CottonCameraBackupUploadedMediaSnapshot> uploadedMedia =
-                await _uploadedMediaStore.LoadAsync(_instanceUri);
+            CottonCameraBackupPlanSnapshot plan =
+                await _planningService.PlanAsync(_instanceUri, _settings);
             CottonCameraBackupHealthDisplayState health =
                 CottonCameraBackupHealthDisplayState.Create(
                     _settings,
-                    new CottonCameraBackupHealthSnapshot(
-                        pendingCount: 0,
-                        uploadedMedia.Count,
-                        failedCount: 0,
-                        blockedCount: 0));
+                    plan.Health);
             HealthTitle = health.Title;
             HealthStatusText = health.StatusText;
             HealthCountsText = health.CountsText;

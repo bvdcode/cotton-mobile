@@ -233,7 +233,36 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
+        [InlineData("image/heic", CottonCameraBackupMediaKind.Photo, "photo.jpg")]
+        [InlineData("video/quicktime", CottonCameraBackupMediaKind.Video, "video.mp4")]
+        public void Camera_backup_media_source_record_uses_stable_defaults_for_blank_names(
+            string contentType,
+            CottonCameraBackupMediaKind expectedKind,
+            string expectedDisplayName)
+        {
+            var record = new CottonCameraBackupMediaSourceRecord(
+                "content://media/external/media/99",
+                " ",
+                contentType,
+                0,
+                new DateTime(2026, 6, 19, 13, 0, 0, DateTimeKind.Utc),
+                null);
+
+            bool mapped = CottonCameraBackupMediaSourceRecordMapper.TryCreateCandidate(
+                record,
+                out CottonCameraBackupCandidate? candidate);
+
+            Assert.True(mapped);
+            Assert.NotNull(candidate);
+            Assert.Equal(expectedKind, candidate.Kind);
+            Assert.Equal(expectedDisplayName, candidate.DisplayName);
+            Assert.Equal(contentType, candidate.ContentType);
+            Assert.Equal(0, candidate.Identity.SizeBytes);
+        }
+
+        [Theory]
         [InlineData(null, "content://media/external/file/1", 1024)]
+        [InlineData(" ", "content://media/external/file/1", 1024)]
         [InlineData("application/pdf", "content://media/external/file/1", 1024)]
         [InlineData("image/jpeg", " ", 1024)]
         [InlineData("video/mp4", "content://media/external/video/media/7", -1)]

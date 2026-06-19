@@ -8,21 +8,25 @@ namespace Cotton.Mobile.Services
         private readonly ICottonTransferMetadataStore _metadataStore;
         private readonly ICottonTransferStagingStore _stagingStore;
         private readonly ICottonQueuedUploadClient _uploadClient;
+        private readonly ICottonCameraBackupUploadedMediaStore _cameraBackupUploadedMediaStore;
         private readonly TimeProvider _timeProvider;
 
         public CottonQueuedUploadExecutor(
             ICottonTransferMetadataStore metadataStore,
             ICottonTransferStagingStore stagingStore,
             ICottonQueuedUploadClient uploadClient,
+            ICottonCameraBackupUploadedMediaStore cameraBackupUploadedMediaStore,
             TimeProvider? timeProvider = null)
         {
             ArgumentNullException.ThrowIfNull(metadataStore);
             ArgumentNullException.ThrowIfNull(stagingStore);
             ArgumentNullException.ThrowIfNull(uploadClient);
+            ArgumentNullException.ThrowIfNull(cameraBackupUploadedMediaStore);
 
             _metadataStore = metadataStore;
             _stagingStore = stagingStore;
             _uploadClient = uploadClient;
+            _cameraBackupUploadedMediaStore = cameraBackupUploadedMediaStore;
             _timeProvider = timeProvider ?? TimeProvider.System;
         }
 
@@ -84,7 +88,7 @@ namespace Cotton.Mobile.Services
             CottonTransferQueueItem current = running;
             try
             {
-                await _uploadClient
+                CottonQueuedUploadClientResult uploadResult = await _uploadClient
                     .UploadAsync(
                         instanceUri,
                         running,
@@ -100,6 +104,12 @@ namespace Cotton.Mobile.Services
 
                 CottonTransferQueueItem completed = current.Complete(GetUtcNow());
                 await SaveTransferAsync(instanceUri, queue, transferIndex, completed, cancellationToken)
+                    .ConfigureAwait(false);
+                await RecordCameraBackupUploadAsync(
+                        instanceUri,
+                        completed,
+                        uploadResult,
+                        cancellationToken)
                     .ConfigureAwait(false);
                 await _stagingStore.DeleteAsync(instanceUri, completed.Id, cancellationToken)
                     .ConfigureAwait(false);
@@ -141,6 +151,31 @@ namespace Cotton.Mobile.Services
         private DateTime GetUtcNow()
         {
             return _timeProvider.GetUtcNow().UtcDateTime;
+        }
+
+        private async Task RecordCameraBackupUploadAsync(
+            Uri instanceUri,
+            CottonTransferQueueItem completed,
+            CottonQueuedUploadClientResult uploadResult,
+            CancellationToken cancellationToken)
+        {
+            CottonTransferSourceSnapshot? source = completed.Source;
+            if (source?.Kind != CottonTransferSourceKind.CameraBackup)
+            {
+                return;
+            }
+
+            var uploaded = new CottonCameraBackupUploadedMediaSnapshot(
+                new CottonCameraBackupMediaIdentity(
+                    source.SourceId,
+                    source.LastModifiedUtc,
+                    source.SizeBytes),
+                completed.UpdatedAtUtc,
+                uploadResult.RemoteFileId,
+                uploadResult.RemoteFileName ?? completed.DisplayName);
+            await _cameraBackupUploadedMediaStore
+                .AddOrReplaceAsync(instanceUri, uploaded, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private static string CreateFailureMessage(Exception exception)

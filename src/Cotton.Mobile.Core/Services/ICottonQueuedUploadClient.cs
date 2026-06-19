@@ -2,7 +2,7 @@ namespace Cotton.Mobile.Services
 {
     public interface ICottonQueuedUploadClient
     {
-        Task UploadAsync(
+        Task<CottonQueuedUploadClientResult> UploadAsync(
             Uri instanceUri,
             CottonTransferQueueItem transfer,
             CottonTransferStagedFileSnapshot stagedFile,

@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Services
             _uploadService = uploadService;
         }
 
-        public async Task UploadAsync(
+        public async Task<CottonQueuedUploadClientResult> UploadAsync(
             Uri instanceUri,
             CottonTransferQueueItem transfer,
             CottonTransferStagedFileSnapshot stagedFile,
@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Services
                     return Task.FromResult(stream);
                 });
             var progress = new QueuedUploadProgress(reportProgressAsync, cancellationToken);
-            await _uploadService
+            CottonFileBrowserEntry uploadedFile = await _uploadService
                 .UploadAsync(
                     instanceUri,
                     new CottonFolderHandle(destination.FolderId, destination.FolderName),
@@ -55,6 +55,7 @@ namespace Cotton.Mobile.Services
                     progress,
                     cancellationToken)
                 .ConfigureAwait(false);
+            return new CottonQueuedUploadClientResult(uploadedFile.Id, uploadedFile.Name);
         }
 
         private sealed class QueuedUploadProgress : IProgress<long>

@@ -10,6 +10,9 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid DestinationFolderId = Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
         private static readonly DateTime CreatedAt = new(2026, 6, 19, 20, 0, 0, DateTimeKind.Utc);
         private static readonly DateTime ExecutedAt = new(2026, 6, 19, 20, 5, 0, DateTimeKind.Utc);
+        private static readonly Guid RemoteFileId = Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff");
+        private static readonly DateTime CameraModifiedAt = new(2026, 6, 18, 8, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime CameraCapturedAt = new(2026, 6, 18, 7, 30, 0, DateTimeKind.Utc);
 
         [Fact]
         public async Task ExecuteNext_runs_first_queued_upload_and_deletes_staged_file()
@@ -35,6 +38,52 @@ namespace Cotton.Mobile.Tests
                 metadataStore.SaveSnapshots,
                 snapshot => snapshot.Single().Progress.TransferredBytes == 40);
             Assert.Equal(CottonTransferStatus.Completed, metadataStore.Items.Single().Status);
+        }
+
+        [Fact]
+        public async Task ExecuteNext_records_camera_backup_upload_after_completed_upload()
+        {
+            CottonTransferQueueItem queued = CreateCameraBackupQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([queued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            var uploadedMediaStore = new FakeCameraBackupUploadedMediaStore();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                uploadedMediaStore);
+
+            CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.Completed, result.Status);
+            CottonCameraBackupUploadedMediaSnapshot uploaded = Assert.Single(uploadedMediaStore.Items);
+            Assert.Equal("content://media/external/images/media/100", uploaded.Identity.SourceId);
+            Assert.Equal(CameraModifiedAt, uploaded.Identity.LastModifiedUtc);
+            Assert.Equal(100, uploaded.Identity.SizeBytes);
+            Assert.Equal(ExecutedAt, uploaded.UploadedAtUtc);
+            Assert.Equal(RemoteFileId, uploaded.RemoteFileId);
+            Assert.Equal("remote-upload.bin", uploaded.RemoteFileName);
+        }
+
+        [Fact]
+        public async Task ExecuteNext_does_not_record_non_camera_backup_upload()
+        {
+            CottonTransferQueueItem queued = CreateQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([queued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([100]);
+            var uploadedMediaStore = new FakeCameraBackupUploadedMediaStore();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                uploadedMediaStore);
+
+            CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.Completed, result.Status);
+            Assert.Empty(uploadedMediaStore.Items);
         }
 
         [Fact]
@@ -117,10 +166,24 @@ namespace Cotton.Mobile.Tests
             FakeTransferStagingStore stagingStore,
             FakeQueuedUploadClient uploadClient)
         {
+            return CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                new FakeCameraBackupUploadedMediaStore());
+        }
+
+        private static CottonQueuedUploadExecutor CreateExecutor(
+            FakeTransferMetadataStore metadataStore,
+            FakeTransferStagingStore stagingStore,
+            FakeQueuedUploadClient uploadClient,
+            FakeCameraBackupUploadedMediaStore uploadedMediaStore)
+        {
             return new CottonQueuedUploadExecutor(
                 metadataStore,
                 stagingStore,
                 uploadClient,
+                uploadedMediaStore,
                 new FixedTimeProvider(ExecutedAt));
         }
 
@@ -135,6 +198,26 @@ namespace Cotton.Mobile.Tests
                     DestinationFolderId,
                     "Default",
                     "Default"));
+        }
+
+        private static CottonTransferQueueItem CreateCameraBackupQueuedUpload()
+        {
+            return CottonTransferQueueItem.CreateUpload(
+                TransferId,
+                "upload.bin",
+                100,
+                CreatedAt,
+                new CottonTransferDestinationSnapshot(
+                    DestinationFolderId,
+                    "Camera",
+                    "Files / Camera"),
+                "image/jpeg",
+                new CottonTransferSourceSnapshot(
+                    CottonTransferSourceKind.CameraBackup,
+                    "content://media/external/images/media/100",
+                    CameraModifiedAt,
+                    100,
+                    CameraCapturedAt));
         }
 
         private static CottonTransferStagedFileSnapshot CreateStagedFile()
@@ -251,7 +334,7 @@ namespace Cotton.Mobile.Tests
 
             public IReadOnlyList<Guid> UploadedTransferIds { get; private set; } = [];
 
-            public async Task UploadAsync(
+            public async Task<CottonQueuedUploadClientResult> UploadAsync(
                 Uri instanceUri,
                 CottonTransferQueueItem transfer,
                 CottonTransferStagedFileSnapshot stagedFile,
@@ -268,6 +351,47 @@ namespace Cotton.Mobile.Tests
                 {
                     throw _exception;
                 }
+
+                return new CottonQueuedUploadClientResult(RemoteFileId, "remote-upload.bin");
+            }
+        }
+
+        private sealed class FakeCameraBackupUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
+        {
+            public IReadOnlyList<CottonCameraBackupUploadedMediaSnapshot> Items { get; private set; } = [];
+
+            public Task<IReadOnlyList<CottonCameraBackupUploadedMediaSnapshot>> LoadAsync(
+                Uri instanceUri,
+                CancellationToken cancellationToken = default)
+            {
+                return Task.FromResult(Items);
+            }
+
+            public Task SaveAsync(
+                Uri instanceUri,
+                IReadOnlyCollection<CottonCameraBackupUploadedMediaSnapshot> items,
+                CancellationToken cancellationToken = default)
+            {
+                Items = items.ToList();
+                return Task.CompletedTask;
+            }
+
+            public Task AddOrReplaceAsync(
+                Uri instanceUri,
+                CottonCameraBackupUploadedMediaSnapshot item,
+                CancellationToken cancellationToken = default)
+            {
+                Items = Items
+                    .Where(existing => !existing.Identity.Equals(item.Identity))
+                    .Concat([item])
+                    .ToList();
+                return Task.CompletedTask;
+            }
+
+            public Task ClearAsync(Uri instanceUri, CancellationToken cancellationToken = default)
+            {
+                Items = [];
+                return Task.CompletedTask;
             }
         }
 

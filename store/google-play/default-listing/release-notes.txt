@@ -1,7 +1,9 @@
 Closed testing build for Cotton Cloud mobile.
 
-Adds a Notifications settings page that checks permission without prompting and asks only after tapping Allow.
+Adds Notifications settings with permission checks that prompt only after tapping Allow.
 
-Improves queued upload restore after sign-in, so restored waiting transfers can be scheduled again and Files transfer status refreshes after background queue changes.
+Improves queued upload restore after sign-in and running Android transfer notifications with live progress.
 
-Manual uploads, Capture Inbox, Camera Backup setup, local transfer alerts, and Android background-transfer foundations remain in testing. True sync is still in progress.
+Adds file Keep offline and Remove offline actions with On device marker refresh.
+
+Manual uploads, Capture Inbox, Camera Backup setup, local alerts, and Android background transfers remain in testing. True sync is still in progress.

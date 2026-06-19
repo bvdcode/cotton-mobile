@@ -6,17 +6,20 @@ namespace Cotton.Mobile.Services
             CottonStorageCategorySnapshot thumbnailCache,
             CottonStorageCategorySnapshot folderListings,
             CottonStorageCategorySnapshot downloadedFiles,
-            CottonOnDeviceStorageSummary onDeviceStorage)
+            CottonOnDeviceStorageSummary onDeviceStorage,
+            CottonStorageBudgetSummary budget)
         {
             ArgumentNullException.ThrowIfNull(thumbnailCache);
             ArgumentNullException.ThrowIfNull(folderListings);
             ArgumentNullException.ThrowIfNull(downloadedFiles);
             ArgumentNullException.ThrowIfNull(onDeviceStorage);
+            ArgumentNullException.ThrowIfNull(budget);
 
             ThumbnailCache = thumbnailCache;
             FolderListings = folderListings;
             DownloadedFiles = downloadedFiles;
             OnDeviceStorage = onDeviceStorage;
+            Budget = budget;
         }
 
         public CottonStorageCategorySnapshot ThumbnailCache { get; }
@@ -26,6 +29,8 @@ namespace Cotton.Mobile.Services
         public CottonStorageCategorySnapshot DownloadedFiles { get; }
 
         public CottonOnDeviceStorageSummary OnDeviceStorage { get; }
+
+        public CottonStorageBudgetSummary Budget { get; }
 
         public long TotalSizeBytes => ThumbnailCache.SizeBytes + FolderListings.SizeBytes + DownloadedFiles.SizeBytes;
 

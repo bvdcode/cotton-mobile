@@ -5,22 +5,29 @@ namespace Cotton.Mobile.Services
 {
     public class StorageManagementService : IStorageManagementService
     {
+        private const long Megabyte = 1024 * 1024;
         private const string ThumbnailCacheName = "Thumbnails";
         private const string FolderListingsName = "Folder listings";
         private const string DownloadedFilesName = "Downloaded files";
+        private const string EvictableDownloadsName = "Evictable downloads";
         private const string TemporaryThumbnailFileExtension = ".tmp";
+        private const long FolderListingBudgetBytes = 25 * Megabyte;
 
         private readonly FileThumbnailCacheOptions _thumbnailOptions;
+        private readonly FileDownloadCacheOptions _downloadOptions;
         private readonly ILogger<StorageManagementService> _logger;
 
         public StorageManagementService(
             FileThumbnailCacheOptions thumbnailOptions,
+            FileDownloadCacheOptions downloadOptions,
             ILogger<StorageManagementService> logger)
         {
             ArgumentNullException.ThrowIfNull(thumbnailOptions);
+            ArgumentNullException.ThrowIfNull(downloadOptions);
             ArgumentNullException.ThrowIfNull(logger);
 
             _thumbnailOptions = thumbnailOptions;
+            _downloadOptions = downloadOptions;
             _logger = logger;
         }
 
@@ -50,6 +57,18 @@ namespace Cotton.Mobile.Services
                         cancellationToken,
                         includeTemporaryDownloads: false);
                     CottonOfflineStorageScan offlineFiles = ScanOfflineFiles(cancellationToken);
+                    CottonStorageCategorySnapshot evictableDownloads = ScanDirectory(
+                        EvictableDownloadsName,
+                        CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                        SearchOption.AllDirectories,
+                        cancellationToken,
+                        includeTemporaryDownloads: false,
+                        excludedDirectories: offlineFiles.ProtectedDownloadDirectories);
+                    int protectedOfflineFileCount =
+                        offlineFiles.AvailableFileCount
+                        + offlineFiles.StaleFileCount
+                        + offlineFiles.MissingFileCount;
+                    long protectedOfflineBytes = offlineFiles.AvailableBytes + offlineFiles.StaleBytes;
 
                     return new CottonStorageSummary(
                         thumbnails,
@@ -64,7 +83,19 @@ namespace Cotton.Mobile.Services
                             folderListings.FileCount,
                             folderListings.SizeBytes,
                             thumbnails.FileCount,
-                            thumbnails.SizeBytes));
+                            thumbnails.SizeBytes),
+                        CottonStorageBudgetSummary.Create(
+                            evictableDownloads.FileCount,
+                            evictableDownloads.SizeBytes,
+                            _downloadOptions.MaxCacheBytes,
+                            thumbnails.FileCount,
+                            thumbnails.SizeBytes,
+                            _thumbnailOptions.MaxCacheBytes,
+                            folderListings.FileCount,
+                            folderListings.SizeBytes,
+                            FolderListingBudgetBytes,
+                            protectedOfflineFileCount,
+                            protectedOfflineBytes));
                 },
                 cancellationToken);
         }
@@ -221,13 +252,15 @@ namespace Cotton.Mobile.Services
             SearchOption searchOption,
             CancellationToken cancellationToken,
             bool includeTemporaryThumbnails = true,
-            bool includeTemporaryDownloads = true)
+            bool includeTemporaryDownloads = true,
+            IReadOnlyCollection<string>? excludedDirectories = null)
         {
             if (!Directory.Exists(directory))
             {
                 return new CottonStorageCategorySnapshot(name, 0, 0);
             }
 
+            IReadOnlyList<string> normalizedExcludedDirectories = NormalizeExcludedDirectories(excludedDirectories);
             long sizeBytes = 0;
             int fileCount = 0;
             try
@@ -235,6 +268,11 @@ namespace Cotton.Mobile.Services
                 foreach (string file in Directory.EnumerateFiles(directory, "*", searchOption))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    if (IsInExcludedDirectory(file, normalizedExcludedDirectories))
+                    {
+                        continue;
+                    }
+
                     if (!includeTemporaryDownloads && CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
                     {
                         continue;
@@ -311,6 +349,11 @@ namespace Cotton.Mobile.Services
                         continue;
                     }
 
+                    scan.ProtectedDownloadDirectories.Add(
+                        Path.Combine(
+                            CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                            instanceStorageKey,
+                            pin.FileId.ToString("D")));
                     AddOfflinePin(scan, instanceStorageKey, pin);
                 }
             }
@@ -497,6 +540,41 @@ namespace Cotton.Mobile.Services
             return path.EndsWith(TemporaryThumbnailFileExtension, StringComparison.OrdinalIgnoreCase);
         }
 
+        private static IReadOnlyList<string> NormalizeExcludedDirectories(IReadOnlyCollection<string>? directories)
+        {
+            if (directories is null || directories.Count == 0)
+            {
+                return [];
+            }
+
+            return directories
+                .Where(directory => !string.IsNullOrWhiteSpace(directory))
+                .Select(Path.GetFullPath)
+                .Distinct(StringComparer.Ordinal)
+                .ToList();
+        }
+
+        private static bool IsInExcludedDirectory(string path, IReadOnlyList<string> excludedDirectories)
+        {
+            if (excludedDirectories.Count == 0)
+            {
+                return false;
+            }
+
+            string fullPath = Path.GetFullPath(path);
+            return excludedDirectories.Any(directory => IsPathInsideDirectory(fullPath, directory));
+        }
+
+        private static bool IsPathInsideDirectory(string path, string directory)
+        {
+            string relativePath = Path.GetRelativePath(directory, path);
+            return !Path.IsPathRooted(relativePath)
+                && !string.Equals(relativePath, ".", StringComparison.Ordinal)
+                && !string.Equals(relativePath, "..", StringComparison.Ordinal)
+                && !relativePath.StartsWith($"..{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                && !relativePath.StartsWith($"..{Path.AltDirectorySeparatorChar}", StringComparison.Ordinal);
+        }
+
         private bool IsAbandonedTemporaryStorageFile(string file, DateTime utcNow)
         {
             try
@@ -586,6 +664,8 @@ namespace Cotton.Mobile.Services
             public long StaleBytes { get; set; }
 
             public int MissingFileCount { get; set; }
+
+            public HashSet<string> ProtectedDownloadDirectories { get; } = new(StringComparer.Ordinal);
         }
 
         private sealed class CottonOfflineStoragePin

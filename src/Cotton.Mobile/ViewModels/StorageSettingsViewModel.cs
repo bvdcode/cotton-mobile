@@ -7,16 +7,6 @@ namespace Cotton.Mobile.ViewModels
 {
     public class StorageSettingsViewModel : ViewModelBase
     {
-        private const string CancelAction = "Cancel";
-        private const string ClearAllAction = "Clear all";
-        private const string ClearDownloadedFilesAction = "Clear downloads";
-        private const string ClearFolderListingsAction = "Clear lists";
-        private const string ClearThumbnailsAction = "Clear thumbnails";
-        private const string ClearAllTitle = "Clear all cached files";
-        private const string ClearDownloadedFilesTitle = "Clear downloaded and offline files";
-        private const string ClearFolderListingsTitle = "Clear offline folder lists";
-        private const string ClearThumbnailsTitle = "Clear thumbnails";
-
         private readonly IStorageManagementService _storageManagementService;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<StorageSettingsViewModel> _logger;
@@ -30,6 +20,8 @@ namespace Cotton.Mobile.ViewModels
         private string _downloadedSizeText = "0 B";
         private string _downloadedFileCountText = "0 files";
         private string _onDeviceSummaryText = CottonOnDeviceStorageSummary.Empty.SummaryText;
+        private string _storageBudgetSummaryText = CottonStorageBudgetSummary.Empty.SummaryText;
+        private string _protectedOfflineText = CottonStorageBudgetSummary.Empty.ProtectedOfflineText;
         private string? _status;
 
         public StorageSettingsViewModel(
@@ -56,6 +48,7 @@ namespace Cotton.Mobile.ViewModels
                 () => !IsBusy);
             ClearAllCommand = new AsyncCommand(ClearAllAsync, LogUnhandledCommandException, () => !IsBusy);
             ShowOnDeviceStorage(CottonOnDeviceStorageSummary.Empty);
+            ShowStorageBudget(CottonStorageBudgetSummary.Empty);
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -69,6 +62,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ClearAllCommand { get; }
 
         public ObservableCollection<CottonOnDeviceStorageBucketSnapshot> OnDeviceBuckets { get; } = new();
+
+        public ObservableCollection<CottonStorageBudgetBucketSnapshot> StorageBudgetBuckets { get; } = new();
 
         public bool IsBusy
         {
@@ -136,6 +131,18 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _onDeviceSummaryText, value);
         }
 
+        public string StorageBudgetSummaryText
+        {
+            get => _storageBudgetSummaryText;
+            private set => SetProperty(ref _storageBudgetSummaryText, value);
+        }
+
+        public string ProtectedOfflineText
+        {
+            get => _protectedOfflineText;
+            private set => SetProperty(ref _protectedOfflineText, value);
+        }
+
         public string? Status
         {
             get => _status;
@@ -165,41 +172,41 @@ namespace Cotton.Mobile.ViewModels
         private Task ClearThumbnailsAsync()
         {
             return ClearAsync(
-                ClearThumbnailsTitle,
-                "Thumbnail previews will reload as you browse.",
-                ClearThumbnailsAction,
+                CottonStorageCleanupPolicyText.ClearThumbnailsTitle,
+                CottonStorageCleanupPolicyText.ClearThumbnailsMessage,
+                CottonStorageCleanupPolicyText.ClearThumbnailsAction,
                 _storageManagementService.ClearThumbnailCacheAsync,
-                "Thumbnails cleared.");
+                CottonStorageCleanupPolicyText.ThumbnailsClearedStatus);
         }
 
         private Task ClearDownloadedFilesAsync()
         {
             return ClearAsync(
-                ClearDownloadedFilesTitle,
-                "Files marked On device, including kept-offline files, will need internet to open again.",
-                ClearDownloadedFilesAction,
+                CottonStorageCleanupPolicyText.ClearDownloadedFilesTitle,
+                CottonStorageCleanupPolicyText.ClearDownloadedFilesMessage,
+                CottonStorageCleanupPolicyText.ClearDownloadedFilesAction,
                 _storageManagementService.ClearDownloadedFilesAsync,
-                "Downloaded and offline files cleared.");
+                CottonStorageCleanupPolicyText.DownloadedFilesClearedStatus);
         }
 
         private Task ClearFolderListingsAsync()
         {
             return ClearAsync(
-                ClearFolderListingsTitle,
-                "Folder lists will reload from your Cotton instance when you browse.",
-                ClearFolderListingsAction,
+                CottonStorageCleanupPolicyText.ClearFolderListingsTitle,
+                CottonStorageCleanupPolicyText.ClearFolderListingsMessage,
+                CottonStorageCleanupPolicyText.ClearFolderListingsAction,
                 _storageManagementService.ClearFolderListingsCacheAsync,
-                "Offline folder lists cleared.");
+                CottonStorageCleanupPolicyText.FolderListingsClearedStatus);
         }
 
         private Task ClearAllAsync()
         {
             return ClearAsync(
-                ClearAllTitle,
-                "Thumbnail previews, offline folder lists, and files marked On device, including kept-offline files, will be removed from this device.",
-                ClearAllAction,
+                CottonStorageCleanupPolicyText.ClearAllTitle,
+                CottonStorageCleanupPolicyText.ClearAllMessage,
+                CottonStorageCleanupPolicyText.ClearAllAction,
                 _storageManagementService.ClearAllCachedFilesAsync,
-                "Cached files cleared.");
+                CottonStorageCleanupPolicyText.AllCachedFilesClearedStatus);
         }
 
         private async Task ClearAsync(
@@ -216,7 +223,7 @@ namespace Cotton.Mobile.ViewModels
                         title,
                         message,
                         acceptAction,
-                        CancelAction);
+                        CottonStorageCleanupPolicyText.CancelAction);
                     if (!confirmed)
                     {
                         Status = null;
@@ -294,6 +301,7 @@ namespace Cotton.Mobile.ViewModels
             DownloadedSizeText = CottonFileSizeFormatter.Format(summary.DownloadedFiles.SizeBytes);
             DownloadedFileCountText = FormatFileCount(summary.DownloadedFiles.FileCount);
             ShowOnDeviceStorage(summary.OnDeviceStorage);
+            ShowStorageBudget(summary.Budget);
         }
 
         private void ShowOnDeviceStorage(CottonOnDeviceStorageSummary summary)
@@ -305,6 +313,19 @@ namespace Cotton.Mobile.ViewModels
             foreach (CottonOnDeviceStorageBucketSnapshot bucket in summary.Buckets)
             {
                 OnDeviceBuckets.Add(bucket);
+            }
+        }
+
+        private void ShowStorageBudget(CottonStorageBudgetSummary budget)
+        {
+            ArgumentNullException.ThrowIfNull(budget);
+
+            StorageBudgetSummaryText = budget.SummaryText;
+            ProtectedOfflineText = budget.ProtectedOfflineText;
+            StorageBudgetBuckets.Clear();
+            foreach (CottonStorageBudgetBucketSnapshot bucket in budget.Buckets)
+            {
+                StorageBudgetBuckets.Add(bucket);
             }
         }
 

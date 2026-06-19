@@ -7,37 +7,6 @@ namespace Cotton.Mobile.Services
     {
         private const string LocalCopyStatusText = "On device";
 
-        private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
-        {
-            ".css",
-            ".csv",
-            ".htm",
-            ".html",
-            ".js",
-            ".json",
-            ".log",
-            ".markdown",
-            ".md",
-            ".svg",
-            ".text",
-            ".ts",
-            ".txt",
-            ".xml",
-            ".yaml",
-            ".yml",
-        };
-
-        private static readonly HashSet<string> TextContentTypes = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "application/javascript",
-            "application/json",
-            "application/markdown",
-            "application/xml",
-            "application/x-yaml",
-            "application/yaml",
-            "image/svg+xml",
-        };
-
         private CottonFileBrowserEntry(
             Guid id,
             CottonFileBrowserEntryType type,
@@ -140,7 +109,7 @@ namespace Cotton.Mobile.Services
             string contentType = string.IsNullOrWhiteSpace(file.ContentType)
                 ? string.Empty
                 : file.ContentType.Trim();
-            string kind = ResolveFileKind(file.Name, CreateContentTypeMediaType(contentType));
+            string kind = CottonFileKindClassifier.ResolveKind(file.Name, contentType);
             return new CottonFileBrowserEntry(
                 file.Id,
                 CottonFileBrowserEntryType.File,
@@ -264,58 +233,6 @@ namespace Cotton.Mobile.Services
         private string CreateFallbackThumbnailCacheKey()
         {
             return $"{Type}:{Id:N}:placeholder";
-        }
-
-        private static string ResolveFileKind(string name, string contentType)
-        {
-            if (IsTextFile(name, contentType))
-            {
-                return "Text";
-            }
-
-            if (contentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Image";
-            }
-
-            if (contentType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase)
-                || Path.GetExtension(name).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
-            {
-                return "PDF";
-            }
-
-            if (contentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Video";
-            }
-
-            if (contentType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Audio";
-            }
-
-            return "File";
-        }
-
-        private static bool IsTextFile(string name, string contentType)
-        {
-            return contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
-                || TextContentTypes.Contains(contentType)
-                || TextFileExtensions.Contains(Path.GetExtension(name));
-        }
-
-        private static string CreateContentTypeMediaType(string contentType)
-        {
-            if (string.IsNullOrWhiteSpace(contentType))
-            {
-                return string.Empty;
-            }
-
-            int parameterIndex = contentType.IndexOf(';', StringComparison.Ordinal);
-            string mediaType = parameterIndex < 0
-                ? contentType
-                : contentType[..parameterIndex];
-            return mediaType.Trim();
         }
 
         private static string ResolveBadgeText(string kind)

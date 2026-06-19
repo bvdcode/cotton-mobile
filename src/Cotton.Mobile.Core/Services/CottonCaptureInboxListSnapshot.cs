@@ -85,7 +85,9 @@ namespace Cotton.Mobile.Services
             return item.Type switch
             {
                 CottonShareIntakeItemType.Text => "Text",
-                CottonShareIntakeItemType.Uri => item.HasStagedContent ? "File" : "Link",
+                CottonShareIntakeItemType.Uri => item.HasStagedContent
+                    ? CottonFileKindClassifier.ResolveKind(item.EffectiveUploadDisplayName, item.MimeType)
+                    : "Link",
                 _ => "Shared item",
             };
         }

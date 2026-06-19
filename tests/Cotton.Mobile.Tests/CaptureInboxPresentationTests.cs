@@ -128,6 +128,43 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Snapshot_classifies_staged_image_shares_from_mime_type()
+        {
+            CottonShareIntakeSnapshot imageShare = CottonShareIntakeSnapshot
+                .CreatePending(
+                    Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    CottonShareIntakeKind.Send,
+                    "image/jpeg",
+                    [
+                        CreateStagedItem(
+                            Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                            "IMG_2042.JPG",
+                            68,
+                            "image/jpeg"),
+                    ],
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Default",
+                        "Default"));
+
+            CottonCaptureInboxListItem imageItem =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([imageShare]).Items);
+
+            Assert.Equal("IMG_2042.JPG", imageItem.DisplayName);
+            Assert.Equal("Image", imageItem.KindText);
+            Assert.Equal("Ready", imageItem.StatusText);
+            Assert.Equal("Copied to this device", imageItem.DetailText);
+            Assert.Equal("Destination: Default", imageItem.DestinationText);
+            Assert.Contains("68 B", imageItem.MetadataText, StringComparison.Ordinal);
+            Assert.Contains("image/jpeg", imageItem.MetadataText, StringComparison.Ordinal);
+            Assert.True(imageItem.CanSelectDestination);
+            Assert.True(imageItem.CanRename);
+            Assert.True(imageItem.CanEnqueue);
+        }
+
+        [Fact]
         public void Snapshot_flattens_multiple_staged_files_with_shared_destination()
         {
             Guid intakeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -203,7 +240,8 @@ namespace Cotton.Mobile.Tests
         private static CottonShareIntakeItemSnapshot CreateStagedItem(
             Guid intakeId,
             string displayName,
-            long sizeBytes)
+            long sizeBytes,
+            string mimeType = "application/octet-stream")
         {
             Guid itemId = Guid.NewGuid();
             var staged = new CottonShareStagedContentSnapshot(
@@ -217,7 +255,7 @@ namespace Cotton.Mobile.Tests
                     CottonShareIntakeItemType.Uri,
                     $"content://shared/{displayName}",
                     displayName,
-                    "text/plain")
+                    mimeType)
                 .WithStagedContent(staged);
         }
 

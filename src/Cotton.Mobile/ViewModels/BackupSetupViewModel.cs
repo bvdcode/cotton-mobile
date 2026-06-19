@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly Uri _instanceUri;
         private readonly ICottonCameraBackupSettingsStore _settingsStore;
         private readonly ICottonCameraBackupUploadedMediaStore _uploadedMediaStore;
+        private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<BackupSetupViewModel> _logger;
         private CottonCameraBackupSettings _settings = CottonCameraBackupSettings.Default;
@@ -23,24 +24,30 @@ namespace Cotton.Mobile.ViewModels
         private string _healthTitle = "Backup Health";
         private string _healthStatusText = "Backup health will appear after background backup is available.";
         private string _healthCountsText = "Pending 0 · Uploaded 0 · Failed 0 · Blocked 0";
+        private string _mediaAccessTitle = "Media Access";
+        private string _mediaAccessStatusText = "Not requested";
+        private string _mediaAccessDetailText = "Cotton will ask before scanning photos or videos.";
         private string? _status;
 
         public BackupSetupViewModel(
             Uri instanceUri,
             ICottonCameraBackupSettingsStore settingsStore,
             ICottonCameraBackupUploadedMediaStore uploadedMediaStore,
+            ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
             ILogger<BackupSetupViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(uploadedMediaStore);
+            ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _settingsStore = settingsStore;
             _uploadedMediaStore = uploadedMediaStore;
+            _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
 
@@ -170,6 +177,24 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _healthCountsText, value);
         }
 
+        public string MediaAccessTitle
+        {
+            get => _mediaAccessTitle;
+            private set => SetProperty(ref _mediaAccessTitle, value);
+        }
+
+        public string MediaAccessStatusText
+        {
+            get => _mediaAccessStatusText;
+            private set => SetProperty(ref _mediaAccessStatusText, value);
+        }
+
+        public string MediaAccessDetailText
+        {
+            get => _mediaAccessDetailText;
+            private set => SetProperty(ref _mediaAccessDetailText, value);
+        }
+
         public string? Status
         {
             get => _status;
@@ -192,6 +217,7 @@ namespace Cotton.Mobile.ViewModels
                     _settings = await _settingsStore.GetAsync(_instanceUri);
                     ShowSettings(_settings);
                     await LoadStoredHealthAsync();
+                    await LoadMediaAccessAsync();
                     Status = null;
                 },
                 "Could not load camera backup setup.");
@@ -213,6 +239,7 @@ namespace Cotton.Mobile.ViewModels
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
                     await LoadStoredHealthAsync();
+                    await LoadMediaAccessAsync();
                     Status = "Camera backup setup saved.";
                 },
                 "Could not choose backup folder.");
@@ -227,6 +254,7 @@ namespace Cotton.Mobile.ViewModels
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
                     await LoadStoredHealthAsync();
+                    await LoadMediaAccessAsync();
                     Status = "Camera backup setup saved.";
                 },
                 "Could not save camera backup setup.");
@@ -291,6 +319,17 @@ namespace Cotton.Mobile.ViewModels
             HealthTitle = health.Title;
             HealthStatusText = health.StatusText;
             HealthCountsText = health.CountsText;
+        }
+
+        private async Task LoadMediaAccessAsync()
+        {
+            CottonCameraBackupMediaAccessState state =
+                await _mediaAccessPolicy.GetAccessStateAsync();
+            CottonCameraBackupMediaAccessDisplayState display =
+                CottonCameraBackupMediaAccessDisplayState.Create(state);
+            MediaAccessTitle = display.Title;
+            MediaAccessStatusText = display.StatusText;
+            MediaAccessDetailText = display.DetailText;
         }
 
         private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)

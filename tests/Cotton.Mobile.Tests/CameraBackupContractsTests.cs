@@ -84,6 +84,28 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Photos and videos, cellular allowed, while charging.", display.PolicySummaryText);
         }
 
+        [Theory]
+        [InlineData(CottonCameraBackupMediaAccessState.NotRequested, "Not requested", false, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Allowed, "Allowed", true, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Limited, "Selected media only", true, false)]
+        [InlineData(CottonCameraBackupMediaAccessState.Denied, "Denied", false, true)]
+        [InlineData(CottonCameraBackupMediaAccessState.Unavailable, "Unavailable", false, true)]
+        public void Camera_backup_media_access_display_keeps_permission_state_explicit(
+            CottonCameraBackupMediaAccessState state,
+            string statusText,
+            bool canReadMedia,
+            bool needsAttention)
+        {
+            CottonCameraBackupMediaAccessDisplayState display =
+                CottonCameraBackupMediaAccessDisplayState.Create(state);
+
+            Assert.Equal("Media Access", display.Title);
+            Assert.Equal(statusText, display.StatusText);
+            Assert.Equal(canReadMedia, display.CanReadMedia);
+            Assert.Equal(needsAttention, display.NeedsAttention);
+            Assert.False(string.IsNullOrWhiteSpace(display.DetailText));
+        }
+
         [Fact]
         public void Camera_backup_rejects_enabled_state_before_durable_queue_is_available()
         {

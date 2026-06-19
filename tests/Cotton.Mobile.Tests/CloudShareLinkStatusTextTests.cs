@@ -81,5 +81,55 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal("Could not create link.", status);
         }
+
+        [Fact]
+        public void Reset_all_links_statuses_use_explicit_destructive_action_copy()
+        {
+            Assert.Equal(
+                "Offline. Reset shared links needs internet.",
+                CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus);
+            Assert.Equal(
+                "Sign in to reset shared links.",
+                CottonCloudShareLinkStatusText.ResetAllUnavailableStatus);
+            Assert.Equal(
+                "Resetting shared links...",
+                CottonCloudShareLinkStatusText.ResetAllInProgressStatus);
+            Assert.Equal(
+                "Shared links reset.",
+                CottonCloudShareLinkStatusText.ResetAllCompletedStatus);
+            Assert.Equal(
+                "Reset shared links cancelled.",
+                CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+        }
+
+        [Fact]
+        public void Reset_all_failure_uses_offline_copy_when_network_is_unavailable()
+        {
+            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+                statusCode: null,
+                hasInternetAccess: false);
+
+            Assert.Equal(CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus, status);
+        }
+
+        [Fact]
+        public void Reset_all_failure_uses_sign_in_copy_for_forbidden_response()
+        {
+            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+                HttpStatusCode.Forbidden,
+                hasInternetAccess: true);
+
+            Assert.Equal("Could not reset shared links. Sign in again.", status);
+        }
+
+        [Fact]
+        public void Reset_all_failure_uses_generic_copy_for_unknown_response()
+        {
+            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+                HttpStatusCode.InternalServerError,
+                hasInternetAccess: true);
+
+            Assert.Equal("Could not reset shared links.", status);
+        }
     }
 }

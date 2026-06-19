@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Net;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
@@ -19,10 +20,15 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
         private const string AccountPrivacyPolicyAction = "Privacy";
+        private const string AccountResetShareLinksAction = "Reset shared links";
+        private const string AccountResetShareLinksConfirmationAction = "Reset links";
         private const string AccountStorageAction = "Storage";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
+        private const string ResetShareLinksConfirmationTitle = "Reset shared links?";
+        private const string ResetShareLinksConfirmationMessage =
+            "All existing public links for this account will stop working. You can create new links later.";
 
         private readonly ICottonSessionService _sessionService;
         private readonly ICottonInstanceStore _instanceStore;
@@ -46,6 +52,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
+        private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -162,6 +169,7 @@ namespace Cotton.Mobile.ViewModels
             _screenReader = screenReader;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
+            _cloudShareLinkService = cloudShareLinkService;
             _presentationService = presentationService;
             _logger = logger;
 
@@ -564,6 +572,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
+                AccountResetShareLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
@@ -583,6 +592,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
+                    break;
+                case AccountResetShareLinksAction:
+                    await ResetSharedLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
                     break;
                 case AccountDiagnosticsAction:
                     await OpenDiagnosticsAsync();
@@ -624,6 +636,98 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await LogoutAsync();
+        }
+
+        private async Task ResetSharedLinksAsync(
+            string profileName,
+            string? profileEmail,
+            string profileInstance,
+            string instanceUrl)
+        {
+            if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+            {
+                return;
+            }
+
+            Uri? instanceUri = CottonServerUrl.NormalizeOptional(instanceUrl);
+            if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
+            {
+                ShowProfileError(CottonCloudShareLinkStatusText.ResetAllUnavailableStatus);
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                ShowProfileError(CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus);
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                ResetShareLinksConfirmationTitle,
+                ResetShareLinksConfirmationMessage,
+                AccountResetShareLinksConfirmationAction,
+                AccountCancelAction);
+            if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+            {
+                return;
+            }
+
+            if (!confirmed)
+            {
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+                return;
+            }
+
+            ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllInProgressStatus);
+
+            try
+            {
+                await _cloudShareLinkService.InvalidateAllAsync(instanceUri);
+                if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+                {
+                    return;
+                }
+
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCompletedStatus);
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share-link reset authorization failure.");
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Cotton mobile share-link reset session expired.");
+                await HandleFileBrowserSessionExpiredAsync(instanceUri);
+            }
+            catch (OperationCanceledException exception)
+            {
+                if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share-link reset cancellation.");
+                    return;
+                }
+
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile share-link reset failure.");
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to reset Cotton mobile share links.");
+                HttpStatusCode? statusCode = exception is CottonApiException apiException
+                    ? apiException.StatusCode
+                    : null;
+                ShowProfileError(CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+                    statusCode,
+                    _networkAccess.HasInternetAccess));
+            }
         }
 
         private void StorageManagementService_DownloadedFilesCleared(object? sender, EventArgs e)
@@ -1308,6 +1412,21 @@ namespace Cotton.Mobile.ViewModels
             Display.ShowProfileError(status);
             RefreshCommands();
             _screenReader.Announce(status);
+        }
+
+        private void ShowProfileStatus(string status)
+        {
+            Display.ShowProfileStatus(status);
+            RefreshCommands();
+            _screenReader.Announce(status);
+        }
+
+        private static bool IsAuthorizationFailure(Exception exception)
+        {
+            return exception is CottonApiException
+            {
+                StatusCode: HttpStatusCode.Unauthorized or HttpStatusCode.Forbidden,
+            };
         }
 
         private void RefreshCommands()

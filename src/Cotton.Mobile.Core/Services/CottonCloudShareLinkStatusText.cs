@@ -8,6 +8,11 @@ namespace Cotton.Mobile.Services
         public const string CancelledStatus = "Link action cancelled.";
         public const string CopyFailedStatus = "Could not copy link.";
         public const string ShareFailedStatus = "Could not share link.";
+        public const string ResetAllOfflineUnavailableStatus = "Offline. Reset shared links needs internet.";
+        public const string ResetAllUnavailableStatus = "Sign in to reset shared links.";
+        public const string ResetAllInProgressStatus = "Resetting shared links...";
+        public const string ResetAllCompletedStatus = "Shared links reset.";
+        public const string ResetAllCancelledStatus = "Reset shared links cancelled.";
 
         public static string CreateCreatingStatus(string targetName)
         {
@@ -52,6 +57,21 @@ namespace Cotton.Mobile.Services
             }
 
             return "Could not create link.";
+        }
+
+        public static string CreateResetAllFailedStatus(HttpStatusCode? statusCode, bool hasInternetAccess)
+        {
+            if (!hasInternetAccess)
+            {
+                return ResetAllOfflineUnavailableStatus;
+            }
+
+            if (statusCode is HttpStatusCode.Forbidden)
+            {
+                return "Could not reset shared links. Sign in again.";
+            }
+
+            return "Could not reset shared links.";
         }
 
         private static string NormalizeTargetName(string targetName)

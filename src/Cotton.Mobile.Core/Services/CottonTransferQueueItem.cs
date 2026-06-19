@@ -169,6 +169,16 @@ namespace Cotton.Mobile.Services
             return With(CottonTransferStatus.Failed, Progress, AttemptCount, failureMessage, updatedAtUtc);
         }
 
+        public CottonTransferQueueItem MarkFailed(string failureMessage, DateTime updatedAtUtc)
+        {
+            if (IsTerminal)
+            {
+                throw new InvalidOperationException($"Cannot mark a {Status} transfer as failed.");
+            }
+
+            return With(CottonTransferStatus.Failed, Progress, AttemptCount, failureMessage, updatedAtUtc);
+        }
+
         public CottonTransferQueueItem Retry(DateTime updatedAtUtc)
         {
             EnsureStatus([CottonTransferStatus.Failed], nameof(Retry));

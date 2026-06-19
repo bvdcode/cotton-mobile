@@ -115,6 +115,23 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Mark_failed_can_fail_restored_non_terminal_transfer()
+        {
+            CottonTransferQueueItem queued = CreateUpload(totalBytes: 200);
+
+            CottonTransferQueueItem failed = queued.MarkFailed("Missing staged file", Later);
+
+            Assert.Equal(CottonTransferStatus.Failed, failed.Status);
+            Assert.True(failed.CanRetry);
+            Assert.Equal("Missing staged file", failed.FailureMessage);
+            Assert.Equal(Later, failed.UpdatedAtUtc);
+
+            CottonTransferQueueItem cancelled = queued.Cancel(Later.AddSeconds(1));
+
+            Assert.Throws<InvalidOperationException>(() => cancelled.MarkFailed("Nope", Later.AddSeconds(2)));
+        }
+
+        [Fact]
         public void Invalid_transitions_are_rejected()
         {
             CottonTransferQueueItem queued = CreateUpload(totalBytes: 200);

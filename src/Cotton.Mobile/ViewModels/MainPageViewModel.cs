@@ -31,6 +31,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IDiagnosticsPageService _diagnosticsPageService;
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
+        private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
@@ -55,6 +56,7 @@ namespace Cotton.Mobile.ViewModels
             IDiagnosticsPageService diagnosticsPageService,
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
+            ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
             ICottonFileUploadService fileUploadService,
@@ -79,6 +81,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(diagnosticsPageService);
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
+            ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileUploadService);
@@ -103,6 +106,7 @@ namespace Cotton.Mobile.ViewModels
             _diagnosticsPageService = diagnosticsPageService;
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
+            _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
@@ -813,6 +817,7 @@ namespace Cotton.Mobile.ViewModels
                 ClearSessionRestoreRetry();
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 ShowProfile(profile);
+                await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 return;
@@ -855,6 +860,18 @@ namespace Cotton.Mobile.ViewModels
                     or CottonSessionResultStatus.TimedOut
                     or CottonSessionResultStatus.AuthorizationFailed
                     or CottonSessionResultStatus.SessionExpired;
+        }
+
+        private async Task RestoreTransferQueueBestEffortAsync(Uri instanceUri)
+        {
+            try
+            {
+                await _transferQueueRestoreCoordinator.RestoreAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to restore Cotton mobile transfer queue.");
+            }
         }
 
         private void ShowLoading(string message)

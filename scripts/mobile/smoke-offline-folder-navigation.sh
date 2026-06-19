@@ -14,6 +14,9 @@ launch_app=1
 skip_network_toggle=0
 leave_network_disabled=0
 network_disabled=0
+preflight_only=0
+expected_version_code=""
+expected_version_name=""
 
 usage() {
   cat <<EOF
@@ -26,6 +29,9 @@ Options:
   --serial SERIAL           ADB serial to use. Defaults to COTTON_ADB_SERIAL.
   --evidence-dir DIR        Evidence directory. Defaults to a timestamped directory under $evidence_root.
   --install-debug           Install the current debug APK with -r before launch, preserving app data.
+  --expected-version-code N Require the installed package to have this Android versionCode.
+  --expected-version-name V Require the installed package to have this versionName.
+  --preflight-only          Capture device/package/version state and exit without manual prompts.
   --no-launch               Do not launch the app automatically.
   --skip-network-toggle     Do not disable Wi-Fi/mobile data; operator handles offline mode.
   --leave-network-disabled  Do not restore Wi-Fi/mobile data at the end.
@@ -66,6 +72,26 @@ while [[ $# -gt 0 ]]; do
       install_debug=1
       shift
       ;;
+    --expected-version-code)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --expected-version-code.\n' >&2
+        exit 64
+      fi
+      expected_version_code="$2"
+      shift 2
+      ;;
+    --expected-version-name)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --expected-version-name.\n' >&2
+        exit 64
+      fi
+      expected_version_name="$2"
+      shift 2
+      ;;
+    --preflight-only)
+      preflight_only=1
+      shift
+      ;;
     --no-launch)
       launch_app=0
       shift
@@ -94,9 +120,10 @@ if ! command -v adb >/dev/null 2>&1; then
   exit 127
 fi
 
-if [[ ! -t 0 ]]; then
+if [[ "$preflight_only" -eq 0 && ! -t 0 ]]; then
   printf 'This smoke requires an interactive terminal because it waits for manual app navigation.\n' >&2
   printf 'Run it from a shell attached to the Android device or emulator.\n' >&2
+  printf 'Use --preflight-only for non-interactive package/version evidence.\n' >&2
   exit 65
 fi
 
@@ -119,6 +146,9 @@ write_metadata() {
     printf 'package=%s\n' "$package_id"
     printf 'serial=%s\n' "$serial"
     printf 'install_debug=%s\n' "$install_debug"
+    printf 'preflight_only=%s\n' "$preflight_only"
+    printf 'expected_version_code=%s\n' "$expected_version_code"
+    printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'skip_network_toggle=%s\n' "$skip_network_toggle"
     printf 'leave_network_disabled=%s\n' "$leave_network_disabled"
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
@@ -153,6 +183,8 @@ Device: \`$serial\`
 ## Evidence To Review
 
 - \`00-device.txt\`
+- \`04-package.txt\`
+- \`05-package-version.txt\`
 - \`10-online-ready.png\` and \`10-online-ready.xml\`
 - \`20-online-kept-folder.png\` and \`20-online-kept-folder.xml\`
 - \`30-network-disabled.txt\`
@@ -239,11 +271,48 @@ if ! adb_device shell pm path "$package_id" > "$evidence_dir/04-package.txt" 2>&
   exit 69
 fi
 
+if ! adb_device shell dumpsys package "$package_id" > "$evidence_dir/05-package-dumpsys.txt" 2>&1; then
+  printf 'Could not inspect installed package %s. See %s/05-package-dumpsys.txt.\n' "$package_id" "$evidence_dir" >&2
+  exit 69
+fi
+
+installed_version_code="$(
+  sed -n 's/.*versionCode=\([0-9][0-9]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
+)"
+installed_version_name="$(
+  sed -n 's/.*versionName=\([^[:space:]]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
+)"
+
+{
+  printf 'installed_version_code=%s\n' "$installed_version_code"
+  printf 'installed_version_name=%s\n' "$installed_version_name"
+  printf 'expected_version_code=%s\n' "$expected_version_code"
+  printf 'expected_version_name=%s\n' "$expected_version_name"
+} > "$evidence_dir/05-package-version.txt"
+
+if [[ -n "$expected_version_code" && "$installed_version_code" != "$expected_version_code" ]]; then
+  printf 'Installed %s versionCode is %s, expected %s. Evidence: %s\n' \
+    "$package_id" "$installed_version_code" "$expected_version_code" "$evidence_dir" >&2
+  exit 70
+fi
+
+if [[ -n "$expected_version_name" && "$installed_version_name" != "$expected_version_name" ]]; then
+  printf 'Installed %s versionName is %s, expected %s. Evidence: %s\n' \
+    "$package_id" "$installed_version_name" "$expected_version_name" "$evidence_dir" >&2
+  exit 70
+fi
+
 adb_device logcat -c >/dev/null 2>&1 || true
 
 if [[ "$launch_app" -eq 1 ]]; then
   capture_text "05-launch.txt" adb_device shell monkey -p "$package_id" 1
   sleep 2
+fi
+
+if [[ "$preflight_only" -eq 1 ]]; then
+  capture_device_state "10-preflight"
+  printf '\nOffline folder-navigation preflight evidence: %s\n' "$evidence_dir"
+  exit 0
 fi
 
 capture_device_state "10-online-ready"

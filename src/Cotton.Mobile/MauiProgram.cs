@@ -62,13 +62,22 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 #if ANDROID
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
-			builder.Services.AddSingleton<ICottonCameraBackupMediaSource, AndroidCameraBackupMediaSource>();
+			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
+			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
+				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
+			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
+				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 #else
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
-			builder.Services.AddSingleton<ICottonCameraBackupMediaSource, DisabledCottonCameraBackupMediaSource>();
+			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();
+			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
+				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
+			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
+				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
 #endif
 			builder.Services.AddSingleton<ICottonCameraBackupScanner, CottonCameraBackupScanner>();
 			builder.Services.AddSingleton<ICottonCameraBackupPlanningService, CottonCameraBackupPlanningService>();
+			builder.Services.AddSingleton<ICottonCameraBackupTransferEnqueueCoordinator, CottonCameraBackupTransferEnqueueCoordinator>();
 			builder.Services.AddSingleton<ICottonTransferStagingPathProvider, CottonTransferStagingPathProvider>();
 			builder.Services.AddSingleton<ICottonTransferStagingStore, FileSystemCottonTransferStagingStore>();
 			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();

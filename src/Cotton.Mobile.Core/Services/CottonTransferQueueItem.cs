@@ -13,7 +13,8 @@ namespace Cotton.Mobile.Services
             DateTime createdAtUtc,
             DateTime updatedAtUtc,
             CottonTransferDestinationSnapshot? destination,
-            string? contentType)
+            string? contentType,
+            CottonTransferSourceSnapshot? source)
         {
             if (id == Guid.Empty)
             {
@@ -53,6 +54,7 @@ namespace Cotton.Mobile.Services
             UpdatedAtUtc = NormalizeUtc(updatedAtUtc);
             Destination = destination;
             ContentType = NormalizeContentType(contentType);
+            Source = source;
         }
 
         public Guid Id { get; }
@@ -76,6 +78,8 @@ namespace Cotton.Mobile.Services
         public CottonTransferDestinationSnapshot? Destination { get; }
 
         public string ContentType { get; }
+
+        public CottonTransferSourceSnapshot? Source { get; }
 
         public bool IsTerminal => Status is CottonTransferStatus.Completed or CottonTransferStatus.Cancelled;
 
@@ -116,6 +120,25 @@ namespace Cotton.Mobile.Services
             CottonTransferDestinationSnapshot? destination,
             string? contentType)
         {
+            return CreateUpload(
+                id,
+                displayName,
+                totalBytes,
+                createdAtUtc,
+                destination,
+                contentType,
+                source: null);
+        }
+
+        public static CottonTransferQueueItem CreateUpload(
+            Guid id,
+            string displayName,
+            long? totalBytes,
+            DateTime createdAtUtc,
+            CottonTransferDestinationSnapshot? destination,
+            string? contentType,
+            CottonTransferSourceSnapshot? source)
+        {
             return new CottonTransferQueueItem(
                 id,
                 CottonTransferKind.Upload,
@@ -127,7 +150,8 @@ namespace Cotton.Mobile.Services
                 createdAtUtc,
                 createdAtUtc,
                 destination,
-                contentType);
+                contentType,
+                source);
         }
 
         public static CottonTransferQueueItem Restore(
@@ -198,6 +222,37 @@ namespace Cotton.Mobile.Services
             CottonTransferDestinationSnapshot? destination,
             string? contentType)
         {
+            return Restore(
+                id,
+                kind,
+                displayName,
+                status,
+                transferredBytes,
+                totalBytes,
+                attemptCount,
+                failureMessage,
+                createdAtUtc,
+                updatedAtUtc,
+                destination,
+                contentType,
+                source: null);
+        }
+
+        public static CottonTransferQueueItem Restore(
+            Guid id,
+            CottonTransferKind kind,
+            string displayName,
+            CottonTransferStatus status,
+            long transferredBytes,
+            long? totalBytes,
+            int attemptCount,
+            string? failureMessage,
+            DateTime createdAtUtc,
+            DateTime updatedAtUtc,
+            CottonTransferDestinationSnapshot? destination,
+            string? contentType,
+            CottonTransferSourceSnapshot? source)
+        {
             return new CottonTransferQueueItem(
                 id,
                 kind,
@@ -209,7 +264,8 @@ namespace Cotton.Mobile.Services
                 createdAtUtc,
                 updatedAtUtc,
                 destination,
-                contentType);
+                contentType,
+                source);
         }
 
         public CottonTransferQueueItem Start(DateTime updatedAtUtc)
@@ -315,7 +371,8 @@ namespace Cotton.Mobile.Services
                 CreatedAtUtc,
                 updatedAtUtc,
                 Destination,
-                ContentType);
+                ContentType,
+                Source);
         }
 
         private void EnsureStatus(CottonTransferStatus[] allowedStatuses, string operationName)

@@ -1,0 +1,81 @@
+namespace Cotton.Mobile.Services
+{
+    public sealed class CottonTransferSourceSnapshot
+    {
+        public CottonTransferSourceSnapshot(
+            CottonTransferSourceKind kind,
+            string sourceId,
+            DateTime? lastModifiedUtc,
+            long? sizeBytes,
+            DateTime? capturedAtUtc)
+        {
+            if (!Enum.IsDefined(kind) || kind == CottonTransferSourceKind.Unknown)
+            {
+                throw new ArgumentOutOfRangeException(nameof(kind), "Transfer source kind is not supported.");
+            }
+
+            if (string.IsNullOrWhiteSpace(sourceId))
+            {
+                throw new ArgumentException("Transfer source id is required.", nameof(sourceId));
+            }
+
+            if (sizeBytes < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(sizeBytes), "Transfer source size cannot be negative.");
+            }
+
+            Kind = kind;
+            SourceId = sourceId.Trim();
+            LastModifiedUtc = NormalizeUtc(lastModifiedUtc);
+            SizeBytes = sizeBytes;
+            CapturedAtUtc = NormalizeUtc(capturedAtUtc);
+        }
+
+        public CottonTransferSourceKind Kind { get; }
+
+        public string SourceId { get; }
+
+        public DateTime? LastModifiedUtc { get; }
+
+        public long? SizeBytes { get; }
+
+        public DateTime? CapturedAtUtc { get; }
+
+        public static CottonTransferSourceSnapshot CreateCameraBackup(CottonCameraBackupCandidate candidate)
+        {
+            ArgumentNullException.ThrowIfNull(candidate);
+
+            return new CottonTransferSourceSnapshot(
+                CottonTransferSourceKind.CameraBackup,
+                candidate.Identity.SourceId,
+                candidate.Identity.LastModifiedUtc,
+                candidate.Identity.SizeBytes,
+                candidate.CapturedAtUtc);
+        }
+
+        public bool MatchesCameraBackupIdentity(CottonCameraBackupMediaIdentity identity)
+        {
+            ArgumentNullException.ThrowIfNull(identity);
+
+            return Kind == CottonTransferSourceKind.CameraBackup
+                && string.Equals(SourceId, identity.SourceId, StringComparison.Ordinal)
+                && LastModifiedUtc == identity.LastModifiedUtc
+                && SizeBytes == identity.SizeBytes;
+        }
+
+        private static DateTime? NormalizeUtc(DateTime? value)
+        {
+            if (value is null)
+            {
+                return null;
+            }
+
+            return value.Value.Kind switch
+            {
+                DateTimeKind.Utc => value.Value,
+                DateTimeKind.Local => value.Value.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(value.Value, DateTimeKind.Utc),
+            };
+        }
+    }
+}

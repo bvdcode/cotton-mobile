@@ -6,7 +6,9 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidCameraBackupMediaSource : ICottonCameraBackupMediaSource
+    public sealed class AndroidCameraBackupMediaSource :
+        ICottonCameraBackupMediaSource,
+        ICottonCameraBackupMediaContentSource
     {
         private const string DefaultImageContentType = "image/jpeg";
         private const string DefaultVideoContentType = "video/mp4";
@@ -68,6 +70,40 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
 
             return candidates;
+        }
+
+        public Task<Stream?> OpenReadAsync(
+            CottonCameraBackupCandidate candidate,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(candidate);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            if (!Uri.TryCreate(candidate.Identity.SourceId, UriKind.Absolute, out Uri? sourceUri)
+                || !string.Equals(sourceUri.Scheme, "content", StringComparison.OrdinalIgnoreCase))
+            {
+                return Task.FromResult<Stream?>(null);
+            }
+
+            try
+            {
+                AndroidUri? androidUri = AndroidUri.Parse(candidate.Identity.SourceId);
+                if (androidUri is null)
+                {
+                    return Task.FromResult<Stream?>(null);
+                }
+
+                Stream? stream = Android.App.Application.Context.ContentResolver?.OpenInputStream(androidUri);
+                return Task.FromResult(stream);
+            }
+            catch (Java.Lang.SecurityException)
+            {
+                return Task.FromResult<Stream?>(null);
+            }
+            catch (FileNotFoundException)
+            {
+                return Task.FromResult<Stream?>(null);
+            }
         }
 
         internal static bool TryCreateCandidate(

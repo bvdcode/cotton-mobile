@@ -153,6 +153,7 @@ namespace Cotton.Mobile.Services
                 Kind = item.Kind,
                 DisplayName = item.DisplayName,
                 ContentType = item.ContentType,
+                Source = CreateStoredSource(item.Source),
                 Destination = CreateStoredDestination(item.Destination),
                 Status = item.Status,
                 TransferredBytes = item.Progress.TransferredBytes,
@@ -180,7 +181,8 @@ namespace Cotton.Mobile.Services
                     item.CreatedAtUtc,
                     item.UpdatedAtUtc,
                     TryCreateDestination(item.Destination),
-                    item.ContentType);
+                    item.ContentType,
+                    TryCreateSource(item.Source));
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException or InvalidOperationException)
@@ -218,6 +220,42 @@ namespace Cotton.Mobile.Services
                     destination.Path);
             }
             catch (ArgumentException)
+            {
+                return null;
+            }
+        }
+
+        private static CottonStoredTransferSource? CreateStoredSource(CottonTransferSourceSnapshot? source)
+        {
+            return source is null
+                ? null
+                : new CottonStoredTransferSource
+                {
+                    Kind = source.Kind,
+                    SourceId = source.SourceId,
+                    LastModifiedUtc = source.LastModifiedUtc,
+                    SizeBytes = source.SizeBytes,
+                    CapturedAtUtc = source.CapturedAtUtc,
+                };
+        }
+
+        private static CottonTransferSourceSnapshot? TryCreateSource(CottonStoredTransferSource? source)
+        {
+            if (source is null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return new CottonTransferSourceSnapshot(
+                    source.Kind,
+                    source.SourceId ?? string.Empty,
+                    source.LastModifiedUtc,
+                    source.SizeBytes,
+                    source.CapturedAtUtc);
+            }
+            catch (Exception exception) when (exception is ArgumentException or ArgumentOutOfRangeException)
             {
                 return null;
             }
@@ -261,6 +299,8 @@ namespace Cotton.Mobile.Services
 
             public string? ContentType { get; set; }
 
+            public CottonStoredTransferSource? Source { get; set; }
+
             public CottonStoredTransferDestination? Destination { get; set; }
 
             public CottonTransferStatus Status { get; set; }
@@ -276,6 +316,19 @@ namespace Cotton.Mobile.Services
             public DateTime CreatedAtUtc { get; set; }
 
             public DateTime UpdatedAtUtc { get; set; }
+        }
+
+        private class CottonStoredTransferSource
+        {
+            public CottonTransferSourceKind Kind { get; set; }
+
+            public string? SourceId { get; set; }
+
+            public DateTime? LastModifiedUtc { get; set; }
+
+            public long? SizeBytes { get; set; }
+
+            public DateTime? CapturedAtUtc { get; set; }
         }
 
         private class CottonStoredTransferDestination

@@ -53,6 +53,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
+        private readonly ICottonRemotePushSessionRegistrationService _remotePushRegistrationService;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -99,6 +100,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             ICottonCloudShareLinkService cloudShareLinkService,
+            ICottonRemotePushSessionRegistrationService remotePushRegistrationService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
@@ -139,6 +141,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
+            ArgumentNullException.ThrowIfNull(remotePushRegistrationService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
@@ -170,6 +173,7 @@ namespace Cotton.Mobile.ViewModels
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
             _cloudShareLinkService = cloudShareLinkService;
+            _remotePushRegistrationService = remotePushRegistrationService;
             _presentationService = presentationService;
             _logger = logger;
 
@@ -540,6 +544,12 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
+                Uri? instanceUri = ResolveInstanceUri();
+                if (instanceUri is not null)
+                {
+                    await _remotePushRegistrationService.RevokeCurrentSessionBestEffortAsync(instanceUri);
+                }
+
                 await _sessionService.LogoutAsync();
                 await ClearCachedSensitiveStateAsync("logout");
                 _fileBrowser.Clear();
@@ -1297,6 +1307,7 @@ namespace Cotton.Mobile.ViewModels
                     await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
                 Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
                 await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
+                await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(result.InstanceUri);
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");

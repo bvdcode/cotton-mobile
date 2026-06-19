@@ -148,6 +148,22 @@ namespace Cotton.Mobile
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
 			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
+#if ANDROID
+			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider, AndroidFirebaseMessagingTokenProvider>();
+#else
+			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider>(_ =>
+				new CottonStaticRemotePushPlatformTokenProvider(
+					CottonRemotePushPlatformTokenSnapshot.NotConfigured(
+						CottonRemotePushProviderKind.FirebaseCloudMessaging,
+						CottonRemotePushMobilePlatform.Ios,
+						"Remote push token provider is not configured for this platform.")));
+#endif
+			builder.Services.AddSingleton<CottonRemotePushRegistrationCoordinator>();
+			builder.Services.AddSingleton<CottonRemotePushSessionRegistrationService>();
+			builder.Services.AddSingleton<ICottonRemotePushSessionRegistrationService>(services =>
+				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
+			builder.Services.AddSingleton<ICottonRemotePushTokenRefreshHandler>(services =>
+				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
 			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddTransient<MainPageViewModel>();

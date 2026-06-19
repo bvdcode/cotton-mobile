@@ -63,6 +63,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTransferProgressSignal, CottonTransferProgressSignal>();
 			builder.Services.AddSingleton<ICottonCameraBackupMetadataPathProvider, CottonCameraBackupMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
+			builder.Services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
+			builder.Services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
 #if ANDROID
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();

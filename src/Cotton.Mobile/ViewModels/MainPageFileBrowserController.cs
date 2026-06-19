@@ -43,6 +43,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonFileBrowserService _fileBrowserService;
         private readonly ICottonFileUploadService _fileUploadService;
         private readonly ICottonFolderContentCache _folderContentCache;
+        private readonly ICottonOfflineFilePinStore _offlineFilePinStore;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileUploadPickerService _fileUploadPickerService;
         private readonly IPhotoUploadPickerService _photoUploadPickerService;
@@ -76,6 +77,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileBrowserService fileBrowserService,
             ICottonFileUploadService fileUploadService,
             ICottonFolderContentCache folderContentCache,
+            ICottonOfflineFilePinStore offlineFilePinStore,
             IFileBrowserPreferenceStore preferenceStore,
             IFileUploadPickerService fileUploadPickerService,
             IPhotoUploadPickerService photoUploadPickerService,
@@ -94,6 +96,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileUploadService);
             ArgumentNullException.ThrowIfNull(folderContentCache);
+            ArgumentNullException.ThrowIfNull(offlineFilePinStore);
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
@@ -112,6 +115,7 @@ namespace Cotton.Mobile.ViewModels
             _fileBrowserService = fileBrowserService;
             _fileUploadService = fileUploadService;
             _folderContentCache = folderContentCache;
+            _offlineFilePinStore = offlineFilePinStore;
             _preferenceStore = preferenceStore;
             _fileUploadPickerService = fileUploadPickerService;
             _photoUploadPickerService = photoUploadPickerService;
@@ -1058,6 +1062,7 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
             if (reusableLocalFile is not null)
             {
+                await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
                 _display.ShowFileLocalCopy(file, reusableLocalFile);
                 _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(file.Name));
                 return;
@@ -1092,6 +1097,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
                 RefreshLocalFileMarkers(instanceUri);
                 _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(result.FileName));
                 shouldRunRecoveryRefresh = true;
@@ -1161,6 +1167,7 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
             if (reusableLocalFile is null)
             {
+                await RemoveFileOfflinePinAsync(instanceUri, file.Id, CancellationToken.None);
                 _display.ClearFileLocalCopy(file);
                 _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateNotOnDeviceStatus(file.Name));
                 return;
@@ -1175,6 +1182,7 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     file,
                     fileActionCancellation.Token);
+                await RemoveFileOfflinePinAsync(instanceUri, file.Id, CancellationToken.None);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
@@ -1216,6 +1224,25 @@ namespace Cotton.Mobile.ViewModels
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
             }
+        }
+
+        private Task PinFileOfflineAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CancellationToken cancellationToken)
+        {
+            return _offlineFilePinStore.AddOrReplaceAsync(
+                instanceUri,
+                CottonOfflineFilePinSnapshot.Create(file, DateTime.UtcNow),
+                cancellationToken);
+        }
+
+        private Task RemoveFileOfflinePinAsync(
+            Uri instanceUri,
+            Guid fileId,
+            CancellationToken cancellationToken)
+        {
+            return _offlineFilePinStore.RemoveAsync(instanceUri, fileId, cancellationToken);
         }
 
         private async Task UploadPickedSourceAsync(

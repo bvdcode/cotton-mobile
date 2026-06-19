@@ -82,6 +82,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileBrowserService fileBrowserService,
             ICottonFileUploadService fileUploadService,
             ICottonFolderContentCache folderContentCache,
+            ICottonOfflineFilePinStore offlineFilePinStore,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
             IFileUploadPickerService fileUploadPickerService,
             IPhotoUploadPickerService photoUploadPickerService,
@@ -118,6 +119,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileUploadService);
             ArgumentNullException.ThrowIfNull(folderContentCache);
+            ArgumentNullException.ThrowIfNull(offlineFilePinStore);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
@@ -162,6 +164,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserService,
                 fileUploadService,
                 folderContentCache,
+                offlineFilePinStore,
                 fileBrowserPreferenceStore,
                 fileUploadPickerService,
                 photoUploadPickerService,

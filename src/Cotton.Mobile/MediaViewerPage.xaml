@@ -28,6 +28,45 @@
                                   HorizontalOptions="Fill"
                                   VerticalOptions="Fill" />
 
+            <VerticalStackLayout IsVisible="{Binding IsAudioPreview}"
+                                 InputTransparent="True"
+                                 Spacing="12"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 MaximumWidthRequest="320">
+                <Border WidthRequest="96"
+                        HeightRequest="96"
+                        Stroke="{StaticResource Primary}"
+                        StrokeShape="RoundRectangle 48"
+                        StrokeThickness="2"
+                        BackgroundColor="{StaticResource Gray950}"
+                        HorizontalOptions="Center">
+                    <Label Text="♪"
+                           FontSize="44"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="{StaticResource Primary}" />
+                </Border>
+
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding Title}"
+                           FontSize="17"
+                           FontAttributes="Bold"
+                           MaxLines="2"
+                           LineBreakMode="TailTruncation"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{StaticResource White}" />
+
+                    <Label Text="{Binding Details}"
+                           FontSize="12"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{StaticResource Gray200}" />
+                </VerticalStackLayout>
+            </VerticalStackLayout>
+
         </Grid>
 
         <VerticalStackLayout Grid.Row="1"

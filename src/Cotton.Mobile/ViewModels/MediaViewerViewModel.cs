@@ -48,6 +48,8 @@ namespace Cotton.Mobile.ViewModels
 
         public CottonFilePreviewKind PreviewKind { get; }
 
+        public bool IsAudioPreview => PreviewKind == CottonFilePreviewKind.Audio;
+
         public string MediaSourcePath { get; }
 
         public AsyncCommand ShareCommand { get; }

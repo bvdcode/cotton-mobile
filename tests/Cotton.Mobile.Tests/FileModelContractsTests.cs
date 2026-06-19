@@ -95,6 +95,65 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Offline_file_availability_distinguishes_available_stale_and_missing_pins()
+        {
+            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt.AddMinutes(1));
+            var freshLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
+            var staleTimeLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt.AddSeconds(-3));
+            var wrongSizeLocal = new CottonLocalFileSnapshot("notes.txt", 41, UpdatedAt);
+
+            CottonOfflineFileAvailabilitySnapshot available =
+                CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, freshLocal);
+            CottonOfflineFileAvailabilitySnapshot staleTime =
+                CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, staleTimeLocal);
+            CottonOfflineFileAvailabilitySnapshot staleSize =
+                CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, wrongSizeLocal);
+            CottonOfflineFileAvailabilitySnapshot missing =
+                CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, localFile: null);
+            CottonOfflineFileAvailabilitySnapshot notPinned =
+                CottonOfflineFileAvailabilitySnapshot.Create(entry, pin: null, freshLocal);
+
+            Assert.Equal(CottonOfflineFileAvailabilityStatus.Available, available.Status);
+            Assert.True(available.IsAvailable);
+            Assert.False(available.NeedsRefresh);
+            Assert.Equal("On device", available.StatusText);
+            Assert.Equal(CottonOfflineFileAvailabilityStatus.Stale, staleTime.Status);
+            Assert.Equal(CottonOfflineFileAvailabilityStatus.Stale, staleSize.Status);
+            Assert.True(staleTime.NeedsRefresh);
+            Assert.Equal("Offline stale", staleTime.StatusText);
+            Assert.Equal("Kept offline, refresh to match the cloud version.", staleTime.DetailsText);
+            Assert.Equal(CottonOfflineFileAvailabilityStatus.Missing, missing.Status);
+            Assert.True(missing.NeedsRefresh);
+            Assert.Equal("Offline missing", missing.StatusText);
+            Assert.Equal(CottonOfflineFileAvailabilityStatus.NotPinned, notPinned.Status);
+            Assert.False(notPinned.IsPinned);
+        }
+
+        [Fact]
+        public void File_entry_surfaces_offline_attention_without_overloading_on_device()
+        {
+            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt);
+            CottonOfflineFileAvailabilitySnapshot stale =
+                CottonOfflineFileAvailabilitySnapshot.Create(
+                    entry,
+                    pin,
+                    new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt.AddSeconds(-3)));
+
+            CottonFileBrowserEntry staleEntry = entry.WithOfflineAvailability(stale);
+            CottonFileBrowserEntry freshEntry = staleEntry.WithLocalFile(new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt));
+
+            Assert.False(staleEntry.HasLocalCopy);
+            Assert.True(staleEntry.IsOfflineAttentionVisible);
+            Assert.Equal("Offline stale", staleEntry.OfflineAttentionStatus);
+            Assert.Equal("42 B · Text · Offline stale", staleEntry.DisplayDetails);
+            Assert.True(freshEntry.HasLocalCopy);
+            Assert.False(freshEntry.IsOfflineAttentionVisible);
+            Assert.Equal("42 B · Text · On device", freshEntry.DisplayDetails);
+        }
+
+        [Fact]
         public void Thumbnail_snapshots_expose_stable_display_flags()
         {
             CottonFileThumbnailSnapshot placeholder = CottonFileThumbnailSnapshot.Placeholder("PDF", "cache-key");
@@ -175,6 +234,15 @@ namespace Cotton.Mobile.Tests
                 CottonOfflineFileStatusText.OfflineUnavailableStatus);
             Assert.Equal("Keep offline cancelled.", CottonOfflineFileStatusText.CancelledStatus);
             Assert.Equal("Keep offline failed.", CottonOfflineFileStatusText.FailedStatus);
+            Assert.Equal(
+                "Refreshing notes.txt offline...",
+                CottonOfflineFileStatusText.CreateRefreshingStatus("notes.txt"));
+            Assert.Equal(
+                "notes.txt offline copy refreshed.",
+                CottonOfflineFileStatusText.CreateRefreshedStatus("notes.txt"));
+            Assert.Equal("Offline. Refresh offline needs internet.", CottonOfflineFileStatusText.RefreshOfflineUnavailableStatus);
+            Assert.Equal("Refresh offline cancelled.", CottonOfflineFileStatusText.RefreshCancelledStatus);
+            Assert.Equal("Refresh offline failed.", CottonOfflineFileStatusText.RefreshFailedStatus);
             Assert.Equal("Remove offline cancelled.", CottonOfflineFileStatusText.RemoveCancelledStatus);
             Assert.Equal("Remove offline failed.", CottonOfflineFileStatusText.RemoveFailedStatus);
         }

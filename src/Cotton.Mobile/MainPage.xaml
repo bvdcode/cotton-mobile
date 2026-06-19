@@ -530,7 +530,7 @@
                                                                LineBreakMode="TailTruncation"
                                                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-                                                        <Grid ColumnDefinitions="*,Auto"
+                                                        <Grid ColumnDefinitions="*,Auto,Auto"
                                                               ColumnSpacing="6">
                                                             <Label Text="{Binding Details}"
                                                                    FontSize="11"
@@ -545,6 +545,20 @@
                                                                     Padding="5,1"
                                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
                                                                 <Label Text="{Binding LocalCopyStatus}"
+                                                                       FontSize="9"
+                                                                       FontAttributes="Bold"
+                                                                       MaxLines="1"
+                                                                       LineBreakMode="NoWrap"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                            </Border>
+
+                                                            <Border Grid.Column="2"
+                                                                    IsVisible="{Binding IsOfflineAttentionVisible}"
+                                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                                    StrokeShape="RoundRectangle 8"
+                                                                    Padding="5,1"
+                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                                <Label Text="{Binding OfflineAttentionStatus}"
                                                                        FontSize="9"
                                                                        FontAttributes="Bold"
                                                                        MaxLines="1"

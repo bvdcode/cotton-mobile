@@ -823,6 +823,37 @@ namespace Cotton.Mobile.ViewModels
             return changed;
         }
 
+        public bool RefreshFileLocalStates(Func<CottonFileBrowserEntry, CottonFileBrowserEntry> refreshEntry)
+        {
+            ArgumentNullException.ThrowIfNull(refreshEntry);
+
+            bool changed = false;
+            for (int index = 0; index < _allFileEntries.Count; index++)
+            {
+                CottonFileBrowserEntry entry = _allFileEntries[index];
+                if (entry.Type != CottonFileBrowserEntryType.File)
+                {
+                    continue;
+                }
+
+                CottonFileBrowserEntry updatedEntry = refreshEntry(entry);
+                if (HasSameLocalState(entry, updatedEntry))
+                {
+                    continue;
+                }
+
+                _allFileEntries[index] = updatedEntry;
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ApplyFileFilters();
+            }
+
+            return changed;
+        }
+
         public void ClearFileLocalCopies()
         {
             bool changed = false;
@@ -1081,6 +1112,13 @@ namespace Cotton.Mobile.ViewModels
             return current.SizeBytes == next.SizeBytes
                 && current.UpdatedAtUtc == next.UpdatedAtUtc
                 && string.Equals(current.FileName, next.FileName, StringComparison.Ordinal);
+        }
+
+        private static bool HasSameLocalState(CottonFileBrowserEntry current, CottonFileBrowserEntry next)
+        {
+            return current.Id == next.Id
+                && HasSameLocalFile(current.LocalFile, next.LocalFile)
+                && current.OfflineAvailability.Status == next.OfflineAvailability.Status;
         }
 
         private static int FindEntryIndex(IList<CottonFileBrowserEntry> entries, Guid id)

@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
+            CottonOfflineFileAvailabilitySnapshot? offlineAvailability = null,
             CottonLocalFileSnapshot? localFile = null,
             CottonFileThumbnailSnapshot? thumbnail = null)
         {
@@ -35,6 +36,7 @@ namespace Cotton.Mobile.Services
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
                 ? null
                 : previewHashEncryptedHex.Trim();
+            OfflineAvailability = offlineAvailability ?? CottonOfflineFileAvailabilitySnapshot.NotPinned;
             LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
         }
@@ -49,11 +51,30 @@ namespace Cotton.Mobile.Services
 
         public string Details { get; }
 
-        public string DisplayDetails => LocalFile is null ? Details : $"{Details} · {LocalCopyStatusText}";
+        public string DisplayDetails
+        {
+            get
+            {
+                if (LocalFile is not null)
+                {
+                    return $"{Details} · {LocalCopyStatusText}";
+                }
+
+                return IsOfflineAttentionVisible
+                    ? $"{Details} · {OfflineAvailability.StatusText}"
+                    : Details;
+            }
+        }
 
         public bool HasLocalCopy => LocalFile is not null;
 
         public string LocalCopyStatus => HasLocalCopy ? LocalCopyStatusText : string.Empty;
+
+        public CottonOfflineFileAvailabilitySnapshot OfflineAvailability { get; }
+
+        public bool IsOfflineAttentionVisible => LocalFile is null && OfflineAvailability.IsAttentionVisible;
+
+        public string OfflineAttentionStatus => IsOfflineAttentionVisible ? OfflineAvailability.StatusText : string.Empty;
 
         public string ActionLabel { get; }
 
@@ -99,6 +120,7 @@ namespace Cotton.Mobile.Services
                 null,
                 null,
                 null,
+                null,
                 null);
         }
 
@@ -122,6 +144,7 @@ namespace Cotton.Mobile.Services
                 file.SizeBytes,
                 contentType,
                 file.PreviewHashEncryptedHex,
+                null,
                 null);
         }
 
@@ -150,6 +173,7 @@ namespace Cotton.Mobile.Services
                 sizeBytes,
                 contentType,
                 previewHashEncryptedHex,
+                null,
                 null);
         }
 
@@ -183,6 +207,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                OfflineAvailability,
                 LocalFile,
                 thumbnail);
         }
@@ -203,7 +228,29 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                OfflineAvailability,
                 localFile,
+                Thumbnail);
+        }
+
+        public CottonFileBrowserEntry WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot offlineAvailability)
+        {
+            ArgumentNullException.ThrowIfNull(offlineAvailability);
+
+            return new CottonFileBrowserEntry(
+                Id,
+                Type,
+                Name,
+                Kind,
+                Details,
+                ActionLabel,
+                BadgeText,
+                UpdatedAtUtc,
+                SizeBytes,
+                ContentType,
+                PreviewHashEncryptedHex,
+                offlineAvailability,
+                LocalFile,
                 Thumbnail);
         }
 
@@ -226,6 +273,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                OfflineAvailability,
                 null,
                 Thumbnail);
         }

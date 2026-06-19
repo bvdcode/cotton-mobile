@@ -185,6 +185,40 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Local_file_state_refresh_updates_offline_attention_and_fresh_marker()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            CottonFileBrowserEntry file = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(file, Newer);
+            var staleLocalFile = new CottonLocalFileSnapshot("zeta.txt", 10, Older.AddSeconds(-3));
+            var freshLocalFile = new CottonLocalFileSnapshot("zeta.txt", 10, Older);
+
+            display.RefreshFileLocalStates(entry =>
+                entry.Id == file.Id
+                    ? entry
+                        .WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, staleLocalFile))
+                        .WithoutLocalFile()
+                    : entry);
+
+            CottonFileBrowserEntry stale = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            Assert.False(stale.HasLocalCopy);
+            Assert.True(stale.IsOfflineAttentionVisible);
+            Assert.Equal("10 B · Text · Offline stale", stale.DisplayDetails);
+
+            display.RefreshFileLocalStates(entry =>
+                entry.Id == file.Id
+                    ? entry
+                        .WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, freshLocalFile))
+                        .WithLocalFile(freshLocalFile)
+                    : entry);
+
+            CottonFileBrowserEntry fresh = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            Assert.True(fresh.HasLocalCopy);
+            Assert.False(fresh.IsOfflineAttentionVisible);
+            Assert.Equal("10 B · Text · On device", fresh.DisplayDetails);
+        }
+
+        [Fact]
         public void Preferences_apply_view_mode_and_sort_mode()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

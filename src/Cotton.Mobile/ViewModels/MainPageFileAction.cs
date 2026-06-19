@@ -6,6 +6,7 @@ namespace Cotton.Mobile.ViewModels
         KeepFolderOffline,
         KeepOffline,
         Open,
+        RefreshOffline,
         RemoveOffline,
         Share,
     }

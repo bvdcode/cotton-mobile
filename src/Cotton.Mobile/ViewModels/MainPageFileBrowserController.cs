@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private const string KeepOfflineAction = "Keep offline";
         private const string OpenAction = "Open";
         private const string OpenWithSystemAppAction = "Open with system app";
+        private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
         private const string ShareAction = "Share";
         private const string UploadPhotoAction = "Upload photo";
@@ -212,12 +213,28 @@ namespace Cotton.Mobile.ViewModels
 
         public void RefreshLocalFileMarkersAfterStorageChange()
         {
-            bool changed = _instanceUri is not null
-                && RefreshLocalFileMarkers(_instanceUri);
-
-            if (changed && !IsFileBrowserBusy())
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
             {
-                _display.ShowFilesStatus("On-device files updated.");
+                return;
+            }
+
+            _ = RefreshLocalFileMarkersAfterStorageChangeAsync(instanceUri);
+        }
+
+        private async Task RefreshLocalFileMarkersAfterStorageChangeAsync(Uri instanceUri)
+        {
+            try
+            {
+                bool changed = await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                if (changed && !IsFileBrowserBusy())
+                {
+                    _display.ShowFilesStatus("On-device files updated.");
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to refresh Cotton mobile local file markers after storage change.");
             }
         }
 
@@ -514,6 +531,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.Open:
                     await OpenFileAsync(currentEntry);
                     break;
+                case MainPageFileAction.RefreshOffline:
+                    await RefreshOfflineFileAsync(currentEntry);
+                    break;
                 case MainPageFileAction.RemoveOffline:
                     await RemoveFileOfflineAsync(currentEntry);
                     break;
@@ -600,7 +620,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            RefreshLocalFileMarkers(instanceUri);
+            await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
             CottonFileBrowserEntry? refreshedFile = GetCurrentVisibleEntry(file, instanceUri);
             if (refreshedFile is null)
             {
@@ -613,9 +633,11 @@ namespace Cotton.Mobile.ViewModels
             {
                 openAction,
                 downloadAction,
-                KeepOfflineAction,
             };
-            if (refreshedFile.HasLocalCopy)
+            actions.Add(refreshedFile.OfflineAvailability.NeedsRefresh
+                ? RefreshOfflineAction
+                : KeepOfflineAction);
+            if (refreshedFile.HasLocalCopy || refreshedFile.OfflineAvailability.IsPinned)
             {
                 actions.Add(RemoveOfflineAction);
             }
@@ -649,6 +671,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case KeepOfflineAction:
                     await KeepFileOfflineAsync(currentFile);
+                    break;
+                case RefreshOfflineAction:
+                    await RefreshOfflineFileAsync(currentFile);
                     break;
                 case RemoveOfflineAction:
                     await RemoveFileOfflineAsync(currentFile);
@@ -776,7 +801,7 @@ namespace Cotton.Mobile.ViewModels
                     fileLoadCancellation.Token);
                 await _folderContentCache.SaveRootAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
-                content = ApplyLocalFiles(instanceUri, content);
+                content = await ApplyLocalFilesAsync(instanceUri, content, fileLoadCancellation.Token);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
                 {
                     return;
@@ -854,7 +879,7 @@ namespace Cotton.Mobile.ViewModels
                     fileLoadCancellation.Token);
                 await _folderContentCache.SaveFolderAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
-                content = ApplyLocalFiles(instanceUri, content);
+                content = await ApplyLocalFilesAsync(instanceUri, content, fileLoadCancellation.Token);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
                 {
                     return;
@@ -940,7 +965,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
-            cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
+            cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             _fileNavigation.Clear();
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
@@ -980,7 +1005,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
-            cachedContent = ApplyLocalFiles(instanceUri, cachedContent);
+            cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
             _lastFileLoadDisplayedCachedContent = true;
@@ -1027,7 +1052,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                RefreshLocalFileMarkers(instanceUri);
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
                 _display.ShowFileActionAwaitingFollowUp();
                 shouldRunRecoveryRefresh = await ShowDownloadedFileActionsBestEffortAsync(
                     file,
@@ -1084,12 +1109,49 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task KeepFileOfflineAsync(CottonFileBrowserEntry file)
+        private Task KeepFileOfflineAsync(CottonFileBrowserEntry file)
+        {
+            return SaveFileOfflineAsync(
+                file,
+                MainPageFileAction.KeepOffline,
+                "keep files offline",
+                "Saving",
+                CottonOfflineFileStatusText.CreateStartingStatus(file.Name),
+                CottonOfflineFileStatusText.CreateAvailableStatus,
+                CottonOfflineFileStatusText.CancelledStatus,
+                CottonOfflineFileStatusText.FailedStatus,
+                CottonOfflineFileStatusText.OfflineUnavailableStatus);
+        }
+
+        private Task RefreshOfflineFileAsync(CottonFileBrowserEntry file)
+        {
+            return SaveFileOfflineAsync(
+                file,
+                MainPageFileAction.RefreshOffline,
+                "refresh offline files",
+                "Refreshing",
+                CottonOfflineFileStatusText.CreateRefreshingStatus(file.Name),
+                CottonOfflineFileStatusText.CreateRefreshedStatus,
+                CottonOfflineFileStatusText.RefreshCancelledStatus,
+                CottonOfflineFileStatusText.RefreshFailedStatus,
+                CottonOfflineFileStatusText.RefreshOfflineUnavailableStatus);
+        }
+
+        private async Task SaveFileOfflineAsync(
+            CottonFileBrowserEntry file,
+            MainPageFileAction retryAction,
+            string signInActionName,
+            string progressActionName,
+            string startingStatus,
+            Func<string, string> createCompletedStatus,
+            string cancelledStatus,
+            string failedStatus,
+            string offlineUnavailableStatus)
         {
             Uri? instanceUri = _instanceUri;
             if (instanceUri is null)
             {
-                _display.ShowFilesStatus("Sign in to keep files offline.");
+                _display.ShowFilesStatus($"Sign in to {signInActionName}.");
                 return;
             }
 
@@ -1098,21 +1160,17 @@ namespace Cotton.Mobile.ViewModels
             if (reusableLocalFile is not null)
             {
                 await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
-                _display.ShowFileLocalCopy(file, reusableLocalFile);
-                _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(file.Name));
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _display.ShowFilesStatus(createCompletedStatus(file.Name));
                 return;
             }
 
-            if (ShowOfflineRetryIfNeeded(
-                    MainPageFileAction.KeepOffline,
-                    file,
-                    CottonOfflineFileStatusText.OfflineUnavailableStatus))
+            if (ShowOfflineRetryIfNeeded(retryAction, file, offlineUnavailableStatus))
             {
                 return;
             }
 
-            CancellationTokenSource fileActionCancellation =
-                BeginFileAction(CottonOfflineFileStatusText.CreateStartingStatus(file.Name));
+            CancellationTokenSource fileActionCancellation = BeginFileAction(startingStatus);
             bool shouldRunRecoveryRefresh = false;
 
             try
@@ -1122,7 +1180,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     CreateFileDownloadProgress(
                         file,
-                        "Saving",
+                        progressActionName,
                         () => IsActiveFileAction(fileActionCancellation, instanceUri),
                         fileActionCancellation.Token),
                     fileActionCancellation.Token);
@@ -1133,8 +1191,8 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
-                RefreshLocalFileMarkers(instanceUri);
-                _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(result.FileName));
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _display.ShowFilesStatus(createCompletedStatus(result.FileName));
                 shouldRunRecoveryRefresh = true;
             }
             catch (Exception exception)
@@ -1142,7 +1200,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
-                    _logger.LogDebug(exception, "Ignored stale Cotton mobile keep-offline authorization failure {FileId}.", file.Id);
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile offline-save authorization failure {FileId}.", file.Id);
                     return;
                 }
 
@@ -1153,35 +1211,35 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
-                    _logger.LogDebug("Ignored stale Cotton mobile keep-offline cancellation {FileId}.", file.Id);
+                    _logger.LogDebug("Ignored stale Cotton mobile offline-save cancellation {FileId}.", file.Id);
                     return;
                 }
 
                 ClearFileActionRetry();
-                if (ShowReusableLocalFileIfAvailable(file))
+                if (await ShowReusableLocalFileIfAvailableAsync(file))
                 {
-                    _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateAvailableStatus(file.Name));
+                    _display.ShowFilesStatus(createCompletedStatus(file.Name));
                     return;
                 }
 
-                _display.ShowFilesStatus(CottonOfflineFileStatusText.CancelledStatus);
+                _display.ShowFilesStatus(cancelledStatus);
             }
             catch (Exception exception)
             {
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
-                    _logger.LogDebug(exception, "Ignored stale Cotton mobile keep-offline failure {FileId}.", file.Id);
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile offline-save failure {FileId}.", file.Id);
                     return;
                 }
 
-                _logger.LogError(exception, "Failed to keep Cotton mobile file offline {FileId}.", file.Id);
+                _logger.LogError(exception, "Failed to save Cotton mobile file offline {FileId}.", file.Id);
                 ShowFileActionRetry(
-                    MainPageFileAction.KeepOffline,
+                    retryAction,
                     file,
                     CreateFileActionFailureStatus(
                         exception,
-                        CottonOfflineFileStatusText.FailedStatus,
-                        CottonOfflineFileStatusText.OfflineUnavailableStatus));
+                        failedStatus,
+                        offlineUnavailableStatus));
             }
             finally
             {
@@ -1198,12 +1256,11 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CottonLocalFileSnapshot? reusableLocalFile =
-                _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
-            if (reusableLocalFile is null)
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(instanceUri, file);
+            if (localFile is null)
             {
                 await RemoveFileOfflinePinAsync(instanceUri, file.Id, CancellationToken.None);
-                _display.ClearFileLocalCopy(file);
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
                 _display.ShowFilesStatus(CottonOfflineFileStatusText.CreateNotOnDeviceStatus(file.Name));
                 return;
             }
@@ -1224,7 +1281,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                _display.ClearFileLocalCopy(file);
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
                 _display.ShowFilesStatus(
                     deleted
                         ? CottonOfflineFileStatusText.CreateRemovedStatus(file.Name)
@@ -1498,7 +1555,7 @@ namespace Cotton.Mobile.ViewModels
                         CancellationToken.None);
                     completedCount++;
                     completedBytes += item.SizeBytes;
-                    RefreshLocalFileMarkers(instanceUri);
+                    await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
                     _display.ShowOfflinePackProgress(
                         CottonOfflinePackProgressSnapshot.CreateRunning(
                             queue,
@@ -1907,19 +1964,63 @@ namespace Cotton.Mobile.ViewModels
             return new CottonFolderContent(content.FolderId, content.FolderName, entries);
         }
 
-        private CottonFolderContent ApplyLocalFiles(Uri instanceUri, CottonFolderContent content)
+        private async Task<CottonFolderContent> ApplyLocalFilesAsync(
+            Uri instanceUri,
+            CottonFolderContent content,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(content);
 
+            IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot> pins =
+                await LoadOfflinePinsByIdAsync(instanceUri, cancellationToken);
             var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
             foreach (CottonFileBrowserEntry entry in content.Entries)
             {
-                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, entry);
-                entries.Add(localFile is null ? entry : entry.WithLocalFile(localFile));
+                cancellationToken.ThrowIfCancellationRequested();
+                entries.Add(CreateEntryWithLocalState(instanceUri, entry, pins));
             }
 
             return new CottonFolderContent(content.FolderId, content.FolderName, entries);
+        }
+
+        private async Task<IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot>> LoadOfflinePinsByIdAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            IReadOnlyList<CottonOfflineFilePinSnapshot> pins =
+                await _offlineFilePinStore.LoadAsync(instanceUri, cancellationToken);
+            return pins
+                .GroupBy(pin => pin.FileId)
+                .ToDictionary(group => group.Key, group => group.First());
+        }
+
+        private CottonFileBrowserEntry CreateEntryWithLocalState(
+            Uri instanceUri,
+            CottonFileBrowserEntry entry,
+            IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot> pins)
+        {
+            if (entry.Type != CottonFileBrowserEntryType.File)
+            {
+                return entry;
+            }
+
+            if (pins.TryGetValue(entry.Id, out CottonOfflineFilePinSnapshot? pin))
+            {
+                CottonLocalFileSnapshot? localFile = _fileBrowserService.GetLocalDownload(instanceUri, entry);
+                CottonOfflineFileAvailabilitySnapshot availability =
+                    CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, localFile);
+                CottonFileBrowserEntry updatedEntry = entry.WithOfflineAvailability(availability);
+                return availability.IsAvailable && localFile is not null
+                    ? updatedEntry.WithLocalFile(localFile)
+                    : updatedEntry.WithoutLocalFile();
+            }
+
+            CottonLocalFileSnapshot? reusableLocalFile =
+                _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, entry);
+            CottonFileBrowserEntry unpinnedEntry =
+                entry.WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot.NotPinned);
+            return reusableLocalFile is null ? unpinnedEntry.WithoutLocalFile() : unpinnedEntry.WithLocalFile(reusableLocalFile);
         }
 
         private async Task OpenFileAsync(CottonFileBrowserEntry file)
@@ -2137,7 +2238,7 @@ namespace Cotton.Mobile.ViewModels
                 CreateFileDownloadProgress(file, actionName, canUpdateProgress, cancellationToken),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            RefreshLocalFileMarkers(instanceUri);
+            await RefreshLocalFileStateAsync(instanceUri, cancellationToken);
             return downloadedFile;
         }
 
@@ -2423,12 +2524,33 @@ namespace Cotton.Mobile.ViewModels
             return true;
         }
 
-        private bool RefreshLocalFileMarkers(Uri instanceUri)
+        private async Task<bool> ShowReusableLocalFileIfAvailableAsync(CottonFileBrowserEntry file)
         {
-            return _display.RefreshFileLocalCopies(entry =>
-                _fileBrowserService.GetReusableLocalDownloadSnapshot(
-                    instanceUri,
-                    entry));
+            if (_instanceUri is null)
+            {
+                return false;
+            }
+
+            CottonLocalFileSnapshot? localFile = _fileBrowserService.GetReusableLocalDownloadSnapshot(_instanceUri, file);
+            await RefreshLocalFileStateAsync(_instanceUri, CancellationToken.None);
+            return localFile is not null;
+        }
+
+        private async Task<bool> RefreshLocalFileStateAsync(Uri instanceUri, CancellationToken cancellationToken)
+        {
+            if (!Uri.Equals(_instanceUri, instanceUri))
+            {
+                return false;
+            }
+
+            IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot> pins =
+                await LoadOfflinePinsByIdAsync(instanceUri, cancellationToken);
+            if (!Uri.Equals(_instanceUri, instanceUri))
+            {
+                return false;
+            }
+
+            return _display.RefreshFileLocalStates(entry => CreateEntryWithLocalState(instanceUri, entry, pins));
         }
 
         private void ClearLocalFileMarkerIfFileMissing(Exception exception, CottonFileBrowserEntry file)

@@ -33,6 +33,13 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CancellationToken cancellationToken = default)
         {
+            return LoadContentAsync(instanceUri, RootCacheFileName, cancellationToken);
+        }
+
+        public Task<CottonCachedFolderContentSnapshot?> LoadRootSnapshotAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken = default)
+        {
             return LoadAsync(instanceUri, RootCacheFileName, cancellationToken);
         }
 
@@ -47,6 +54,16 @@ namespace Cotton.Mobile.Services
         }
 
         public Task<CottonFolderContent?> LoadFolderAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(folder);
+
+            return LoadContentAsync(instanceUri, CreateFolderCacheFileName(folder.Id), cancellationToken);
+        }
+
+        public Task<CottonCachedFolderContentSnapshot?> LoadFolderSnapshotAsync(
             Uri instanceUri,
             CottonFolderHandle folder,
             CancellationToken cancellationToken = default)
@@ -106,7 +123,17 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private async Task<CottonFolderContent?> LoadAsync(
+        private async Task<CottonFolderContent?> LoadContentAsync(
+            Uri instanceUri,
+            string fileName,
+            CancellationToken cancellationToken)
+        {
+            CottonCachedFolderContentSnapshot? snapshot =
+                await LoadAsync(instanceUri, fileName, cancellationToken).ConfigureAwait(false);
+            return snapshot?.Content;
+        }
+
+        private async Task<CottonCachedFolderContentSnapshot?> LoadAsync(
             Uri instanceUri,
             string fileName,
             CancellationToken cancellationToken)
@@ -134,13 +161,13 @@ namespace Cotton.Mobile.Services
                     stream,
                     SerializerOptions,
                     cancellationToken).ConfigureAwait(false);
-                CottonFolderContent? folderContent = CreateFolderContent(cachedContent);
-                if (folderContent is null)
+                CottonCachedFolderContentSnapshot? snapshot = CreateFolderContentSnapshot(cachedContent);
+                if (snapshot is null)
                 {
                     DeleteCacheFile(filePath);
                 }
 
-                return folderContent;
+                return snapshot;
             }
             catch (OperationCanceledException)
             {
@@ -187,11 +214,12 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static CottonFolderContent? CreateFolderContent(CottonCachedFolderContent? cachedContent)
+        private static CottonCachedFolderContentSnapshot? CreateFolderContentSnapshot(CottonCachedFolderContent? cachedContent)
         {
             if (cachedContent is null
                 || cachedContent.SchemaVersion != SchemaVersion
                 || cachedContent.FolderId == Guid.Empty
+                || cachedContent.CachedAtUtc == default
                 || cachedContent.Entries is null)
             {
                 return null;
@@ -213,7 +241,8 @@ namespace Cotton.Mobile.Services
                     entry.ContentType,
                     entry.PreviewHashEncryptedHex))
                 .ToList();
-            return new CottonFolderContent(cachedContent.FolderId, cachedContent.FolderName, entries);
+            var content = new CottonFolderContent(cachedContent.FolderId, cachedContent.FolderName, entries);
+            return new CottonCachedFolderContentSnapshot(content, cachedContent.CachedAtUtc);
         }
 
         private static bool IsUsableCachedEntry(CottonCachedFileBrowserEntry entry)

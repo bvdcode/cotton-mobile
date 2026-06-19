@@ -92,6 +92,42 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Offline_cached_listing_notice_reports_cache_age()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            display.ShowFiles(
+                CreateContent(CreateFile("zeta.txt", "Text", 10, Older)),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+
+            display.ShowOfflineFilesNotice(
+                isCachedListing: true,
+                cachedAtUtc: DateTime.UtcNow.AddHours(-2).AddMinutes(-5));
+
+            Assert.True(display.IsFilesNoticeVisible);
+            Assert.Equal("Offline", display.FilesNoticeTitle);
+            Assert.Equal(
+                "Saved folder list cached 2 hours ago. Files marked On device can still open.",
+                display.FilesNoticeMessage);
+        }
+
+        [Fact]
+        public void Empty_offline_cached_listing_notice_reports_age_without_claiming_files()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            display.ShowFiles(CreateContent(), isRoot: true, canNavigateUp: false, path: "Files");
+
+            display.ShowOfflineFilesNotice(
+                isCachedListing: true,
+                cachedAtUtc: DateTime.UtcNow.AddDays(-1).AddHours(-1));
+
+            Assert.Equal(
+                "Saved folder list is empty. Cached 1 day ago. Reconnect to refresh.",
+                display.FilesNoticeMessage);
+        }
+
+        [Fact]
         public void Busy_file_action_preserves_status_and_disables_browser_chrome()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

@@ -950,7 +950,7 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
-            CottonFolderContent? cachedContent = await _folderContentCache.LoadRootAsync(
+            CottonCachedFolderContentSnapshot? cachedSnapshot = await _folderContentCache.LoadRootSnapshotAsync(
                 instanceUri,
                 fileLoadCancellation.Token);
             fileLoadCancellation.Token.ThrowIfCancellationRequested();
@@ -959,12 +959,15 @@ namespace Cotton.Mobile.ViewModels
                 return true;
             }
 
-            if (cachedContent is null)
+            if (cachedSnapshot is null)
             {
                 return false;
             }
 
-            cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
+            CottonFolderContent cachedContent = await ApplyCachedThumbnailsAsync(
+                instanceUri,
+                cachedSnapshot.Content,
+                fileLoadCancellation.Token);
             cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             _fileNavigation.Clear();
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
@@ -975,7 +978,7 @@ namespace Cotton.Mobile.ViewModels
                 isRoot: true,
                 canNavigateUp: false,
                 CreatePath(cachedContent.FolderName));
-            _display.ShowOfflineFilesNotice(isCachedListing: true);
+            _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
             return true;
         }
 
@@ -989,7 +992,7 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
-            CottonFolderContent? cachedContent = await _folderContentCache.LoadFolderAsync(
+            CottonCachedFolderContentSnapshot? cachedSnapshot = await _folderContentCache.LoadFolderSnapshotAsync(
                 instanceUri,
                 folder,
                 fileLoadCancellation.Token);
@@ -999,12 +1002,15 @@ namespace Cotton.Mobile.ViewModels
                 return true;
             }
 
-            if (cachedContent is null)
+            if (cachedSnapshot is null)
             {
                 return false;
             }
 
-            cachedContent = await ApplyCachedThumbnailsAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
+            CottonFolderContent cachedContent = await ApplyCachedThumbnailsAsync(
+                instanceUri,
+                cachedSnapshot.Content,
+                fileLoadCancellation.Token);
             cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
@@ -1014,7 +1020,7 @@ namespace Cotton.Mobile.ViewModels
                 isRoot: false,
                 canNavigateUp: _fileNavigation.Count > 0,
                 CreatePath(cachedContent.FolderName));
-            _display.ShowOfflineFilesNotice(isCachedListing: true);
+            _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
             return true;
         }
 

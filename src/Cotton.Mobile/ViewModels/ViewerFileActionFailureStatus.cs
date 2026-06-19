@@ -5,7 +5,7 @@ namespace Cotton.Mobile.ViewModels
     public static class ViewerFileActionFailureStatus
     {
         private const string MissingFileStatus = "File no longer available.";
-        private const string OpenUnavailableStatus = "No app can open this file.";
+        private const string OpenUnavailableStatus = CottonFileOpenRouter.OpenUnavailableStatus;
 
         public static string Create(Exception exception, string fallbackStatus)
         {

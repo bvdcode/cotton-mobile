@@ -119,7 +119,7 @@ namespace Cotton.Mobile.Services
                 await _downloadCachePruner.PruneAsync(instanceUri, filePath, cancellationToken).ConfigureAwait(false);
                 cancellationToken.ThrowIfCancellationRequested();
 
-                return new CottonFileDownloadResult(file.Name, filePath, sizeBytes);
+                return new CottonFileDownloadResult(file.Name, filePath, sizeBytes, file.ContentType);
             }
             finally
             {
@@ -177,7 +177,7 @@ namespace Cotton.Mobile.Services
                     }
 
                     TouchLocalDownload(info);
-                    return new CottonFileDownloadResult(file.Name, info.FullName, info.Length);
+                    return new CottonFileDownloadResult(file.Name, info.FullName, info.Length, file.ContentType);
                 });
         }
 

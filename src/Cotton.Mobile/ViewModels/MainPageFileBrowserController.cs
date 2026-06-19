@@ -14,8 +14,7 @@ namespace Cotton.Mobile.ViewModels
         private const string DownloadAction = "Download";
         private const string DownloadAgainAction = "Download again";
         private const string KeepOfflineAction = "Keep offline";
-        private const string OpenAction = "Open";
-        private const string OpenWithSystemAppAction = "Open with system app";
+        private const string OpenAction = CottonFileOpenRouter.OpenActionLabel;
         private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
         private const string ShareAction = "Share";
@@ -36,7 +35,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineOpenStatus = "Offline. This file is not available on device.";
         private const string OfflineShareStatus = "Offline. This file is not available on device.";
         private const string OfflineUploadStatus = "Offline. Upload needs internet.";
-        private const string OpenUnavailableStatus = "No app can open this file.";
+        private const string OpenUnavailableStatus = CottonFileOpenRouter.OpenUnavailableStatus;
         private const int PayloadTooLargeStatusCode = 413;
         private const int InsufficientStorageStatusCode = 507;
 
@@ -2441,7 +2440,7 @@ namespace Cotton.Mobile.ViewModels
 
         private string CreateOpenAction(CottonFileBrowserEntry file)
         {
-            return _filePreviewService.CanPreview(file) ? OpenAction : OpenWithSystemAppAction;
+            return CottonFileOpenRouter.CreateRoute(file).ActionLabel;
         }
 
         private static string CreateDownloadAction(CottonFileBrowserEntry file)
@@ -2461,14 +2460,14 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             CottonLocalFileSnapshot localFile)
         {
-            return _filePreviewService.CanPreview(file, localFile) ? OpenAction : OpenWithSystemAppAction;
+            return CottonFileOpenRouter.CreateRoute(file, localFile.SizeBytes).ActionLabel;
         }
 
         private string CreateOpenAction(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile)
         {
-            return _filePreviewService.CanPreview(file, downloadedFile) ? OpenAction : OpenWithSystemAppAction;
+            return CottonFileOpenRouter.CreateRoute(file, downloadedFile.SizeBytes).ActionLabel;
         }
 
         private async Task<bool> OpenDownloadedFileAsync(

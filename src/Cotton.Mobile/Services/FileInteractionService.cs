@@ -28,7 +28,9 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 return await _launcher.OpenAsync(
-                    new OpenFileRequest(file.FileName, new ReadOnlyFile(file.FilePath)));
+                    new OpenFileRequest(
+                        file.FileName,
+                        new ReadOnlyFile(file.FilePath, file.ContentType)));
             });
             cancellationToken.ThrowIfCancellationRequested();
             if (!opened)

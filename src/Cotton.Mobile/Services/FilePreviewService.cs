@@ -7,8 +7,6 @@ namespace Cotton.Mobile.Services
 {
     public class FilePreviewService : IFilePreviewService
     {
-        private const long MaxTextPreviewBytes = 512 * 1024;
-
         private readonly IServiceProvider _serviceProvider;
 
         public FilePreviewService(IServiceProvider serviceProvider)
@@ -23,7 +21,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(file);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && (file.IsImage || CanPreviewTextFromMetadata(file));
+                && CottonFileOpenRouter.CreateRoute(file).CanPreviewInApp;
         }
 
         public bool CanPreview(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile)
@@ -32,7 +30,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(downloadedFile);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && (file.IsImage || CanPreviewAvailableText(file, downloadedFile.SizeBytes));
+                && CottonFileOpenRouter.CreateRoute(file, downloadedFile.SizeBytes).CanPreviewInApp;
         }
 
         public bool CanPreview(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile)
@@ -41,7 +39,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(localFile);
 
             return file.Type == CottonFileBrowserEntryType.File
-                && (file.IsImage || CanPreviewAvailableText(file, localFile.SizeBytes));
+                && CottonFileOpenRouter.CreateRoute(file, localFile.SizeBytes).CanPreviewInApp;
         }
 
         public async Task OpenAsync(
@@ -55,10 +53,16 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
             EnsureFileExists(downloadedFile);
 
-            if (file.IsImage)
+            CottonFileOpenRoute route = CottonFileOpenRouter.CreateRoute(file, downloadedFile.SizeBytes);
+            if (route.PreviewKind == CottonFilePreviewKind.Image)
             {
                 await OpenImagePreviewAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
                 return;
+            }
+
+            if (route.PreviewKind != CottonFilePreviewKind.Text)
+            {
+                throw new InvalidOperationException("The selected file cannot be previewed inside Cotton.");
             }
 
             string textContent = await ReadTextPreviewAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
@@ -94,18 +98,6 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
         }
 
-        private static bool CanPreviewTextFromMetadata(CottonFileBrowserEntry file)
-        {
-            return file.IsText
-                && (!file.SizeBytes.HasValue || file.SizeBytes.Value is >= 0 and <= MaxTextPreviewBytes);
-        }
-
-        private static bool CanPreviewAvailableText(CottonFileBrowserEntry file, long availableSizeBytes)
-        {
-            return CanPreviewTextFromMetadata(file)
-                && availableSizeBytes is >= 0 and <= MaxTextPreviewBytes;
-        }
-
         private ImageViewerPage CreateImageViewerPage(
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile)
@@ -124,7 +116,7 @@ namespace Cotton.Mobile.Services
             CottonFileDownloadResult downloadedFile,
             CancellationToken cancellationToken)
         {
-            if (!CanPreviewAvailableText(file, downloadedFile.SizeBytes))
+            if (CottonFileOpenRouter.CreateRoute(file, downloadedFile.SizeBytes).PreviewKind != CottonFilePreviewKind.Text)
             {
                 throw new InvalidOperationException("The selected file cannot be previewed as text.");
             }

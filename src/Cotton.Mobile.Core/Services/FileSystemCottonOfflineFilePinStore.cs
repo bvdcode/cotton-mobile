@@ -5,10 +5,11 @@ namespace Cotton.Mobile.Services
     public class FileSystemCottonOfflineFilePinStore : ICottonOfflineFilePinStore
     {
         private const int SchemaVersion = 1;
-        private const string MetadataFileName = "offline-files.json";
         private const string TemporaryFileExtension = ".tmp";
 
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
+
+        public const string MetadataFileName = "offline-files.json";
 
         private readonly ICottonOfflineFileMetadataPathProvider _pathProvider;
 

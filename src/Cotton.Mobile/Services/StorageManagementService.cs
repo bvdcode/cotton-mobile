@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
@@ -31,24 +32,39 @@ namespace Cotton.Mobile.Services
                 () =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
+                    CottonStorageCategorySnapshot thumbnails = ScanDirectory(
+                        ThumbnailCacheName,
+                        CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
+                        SearchOption.TopDirectoryOnly,
+                        cancellationToken,
+                        includeTemporaryThumbnails: false);
+                    CottonStorageCategorySnapshot folderListings = ScanDirectory(
+                        FolderListingsName,
+                        CottonMobileStoragePaths.CreateFolderContentCacheRootDirectory(),
+                        SearchOption.AllDirectories,
+                        cancellationToken);
+                    CottonStorageCategorySnapshot downloadedFiles = ScanDirectory(
+                        DownloadedFilesName,
+                        CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                        SearchOption.AllDirectories,
+                        cancellationToken,
+                        includeTemporaryDownloads: false);
+                    CottonOfflineStorageScan offlineFiles = ScanOfflineFiles(cancellationToken);
+
                     return new CottonStorageSummary(
-                        ScanDirectory(
-                            ThumbnailCacheName,
-                            CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
-                            SearchOption.TopDirectoryOnly,
-                            cancellationToken,
-                            includeTemporaryThumbnails: false),
-                        ScanDirectory(
-                            FolderListingsName,
-                            CottonMobileStoragePaths.CreateFolderContentCacheRootDirectory(),
-                            SearchOption.AllDirectories,
-                            cancellationToken),
-                        ScanDirectory(
-                            DownloadedFilesName,
-                            CottonMobileStoragePaths.CreateDownloadsDirectory(),
-                            SearchOption.AllDirectories,
-                            cancellationToken,
-                            includeTemporaryDownloads: false));
+                        thumbnails,
+                        folderListings,
+                        downloadedFiles,
+                        CottonOnDeviceStorageSummary.Create(
+                            offlineFiles.AvailableFileCount,
+                            offlineFiles.AvailableBytes,
+                            offlineFiles.StaleFileCount,
+                            offlineFiles.StaleBytes,
+                            offlineFiles.MissingFileCount,
+                            folderListings.FileCount,
+                            folderListings.SizeBytes,
+                            thumbnails.FileCount,
+                            thumbnails.SizeBytes));
                 },
                 cancellationToken);
         }
@@ -248,6 +264,207 @@ namespace Cotton.Mobile.Services
             return new CottonStorageCategorySnapshot(name, sizeBytes, fileCount);
         }
 
+        private CottonOfflineStorageScan ScanOfflineFiles(CancellationToken cancellationToken)
+        {
+            string metadataRootDirectory = CottonMobileStoragePaths.CreateOfflineFileMetadataRootDirectory();
+            if (!Directory.Exists(metadataRootDirectory))
+            {
+                return CottonOfflineStorageScan.Empty;
+            }
+
+            var scan = new CottonOfflineStorageScan();
+            var seenPins = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            IReadOnlyList<string> manifestPaths;
+            try
+            {
+                manifestPaths = Directory
+                    .EnumerateFiles(
+                        metadataRootDirectory,
+                        FileSystemCottonOfflineFilePinStore.MetadataFileName,
+                        SearchOption.AllDirectories)
+                    .ToList();
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to enumerate Cotton mobile offline file metadata directory {Directory}.",
+                    metadataRootDirectory);
+                return scan;
+            }
+
+            foreach (string manifestPath in manifestPaths)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string? instanceStorageKey = Path.GetFileName(Path.GetDirectoryName(manifestPath));
+                if (string.IsNullOrWhiteSpace(instanceStorageKey))
+                {
+                    continue;
+                }
+
+                foreach (CottonOfflineStoragePin pin in ReadOfflinePins(manifestPath, cancellationToken))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string pinKey = $"{instanceStorageKey}:{pin.FileId:D}";
+                    if (!seenPins.Add(pinKey))
+                    {
+                        continue;
+                    }
+
+                    AddOfflinePin(scan, instanceStorageKey, pin);
+                }
+            }
+
+            return scan;
+        }
+
+        private IReadOnlyList<CottonOfflineStoragePin> ReadOfflinePins(
+            string manifestPath,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                using FileStream stream = File.OpenRead(manifestPath);
+                using JsonDocument document = JsonDocument.Parse(stream);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (!document.RootElement.TryGetProperty("schemaVersion", out JsonElement schemaVersion)
+                    || !schemaVersion.TryGetInt32(out int parsedSchemaVersion)
+                    || parsedSchemaVersion != 1
+                    || !document.RootElement.TryGetProperty("items", out JsonElement items)
+                    || items.ValueKind != JsonValueKind.Array)
+                {
+                    return [];
+                }
+
+                var pins = new List<CottonOfflineStoragePin>();
+                foreach (JsonElement item in items.EnumerateArray())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    CottonOfflineStoragePin? pin = TryCreateOfflinePin(item);
+                    if (pin is not null)
+                    {
+                        pins.Add(pin);
+                    }
+                }
+
+                return pins;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or JsonException
+                    or InvalidOperationException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile offline file metadata {Path}.",
+                    manifestPath);
+                return [];
+            }
+        }
+
+        private CottonOfflineStoragePin? TryCreateOfflinePin(JsonElement item)
+        {
+            try
+            {
+                if (!item.TryGetProperty("fileId", out JsonElement fileIdElement)
+                    || !Guid.TryParse(fileIdElement.GetString(), out Guid fileId)
+                    || fileId == Guid.Empty
+                    || !item.TryGetProperty("remoteUpdatedAtUtc", out JsonElement remoteUpdatedAtElement)
+                    || !remoteUpdatedAtElement.TryGetDateTime(out DateTime remoteUpdatedAtUtc))
+                {
+                    return null;
+                }
+
+                long? sizeBytes = null;
+                if (item.TryGetProperty("sizeBytes", out JsonElement sizeElement)
+                    && sizeElement.ValueKind == JsonValueKind.Number
+                    && sizeElement.TryGetInt64(out long parsedSize)
+                    && parsedSize >= 0)
+                {
+                    sizeBytes = parsedSize;
+                }
+
+                return new CottonOfflineStoragePin(fileId, remoteUpdatedAtUtc, sizeBytes);
+            }
+            catch (Exception exception) when (exception is InvalidOperationException or FormatException)
+            {
+                return null;
+            }
+        }
+
+        private void AddOfflinePin(
+            CottonOfflineStorageScan scan,
+            string instanceStorageKey,
+            CottonOfflineStoragePin pin)
+        {
+            FileInfo? localFile = TryGetOfflineLocalFile(instanceStorageKey, pin.FileId);
+            if (localFile is null)
+            {
+                scan.MissingFileCount++;
+                return;
+            }
+
+            try
+            {
+                bool sizeMatches = !pin.SizeBytes.HasValue || pin.SizeBytes.Value == localFile.Length;
+                bool isFresh = CottonLocalFileFreshness.IsFresh(localFile.LastWriteTimeUtc, pin.RemoteUpdatedAtUtc);
+                if (sizeMatches && isFresh)
+                {
+                    scan.AvailableFileCount++;
+                    scan.AvailableBytes += localFile.Length;
+                    return;
+                }
+
+                scan.StaleFileCount++;
+                scan.StaleBytes += localFile.Length;
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to classify Cotton mobile offline local file {FileId}.",
+                    pin.FileId);
+                scan.MissingFileCount++;
+            }
+        }
+
+        private FileInfo? TryGetOfflineLocalFile(string instanceStorageKey, Guid fileId)
+        {
+            try
+            {
+                string directory = Path.Combine(
+                    CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                    instanceStorageKey,
+                    fileId.ToString("D"));
+                if (!Directory.Exists(directory))
+                {
+                    return null;
+                }
+
+                return Directory
+                    .EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
+                    .Where(file => !CottonMobileStoragePaths.IsTemporaryDownloadPath(file))
+                    .Select(file => new FileInfo(file))
+                    .Where(file => file.Exists)
+                    .OrderByDescending(file => file.LastWriteTimeUtc)
+                    .FirstOrDefault();
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile offline local file {FileId}.",
+                    fileId);
+                return null;
+            }
+        }
+
         private bool TryReadStorageFile(string storageCategoryName, string file, out long sizeBytes)
         {
             sizeBytes = 0;
@@ -354,6 +571,40 @@ namespace Cotton.Mobile.Services
                     _logger.LogWarning(exception, "Cotton mobile downloaded-files-cleared subscriber failed.");
                 }
             }
+        }
+
+        private sealed class CottonOfflineStorageScan
+        {
+            public static CottonOfflineStorageScan Empty => new();
+
+            public int AvailableFileCount { get; set; }
+
+            public long AvailableBytes { get; set; }
+
+            public int StaleFileCount { get; set; }
+
+            public long StaleBytes { get; set; }
+
+            public int MissingFileCount { get; set; }
+        }
+
+        private sealed class CottonOfflineStoragePin
+        {
+            public CottonOfflineStoragePin(
+                Guid fileId,
+                DateTime remoteUpdatedAtUtc,
+                long? sizeBytes)
+            {
+                FileId = fileId;
+                RemoteUpdatedAtUtc = CottonLocalFileFreshness.NormalizeUtc(remoteUpdatedAtUtc);
+                SizeBytes = sizeBytes;
+            }
+
+            public Guid FileId { get; }
+
+            public DateTime RemoteUpdatedAtUtc { get; }
+
+            public long? SizeBytes { get; }
         }
     }
 }

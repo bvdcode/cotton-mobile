@@ -1,6 +1,7 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
+using System.Collections.ObjectModel;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -28,6 +29,7 @@ namespace Cotton.Mobile.ViewModels
         private string _folderListingFileCountText = "0 files";
         private string _downloadedSizeText = "0 B";
         private string _downloadedFileCountText = "0 files";
+        private string _onDeviceSummaryText = CottonOnDeviceStorageSummary.Empty.SummaryText;
         private string? _status;
 
         public StorageSettingsViewModel(
@@ -53,6 +55,7 @@ namespace Cotton.Mobile.ViewModels
                 LogUnhandledCommandException,
                 () => !IsBusy);
             ClearAllCommand = new AsyncCommand(ClearAllAsync, LogUnhandledCommandException, () => !IsBusy);
+            ShowOnDeviceStorage(CottonOnDeviceStorageSummary.Empty);
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -64,6 +67,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ClearDownloadedFilesCommand { get; }
 
         public AsyncCommand ClearAllCommand { get; }
+
+        public ObservableCollection<CottonOnDeviceStorageBucketSnapshot> OnDeviceBuckets { get; } = new();
 
         public bool IsBusy
         {
@@ -123,6 +128,12 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _downloadedFileCountText;
             private set => SetProperty(ref _downloadedFileCountText, value);
+        }
+
+        public string OnDeviceSummaryText
+        {
+            get => _onDeviceSummaryText;
+            private set => SetProperty(ref _onDeviceSummaryText, value);
         }
 
         public string? Status
@@ -282,6 +293,19 @@ namespace Cotton.Mobile.ViewModels
             FolderListingFileCountText = FormatFileCount(summary.FolderListings.FileCount);
             DownloadedSizeText = CottonFileSizeFormatter.Format(summary.DownloadedFiles.SizeBytes);
             DownloadedFileCountText = FormatFileCount(summary.DownloadedFiles.FileCount);
+            ShowOnDeviceStorage(summary.OnDeviceStorage);
+        }
+
+        private void ShowOnDeviceStorage(CottonOnDeviceStorageSummary summary)
+        {
+            ArgumentNullException.ThrowIfNull(summary);
+
+            OnDeviceSummaryText = summary.SummaryText;
+            OnDeviceBuckets.Clear();
+            foreach (CottonOnDeviceStorageBucketSnapshot bucket in summary.Buckets)
+            {
+                OnDeviceBuckets.Add(bucket);
+            }
         }
 
         private void RaiseCommandStatesChanged()

@@ -145,6 +145,74 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Camera_backup_media_source_record_maps_image_media()
+        {
+            var record = new CottonCameraBackupMediaSourceRecord(
+                " content://media/external/images/media/12 ",
+                " /storage/emulated/0/DCIM/Camera/IMG_0001.JPG ",
+                " image/jpeg ",
+                2048,
+                new DateTime(2026, 6, 19, 11, 0, 0, DateTimeKind.Unspecified),
+                new DateTime(2026, 6, 19, 10, 30, 0, DateTimeKind.Local));
+
+            bool mapped = CottonCameraBackupMediaSourceRecordMapper.TryCreateCandidate(record, out CottonCameraBackupCandidate? candidate);
+
+            Assert.True(mapped);
+            Assert.NotNull(candidate);
+            Assert.Equal(CottonCameraBackupMediaKind.Photo, candidate.Kind);
+            Assert.Equal("content://media/external/images/media/12", candidate.Identity.SourceId);
+            Assert.Equal("IMG_0001.JPG", candidate.DisplayName);
+            Assert.Equal("image/jpeg", candidate.ContentType);
+            Assert.Equal(DateTimeKind.Utc, candidate.Identity.LastModifiedUtc?.Kind);
+            Assert.Equal(DateTimeKind.Utc, candidate.CapturedAtUtc?.Kind);
+        }
+
+        [Fact]
+        public void Camera_backup_media_source_record_maps_video_media_case_insensitively()
+        {
+            var record = new CottonCameraBackupMediaSourceRecord(
+                "content://media/external/video/media/7",
+                "VID_0007.MP4",
+                " Video/MP4 ",
+                4096,
+                null,
+                null);
+
+            bool mapped = CottonCameraBackupMediaSourceRecordMapper.TryCreateCandidate(record, out CottonCameraBackupCandidate? candidate);
+
+            Assert.True(mapped);
+            Assert.NotNull(candidate);
+            Assert.Equal(CottonCameraBackupMediaKind.Video, candidate.Kind);
+            Assert.Equal("VID_0007.MP4", candidate.DisplayName);
+            Assert.Equal("Video/MP4", candidate.ContentType);
+            Assert.True(candidate.IsVideo);
+        }
+
+        [Theory]
+        [InlineData(null, "content://media/external/file/1", 1024)]
+        [InlineData("application/pdf", "content://media/external/file/1", 1024)]
+        [InlineData("image/jpeg", " ", 1024)]
+        [InlineData("video/mp4", "content://media/external/video/media/7", -1)]
+        public void Camera_backup_media_source_record_rejects_unsupported_or_unstable_media(
+            string? contentType,
+            string? sourceId,
+            int? sizeBytes)
+        {
+            var record = new CottonCameraBackupMediaSourceRecord(
+                sourceId,
+                "media.bin",
+                contentType,
+                sizeBytes,
+                null,
+                null);
+
+            bool mapped = CottonCameraBackupMediaSourceRecordMapper.TryCreateCandidate(record, out CottonCameraBackupCandidate? candidate);
+
+            Assert.False(mapped);
+            Assert.Null(candidate);
+        }
+
+        [Fact]
         public async Task Camera_backup_scanner_filters_photos_only_and_suppresses_known_media()
         {
             CottonCameraBackupCandidate photo = CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo);

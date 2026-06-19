@@ -80,6 +80,38 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task ExecuteNext_notifies_running_upload_progress()
+        {
+            CottonTransferQueueItem queued = CreateQueuedUpload();
+            var metadataStore = new FakeTransferMetadataStore([queued]);
+            var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
+            var uploadClient = new FakeQueuedUploadClient([40, 100]);
+            var progressSignal = new CottonTransferProgressSignal();
+            IReadOnlyList<CottonTransferProgressChangedEventArgs> progressEvents = [];
+            progressSignal.TransferProgressChanged += (_, args) =>
+            {
+                progressEvents = progressEvents.Concat([args]).ToList();
+            };
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                new FakeCameraBackupUploadedMediaStore(),
+                notificationService: null,
+                transferActivitySignal: null,
+                transferProgressSignal: progressSignal);
+
+            CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
+
+            Assert.Equal(CottonQueuedUploadExecutionStatus.Completed, result.Status);
+            Assert.Equal(
+                [0L, 40L, 100L],
+                progressEvents.Select(item => item.Progress.TransferredBytes).ToArray());
+            Assert.All(progressEvents, item => Assert.Equal(TransferId, item.TransferId));
+            Assert.All(progressEvents, item => Assert.Equal(100, item.Progress.TotalBytes));
+        }
+
+        [Fact]
         public async Task Execute_runs_requested_queued_upload_without_running_earlier_waiting_upload()
         {
             Guid firstTransferId = Guid.Parse("99999999-aaaa-bbbb-cccc-dddddddddddd");
@@ -359,7 +391,8 @@ namespace Cotton.Mobile.Tests
             FakeQueuedUploadClient uploadClient,
             FakeCameraBackupUploadedMediaStore uploadedMediaStore,
             FakeLocalNotificationService? notificationService = null,
-            ICottonTransferActivitySignal? transferActivitySignal = null)
+            ICottonTransferActivitySignal? transferActivitySignal = null,
+            ICottonTransferProgressSignal? transferProgressSignal = null)
         {
             return new CottonQueuedUploadExecutor(
                 metadataStore,
@@ -368,7 +401,8 @@ namespace Cotton.Mobile.Tests
                 uploadedMediaStore,
                 notificationService,
                 new FixedTimeProvider(ExecutedAt),
-                transferActivitySignal);
+                transferActivitySignal,
+                transferProgressSignal);
         }
 
         private static CottonTransferQueueItem CreateQueuedUpload()

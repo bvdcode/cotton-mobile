@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonCameraBackupUploadedMediaStore _cameraBackupUploadedMediaStore;
         private readonly ICottonLocalNotificationService _localNotificationService;
         private readonly ICottonTransferActivitySignal? _transferActivitySignal;
+        private readonly ICottonTransferProgressSignal? _transferProgressSignal;
         private readonly TimeProvider _timeProvider;
 
         public CottonQueuedUploadExecutor(
@@ -26,6 +27,7 @@ namespace Cotton.Mobile.Services
                 cameraBackupUploadedMediaStore,
                 null,
                 timeProvider,
+                null,
                 null)
         {
         }
@@ -37,7 +39,8 @@ namespace Cotton.Mobile.Services
             ICottonCameraBackupUploadedMediaStore cameraBackupUploadedMediaStore,
             ICottonLocalNotificationService? localNotificationService = null,
             TimeProvider? timeProvider = null,
-            ICottonTransferActivitySignal? transferActivitySignal = null)
+            ICottonTransferActivitySignal? transferActivitySignal = null,
+            ICottonTransferProgressSignal? transferProgressSignal = null)
         {
             ArgumentNullException.ThrowIfNull(metadataStore);
             ArgumentNullException.ThrowIfNull(stagingStore);
@@ -50,6 +53,7 @@ namespace Cotton.Mobile.Services
             _cameraBackupUploadedMediaStore = cameraBackupUploadedMediaStore;
             _localNotificationService = localNotificationService ?? NullCottonLocalNotificationService.Instance;
             _transferActivitySignal = transferActivitySignal;
+            _transferProgressSignal = transferProgressSignal;
             _timeProvider = timeProvider ?? TimeProvider.System;
         }
 
@@ -226,6 +230,10 @@ namespace Cotton.Mobile.Services
             queue[transferIndex] = transfer;
             await _metadataStore.SaveAsync(instanceUri, queue, cancellationToken).ConfigureAwait(false);
             _transferActivitySignal?.NotifyTransferActivityChanged();
+            if (transfer.Status == CottonTransferStatus.Running)
+            {
+                _transferProgressSignal?.NotifyTransferProgressChanged(transfer.Id, transfer.Progress);
+            }
         }
 
         private DateTime GetUtcNow()

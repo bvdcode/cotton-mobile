@@ -6,6 +6,7 @@ using Android.Content;
 using Android.OS;
 using Android.Util;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading;
 
 namespace Cotton.Mobile.Services
 {
@@ -17,7 +18,7 @@ namespace Cotton.Mobile.Services
     {
         private const string LogTag = "CottonTransfer";
 
-        private readonly ConcurrentDictionary<int, CancellationTokenSource> _runningJobs = new();
+        private readonly ConcurrentDictionary<int, RunningTransferJob> _runningJobs = new();
 
         public override bool OnStartJob(JobParameters? parameters)
         {
@@ -40,9 +41,15 @@ namespace Cotton.Mobile.Services
             }
 
             var cancellationTokenSource = new CancellationTokenSource();
-            _runningJobs[parameters.JobId] = cancellationTokenSource;
+            RunningTransferJob runningJob = CreateRunningTransferJob(
+                parameters,
+                transferId,
+                displayName,
+                workKind,
+                cancellationTokenSource);
+            _runningJobs[parameters.JobId] = runningJob;
             SetRunningNotification(parameters, transferId, displayName, workKind);
-            _ = ExecuteTransferAsync(parameters, instanceUri, transferId, cancellationTokenSource);
+            _ = ExecuteTransferAsync(parameters, instanceUri, transferId, runningJob);
             return true;
         }
 
@@ -53,19 +60,47 @@ namespace Cotton.Mobile.Services
                 return false;
             }
 
-            if (_runningJobs.TryRemove(parameters.JobId, out CancellationTokenSource? cancellationTokenSource))
+            if (_runningJobs.TryRemove(parameters.JobId, out RunningTransferJob? runningJob))
             {
-                cancellationTokenSource.Cancel();
+                runningJob.Cancel();
+                runningJob.DetachProgress();
             }
 
             return true;
+        }
+
+        private RunningTransferJob CreateRunningTransferJob(
+            JobParameters parameters,
+            Guid transferId,
+            string displayName,
+            CottonAndroidTransferWorkKind workKind,
+            CancellationTokenSource cancellationTokenSource)
+        {
+            ICottonTransferProgressSignal? progressSignal = IPlatformApplication.Current?.Services
+                .GetService<ICottonTransferProgressSignal>();
+            EventHandler<CottonTransferProgressChangedEventArgs>? progressHandler = null;
+            if (progressSignal is not null)
+            {
+                progressHandler = (_, args) =>
+                {
+                    if (args.TransferId != transferId)
+                    {
+                        return;
+                    }
+
+                    SetRunningNotification(parameters, transferId, displayName, workKind, args.Progress);
+                };
+                progressSignal.TransferProgressChanged += progressHandler;
+            }
+
+            return new RunningTransferJob(cancellationTokenSource, progressSignal, progressHandler);
         }
 
         private async Task ExecuteTransferAsync(
             JobParameters parameters,
             Uri instanceUri,
             Guid transferId,
-            CancellationTokenSource cancellationTokenSource)
+            RunningTransferJob runningJob)
         {
             bool needsReschedule = false;
             try
@@ -80,7 +115,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 CottonQueuedUploadExecutionResult result = await runner
-                    .RunAsync(instanceUri, transferId, cancellationTokenSource.Token)
+                    .RunAsync(instanceUri, transferId, runningJob.CancellationToken)
                     .ConfigureAwait(false);
                 Log.Info(
                     LogTag,
@@ -98,7 +133,7 @@ namespace Cotton.Mobile.Services
             finally
             {
                 _runningJobs.TryRemove(parameters.JobId, out _);
-                cancellationTokenSource.Dispose();
+                runningJob.Dispose();
                 JobFinished(parameters, needsReschedule);
             }
         }
@@ -107,7 +142,8 @@ namespace Cotton.Mobile.Services
             JobParameters parameters,
             Guid transferId,
             string displayName,
-            CottonAndroidTransferWorkKind workKind)
+            CottonAndroidTransferWorkKind workKind,
+            CottonTransferProgressSnapshot? progress = null)
         {
             if ((int)Build.VERSION.SdkInt < 34)
             {
@@ -124,8 +160,10 @@ namespace Cotton.Mobile.Services
                     parameters.JobId,
                     transferId,
                     displayName,
-                    workKind);
+                    workKind,
+                    progress);
 #pragma warning disable CA1416
+                UpdateNetworkBytes(parameters, progress);
                 SetNotification(
                     parameters,
                     parameters.JobId,
@@ -143,7 +181,8 @@ namespace Cotton.Mobile.Services
             int jobId,
             Guid transferId,
             string displayName,
-            CottonAndroidTransferWorkKind workKind)
+            CottonAndroidTransferWorkKind workKind,
+            CottonTransferProgressSnapshot? progress)
         {
             CottonNotificationChannelSnapshot channel =
                 CottonNotificationChannelCatalog.Get(CottonNotificationChannelKind.Transfers);
@@ -164,14 +203,23 @@ namespace Cotton.Mobile.Services
             PendingIntent? pendingIntent = CreateLaunchPendingIntent(jobId);
             builder
                 .SetContentTitle(CreateNotificationTitle(workKind))
-                .SetContentText($"{displayName} is uploading.")
+                .SetContentText(CreateNotificationText(displayName, progress))
                 .SetSmallIcon(ApplicationInfo?.Icon ?? Resource.Mipmap.appicon)
                 .SetOngoing(true)
                 .SetOnlyAlertOnce(true)
                 .SetShowWhen(true)
-                .SetProgress(0, 0, true)
                 .SetCategory(Notification.CategoryProgress)
                 .SetSubText(transferId.ToString("N")[..8]);
+
+            int? percent = progress?.Percent;
+            if (percent.HasValue)
+            {
+                builder.SetProgress(100, percent.Value, false);
+            }
+            else
+            {
+                builder.SetProgress(0, 0, true);
+            }
 
             if (pendingIntent is not null)
             {
@@ -179,6 +227,25 @@ namespace Cotton.Mobile.Services
             }
 
             return builder.Build();
+        }
+
+        private void UpdateNetworkBytes(
+            JobParameters parameters,
+            CottonTransferProgressSnapshot? progress)
+        {
+            if (progress is null || (int)Build.VERSION.SdkInt < 34)
+            {
+                return;
+            }
+
+#pragma warning disable CA1416
+            if (progress.TotalBytes is long totalBytes)
+            {
+                UpdateEstimatedNetworkBytes(parameters, 0, totalBytes);
+            }
+
+            UpdateTransferredNetworkBytes(parameters, 0, progress.TransferredBytes);
+#pragma warning restore CA1416
         }
 
         private PendingIntent? CreateLaunchPendingIntent(int jobId)
@@ -208,6 +275,74 @@ namespace Cotton.Mobile.Services
                 CottonAndroidTransferWorkKind.ManualUpload => "Upload running",
                 _ => "Transfer running",
             };
+        }
+
+        private static string CreateNotificationText(
+            string displayName,
+            CottonTransferProgressSnapshot? progress)
+        {
+            if (progress is null)
+            {
+                return $"{displayName} is uploading.";
+            }
+
+            if (progress.TotalBytes is > 0)
+            {
+                return $"{displayName}: {progress.DisplayText} uploaded.";
+            }
+
+            if (progress.TransferredBytes > 0)
+            {
+                return $"{displayName}: {CottonFileSizeFormatter.Format(progress.TransferredBytes)} uploaded.";
+            }
+
+            return $"{displayName} is uploading.";
+        }
+
+        private class RunningTransferJob : IDisposable
+        {
+            private readonly CancellationTokenSource _cancellationTokenSource;
+            private readonly ICottonTransferProgressSignal? _progressSignal;
+            private readonly EventHandler<CottonTransferProgressChangedEventArgs>? _progressHandler;
+            private int _isProgressDetached;
+
+            public RunningTransferJob(
+                CancellationTokenSource cancellationTokenSource,
+                ICottonTransferProgressSignal? progressSignal,
+                EventHandler<CottonTransferProgressChangedEventArgs>? progressHandler)
+            {
+                ArgumentNullException.ThrowIfNull(cancellationTokenSource);
+
+                _cancellationTokenSource = cancellationTokenSource;
+                _progressSignal = progressSignal;
+                _progressHandler = progressHandler;
+            }
+
+            public CancellationToken CancellationToken => _cancellationTokenSource.Token;
+
+            public void Cancel()
+            {
+                _cancellationTokenSource.Cancel();
+            }
+
+            public void DetachProgress()
+            {
+                if (Interlocked.Exchange(ref _isProgressDetached, 1) == 1)
+                {
+                    return;
+                }
+
+                if (_progressSignal is not null && _progressHandler is not null)
+                {
+                    _progressSignal.TransferProgressChanged -= _progressHandler;
+                }
+            }
+
+            public void Dispose()
+            {
+                DetachProgress();
+                _cancellationTokenSource.Dispose();
+            }
         }
     }
 }

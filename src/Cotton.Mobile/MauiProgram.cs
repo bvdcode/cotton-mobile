@@ -60,6 +60,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTransferMetadataPathProvider, CottonTransferMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonTransferMetadataStore, FileSystemCottonTransferMetadataStore>();
 			builder.Services.AddSingleton<ICottonTransferActivitySignal, CottonTransferActivitySignal>();
+			builder.Services.AddSingleton<ICottonTransferProgressSignal, CottonTransferProgressSignal>();
 			builder.Services.AddSingleton<ICottonCameraBackupMetadataPathProvider, CottonCameraBackupMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 #if ANDROID
@@ -103,7 +104,8 @@ namespace Cotton.Mobile
 					services.GetRequiredService<ICottonCameraBackupUploadedMediaStore>(),
 					services.GetRequiredService<ICottonLocalNotificationService>(),
 					timeProvider: null,
-					transferActivitySignal: services.GetRequiredService<ICottonTransferActivitySignal>()));
+					transferActivitySignal: services.GetRequiredService<ICottonTransferActivitySignal>(),
+					transferProgressSignal: services.GetRequiredService<ICottonTransferProgressSignal>()));
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferJobRunner, CottonAndroidBackgroundTransferJobRunner>();
 			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
 			builder.Services.AddSingleton<ICottonShareLaunchState, CottonShareLaunchState>();

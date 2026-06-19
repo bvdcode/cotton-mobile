@@ -31,7 +31,7 @@ namespace Cotton.Mobile.ViewModels
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
         private const string ViewTilesAction = "Tiles";
-        private const string CurrentActionSuffix = " (current)";
+        private const string CurrentActionPrefix = "✓ ";
         private const string OfflineBrowseStatus = "Offline. Files marked On device can still open.";
         private const string OfflineDownloadStatus = "Offline. Download needs internet.";
         private const string OfflineOpenStatus = "Offline. This file is not available on device.";
@@ -3232,7 +3232,7 @@ namespace Cotton.Mobile.ViewModels
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)
         {
-            return isCurrent ? label + CurrentActionSuffix : label;
+            return isCurrent ? CurrentActionPrefix + label : label;
         }
 
         private static string? NormalizeAction(string? action)
@@ -3242,8 +3242,8 @@ namespace Cotton.Mobile.ViewModels
                 return null;
             }
 
-            return action.EndsWith(CurrentActionSuffix, StringComparison.Ordinal)
-                ? action[..^CurrentActionSuffix.Length]
+            return action.StartsWith(CurrentActionPrefix, StringComparison.Ordinal)
+                ? action[CurrentActionPrefix.Length..]
                 : action;
         }
 

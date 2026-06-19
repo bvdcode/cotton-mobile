@@ -10,6 +10,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCameraBackupSettingsStore _settingsStore;
         private readonly ICottonCameraBackupPlanningService _planningService;
         private readonly ICottonCameraBackupTransferEnqueueCoordinator _transferEnqueueCoordinator;
+        private readonly ICottonTransferActivitySignal _transferActivitySignal;
         private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<BackupSetupViewModel> _logger;
@@ -39,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonCameraBackupSettingsStore settingsStore,
             ICottonCameraBackupPlanningService planningService,
             ICottonCameraBackupTransferEnqueueCoordinator transferEnqueueCoordinator,
+            ICottonTransferActivitySignal transferActivitySignal,
             ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
             ILogger<BackupSetupViewModel> logger)
@@ -47,6 +49,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(planningService);
             ArgumentNullException.ThrowIfNull(transferEnqueueCoordinator);
+            ArgumentNullException.ThrowIfNull(transferActivitySignal);
             ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -55,6 +58,7 @@ namespace Cotton.Mobile.ViewModels
             _settingsStore = settingsStore;
             _planningService = planningService;
             _transferEnqueueCoordinator = transferEnqueueCoordinator;
+            _transferActivitySignal = transferActivitySignal;
             _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
@@ -356,6 +360,11 @@ namespace Cotton.Mobile.ViewModels
 
                     CottonCameraBackupTransferEnqueueResult result =
                         await _transferEnqueueCoordinator.EnqueueAsync(_instanceUri, _settings);
+                    if (result.QueuedCount > 0 || result.SkippedExistingTransferCount > 0)
+                    {
+                        _transferActivitySignal.NotifyTransferActivityChanged();
+                    }
+
                     await LoadPlanningHealthAsync();
                     Status = CottonCameraBackupQueueStatusText.CreateResultStatus(result);
                 },

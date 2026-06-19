@@ -8,6 +8,18 @@ namespace Cotton.Mobile.Tests
         private static readonly DateTime CreatedAt = new(2026, 6, 19, 12, 0, 0, DateTimeKind.Utc);
 
         [Fact]
+        public void Transfer_activity_signal_notifies_subscribers()
+        {
+            var signal = new CottonTransferActivitySignal();
+            int eventCount = 0;
+            signal.TransferActivityChanged += (_, _) => eventCount++;
+
+            signal.NotifyTransferActivityChanged();
+
+            Assert.Equal(1, eventCount);
+        }
+
+        [Fact]
         public void Snapshot_reports_empty_transfer_state()
         {
             CottonTransferListSnapshot snapshot = CottonTransferListSnapshot.Create([]);

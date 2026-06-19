@@ -39,6 +39,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
+        private readonly ICottonTransferActivitySignal _transferActivitySignal;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
@@ -69,6 +70,7 @@ namespace Cotton.Mobile.ViewModels
             ICaptureInboxPageService captureInboxPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
+            ICottonTransferActivitySignal transferActivitySignal,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
             ICottonFileUploadService fileUploadService,
@@ -101,6 +103,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
+            ArgumentNullException.ThrowIfNull(transferActivitySignal);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
             ArgumentNullException.ThrowIfNull(fileUploadService);
@@ -133,6 +136,7 @@ namespace Cotton.Mobile.ViewModels
             _captureInboxPageService = captureInboxPageService;
             _shareLaunchState = shareLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
+            _transferActivitySignal = transferActivitySignal;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
@@ -160,6 +164,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserLogger);
             _storageManagementService.DownloadedFilesCleared += StorageManagementService_DownloadedFilesCleared;
             _shareLaunchState.ShareStaged += ShareLaunchState_ShareStaged;
+            _transferActivitySignal.TransferActivityChanged += TransferActivitySignal_TransferActivityChanged;
             ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(
                 CancelAuthorizationAsync,
@@ -753,6 +758,23 @@ namespace Cotton.Mobile.ViewModels
         private void ShareLaunchState_ShareStaged(object? sender, EventArgs e)
         {
             QueuePendingCaptureInboxOpen("share launch");
+        }
+
+        private void TransferActivitySignal_TransferActivityChanged(object? sender, EventArgs e)
+        {
+            _ = RunTransferActivityRefreshAfterSignalAsync();
+        }
+
+        private async Task RunTransferActivityRefreshAfterSignalAsync()
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(RefreshTransferActivityAsync);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to refresh Cotton mobile transfer activity after queue change.");
+            }
         }
 
         private void QueuePendingCaptureInboxOpen(string reason)

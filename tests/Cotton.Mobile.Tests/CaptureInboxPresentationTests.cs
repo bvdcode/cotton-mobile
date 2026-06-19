@@ -99,6 +99,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("No destination selected", fileItem.DestinationText);
             Assert.True(fileItem.IsDestinationVisible);
             Assert.True(fileItem.CanSelectDestination);
+            Assert.False(fileItem.CanEnqueue);
             Assert.Contains("12 B", fileItem.MetadataText, StringComparison.Ordinal);
             Assert.False(fileItem.IsFailureVisible);
         }
@@ -123,6 +124,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Destination: Files / Camera Uploads", fileItem.DestinationText);
             Assert.True(fileItem.IsDestinationVisible);
             Assert.True(fileItem.CanSelectDestination);
+            Assert.True(fileItem.CanEnqueue);
         }
 
         [Fact]

@@ -11,6 +11,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonShareIntakeStore _intakeStore;
         private readonly ICottonShareContentStagingStore _contentStagingStore;
         private readonly ICaptureDestinationPickerPageService _destinationPickerPageService;
+        private readonly ICottonShareTransferEnqueueCoordinator _enqueueCoordinator;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<CaptureInboxViewModel> _logger;
 
@@ -25,6 +26,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonShareIntakeStore intakeStore,
             ICottonShareContentStagingStore contentStagingStore,
             ICaptureDestinationPickerPageService destinationPickerPageService,
+            ICottonShareTransferEnqueueCoordinator enqueueCoordinator,
             IUserDialogService dialogService,
             ILogger<CaptureInboxViewModel> logger)
         {
@@ -32,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(intakeStore);
             ArgumentNullException.ThrowIfNull(contentStagingStore);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
+            ArgumentNullException.ThrowIfNull(enqueueCoordinator);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -39,6 +42,7 @@ namespace Cotton.Mobile.ViewModels
             _intakeStore = intakeStore;
             _contentStagingStore = contentStagingStore;
             _destinationPickerPageService = destinationPickerPageService;
+            _enqueueCoordinator = enqueueCoordinator;
             _dialogService = dialogService;
             _logger = logger;
             Items = [];
@@ -51,6 +55,10 @@ namespace Cotton.Mobile.ViewModels
                 RenameCapturedFileAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy && Items.Any(item => item.CanRename));
+            EnqueueCommand = new AsyncCommand(
+                EnqueueCapturedFilesAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && Items.Any(item => item.CanEnqueue));
             ClearCommand = new AsyncCommand(ClearAsync, LogUnhandledCommandException, () => !IsBusy && Items.Count > 0);
         }
 
@@ -61,6 +69,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand DestinationCommand { get; }
 
         public AsyncCommand RenameCommand { get; }
+
+        public AsyncCommand EnqueueCommand { get; }
 
         public AsyncCommand ClearCommand { get; }
 
@@ -75,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
                     LoadCommand.RaiseCanExecuteChanged();
                     DestinationCommand.RaiseCanExecuteChanged();
                     RenameCommand.RaiseCanExecuteChanged();
+                    EnqueueCommand.RaiseCanExecuteChanged();
                     ClearCommand.RaiseCanExecuteChanged();
                 }
             }
@@ -119,6 +130,8 @@ namespace Cotton.Mobile.ViewModels
         public bool CanChooseDestination => Items.Any(item => item.CanSelectDestination);
 
         public bool CanRenameCapturedFiles => Items.Any(item => item.CanRename);
+
+        public bool CanEnqueueCapturedFiles => Items.Any(item => item.CanEnqueue);
 
         private async Task LoadAsync()
         {
@@ -276,6 +289,36 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task EnqueueCapturedFilesAsync()
+        {
+            if (IsBusy || !CanEnqueueCapturedFiles)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                CottonShareTransferEnqueueResult result =
+                    await _enqueueCoordinator.EnqueueAsync(_instanceUri);
+                IReadOnlyList<CottonShareIntakeSnapshot> snapshots = await _intakeStore.LoadAsync();
+                ShowSnapshot(CottonCaptureInboxListSnapshot.Create(snapshots));
+                Status = result.HasQueuedTransfers
+                    ? result.StatusText
+                    : "Choose a destination before queueing uploads.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture inbox enqueue failed.");
+                Status = "Could not queue captured files.";
+            }
+            finally
+            {
+                IsBusy = false;
+                RaiseListStateChanged();
+            }
+        }
+
         private async Task<CottonCaptureInboxListItem?> SelectRenameItemAsync()
         {
             List<CottonCaptureInboxListItem> renameItems = Items
@@ -360,8 +403,10 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanChooseDestination));
             OnPropertyChanged(nameof(CanRenameCapturedFiles));
+            OnPropertyChanged(nameof(CanEnqueueCapturedFiles));
             DestinationCommand.RaiseCanExecuteChanged();
             RenameCommand.RaiseCanExecuteChanged();
+            EnqueueCommand.RaiseCanExecuteChanged();
             ClearCommand.RaiseCanExecuteChanged();
         }
 

@@ -152,6 +152,7 @@ namespace Cotton.Mobile.Services
                 Id = item.Id,
                 Kind = item.Kind,
                 DisplayName = item.DisplayName,
+                Destination = CreateStoredDestination(item.Destination),
                 Status = item.Status,
                 TransferredBytes = item.Progress.TransferredBytes,
                 TotalBytes = item.Progress.TotalBytes,
@@ -176,10 +177,45 @@ namespace Cotton.Mobile.Services
                     item.AttemptCount,
                     item.FailureMessage,
                     item.CreatedAtUtc,
-                    item.UpdatedAtUtc);
+                    item.UpdatedAtUtc,
+                    TryCreateDestination(item.Destination));
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException or InvalidOperationException)
+            {
+                return null;
+            }
+        }
+
+        private static CottonStoredTransferDestination? CreateStoredDestination(
+            CottonTransferDestinationSnapshot? destination)
+        {
+            return destination is null
+                ? null
+                : new CottonStoredTransferDestination
+                {
+                    FolderId = destination.FolderId,
+                    FolderName = destination.FolderName,
+                    Path = destination.Path,
+                };
+        }
+
+        private static CottonTransferDestinationSnapshot? TryCreateDestination(
+            CottonStoredTransferDestination? destination)
+        {
+            if (destination is null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return new CottonTransferDestinationSnapshot(
+                    destination.FolderId,
+                    destination.FolderName ?? string.Empty,
+                    destination.Path);
+            }
+            catch (ArgumentException)
             {
                 return null;
             }
@@ -221,6 +257,8 @@ namespace Cotton.Mobile.Services
 
             public string? DisplayName { get; set; }
 
+            public CottonStoredTransferDestination? Destination { get; set; }
+
             public CottonTransferStatus Status { get; set; }
 
             public long TransferredBytes { get; set; }
@@ -234,6 +272,15 @@ namespace Cotton.Mobile.Services
             public DateTime CreatedAtUtc { get; set; }
 
             public DateTime UpdatedAtUtc { get; set; }
+        }
+
+        private class CottonStoredTransferDestination
+        {
+            public Guid FolderId { get; set; }
+
+            public string? FolderName { get; set; }
+
+            public string? Path { get; set; }
         }
     }
 }

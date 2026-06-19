@@ -101,14 +101,15 @@ namespace Cotton.Mobile.Services
 
         private static string FormatDetail(CottonTransferQueueItem item)
         {
+            string destination = item.Destination is null ? string.Empty : $" to {item.Destination.Path}";
             return item.Status switch
             {
-                CottonTransferStatus.Queued => $"{FormatKind(item.Kind)} waiting",
-                CottonTransferStatus.Running => $"{FormatKind(item.Kind)} in progress",
-                CottonTransferStatus.Paused => $"{FormatKind(item.Kind)} paused",
-                CottonTransferStatus.Completed => $"{FormatKind(item.Kind)} complete",
-                CottonTransferStatus.Failed => $"{FormatKind(item.Kind)} needs attention",
-                CottonTransferStatus.Cancelled => $"{FormatKind(item.Kind)} cancelled",
+                CottonTransferStatus.Queued => $"{FormatKind(item.Kind)} waiting{destination}",
+                CottonTransferStatus.Running => $"{FormatKind(item.Kind)} in progress{destination}",
+                CottonTransferStatus.Paused => $"{FormatKind(item.Kind)} paused{destination}",
+                CottonTransferStatus.Completed => $"{FormatKind(item.Kind)} complete{destination}",
+                CottonTransferStatus.Failed => $"{FormatKind(item.Kind)} needs attention{destination}",
+                CottonTransferStatus.Cancelled => $"{FormatKind(item.Kind)} cancelled{destination}",
                 _ => FormatKind(item.Kind),
             };
         }

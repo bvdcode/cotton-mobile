@@ -61,6 +61,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
 			builder.Services.AddSingleton<ICottonShareIntakeStore, FileSystemCottonShareIntakeStore>();
 			builder.Services.AddSingleton<ICottonShareContentStagingStore, FileSystemCottonShareContentStagingStore>();
+			builder.Services.AddSingleton<ICottonShareTransferEnqueueCoordinator, CottonShareTransferEnqueueCoordinator>();
 #if ANDROID
 			builder.Services.AddSingleton<IAndroidShareIntentStagingService, AndroidShareIntentStagingService>();
 #endif

@@ -25,9 +25,31 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(0, item.Progress.TransferredBytes);
             Assert.Equal(200, item.Progress.TotalBytes);
             Assert.Equal(0, item.AttemptCount);
+            Assert.Null(item.Destination);
             Assert.False(item.IsTerminal);
             Assert.True(item.CanCancel);
             Assert.False(item.CanRetry);
+        }
+
+        [Fact]
+        public void Upload_transfer_can_target_destination_folder()
+        {
+            var destination = new CottonTransferDestinationSnapshot(
+                Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                "Camera Uploads",
+                "Files / Camera Uploads");
+
+            CottonTransferQueueItem item = CottonTransferQueueItem.CreateUpload(
+                TransferId,
+                "photo.jpg",
+                200,
+                CreatedAt,
+                destination);
+
+            Assert.Equal(destination.FolderId, item.Destination?.FolderId);
+            Assert.Equal("Camera Uploads", item.Destination?.FolderName);
+            Assert.Equal("Files / Camera Uploads", item.Destination?.Path);
+            Assert.Equal(destination.FolderId, item.Start(Later).Destination?.FolderId);
         }
 
         [Fact]

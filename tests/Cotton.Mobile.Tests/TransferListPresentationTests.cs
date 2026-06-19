@@ -91,6 +91,25 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Snapshot_includes_destination_in_transfer_detail()
+        {
+            CottonTransferQueueItem transfer = CottonTransferQueueItem.CreateUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "photo.jpg",
+                100,
+                CreatedAt,
+                new CottonTransferDestinationSnapshot(
+                    Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    "Camera Uploads",
+                    "Files / Camera Uploads"));
+
+            CottonTransferListItem item =
+                Assert.Single(CottonTransferListSnapshot.Create([transfer]).Items);
+
+            Assert.Equal("Upload waiting to Files / Camera Uploads", item.DetailText);
+        }
+
+        [Fact]
         public void Activity_indicator_hides_completed_and_cancelled_transfers()
         {
             CottonTransferQueueItem completed = CreateUpload(

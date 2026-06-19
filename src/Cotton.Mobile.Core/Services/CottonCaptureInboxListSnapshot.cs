@@ -54,6 +54,7 @@ namespace Cotton.Mobile.Services
                     IsDestinationVisible(snapshot, item),
                     CanSelectDestination(snapshot, item),
                     CanRename(snapshot, item),
+                    CanEnqueue(snapshot, item),
                     IsFailureVisible(snapshot, item),
                     FormatFailure(snapshot, item));
             }
@@ -197,6 +198,13 @@ namespace Cotton.Mobile.Services
             return snapshot.Status == CottonShareIntakeStatus.Pending
                 && item.Type == CottonShareIntakeItemType.Uri
                 && item.HasStagedContent;
+        }
+
+        private static bool CanEnqueue(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            return CanRename(snapshot, item) && snapshot.Destination is not null;
         }
 
         private static bool IsFailureVisible(

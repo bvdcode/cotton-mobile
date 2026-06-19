@@ -49,7 +49,7 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-            <Grid ColumnDefinitions="*,*"
+            <Grid ColumnDefinitions="*,*,*"
                   ColumnSpacing="10">
                 <Button Text="Destination"
                         Command="{Binding DestinationCommand}"
@@ -67,6 +67,15 @@
                         CornerRadius="8"
                         BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                <Button Grid.Column="2"
+                        Text="Queue"
+                        Command="{Binding EnqueueCommand}"
+                        FontAttributes="Bold"
+                        HeightRequest="42"
+                        CornerRadius="8"
+                        BackgroundColor="{StaticResource Magenta}"
+                        TextColor="{StaticResource White}" />
             </Grid>
 
             <Border IsVisible="{Binding IsEmpty}"

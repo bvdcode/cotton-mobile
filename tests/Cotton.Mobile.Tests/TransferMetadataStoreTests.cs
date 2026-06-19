@@ -58,6 +58,28 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_and_load_preserves_transfer_destination()
+        {
+            var destination = new CottonTransferDestinationSnapshot(
+                Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                "Camera Uploads",
+                "Files / Camera Uploads");
+            CottonTransferQueueItem transfer = CottonTransferQueueItem.CreateUpload(
+                UploadId,
+                "photo.jpg",
+                200,
+                CreatedAt,
+                destination);
+
+            await _store.SaveAsync(InstanceUri, [transfer]);
+
+            CottonTransferQueueItem loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            Assert.Equal(destination.FolderId, loaded.Destination?.FolderId);
+            Assert.Equal("Camera Uploads", loaded.Destination?.FolderName);
+            Assert.Equal("Files / Camera Uploads", loaded.Destination?.Path);
+        }
+
+        [Fact]
         public async Task Load_returns_empty_list_when_metadata_file_is_missing()
         {
             IReadOnlyList<CottonTransferQueueItem> loaded = await _store.LoadAsync(InstanceUri);

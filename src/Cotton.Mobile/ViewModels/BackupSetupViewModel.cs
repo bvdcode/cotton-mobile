@@ -1,0 +1,275 @@
+using Cotton.Mobile.Commands;
+using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
+
+namespace Cotton.Mobile.ViewModels
+{
+    public class BackupSetupViewModel : ViewModelBase
+    {
+        private readonly Uri _instanceUri;
+        private readonly ICottonCameraBackupSettingsStore _settingsStore;
+        private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
+        private readonly ILogger<BackupSetupViewModel> _logger;
+        private CottonCameraBackupSettings _settings = CottonCameraBackupSettings.Default;
+        private bool _isBusy;
+        private bool _photosOnly = true;
+        private bool _wifiOnly = true;
+        private bool _allowCellular;
+        private bool _chargingOnly;
+        private string _destinationText = "No folder selected";
+        private string _executionStatusText = "Choose a folder before camera backup can run.";
+        private string _policySummaryText = "Photos only, Wi-Fi only, any battery state.";
+        private string? _status;
+
+        public BackupSetupViewModel(
+            Uri instanceUri,
+            ICottonCameraBackupSettingsStore settingsStore,
+            IUploadDestinationPickerPageService destinationPickerPageService,
+            ILogger<BackupSetupViewModel> logger)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(settingsStore);
+            ArgumentNullException.ThrowIfNull(destinationPickerPageService);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _instanceUri = instanceUri;
+            _settingsStore = settingsStore;
+            _destinationPickerPageService = destinationPickerPageService;
+            _logger = logger;
+
+            LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            ChooseDestinationCommand = new AsyncCommand(
+                ChooseDestinationAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy);
+            SaveCommand = new AsyncCommand(SaveAsync, LogUnhandledCommandException, () => !IsBusy);
+        }
+
+        public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand ChooseDestinationCommand { get; }
+
+        public AsyncCommand SaveCommand { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    RaiseCommandStatesChanged();
+                }
+            }
+        }
+
+        public bool IsBackupEnabled => false;
+
+        public bool CanEnableBackup => false;
+
+        public bool PhotosOnly
+        {
+            get => _photosOnly;
+            set
+            {
+                if (SetProperty(ref _photosOnly, value))
+                {
+                    RefreshPolicyPreview();
+                }
+            }
+        }
+
+        public bool WifiOnly
+        {
+            get => _wifiOnly;
+            set
+            {
+                if (SetProperty(ref _wifiOnly, value))
+                {
+                    if (value && _allowCellular)
+                    {
+                        _allowCellular = false;
+                        OnPropertyChanged(nameof(AllowCellular));
+                    }
+
+                    RefreshPolicyPreview();
+                }
+            }
+        }
+
+        public bool AllowCellular
+        {
+            get => _allowCellular;
+            set
+            {
+                if (SetProperty(ref _allowCellular, value))
+                {
+                    if (value && _wifiOnly)
+                    {
+                        _wifiOnly = false;
+                        OnPropertyChanged(nameof(WifiOnly));
+                    }
+
+                    RefreshPolicyPreview();
+                }
+            }
+        }
+
+        public bool ChargingOnly
+        {
+            get => _chargingOnly;
+            set
+            {
+                if (SetProperty(ref _chargingOnly, value))
+                {
+                    RefreshPolicyPreview();
+                }
+            }
+        }
+
+        public string DestinationText
+        {
+            get => _destinationText;
+            private set => SetProperty(ref _destinationText, value);
+        }
+
+        public string ExecutionStatusText
+        {
+            get => _executionStatusText;
+            private set => SetProperty(ref _executionStatusText, value);
+        }
+
+        public string PolicySummaryText
+        {
+            get => _policySummaryText;
+            private set => SetProperty(ref _policySummaryText, value);
+        }
+
+        public string? Status
+        {
+            get => _status;
+            private set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(IsStatusVisible));
+                }
+            }
+        }
+
+        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        private async Task LoadAsync()
+        {
+            await RunBackupActionAsync(
+                async () =>
+                {
+                    _settings = await _settingsStore.GetAsync(_instanceUri);
+                    ShowSettings(_settings);
+                    Status = null;
+                },
+                "Could not load camera backup setup.");
+        }
+
+        private async Task ChooseDestinationAsync()
+        {
+            await RunBackupActionAsync(
+                async () =>
+                {
+                    CottonUploadDestinationSnapshot? destination =
+                        await _destinationPickerPageService.PickAsync(_instanceUri);
+                    if (destination is null)
+                    {
+                        return;
+                    }
+
+                    _settings = CreateSettingsFromUi().WithDestination(destination);
+                    await _settingsStore.SaveAsync(_instanceUri, _settings);
+                    ShowSettings(_settings);
+                    Status = "Camera backup setup saved.";
+                },
+                "Could not choose backup folder.");
+        }
+
+        private async Task SaveAsync()
+        {
+            await RunBackupActionAsync(
+                async () =>
+                {
+                    _settings = CreateSettingsFromUi();
+                    await _settingsStore.SaveAsync(_instanceUri, _settings);
+                    ShowSettings(_settings);
+                    Status = "Camera backup setup saved.";
+                },
+                "Could not save camera backup setup.");
+        }
+
+        private CottonCameraBackupSettings CreateSettingsFromUi()
+        {
+            return _settings
+                .WithPhotosOnly(PhotosOnly)
+                .WithWifiOnly(WifiOnly)
+                .WithAllowCellular(AllowCellular)
+                .WithChargingOnly(ChargingOnly);
+        }
+
+        private void ShowSettings(CottonCameraBackupSettings settings)
+        {
+            _settings = settings;
+            PhotosOnly = settings.PhotosOnly;
+            WifiOnly = settings.WifiOnly;
+            AllowCellular = settings.AllowCellular;
+            ChargingOnly = settings.ChargingOnly;
+            CottonCameraBackupSetupDisplayState display =
+                CottonCameraBackupSetupDisplayState.Create(settings);
+            DestinationText = display.DestinationText;
+            ExecutionStatusText = display.ExecutionStatusText;
+            PolicySummaryText = display.PolicySummaryText;
+        }
+
+        private void RefreshPolicyPreview()
+        {
+            CottonCameraBackupSettings preview = _settings
+                .WithPhotosOnly(PhotosOnly)
+                .WithWifiOnly(WifiOnly)
+                .WithAllowCellular(AllowCellular)
+                .WithChargingOnly(ChargingOnly);
+            PolicySummaryText = CottonCameraBackupSetupDisplayState.Create(preview).PolicySummaryText;
+        }
+
+        private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                await actionAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile camera backup setup action failed.");
+                Status = failureStatus;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private void RaiseCommandStatesChanged()
+        {
+            LoadCommand.RaiseCanExecuteChanged();
+            ChooseDestinationCommand.RaiseCanExecuteChanged();
+            SaveCommand.RaiseCanExecuteChanged();
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile camera backup setup command exception.");
+        }
+    }
+}

@@ -13,6 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
+        private const string AccountBackupAction = "Camera Backup";
         private const string AccountCaptureInboxAction = "Capture Inbox";
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
@@ -34,6 +35,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
+        private readonly IBackupSetupPageService _backupSetupPageService;
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
@@ -63,6 +65,7 @@ namespace Cotton.Mobile.ViewModels
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
             ITransfersPageService transfersPageService,
+            IBackupSetupPageService backupSetupPageService,
             ICaptureInboxPageService captureInboxPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
@@ -94,6 +97,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
+            ArgumentNullException.ThrowIfNull(backupSetupPageService);
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
@@ -125,6 +129,7 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
             _transfersPageService = transfersPageService;
+            _backupSetupPageService = backupSetupPageService;
             _captureInboxPageService = captureInboxPageService;
             _shareLaunchState = shareLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
@@ -437,6 +442,7 @@ namespace Cotton.Mobile.ViewModels
                 accountTitle,
                 AccountCancelAction,
                 AccountLogoutAction,
+                AccountBackupAction,
                 AccountCaptureInboxAction,
                 AccountTransfersAction,
                 AccountStorageAction,
@@ -459,6 +465,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountTransfersAction:
                     await OpenTransfersAsync();
+                    break;
+                case AccountBackupAction:
+                    await OpenBackupSetupAsync();
                     break;
                 case AccountCaptureInboxAction:
                     await OpenCaptureInboxAsync();
@@ -670,6 +679,32 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Transfers",
                     "Could not inspect transfers.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenBackupSetupAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Camera Backup",
+                    "Could not open camera backup for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _backupSetupPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile camera backup setup page.");
+                await _dialogService.ShowAlertAsync(
+                    "Camera Backup",
+                    "Could not open camera backup setup.",
                     "OK");
             }
         }

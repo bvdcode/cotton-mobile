@@ -51,6 +51,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
+			builder.Services.AddSingleton<IBackupSetupPageService, BackupSetupPageService>();
 			builder.Services.AddSingleton<ICaptureInboxPageService, CaptureInboxPageService>();
 			builder.Services.AddSingleton<ICaptureDestinationPickerPageService, CaptureDestinationPickerPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
@@ -72,6 +73,7 @@ namespace Cotton.Mobile
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
+			builder.Services.AddSingleton<ICottonCameraBackupSettingsStore, PreferencesCottonCameraBackupSettingsStore>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
 			builder.Services.AddSingleton<IFileUploadPickerService, FileUploadPickerService>();
 			builder.Services.AddSingleton<IPhotoUploadPickerService, PhotoUploadPickerService>();
@@ -92,6 +94,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<MainPage>();
 			builder.Services.AddTransient<StorageSettingsViewModel>();
 			builder.Services.AddTransient<StoragePage>();
+			builder.Services.AddTransient<BackupSetupViewModel>();
+			builder.Services.AddTransient<BackupSetupPage>();
 			builder.Services.AddTransient<TransfersViewModel>();
 			builder.Services.AddTransient<TransfersPage>();
 			builder.Services.AddTransient<CaptureInboxViewModel>();

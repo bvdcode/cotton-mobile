@@ -246,7 +246,9 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            if (_fileNavigation.Count == 0)
+            CottonFileNavigationUpPlan plan =
+                CottonFileNavigationPlanner.CreateNavigateUpPlan(_currentFolder, _fileNavigation);
+            if (!plan.CanNavigate)
             {
                 return;
             }
@@ -258,17 +260,16 @@ namespace Cotton.Mobile.ViewModels
                 var originalNavigation = new List<CottonFolderHandle>(_fileNavigation);
                 string originalSearchText = _display.FileSearchText;
                 bool originalSearchOpen = _display.IsFileSearchOpen;
-                int previousIndex = _fileNavigation.Count - 1;
-                CottonFolderHandle previous = _fileNavigation[previousIndex];
-                _fileNavigation.RemoveAt(previousIndex);
+                _fileNavigation.Clear();
+                _fileNavigation.AddRange(plan.NavigationAfterNavigate);
                 _display.ClearFileSearch();
-                if (_fileNavigation.Count == 0)
+                if (plan.IsRootTarget)
                 {
                     await LoadRootFilesAsync();
                 }
                 else
                 {
-                    await LoadFolderAsync(previous, preserveHistory: true);
+                    await LoadFolderAsync(plan.TargetFolder!, preserveHistory: true);
                 }
 
                 if (ShouldRestoreNavigationAfterFileLoadFailure()

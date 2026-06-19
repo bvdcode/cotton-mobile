@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
+        private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountStorageAction = "Storage";
         private const string AccountTransfersAction = "Transfers";
@@ -37,6 +38,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ITransfersPageService _transfersPageService;
         private readonly IBackupSetupPageService _backupSetupPageService;
         private readonly ICaptureInboxPageService _captureInboxPageService;
+        private readonly INotificationSettingsPageService _notificationSettingsPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
@@ -70,6 +72,7 @@ namespace Cotton.Mobile.ViewModels
             ITransfersPageService transfersPageService,
             IBackupSetupPageService backupSetupPageService,
             ICaptureInboxPageService captureInboxPageService,
+            INotificationSettingsPageService notificationSettingsPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
@@ -105,6 +108,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(transfersPageService);
             ArgumentNullException.ThrowIfNull(backupSetupPageService);
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
+            ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
@@ -140,6 +144,7 @@ namespace Cotton.Mobile.ViewModels
             _transfersPageService = transfersPageService;
             _backupSetupPageService = backupSetupPageService;
             _captureInboxPageService = captureInboxPageService;
+            _notificationSettingsPageService = notificationSettingsPageService;
             _shareLaunchState = shareLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _backgroundTransferCoordinator = backgroundTransferCoordinator;
@@ -458,6 +463,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountBackupAction,
                 AccountCaptureInboxAction,
                 AccountTransfersAction,
+                AccountNotificationsAction,
                 AccountStorageAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -478,6 +484,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountTransfersAction:
                     await OpenTransfersAsync();
+                    break;
+                case AccountNotificationsAction:
+                    await OpenNotificationsAsync();
                     break;
                 case AccountBackupAction:
                     await OpenBackupSetupAsync();
@@ -666,6 +675,22 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Storage",
                     "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenNotificationsAsync()
+        {
+            try
+            {
+                await _notificationSettingsPageService.OpenAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile notifications page.");
+                await _dialogService.ShowAlertAsync(
+                    "Notifications",
+                    "Could not inspect notifications.",
                     "OK");
             }
         }

@@ -78,6 +78,8 @@ namespace Cotton.Mobile.Services
                     GetUtcNow());
                 await SaveTransferAsync(instanceUri, queue, transferIndex, failed, cancellationToken)
                     .ConfigureAwait(false);
+                await ShowFailedNotificationAsync(failed, cancellationToken)
+                    .ConfigureAwait(false);
                 return new CottonQueuedUploadExecutionResult(
                     CottonQueuedUploadExecutionStatus.MissingDestination,
                     failed,
@@ -93,6 +95,8 @@ namespace Cotton.Mobile.Services
                     MissingStagedFileMessage,
                     GetUtcNow());
                 await SaveTransferAsync(instanceUri, queue, transferIndex, failed, cancellationToken)
+                    .ConfigureAwait(false);
+                await ShowFailedNotificationAsync(failed, cancellationToken)
                     .ConfigureAwait(false);
                 return new CottonQueuedUploadExecutionResult(
                     CottonQueuedUploadExecutionStatus.MissingStagedFile,
@@ -150,6 +154,8 @@ namespace Cotton.Mobile.Services
             {
                 CottonTransferQueueItem failed = current.MarkFailed(CreateFailureMessage(exception), GetUtcNow());
                 await SaveTransferAsync(instanceUri, queue, transferIndex, failed, cancellationToken)
+                    .ConfigureAwait(false);
+                await ShowFailedNotificationAsync(failed, cancellationToken)
                     .ConfigureAwait(false);
                 return new CottonQueuedUploadExecutionResult(
                     CottonQueuedUploadExecutionStatus.Failed,
@@ -214,6 +220,24 @@ namespace Cotton.Mobile.Services
             catch
             {
                 // Notification delivery must never turn a completed upload into a failed transfer.
+            }
+        }
+
+        private async Task ShowFailedNotificationAsync(
+            CottonTransferQueueItem failed,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                CottonLocalNotificationSnapshot notification =
+                    CottonTransferNotificationFactory.CreateFailedUpload(failed);
+                await _localNotificationService
+                    .ShowAsync(notification, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            catch
+            {
+                // Notification delivery must never hide or replace the persisted failure state.
             }
         }
 

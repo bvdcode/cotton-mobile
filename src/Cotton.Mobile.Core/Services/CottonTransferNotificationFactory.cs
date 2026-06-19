@@ -23,6 +23,26 @@ namespace Cotton.Mobile.Services
                 message);
         }
 
+        public static CottonLocalNotificationSnapshot CreateFailedUpload(
+            CottonTransferQueueItem transfer)
+        {
+            ArgumentNullException.ThrowIfNull(transfer);
+
+            string displayName = string.IsNullOrWhiteSpace(transfer.DisplayName)
+                ? "Upload"
+                : transfer.DisplayName.Trim();
+            string failure = string.IsNullOrWhiteSpace(transfer.FailureMessage)
+                ? "Open Transfers for details."
+                : transfer.FailureMessage.Trim();
+
+            return new CottonLocalNotificationSnapshot(
+                CreateNotificationId(transfer.Id, CottonLocalNotificationKind.TransferFailed),
+                CottonLocalNotificationKind.TransferFailed,
+                CottonNotificationChannelKind.Transfers,
+                "Upload failed",
+                $"{displayName}: {failure}");
+        }
+
         private static int CreateNotificationId(
             Guid transferId,
             CottonLocalNotificationKind kind)

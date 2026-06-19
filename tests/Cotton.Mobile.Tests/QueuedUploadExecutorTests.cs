@@ -123,7 +123,12 @@ namespace Cotton.Mobile.Tests
             var metadataStore = new FakeTransferMetadataStore([queued]);
             var stagingStore = new FakeTransferStagingStore(stagedFile: null);
             var uploadClient = new FakeQueuedUploadClient([]);
-            CottonQueuedUploadExecutor executor = CreateExecutor(metadataStore, stagingStore, uploadClient);
+            var notificationService = new FakeLocalNotificationService();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                notificationService);
 
             CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
 
@@ -132,6 +137,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Upload file is no longer available on this device.", result.FailureMessage);
             Assert.Empty(uploadClient.UploadedTransferIds);
             Assert.Equal(CottonTransferStatus.Failed, metadataStore.Items.Single().Status);
+            CottonLocalNotificationSnapshot notification = Assert.Single(notificationService.Notifications);
+            Assert.Equal(CottonLocalNotificationKind.TransferFailed, notification.Kind);
+            Assert.Equal("upload.bin: Upload file is no longer available on this device.", notification.Message);
         }
 
         [Fact]
@@ -145,7 +153,12 @@ namespace Cotton.Mobile.Tests
             var metadataStore = new FakeTransferMetadataStore([queued]);
             var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
             var uploadClient = new FakeQueuedUploadClient([]);
-            CottonQueuedUploadExecutor executor = CreateExecutor(metadataStore, stagingStore, uploadClient);
+            var notificationService = new FakeLocalNotificationService();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                notificationService);
 
             CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
 
@@ -153,6 +166,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Upload destination is missing.", result.FailureMessage);
             Assert.Empty(uploadClient.UploadedTransferIds);
             Assert.Equal(CottonTransferStatus.Failed, metadataStore.Items.Single().Status);
+            CottonLocalNotificationSnapshot notification = Assert.Single(notificationService.Notifications);
+            Assert.Equal(CottonLocalNotificationKind.TransferFailed, notification.Kind);
+            Assert.Equal("upload.bin: Upload destination is missing.", notification.Message);
         }
 
         [Fact]
@@ -162,7 +178,12 @@ namespace Cotton.Mobile.Tests
             var metadataStore = new FakeTransferMetadataStore([queued]);
             var stagingStore = new FakeTransferStagingStore(CreateStagedFile());
             var uploadClient = new FakeQueuedUploadClient([], new InvalidOperationException("Offline"));
-            CottonQueuedUploadExecutor executor = CreateExecutor(metadataStore, stagingStore, uploadClient);
+            var notificationService = new FakeLocalNotificationService();
+            CottonQueuedUploadExecutor executor = CreateExecutor(
+                metadataStore,
+                stagingStore,
+                uploadClient,
+                notificationService);
 
             CottonQueuedUploadExecutionResult result = await executor.ExecuteNextAsync(InstanceUri);
 
@@ -171,6 +192,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Offline", result.FailureMessage);
             Assert.Empty(stagingStore.DeletedTransferIds);
             Assert.True(metadataStore.Items.Single().CanRetry);
+            CottonLocalNotificationSnapshot notification = Assert.Single(notificationService.Notifications);
+            Assert.Equal(CottonLocalNotificationKind.TransferFailed, notification.Kind);
+            Assert.Equal("upload.bin: Offline", notification.Message);
         }
 
         [Fact]

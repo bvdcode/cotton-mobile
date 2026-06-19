@@ -154,5 +154,31 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("report.pdf uploaded to Files / Reports.", notification.Message);
             Assert.True(notification.Id > 0);
         }
+
+        [Fact]
+        public void Transfer_failed_notification_uses_transfer_channel_and_failure_copy()
+        {
+            CottonTransferQueueItem transfer = CottonTransferQueueItem
+                .CreateUpload(
+                    Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                    "report.pdf",
+                    120,
+                    new DateTime(2026, 6, 19, 21, 0, 0, DateTimeKind.Utc),
+                    new CottonTransferDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
+                        "Default",
+                        "Files / Reports"))
+                .Start(new DateTime(2026, 6, 19, 21, 1, 0, DateTimeKind.Utc))
+                .Fail("Offline", new DateTime(2026, 6, 19, 21, 2, 0, DateTimeKind.Utc));
+
+            CottonLocalNotificationSnapshot notification =
+                CottonTransferNotificationFactory.CreateFailedUpload(transfer);
+
+            Assert.Equal(CottonLocalNotificationKind.TransferFailed, notification.Kind);
+            Assert.Equal(CottonNotificationChannelKind.Transfers, notification.ChannelKind);
+            Assert.Equal("Upload failed", notification.Title);
+            Assert.Equal("report.pdf: Offline", notification.Message);
+            Assert.True(notification.Id > 0);
+        }
     }
 }

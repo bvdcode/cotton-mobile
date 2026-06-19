@@ -1,7 +1,7 @@
-Closed testing build for Cotton Cloud mobile.
+Closed testing build for Cotton Cloud.
 
-Improves file details, SVG handling, and the cloud share-link foundation while keeping in-app audio/video preview and the Android WorkManager path for queued Camera Backup uploads.
+Adds Copy link and Share link for files/folders, using Android clipboard/share sheet flows with offline/error status. Accepts backend plain-text link responses.
 
-Keeps safer file opening, cached offline start, folder navigation, On device markers, transfer notifications, Storage, feedback, and logout cleanup.
+Keeps file details, SVG handling, safer file opening, audio/video preview, cached offline start, On device markers, transfer notifications, Storage, feedback, logout cleanup, and Camera Backup queue restore.
 
-Full automatic backup, visible copy-link UI, remote push notifications, and true sync remain in progress.
+Per-link revoke/options, remote push, and true sync remain in progress.

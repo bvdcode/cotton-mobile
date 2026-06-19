@@ -577,6 +577,11 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowProfileError(string status)
         {
+            ShowProfileStatus(status);
+        }
+
+        public void ShowProfileStatus(string status)
+        {
             SetState(MainPageViewState.Profile);
             ProfileStatus = status;
             IsLogoutEnabled = true;

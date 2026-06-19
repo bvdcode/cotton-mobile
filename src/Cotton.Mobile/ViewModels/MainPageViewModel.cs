@@ -11,6 +11,8 @@ namespace Cotton.Mobile.ViewModels
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
+        private const string OfflineCachedSessionStatus =
+            "Offline. Showing saved files until your session can refresh.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
         private const string AccountBackupAction = "Camera Backup";
@@ -28,6 +30,7 @@ namespace Cotton.Mobile.ViewModels
 
         private readonly ICottonSessionService _sessionService;
         private readonly ICottonInstanceStore _instanceStore;
+        private readonly ICottonProfileCacheStore _profileCacheStore;
         private readonly IBrowser _browser;
         private readonly CottonMobileOptions _options;
         private readonly IUserDialogService _dialogService;
@@ -58,10 +61,12 @@ namespace Cotton.Mobile.ViewModels
         private bool _isCaptureInboxOpenQueued;
         private bool _shouldRetrySessionRestoreWhenOnline;
         private bool _shouldRetrySessionRestoreOnResume;
+        private bool _isShowingCachedOfflineSession;
 
         public MainPageViewModel(
             ICottonSessionService sessionService,
             ICottonInstanceStore instanceStore,
+            ICottonProfileCacheStore profileCacheStore,
             IBrowser browser,
             CottonMobileOptions options,
             IUserDialogService dialogService,
@@ -99,6 +104,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(sessionService);
             ArgumentNullException.ThrowIfNull(instanceStore);
+            ArgumentNullException.ThrowIfNull(profileCacheStore);
             ArgumentNullException.ThrowIfNull(browser);
             ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(dialogService);
@@ -136,6 +142,7 @@ namespace Cotton.Mobile.ViewModels
 
             _sessionService = sessionService;
             _instanceStore = instanceStore;
+            _profileCacheStore = profileCacheStore;
             _browser = browser;
             _options = options;
             _dialogService = dialogService;
@@ -340,6 +347,11 @@ namespace Cotton.Mobile.ViewModels
                 {
                     _shouldRetrySessionRestoreWhenOnline = true;
                     _shouldRetrySessionRestoreOnResume = true;
+                    if (await TryShowCachedOfflineSessionAsync())
+                    {
+                        return;
+                    }
+
                     ShowSignIn("Offline. Reconnect to restore your session.");
                 }
                 else
@@ -369,6 +381,74 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile instance URL after {Reason}.", reason);
+            }
+        }
+
+        private async Task<bool> TryShowCachedOfflineSessionAsync()
+        {
+            try
+            {
+                Uri? instanceUri = await _instanceStore.GetAsync();
+                if (instanceUri is null || !await _fileBrowser.HasCachedRootAsync(instanceUri))
+                {
+                    return false;
+                }
+
+                MainPageProfile profile =
+                    await _profileCacheStore.GetAsync(instanceUri)
+                    ?? CreateFallbackOfflineProfile(instanceUri);
+
+                Display.InstanceUrl = instanceUri.AbsoluteUri;
+                Display.ShowProfile(profile);
+                Display.ShowProfileStatus(OfflineCachedSessionStatus);
+                _isShowingCachedOfflineSession = true;
+
+                IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
+                    await RestoreTransferQueueBestEffortAsync(instanceUri);
+                Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
+
+                if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri))
+                {
+                    _fileBrowser.Clear();
+                    _isShowingCachedOfflineSession = false;
+                    return false;
+                }
+
+                RefreshCommands();
+                QueuePendingCaptureInboxOpen("cached offline session");
+                AnnounceStatus(OfflineCachedSessionStatus);
+                return true;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to show Cotton mobile cached offline session.");
+                _fileBrowser.Clear();
+                _isShowingCachedOfflineSession = false;
+                return false;
+            }
+        }
+
+        private static MainPageProfile CreateFallbackOfflineProfile(Uri instanceUri)
+        {
+            string authority = instanceUri.IsDefaultPort
+                ? instanceUri.Host
+                : instanceUri.Authority;
+            string path = instanceUri.AbsolutePath.TrimEnd('/');
+            string instance = string.IsNullOrWhiteSpace(path) || string.Equals(path, "/", StringComparison.Ordinal)
+                ? authority
+                : $"{authority}{path}";
+            return new MainPageProfile("Saved session", null, instance);
+        }
+
+        private async Task SaveCachedProfileBestEffortAsync(Uri instanceUri, MainPageProfile profile)
+        {
+            try
+            {
+                await _profileCacheStore.SaveAsync(instanceUri, profile);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile cached profile.");
             }
         }
 
@@ -618,7 +698,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if ((!_shouldRetrySessionRestoreWhenOnline && !_shouldRetrySessionRestoreOnResume)
                     || _isSessionRestoreInProgress
-                    || !Display.IsSignInVisible
+                    || (!Display.IsSignInVisible && !_isShowingCachedOfflineSession)
                     || !_networkAccess.HasInternetAccess)
                 {
                     return;
@@ -649,6 +729,15 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to clear Cotton mobile local session during {Reason}.", reason);
+            }
+
+            try
+            {
+                await _profileCacheStore.ClearAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to clear Cotton mobile cached profile during {Reason}.", reason);
             }
 
             await ClearCachedSensitiveStateAsync(reason);
@@ -1091,8 +1180,10 @@ namespace Cotton.Mobile.ViewModels
 
             if (result.IsAuthenticated && result.InstanceUri is not null && result.User is not null)
             {
+                _isShowingCachedOfflineSession = false;
                 ClearSessionRestoreRetry();
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
+                await SaveCachedProfileBestEffortAsync(result.InstanceUri, profile);
                 ShowProfile(profile);
                 IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
                     await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
@@ -1187,6 +1278,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSignIn(string? status)
         {
+            _isShowingCachedOfflineSession = false;
             Display.ShowSignIn(status);
             RefreshCommands();
             AnnounceStatus(status);
@@ -1201,6 +1293,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowProfile(MainPageProfile profile)
         {
+            _isShowingCachedOfflineSession = false;
             Display.ShowProfile(profile);
             RefreshCommands();
             _screenReader.Announce("Signed in.");

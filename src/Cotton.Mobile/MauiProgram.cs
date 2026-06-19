@@ -130,6 +130,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();
 			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
+			builder.Services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();

@@ -144,6 +144,46 @@ namespace Cotton.Mobile.ViewModels
             await LoadRootFilesAsync();
         }
 
+        public async Task<bool> HasCachedRootAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            CottonCachedFolderContentSnapshot? cachedSnapshot =
+                await _folderContentCache.LoadRootSnapshotAsync(instanceUri, cancellationToken);
+            return cachedSnapshot is not null;
+        }
+
+        public async Task<bool> InitializeCachedRootAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            CottonCachedFolderContentSnapshot? cachedSnapshot =
+                await _folderContentCache.LoadRootSnapshotAsync(instanceUri, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (cachedSnapshot is null)
+            {
+                return false;
+            }
+
+            _instanceUri = instanceUri;
+            _display.ApplyFileBrowserPreferences(LoadFileBrowserPreferences());
+
+            CancellationTokenSource fileLoadCancellation = BeginFileLoad();
+            try
+            {
+                _display.ClearFileSearch();
+                return await ShowCachedRootFilesAsync(instanceUri, cachedSnapshot, fileLoadCancellation);
+            }
+            finally
+            {
+                EndFileLoad(fileLoadCancellation);
+            }
+        }
+
         private CottonFileBrowserPreferences LoadFileBrowserPreferences()
         {
             try
@@ -968,11 +1008,24 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
+            return await ShowCachedRootFilesAsync(instanceUri, cachedSnapshot, fileLoadCancellation);
+        }
+
+        private async Task<bool> ShowCachedRootFilesAsync(
+            Uri instanceUri,
+            CottonCachedFolderContentSnapshot cachedSnapshot,
+            CancellationTokenSource fileLoadCancellation)
+        {
             CottonFolderContent cachedContent = await ApplyCachedThumbnailsAsync(
                 instanceUri,
                 cachedSnapshot.Content,
                 fileLoadCancellation.Token);
             cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
+            if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
+            {
+                return true;
+            }
+
             _fileNavigation.Clear();
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;

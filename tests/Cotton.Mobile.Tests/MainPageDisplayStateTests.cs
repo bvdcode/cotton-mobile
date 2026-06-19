@@ -173,6 +173,20 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Profile_status_can_report_cached_offline_session()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+
+            display.ShowProfileStatus("Offline. Showing saved files until your session can refresh.");
+
+            Assert.True(display.IsProfileVisible);
+            Assert.True(display.IsProfileStatusVisible);
+            Assert.Equal("Offline. Showing saved files until your session can refresh.", display.ProfileStatus);
+            Assert.Equal("Mobile Demo", display.ProfileName);
+            Assert.Equal("app.cottoncloud.dev", display.ProfileInstance);
+        }
+
+        [Fact]
         public void Offline_pack_progress_survives_file_summary_and_clears_on_sign_out()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

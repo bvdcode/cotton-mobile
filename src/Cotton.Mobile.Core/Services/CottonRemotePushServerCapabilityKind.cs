@@ -5,8 +5,9 @@ namespace Cotton.Mobile.Services
         DeviceTokenRegistrationEndpoint = 0,
         DeviceTokenRefreshUpsert = 1,
         LogoutTokenRevocation = 2,
-        StaleTokenCleanup = 3,
-        UserNotificationPreferences = 4,
-        PushPayloadPrivacyFiltering = 5,
+        ServerEventCategories = 3,
+        PushPayloadPrivacyFiltering = 4,
+        StaleTokenCleanup = 5,
+        UserNotificationPreferences = 6,
     }
 }

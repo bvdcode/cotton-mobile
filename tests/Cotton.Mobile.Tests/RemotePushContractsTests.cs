@@ -26,17 +26,26 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.LogoutTokenRevocation,
                 capability.AvailableServerCapabilities);
+            Assert.Contains(
+                CottonRemotePushServerCapabilityKind.ServerEventCategories,
+                capability.AvailableServerCapabilities);
+            Assert.Contains(
+                CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
+                capability.AvailableServerCapabilities);
             Assert.DoesNotContain(
                 CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
+                capability.MissingServerCapabilities);
+            Assert.DoesNotContain(
+                CottonRemotePushServerCapabilityKind.ServerEventCategories,
+                capability.MissingServerCapabilities);
+            Assert.DoesNotContain(
+                CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
                 capability.MissingServerCapabilities);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
                 capability.MissingServerCapabilities);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
-                capability.MissingServerCapabilities);
-            Assert.Contains(
-                CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
                 capability.MissingServerCapabilities);
         }
 

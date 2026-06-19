@@ -7,8 +7,10 @@ namespace Cotton.Mobile.ViewModels
 {
     public class CaptureInboxViewModel : ViewModelBase
     {
+        private readonly Uri _instanceUri;
         private readonly ICottonShareIntakeStore _intakeStore;
         private readonly ICottonShareContentStagingStore _contentStagingStore;
+        private readonly ICaptureDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<CaptureInboxViewModel> _logger;
 
         private bool _isBusy;
@@ -18,25 +20,37 @@ namespace Cotton.Mobile.ViewModels
         private string? _status;
 
         public CaptureInboxViewModel(
+            Uri instanceUri,
             ICottonShareIntakeStore intakeStore,
             ICottonShareContentStagingStore contentStagingStore,
+            ICaptureDestinationPickerPageService destinationPickerPageService,
             ILogger<CaptureInboxViewModel> logger)
         {
+            ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(intakeStore);
             ArgumentNullException.ThrowIfNull(contentStagingStore);
+            ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
 
+            _instanceUri = instanceUri;
             _intakeStore = intakeStore;
             _contentStagingStore = contentStagingStore;
+            _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
             Items = [];
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            DestinationCommand = new AsyncCommand(
+                OpenDestinationPickerAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && Items.Any(item => item.CanSelectDestination));
             ClearCommand = new AsyncCommand(ClearAsync, LogUnhandledCommandException, () => !IsBusy && Items.Count > 0);
         }
 
         public ObservableCollection<CottonCaptureInboxListItem> Items { get; }
 
         public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand DestinationCommand { get; }
 
         public AsyncCommand ClearCommand { get; }
 
@@ -49,6 +63,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsEmpty));
                     LoadCommand.RaiseCanExecuteChanged();
+                    DestinationCommand.RaiseCanExecuteChanged();
                     ClearCommand.RaiseCanExecuteChanged();
                 }
             }
@@ -89,6 +104,8 @@ namespace Cotton.Mobile.ViewModels
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
         public bool IsListVisible => Items.Count > 0;
+
+        public bool CanChooseDestination => Items.Any(item => item.CanSelectDestination);
 
         private async Task LoadAsync()
         {
@@ -143,6 +160,24 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task OpenDestinationPickerAsync()
+        {
+            if (IsBusy || !CanChooseDestination)
+            {
+                return;
+            }
+
+            try
+            {
+                await _destinationPickerPageService.OpenAsync(_instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture destination picker open failed.");
+                Status = "Could not open destination picker.";
+            }
+        }
+
         private void ShowSnapshot(CottonCaptureInboxListSnapshot snapshot)
         {
             Items.Clear();
@@ -161,6 +196,8 @@ namespace Cotton.Mobile.ViewModels
         {
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsListVisible));
+            OnPropertyChanged(nameof(CanChooseDestination));
+            DestinationCommand.RaiseCanExecuteChanged();
             ClearCommand.RaiseCanExecuteChanged();
         }
 

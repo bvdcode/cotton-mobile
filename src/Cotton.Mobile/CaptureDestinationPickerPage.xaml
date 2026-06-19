@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.CaptureDestinationPickerPage"
+             x:DataType="viewModels:CaptureDestinationPickerViewModel"
+             Shell.NavBarIsVisible="True"
+             Title="Choose Destination"
+             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Refresh"
+                     Command="{Binding LoadCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="16"
+                             Spacing="14">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Choose Destination"
+                           FontSize="28"
+                           FontAttributes="Bold"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Text="{Binding PathText}"
+                           FontSize="13"
+                           MaxLines="2"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </VerticalStackLayout>
+
+                <ActivityIndicator Grid.Column="1"
+                                   IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   VerticalOptions="Center" />
+            </Grid>
+
+            <Label Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   FontSize="13"
+                   MaxLines="2"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+            <Grid ColumnDefinitions="Auto,*"
+                  ColumnSpacing="10">
+                <Button Text="Up"
+                        Command="{Binding UpCommand}"
+                        FontAttributes="Bold"
+                        HeightRequest="42"
+                        MinimumWidthRequest="78"
+                        CornerRadius="8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                <Button Grid.Column="1"
+                        Text="{Binding CurrentFolderName, StringFormat='Choose {0}'}"
+                        Command="{Binding ChooseCommand}"
+                        FontAttributes="Bold"
+                        HeightRequest="42"
+                        CornerRadius="8"
+                        BackgroundColor="{StaticResource Magenta}"
+                        TextColor="{StaticResource White}" />
+            </Grid>
+
+            <Label Text="{Binding SummaryText}"
+                   FontSize="13"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+            <Border IsVisible="{Binding IsEmpty}"
+                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="24,34"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                <VerticalStackLayout Spacing="8"
+                                     HorizontalOptions="Center"
+                                     VerticalOptions="Center">
+                    <Label Text="No folders here"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Text="Choose this folder or go back."
+                           FontSize="12"
+                           MaxLines="2"
+                           LineBreakMode="WordWrap"
+                           HorizontalTextAlignment="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </VerticalStackLayout>
+            </Border>
+
+            <VerticalStackLayout Spacing="10"
+                                 IsVisible="{Binding IsListVisible}"
+                                 BindableLayout.ItemsSource="{Binding Folders}">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="14"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCommand}" />
+                            </Border.GestureRecognizers>
+
+                            <Grid ColumnDefinitions="*,Auto"
+                                  ColumnSpacing="10">
+                                <Label Text="{Binding DisplayName}"
+                                       FontSize="15"
+                                       FontAttributes="Bold"
+                                       MaxLines="1"
+                                       LineBreakMode="TailTruncation"
+                                       VerticalOptions="Center"
+                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                <Button Grid.Column="1"
+                                        Text="Open"
+                                        Command="{Binding OpenCommand}"
+                                        HeightRequest="36"
+                                        MinimumWidthRequest="76"
+                                        CornerRadius="8"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

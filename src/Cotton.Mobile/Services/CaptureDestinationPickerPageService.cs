@@ -5,11 +5,11 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.Services
 {
-    public class CaptureInboxPageService : ICaptureInboxPageService
+    public class CaptureDestinationPickerPageService : ICaptureDestinationPickerPageService
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public CaptureInboxPageService(IServiceProvider serviceProvider)
+        public CaptureDestinationPickerPageService(IServiceProvider serviceProvider)
         {
             ArgumentNullException.ThrowIfNull(serviceProvider);
 
@@ -24,10 +24,12 @@ namespace Cotton.Mobile.Services
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var viewModel = ActivatorUtilities.CreateInstance<CaptureInboxViewModel>(
+                var viewModel = ActivatorUtilities.CreateInstance<CaptureDestinationPickerViewModel>(
                     _serviceProvider,
                     instanceUri);
-                var page = ActivatorUtilities.CreateInstance<CaptureInboxPage>(_serviceProvider, viewModel);
+                var page = ActivatorUtilities.CreateInstance<CaptureDestinationPickerPage>(
+                    _serviceProvider,
+                    viewModel);
                 await Shell.Current.Navigation.PushAsync(page);
             });
             cancellationToken.ThrowIfCancellationRequested();

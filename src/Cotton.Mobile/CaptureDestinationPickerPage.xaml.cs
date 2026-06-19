@@ -2,9 +2,11 @@ using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
-    public partial class CaptureInboxPage : ContentPage
+    public partial class CaptureDestinationPickerPage : ContentPage
     {
-        public CaptureInboxPage(CaptureInboxViewModel viewModel)
+        private bool _didLoad;
+
+        public CaptureDestinationPickerPage(CaptureDestinationPickerViewModel viewModel)
         {
             ArgumentNullException.ThrowIfNull(viewModel);
 
@@ -15,11 +17,12 @@ namespace Cotton.Mobile
         protected override void OnAppearing()
         {
             base.OnAppearing();
-            if (BindingContext is not CaptureInboxViewModel viewModel)
+            if (_didLoad || BindingContext is not CaptureDestinationPickerViewModel viewModel)
             {
                 return;
             }
 
+            _didLoad = true;
             viewModel.LoadCommand.Execute(null);
         }
     }

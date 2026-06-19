@@ -10,6 +10,8 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Destination"
+                     Command="{Binding DestinationCommand}" />
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
         <ToolbarItem Text="Clear"
@@ -81,7 +83,7 @@
                                 StrokeShape="RoundRectangle 8"
                                 Padding="14"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
-                            <Grid RowDefinitions="Auto,Auto,Auto"
+                            <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                                   ColumnDefinitions="*,Auto"
                                   RowSpacing="6"
                                   ColumnSpacing="10">
@@ -123,6 +125,16 @@
                                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                                 <Label Grid.Row="2"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding DestinationText}"
+                                       IsVisible="{Binding IsDestinationVisible}"
+                                       FontSize="12"
+                                       FontAttributes="Bold"
+                                       MaxLines="2"
+                                       LineBreakMode="WordWrap"
+                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                <Label Grid.Row="3"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"

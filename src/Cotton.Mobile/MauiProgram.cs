@@ -50,6 +50,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
 			builder.Services.AddSingleton<ICaptureInboxPageService, CaptureInboxPageService>();
+			builder.Services.AddSingleton<ICaptureDestinationPickerPageService, CaptureDestinationPickerPageService>();
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
 			builder.Services.AddSingleton<ICottonFolderContentCache, FileSystemCottonFolderContentCache>();
 			builder.Services.AddSingleton<ICottonTransferMetadataPathProvider, CottonTransferMetadataPathProvider>();
@@ -86,6 +87,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<TransfersPage>();
 			builder.Services.AddTransient<CaptureInboxViewModel>();
 			builder.Services.AddTransient<CaptureInboxPage>();
+			builder.Services.AddTransient<CaptureDestinationPickerViewModel>();
+			builder.Services.AddTransient<CaptureDestinationPickerPage>();
 
 #if DEBUG
 			builder.Logging.AddDebug();

@@ -57,6 +57,41 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_and_load_preserves_capture_destination()
+        {
+            var item = new CottonShareIntakeItemSnapshot(
+                ItemId,
+                CottonShareIntakeItemType.Uri,
+                "content://media/external/images/media/42",
+                "photo.jpg",
+                "image/jpeg",
+                "photo.jpg",
+                "/tmp/cotton-share/photo.jpg",
+                123);
+            var destination = new CottonShareDestinationSnapshot(
+                Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                "Camera Uploads",
+                "Files / Camera Uploads");
+            CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot
+                .CreatePending(
+                    IntakeId,
+                    CottonShareIntakeKind.Send,
+                    "image/jpeg",
+                    [item],
+                    ReceivedAt)
+                .WithDestination(destination);
+
+            await _store.SaveAsync([snapshot]);
+
+            CottonShareDestinationSnapshot loadedDestination =
+                Assert.Single(await _store.LoadAsync()).Destination!;
+            Assert.NotNull(loadedDestination);
+            Assert.Equal(destination.FolderId, loadedDestination.FolderId);
+            Assert.Equal("Camera Uploads", loadedDestination.FolderName);
+            Assert.Equal("Files / Camera Uploads", loadedDestination.Path);
+        }
+
+        [Fact]
         public async Task Save_orders_loaded_snapshots_by_received_time()
         {
             CottonShareIntakeSnapshot later = CreateTextShare(

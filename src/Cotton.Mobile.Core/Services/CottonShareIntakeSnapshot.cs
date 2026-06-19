@@ -10,6 +10,27 @@ namespace Cotton.Mobile.Services
             IReadOnlyList<CottonShareIntakeItemSnapshot> items,
             string? failureMessage,
             DateTime receivedAtUtc)
+            : this(
+                id,
+                kind,
+                status,
+                sourceMimeType,
+                items,
+                failureMessage,
+                receivedAtUtc,
+                destination: null)
+        {
+        }
+
+        public CottonShareIntakeSnapshot(
+            Guid id,
+            CottonShareIntakeKind kind,
+            CottonShareIntakeStatus status,
+            string? sourceMimeType,
+            IReadOnlyList<CottonShareIntakeItemSnapshot> items,
+            string? failureMessage,
+            DateTime receivedAtUtc,
+            CottonShareDestinationSnapshot? destination)
         {
             if (id == Guid.Empty)
             {
@@ -44,6 +65,7 @@ namespace Cotton.Mobile.Services
             Items = items.ToList();
             FailureMessage = NormalizeOptional(failureMessage);
             ReceivedAtUtc = receivedAtUtc;
+            Destination = destination;
         }
 
         public Guid Id { get; }
@@ -60,9 +82,14 @@ namespace Cotton.Mobile.Services
 
         public DateTime ReceivedAtUtc { get; }
 
+        public CottonShareDestinationSnapshot? Destination { get; }
+
         public int ItemCount => Items.Count;
 
         public bool CanStageForCaptureInbox => Status == CottonShareIntakeStatus.Pending;
+
+        public bool CanSelectCaptureDestination => Status == CottonShareIntakeStatus.Pending
+            && Items.Any(item => item.Type == CottonShareIntakeItemType.Uri && item.HasStagedContent);
 
         public static CottonShareIntakeSnapshot CreatePending(
             Guid id,
@@ -103,6 +130,21 @@ namespace Cotton.Mobile.Services
                 items,
                 failureMessage,
                 receivedAtUtc);
+        }
+
+        public CottonShareIntakeSnapshot WithDestination(CottonShareDestinationSnapshot destination)
+        {
+            ArgumentNullException.ThrowIfNull(destination);
+
+            return new CottonShareIntakeSnapshot(
+                Id,
+                Kind,
+                Status,
+                SourceMimeType,
+                Items,
+                FailureMessage,
+                ReceivedAtUtc,
+                destination);
         }
 
         private static string? NormalizeOptional(string? value)

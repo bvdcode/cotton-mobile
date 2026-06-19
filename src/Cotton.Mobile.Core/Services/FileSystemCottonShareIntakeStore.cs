@@ -162,9 +162,23 @@ namespace Cotton.Mobile.Services
                 Status = snapshot.Status,
                 SourceMimeType = snapshot.SourceMimeType,
                 Items = snapshot.Items.Select(CreateStoredItem).ToList(),
+                Destination = CreateStoredDestination(snapshot.Destination),
                 FailureMessage = snapshot.FailureMessage,
                 ReceivedAtUtc = snapshot.ReceivedAtUtc,
             };
+        }
+
+        private static CottonStoredShareDestination? CreateStoredDestination(
+            CottonShareDestinationSnapshot? destination)
+        {
+            return destination is null
+                ? null
+                : new CottonStoredShareDestination
+                {
+                    FolderId = destination.FolderId,
+                    FolderName = destination.FolderName,
+                    Path = destination.Path,
+                };
         }
 
         private static CottonStoredShareIntakeItem CreateStoredItem(CottonShareIntakeItemSnapshot item)
@@ -203,10 +217,32 @@ namespace Cotton.Mobile.Services
                     item.SourceMimeType,
                     items,
                     item.FailureMessage,
-                    item.ReceivedAtUtc);
+                    item.ReceivedAtUtc,
+                    TryCreateDestination(item.Destination));
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException or InvalidOperationException)
+            {
+                return null;
+            }
+        }
+
+        private static CottonShareDestinationSnapshot? TryCreateDestination(
+            CottonStoredShareDestination? destination)
+        {
+            if (destination is null)
+            {
+                return null;
+            }
+
+            try
+            {
+                return new CottonShareDestinationSnapshot(
+                    destination.FolderId,
+                    destination.FolderName ?? string.Empty,
+                    destination.Path);
+            }
+            catch (ArgumentException)
             {
                 return null;
             }
@@ -273,9 +309,20 @@ namespace Cotton.Mobile.Services
 
             public List<CottonStoredShareIntakeItem>? Items { get; set; }
 
+            public CottonStoredShareDestination? Destination { get; set; }
+
             public string? FailureMessage { get; set; }
 
             public DateTime ReceivedAtUtc { get; set; }
+        }
+
+        private class CottonStoredShareDestination
+        {
+            public Guid FolderId { get; set; }
+
+            public string? FolderName { get; set; }
+
+            public string? Path { get; set; }
         }
 
         private class CottonStoredShareIntakeItem

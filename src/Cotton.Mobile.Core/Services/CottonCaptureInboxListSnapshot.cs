@@ -50,6 +50,9 @@ namespace Cotton.Mobile.Services
                     FormatStatus(snapshot, item),
                     FormatDetail(snapshot, item),
                     FormatMetadata(snapshot, item),
+                    FormatDestination(snapshot, item),
+                    IsDestinationVisible(snapshot, item),
+                    CanSelectDestination(snapshot, item),
                     IsFailureVisible(snapshot, item),
                     FormatFailure(snapshot, item));
             }
@@ -99,6 +102,13 @@ namespace Cotton.Mobile.Services
                 return "Not staged";
             }
 
+            if (item.Type == CottonShareIntakeItemType.Uri
+                && item.HasStagedContent
+                && snapshot.Destination is null)
+            {
+                return "Choose folder";
+            }
+
             return "Ready";
         }
 
@@ -142,6 +152,36 @@ namespace Cotton.Mobile.Services
 
             parts.Add(snapshot.ReceivedAtUtc.ToLocalTime().ToString("g"));
             return string.Join(" · ", parts);
+        }
+
+        private static string FormatDestination(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            if (!IsDestinationVisible(snapshot, item))
+            {
+                return string.Empty;
+            }
+
+            return snapshot.Destination is null
+                ? "No destination selected"
+                : $"Destination: {snapshot.Destination.Path}";
+        }
+
+        private static bool IsDestinationVisible(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            return snapshot.Status == CottonShareIntakeStatus.Pending
+                && item.Type == CottonShareIntakeItemType.Uri
+                && item.HasStagedContent;
+        }
+
+        private static bool CanSelectDestination(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            return IsDestinationVisible(snapshot, item);
         }
 
         private static bool IsFailureVisible(

@@ -1,6 +1,6 @@
 namespace Cotton.Mobile.Services
 {
-    public interface ICaptureInboxPageService
+    public interface ICaptureDestinationPickerPageService
     {
         Task OpenAsync(Uri instanceUri, CancellationToken cancellationToken = default);
     }

@@ -641,9 +641,19 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenCaptureInboxAsync()
         {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Capture Inbox",
+                    "Could not open captured items for this instance.",
+                    "OK");
+                return;
+            }
+
             try
             {
-                await _captureInboxPageService.OpenAsync();
+                await _captureInboxPageService.OpenAsync(instanceUri);
             }
             catch (Exception exception)
             {

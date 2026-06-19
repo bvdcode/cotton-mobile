@@ -1,0 +1,321 @@
+using System.Collections.ObjectModel;
+using Cotton.Mobile.Commands;
+using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
+
+namespace Cotton.Mobile.ViewModels
+{
+    public class CaptureDestinationPickerViewModel : ViewModelBase
+    {
+        private readonly Uri _instanceUri;
+        private readonly ICottonFileBrowserService _fileBrowserService;
+        private readonly ICottonShareIntakeStore _intakeStore;
+        private readonly ILogger<CaptureDestinationPickerViewModel> _logger;
+        private readonly List<CottonFolderHandle> _path = [];
+
+        private bool _isBusy;
+        private string _currentFolderName = "Files";
+        private string _pathText = "Files";
+        private string _summaryText = "Loading folders...";
+        private string? _status;
+        private CottonFolderHandle? _currentFolder;
+
+        public CaptureDestinationPickerViewModel(
+            Uri instanceUri,
+            ICottonFileBrowserService fileBrowserService,
+            ICottonShareIntakeStore intakeStore,
+            ILogger<CaptureDestinationPickerViewModel> logger)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(intakeStore);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _instanceUri = instanceUri;
+            _fileBrowserService = fileBrowserService;
+            _intakeStore = intakeStore;
+            _logger = logger;
+            Folders = [];
+            LoadCommand = new AsyncCommand(LoadCurrentAsync, LogUnhandledCommandException, () => !IsBusy);
+            UpCommand = new AsyncCommand(NavigateUpAsync, LogUnhandledCommandException, () => !IsBusy && CanNavigateUp);
+            ChooseCommand = new AsyncCommand(ChooseCurrentAsync, LogUnhandledCommandException, () => !IsBusy && _currentFolder is not null);
+        }
+
+        public ObservableCollection<CaptureDestinationFolderItemViewModel> Folders { get; }
+
+        public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand UpCommand { get; }
+
+        public AsyncCommand ChooseCommand { get; }
+
+        public bool IsBusy
+        {
+            get => _isBusy;
+            private set
+            {
+                if (SetProperty(ref _isBusy, value))
+                {
+                    OnPropertyChanged(nameof(IsEmpty));
+                    LoadCommand.RaiseCanExecuteChanged();
+                    UpCommand.RaiseCanExecuteChanged();
+                    ChooseCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public string CurrentFolderName
+        {
+            get => _currentFolderName;
+            private set => SetProperty(ref _currentFolderName, value);
+        }
+
+        public string PathText
+        {
+            get => _pathText;
+            private set => SetProperty(ref _pathText, value);
+        }
+
+        public string SummaryText
+        {
+            get => _summaryText;
+            private set => SetProperty(ref _summaryText, value);
+        }
+
+        public string? Status
+        {
+            get => _status;
+            private set
+            {
+                if (SetProperty(ref _status, value))
+                {
+                    OnPropertyChanged(nameof(IsStatusVisible));
+                }
+            }
+        }
+
+        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public bool CanNavigateUp => _path.Count > 1;
+
+        public bool IsEmpty => Folders.Count == 0 && !IsBusy;
+
+        public bool IsListVisible => Folders.Count > 0;
+
+        private async Task LoadCurrentAsync()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            if (_currentFolder is null)
+            {
+                await LoadRootAsync();
+                return;
+            }
+
+            if (_path.Count <= 1)
+            {
+                await LoadRootAsync();
+                return;
+            }
+
+            await LoadFolderAsync(_currentFolder, preserveExistingPath: true);
+        }
+
+        private async Task NavigateUpAsync()
+        {
+            if (IsBusy || !CanNavigateUp)
+            {
+                return;
+            }
+
+            _path.RemoveAt(_path.Count - 1);
+            CottonFolderHandle folder = _path[^1];
+            if (_path.Count == 1)
+            {
+                await LoadRootAsync();
+            }
+            else
+            {
+                await LoadFolderAsync(folder, preserveExistingPath: true);
+            }
+        }
+
+        private async Task OpenFolderAsync(CottonFolderHandle folder)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            await LoadFolderAsync(folder, preserveExistingPath: false);
+        }
+
+        private async Task LoadRootAsync()
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                SummaryText = "Loading folders...";
+                CottonFolderContent content = await _fileBrowserService.GetRootAsync(_instanceUri);
+                var folder = new CottonFolderHandle(content.FolderId, content.FolderName);
+                _path.Clear();
+                _path.Add(folder);
+                ShowContent(content);
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture destination root load failed.");
+                Status = "Could not load folders.";
+            }
+            finally
+            {
+                IsBusy = false;
+                RaiseFolderStateChanged();
+            }
+        }
+
+        private async Task LoadFolderAsync(CottonFolderHandle folder, bool preserveExistingPath)
+        {
+            IsBusy = true;
+            try
+            {
+                SummaryText = $"Loading {folder.Name}...";
+                CottonFolderContent content = await _fileBrowserService.GetFolderAsync(_instanceUri, folder);
+                var loadedFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
+                if (preserveExistingPath)
+                {
+                    ReplaceCurrentPathFolder(loadedFolder);
+                }
+                else
+                {
+                    _path.Add(loadedFolder);
+                }
+
+                ShowContent(content);
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture destination folder load failed.");
+                Status = "Could not load this folder.";
+            }
+            finally
+            {
+                IsBusy = false;
+                RaiseFolderStateChanged();
+            }
+        }
+
+        private async Task ChooseCurrentAsync()
+        {
+            if (IsBusy || _currentFolder is null)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                var destination = new CottonShareDestinationSnapshot(
+                    _currentFolder.Id,
+                    _currentFolder.Name,
+                    PathText);
+                IReadOnlyList<CottonShareIntakeSnapshot> snapshots = await _intakeStore.LoadAsync();
+                List<CottonShareIntakeSnapshot> updatedSnapshots = snapshots
+                    .Select(snapshot => snapshot.CanSelectCaptureDestination
+                        ? snapshot.WithDestination(destination)
+                        : snapshot)
+                    .ToList();
+                int updatedCount = updatedSnapshots.Count(snapshot =>
+                    snapshot.Destination?.FolderId == destination.FolderId
+                    && snapshot.CanSelectCaptureDestination);
+                if (updatedCount == 0)
+                {
+                    Status = "No staged files need a destination.";
+                    return;
+                }
+
+                await _intakeStore.SaveAsync(updatedSnapshots);
+                Status = $"Destination set to {destination.Path}.";
+                await Shell.Current.Navigation.PopAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile capture destination save failed.");
+                Status = "Could not save destination.";
+            }
+            finally
+            {
+                IsBusy = false;
+                RaiseFolderStateChanged();
+            }
+        }
+
+        private void ShowContent(CottonFolderContent content)
+        {
+            _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
+            CurrentFolderName = _currentFolder.Name;
+            PathText = CreatePathText();
+            Folders.Clear();
+
+            foreach (CottonFileBrowserEntry folder in content.Entries
+                         .Where(entry => entry.Type == CottonFileBrowserEntryType.Folder)
+                         .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                         .ThenBy(entry => entry.Id))
+            {
+                Folders.Add(
+                    new CaptureDestinationFolderItemViewModel(
+                        new CottonFolderHandle(folder.Id, folder.Name),
+                        OpenFolderAsync,
+                        LogUnhandledCommandException));
+            }
+
+            SummaryText = Folders.Count == 1 ? "1 folder" : $"{Folders.Count:N0} folders";
+            RaiseFolderStateChanged();
+        }
+
+        private void ReplaceCurrentPathFolder(CottonFolderHandle folder)
+        {
+            if (_path.Count == 0)
+            {
+                _path.Add(folder);
+                return;
+            }
+
+            _path[^1] = folder;
+        }
+
+        private string CreatePathText()
+        {
+            if (_path.Count == 0)
+            {
+                return "Files";
+            }
+
+            return string.Join(" / ", _path.Select(folder => folder.Name));
+        }
+
+        private void RaiseFolderStateChanged()
+        {
+            OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsListVisible));
+            OnPropertyChanged(nameof(CanNavigateUp));
+            UpCommand.RaiseCanExecuteChanged();
+            ChooseCommand.RaiseCanExecuteChanged();
+        }
+
+        private void LogUnhandledCommandException(Exception exception)
+        {
+            _logger.LogError(exception, "Unhandled Cotton mobile capture destination command exception.");
+        }
+    }
+}

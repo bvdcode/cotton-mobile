@@ -10,6 +10,9 @@ namespace Cotton.Mobile.Services
             string statusText,
             string detailText,
             string metadataText,
+            string? destinationText,
+            bool isDestinationVisible,
+            bool canSelectDestination,
             bool isFailureVisible,
             string? failureMessage)
         {
@@ -35,6 +38,9 @@ namespace Cotton.Mobile.Services
             StatusText = string.IsNullOrWhiteSpace(statusText) ? "Unknown" : statusText.Trim();
             DetailText = string.IsNullOrWhiteSpace(detailText) ? KindText : detailText.Trim();
             MetadataText = string.IsNullOrWhiteSpace(metadataText) ? StatusText : metadataText.Trim();
+            DestinationText = string.IsNullOrWhiteSpace(destinationText) ? string.Empty : destinationText.Trim();
+            IsDestinationVisible = isDestinationVisible && DestinationText.Length > 0;
+            CanSelectDestination = canSelectDestination;
             IsFailureVisible = isFailureVisible && !string.IsNullOrWhiteSpace(failureMessage);
             FailureMessage = IsFailureVisible ? failureMessage!.Trim() : null;
         }
@@ -52,6 +58,12 @@ namespace Cotton.Mobile.Services
         public string DetailText { get; }
 
         public string MetadataText { get; }
+
+        public string DestinationText { get; }
+
+        public bool IsDestinationVisible { get; }
+
+        public bool CanSelectDestination { get; }
 
         public bool IsFailureVisible { get; }
 

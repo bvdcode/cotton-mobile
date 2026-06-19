@@ -88,14 +88,41 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Text", textItem.KindText);
             Assert.Equal("Ready", textItem.StatusText);
             Assert.Equal("Text share captured", textItem.DetailText);
+            Assert.False(textItem.IsDestinationVisible);
+            Assert.False(textItem.CanSelectDestination);
             Assert.False(textItem.IsFailureVisible);
 
             CottonCaptureInboxListItem fileItem = Find(snapshot, "photo.jpg");
             Assert.Equal("File", fileItem.KindText);
-            Assert.Equal("Ready", fileItem.StatusText);
+            Assert.Equal("Choose folder", fileItem.StatusText);
             Assert.Equal("Copied to this device", fileItem.DetailText);
+            Assert.Equal("No destination selected", fileItem.DestinationText);
+            Assert.True(fileItem.IsDestinationVisible);
+            Assert.True(fileItem.CanSelectDestination);
             Assert.Contains("12 B", fileItem.MetadataText, StringComparison.Ordinal);
             Assert.False(fileItem.IsFailureVisible);
+        }
+
+        [Fact]
+        public void Snapshot_formats_selected_destination_for_staged_files()
+        {
+            CottonShareIntakeSnapshot stagedFile = CreatePending(
+                    Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    "photo.jpg",
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Camera Uploads",
+                        "Files / Camera Uploads"));
+
+            CottonCaptureInboxListItem fileItem =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([stagedFile]).Items);
+
+            Assert.Equal("Ready", fileItem.StatusText);
+            Assert.Equal("Destination: Files / Camera Uploads", fileItem.DestinationText);
+            Assert.True(fileItem.IsDestinationVisible);
+            Assert.True(fileItem.CanSelectDestination);
         }
 
         private static CottonShareIntakeSnapshot CreatePending(Guid id, string displayName, DateTime receivedAtUtc)

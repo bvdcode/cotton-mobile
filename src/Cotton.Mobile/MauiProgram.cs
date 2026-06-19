@@ -62,6 +62,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupMetadataPathProvider, CottonCameraBackupMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 #if ANDROID
+			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
@@ -70,6 +71,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 #else
+			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, DisabledCottonNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();

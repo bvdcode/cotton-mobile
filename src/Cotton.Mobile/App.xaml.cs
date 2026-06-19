@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Cotton.Mobile.Services;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cotton.Mobile
 {
@@ -11,6 +12,8 @@ namespace Cotton.Mobile
 			ArgumentNullException.ThrowIfNull(serviceProvider);
 
 			InitializeComponent();
+			serviceProvider.GetRequiredService<ICottonNotificationChannelProvisioningService>()
+				.EnsureChannels();
 			_appShell = serviceProvider.GetRequiredService<AppShell>();
 		}
 

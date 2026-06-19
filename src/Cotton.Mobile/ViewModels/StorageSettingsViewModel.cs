@@ -12,7 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private const string ClearFolderListingsAction = "Clear lists";
         private const string ClearThumbnailsAction = "Clear thumbnails";
         private const string ClearAllTitle = "Clear all cached files";
-        private const string ClearDownloadedFilesTitle = "Clear downloaded files";
+        private const string ClearDownloadedFilesTitle = "Clear downloaded and offline files";
         private const string ClearFolderListingsTitle = "Clear offline folder lists";
         private const string ClearThumbnailsTitle = "Clear thumbnails";
 
@@ -165,10 +165,10 @@ namespace Cotton.Mobile.ViewModels
         {
             return ClearAsync(
                 ClearDownloadedFilesTitle,
-                "Files marked On device will need internet to open again.",
+                "Files marked On device, including kept-offline files, will need internet to open again.",
                 ClearDownloadedFilesAction,
                 _storageManagementService.ClearDownloadedFilesAsync,
-                "Downloaded files cleared.");
+                "Downloaded and offline files cleared.");
         }
 
         private Task ClearFolderListingsAsync()
@@ -185,7 +185,7 @@ namespace Cotton.Mobile.ViewModels
         {
             return ClearAsync(
                 ClearAllTitle,
-                "Thumbnail previews, offline folder lists, and files marked On device will be removed from this device.",
+                "Thumbnail previews, offline folder lists, and files marked On device, including kept-offline files, will be removed from this device.",
                 ClearAllAction,
                 _storageManagementService.ClearAllCachedFilesAsync,
                 "Cached files cleared.");

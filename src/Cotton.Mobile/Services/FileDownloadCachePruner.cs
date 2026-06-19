@@ -5,31 +5,57 @@ namespace Cotton.Mobile.Services
     public class FileDownloadCachePruner : IFileDownloadCachePruner
     {
         private readonly FileDownloadCacheOptions _options;
+        private readonly ICottonOfflineFilePinStore _offlineFilePinStore;
         private readonly ILogger<FileDownloadCachePruner> _logger;
 
         public FileDownloadCachePruner(
             FileDownloadCacheOptions options,
+            ICottonOfflineFilePinStore offlineFilePinStore,
             ILogger<FileDownloadCachePruner> logger)
         {
             ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(offlineFilePinStore);
             ArgumentNullException.ThrowIfNull(logger);
 
             _options = options;
+            _offlineFilePinStore = offlineFilePinStore;
             _logger = logger;
         }
 
-        public Task PruneAsync(string? protectedPath = null, CancellationToken cancellationToken = default)
+        public async Task PruneAsync(
+            Uri instanceUri,
+            string? protectedPath = null,
+            CancellationToken cancellationToken = default)
         {
-            return Task.Run(
-                () => PruneBestEffort(protectedPath, cancellationToken),
-                cancellationToken);
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            IReadOnlyCollection<string> protectedDirectories =
+                await LoadProtectedDownloadDirectoriesAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            await Task.Run(
+                    () => PruneBestEffort(protectedPath, protectedDirectories, cancellationToken),
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
-        private void PruneBestEffort(string? protectedPath, CancellationToken cancellationToken)
+        private async Task<IReadOnlyCollection<string>> LoadProtectedDownloadDirectoriesAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            IReadOnlyList<CottonOfflineFilePinSnapshot> pins =
+                await _offlineFilePinStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            return pins
+                .Select(pin => CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, pin.FileId))
+                .ToList();
+        }
+
+        private void PruneBestEffort(
+            string? protectedPath,
+            IReadOnlyCollection<string> protectedDirectories,
+            CancellationToken cancellationToken)
         {
             try
             {
-                PruneCore(protectedPath, cancellationToken);
+                PruneCore(protectedPath, protectedDirectories, cancellationToken);
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
@@ -37,7 +63,10 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private void PruneCore(string? protectedPath, CancellationToken cancellationToken)
+        private void PruneCore(
+            string? protectedPath,
+            IReadOnlyCollection<string> protectedDirectories,
+            CancellationToken cancellationToken)
         {
             string rootDirectory = CottonMobileStoragePaths.CreateDownloadsDirectory();
             if (!Directory.Exists(rootDirectory))
@@ -47,30 +76,25 @@ namespace Cotton.Mobile.Services
 
             string? normalizedProtectedPath = NormalizeProtectedPath(protectedPath);
             DeleteAbandonedTemporaryDownloads(rootDirectory, cancellationToken);
-            List<FileInfo> files = Directory
+            List<CottonFileDownloadCacheEntry> entries = Directory
                 .EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories)
                 .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
                 .Select(path => new FileInfo(path))
                 .Where(file => file.Exists)
-                .OrderBy(ResolvePruneTimestamp)
-                .ThenBy(file => file.FullName, StringComparer.Ordinal)
+                .Select(file => new CottonFileDownloadCacheEntry(
+                    file.FullName,
+                    file.Length,
+                    ResolvePruneTimestamp(file)))
                 .ToList();
-
-            long totalBytes = files.Sum(file => file.Length);
-            foreach (FileInfo file in files)
+            IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
+                entries,
+                _options.MaxCacheBytes,
+                normalizedProtectedPath,
+                protectedDirectories);
+            foreach (string deletePath in deletePaths)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                if (totalBytes <= _options.MaxCacheBytes)
-                {
-                    break;
-                }
-
-                if (IsProtected(file, normalizedProtectedPath))
-                {
-                    continue;
-                }
-
-                totalBytes -= TryDelete(file);
+                TryDelete(new FileInfo(deletePath));
             }
 
             DeleteEmptyDirectories(rootDirectory, cancellationToken);
@@ -102,12 +126,6 @@ namespace Cotton.Mobile.Services
             return string.IsNullOrWhiteSpace(protectedPath)
                 ? null
                 : Path.GetFullPath(protectedPath);
-        }
-
-        private static bool IsProtected(FileInfo file, string? normalizedProtectedPath)
-        {
-            return normalizedProtectedPath is not null
-                && string.Equals(file.FullName, normalizedProtectedPath, StringComparison.Ordinal);
         }
 
         private static DateTime ResolvePruneTimestamp(FileInfo file)

@@ -96,10 +96,21 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(file);
 
+            return CreateDownloadDirectory(instanceUri, file.Id);
+        }
+
+        public static string CreateDownloadDirectory(Uri instanceUri, Guid fileId)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            if (fileId == Guid.Empty)
+            {
+                throw new ArgumentException("File id is required.", nameof(fileId));
+            }
+
             return Path.Combine(
                 CreateDownloadsDirectory(),
                 CreateInstanceStorageKey(instanceUri),
-                file.Id.ToString("D"));
+                fileId.ToString("D"));
         }
 
         public static string CreateDownloadPath(Uri instanceUri, CottonFileBrowserEntry file)

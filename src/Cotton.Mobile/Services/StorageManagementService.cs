@@ -78,6 +78,9 @@ namespace Cotton.Mobile.Services
                     cancellationToken,
                     includeTemporaryDownloads: false,
                     onFileDeleted: () => deletedFile = true).ConfigureAwait(false);
+                await ClearDirectoryAsync(
+                    CottonMobileStoragePaths.CreateOfflineFileMetadataRootDirectory(),
+                    cancellationToken).ConfigureAwait(false);
                 NotifyDownloadedFilesCleared();
             }
             catch (Exception exception) when (exception is not OperationCanceledException)

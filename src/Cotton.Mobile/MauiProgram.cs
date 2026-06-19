@@ -62,20 +62,24 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupMetadataPathProvider, CottonCameraBackupMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 #if ANDROID
+			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost, AndroidBackgroundTransferHost>();
 			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 #else
+			builder.Services.AddSingleton<IAndroidApiLevelProvider, DisabledAndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, DisabledCottonNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonLocalNotificationService>(_ => NullCottonLocalNotificationService.Instance);
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost>(_ => DisabledCottonAndroidBackgroundTransferHost.Instance);
 			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
 				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
@@ -88,7 +92,6 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTransferStagingPathProvider, CottonTransferStagingPathProvider>();
 			builder.Services.AddSingleton<ICottonTransferStagingStore, FileSystemCottonTransferStagingStore>();
 			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost>(_ => DisabledCottonAndroidBackgroundTransferHost.Instance);
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferCoordinator, CottonAndroidBackgroundTransferCoordinator>();
 			builder.Services.AddSingleton<ICottonQueuedUploadClient, CottonQueuedUploadClient>();
 			builder.Services.AddSingleton<ICottonQueuedUploadExecutor, CottonQueuedUploadExecutor>();

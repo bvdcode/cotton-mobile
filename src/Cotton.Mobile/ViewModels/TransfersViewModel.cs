@@ -9,6 +9,8 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonTransferMetadataStore _metadataStore;
+        private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
+        private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
         private readonly ICottonQueuedUploadExecutor _queuedUploadExecutor;
         private readonly ILogger<TransfersViewModel> _logger;
 
@@ -21,16 +23,22 @@ namespace Cotton.Mobile.ViewModels
         public TransfersViewModel(
             Uri instanceUri,
             ICottonTransferMetadataStore metadataStore,
+            ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
+            IAndroidApiLevelProvider androidApiLevelProvider,
             ICottonQueuedUploadExecutor queuedUploadExecutor,
             ILogger<TransfersViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(metadataStore);
+            ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
+            ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
             ArgumentNullException.ThrowIfNull(queuedUploadExecutor);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _metadataStore = metadataStore;
+            _backgroundTransferCoordinator = backgroundTransferCoordinator;
+            _androidApiLevelProvider = androidApiLevelProvider;
             _queuedUploadExecutor = queuedUploadExecutor;
             _logger = logger;
             Items = [];
@@ -129,9 +137,25 @@ namespace Cotton.Mobile.ViewModels
             }
 
             IsBusy = true;
-            Status = "Running next waiting upload...";
             try
             {
+                CottonAndroidBackgroundTransferScheduleResult scheduleResult =
+                    await _backgroundTransferCoordinator.ScheduleNextQueuedUploadAsync(
+                        _instanceUri,
+                        _androidApiLevelProvider.CurrentApiLevel);
+                if (scheduleResult.IsScheduled
+                    || scheduleResult.Status == CottonAndroidBackgroundTransferScheduleStatus.NoQueuedTransfer)
+                {
+                    IReadOnlyList<CottonTransferQueueItem> scheduledTransfers =
+                        await _metadataStore.LoadAsync(_instanceUri);
+                    ShowSnapshot(CottonTransferListSnapshot.Create(scheduledTransfers));
+                    Status = scheduleResult.Status == CottonAndroidBackgroundTransferScheduleStatus.NoQueuedTransfer
+                        ? "No waiting uploads."
+                        : scheduleResult.StatusText;
+                    return;
+                }
+
+                Status = "Running next waiting upload...";
                 CottonQueuedUploadExecutionResult result =
                     await _queuedUploadExecutor.ExecuteNextAsync(_instanceUri);
                 IReadOnlyList<CottonTransferQueueItem> transfers = await _metadataStore.LoadAsync(_instanceUri);

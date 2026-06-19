@@ -17,6 +17,11 @@ namespace Cotton.Mobile.Services
 
         public CottonFileUploadSourceSnapshot Snapshot { get; }
 
+        public CottonFileUploadSource WithSnapshot(CottonFileUploadSourceSnapshot snapshot)
+        {
+            return new CottonFileUploadSource(snapshot, _openReadAsync);
+        }
+
         public Task<Stream> OpenReadAsync(CancellationToken cancellationToken)
         {
             return _openReadAsync(cancellationToken);

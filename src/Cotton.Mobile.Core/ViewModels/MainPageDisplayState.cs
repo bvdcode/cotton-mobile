@@ -189,6 +189,8 @@ namespace Cotton.Mobile.ViewModels
 
         public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
 
+        public IReadOnlyList<CottonFileBrowserEntry> AllFileEntries => _allFileEntries;
+
         public int TotalFileEntryCount => _allFileEntries.Count;
 
         public int VisibleFileEntryCount => FileEntries.Count;

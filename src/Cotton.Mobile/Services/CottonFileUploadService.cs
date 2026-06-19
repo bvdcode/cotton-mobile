@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Services
                 Name = source.Snapshot.Name,
                 ContentType = source.Snapshot.ContentType,
                 Hash = result.ContentHash,
-                Metadata = new Dictionary<string, string>(),
+                Metadata = new Dictionary<string, string>(source.Snapshot.Metadata, StringComparer.Ordinal),
                 Validate = true,
             };
 

@@ -31,7 +31,8 @@ namespace Cotton.Mobile.Services
             var snapshot = new CottonFileUploadSourceSnapshot(
                 result.FileName,
                 result.ContentType,
-                TryGetFileSize(result.FullPath));
+                TryGetFileSize(result.FullPath),
+                CreateUploadMetadata(result.FullPath));
             return new CottonFileUploadSource(
                 snapshot,
                 async token =>
@@ -50,6 +51,22 @@ namespace Cotton.Mobile.Services
             }
 
             return new FileInfo(path).Length;
+        }
+
+        private static IReadOnlyDictionary<string, string> CreateUploadMetadata(string? path)
+        {
+            var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                ["cotton.mobile.source"] = "picked-photo",
+            };
+
+            if (!string.IsNullOrWhiteSpace(path) && File.Exists(path))
+            {
+                metadata["cotton.mobile.originalLastModifiedUtc"] =
+                    File.GetLastWriteTimeUtc(path).ToString("O", System.Globalization.CultureInfo.InvariantCulture);
+            }
+
+            return metadata;
         }
     }
 }

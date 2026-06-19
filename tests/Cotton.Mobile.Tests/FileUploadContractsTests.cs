@@ -44,6 +44,45 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonFileUploadSourceSnapshot.DefaultFileName, snapshot.Name);
             Assert.Equal(CottonFileUploadSourceSnapshot.DefaultContentType, snapshot.ContentType);
             Assert.Null(snapshot.SizeBytes);
+            Assert.Empty(snapshot.Metadata);
+        }
+
+        [Fact]
+        public void Upload_source_snapshot_normalizes_optional_metadata()
+        {
+            var snapshot = new CottonFileUploadSourceSnapshot(
+                "photo.jpg",
+                "image/jpeg",
+                200,
+                new Dictionary<string, string>
+                {
+                    [" cotton.mobile.source "] = " picked-photo ",
+                    ["cotton.mobile.originalLastModifiedUtc"] = " 2026-06-19T10:00:00.0000000Z ",
+                    [" "] = "ignored",
+                    ["ignored"] = " ",
+                });
+
+            Assert.Equal("picked-photo", snapshot.Metadata["cotton.mobile.source"]);
+            Assert.Equal("2026-06-19T10:00:00.0000000Z", snapshot.Metadata["cotton.mobile.originalLastModifiedUtc"]);
+            Assert.DoesNotContain("ignored", snapshot.Metadata.Keys);
+        }
+
+        [Fact]
+        public void Upload_source_snapshot_keeps_metadata_when_renamed()
+        {
+            var snapshot = new CottonFileUploadSourceSnapshot(
+                "photo.jpg",
+                "image/jpeg",
+                200,
+                new Dictionary<string, string>
+                {
+                    ["cotton.mobile.source"] = "picked-photo",
+                });
+
+            CottonFileUploadSourceSnapshot renamed = snapshot.WithName("photo (1).jpg");
+
+            Assert.Equal("photo (1).jpg", renamed.Name);
+            Assert.Equal("picked-photo", renamed.Metadata["cotton.mobile.source"]);
         }
 
         [Fact]
@@ -92,6 +131,36 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
                 hash);
+        }
+
+        [Fact]
+        public void Upload_name_resolver_keeps_available_name()
+        {
+            string name = CottonFileUploadNameResolver.ResolveUniqueName(
+                "photo.jpg",
+                ["notes.txt"]);
+
+            Assert.Equal("photo.jpg", name);
+        }
+
+        [Fact]
+        public void Upload_name_resolver_adds_suffix_for_case_insensitive_duplicates()
+        {
+            string name = CottonFileUploadNameResolver.ResolveUniqueName(
+                "photo.jpg",
+                ["PHOTO.jpg", "photo (1).jpg"]);
+
+            Assert.Equal("photo (2).jpg", name);
+        }
+
+        [Fact]
+        public void Upload_name_resolver_handles_names_without_extension()
+        {
+            string name = CottonFileUploadNameResolver.ResolveUniqueName(
+                "Screenshot",
+                ["screenshot"]);
+
+            Assert.Equal("Screenshot (1)", name);
         }
     }
 }

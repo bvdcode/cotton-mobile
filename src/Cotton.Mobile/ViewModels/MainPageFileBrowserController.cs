@@ -1020,6 +1020,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            source = ResolveUniqueUploadSource(source);
             CancellationTokenSource fileActionCancellation = BeginFileAction($"Uploading {source.Snapshot.Name}...");
 
             try
@@ -1084,6 +1085,20 @@ namespace Cotton.Mobile.ViewModels
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
             }
+        }
+
+        private CottonFileUploadSource ResolveUniqueUploadSource(CottonFileUploadSource source)
+        {
+            IReadOnlyList<string> existingFileNames = _display.AllFileEntries
+                .Where(entry => entry.Type == CottonFileBrowserEntryType.File)
+                .Select(entry => entry.Name)
+                .ToArray();
+            string resolvedName = CottonFileUploadNameResolver.ResolveUniqueName(
+                source.Snapshot.Name,
+                existingFileNames);
+            return string.Equals(resolvedName, source.Snapshot.Name, StringComparison.Ordinal)
+                ? source
+                : source.WithSnapshot(source.Snapshot.WithName(resolvedName));
         }
 
         private async Task RefreshAfterUploadAsync(

@@ -90,6 +90,35 @@
                     StrokeShape="RoundRectangle 8"
                     Padding="14"
                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      RowSpacing="6">
+                    <Label Text="{Binding HealthTitle}"
+                           FontSize="15"
+                           FontAttributes="Bold"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Grid.Row="1"
+                           Text="{Binding HealthCountsText}"
+                           FontSize="13"
+                           MaxLines="2"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Grid.Row="2"
+                           Text="{Binding HealthStatusText}"
+                           FontSize="12"
+                           MaxLines="2"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </Grid>
+            </Border>
+
+            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12"

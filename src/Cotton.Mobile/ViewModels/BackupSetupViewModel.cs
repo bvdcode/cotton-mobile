@@ -19,6 +19,9 @@ namespace Cotton.Mobile.ViewModels
         private string _destinationText = "No folder selected";
         private string _executionStatusText = "Choose a folder before camera backup can run.";
         private string _policySummaryText = "Photos only, Wi-Fi only, any battery state.";
+        private string _healthTitle = "Backup Health";
+        private string _healthStatusText = "Backup health will appear after background backup is available.";
+        private string _healthCountsText = "Pending 0 · Uploaded 0 · Failed 0 · Blocked 0";
         private string? _status;
 
         public BackupSetupViewModel(
@@ -145,6 +148,24 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _policySummaryText, value);
         }
 
+        public string HealthTitle
+        {
+            get => _healthTitle;
+            private set => SetProperty(ref _healthTitle, value);
+        }
+
+        public string HealthStatusText
+        {
+            get => _healthStatusText;
+            private set => SetProperty(ref _healthStatusText, value);
+        }
+
+        public string HealthCountsText
+        {
+            get => _healthCountsText;
+            private set => SetProperty(ref _healthCountsText, value);
+        }
+
         public string? Status
         {
             get => _status;
@@ -225,6 +246,7 @@ namespace Cotton.Mobile.ViewModels
             DestinationText = display.DestinationText;
             ExecutionStatusText = display.ExecutionStatusText;
             PolicySummaryText = display.PolicySummaryText;
+            ShowHealth(settings);
         }
 
         private void RefreshPolicyPreview()
@@ -235,6 +257,16 @@ namespace Cotton.Mobile.ViewModels
                 .WithAllowCellular(AllowCellular)
                 .WithChargingOnly(ChargingOnly);
             PolicySummaryText = CottonCameraBackupSetupDisplayState.Create(preview).PolicySummaryText;
+            ShowHealth(preview);
+        }
+
+        private void ShowHealth(CottonCameraBackupSettings settings)
+        {
+            CottonCameraBackupHealthDisplayState health =
+                CottonCameraBackupHealthDisplayState.Create(settings, CottonCameraBackupHealthSnapshot.Empty);
+            HealthTitle = health.Title;
+            HealthStatusText = health.StatusText;
+            HealthCountsText = health.CountsText;
         }
 
         private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)

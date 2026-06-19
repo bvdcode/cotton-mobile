@@ -63,7 +63,11 @@ namespace Cotton.Mobile
 		{
 			base.OnAppearing();
 
-			await _viewModel.RestoreSessionOnceAsync();
+			bool restoredSession = await _viewModel.RestoreSessionOnceAsync();
+			if (!restoredSession)
+			{
+				await _viewModel.RefreshTransferActivityAsync();
+			}
 		}
 
 		private void MainPage_Loaded(object? sender, EventArgs e)

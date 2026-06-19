@@ -249,15 +249,34 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand OpenTransfersCommand { get; }
 
-        public async Task RestoreSessionOnceAsync()
+        public async Task<bool> RestoreSessionOnceAsync()
         {
             if (_didRestoreSession)
             {
-                return;
+                return false;
             }
 
             _didRestoreSession = true;
             await RestoreSessionAsync();
+            return true;
+        }
+
+        public async Task RefreshTransferActivityAsync()
+        {
+            if (!Display.IsProfileVisible)
+            {
+                return;
+            }
+
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                return;
+            }
+
+            IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
+                await RestoreTransferQueueBestEffortAsync(instanceUri);
+            Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
         }
 
         public async Task HandleFileBrowserSessionExpiredAsync(Uri? instanceUri)

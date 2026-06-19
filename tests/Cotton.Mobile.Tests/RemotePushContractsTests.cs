@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class RemotePushContractsTests
     {
         [Fact]
-        public void Android_closed_testing_path_uses_fcm_and_keeps_delivery_gap_explicit()
+        public void Android_closed_testing_path_uses_fcm_and_marks_backend_surface_complete()
         {
             CottonRemotePushCapabilitySnapshot capability =
                 CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend;
@@ -16,7 +16,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonRemotePushMobilePlatform.Android, capability.Platform);
             Assert.True(capability.RequiresAndroidPostNotificationsPermissionForVisibleAlerts);
             Assert.True(capability.CanRegisterDeviceToken);
-            Assert.False(capability.CanDeliverRemotePush);
+            Assert.True(capability.CanDeliverRemotePush);
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
                 capability.AvailableServerCapabilities);
@@ -38,6 +38,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(
                 CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
                 capability.AvailableServerCapabilities);
+            Assert.Contains(
+                CottonRemotePushServerCapabilityKind.ProviderDeliveryService,
+                capability.AvailableServerCapabilities);
             Assert.DoesNotContain(
                 CottonRemotePushServerCapabilityKind.DeviceTokenRegistrationEndpoint,
                 capability.MissingServerCapabilities);
@@ -53,7 +56,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain(
                 CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
                 capability.MissingServerCapabilities);
-            Assert.Contains(
+            Assert.DoesNotContain(
                 CottonRemotePushServerCapabilityKind.ProviderDeliveryService,
                 capability.MissingServerCapabilities);
         }

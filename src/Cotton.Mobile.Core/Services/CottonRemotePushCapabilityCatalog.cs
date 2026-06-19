@@ -23,6 +23,7 @@ namespace Cotton.Mobile.Services
             CottonRemotePushServerCapabilityKind.PushPayloadPrivacyFiltering,
             CottonRemotePushServerCapabilityKind.StaleTokenCleanup,
             CottonRemotePushServerCapabilityKind.UserNotificationPreferences,
+            CottonRemotePushServerCapabilityKind.ProviderDeliveryService,
         };
 
         private static readonly CottonRemotePushEventCategorySnapshot[] EventCategories =

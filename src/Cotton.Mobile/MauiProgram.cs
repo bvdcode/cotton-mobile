@@ -138,14 +138,16 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
 			builder.Services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
-			builder.Services.AddSingleton<ICottonCloudShareLinkService>(services =>
+			builder.Services.AddSingleton(services =>
 			{
 				ICottonMobileApplicationMetadata metadata = services.GetRequiredService<ICottonMobileApplicationMetadata>();
-				return new CottonCloudShareLinkService(
+				return new CottonAuthenticatedApiClient(
 					services.GetRequiredService<HttpClient>(),
 					services.GetRequiredService<ICottonTokenStore>(),
-					new CottonCloudShareLinkHttpOptions(metadata.UserAgent, metadata.DeviceName));
+					new CottonAuthenticatedApiHttpOptions(metadata.UserAgent, metadata.DeviceName));
 			});
+			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
+			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
 			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddTransient<MainPageViewModel>();

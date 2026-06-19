@@ -1,8 +1,8 @@
 namespace Cotton.Mobile.Services
 {
-    public class CottonCloudShareLinkHttpOptions
+    public class CottonAuthenticatedApiHttpOptions
     {
-        public CottonCloudShareLinkHttpOptions(
+        public CottonAuthenticatedApiHttpOptions(
             string? userAgent,
             string? deviceName,
             bool refreshOnUnauthorized = true)
@@ -12,7 +12,7 @@ namespace Cotton.Mobile.Services
             RefreshOnUnauthorized = refreshOnUnauthorized;
         }
 
-        public static CottonCloudShareLinkHttpOptions Default { get; } =
+        public static CottonAuthenticatedApiHttpOptions Default { get; } =
             new(userAgent: null, deviceName: null);
 
         public string? UserAgent { get; }

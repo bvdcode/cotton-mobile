@@ -177,11 +177,8 @@ namespace Cotton.Mobile.Tests
             handler.EnqueueJson(HttpStatusCode.OK, "/s/file-token");
             var tokenStore = new FakeTokenStore("access", "refresh");
             var longDeviceName = new string('d', CottonClientHeaders.DeviceNameMaxLength + 1);
-            using var httpClient = new HttpClient(handler);
             var service = new CottonCloudShareLinkService(
-                httpClient,
-                tokenStore,
-                new CottonCloudShareLinkHttpOptions("Cotton-Mobile/1.0", longDeviceName));
+                CreateApiClient(handler, tokenStore, deviceName: longDeviceName));
 
             await service.CreateAsync(InstanceUri, CottonCloudShareLinkRequest.ForFile(FileId));
 
@@ -260,11 +257,20 @@ namespace Cotton.Mobile.Tests
             RecordingHttpMessageHandler handler,
             ICottonTokenStore tokenStore)
         {
+            return new CottonCloudShareLinkService(CreateApiClient(handler, tokenStore));
+        }
+
+        private static CottonAuthenticatedApiClient CreateApiClient(
+            RecordingHttpMessageHandler handler,
+            ICottonTokenStore tokenStore,
+            string userAgent = "Cotton-Mobile/1.0",
+            string deviceName = "Test device")
+        {
             var httpClient = new HttpClient(handler);
-            return new CottonCloudShareLinkService(
+            return new CottonAuthenticatedApiClient(
                 httpClient,
                 tokenStore,
-                new CottonCloudShareLinkHttpOptions("Cotton-Mobile/1.0", "Test device"));
+                new CottonAuthenticatedApiHttpOptions(userAgent, deviceName));
         }
 
         private class FakeTokenStore : ICottonTokenStore

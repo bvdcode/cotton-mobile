@@ -35,6 +35,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
         private readonly ICaptureInboxPageService _captureInboxPageService;
+        private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly IScreenReaderService _screenReader;
         private readonly INetworkAccessService _networkAccess;
@@ -47,6 +48,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _didRestoreSession;
         private bool _isSessionRestoreInProgress;
         private bool _isSessionRestoreRetryQueued;
+        private bool _isCaptureInboxOpenQueued;
         private bool _shouldRetrySessionRestoreWhenOnline;
         private bool _shouldRetrySessionRestoreOnResume;
 
@@ -62,6 +64,7 @@ namespace Cotton.Mobile.ViewModels
             IStorageSettingsPageService storageSettingsPageService,
             ITransfersPageService transfersPageService,
             ICaptureInboxPageService captureInboxPageService,
+            ICottonShareLaunchState shareLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
@@ -89,6 +92,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
+            ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
@@ -116,6 +120,7 @@ namespace Cotton.Mobile.ViewModels
             _storageSettingsPageService = storageSettingsPageService;
             _transfersPageService = transfersPageService;
             _captureInboxPageService = captureInboxPageService;
+            _shareLaunchState = shareLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _screenReader = screenReader;
             _networkAccess = networkAccess;
@@ -140,6 +145,7 @@ namespace Cotton.Mobile.ViewModels
                 this,
                 fileBrowserLogger);
             _storageManagementService.DownloadedFilesCleared += StorageManagementService_DownloadedFilesCleared;
+            _shareLaunchState.ShareStaged += ShareLaunchState_ShareStaged;
             ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(
                 CancelAuthorizationAsync,
@@ -292,6 +298,7 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 _isSessionRestoreInProgress = false;
+                QueuePendingCaptureInboxOpen("session restore finished");
             }
         }
 
@@ -641,27 +648,100 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenCaptureInboxAsync()
         {
+            await TryOpenCaptureInboxAsync(showAlertOnFailure: true);
+        }
+
+        private async Task<bool> TryOpenCaptureInboxAsync(bool showAlertOnFailure)
+        {
             Uri? instanceUri = ResolveInstanceUri();
             if (instanceUri is null)
             {
-                await _dialogService.ShowAlertAsync(
-                    "Capture Inbox",
-                    "Could not open captured items for this instance.",
-                    "OK");
-                return;
+                if (showAlertOnFailure)
+                {
+                    await _dialogService.ShowAlertAsync(
+                        "Capture Inbox",
+                        "Could not open captured items for this instance.",
+                        "OK");
+                }
+
+                return false;
             }
 
             try
             {
                 await _captureInboxPageService.OpenAsync(instanceUri);
+                return true;
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to open Cotton mobile capture inbox page.");
-                await _dialogService.ShowAlertAsync(
-                    "Capture Inbox",
-                    "Could not inspect captured items.",
-                    "OK");
+                if (showAlertOnFailure)
+                {
+                    await _dialogService.ShowAlertAsync(
+                        "Capture Inbox",
+                        "Could not inspect captured items.",
+                        "OK");
+                }
+
+                return false;
+            }
+        }
+
+        private void ShareLaunchState_ShareStaged(object? sender, EventArgs e)
+        {
+            QueuePendingCaptureInboxOpen("share launch");
+        }
+
+        private void QueuePendingCaptureInboxOpen(string reason)
+        {
+            if (_isCaptureInboxOpenQueued || _shareLaunchState.PendingShareLaunchCount == 0)
+            {
+                return;
+            }
+
+            _isCaptureInboxOpenQueued = true;
+            _ = RunQueuedCaptureInboxOpenAsync(reason);
+        }
+
+        private async Task RunQueuedCaptureInboxOpenAsync(string reason)
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => OpenPendingCaptureInboxAfterShareAsync(reason));
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to queue Cotton mobile Capture Inbox open after {Reason}.",
+                    reason);
+                _isCaptureInboxOpenQueued = false;
+            }
+        }
+
+        private async Task OpenPendingCaptureInboxAfterShareAsync(string reason)
+        {
+            try
+            {
+                if (_isSessionRestoreInProgress || !Display.IsProfileVisible)
+                {
+                    return;
+                }
+
+                if (_shareLaunchState.PendingShareLaunchCount == 0)
+                {
+                    return;
+                }
+
+                _logger.LogInformation("Opening Cotton mobile Capture Inbox after {Reason}.", reason);
+                if (await TryOpenCaptureInboxAsync(showAlertOnFailure: false))
+                {
+                    _shareLaunchState.TryConsumePendingShareLaunch();
+                }
+            }
+            finally
+            {
+                _isCaptureInboxOpenQueued = false;
             }
         }
 
@@ -898,6 +978,7 @@ namespace Cotton.Mobile.ViewModels
                 Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
+                QueuePendingCaptureInboxOpen("authenticated session");
                 return;
             }
 

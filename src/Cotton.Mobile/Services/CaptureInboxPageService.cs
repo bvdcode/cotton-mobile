@@ -24,6 +24,13 @@ namespace Cotton.Mobile.Services
             await MainThread.InvokeOnMainThreadAsync(async () =>
             {
                 cancellationToken.ThrowIfCancellationRequested();
+                if (Shell.Current.Navigation.NavigationStack.LastOrDefault() is CaptureInboxPage currentPage
+                    && currentPage.BindingContext is CaptureInboxViewModel currentViewModel)
+                {
+                    currentViewModel.LoadCommand.Execute(null);
+                    return;
+                }
+
                 var viewModel = ActivatorUtilities.CreateInstance<CaptureInboxViewModel>(
                     _serviceProvider,
                     instanceUri);

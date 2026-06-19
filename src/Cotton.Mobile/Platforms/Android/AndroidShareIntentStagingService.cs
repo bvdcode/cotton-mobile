@@ -14,21 +14,25 @@ namespace Cotton.Mobile.Services
 
         private readonly ICottonShareIntakeStore _store;
         private readonly ICottonShareContentStagingStore _contentStagingStore;
+        private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ILogger<AndroidShareIntentStagingService> _logger;
         private readonly TimeProvider _timeProvider;
 
         public AndroidShareIntentStagingService(
             ICottonShareIntakeStore store,
             ICottonShareContentStagingStore contentStagingStore,
+            ICottonShareLaunchState shareLaunchState,
             ILogger<AndroidShareIntentStagingService> logger,
             TimeProvider? timeProvider = null)
         {
             ArgumentNullException.ThrowIfNull(store);
             ArgumentNullException.ThrowIfNull(contentStagingStore);
+            ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(logger);
 
             _store = store;
             _contentStagingStore = contentStagingStore;
+            _shareLaunchState = shareLaunchState;
             _logger = logger;
             _timeProvider = timeProvider ?? TimeProvider.System;
         }
@@ -97,6 +101,7 @@ namespace Cotton.Mobile.Services
                     receivedAtUtc);
 
             await _store.AddAsync(snapshot, cancellationToken).ConfigureAwait(false);
+            _shareLaunchState.NotifyShareStaged();
             return snapshot;
         }
 

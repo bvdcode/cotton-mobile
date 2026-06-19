@@ -185,7 +185,7 @@
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
-                           Text="Setup only until durable background uploads are available."
+                           Text="Choose which camera media is queued from this device."
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"

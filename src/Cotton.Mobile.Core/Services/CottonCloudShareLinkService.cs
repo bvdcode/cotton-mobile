@@ -222,6 +222,12 @@ namespace Cotton.Mobile.Services
 
             try
             {
+                if (typeof(T) == typeof(string)
+                    && !body.TrimStart().StartsWith("\"", StringComparison.Ordinal))
+                {
+                    return (T)(object)body.Trim();
+                }
+
                 T? result = JsonSerializer.Deserialize<T>(body, JsonOptions);
                 return result ?? throw new CottonApiException(
                     response.StatusCode,

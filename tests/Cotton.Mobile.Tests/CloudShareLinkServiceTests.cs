@@ -60,6 +60,20 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task CreateAsync_accepts_plain_text_backend_link_response()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueText(HttpStatusCode.OK, "/s/plain-token");
+            var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
+
+            CottonCloudShareLinkSnapshot result = await service.CreateAsync(
+                InstanceUri,
+                CottonCloudShareLinkRequest.ForFolder(FolderId));
+
+            Assert.Equal("https://cloud.example/s/plain-token", result.ShareUrl);
+        }
+
+        [Fact]
         public async Task CreateAsync_refreshes_token_once_after_unauthorized_response()
         {
             var handler = new RecordingHttpMessageHandler();
@@ -245,6 +259,14 @@ namespace Cotton.Mobile.Tests
                     {
                         Content = new StringContent(json, Encoding.UTF8, "application/json"),
                     };
+                });
+            }
+
+            public void EnqueueText(HttpStatusCode statusCode, string value)
+            {
+                _responses.Enqueue(_ => new HttpResponseMessage(statusCode)
+                {
+                    Content = new StringContent(value, Encoding.UTF8, "text/plain"),
                 });
             }
 

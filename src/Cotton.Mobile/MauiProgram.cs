@@ -29,6 +29,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ILauncher>(Launcher.Default);
 			builder.Services.AddSingleton<IShare>(Share.Default);
 			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
+			builder.Services.AddSingleton<IFilePicker>(FilePicker.Default);
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
 			builder.Services.AddSingleton(FileDownloadCacheOptions.Default);
@@ -50,7 +51,9 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
 			builder.Services.AddSingleton<ICottonFolderContentCache, FileSystemCottonFolderContentCache>();
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
+			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
+			builder.Services.AddSingleton<IFileUploadPickerService, FileUploadPickerService>();
 			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
 			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
 			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();

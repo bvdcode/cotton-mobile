@@ -57,8 +57,10 @@ namespace Cotton.Mobile.ViewModels
             IStorageSettingsPageService storageSettingsPageService,
             IScreenReaderService screenReader,
             ICottonFileBrowserService fileBrowserService,
+            ICottonFileUploadService fileUploadService,
             ICottonFolderContentCache folderContentCache,
             IFileBrowserPreferenceStore fileBrowserPreferenceStore,
+            IFileUploadPickerService fileUploadPickerService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             IFileThumbnailProvider thumbnailProvider,
@@ -79,8 +81,10 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(screenReader);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(fileUploadService);
             ArgumentNullException.ThrowIfNull(folderContentCache);
             ArgumentNullException.ThrowIfNull(fileBrowserPreferenceStore);
+            ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
@@ -109,8 +113,10 @@ namespace Cotton.Mobile.ViewModels
             _fileBrowser = new MainPageFileBrowserController(
                 Display,
                 fileBrowserService,
+                fileUploadService,
                 folderContentCache,
                 fileBrowserPreferenceStore,
+                fileUploadPickerService,
                 fileInteractionService,
                 filePreviewService,
                 thumbnailProvider,
@@ -147,6 +153,10 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowser.ShowEntryActionsAsync,
                 LogUnhandledCommandException,
                 _ => Display.IsFileBrowserChromeEnabled);
+            ShowFileAddActionsCommand = new AsyncCommand(
+                _fileBrowser.ShowAddActionsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileBrowserChromeEnabled);
             CancelFileActionCommand = new AsyncCommand(
                 _fileBrowser.CancelFileActionAsync,
                 LogUnhandledCommandException,
@@ -191,6 +201,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand<CottonFileBrowserEntry> ActivateFileBrowserEntryCommand { get; }
 
         public AsyncCommand<CottonFileBrowserEntry> ShowFileBrowserEntryActionsCommand { get; }
+
+        public AsyncCommand ShowFileAddActionsCommand { get; }
 
         public AsyncCommand CancelFileActionCommand { get; }
 
@@ -890,6 +902,7 @@ namespace Cotton.Mobile.ViewModels
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
             ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
+            ShowFileAddActionsCommand.RaiseCanExecuteChanged();
             CancelFileActionCommand.RaiseCanExecuteChanged();
             RetryFileActionCommand.RaiseCanExecuteChanged();
             ToggleFileSearchCommand.RaiseCanExecuteChanged();
@@ -923,6 +936,7 @@ namespace Cotton.Mobile.ViewModels
                     RefreshFilesCommand.RaiseCanExecuteChanged();
                     ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
                     ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
+                    ShowFileAddActionsCommand.RaiseCanExecuteChanged();
                     ToggleFileSearchCommand.RaiseCanExecuteChanged();
                     ShowFileViewActionsCommand.RaiseCanExecuteChanged();
                     ShowFileSortActionsCommand.RaiseCanExecuteChanged();

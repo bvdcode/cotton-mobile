@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenAction = "Open";
         private const string OpenWithSystemAppAction = "Open with system app";
         private const string ShareAction = "Share";
+        private const string UploadFileAction = "Upload file";
         private const string SortNameAction = "Name";
         private const string SortUpdatedAction = "Updated";
         private const string SortSizeAction = "Size";
@@ -27,12 +28,17 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineDownloadStatus = "Offline. Download needs internet.";
         private const string OfflineOpenStatus = "Offline. This file is not available on device.";
         private const string OfflineShareStatus = "Offline. This file is not available on device.";
+        private const string OfflineUploadStatus = "Offline. Upload needs internet.";
         private const string OpenUnavailableStatus = "No app can open this file.";
+        private const int PayloadTooLargeStatusCode = 413;
+        private const int InsufficientStorageStatusCode = 507;
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
+        private readonly ICottonFileUploadService _fileUploadService;
         private readonly ICottonFolderContentCache _folderContentCache;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
+        private readonly IFileUploadPickerService _fileUploadPickerService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
@@ -59,8 +65,10 @@ namespace Cotton.Mobile.ViewModels
         public MainPageFileBrowserController(
             MainPageDisplayState display,
             ICottonFileBrowserService fileBrowserService,
+            ICottonFileUploadService fileUploadService,
             ICottonFolderContentCache folderContentCache,
             IFileBrowserPreferenceStore preferenceStore,
+            IFileUploadPickerService fileUploadPickerService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             IFileThumbnailProvider thumbnailProvider,
@@ -72,8 +80,10 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(display);
             ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(fileUploadService);
             ArgumentNullException.ThrowIfNull(folderContentCache);
             ArgumentNullException.ThrowIfNull(preferenceStore);
+            ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
@@ -85,8 +95,10 @@ namespace Cotton.Mobile.ViewModels
 
             _display = display;
             _fileBrowserService = fileBrowserService;
+            _fileUploadService = fileUploadService;
             _folderContentCache = folderContentCache;
             _preferenceStore = preferenceStore;
+            _fileUploadPickerService = fileUploadPickerService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
             _thumbnailProvider = thumbnailProvider;
@@ -313,6 +325,34 @@ namespace Cotton.Mobile.ViewModels
             ClearFileActionRetry();
             _display.ToggleFileSearch();
             return Task.CompletedTask;
+        }
+
+        public async Task ShowAddActionsAsync()
+        {
+            ClearFileActionRetry();
+            Uri? instanceUri = GetActiveFileBrowserInstance();
+            CottonFolderHandle? folder = _currentFolder;
+            if (instanceUri is null || folder is null)
+            {
+                _display.ShowFilesStatus("Open a folder before uploading.");
+                return;
+            }
+
+            string? action = await _dialogService.ShowActionSheetAsync(
+                "Add",
+                CancelAction,
+                null,
+                UploadFileAction);
+
+            if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
+            {
+                return;
+            }
+
+            if (NormalizeAction(action) == UploadFileAction)
+            {
+                await UploadFileAsync(instanceUri, folder);
+            }
         }
 
         public async Task ShowSortActionsAsync()
@@ -917,6 +957,129 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task UploadFileAsync(Uri instanceUri, CottonFolderHandle folder)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(OfflineUploadStatus);
+                return;
+            }
+
+            CottonFileUploadSource? source;
+            try
+            {
+                source = await _fileUploadPickerService.PickFileAsync();
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload file.");
+                _display.ShowFilesStatus("Could not choose file.");
+                return;
+            }
+
+            if (source is null)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
+            {
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction($"Uploading {source.Snapshot.Name}...");
+
+            try
+            {
+                await _fileUploadService.UploadAsync(
+                    instanceUri,
+                    folder,
+                    source,
+                    CreateFileUploadProgress(
+                        source.Snapshot,
+                        () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                        fileActionCancellation.Token),
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await RefreshAfterUploadAsync(
+                    instanceUri,
+                    folder,
+                    source.Snapshot.Name,
+                    fileActionCancellation);
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile upload authorization failure.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile upload cancellation.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus("Upload cancelled.");
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile upload failure.");
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to upload Cotton mobile file.");
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CreateUploadFailureStatus(exception));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
+        private async Task RefreshAfterUploadAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            string fileName,
+            CancellationTokenSource fileActionCancellation)
+        {
+            if (_fileNavigation.Count == 0)
+            {
+                await LoadRootFilesAsync(isRefresh: true);
+            }
+            else
+            {
+                await LoadFolderAsync(folder, preserveHistory: true, isRefresh: true);
+            }
+
+            if (IsActiveFileAction(fileActionCancellation, instanceUri)
+                && HasSameFolder(_currentFolder, folder)
+                && !_lastFileLoadFailed)
+            {
+                _display.ShowFilesStatus($"Uploaded {fileName}.");
             }
         }
 
@@ -1535,6 +1698,32 @@ namespace Cotton.Mobile.ViewModels
             });
         }
 
+        private IProgress<long> CreateFileUploadProgress(
+            CottonFileUploadSourceSnapshot source,
+            Func<bool> canUpdateProgress,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            string? lastStatus = null;
+            return new Progress<long>(uploadedBytes =>
+            {
+                if (cancellationToken.IsCancellationRequested || !canUpdateProgress())
+                {
+                    return;
+                }
+
+                string status = new CottonFileUploadProgressSnapshot(source, uploadedBytes).StatusText;
+                if (string.Equals(status, lastStatus, StringComparison.Ordinal))
+                {
+                    return;
+                }
+
+                lastStatus = status;
+                _display.ShowFileActionLoading(status);
+            });
+        }
+
         private CancellationTokenSource BeginFileAction(string status)
         {
             CancelCurrentFileAction();
@@ -1881,6 +2070,38 @@ namespace Cotton.Mobile.ViewModels
             return exception is FileOpenUnavailableException
                 ? OpenUnavailableStatus
                 : fallbackStatus;
+        }
+
+        private string CreateUploadFailureStatus(Exception exception)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return OfflineUploadStatus;
+            }
+
+            if (exception is CottonApiException apiException
+                && apiException.StatusCode is HttpStatusCode httpStatusCode)
+            {
+                int statusCode = (int)httpStatusCode;
+                if (statusCode == PayloadTooLargeStatusCode)
+                {
+                    return "Upload failed. File is too large.";
+                }
+
+                if (statusCode == InsufficientStorageStatusCode)
+                {
+                    return "Upload failed. Storage quota is full.";
+                }
+
+                if (httpStatusCode is HttpStatusCode.BadRequest
+                    or HttpStatusCode.Conflict
+                    or HttpStatusCode.UnprocessableEntity)
+                {
+                    return "Upload failed. Server rejected this file.";
+                }
+            }
+
+            return "Upload failed.";
         }
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)

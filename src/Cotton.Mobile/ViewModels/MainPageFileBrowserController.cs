@@ -298,7 +298,7 @@ namespace Cotton.Mobile.ViewModels
             if (currentEntry.IsFolder)
             {
                 ClearFileActionRetry();
-                await OpenFolderAsync(currentEntry);
+                await ShowFolderActionsAsync(currentEntry);
                 return;
             }
 
@@ -505,6 +505,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.Download:
                     await DownloadFileAsync(currentEntry);
                     break;
+                case MainPageFileAction.KeepFolderOffline:
+                    await PlanFolderOfflineAsync(currentEntry);
+                    break;
                 case MainPageFileAction.KeepOffline:
                     await KeepFileOfflineAsync(currentEntry);
                     break;
@@ -516,6 +519,38 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case MainPageFileAction.Share:
                     await ShareFileAsync(currentEntry);
+                    break;
+            }
+        }
+
+        private async Task ShowFolderActionsAsync(CottonFileBrowserEntry folder)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null || !CanUseVisibleEntry(folder, instanceUri))
+            {
+                return;
+            }
+
+            string? action = await _dialogService.ShowActionSheetAsync(
+                folder.Name,
+                CancelAction,
+                null,
+                OpenAction,
+                KeepOfflineAction);
+
+            CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
+            if (currentFolder is null)
+            {
+                return;
+            }
+
+            switch (NormalizeAction(action))
+            {
+                case OpenAction:
+                    await OpenFolderAsync(currentFolder);
+                    break;
+                case KeepOfflineAction:
+                    await PlanFolderOfflineAsync(currentFolder);
                     break;
             }
         }
@@ -1243,6 +1278,145 @@ namespace Cotton.Mobile.ViewModels
             CancellationToken cancellationToken)
         {
             return _offlineFilePinStore.RemoveAsync(instanceUri, fileId, cancellationToken);
+        }
+
+        private async Task PlanFolderOfflineAsync(CottonFileBrowserEntry folder)
+        {
+            if (!folder.IsFolder)
+            {
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to keep folders offline.");
+                return;
+            }
+
+            var folderHandle = new CottonFolderHandle(folder.Id, folder.Name);
+            if (!_networkAccess.HasInternetAccess)
+            {
+                CottonFolderContent? cachedContent =
+                    await TryLoadCachedFolderForOfflinePlanAsync(instanceUri, folderHandle, CancellationToken.None);
+                if (cachedContent is not null)
+                {
+                    ShowFolderOfflinePlanStatus(cachedContent, isCachedEstimate: true);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                ShowFileActionRetry(
+                    MainPageFileAction.KeepFolderOffline,
+                    folder,
+                    CottonOfflineFolderStatusText.OfflineUnavailableStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction(CottonOfflineFolderStatusText.CreateStartingStatus(folder.Name));
+
+            try
+            {
+                CottonFolderContent content = await _fileBrowserService.GetFolderAsync(
+                    instanceUri,
+                    folderHandle,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await _folderContentCache.SaveFolderAsync(
+                    instanceUri,
+                    content,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                ShowFolderOfflinePlanStatus(content, isCachedEstimate: false);
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder offline authorization failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile folder offline cancellation {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonOfflineFolderStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder offline failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to plan Cotton mobile folder offline {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.KeepFolderOffline,
+                    folder,
+                    _networkAccess.HasInternetAccess
+                        ? CottonOfflineFolderStatusText.FailedStatus
+                        : CottonOfflineFolderStatusText.OfflineUnavailableStatus);
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
+        private async Task<CottonFolderContent?> TryLoadCachedFolderForOfflinePlanAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _folderContentCache.LoadFolderAsync(
+                    instanceUri,
+                    folder,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to load cached Cotton mobile folder offline plan {FolderId}.",
+                    folder.Id);
+                return null;
+            }
+        }
+
+        private void ShowFolderOfflinePlanStatus(
+            CottonFolderContent content,
+            bool isCachedEstimate)
+        {
+            CottonOfflineFolderPlanSnapshot plan = CottonOfflineFolderPlanSnapshot.Create(content);
+            _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(plan, isCachedEstimate));
         }
 
         private async Task UploadPickedSourceAsync(

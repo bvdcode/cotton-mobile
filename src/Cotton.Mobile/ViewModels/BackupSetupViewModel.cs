@@ -11,6 +11,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCameraBackupPlanningService _planningService;
         private readonly ICottonCameraBackupTransferEnqueueCoordinator _transferEnqueueCoordinator;
         private readonly ICottonTransferActivitySignal _transferActivitySignal;
+        private readonly ICottonLocalNotificationService _localNotificationService;
         private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUploadDestinationPickerPageService _destinationPickerPageService;
         private readonly ILogger<BackupSetupViewModel> _logger;
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonCameraBackupPlanningService planningService,
             ICottonCameraBackupTransferEnqueueCoordinator transferEnqueueCoordinator,
             ICottonTransferActivitySignal transferActivitySignal,
+            ICottonLocalNotificationService localNotificationService,
             ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUploadDestinationPickerPageService destinationPickerPageService,
             ILogger<BackupSetupViewModel> logger)
@@ -50,6 +52,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(planningService);
             ArgumentNullException.ThrowIfNull(transferEnqueueCoordinator);
             ArgumentNullException.ThrowIfNull(transferActivitySignal);
+            ArgumentNullException.ThrowIfNull(localNotificationService);
             ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(destinationPickerPageService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -59,6 +62,7 @@ namespace Cotton.Mobile.ViewModels
             _planningService = planningService;
             _transferEnqueueCoordinator = transferEnqueueCoordinator;
             _transferActivitySignal = transferActivitySignal;
+            _localNotificationService = localNotificationService;
             _mediaAccessPolicy = mediaAccessPolicy;
             _destinationPickerPageService = destinationPickerPageService;
             _logger = logger;
@@ -344,6 +348,7 @@ namespace Cotton.Mobile.ViewModels
                     {
                         ShowSettings(_settings);
                         Status = "Choose a folder before queueing camera backup.";
+                        await ShowBackupBlockedNotificationAsync(Status);
                         return;
                     }
 
@@ -354,6 +359,7 @@ namespace Cotton.Mobile.ViewModels
                     if (!mediaDisplay.CanScanFullLibrary)
                     {
                         Status = CottonCameraBackupQueueStatusText.CreateBlockedAccessStatus(mediaDisplay);
+                        await ShowBackupBlockedNotificationAsync(Status);
                         await LoadPlanningHealthAsync();
                         return;
                     }
@@ -483,6 +489,20 @@ namespace Cotton.Mobile.ViewModels
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled Cotton mobile camera backup setup command exception.");
+        }
+
+        private async Task ShowBackupBlockedNotificationAsync(string? reason)
+        {
+            try
+            {
+                CottonLocalNotificationSnapshot notification =
+                    CottonTransferNotificationFactory.CreateBackupBlocked(reason ?? string.Empty);
+                await _localNotificationService.ShowAsync(notification);
+            }
+            catch
+            {
+                // Notification delivery must never hide the in-app blocked status.
+            }
         }
     }
 }

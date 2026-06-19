@@ -2,6 +2,8 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonTransferNotificationFactory
     {
+        private const int BackupBlockedNotificationId = 700_001;
+
         public static CottonLocalNotificationSnapshot CreateCompletedUpload(
             CottonTransferQueueItem transfer)
         {
@@ -41,6 +43,21 @@ namespace Cotton.Mobile.Services
                 CottonNotificationChannelKind.Transfers,
                 "Upload failed",
                 $"{displayName}: {failure}");
+        }
+
+        public static CottonLocalNotificationSnapshot CreateBackupBlocked(
+            string reason)
+        {
+            string message = string.IsNullOrWhiteSpace(reason)
+                ? "Open Camera Backup for details."
+                : reason.Trim();
+
+            return new CottonLocalNotificationSnapshot(
+                BackupBlockedNotificationId,
+                CottonLocalNotificationKind.BackupBlocked,
+                CottonNotificationChannelKind.Backup,
+                "Camera backup blocked",
+                message);
         }
 
         private static int CreateNotificationId(

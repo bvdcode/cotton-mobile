@@ -180,5 +180,19 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("report.pdf: Offline", notification.Message);
             Assert.True(notification.Id > 0);
         }
+
+        [Fact]
+        public void Backup_blocked_notification_uses_backup_channel_and_reason_copy()
+        {
+            CottonLocalNotificationSnapshot notification =
+                CottonTransferNotificationFactory.CreateBackupBlocked(
+                    "Automatic camera backup needs full media access.");
+
+            Assert.Equal(CottonLocalNotificationKind.BackupBlocked, notification.Kind);
+            Assert.Equal(CottonNotificationChannelKind.Backup, notification.ChannelKind);
+            Assert.Equal("Camera backup blocked", notification.Title);
+            Assert.Equal("Automatic camera backup needs full media access.", notification.Message);
+            Assert.True(notification.Id > 0);
+        }
     }
 }

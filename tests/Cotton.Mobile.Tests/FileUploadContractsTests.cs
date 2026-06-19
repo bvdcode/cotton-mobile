@@ -146,6 +146,47 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Uploading photo.jpg... 1.5 KB", progress.StatusText);
         }
 
+        [Theory]
+        [InlineData("file", "Uploading notes.txt...", "Uploaded notes.txt.")]
+        [InlineData("photo", "Importing 1 photo: photo.jpg...", "Imported 1 photo: photo.jpg.")]
+        [InlineData("video", "Importing 1 video: clip.mp4...", "Imported 1 video: clip.mp4.")]
+        public void Upload_status_text_distinguishes_selected_media_imports(
+            string sourceKind,
+            string expectedStartingStatus,
+            string expectedCompletedStatus)
+        {
+            string fileName = sourceKind switch
+            {
+                "photo" => "photo.jpg",
+                "video" => "clip.mp4",
+                _ => "notes.txt",
+            };
+
+            string startingStatus = CottonFileUploadStatusText.CreateStartingStatus(sourceKind, fileName);
+            string completedStatus = CottonFileUploadStatusText.CreateCompletedStatus(sourceKind, fileName);
+
+            Assert.Equal(expectedStartingStatus, startingStatus);
+            Assert.Equal(expectedCompletedStatus, completedStatus);
+        }
+
+        [Fact]
+        public void Upload_status_text_includes_import_count_and_destination()
+        {
+            string photoStatus = CottonFileUploadStatusText.CreateCompletedStatus(
+                "photo",
+                "trip.jpg",
+                "Files / Camera Uploads",
+                importCount: 1);
+            string videoStatus = CottonFileUploadStatusText.CreateCompletedStatus(
+                "video",
+                "clip.mp4",
+                "Files / Camera Uploads",
+                importCount: 2);
+
+            Assert.Equal("Imported 1 photo: trip.jpg to Files / Camera Uploads.", photoStatus);
+            Assert.Equal("Imported 2 videos: clip.mp4 to Files / Camera Uploads.", videoStatus);
+        }
+
         [Fact]
         public void Upload_progress_rejects_negative_uploaded_bytes()
         {

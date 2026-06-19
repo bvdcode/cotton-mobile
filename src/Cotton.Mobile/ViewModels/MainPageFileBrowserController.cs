@@ -1052,6 +1052,7 @@ namespace Cotton.Mobile.ViewModels
                 instanceUri,
                 folder,
                 source,
+                sourceKind,
                 destinationPath: null,
                 refreshCurrentFolderAfterUpload: true);
         }
@@ -1138,6 +1139,7 @@ namespace Cotton.Mobile.ViewModels
                 instanceUri,
                 destinationFolder,
                 source,
+                sourceKind,
                 destination.Path,
                 refreshCurrentFolderAfterUpload);
         }
@@ -1167,10 +1169,12 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonFolderHandle folder,
             CottonFileUploadSource source,
+            string sourceKind,
             string? destinationPath,
             bool refreshCurrentFolderAfterUpload)
         {
-            CancellationTokenSource fileActionCancellation = BeginFileAction($"Uploading {source.Snapshot.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonFileUploadStatusText.CreateStartingStatus(sourceKind, source.Snapshot.Name));
 
             try
             {
@@ -1195,12 +1199,16 @@ namespace Cotton.Mobile.ViewModels
                         instanceUri,
                         folder,
                         source.Snapshot.Name,
+                        sourceKind,
                         fileActionCancellation);
                 }
                 else
                 {
                     string target = string.IsNullOrWhiteSpace(destinationPath) ? folder.Name : destinationPath;
-                    _display.ShowFilesStatus($"Uploaded {source.Snapshot.Name} to {target}.");
+                    _display.ShowFilesStatus(CottonFileUploadStatusText.CreateCompletedStatus(
+                        sourceKind,
+                        source.Snapshot.Name,
+                        target));
                 }
             }
             catch (Exception exception)
@@ -1269,6 +1277,7 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonFolderHandle folder,
             string fileName,
+            string sourceKind,
             CancellationTokenSource fileActionCancellation)
         {
             if (_fileNavigation.Count == 0)
@@ -1284,7 +1293,7 @@ namespace Cotton.Mobile.ViewModels
                 && HasSameFolder(_currentFolder, folder)
                 && !_lastFileLoadFailed)
             {
-                _display.ShowFilesStatus($"Uploaded {fileName}.");
+                _display.ShowFilesStatus(CottonFileUploadStatusText.CreateCompletedStatus(sourceKind, fileName));
             }
         }
 

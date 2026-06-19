@@ -8,6 +8,27 @@ namespace Cotton.Mobile.Services
             string value,
             string? displayName,
             string? mimeType)
+            : this(
+                id,
+                type,
+                value,
+                displayName,
+                mimeType,
+                stagedFileName: null,
+                stagedPath: null,
+                stagedSizeBytes: null)
+        {
+        }
+
+        public CottonShareIntakeItemSnapshot(
+            Guid id,
+            CottonShareIntakeItemType type,
+            string value,
+            string? displayName,
+            string? mimeType,
+            string? stagedFileName,
+            string? stagedPath,
+            long? stagedSizeBytes)
         {
             if (id == Guid.Empty)
             {
@@ -29,6 +50,20 @@ namespace Cotton.Mobile.Services
             Value = value.Trim();
             DisplayName = NormalizeOptional(displayName);
             MimeType = NormalizeOptional(mimeType);
+            StagedFileName = NormalizeOptional(stagedFileName);
+            StagedPath = NormalizeOptional(stagedPath);
+            StagedSizeBytes = stagedSizeBytes;
+
+            if (StagedSizeBytes < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stagedSizeBytes));
+            }
+
+            if ((StagedFileName is null) != (StagedPath is null)
+                || (StagedPath is null) != (StagedSizeBytes is null))
+            {
+                throw new ArgumentException("Share intake staged file metadata must be complete.");
+            }
         }
 
         public Guid Id { get; }
@@ -40,6 +75,33 @@ namespace Cotton.Mobile.Services
         public string? DisplayName { get; }
 
         public string? MimeType { get; }
+
+        public string? StagedFileName { get; }
+
+        public string? StagedPath { get; }
+
+        public long? StagedSizeBytes { get; }
+
+        public bool HasStagedContent => StagedPath is not null;
+
+        public CottonShareIntakeItemSnapshot WithStagedContent(CottonShareStagedContentSnapshot stagedContent)
+        {
+            ArgumentNullException.ThrowIfNull(stagedContent);
+            if (stagedContent.ItemId != Id)
+            {
+                throw new ArgumentException("Staged content item id must match the intake item id.", nameof(stagedContent));
+            }
+
+            return new CottonShareIntakeItemSnapshot(
+                Id,
+                Type,
+                Value,
+                DisplayName,
+                MimeType,
+                stagedContent.FileName,
+                stagedContent.Path,
+                stagedContent.SizeBytes);
+        }
 
         private static string? NormalizeOptional(string? value)
         {

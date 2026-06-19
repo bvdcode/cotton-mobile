@@ -176,6 +176,9 @@ namespace Cotton.Mobile.Services
                 Value = item.Value,
                 DisplayName = item.DisplayName,
                 MimeType = item.MimeType,
+                StagedFileName = item.StagedFileName,
+                StagedPath = item.StagedPath,
+                StagedSizeBytes = item.StagedSizeBytes,
             };
         }
 
@@ -218,7 +221,10 @@ namespace Cotton.Mobile.Services
                     item.Type,
                     item.Value ?? string.Empty,
                     item.DisplayName,
-                    item.MimeType);
+                    item.MimeType,
+                    item.StagedFileName,
+                    item.StagedPath,
+                    item.StagedSizeBytes);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException)
@@ -283,6 +289,12 @@ namespace Cotton.Mobile.Services
             public string? DisplayName { get; set; }
 
             public string? MimeType { get; set; }
+
+            public string? StagedFileName { get; set; }
+
+            public string? StagedPath { get; set; }
+
+            public long? StagedSizeBytes { get; set; }
         }
     }
 }

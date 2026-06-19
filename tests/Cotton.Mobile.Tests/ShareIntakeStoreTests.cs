@@ -26,7 +26,10 @@ namespace Cotton.Mobile.Tests
                 CottonShareIntakeItemType.Uri,
                 "content://media/external/images/media/42",
                 "photo.jpg",
-                "image/jpeg");
+                "image/jpeg",
+                "photo.jpg",
+                "/tmp/cotton-share/photo.jpg",
+                123);
             CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot.CreatePending(
                 IntakeId,
                 CottonShareIntakeKind.Send,
@@ -47,6 +50,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("content://media/external/images/media/42", loadedItem.Value);
             Assert.Equal("photo.jpg", loadedItem.DisplayName);
             Assert.Equal("image/jpeg", loadedItem.MimeType);
+            Assert.True(loadedItem.HasStagedContent);
+            Assert.Equal("photo.jpg", loadedItem.StagedFileName);
+            Assert.Equal("/tmp/cotton-share/photo.jpg", loadedItem.StagedPath);
+            Assert.Equal(123, loadedItem.StagedSizeBytes);
         }
 
         [Fact]

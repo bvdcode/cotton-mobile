@@ -137,6 +137,32 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Offline_pack_progress_survives_file_summary_and_clears_on_sign_out()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            var progress = new CottonOfflinePackProgressSnapshot(
+                CottonOfflinePackProgressStatus.Running,
+                "Projects",
+                completedCount: 1,
+                totalCount: 2,
+                completedBytes: 1024,
+                totalBytes: 3072,
+                currentFileName: "zeta.txt");
+
+            display.ShowOfflinePackProgress(progress);
+            display.ShowFilesSummary();
+
+            Assert.True(display.IsOfflinePackProgressVisible);
+            Assert.Equal("Keeping Projects offline", display.OfflinePackProgress.Text);
+            Assert.Equal("4 items · A-Z", display.FilesStatus);
+
+            display.ShowSignIn("Signed out.");
+
+            Assert.False(display.IsOfflinePackProgressVisible);
+            Assert.False(display.OfflinePackProgress.IsVisible);
+        }
+
+        [Fact]
         public void Local_file_markers_update_visible_and_backing_entries()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

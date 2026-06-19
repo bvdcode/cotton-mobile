@@ -26,6 +26,7 @@ namespace Cotton.Mobile.ViewModels
         private string? _filesNoticeTitle;
         private string? _filesNoticeMessage;
         private CottonTransferActivityIndicator _transferActivityIndicator = CottonTransferActivityIndicator.Empty;
+        private CottonOfflinePackProgressSnapshot _offlinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
         private string _fileSearchText = string.Empty;
         private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
         private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
@@ -260,6 +261,21 @@ namespace Cotton.Mobile.ViewModels
         public bool IsTransferActivityIndicatorVisible =>
             IsProfileVisible && TransferActivityIndicator.IsVisible;
 
+        public CottonOfflinePackProgressSnapshot OfflinePackProgress
+        {
+            get => _offlinePackProgress;
+            private set
+            {
+                if (SetProperty(ref _offlinePackProgress, value))
+                {
+                    OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
+                }
+            }
+        }
+
+        public bool IsOfflinePackProgressVisible =>
+            IsProfileVisible && OfflinePackProgress.IsVisible;
+
         public string FileSearchText
         {
             get => _fileSearchText;
@@ -473,6 +489,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             ProfileStatus = null;
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
+            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
         }
 
         public void ShowSignIn(string? status)
@@ -521,6 +538,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             CanNavigateFilesUp = false;
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
+            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
             _allFileEntries.Clear();
             FileEntries.Clear();
             NotifyFilesEmptyStateChanged();
@@ -536,6 +554,7 @@ namespace Cotton.Mobile.ViewModels
             ProfileInstance = string.Empty;
             ProfileStatus = null;
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
+            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
             FilesTitle = RootFilesTitle;
             FilesPath = string.Empty;
             FilesStatus = null;
@@ -689,6 +708,18 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(indicator);
 
             TransferActivityIndicator = indicator;
+        }
+
+        public void ShowOfflinePackProgress(CottonOfflinePackProgressSnapshot progress)
+        {
+            ArgumentNullException.ThrowIfNull(progress);
+
+            OfflinePackProgress = progress;
+        }
+
+        public void ClearOfflinePackProgress()
+        {
+            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
         }
 
         public void ShowOfflineFilesNotice(bool isCachedListing = false)
@@ -909,6 +940,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsAuthorizationProgressVisible));
             OnPropertyChanged(nameof(IsProfileVisible));
             OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
+            OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));

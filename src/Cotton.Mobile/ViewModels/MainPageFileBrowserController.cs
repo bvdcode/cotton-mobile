@@ -1429,8 +1429,15 @@ namespace Cotton.Mobile.ViewModels
         {
             CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(content);
             _display.ShowFileActionLoading(CottonOfflineDownloadQueueStatusText.CreateQueuedStatus(queue));
+            _display.ShowOfflinePackProgress(
+                CottonOfflinePackProgressSnapshot.CreateRunning(
+                    queue,
+                    completedCount: 0,
+                    completedBytes: 0,
+                    currentItem: queue.Items[0]));
 
             int completedCount = 0;
+            long completedBytes = 0;
             try
             {
                 foreach (CottonOfflineDownloadQueueItem item in queue.Items)
@@ -1442,6 +1449,12 @@ namespace Cotton.Mobile.ViewModels
                     }
 
                     CottonFileBrowserEntry file = content.Entries.Single(entry => entry.Id == item.FileId);
+                    _display.ShowOfflinePackProgress(
+                        CottonOfflinePackProgressSnapshot.CreateRunning(
+                            queue,
+                            completedCount,
+                            completedBytes,
+                            item));
                     CottonLocalFileSnapshot? reusableLocalFile =
                         _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
                     if (reusableLocalFile is not null)
@@ -1452,6 +1465,13 @@ namespace Cotton.Mobile.ViewModels
                             CancellationToken.None);
                         _display.ShowFileLocalCopy(file, reusableLocalFile);
                         completedCount++;
+                        completedBytes += item.SizeBytes;
+                        _display.ShowOfflinePackProgress(
+                            CottonOfflinePackProgressSnapshot.CreateRunning(
+                                queue,
+                                completedCount,
+                                completedBytes,
+                                GetNextOfflineQueueItem(queue, completedCount)));
                         continue;
                     }
 
@@ -1477,9 +1497,17 @@ namespace Cotton.Mobile.ViewModels
                         item.CreatePin(DateTime.UtcNow),
                         CancellationToken.None);
                     completedCount++;
+                    completedBytes += item.SizeBytes;
                     RefreshLocalFileMarkers(instanceUri);
+                    _display.ShowOfflinePackProgress(
+                        CottonOfflinePackProgressSnapshot.CreateRunning(
+                            queue,
+                            completedCount,
+                            completedBytes,
+                            GetNextOfflineQueueItem(queue, completedCount)));
                 }
 
+                _display.ShowOfflinePackProgress(CottonOfflinePackProgressSnapshot.CreateCompleted(queue));
                 _display.ShowFilesStatus(CottonOfflineDownloadQueueStatusText.CreateCompletedStatus(queue));
             }
             catch (Exception exception)
@@ -1495,6 +1523,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 ClearFileActionRetry();
+                _display.ShowOfflinePackProgress(
+                    CottonOfflinePackProgressSnapshot.CreateCancelled(
+                        queue,
+                        completedCount,
+                        completedBytes));
                 _display.ShowFilesStatus(
                     CottonOfflineDownloadQueueStatusText.CreateCancelledStatus(
                         completedCount,
@@ -1509,6 +1542,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _logger.LogWarning(exception, "Failed to keep Cotton mobile folder offline {FolderId}.", folder.Id);
+                _display.ShowOfflinePackProgress(
+                    CottonOfflinePackProgressSnapshot.CreateFailed(
+                        queue,
+                        completedCount,
+                        completedBytes));
                 ShowFileActionRetry(
                     MainPageFileAction.KeepFolderOffline,
                     folder,
@@ -1516,6 +1554,19 @@ namespace Cotton.Mobile.ViewModels
                         completedCount,
                         queue.TotalCount));
             }
+        }
+
+        private static CottonOfflineDownloadQueueItem? GetNextOfflineQueueItem(
+            CottonOfflineDownloadQueueSnapshot queue,
+            int completedCount)
+        {
+            ArgumentNullException.ThrowIfNull(queue);
+            if (completedCount < 0 || completedCount > queue.TotalCount)
+            {
+                throw new ArgumentOutOfRangeException(nameof(completedCount), "Completed count must be within the queue.");
+            }
+
+            return completedCount == queue.TotalCount ? null : queue.Items[completedCount];
         }
 
         private CottonOfflineFolderPlanSnapshot ShowFolderOfflinePlanStatus(

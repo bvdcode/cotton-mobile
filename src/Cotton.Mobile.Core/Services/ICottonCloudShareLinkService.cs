@@ -6,5 +6,9 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonCloudShareLinkRequest request,
             CancellationToken cancellationToken = default);
+
+        Task InvalidateAllAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken = default);
     }
 }

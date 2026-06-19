@@ -188,6 +188,74 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonClientHeaders.DeviceNameMaxLength, Assert.Single(handler.Requests).DeviceName!.Length);
         }
 
+        [Fact]
+        public async Task InvalidateAllAsync_posts_authorized_request()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueStatus(HttpStatusCode.NoContent);
+            var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
+
+            await service.InvalidateAllAsync(InstanceUri);
+
+            RecordedRequest request = Assert.Single(handler.Requests);
+            Assert.Equal(HttpMethod.Post, request.Method);
+            Assert.Equal("/api/v1/auth/invalidate-share-links", request.Uri.PathAndQuery);
+            Assert.Equal("Bearer", request.AuthorizationScheme);
+            Assert.Equal("access", request.AuthorizationParameter);
+            Assert.Equal("Cotton-Mobile/1.0", request.UserAgent);
+            Assert.Equal("Test device", request.DeviceName);
+        }
+
+        [Fact]
+        public async Task InvalidateAllAsync_refreshes_token_once_after_unauthorized_response()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueJson(HttpStatusCode.Unauthorized, new { error = "expired" });
+            handler.EnqueueJson(
+                HttpStatusCode.OK,
+                new TokenPairDto
+                {
+                    AccessToken = "new-access",
+                    RefreshToken = "new-refresh",
+                });
+            handler.EnqueueStatus(HttpStatusCode.NoContent);
+            var tokenStore = new FakeTokenStore("old-access", "old refresh");
+            var service = CreateService(handler, tokenStore);
+
+            await service.InvalidateAllAsync(InstanceUri);
+
+            Assert.Equal("new-access", tokenStore.Tokens?.AccessToken);
+            Assert.Equal("new-refresh", tokenStore.Tokens?.RefreshToken);
+            Assert.Equal(3, handler.Requests.Count);
+            Assert.Equal("old-access", handler.Requests[0].AuthorizationParameter);
+            Assert.Null(handler.Requests[1].AuthorizationParameter);
+            Assert.Equal("/api/v1/auth/refresh?refreshToken=old%20refresh", handler.Requests[1].Uri.PathAndQuery);
+            Assert.Equal("new-access", handler.Requests[2].AuthorizationParameter);
+        }
+
+        [Fact]
+        public async Task InvalidateAllAsync_surfaces_forbidden_without_refresh()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueJson(HttpStatusCode.Forbidden, new { error = "not allowed" });
+            var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
+
+            CottonApiException exception = await Assert.ThrowsAsync<CottonApiException>(
+                () => service.InvalidateAllAsync(InstanceUri));
+
+            Assert.Equal(HttpStatusCode.Forbidden, exception.StatusCode);
+            Assert.Single(handler.Requests);
+        }
+
+        [Fact]
+        public async Task InvalidateAllAsync_requires_supported_https_instance_uri()
+        {
+            var service = CreateService(new RecordingHttpMessageHandler(), new FakeTokenStore("access", "refresh"));
+
+            await Assert.ThrowsAsync<ArgumentException>(
+                () => service.InvalidateAllAsync(new Uri("http://cloud.example")));
+        }
+
         private static CottonCloudShareLinkService CreateService(
             RecordingHttpMessageHandler handler,
             ICottonTokenStore tokenStore)
@@ -260,6 +328,11 @@ namespace Cotton.Mobile.Tests
                         Content = new StringContent(json, Encoding.UTF8, "application/json"),
                     };
                 });
+            }
+
+            public void EnqueueStatus(HttpStatusCode statusCode)
+            {
+                _responses.Enqueue(_ => new HttpResponseMessage(statusCode));
             }
 
             public void EnqueueText(HttpStatusCode statusCode, string value)

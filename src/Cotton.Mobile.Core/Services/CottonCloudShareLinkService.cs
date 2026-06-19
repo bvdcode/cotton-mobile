@@ -49,6 +49,20 @@ namespace Cotton.Mobile.Services
             return CottonCloudShareLinkSnapshot.Create(request, instanceUri, backendLink);
         }
 
+        public async Task InvalidateAllAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken = default)
+        {
+            EnsureSupportedInstanceUri(instanceUri);
+
+            await SendRequiredAsync(
+                    instanceUri,
+                    HttpMethod.Post,
+                    Routes.V1.Auth + "/invalidate-share-links",
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
         private static string CreateRoute(CottonCloudShareLinkRequest request)
         {
             string expireQuery = "?expireAfterMinutes=" + request.ExpireAfterMinutes;
@@ -98,6 +112,44 @@ namespace Cotton.Mobile.Services
             {
                 return await ReadRequiredJsonAsync<T>(retry, method, path, cancellationToken)
                     .ConfigureAwait(false);
+            }
+        }
+
+        private async Task SendRequiredAsync(
+            Uri instanceUri,
+            HttpMethod method,
+            string path,
+            CancellationToken cancellationToken)
+        {
+            (HttpResponseMessage response, string? requestAccessToken) =
+                await SendOnceAsync(
+                        instanceUri,
+                        method,
+                        path,
+                        authorize: true,
+                        cancellationToken)
+                    .ConfigureAwait(false);
+            using (response)
+            {
+                if (response.StatusCode != HttpStatusCode.Unauthorized || !_options.RefreshOnUnauthorized)
+                {
+                    await EnsureSuccessAsync(response, method, path, cancellationToken).ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            await TryRefreshAsync(instanceUri, requestAccessToken, cancellationToken).ConfigureAwait(false);
+
+            (HttpResponseMessage retry, _) = await SendOnceAsync(
+                    instanceUri,
+                    method,
+                    path,
+                    authorize: true,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            using (retry)
+            {
+                await EnsureSuccessAsync(retry, method, path, cancellationToken).ConfigureAwait(false);
             }
         }
 

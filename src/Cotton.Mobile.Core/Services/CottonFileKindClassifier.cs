@@ -4,22 +4,62 @@ namespace Cotton.Mobile.Services
     {
         private static readonly HashSet<string> TextFileExtensions = new(StringComparer.OrdinalIgnoreCase)
         {
+            ".bash",
+            ".c",
+            ".cc",
+            ".conf",
+            ".cpp",
+            ".cs",
+            ".csproj",
             ".css",
             ".csv",
+            ".env",
+            ".go",
+            ".gradle",
+            ".h",
+            ".hpp",
             ".htm",
             ".html",
+            ".ini",
+            ".java",
             ".js",
             ".json",
+            ".kt",
+            ".kts",
             ".log",
+            ".m",
             ".markdown",
             ".md",
+            ".mm",
+            ".php",
+            ".props",
+            ".py",
+            ".rb",
+            ".rs",
+            ".sh",
+            ".sln",
             ".svg",
+            ".swift",
+            ".targets",
             ".text",
+            ".toml",
             ".ts",
             ".txt",
             ".xml",
             ".yaml",
             ".yml",
+            ".zsh",
+        };
+
+        private static readonly HashSet<string> TextFileNames = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".editorconfig",
+            ".gitattributes",
+            ".gitignore",
+            "Dockerfile",
+            "LICENSE",
+            "Makefile",
+            "README",
         };
 
         private static readonly HashSet<string> TextContentTypes = new(StringComparer.OrdinalIgnoreCase)
@@ -27,10 +67,21 @@ namespace Cotton.Mobile.Services
             "application/javascript",
             "application/json",
             "application/markdown",
+            "application/typescript",
             "application/xml",
+            "application/x-csharp",
+            "application/x-python",
+            "application/x-sh",
+            "application/x-shellscript",
+            "application/x-typescript",
             "application/x-yaml",
             "application/yaml",
             "image/svg+xml",
+            "text/x-c",
+            "text/x-csharp",
+            "text/x-java-source",
+            "text/x-python",
+            "text/x-shellscript",
         };
 
         private static readonly HashSet<string> DocumentFileExtensions = new(StringComparer.OrdinalIgnoreCase)
@@ -119,7 +170,8 @@ namespace Cotton.Mobile.Services
         {
             return contentType.StartsWith("text/", StringComparison.OrdinalIgnoreCase)
                 || TextContentTypes.Contains(contentType)
-                || TextFileExtensions.Contains(Path.GetExtension(name));
+                || TextFileExtensions.Contains(Path.GetExtension(name))
+                || TextFileNames.Contains(name);
         }
     }
 }

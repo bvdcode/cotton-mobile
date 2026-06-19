@@ -11,6 +11,9 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData("notes.txt", "text/plain; charset=utf-8", 42, CottonFilePreviewKind.Text, "text/plain")]
         [InlineData("data.json", "", 512, CottonFilePreviewKind.Text, "application/json")]
+        [InlineData("Program.cs", "", 256, CottonFilePreviewKind.Text, "text/plain")]
+        [InlineData("build.gradle", "", 256, CottonFilePreviewKind.Text, "text/plain")]
+        [InlineData("script.py", "", 256, CottonFilePreviewKind.Text, "text/x-python")]
         [InlineData("diagram.svg", "", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
         [InlineData("photo.webp", "image/webp", 8_192, CottonFilePreviewKind.Image, "image/webp")]
         public void Known_in_app_preview_types_route_to_open(

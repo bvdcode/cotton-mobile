@@ -132,11 +132,12 @@ namespace Cotton.Mobile.Services
             CottonFileDownloadResult downloadedFile,
             string content)
         {
-            string details = CreateDetails(file, downloadedFile);
+            CottonTextPreviewDisplayState display =
+                CottonTextPreviewDisplayState.Create(file.Kind, downloadedFile.SizeBytes, content);
             var viewModel = ActivatorUtilities.CreateInstance<TextViewerViewModel>(
                 _serviceProvider,
                 file.Name,
-                details,
+                display.DetailsText,
                 content,
                 downloadedFile);
             return ActivatorUtilities.CreateInstance<TextViewerPage>(_serviceProvider, viewModel);

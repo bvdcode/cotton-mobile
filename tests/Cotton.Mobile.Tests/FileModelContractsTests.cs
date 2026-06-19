@@ -12,6 +12,8 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData("notes.txt", "text/plain; charset=utf-8", "Text", "TXT", true, false)]
         [InlineData("data.json", "application/json", "Text", "TXT", true, false)]
+        [InlineData("Program.cs", "", "Text", "TXT", true, false)]
+        [InlineData("Dockerfile", "", "Text", "TXT", true, false)]
         [InlineData("diagram.svg", "", "Text", "TXT", true, false)]
         [InlineData("photo.webp", "image/webp", "Image", "IMG", false, true)]
         [InlineData("report.pdf", "", "PDF", "PDF", false, false)]

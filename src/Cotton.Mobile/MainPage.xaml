@@ -397,7 +397,7 @@
                                     <DataTemplate>
                                         <Grid Padding="0,10"
                                               HeightRequest="64"
-                                              ColumnDefinitions="44,*"
+                                              ColumnDefinitions="44,*,44"
                                               ColumnSpacing="12">
                                             <Border WidthRequest="36"
                                                     HeightRequest="36"
@@ -461,6 +461,19 @@
                                                                                  TapCommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}" />
                                                 </Grid.Behaviors>
                                             </Grid>
+
+                                            <Button Grid.Column="2"
+                                                    Style="{StaticResource FileChromeButton}"
+                                                    Text="⋯"
+                                                    FontSize="18"
+                                                    FontAttributes="Bold"
+                                                    Padding="0"
+                                                    HeightRequest="44"
+                                                    WidthRequest="44"
+                                                    Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                    CommandParameter="{Binding .}"
+                                                    IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                    SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -578,6 +591,22 @@
                                                                                          TapCommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}" />
                                                         </Grid.Behaviors>
                                                     </Grid>
+
+                                                    <Button Grid.Row="0"
+                                                            Style="{StaticResource FileChromeButton}"
+                                                            Text="⋯"
+                                                            FontSize="18"
+                                                            FontAttributes="Bold"
+                                                            Padding="0"
+                                                            HeightRequest="44"
+                                                            WidthRequest="44"
+                                                            HorizontalOptions="End"
+                                                            VerticalOptions="Start"
+                                                            Margin="0,4,4,0"
+                                                            Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                            CommandParameter="{Binding .}"
+                                                            IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                            SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
 
                                                 </Grid>
                                             </Border>

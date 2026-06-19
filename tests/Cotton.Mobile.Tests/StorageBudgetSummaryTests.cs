@@ -33,6 +33,7 @@ namespace Cotton.Mobile.Tests
                 "Evictable downloads",
                 "Opened files not kept offline.",
                 "512 B of 1 KB",
+                0.5d,
                 "2 files",
                 CottonStorageBudgetStatus.WithinBudget,
                 isAttentionVisible: false);
@@ -42,6 +43,7 @@ namespace Cotton.Mobile.Tests
                 "Thumbnail cache",
                 "Regenerated while browsing.",
                 "1.8 KB of 2 KB",
+                0.9d,
                 "3 previews",
                 CottonStorageBudgetStatus.NearBudget,
                 isAttentionVisible: true);
@@ -51,6 +53,7 @@ namespace Cotton.Mobile.Tests
                 "Folder list cache",
                 "Saved navigation for offline browsing.",
                 "2.4 KB of 2 KB",
+                1d,
                 "4 lists",
                 CottonStorageBudgetStatus.OverBudget,
                 isAttentionVisible: true);
@@ -70,6 +73,7 @@ namespace Cotton.Mobile.Tests
             {
                 Assert.Equal(CottonStorageBudgetStatus.Empty, bucket.Status);
                 Assert.Equal("Empty", bucket.StatusText);
+                Assert.Equal(0d, bucket.UsageFraction);
                 Assert.False(bucket.IsAttentionVisible);
             });
         }
@@ -109,6 +113,7 @@ namespace Cotton.Mobile.Tests
             string expectedTitle,
             string expectedDetails,
             string expectedUsage,
+            double expectedUsageFraction,
             string expectedCount,
             CottonStorageBudgetStatus expectedStatus,
             bool isAttentionVisible)
@@ -117,6 +122,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(expectedTitle, bucket.Title);
             Assert.Equal(expectedDetails, bucket.DetailText);
             Assert.Equal(expectedUsage, bucket.UsageText);
+            Assert.Equal(expectedUsageFraction, bucket.UsageFraction, precision: 3);
             Assert.Equal(expectedCount, bucket.CountText);
             Assert.Equal(expectedStatus, bucket.Status);
             Assert.Equal(isAttentionVisible, bucket.IsAttentionVisible);

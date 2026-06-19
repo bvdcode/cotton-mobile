@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Services
             SizeText = CottonFileSizeFormatter.Format(sizeBytes);
             BudgetText = CottonFileSizeFormatter.Format(budgetBytes);
             UsageText = $"{SizeText} of {BudgetText}";
+            UsageFraction = Math.Clamp((double)sizeBytes / budgetBytes, 0d, 1d);
             CountText = FormatCount(itemCount, singularUnit, pluralUnit);
             Status = ResolveStatus(sizeBytes, budgetBytes);
             StatusText = CreateStatusText(Status);
@@ -75,6 +76,8 @@ namespace Cotton.Mobile.Services
         public string BudgetText { get; }
 
         public string UsageText { get; }
+
+        public double UsageFraction { get; }
 
         public string CountText { get; }
 

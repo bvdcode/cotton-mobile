@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Services
                     snapshot.Id,
                     item.Id,
                     FormatDisplayName(item),
-                    FormatKind(item),
+                    FormatKind(snapshot, item),
                     FormatStatus(snapshot, item),
                     FormatDetail(snapshot, item),
                     FormatMetadata(snapshot, item),
@@ -80,16 +80,28 @@ namespace Cotton.Mobile.Services
             return "Shared file";
         }
 
-        private static string FormatKind(CottonShareIntakeItemSnapshot item)
+        private static string FormatKind(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
         {
             return item.Type switch
             {
                 CottonShareIntakeItemType.Text => "Text",
                 CottonShareIntakeItemType.Uri => item.HasStagedContent
                     ? CottonFileKindClassifier.ResolveKind(item.EffectiveUploadDisplayName, item.MimeType)
-                    : "Link",
+                    : FormatUnstagedUriKind(snapshot, item),
                 _ => "Shared item",
             };
+        }
+
+        private static string FormatUnstagedUriKind(
+            CottonShareIntakeSnapshot snapshot,
+            CottonShareIntakeItemSnapshot item)
+        {
+            string kind = CottonFileKindClassifier.ResolveKind(
+                FormatDisplayName(item),
+                item.MimeType ?? snapshot.SourceMimeType);
+            return kind == "File" ? "Link" : kind;
         }
 
         private static string FormatStatus(

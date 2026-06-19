@@ -80,7 +80,14 @@ namespace Cotton.Mobile.Tests
                 CottonCaptureInboxListSnapshot.Create([stagedFile, textShare, missingAccess]);
 
             CottonCaptureInboxListItem missingItem = Find(snapshot, "report.pdf");
+            Assert.Equal("PDF", missingItem.KindText);
             Assert.Equal("Needs access", missingItem.StatusText);
+            Assert.Equal("Android access was not granted", missingItem.DetailText);
+            Assert.False(missingItem.IsDestinationVisible);
+            Assert.False(missingItem.CanSelectDestination);
+            Assert.False(missingItem.CanRename);
+            Assert.False(missingItem.CanEnqueue);
+            Assert.Contains("application/pdf", missingItem.MetadataText, StringComparison.Ordinal);
             Assert.True(missingItem.IsFailureVisible);
             Assert.Equal("Android revoked access to the shared content.", missingItem.FailureMessage);
 
@@ -102,6 +109,75 @@ namespace Cotton.Mobile.Tests
             Assert.False(fileItem.CanEnqueue);
             Assert.Contains("12 B", fileItem.MetadataText, StringComparison.Ordinal);
             Assert.False(fileItem.IsFailureVisible);
+        }
+
+        [Fact]
+        public void Snapshot_keeps_revoked_uri_permission_out_of_upload_actions()
+        {
+            CottonShareIntakeSnapshot missingAccess = CottonShareIntakeSnapshot.CreateProblem(
+                Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                CottonShareIntakeKind.Send,
+                CottonShareIntakeStatus.MissingPermission,
+                "image/png",
+                [
+                    new CottonShareIntakeItemSnapshot(
+                        Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                        CottonShareIntakeItemType.Uri,
+                        "content://media/external/images/media/42",
+                        "holiday.png",
+                        "image/png")
+                ],
+                "Android revoked access to the shared content.",
+                NewReceivedAt);
+
+            CottonCaptureInboxListItem item =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([missingAccess]).Items);
+
+            Assert.Equal("holiday.png", item.DisplayName);
+            Assert.Equal("Image", item.KindText);
+            Assert.Equal("Needs access", item.StatusText);
+            Assert.Equal("Android access was not granted", item.DetailText);
+            Assert.Contains("image/png", item.MetadataText, StringComparison.Ordinal);
+            Assert.False(item.IsDestinationVisible);
+            Assert.Equal(string.Empty, item.DestinationText);
+            Assert.False(item.CanSelectDestination);
+            Assert.False(item.CanRename);
+            Assert.False(item.CanEnqueue);
+            Assert.True(item.IsFailureVisible);
+            Assert.Equal("Android revoked access to the shared content.", item.FailureMessage);
+        }
+
+        [Fact]
+        public void Snapshot_distinguishes_unsupported_uri_from_missing_permission()
+        {
+            CottonShareIntakeSnapshot unsupported = CottonShareIntakeSnapshot.CreateProblem(
+                Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                CottonShareIntakeKind.Send,
+                CottonShareIntakeStatus.Unsupported,
+                "application/octet-stream",
+                [
+                    new CottonShareIntakeItemSnapshot(
+                        Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                        CottonShareIntakeItemType.Uri,
+                        "content://docs/unknown",
+                        "unknown.bin",
+                        "application/octet-stream")
+                ],
+                "Android could not open the shared content.",
+                NewReceivedAt);
+
+            CottonCaptureInboxListItem item =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([unsupported]).Items);
+
+            Assert.Equal("unknown.bin", item.DisplayName);
+            Assert.Equal("Link", item.KindText);
+            Assert.Equal("Unsupported", item.StatusText);
+            Assert.Equal("Could not copy this item", item.DetailText);
+            Assert.False(item.CanSelectDestination);
+            Assert.False(item.CanRename);
+            Assert.False(item.CanEnqueue);
+            Assert.True(item.IsFailureVisible);
+            Assert.Equal("Android could not open the shared content.", item.FailureMessage);
         }
 
         [Fact]

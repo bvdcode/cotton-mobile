@@ -63,8 +63,8 @@
                         FontAttributes="Bold"
                         HeightRequest="42"
                         CornerRadius="8"
-                        BackgroundColor="{StaticResource Magenta}"
-                        TextColor="{StaticResource White}" />
+                        BackgroundColor="{StaticResource Primary}"
+                        TextColor="{StaticResource PrimaryDarkText}" />
             </Grid>
 
             <Label Text="{Binding SummaryText}"

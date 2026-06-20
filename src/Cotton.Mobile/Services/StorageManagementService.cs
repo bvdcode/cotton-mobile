@@ -144,6 +144,9 @@ namespace Cotton.Mobile.Services
                 await ClearDirectoryAsync(
                     CottonMobileStoragePaths.CreateOfflineFileMetadataRootDirectory(),
                     cancellationToken).ConfigureAwait(false);
+                await ClearDirectoryAsync(
+                    CottonMobileStoragePaths.CreateSyncedFileManifestRootDirectory(),
+                    cancellationToken).ConfigureAwait(false);
                 NotifyDownloadedFilesCleared();
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
@@ -536,7 +539,73 @@ namespace Cotton.Mobile.Services
                 }
             }
 
+            AddSyncedManifestFiles(scan, seenPins, cancellationToken);
+
             return scan;
+        }
+
+        private void AddSyncedManifestFiles(
+            CottonOfflineStorageScan scan,
+            HashSet<string> seenPins,
+            CancellationToken cancellationToken)
+        {
+            string metadataRootDirectory = CottonMobileStoragePaths.CreateSyncedFileManifestRootDirectory();
+            if (!Directory.Exists(metadataRootDirectory))
+            {
+                return;
+            }
+
+            IReadOnlyList<string> manifestPaths;
+            try
+            {
+                manifestPaths = Directory
+                    .EnumerateFiles(
+                        metadataRootDirectory,
+                        FileSystemCottonSyncedFileManifestStore.MetadataFileName,
+                        SearchOption.AllDirectories)
+                    .ToList();
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to enumerate Cotton mobile synced-file metadata directory {Directory}.",
+                    metadataRootDirectory);
+                return;
+            }
+
+            foreach (string manifestPath in manifestPaths)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                string? syncRootDirectory = Path.GetDirectoryName(manifestPath);
+                string? instanceDirectory = string.IsNullOrWhiteSpace(syncRootDirectory)
+                    ? null
+                    : Path.GetDirectoryName(syncRootDirectory);
+                string? instanceStorageKey = string.IsNullOrWhiteSpace(instanceDirectory)
+                    ? null
+                    : Path.GetFileName(instanceDirectory);
+                if (string.IsNullOrWhiteSpace(instanceStorageKey))
+                {
+                    continue;
+                }
+
+                foreach (CottonOfflineStoragePin pin in ReadOfflinePins(manifestPath, cancellationToken))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string pinKey = $"{instanceStorageKey}:{pin.FileId:D}";
+                    if (!seenPins.Add(pinKey))
+                    {
+                        continue;
+                    }
+
+                    scan.ProtectedDownloadDirectories.Add(
+                        Path.Combine(
+                            CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                            instanceStorageKey,
+                            pin.FileId.ToString("D")));
+                    AddOfflinePin(scan, instanceStorageKey, pin);
+                }
+            }
         }
 
         private IReadOnlyList<CottonOfflineStoragePin> ReadOfflinePins(
@@ -583,7 +652,7 @@ namespace Cotton.Mobile.Services
             {
                 _logger.LogDebug(
                     exception,
-                    "Failed to inspect Cotton mobile offline file metadata {Path}.",
+                    "Failed to inspect Cotton mobile offline or synced file metadata {Path}.",
                     manifestPath);
                 return [];
             }

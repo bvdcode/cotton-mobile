@@ -57,13 +57,13 @@ namespace Cotton.Mobile.Services
                         break;
 
                     case CottonCloudToDeviceSyncActionKind.RenameLocalFile:
-                        await _fileOperator.RenameAsync(root, item, cancellationToken).ConfigureAwait(false);
+                        await _fileOperator.RenameAsync(instanceUri, root, item, cancellationToken).ConfigureAwait(false);
                         await SaveManifestItemAsync(instanceUri, root, item, cancellationToken).ConfigureAwait(false);
                         renamedCount++;
                         break;
 
                     case CottonCloudToDeviceSyncActionKind.RemoveLocalOrphan:
-                        await _fileOperator.RemoveAsync(root, item, cancellationToken).ConfigureAwait(false);
+                        await _fileOperator.RemoveAsync(instanceUri, root, item, cancellationToken).ConfigureAwait(false);
                         await _manifestStore.RemoveAsync(instanceUri, root, item.TargetId, cancellationToken).ConfigureAwait(false);
                         removedCount++;
                         break;
@@ -97,7 +97,7 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken)
         {
-            await _fileOperator.DownloadOrReplaceAsync(root, item, cancellationToken).ConfigureAwait(false);
+            await _fileOperator.DownloadOrReplaceAsync(instanceUri, root, item, cancellationToken).ConfigureAwait(false);
             await SaveManifestItemAsync(instanceUri, root, item, cancellationToken).ConfigureAwait(false);
         }
 

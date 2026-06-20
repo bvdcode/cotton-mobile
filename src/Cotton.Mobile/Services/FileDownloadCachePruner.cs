@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
@@ -43,9 +44,108 @@ namespace Cotton.Mobile.Services
         {
             IReadOnlyList<CottonOfflineFilePinSnapshot> pins =
                 await _offlineFilePinStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            return pins
+            List<string> protectedDirectories = pins
                 .Select(pin => CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, pin.FileId))
                 .ToList();
+            protectedDirectories.AddRange(LoadSyncedManifestDownloadDirectories(instanceUri, cancellationToken));
+            return protectedDirectories;
+        }
+
+        private IReadOnlyCollection<string> LoadSyncedManifestDownloadDirectories(
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            string instanceManifestDirectory = Path.Combine(
+                CottonMobileStoragePaths.CreateSyncedFileManifestRootDirectory(),
+                CottonMobileStoragePaths.CreateInstanceStorageKey(instanceUri));
+            if (!Directory.Exists(instanceManifestDirectory))
+            {
+                return [];
+            }
+
+            var protectedDirectories = new HashSet<string>(StringComparer.Ordinal);
+            try
+            {
+                foreach (string manifestPath in Directory.EnumerateFiles(
+                    instanceManifestDirectory,
+                    FileSystemCottonSyncedFileManifestStore.MetadataFileName,
+                    SearchOption.AllDirectories))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    foreach (Guid fileId in ReadSyncedManifestFileIds(manifestPath, cancellationToken))
+                    {
+                        protectedDirectories.Add(CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, fileId));
+                    }
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or JsonException
+                    or InvalidOperationException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile synced-file manifests under {Directory}.",
+                    instanceManifestDirectory);
+            }
+
+            return protectedDirectories;
+        }
+
+        private IReadOnlyList<Guid> ReadSyncedManifestFileIds(
+            string manifestPath,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                using FileStream stream = File.OpenRead(manifestPath);
+                using JsonDocument document = JsonDocument.Parse(stream);
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (!document.RootElement.TryGetProperty("schemaVersion", out JsonElement schemaVersion)
+                    || !schemaVersion.TryGetInt32(out int parsedSchemaVersion)
+                    || parsedSchemaVersion != 1
+                    || !document.RootElement.TryGetProperty("items", out JsonElement items)
+                    || items.ValueKind != JsonValueKind.Array)
+                {
+                    return [];
+                }
+
+                var fileIds = new List<Guid>();
+                foreach (JsonElement item in items.EnumerateArray())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (item.TryGetProperty("fileId", out JsonElement fileIdElement)
+                        && Guid.TryParse(fileIdElement.GetString(), out Guid fileId)
+                        && fileId != Guid.Empty)
+                    {
+                        fileIds.Add(fileId);
+                    }
+                }
+
+                return fileIds;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or JsonException
+                    or InvalidOperationException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to inspect Cotton mobile synced-file manifest {Path}.",
+                    manifestPath);
+                return [];
+            }
         }
 
         private void PruneBestEffort(

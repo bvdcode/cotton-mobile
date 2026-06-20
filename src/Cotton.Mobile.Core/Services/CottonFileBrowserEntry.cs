@@ -156,6 +156,36 @@ namespace Cotton.Mobile.Services
                 null);
         }
 
+        public static CottonFileBrowserEntry CreateFile(
+            Guid id,
+            string name,
+            DateTime updatedAtUtc,
+            long? sizeBytes,
+            string? contentType,
+            string? previewHashEncryptedHex,
+            string? eTag)
+        {
+            string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
+            string details = sizeBytes.HasValue
+                ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {kind}"
+                : kind;
+            return new CottonFileBrowserEntry(
+                id,
+                CottonFileBrowserEntryType.File,
+                name,
+                kind,
+                details,
+                "More",
+                ResolveBadgeText(kind),
+                updatedAtUtc,
+                sizeBytes,
+                contentType,
+                previewHashEncryptedHex,
+                eTag,
+                null,
+                null);
+        }
+
         public static CottonFileBrowserEntry CreateCached(
             Guid id,
             CottonFileBrowserEntryType type,

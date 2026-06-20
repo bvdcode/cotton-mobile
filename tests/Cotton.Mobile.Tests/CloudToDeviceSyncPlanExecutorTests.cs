@@ -62,6 +62,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, result.RefreshedCount);
             Assert.True(result.HasAppliedChanges);
             Assert.Equal([FirstFileId, SecondFileId], _fileOperator.DownloadedIds);
+            Assert.All(_fileOperator.DownloadedInstanceUris, uri => Assert.Equal(InstanceUri, uri));
 
             IReadOnlyList<CottonSyncedFileSnapshot> manifest =
                 await _manifestStore.LoadAsync(InstanceUri, _syncRoot);
@@ -92,6 +93,8 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(1, result.RenamedCount);
             Assert.Equal([FirstFileId], _fileOperator.RenamedIds);
+            Uri renamedInstanceUri = Assert.Single(_fileOperator.RenamedInstanceUris);
+            Assert.Equal(InstanceUri, renamedInstanceUri);
             CottonSyncedFileSnapshot manifestItem = Assert.Single(await _manifestStore.LoadAsync(InstanceUri, _syncRoot));
             Assert.Equal("renamed.txt", manifestItem.FileName);
             Assert.Equal(SyncedAt, manifestItem.SyncedAtUtc);
@@ -119,6 +122,8 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(1, result.RemovedCount);
             Assert.Equal([ThirdFileId], _fileOperator.RemovedIds);
+            Uri removedInstanceUri = Assert.Single(_fileOperator.RemovedInstanceUris);
+            Assert.Equal(InstanceUri, removedInstanceUri);
             Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, _syncRoot));
         }
 
@@ -144,6 +149,9 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(_fileOperator.DownloadedIds);
             Assert.Empty(_fileOperator.RenamedIds);
             Assert.Empty(_fileOperator.RemovedIds);
+            Assert.Empty(_fileOperator.DownloadedInstanceUris);
+            Assert.Empty(_fileOperator.RenamedInstanceUris);
+            Assert.Empty(_fileOperator.RemovedInstanceUris);
         }
 
         [Fact]
@@ -243,33 +251,45 @@ namespace Cotton.Mobile.Tests
         {
             public List<Guid> DownloadedIds { get; } = [];
 
+            public List<Uri> DownloadedInstanceUris { get; } = [];
+
             public List<Guid> RenamedIds { get; } = [];
+
+            public List<Uri> RenamedInstanceUris { get; } = [];
 
             public List<Guid> RemovedIds { get; } = [];
 
+            public List<Uri> RemovedInstanceUris { get; } = [];
+
             public Task DownloadOrReplaceAsync(
+                Uri instanceUri,
                 CottonSyncRootSnapshot root,
                 CottonCloudToDeviceSyncPlanItem item,
                 CancellationToken cancellationToken = default)
             {
+                DownloadedInstanceUris.Add(instanceUri);
                 DownloadedIds.Add(item.TargetId);
                 return Task.CompletedTask;
             }
 
             public Task RenameAsync(
+                Uri instanceUri,
                 CottonSyncRootSnapshot root,
                 CottonCloudToDeviceSyncPlanItem item,
                 CancellationToken cancellationToken = default)
             {
+                RenamedInstanceUris.Add(instanceUri);
                 RenamedIds.Add(item.TargetId);
                 return Task.CompletedTask;
             }
 
             public Task RemoveAsync(
+                Uri instanceUri,
                 CottonSyncRootSnapshot root,
                 CottonCloudToDeviceSyncPlanItem item,
                 CancellationToken cancellationToken = default)
             {
+                RemovedInstanceUris.Add(instanceUri);
                 RemovedIds.Add(item.TargetId);
                 return Task.CompletedTask;
             }

@@ -70,6 +70,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 			builder.Services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
+			builder.Services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
+			builder.Services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
 #if ANDROID
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
@@ -128,6 +130,13 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
+			builder.Services.AddSingleton<
+				ICottonCloudToDeviceSyncFileOperator,
+				CottonAppPrivateCloudToDeviceSyncFileOperator>();
+			builder.Services.AddSingleton(services =>
+				new CottonCloudToDeviceSyncPlanExecutor(
+					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
+					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
 			builder.Services.AddSingleton<ICottonCameraBackupSettingsStore, PreferencesCottonCameraBackupSettingsStore>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();

@@ -2122,6 +2122,13 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            bool confirmed = await ConfirmDeviceToCloudSyncAsync();
+            if (!confirmed)
+            {
+                _display.ShowFilesStatus(CottonDeviceToCloudSyncStatusText.CancelledStatus);
+                return;
+            }
+
             CancellationTokenSource fileActionCancellation =
                 BeginFileAction(CottonDeviceToCloudSyncStatusText.CreateStartingStatus(folder.Name));
             bool shouldRunRecoveryRefresh = false;
@@ -2210,6 +2217,15 @@ namespace Cotton.Mobile.ViewModels
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
             }
+        }
+
+        private async Task<bool> ConfirmDeviceToCloudSyncAsync()
+        {
+            return await _dialogService.ShowConfirmationAsync(
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveTitle,
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage,
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction,
+                CancelAction);
         }
 
         private async Task UploadPickedSourceAsync(

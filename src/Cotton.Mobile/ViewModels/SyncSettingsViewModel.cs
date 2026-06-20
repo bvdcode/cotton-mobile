@@ -197,6 +197,13 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 Status = CreateStartingStatus(root);
+                if (RequiresDeviceToCloudConfirmation(root)
+                    && !await ConfirmDeviceToCloudSyncAsync())
+                {
+                    Status = CottonDeviceToCloudSyncStatusText.CancelledStatus;
+                    return;
+                }
+
                 string completedStatus = await RunRootAndCreateCompletedStatusAsync(instanceUri, root);
                 IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
@@ -234,6 +241,15 @@ namespace Cotton.Mobile.ViewModels
             {
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+                if (RequiresDeviceToCloudConfirmation(roots, pausedRootIds)
+                    && !await ConfirmDeviceToCloudSyncAsync())
+                {
+                    ShowRoots(roots, pausedRootIds);
+                    Status = CottonDeviceToCloudSyncStatusText.CancelledStatus;
+                    return;
+                }
+
                 (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
                     CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary) summaries =
                     await RunAllRootsAsync(instanceUri, roots);
@@ -413,6 +429,28 @@ namespace Cotton.Mobile.ViewModels
             return root.Direction == CottonSyncDirection.CloudToDevice
                 ? CottonCloudToDeviceSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName)
                 : CottonDeviceToCloudSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName);
+        }
+
+        private async Task<bool> ConfirmDeviceToCloudSyncAsync()
+        {
+            return await _dialogService.ShowConfirmationAsync(
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveTitle,
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage,
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction,
+                CottonSyncRootManagementText.CancelAction);
+        }
+
+        private static bool RequiresDeviceToCloudConfirmation(CottonSyncRootSnapshot root)
+        {
+            return root.Direction is CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional
+                && CottonDeviceToCloudSyncRootCapability.CanRun(root);
+        }
+
+        private static bool RequiresDeviceToCloudConfirmation(
+            IReadOnlyList<CottonSyncRootSnapshot> roots,
+            IReadOnlySet<Guid> pausedRootIds)
+        {
+            return roots.Any(root => !pausedRootIds.Contains(root.Id) && RequiresDeviceToCloudConfirmation(root));
         }
 
         private void ShowRoots(IReadOnlyList<CottonSyncRootSnapshot> roots, IReadOnlySet<Guid> pausedRootIds)

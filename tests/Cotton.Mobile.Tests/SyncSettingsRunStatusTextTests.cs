@@ -72,6 +72,11 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "This local folder already syncs from cloud. Stop that sync first.",
                 CottonDeviceToCloudSyncStatusText.DirectionConflictStatus);
+            Assert.Equal("Sync from device folder?", CottonDeviceToCloudSyncStatusText.ConfirmDestructiveTitle);
+            Assert.Equal(
+                "Files removed from the selected device folder may be moved to trash in Cotton Cloud for this sync root.",
+                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage);
+            Assert.Equal("Sync", CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction);
             Assert.Equal(
                 "Sync complete. Everything is up to date.",
                 CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary));

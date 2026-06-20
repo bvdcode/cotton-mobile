@@ -21,6 +21,13 @@ namespace Cotton.Mobile.Services
         public static string DirectionConflictStatus { get; } =
             "This local folder already syncs from cloud. Stop that sync first.";
 
+        public static string ConfirmDestructiveTitle { get; } = "Sync from device folder?";
+
+        public static string ConfirmDestructiveMessage { get; } =
+            "Files removed from the selected device folder may be moved to trash in Cotton Cloud for this sync root.";
+
+        public static string ConfirmDestructiveAction { get; } = "Sync";
+
         public static string CreateStartingStatus(string folderName)
         {
             return $"Syncing {NormalizeFolderName(folderName)}...";

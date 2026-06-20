@@ -83,6 +83,46 @@
                             IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
                 </Grid>
             </Border>
+
+            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="14"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                <Grid ColumnDefinitions="*,Auto"
+                      RowDefinitions="Auto,Auto,Auto"
+                      RowSpacing="6"
+                      ColumnSpacing="12">
+                    <Label Text="{Binding DeviceUnlockTitle}"
+                           FontSize="15"
+                           FontAttributes="Bold"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Grid.Column="1"
+                           Text="{Binding DeviceUnlockStatusText}"
+                           FontSize="13"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                    <Label Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           Text="{Binding DeviceUnlockDetailText}"
+                           FontSize="12"
+                           MaxLines="2"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                    <Button Grid.Row="2"
+                            Grid.ColumnSpan="2"
+                            Text="{Binding DeviceUnlockActionText}"
+                            Command="{Binding VerifyDeviceUnlockCommand}"
+                            IsEnabled="{Binding CanVerifyDeviceUnlock}"
+                            IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                            HorizontalOptions="End" />
+                </Grid>
+            </Border>
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

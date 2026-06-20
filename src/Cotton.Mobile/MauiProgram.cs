@@ -144,6 +144,14 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
 			builder.Services.AddSingleton<ICottonAppLockSettingsStore, PreferencesCottonAppLockSettingsStore>();
 			builder.Services.AddSingleton<ICottonAppLockCapabilityService, UnavailableCottonAppLockCapabilityService>();
+#if ANDROID
+			builder.Services.AddSingleton<
+				IAndroidDeviceCredentialUnlockActivityResultBridge,
+				AndroidDeviceCredentialUnlockActivityResultBridge>();
+			builder.Services.AddSingleton<ICottonDeviceUnlockService, AndroidDeviceUnlockService>();
+#else
+			builder.Services.AddSingleton<ICottonDeviceUnlockService, UnavailableCottonDeviceUnlockService>();
+#endif
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();

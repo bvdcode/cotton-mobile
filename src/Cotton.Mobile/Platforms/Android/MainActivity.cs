@@ -37,6 +37,14 @@ namespace Cotton.Mobile
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
         {
+            IAndroidDeviceCredentialUnlockActivityResultBridge? unlockResultBridge =
+                IPlatformApplication.Current?.Services
+                    .GetService<IAndroidDeviceCredentialUnlockActivityResultBridge>();
+            if (unlockResultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
+            {
+                return;
+            }
+
             IAndroidDocumentScanActivityResultBridge? scanResultBridge = IPlatformApplication.Current?.Services
                 .GetService<IAndroidDocumentScanActivityResultBridge>();
             if (scanResultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)

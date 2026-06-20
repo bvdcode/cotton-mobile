@@ -8,10 +8,13 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly ICottonAppLockSettingsStore _settingsStore;
         private readonly ICottonAppLockCapabilityService _capabilityService;
+        private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ILogger<SecuritySettingsViewModel> _logger;
         private CottonAppLockSettings _settings = CottonAppLockSettings.Disabled;
         private CottonAppLockCapabilitySnapshot _capability =
             CottonAppLockCapabilitySnapshot.Unavailable("App lock status has not been checked.");
+        private CottonDeviceUnlockAvailabilitySnapshot _deviceUnlockAvailability =
+            CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Device unlock status has not been checked.");
         private bool _isBusy;
         private bool _isApplyingSourceValue;
         private bool _isAppLockEnabled;
@@ -20,20 +23,30 @@ namespace Cotton.Mobile.ViewModels
         public SecuritySettingsViewModel(
             ICottonAppLockSettingsStore settingsStore,
             ICottonAppLockCapabilityService capabilityService,
+            ICottonDeviceUnlockService deviceUnlockService,
             ILogger<SecuritySettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(capabilityService);
+            ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _settingsStore = settingsStore;
             _capabilityService = capabilityService;
+            _deviceUnlockService = deviceUnlockService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            VerifyDeviceUnlockCommand = new AsyncCommand(
+                VerifyDeviceUnlockAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && DeviceUnlockDisplay.CanVerify);
             ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
+            ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
         }
 
         public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand VerifyDeviceUnlockCommand { get; }
 
         public bool IsBusy
         {
@@ -44,6 +57,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(CanToggleAppLock));
                     LoadCommand.RaiseCanExecuteChanged();
+                    VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -53,6 +67,18 @@ namespace Cotton.Mobile.ViewModels
         public string AppLockStatusText => AppLockDisplay.StatusText;
 
         public string AppLockDetailText => AppLockDisplay.DetailText;
+
+        public string DeviceUnlockTitle => DeviceUnlockDisplay.Title;
+
+        public string DeviceUnlockStatusText => DeviceUnlockDisplay.StatusText;
+
+        public string DeviceUnlockDetailText => DeviceUnlockDisplay.DetailText;
+
+        public string DeviceUnlockActionText => DeviceUnlockDisplay.ActionText;
+
+        public bool CanVerifyDeviceUnlock => !IsBusy && DeviceUnlockDisplay.CanVerify;
+
+        public bool IsDeviceUnlockActionVisible => DeviceUnlockDisplay.IsActionVisible;
 
         public bool IsAppLockEnabled
         {
@@ -93,6 +119,10 @@ namespace Cotton.Mobile.ViewModels
                 CottonAppLockSettings.Disabled,
                 CottonAppLockCapabilitySnapshot.Unavailable("App lock status has not been checked."));
 
+        private CottonDeviceUnlockDisplayState DeviceUnlockDisplay { get; set; } =
+            CottonDeviceUnlockDisplayState.Create(
+                CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Device unlock status has not been checked."));
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -105,7 +135,9 @@ namespace Cotton.Mobile.ViewModels
             {
                 _settings = await _settingsStore.GetAsync();
                 _capability = await _capabilityService.GetCapabilityAsync();
+                _deviceUnlockAvailability = await _deviceUnlockService.GetAvailabilityAsync();
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
+                ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
                 Status = _capability.CanEnable ? null : "App lock is unavailable.";
             }
             catch (Exception exception)
@@ -114,6 +146,8 @@ namespace Cotton.Mobile.ViewModels
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(
                     CottonAppLockSettings.Disabled,
                     CottonAppLockCapabilitySnapshot.Unavailable("Could not inspect app lock.")));
+                ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
+                    CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Could not inspect device unlock.")));
                 Status = "Could not inspect security settings.";
             }
             finally
@@ -151,6 +185,42 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task VerifyDeviceUnlockAsync()
+        {
+            if (!_deviceUnlockAvailability.CanVerify)
+            {
+                ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
+                Status = "Device unlock is unavailable.";
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                CottonDeviceUnlockResult result = await _deviceUnlockService.RequestUnlockAsync();
+                ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability, result));
+                Status = result.Result switch
+                {
+                    CottonDeviceUnlockResultKind.Succeeded => "Device unlock verified.",
+                    CottonDeviceUnlockResultKind.Cancelled => "Device unlock was cancelled.",
+                    CottonDeviceUnlockResultKind.Unavailable => "Device unlock is unavailable.",
+                    _ => "Could not verify device unlock."
+                };
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to verify Cotton mobile device unlock.");
+                ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
+                    _deviceUnlockAvailability,
+                    CottonDeviceUnlockResult.Failed("Could not verify device unlock.")));
+                Status = "Could not verify device unlock.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
         private void ShowAppLock(CottonAppLockSettingsDisplayState display)
         {
             ArgumentNullException.ThrowIfNull(display);
@@ -162,6 +232,20 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(AppLockDetailText));
             OnPropertyChanged(nameof(CanToggleAppLock));
             OnPropertyChanged(nameof(SummaryText));
+        }
+
+        private void ShowDeviceUnlock(CottonDeviceUnlockDisplayState display)
+        {
+            ArgumentNullException.ThrowIfNull(display);
+
+            DeviceUnlockDisplay = display;
+            OnPropertyChanged(nameof(DeviceUnlockTitle));
+            OnPropertyChanged(nameof(DeviceUnlockStatusText));
+            OnPropertyChanged(nameof(DeviceUnlockDetailText));
+            OnPropertyChanged(nameof(DeviceUnlockActionText));
+            OnPropertyChanged(nameof(CanVerifyDeviceUnlock));
+            OnPropertyChanged(nameof(IsDeviceUnlockActionVisible));
+            VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
         }
 
         private void ApplyAppLockSourceValue(bool isEnabled)

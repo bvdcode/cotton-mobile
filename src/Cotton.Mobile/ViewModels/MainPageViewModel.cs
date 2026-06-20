@@ -27,8 +27,10 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
         private const string LogoutConfirmationTitle = "Log out?";
-        private const string LogoutConfirmationMessage =
+        private const string LogoutConfirmationClearCacheMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
+        private const string LogoutConfirmationKeepCacheMessage =
+            "You will need to sign in again. Cached files on this device will stay here.";
         private const string ResetFileLinksConfirmationTitle = "Reset file links?";
         private const string ResetFileLinksConfirmationMessage =
             "Existing public file links for this account will stop working. Folder links stay active.";
@@ -42,6 +44,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFeedbackService _feedbackService;
         private readonly IDiagnosticsPageService _diagnosticsPageService;
         private readonly IStorageManagementService _storageManagementService;
+        private readonly ICottonLogoutCacheCleanupSettingsStore _logoutCleanupSettingsStore;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
         private readonly ISecuritySettingsPageService _securitySettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
@@ -84,6 +87,7 @@ namespace Cotton.Mobile.ViewModels
             IFeedbackService feedbackService,
             IDiagnosticsPageService diagnosticsPageService,
             IStorageManagementService storageManagementService,
+            ICottonLogoutCacheCleanupSettingsStore logoutCleanupSettingsStore,
             IStorageSettingsPageService storageSettingsPageService,
             ISecuritySettingsPageService securitySettingsPageService,
             ITransfersPageService transfersPageService,
@@ -130,6 +134,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(feedbackService);
             ArgumentNullException.ThrowIfNull(diagnosticsPageService);
             ArgumentNullException.ThrowIfNull(storageManagementService);
+            ArgumentNullException.ThrowIfNull(logoutCleanupSettingsStore);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
             ArgumentNullException.ThrowIfNull(securitySettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
@@ -176,6 +181,7 @@ namespace Cotton.Mobile.ViewModels
             _feedbackService = feedbackService;
             _diagnosticsPageService = diagnosticsPageService;
             _storageManagementService = storageManagementService;
+            _logoutCleanupSettingsStore = logoutCleanupSettingsStore;
             _storageSettingsPageService = storageSettingsPageService;
             _securitySettingsPageService = securitySettingsPageService;
             _transfersPageService = transfersPageService;
@@ -576,7 +582,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 await _sessionService.LogoutAsync();
-                await ClearCachedSensitiveStateAsync("logout");
+                if (await ShouldClearCachedFilesOnLogoutAsync())
+                {
+                    await ClearCachedSensitiveStateAsync("logout");
+                }
+
                 _fileBrowser.Clear();
                 Display.InstanceUrl = _options.DefaultInstanceUrl;
                 ShowSignIn("Signed out.");
@@ -585,6 +595,29 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogError(exception, "Cotton mobile logout failed.");
                 ShowProfileError("Logout failed. Try again.");
+            }
+        }
+
+        private async Task<bool> ShouldClearCachedFilesOnLogoutAsync()
+        {
+            CottonLogoutCacheCleanupSettings settings =
+                await GetLogoutCacheCleanupSettingsAsync("logout");
+            return settings.ClearCachedFilesOnLogout;
+        }
+
+        private async Task<CottonLogoutCacheCleanupSettings> GetLogoutCacheCleanupSettingsAsync(string reason)
+        {
+            try
+            {
+                return await _logoutCleanupSettingsStore.GetAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to inspect Cotton mobile logout cache cleanup settings during {Reason}.",
+                    reason);
+                return CottonLogoutCacheCleanupSettings.Default;
             }
         }
 
@@ -672,9 +705,13 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            CottonLogoutCacheCleanupSettings logoutCleanupSettings =
+                await GetLogoutCacheCleanupSettingsAsync("logout confirmation");
             bool confirmed = await _dialogService.ShowConfirmationAsync(
                 LogoutConfirmationTitle,
-                LogoutConfirmationMessage,
+                logoutCleanupSettings.ClearCachedFilesOnLogout
+                    ? LogoutConfirmationClearCacheMessage
+                    : LogoutConfirmationKeepCacheMessage,
                 AccountLogoutAction,
                 AccountCancelAction);
             if (!confirmed)

@@ -8,6 +8,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly ICottonAppLockSettingsStore _settingsStore;
         private readonly ICottonAppLockRuntimeStateStore _runtimeStateStore;
+        private readonly ICottonLogoutCacheCleanupSettingsStore _logoutCleanupSettingsStore;
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ICottonWindowPrivacyService _windowPrivacyService;
@@ -17,14 +18,19 @@ namespace Cotton.Mobile.ViewModels
             CottonAppLockCapabilitySnapshot.Unavailable("App lock status has not been checked.");
         private CottonDeviceUnlockAvailabilitySnapshot _deviceUnlockAvailability =
             CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Device unlock status has not been checked.");
+        private CottonLogoutCacheCleanupSettings _logoutCleanupSettings =
+            CottonLogoutCacheCleanupSettings.Default;
         private bool _isBusy;
         private bool _isApplyingSourceValue;
+        private bool _isApplyingLogoutCleanupSourceValue;
         private bool _isAppLockEnabled;
+        private bool _isLogoutCacheCleanupEnabled;
         private string? _status;
 
         public SecuritySettingsViewModel(
             ICottonAppLockSettingsStore settingsStore,
             ICottonAppLockRuntimeStateStore runtimeStateStore,
+            ICottonLogoutCacheCleanupSettingsStore logoutCleanupSettingsStore,
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
             ICottonWindowPrivacyService windowPrivacyService,
@@ -32,6 +38,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(runtimeStateStore);
+            ArgumentNullException.ThrowIfNull(logoutCleanupSettingsStore);
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(windowPrivacyService);
@@ -39,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
 
             _settingsStore = settingsStore;
             _runtimeStateStore = runtimeStateStore;
+            _logoutCleanupSettingsStore = logoutCleanupSettingsStore;
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
             _windowPrivacyService = windowPrivacyService;
@@ -50,6 +58,7 @@ namespace Cotton.Mobile.ViewModels
                 () => !IsBusy && DeviceUnlockDisplay.CanVerify);
             ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
             ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
+            ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -64,6 +73,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     OnPropertyChanged(nameof(CanToggleAppLock));
+                    OnPropertyChanged(nameof(CanToggleLogoutCacheCleanup));
                     LoadCommand.RaiseCanExecuteChanged();
                     VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
                 }
@@ -87,6 +97,29 @@ namespace Cotton.Mobile.ViewModels
         public bool CanVerifyDeviceUnlock => !IsBusy && DeviceUnlockDisplay.CanVerify;
 
         public bool IsDeviceUnlockActionVisible => DeviceUnlockDisplay.IsActionVisible;
+
+        public string LogoutCacheCleanupTitle => LogoutCleanupDisplay.Title;
+
+        public string LogoutCacheCleanupStatusText => LogoutCleanupDisplay.StatusText;
+
+        public string LogoutCacheCleanupDetailText => LogoutCleanupDisplay.DetailText;
+
+        public bool IsLogoutCacheCleanupEnabled
+        {
+            get => _isLogoutCacheCleanupEnabled;
+            set
+            {
+                if (!SetProperty(ref _isLogoutCacheCleanupEnabled, value)
+                    || _isApplyingLogoutCleanupSourceValue)
+                {
+                    return;
+                }
+
+                _ = SaveLogoutCacheCleanupAsync(value);
+            }
+        }
+
+        public bool CanToggleLogoutCacheCleanup => !IsBusy;
 
         public bool IsAppLockEnabled
         {
@@ -131,6 +164,9 @@ namespace Cotton.Mobile.ViewModels
             CottonDeviceUnlockDisplayState.Create(
                 CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Device unlock status has not been checked."));
 
+        private CottonLogoutCacheCleanupDisplayState LogoutCleanupDisplay { get; set; } =
+            CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default);
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -142,6 +178,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 _settings = await _settingsStore.GetAsync();
+                _logoutCleanupSettings = await _logoutCleanupSettingsStore.GetAsync();
                 _capability = await _capabilityService.GetCapabilityAsync();
                 _deviceUnlockAvailability = await _deviceUnlockService.GetAvailabilityAsync();
                 bool disabledUnavailableAppLock = false;
@@ -154,12 +191,13 @@ namespace Cotton.Mobile.ViewModels
 
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
+                ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
                 Status = disabledUnavailableAppLock
                     ? "App lock was turned off because device unlock is unavailable."
                     : _capability.CanEnable ? null : "App lock is unavailable.";
                 if (disabledUnavailableAppLock)
                 {
-                    await _windowPrivacyService.ApplyAsync();
+                    _ = _windowPrivacyService.ApplyAsync();
                 }
             }
             catch (Exception exception)
@@ -170,6 +208,7 @@ namespace Cotton.Mobile.ViewModels
                     CottonAppLockCapabilitySnapshot.Unavailable("Could not inspect app lock.")));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
                     CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Could not inspect device unlock.")));
+                ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default));
                 Status = "Could not inspect security settings.";
             }
             finally
@@ -214,7 +253,7 @@ namespace Cotton.Mobile.ViewModels
 
                 _settings = _settings.WithEnabled(isEnabled);
                 await _settingsStore.SaveAsync(_settings);
-                await _windowPrivacyService.ApplyAsync();
+                _ = _windowPrivacyService.ApplyAsync();
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 Status = isEnabled ? "App lock enabled." : "App lock disabled.";
             }
@@ -266,6 +305,30 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task SaveLogoutCacheCleanupAsync(bool isEnabled)
+        {
+            IsBusy = true;
+            try
+            {
+                _logoutCleanupSettings = _logoutCleanupSettings.WithClearCachedFilesOnLogout(isEnabled);
+                await _logoutCleanupSettingsStore.SaveAsync(_logoutCleanupSettings);
+                ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
+                Status = isEnabled
+                    ? "Cache will be cleared on logout."
+                    : "Cache will be kept on logout.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile logout cache cleanup settings.");
+                ApplyLogoutCleanupSourceValue(LogoutCleanupDisplay.IsEnabled);
+                Status = "Could not update logout cleanup.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
         private void ShowAppLock(CottonAppLockSettingsDisplayState display)
         {
             ArgumentNullException.ThrowIfNull(display);
@@ -293,6 +356,18 @@ namespace Cotton.Mobile.ViewModels
             VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
         }
 
+        private void ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState display)
+        {
+            ArgumentNullException.ThrowIfNull(display);
+
+            LogoutCleanupDisplay = display;
+            ApplyLogoutCleanupSourceValue(display.IsEnabled);
+            OnPropertyChanged(nameof(LogoutCacheCleanupTitle));
+            OnPropertyChanged(nameof(LogoutCacheCleanupStatusText));
+            OnPropertyChanged(nameof(LogoutCacheCleanupDetailText));
+            OnPropertyChanged(nameof(CanToggleLogoutCacheCleanup));
+        }
+
         private void ApplyAppLockSourceValue(bool isEnabled)
         {
             _isApplyingSourceValue = true;
@@ -303,6 +378,19 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 _isApplyingSourceValue = false;
+            }
+        }
+
+        private void ApplyLogoutCleanupSourceValue(bool isEnabled)
+        {
+            _isApplyingLogoutCleanupSourceValue = true;
+            try
+            {
+                IsLogoutCacheCleanupEnabled = isEnabled;
+            }
+            finally
+            {
+                _isApplyingLogoutCleanupSourceValue = false;
             }
         }
 

@@ -176,6 +176,58 @@ namespace Cotton.Mobile.Services
                 .ConfigureAwait(false);
         }
 
+        public async Task<CottonDeviceSpaceCleanupResult> FreeDeviceSpaceAsync(
+            CancellationToken cancellationToken = default)
+        {
+            CottonOfflineStorageScan offlineFiles = await Task
+                .Run(() => ScanOfflineFiles(cancellationToken), cancellationToken)
+                .ConfigureAwait(false);
+            var failures = new List<Exception>();
+            CottonDeviceSpaceCleanupResult result = CottonDeviceSpaceCleanupResult.Empty;
+
+            result = result.Add(await TryFreeDeviceSpaceAreaAsync(
+                () => ClearDirectoryWithResultAsync(
+                    CottonMobileStoragePaths.CreateThumbnailCacheDirectory(_thumbnailOptions),
+                    cancellationToken,
+                    includeTemporaryThumbnails: false),
+                "thumbnail cache",
+                failures).ConfigureAwait(false));
+            result = result.Add(await TryFreeDeviceSpaceAreaAsync(
+                () => ClearDirectoryWithResultAsync(
+                    CottonMobileStoragePaths.CreateFolderContentCacheRootDirectory(),
+                    cancellationToken),
+                "folder listings",
+                failures).ConfigureAwait(false));
+
+            bool deletedDownloads = false;
+            result = result.Add(await TryFreeDeviceSpaceAreaAsync(
+                () => ClearDirectoryWithResultAsync(
+                    CottonMobileStoragePaths.CreateDownloadsDirectory(),
+                    cancellationToken,
+                    includeTemporaryDownloads: false,
+                    excludedDirectories: offlineFiles.ProtectedDownloadDirectories,
+                    onFileDeleted: () => deletedDownloads = true),
+                "evictable downloads",
+                failures).ConfigureAwait(false));
+
+            if (deletedDownloads)
+            {
+                NotifyDownloadedFilesCleared();
+            }
+
+            if (failures.Count == 1)
+            {
+                throw new InvalidOperationException("Failed to free one Cotton mobile storage area.", failures[0]);
+            }
+
+            if (failures.Count > 1)
+            {
+                throw new AggregateException("Failed to free Cotton mobile device space.", failures);
+            }
+
+            return result;
+        }
+
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)
         {
             List<Exception> failures = [];
@@ -230,20 +282,45 @@ namespace Cotton.Mobile.Services
             bool includeTemporaryDownloads = true,
             Action? onFileDeleted = null)
         {
+            return ClearDirectoryWithResultAsync(
+                directory,
+                cancellationToken,
+                includeTemporaryThumbnails,
+                includeTemporaryDownloads,
+                excludedDirectories: null,
+                onFileDeleted);
+        }
+
+        private Task<CottonDeviceSpaceCleanupResult> ClearDirectoryWithResultAsync(
+            string directory,
+            CancellationToken cancellationToken,
+            bool includeTemporaryThumbnails = true,
+            bool includeTemporaryDownloads = true,
+            IReadOnlyCollection<string>? excludedDirectories = null,
+            Action? onFileDeleted = null)
+        {
             return Task.Run(
                 () =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     if (!Directory.Exists(directory))
                     {
-                        return;
+                        return CottonDeviceSpaceCleanupResult.Empty;
                     }
 
+                    IReadOnlyList<string> normalizedExcludedDirectories = NormalizeExcludedDirectories(excludedDirectories);
                     List<Exception> failures = [];
                     DateTime utcNow = DateTime.UtcNow;
+                    int deletedFileCount = 0;
+                    long deletedBytes = 0;
                     foreach (string file in Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories))
                     {
                         cancellationToken.ThrowIfCancellationRequested();
+                        if (IsInExcludedDirectory(file, normalizedExcludedDirectories))
+                        {
+                            continue;
+                        }
+
                         if (!includeTemporaryDownloads
                             && CottonMobileStoragePaths.IsTemporaryDownloadPath(file)
                             && !IsAbandonedTemporaryStorageFile(file, utcNow))
@@ -258,9 +335,18 @@ namespace Cotton.Mobile.Services
                             continue;
                         }
 
+                        bool hasFileSize = TryReadStorageFile(
+                            "device space cleanup",
+                            file,
+                            out long fileSizeBytes);
                         if (DeleteFile(file, failures))
                         {
                             onFileDeleted?.Invoke();
+                            deletedFileCount++;
+                            if (hasFileSize)
+                            {
+                                deletedBytes += fileSizeBytes;
+                            }
                         }
                     }
 
@@ -274,8 +360,27 @@ namespace Cotton.Mobile.Services
                     {
                         throw new AggregateException("Failed to delete Cotton mobile storage files.", failures);
                     }
+
+                    return new CottonDeviceSpaceCleanupResult(deletedFileCount, deletedBytes);
                 },
                 cancellationToken);
+        }
+
+        private async Task<CottonDeviceSpaceCleanupResult> TryFreeDeviceSpaceAreaAsync(
+            Func<Task<CottonDeviceSpaceCleanupResult>> freeAsync,
+            string cacheAreaName,
+            List<Exception> failures)
+        {
+            try
+            {
+                return await freeAsync().ConfigureAwait(false);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Failed to free Cotton mobile {CacheAreaName}.", cacheAreaName);
+                failures.Add(exception);
+                return CottonDeviceSpaceCleanupResult.Empty;
+            }
         }
 
         private CottonStorageCategorySnapshot ScanDirectory(

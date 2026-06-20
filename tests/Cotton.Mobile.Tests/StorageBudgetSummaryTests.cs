@@ -94,12 +94,16 @@ namespace Cotton.Mobile.Tests
         {
             Assert.Equal("Clear downloads and kept-offline files", CottonStorageCleanupPolicyText.ClearDownloadedFilesTitle);
             Assert.Equal("Clear temporary upload files", CottonStorageCleanupPolicyText.ClearTemporaryUploadsTitle);
+            Assert.Equal("Free device space", CottonStorageCleanupPolicyText.FreeDeviceSpaceTitle);
             Assert.Equal(
                 "Opened downloads and files marked On device, including kept-offline files, will need internet to open again.",
                 CottonStorageCleanupPolicyText.ClearDownloadedFilesMessage);
             Assert.Equal(
                 "Only completed, cancelled, or abandoned upload files for this account will be removed. Waiting, running, and failed uploads stay in Transfers.",
                 CottonStorageCleanupPolicyText.ClearTemporaryUploadsMessage);
+            Assert.Equal(
+                "Opened downloads not kept offline, cached previews, and saved folder lists will be removed. Kept-offline files and waiting, running, or failed uploads stay on this device.",
+                CottonStorageCleanupPolicyText.FreeDeviceSpaceMessage);
             Assert.Equal(
                 "Only cached previews will be removed. Offline files stay on this device.",
                 CottonStorageCleanupPolicyText.ClearThumbnailsMessage);
@@ -129,10 +133,40 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Free_device_space_status_reports_empty_and_deleted_results()
+        {
+            Assert.Equal(
+                "No evictable Cotton files to clear.",
+                CottonStorageCleanupPolicyText.CreateDeviceSpaceFreedStatus(CottonDeviceSpaceCleanupResult.Empty));
+            Assert.Equal(
+                "Freed 512 B from 1 Cotton file.",
+                CottonStorageCleanupPolicyText.CreateDeviceSpaceFreedStatus(
+                    new CottonDeviceSpaceCleanupResult(1, 512)));
+            Assert.Equal(
+                "Freed 2 KB from 2 Cotton files.",
+                CottonStorageCleanupPolicyText.CreateDeviceSpaceFreedStatus(
+                    new CottonDeviceSpaceCleanupResult(2, 2048)));
+        }
+
+        [Fact]
         public void Temporary_upload_cleanup_result_rejects_negative_values()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new CottonTransferStagedFileCleanupResult(-1, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => new CottonTransferStagedFileCleanupResult(0, -1));
+        }
+
+        [Fact]
+        public void Free_device_space_result_rejects_negative_values_and_combines_results()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CottonDeviceSpaceCleanupResult(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CottonDeviceSpaceCleanupResult(0, -1));
+
+            CottonDeviceSpaceCleanupResult result = new CottonDeviceSpaceCleanupResult(1, 512)
+                .Add(new CottonDeviceSpaceCleanupResult(2, 2048));
+
+            Assert.Equal(3, result.FileCount);
+            Assert.Equal(2560, result.SizeBytes);
+            Assert.True(result.HasDeletedFiles);
         }
 
         private static void AssertBucket(

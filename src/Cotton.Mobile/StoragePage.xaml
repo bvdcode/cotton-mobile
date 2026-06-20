@@ -94,35 +94,43 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-            <Grid RowDefinitions="Auto,Auto,Auto"
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                   ColumnDefinitions="*,*"
                   RowSpacing="10"
                   ColumnSpacing="10">
-                <Button Text="Clear thumbnails"
+                <Button Grid.ColumnSpan="2"
+                        Text="Free space"
+                        Command="{Binding FreeDeviceSpaceCommand}"
+                        Style="{StaticResource FileChromeButton}"
+                        HeightRequest="44" />
+
+                <Button Grid.Row="1"
+                        Text="Clear thumbnails"
                         Command="{Binding ClearThumbnailsCommand}"
                         Style="{StaticResource FileChromeButton}"
                         HeightRequest="44" />
 
-                <Button Grid.Column="1"
+                <Button Grid.Row="1"
+                        Grid.Column="1"
                         Text="Clear downloads"
                         Command="{Binding ClearDownloadedFilesCommand}"
                         Style="{StaticResource FileChromeButton}"
                         HeightRequest="44" />
 
-                <Button Grid.Row="1"
+                <Button Grid.Row="2"
                         Text="Clear lists"
                         Command="{Binding ClearFolderListingsCommand}"
                         Style="{StaticResource FileChromeButton}"
                         HeightRequest="44" />
 
-                <Button Grid.Row="1"
+                <Button Grid.Row="2"
                         Grid.Column="1"
                         Text="Clear temp uploads"
                         Command="{Binding ClearTemporaryUploadsCommand}"
                         Style="{StaticResource FileChromeButton}"
                         HeightRequest="44" />
 
-                <Button Grid.Row="2"
+                <Button Grid.Row="3"
                         Grid.ColumnSpan="2"
                         Text="Clear all"
                         Command="{Binding ClearAllCommand}"

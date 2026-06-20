@@ -57,6 +57,7 @@ namespace Cotton.Mobile.ViewModels
                 ClearDownloadedFilesAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy);
+            FreeDeviceSpaceCommand = new AsyncCommand(FreeDeviceSpaceAsync, LogUnhandledCommandException, () => !IsBusy);
             ClearAllCommand = new AsyncCommand(ClearAllAsync, LogUnhandledCommandException, () => !IsBusy);
             ShowOnDeviceStorage(CottonOnDeviceStorageSummary.Empty);
             ShowStorageBudget(CottonStorageBudgetSummary.Empty);
@@ -72,6 +73,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ClearTemporaryUploadsCommand { get; }
 
         public AsyncCommand ClearDownloadedFilesCommand { get; }
+
+        public AsyncCommand FreeDeviceSpaceCommand { get; }
 
         public AsyncCommand ClearAllCommand { get; }
 
@@ -281,6 +284,32 @@ namespace Cotton.Mobile.ViewModels
                 RefreshSummaryAfterClearFailureAsync);
         }
 
+        private async Task FreeDeviceSpaceAsync()
+        {
+            await RunStorageActionAsync(
+                async () =>
+                {
+                    bool confirmed = await _dialogService.ShowConfirmationAsync(
+                        CottonStorageCleanupPolicyText.FreeDeviceSpaceTitle,
+                        CottonStorageCleanupPolicyText.FreeDeviceSpaceMessage,
+                        CottonStorageCleanupPolicyText.FreeDeviceSpaceAction,
+                        CottonStorageCleanupPolicyText.CancelAction);
+                    if (!confirmed)
+                    {
+                        Status = null;
+                        return;
+                    }
+
+                    CottonDeviceSpaceCleanupResult result =
+                        await _storageManagementService.FreeDeviceSpaceAsync(CancellationToken.None);
+                    CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+                    ShowSummary(summary);
+                    Status = CottonStorageCleanupPolicyText.CreateDeviceSpaceFreedStatus(result);
+                },
+                "Could not free device space.",
+                RefreshSummaryAfterClearFailureAsync);
+        }
+
         private Task ClearAllAsync()
         {
             return ClearAsync(
@@ -432,6 +461,7 @@ namespace Cotton.Mobile.ViewModels
             ClearFolderListingsCommand.RaiseCanExecuteChanged();
             ClearTemporaryUploadsCommand.RaiseCanExecuteChanged();
             ClearDownloadedFilesCommand.RaiseCanExecuteChanged();
+            FreeDeviceSpaceCommand.RaiseCanExecuteChanged();
             ClearAllCommand.RaiseCanExecuteChanged();
         }
 

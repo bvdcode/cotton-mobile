@@ -18,8 +18,6 @@ namespace Cotton.Mobile.Services
             ScanDocumentAction,
             UploadPhotoAction,
             UploadVideoAction,
-            UploadPhotoToFolderAction,
-            UploadVideoToFolderAction,
         ];
 
         private static readonly string[] ActionsWithoutDocumentScan =
@@ -28,8 +26,6 @@ namespace Cotton.Mobile.Services
             UploadFileAction,
             UploadPhotoAction,
             UploadVideoAction,
-            UploadPhotoToFolderAction,
-            UploadVideoToFolderAction,
         ];
 
         public static IReadOnlyList<string> CreateActions(bool canScanDocument = true)

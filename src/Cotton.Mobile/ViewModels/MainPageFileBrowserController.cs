@@ -946,12 +946,17 @@ namespace Cotton.Mobile.ViewModels
                 openAction,
                 downloadAction,
             };
-            actions.Add(refreshedFile.OfflineAvailability.NeedsRefresh
-                ? RefreshOfflineAction
-                : KeepOfflineAction);
-            if (refreshedFile.HasLocalCopy || refreshedFile.OfflineAvailability.IsPinned)
+            if (refreshedFile.OfflineAvailability.NeedsRefresh)
+            {
+                actions.Add(RefreshOfflineAction);
+            }
+            else if (refreshedFile.OfflineAvailability.IsPinned)
             {
                 actions.Add(RemoveOfflineAction);
+            }
+            else
+            {
+                actions.Add(KeepOfflineAction);
             }
 
             actions.Add(CopyLinkAction);

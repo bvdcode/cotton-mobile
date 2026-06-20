@@ -15,8 +15,6 @@ namespace Cotton.Mobile.Tests
                     CottonFileAddActionSheet.ScanDocumentAction,
                     CottonFileAddActionSheet.UploadPhotoAction,
                     CottonFileAddActionSheet.UploadVideoAction,
-                    CottonFileAddActionSheet.UploadPhotoToFolderAction,
-                    CottonFileAddActionSheet.UploadVideoToFolderAction,
                 ],
                 CottonFileAddActionSheet.CreateActions());
         }
@@ -30,8 +28,6 @@ namespace Cotton.Mobile.Tests
                     CottonFileAddActionSheet.UploadFileAction,
                     CottonFileAddActionSheet.UploadPhotoAction,
                     CottonFileAddActionSheet.UploadVideoAction,
-                    CottonFileAddActionSheet.UploadPhotoToFolderAction,
-                    CottonFileAddActionSheet.UploadVideoToFolderAction,
                 ],
                 CottonFileAddActionSheet.CreateActions(canScanDocument: false));
         }

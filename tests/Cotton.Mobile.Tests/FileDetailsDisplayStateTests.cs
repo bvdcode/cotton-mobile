@@ -59,8 +59,8 @@ namespace Cotton.Mobile.Tests
             CottonFileDetailsDisplayState details =
                 CottonFileDetailsDisplayState.Create(file, localFile, TimeZoneInfo.Utc);
 
-            Assert.Equal("Saved (42 B)", details.OnDeviceText);
-            Assert.Contains("Saved on this device: Saved (42 B)", details.Message, StringComparison.Ordinal);
+            Assert.Equal("Saved", details.OnDeviceText);
+            Assert.Contains("Saved on this device: Saved", details.Message, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Services
                 return $"Needs refresh ({localSize})";
             }
 
-            return $"Saved ({localSize})";
+            return "Saved";
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Services
             Kind = string.IsNullOrWhiteSpace(kind) ? "Text" : kind.Trim();
             SizeBytes = sizeBytes < 0 ? 0 : sizeBytes;
             LineCount = lineCount < 0 ? 0 : lineCount;
-            DetailsText = $"{Kind} · {CottonFileSizeFormatter.Format(SizeBytes)} · {FormatLineCount(LineCount)}";
+            DetailsText = $"{Kind} · {FormatLineCount(LineCount)}";
         }
 
         public string Kind { get; }

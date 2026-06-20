@@ -18,10 +18,10 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(" Text ", 42, "hello", "Text · 42 B · 1 line")]
-        [InlineData("", 1536, "one\ntwo", "Text · 1.5 KB · 2 lines")]
-        [InlineData("Config", -1, "", "Config · 0 B · 0 lines")]
-        public void Create_formats_details_with_kind_size_and_line_count(
+        [InlineData(" Text ", 42, "hello", "Text · 1 line")]
+        [InlineData("", 1536, "one\ntwo", "Text · 2 lines")]
+        [InlineData("Config", -1, "", "Config · 0 lines")]
+        public void Create_formats_details_with_kind_and_line_count(
             string kind,
             long sizeBytes,
             string content,

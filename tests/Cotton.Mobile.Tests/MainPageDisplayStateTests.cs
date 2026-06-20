@@ -141,6 +141,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(["alpha.png"], VisibleNames(display));
             Assert.Equal("Downloading zeta.txt... 50%", display.FilesStatus);
             Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.False(display.IsInlineFilesLoadingVisible);
             Assert.False(display.IsAccountActionEnabled);
             Assert.True(display.CanCancelFileAction);
 
@@ -177,6 +178,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.CanRefreshFiles);
+            Assert.True(display.IsInlineFilesLoadingVisible);
         }
 
         [Fact]

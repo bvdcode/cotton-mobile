@@ -420,11 +420,14 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isFilesLoading, value))
                 {
+                    OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
                     NotifyFileBrowserChromeStateChanged();
                     NotifyFilesEmptyStateChanged();
                 }
             }
         }
+
+        public bool IsInlineFilesLoadingVisible => IsFilesLoading && !IsFileActionInProgress;
 
         public bool IsFilesRefreshing
         {
@@ -529,6 +532,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isFileActionInProgress, value))
                 {
+                    OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
                     OnPropertyChanged(nameof(IsAccountActionEnabled));
                     NotifyFileBrowserChromeStateChanged();
                 }

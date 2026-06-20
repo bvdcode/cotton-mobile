@@ -494,8 +494,8 @@
                             </Border>
 
                             <HorizontalStackLayout Spacing="12"
-                                                   IsVisible="{Binding Display.IsFilesLoading}">
-                                <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
+                                                   IsVisible="{Binding Display.IsInlineFilesLoadingVisible}">
+                                <ActivityIndicator IsRunning="{Binding Display.IsInlineFilesLoadingVisible}"
                                                    VerticalOptions="Center" />
 
                                 <Button Text="Cancel"

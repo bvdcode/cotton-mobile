@@ -202,7 +202,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Selection_action_sheet_keeps_multi_folder_selection_to_link_actions_only()
+        public void Selection_action_sheet_exposes_multi_folder_keep_offline()
         {
             CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
             [
@@ -218,6 +218,7 @@ namespace Cotton.Mobile.Tests
                 {
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.KeepOffline,
                 },
                 actions.Select(action => action.Kind));
         }

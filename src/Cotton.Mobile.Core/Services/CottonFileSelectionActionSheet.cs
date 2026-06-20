@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Services
             if (action.Kind == CottonFileBulkActionKind.KeepOffline)
             {
                 return (selection.FileCount > 0 && !selection.HasFolders)
-                    || selection.Count == 1 && selection.FolderCount == 1;
+                    || (selection.FolderCount > 0 && !selection.HasFiles);
             }
 
             if (action.Kind == CottonFileBulkActionKind.RemoveOffline)

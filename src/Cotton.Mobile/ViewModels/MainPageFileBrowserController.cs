@@ -508,7 +508,7 @@ namespace Cotton.Mobile.ViewModels
                     await DownloadSelectionFilesAsync(entries);
                     break;
                 case CottonFileBulkActionKind.KeepOffline:
-                    await KeepSelectedEntryOfflineAsync(entries[0]);
+                    await KeepSelectionOfflineAsync(entries);
                     break;
                 case CottonFileBulkActionKind.RemoveOffline:
                     await RemoveFileOfflineAsync(entries[0]);
@@ -1700,6 +1700,173 @@ namespace Cotton.Mobile.ViewModels
             return entry.Type == CottonFileBrowserEntryType.Folder
                 ? PlanFolderOfflineAsync(entry)
                 : KeepFileOfflineAsync(entry);
+        }
+
+        private async Task KeepSelectionOfflineAsync(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            ArgumentNullException.ThrowIfNull(entries);
+
+            if (entries.Count == 1)
+            {
+                await KeepSelectedEntryOfflineAsync(entries[0]);
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to keep files offline.");
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedFiles = entries
+                .Select(entry => GetCurrentVisibleEntry(entry, instanceUri))
+                .Where(entry => entry is not null && entry.Type == CottonFileBrowserEntryType.File)
+                .Select(entry => entry!)
+                .ToArray();
+            if (selectedFiles.Length == 0)
+            {
+                _display.ShowFilesStatus(CottonFileBulkOfflineStatusText.UnavailableStatus);
+                return;
+            }
+
+            if (selectedFiles.Length == 1)
+            {
+                await KeepFileOfflineAsync(selectedFiles[0]);
+                return;
+            }
+
+            bool needsNetwork = selectedFiles.Any(
+                file => _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file) is null);
+            if (needsNetwork && !_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(CottonFileBulkOfflineStatusText.OfflineUnavailableStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonFileBulkOfflineStatusText.CreateStartingStatus(selectedFiles.Length));
+            int completedCount = 0;
+
+            try
+            {
+                for (int index = 0; index < selectedFiles.Length; index++)
+                {
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    CottonFileBrowserEntry file = selectedFiles[index];
+                    _display.ShowFileActionLoading(
+                        CottonFileBulkOfflineStatusText.CreateSavingItemStatus(
+                            index + 1,
+                            selectedFiles.Length,
+                            file.Name));
+
+                    CottonLocalFileSnapshot? reusableLocalFile =
+                        _fileBrowserService.GetReusableLocalDownloadSnapshot(instanceUri, file);
+                    if (reusableLocalFile is not null)
+                    {
+                        await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
+                        _display.ShowFileLocalCopy(file, reusableLocalFile);
+                        completedCount++;
+                        continue;
+                    }
+
+                    await _fileBrowserService.DownloadAsync(
+                        instanceUri,
+                        file,
+                        CreateBulkFileOfflineProgress(
+                            file,
+                            index + 1,
+                            selectedFiles.Length,
+                            () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                            fileActionCancellation.Token),
+                        fileActionCancellation.Token);
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    await PinFileOfflineAsync(instanceUri, file, CancellationToken.None);
+                    completedCount++;
+                }
+
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _display.ShowFilesStatus(CottonFileBulkOfflineStatusText.CreateCompletedStatus(completedCount));
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection keep-offline authorization failure.");
+                    return;
+                }
+
+                if (completedCount > 0)
+                {
+                    await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile selection keep-offline cancellation.");
+                    return;
+                }
+
+                if (completedCount > 0)
+                {
+                    await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(
+                    CottonFileBulkOfflineStatusText.CreateCancelledStatus(
+                        completedCount,
+                        selectedFiles.Length));
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection keep-offline failure.");
+                    return;
+                }
+
+                if (completedCount > 0)
+                {
+                    await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                }
+
+                _logger.LogError(exception, "Failed to keep Cotton mobile selection offline.");
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonFileBulkOfflineStatusText.CreateFailedStatus(
+                            completedCount,
+                            selectedFiles.Length),
+                        CottonFileBulkOfflineStatusText.OfflineUnavailableStatus));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
         }
 
         private Task RefreshOfflineFileAsync(CottonFileBrowserEntry file)
@@ -4077,6 +4244,43 @@ namespace Cotton.Mobile.ViewModels
                 lastPercent = percent;
                 _display.ShowFileActionLoading(
                     CottonFileBulkDownloadStatusText.CreateDownloadingItemProgressStatus(
+                        itemPosition,
+                        fileCount,
+                        file.Name,
+                        percent));
+            });
+        }
+
+        private IProgress<long>? CreateBulkFileOfflineProgress(
+            CottonFileBrowserEntry file,
+            int itemPosition,
+            int fileCount,
+            Func<bool> canUpdateProgress,
+            CancellationToken cancellationToken)
+        {
+            if (file.SizeBytes is not > 0)
+            {
+                return null;
+            }
+
+            long totalBytes = file.SizeBytes.Value;
+            int lastPercent = -1;
+            return new Progress<long>(downloadedBytes =>
+            {
+                if (cancellationToken.IsCancellationRequested || !canUpdateProgress())
+                {
+                    return;
+                }
+
+                int percent = (int)Math.Min(100d, Math.Floor(downloadedBytes / (double)totalBytes * 100d));
+                if (percent == lastPercent)
+                {
+                    return;
+                }
+
+                lastPercent = percent;
+                _display.ShowFileActionLoading(
+                    CottonFileBulkOfflineStatusText.CreateSavingItemProgressStatus(
                         itemPosition,
                         fileCount,
                         file.Name,

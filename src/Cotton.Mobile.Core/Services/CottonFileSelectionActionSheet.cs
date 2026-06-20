@@ -22,14 +22,14 @@ namespace Cotton.Mobile.Services
                 return true;
             }
 
-            if (action.Kind == CottonFileBulkActionKind.DownloadFiles)
+            if (action.Kind == CottonFileBulkActionKind.DownloadFiles
+                || action.Kind == CottonFileBulkActionKind.KeepOffline)
             {
                 return selection.FileCount > 0 && !selection.HasFolders;
             }
 
             return selection.Count == 1
-                && action.Kind is (CottonFileBulkActionKind.KeepOffline
-                    or CottonFileBulkActionKind.RemoveOffline
+                && action.Kind is (CottonFileBulkActionKind.RemoveOffline
                     or CottonFileBulkActionKind.ShareLocalFiles);
         }
     }

@@ -152,9 +152,11 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
                     CottonFileBulkActionKind.DownloadFiles,
+                    CottonFileBulkActionKind.KeepOffline,
                 },
                 actions.Select(action => action.Kind));
             Assert.Equal("Download files", actions.Single(action => action.Kind == CottonFileBulkActionKind.DownloadFiles).Label);
+            Assert.Equal("Keep offline", actions.Single(action => action.Kind == CottonFileBulkActionKind.KeepOffline).Label);
         }
 
         [Fact]

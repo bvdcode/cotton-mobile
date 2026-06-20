@@ -2322,7 +2322,24 @@ namespace Cotton.Mobile.ViewModels
                     await TryLoadCachedFolderForOfflinePlanAsync(instanceUri, folderHandle, CancellationToken.None);
                 if (cachedContent is not null)
                 {
-                    ShowFolderOfflinePlanStatus(cachedContent, isCachedEstimate: true);
+                    CottonOfflineFolderPlanSnapshot cachedPlan =
+                        CottonOfflineFolderPlanSnapshot.Create(cachedContent);
+                    if (cachedPlan.Status == CottonOfflineFolderPlanStatus.ContainsFolders)
+                    {
+                        CottonOfflineFolderTreeContent cachedTree =
+                            await LoadCachedFolderTreeForOfflinePlanAsync(
+                                instanceUri,
+                                cachedContent,
+                                CancellationToken.None);
+                        ShowRecursiveFolderOfflinePlanStatus(cachedTree, isCachedEstimate: true);
+                    }
+                    else
+                    {
+                        _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(
+                            cachedPlan,
+                            isCachedEstimate: true));
+                    }
+
                     return true;
                 }
 
@@ -2484,17 +2501,44 @@ namespace Cotton.Mobile.ViewModels
             CancellationToken cancellationToken)
         {
             return LoadFolderTreeForOfflinePlanAsync(
-                instanceUri,
                 content,
                 [],
-                cancellationToken);
+                cancellationToken,
+                async (childHandle, childCancellationToken) =>
+                {
+                    CottonFolderContent childContent = await _fileBrowserService.GetFolderAsync(
+                        instanceUri,
+                        childHandle,
+                        childCancellationToken);
+                    childCancellationToken.ThrowIfCancellationRequested();
+                    await _folderContentCache.SaveFolderAsync(
+                        instanceUri,
+                        childContent,
+                        childCancellationToken);
+                    return childContent;
+                });
+        }
+
+        private Task<CottonOfflineFolderTreeContent> LoadCachedFolderTreeForOfflinePlanAsync(
+            Uri instanceUri,
+            CottonFolderContent content,
+            CancellationToken cancellationToken)
+        {
+            return LoadFolderTreeForOfflinePlanAsync(
+                content,
+                [],
+                cancellationToken,
+                (childHandle, childCancellationToken) => TryLoadCachedFolderForOfflinePlanAsync(
+                    instanceUri,
+                    childHandle,
+                    childCancellationToken));
         }
 
         private async Task<CottonOfflineFolderTreeContent> LoadFolderTreeForOfflinePlanAsync(
-            Uri instanceUri,
             CottonFolderContent content,
             HashSet<Guid> visitedFolderIds,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            Func<CottonFolderHandle, CancellationToken, Task<CottonFolderContent?>> childContentLoader)
         {
             if (!visitedFolderIds.Add(content.FolderId))
             {
@@ -2512,20 +2556,17 @@ namespace Cotton.Mobile.ViewModels
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var childHandle = new CottonFolderHandle(folderEntry.Id, folderEntry.Name);
-                CottonFolderContent childContent = await _fileBrowserService.GetFolderAsync(
-                    instanceUri,
-                    childHandle,
-                    cancellationToken);
-                cancellationToken.ThrowIfCancellationRequested();
-                await _folderContentCache.SaveFolderAsync(
-                    instanceUri,
-                    childContent,
-                    cancellationToken);
+                CottonFolderContent? childContent = await childContentLoader(childHandle, cancellationToken);
+                if (childContent is null)
+                {
+                    continue;
+                }
+
                 childTrees.Add(await LoadFolderTreeForOfflinePlanAsync(
-                    instanceUri,
                     childContent,
                     visitedFolderIds,
-                    cancellationToken));
+                    cancellationToken,
+                    childContentLoader));
             }
 
             return new CottonOfflineFolderTreeContent(content, childTrees);

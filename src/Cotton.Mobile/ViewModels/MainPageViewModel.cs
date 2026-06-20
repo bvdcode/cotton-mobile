@@ -102,6 +102,7 @@ namespace Cotton.Mobile.ViewModels
             ICaptureInboxPageService captureInboxPageService,
             INotificationSettingsPageService notificationSettingsPageService,
             IActivityFeedPageService activityFeedPageService,
+            IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonNotificationLaunchState notificationLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
@@ -159,6 +160,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
             ArgumentNullException.ThrowIfNull(activityFeedPageService);
+            ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(notificationLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
@@ -248,6 +250,7 @@ namespace Cotton.Mobile.ViewModels
                 uploadDestinationPickerPageService,
                 fileInteractionService,
                 filePreviewService,
+                fileVersionHistoryPageService,
                 cloudShareLinkService,
                 cloudShareLinkInteractionService,
                 thumbnailProvider,

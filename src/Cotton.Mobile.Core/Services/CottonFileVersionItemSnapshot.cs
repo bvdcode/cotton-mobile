@@ -110,7 +110,9 @@ namespace Cotton.Mobile.Services
             string updatedText = FormatTimestamp(version.UpdatedAt, displayTimeZone);
             string createdText = FormatTimestamp(version.CreatedAt, displayTimeZone);
             string versionText = CreateVersionText(version);
-            string detailText = $"{sizeText} · {kindText} · Updated {updatedText}";
+            string detailText = string.Equals(updatedText, UnknownText, StringComparison.Ordinal)
+                ? $"{sizeText} · {kindText}"
+                : $"{sizeText} · {kindText} · Updated {updatedText}";
 
             return new CottonFileVersionItemSnapshot(
                 version.Id,
@@ -152,6 +154,11 @@ namespace Cotton.Mobile.Services
 
         private static string FormatTimestamp(DateTime value, TimeZoneInfo displayTimeZone)
         {
+            if (value == default)
+            {
+                return UnknownText;
+            }
+
             DateTime utc = CottonLocalFileFreshness.NormalizeUtc(value);
             DateTime displayTime = TimeZoneInfo.ConvertTimeFromUtc(utc, displayTimeZone);
             return $"{displayTime:yyyy-MM-dd HH:mm}";

@@ -20,6 +20,7 @@ namespace Cotton.Mobile.ViewModels
         private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
         private const string ShareAction = "Share...";
+        private const string VersionHistoryAction = "Version history";
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
         private const string SyncFromSelectedFolderAction = CottonDeviceToCloudSyncStatusText.ActionLabel;
@@ -59,6 +60,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
+        private readonly IFileVersionHistoryPageService _fileVersionHistoryPageService;
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly ICloudShareLinkInteractionService _cloudShareLinkInteractionService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
@@ -106,6 +108,7 @@ namespace Cotton.Mobile.ViewModels
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
+            IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonCloudShareLinkService cloudShareLinkService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
@@ -136,6 +139,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
+            ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
@@ -166,6 +170,7 @@ namespace Cotton.Mobile.ViewModels
             _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
+            _fileVersionHistoryPageService = fileVersionHistoryPageService;
             _cloudShareLinkService = cloudShareLinkService;
             _cloudShareLinkInteractionService = cloudShareLinkInteractionService;
             _thumbnailProvider = thumbnailProvider;
@@ -1047,6 +1052,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             actions.Add(ShareAction);
+            actions.Add(VersionHistoryAction);
             actions.Add(DetailsAction);
 
             string? action = await _dialogService.ShowActionSheetAsync(
@@ -1084,6 +1090,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case ShareAction:
                     await ShowFileShareActionsAsync(currentFile, instanceUri);
+                    break;
+                case VersionHistoryAction:
+                    await OpenFileVersionHistoryAsync(currentFile, instanceUri);
                     break;
                 case DetailsAction:
                     await ShowFileDetailsAsync(currentFile);
@@ -4310,6 +4319,25 @@ namespace Cotton.Mobile.ViewModels
                 details.Title,
                 details.Message,
                 "OK");
+        }
+
+        private async Task OpenFileVersionHistoryAsync(CottonFileBrowserEntry file, Uri instanceUri)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(CottonFileVersionStatusText.OfflineUnavailableStatus);
+                return;
+            }
+
+            try
+            {
+                await _fileVersionHistoryPageService.OpenAsync(instanceUri, file);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile file version history {FileId}.", file.Id);
+                _display.ShowFilesStatus(CottonFileVersionStatusText.FailedStatus);
+            }
         }
 
         private async Task ShowFileShareActionsAsync(CottonFileBrowserEntry file, Uri instanceUri)

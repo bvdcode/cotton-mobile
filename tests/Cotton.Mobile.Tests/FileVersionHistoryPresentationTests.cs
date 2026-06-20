@@ -150,6 +150,29 @@ namespace Cotton.Mobile.Tests
                 CottonFileVersionStatusText.CreateLoadedStatus(-1));
         }
 
+        [Fact]
+        public void File_version_item_hides_default_timestamps()
+        {
+            FileVersionDto version = CreateVersion(
+                versionId: Guid.NewGuid(),
+                manifestId: CurrentManifestId,
+                versionNumber: 1,
+                isCurrent: true,
+                isOriginal: true,
+                canDelete: false,
+                updatedAtUtc: DateTime.UtcNow,
+                sizeBytes: 4096);
+            version.CreatedAt = default;
+            version.UpdatedAt = default;
+
+            CottonFileVersionItemSnapshot item = CottonFileVersionItemSnapshot.Create(version, Utc);
+
+            Assert.Equal("Unknown", item.CreatedText);
+            Assert.Equal("Unknown", item.UpdatedText);
+            Assert.Equal("4 KB · Image", item.DetailText);
+            Assert.DoesNotContain("0001", item.DetailText);
+        }
+
         private static FileVersionDto CreateVersion(
             Guid versionId,
             Guid manifestId,

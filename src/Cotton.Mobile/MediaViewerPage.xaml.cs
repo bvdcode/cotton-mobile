@@ -18,5 +18,11 @@ namespace Cotton.Mobile
 
             base.OnDisappearing();
         }
+
+        private void OnPlayClicked(object? sender, EventArgs e)
+        {
+            StartOverlay.IsVisible = false;
+            MediaPlayer.Play();
+        }
     }
 }

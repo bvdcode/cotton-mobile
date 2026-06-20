@@ -22,7 +22,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(capabilities.SupportsPerLinkRevoke);
             Assert.False(capabilities.SupportsPassword);
             Assert.False(capabilities.SupportsSharePermissions);
-            Assert.False(capabilities.SupportsActivityFeed);
+            Assert.True(capabilities.SupportsActivityFeed);
             Assert.False(capabilities.SupportsSharedWithMe);
             Assert.False(capabilities.SupportsAccessRequests);
         }

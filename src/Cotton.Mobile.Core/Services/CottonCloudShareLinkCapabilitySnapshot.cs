@@ -13,7 +13,7 @@ namespace Cotton.Mobile.Services
                 supportsPerLinkRevoke: false,
                 supportsPassword: false,
                 supportsSharePermissions: false,
-                supportsActivityFeed: false,
+                supportsActivityFeed: true,
                 supportsSharedWithMe: false,
                 supportsAccessRequests: false);
 

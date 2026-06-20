@@ -153,6 +153,7 @@ namespace Cotton.Mobile
 					new CottonAuthenticatedApiHttpOptions(metadata.UserAgent, metadata.DeviceName));
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
+			builder.Services.AddSingleton<ICottonActivityFeedService, CottonActivityFeedService>();
 			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
 			builder.Services.AddSingleton<ICottonRemotePushPreferenceService, CottonRemotePushPreferenceService>();
 #if ANDROID

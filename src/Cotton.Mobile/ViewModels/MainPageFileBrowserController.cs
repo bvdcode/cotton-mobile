@@ -2616,7 +2616,15 @@ namespace Cotton.Mobile.ViewModels
             if (!await ConfirmOfflineFolderStorageAsync(queue, fileActionCancellation.Token))
             {
                 ClearFileActionRetry();
-                _display.ShowFilesStatus(CottonOfflineFolderStatusText.CancelledStatus);
+                _display.ShowOfflinePackProgress(
+                    CottonOfflinePackProgressSnapshot.CreateCancelled(
+                        queue,
+                        completedCount: 0,
+                        completedBytes: 0));
+                _display.ShowFilesStatus(
+                    CottonOfflineDownloadQueueStatusText.CreateCancelledStatus(
+                        completedCount: 0,
+                        queue.TotalCount));
                 return false;
             }
 

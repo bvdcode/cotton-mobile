@@ -62,6 +62,8 @@ namespace Cotton.Mobile.Tests
             CottonOfflinePackProgressSnapshot completed = CottonOfflinePackProgressSnapshot.CreateCompleted(queue);
             CottonOfflinePackProgressSnapshot cancelled =
                 CottonOfflinePackProgressSnapshot.CreateCancelled(queue, completedCount: 1, completedBytes: 1024);
+            CottonOfflinePackProgressSnapshot cancelledBeforeDownload =
+                CottonOfflinePackProgressSnapshot.CreateCancelled(queue, completedCount: 0, completedBytes: 0);
             CottonOfflinePackProgressSnapshot failed =
                 CottonOfflinePackProgressSnapshot.CreateFailed(
                     queue,
@@ -73,6 +75,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("2 files · 3 KB", completed.Details);
             Assert.Equal("Projects offline cancelled", cancelled.Text);
             Assert.Equal("1/2 files saved", cancelled.Details);
+            Assert.Equal("Projects offline cancelled", cancelledBeforeDownload.Text);
+            Assert.Equal("0/2 files saved", cancelledBeforeDownload.Details);
             Assert.Equal("Projects offline failed", failed.Text);
             Assert.Equal("Network lost", failed.FailureText);
             Assert.Equal("1/2 files saved · Network lost", failed.Details);

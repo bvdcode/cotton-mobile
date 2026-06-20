@@ -103,6 +103,9 @@ namespace Cotton.Mobile.Tests
                 "Keep folder offline cancelled after 1/2 files.",
                 CottonOfflineDownloadQueueStatusText.CreateCancelledStatus(1, queue.TotalCount));
             Assert.Equal(
+                "Keep folder offline cancelled after 0/2 files.",
+                CottonOfflineDownloadQueueStatusText.CreateCancelledStatus(0, queue.TotalCount));
+            Assert.Equal(
                 "Keep folder offline failed after 1/2 files.",
                 CottonOfflineDownloadQueueStatusText.CreateFailedStatus(1, queue.TotalCount));
             Assert.Equal(

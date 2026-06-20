@@ -6,8 +6,15 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return CottonCloudToDeviceSyncRootCapability.CanRun(root)
-                || CottonDeviceToCloudSyncRootCapability.CanRun(root);
+            return root.Direction switch
+            {
+                CottonSyncDirection.CloudToDevice => CottonCloudToDeviceSyncRootCapability.CanRun(root),
+                CottonSyncDirection.DeviceToCloud => CottonDeviceToCloudSyncRootCapability.CanRun(root),
+                CottonSyncDirection.Bidirectional => false,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(root),
+                    "Sync direction is not supported."),
+            };
         }
 
         public static bool HasUnsupportedLocalRoot(CottonSyncRootSnapshot root)
@@ -18,8 +25,9 @@ namespace Cotton.Mobile.Services
             {
                 CottonSyncDirection.CloudToDevice =>
                     CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root),
-                CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional =>
+                CottonSyncDirection.DeviceToCloud =>
                     CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root),
+                CottonSyncDirection.Bidirectional => false,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(root),
                     "Sync direction is not supported."),
@@ -34,8 +42,9 @@ namespace Cotton.Mobile.Services
             {
                 CottonSyncDirection.CloudToDevice =>
                     CottonCloudToDeviceSyncRootCapability.UnsupportedLocalRootStatusText,
-                CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional =>
+                CottonSyncDirection.DeviceToCloud =>
                     CottonDeviceToCloudSyncRootCapability.UnsupportedLocalRootStatusText,
+                CottonSyncDirection.Bidirectional => CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(root),
                     "Sync direction is not supported."),

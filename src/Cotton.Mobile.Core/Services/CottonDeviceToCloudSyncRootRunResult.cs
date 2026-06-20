@@ -140,7 +140,9 @@ namespace Cotton.Mobile.Services
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection,
-                "Sync direction is not device-to-cloud",
+                root.Direction == CottonSyncDirection.Bidirectional
+                    ? CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus
+                    : "Sync direction is not device-to-cloud",
                 null,
                 null);
         }

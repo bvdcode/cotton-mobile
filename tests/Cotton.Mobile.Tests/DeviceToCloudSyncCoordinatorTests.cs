@@ -187,7 +187,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_supports_bidirectional_user_selected_roots()
+        public async Task Run_root_skips_bidirectional_roots_until_shared_executor_is_available()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -195,15 +195,15 @@ namespace Cotton.Mobile.Tests
                 "Projects",
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.Bidirectional);
-            _localTreeReader.SetContent(root.Id, CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt")));
-            _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
-            _fileOperator.UploadedNewFiles["alpha.txt"] = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
 
             CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
-            Assert.Equal(1, summary.UploadedCount);
+            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection, result.Status);
+            Assert.Equal(CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus, result.StatusText);
+            Assert.Empty(_localTreeReader.ReadRootIds);
+            Assert.Empty(_remoteFolderContentSource.RequestedFolderIds);
+            Assert.Empty(_fileOperator.UploadedNewRelativePaths);
         }
 
         [Fact]

@@ -175,6 +175,31 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Bidirectional_root_is_visible_but_not_runnable_until_conflict_review_is_available()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.Bidirectional,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Equal("Bidirectional · Device folder", item.DetailText);
+            Assert.Equal(CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus, item.StatusText);
+            Assert.False(item.IsUnsupportedLocalRoot);
+            Assert.False(item.IsReady);
+            Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
+            Assert.True(item.CanPauseSync);
+            Assert.True(item.CanStopSync);
+        }
+
+        [Fact]
         public void Device_to_cloud_app_private_root_shows_source_unsupported()
         {
             CottonSyncRootSnapshot root = CreateRoot(

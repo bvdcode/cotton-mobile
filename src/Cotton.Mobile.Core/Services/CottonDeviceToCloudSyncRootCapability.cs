@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Services
 
         private static bool IsDeviceToCloudDirection(CottonSyncRootSnapshot root)
         {
-            return root.Direction is CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional;
+            return root.Direction == CottonSyncDirection.DeviceToCloud;
         }
 
         private static bool HasSupportedLocalRoot(CottonSyncRootSnapshot root)

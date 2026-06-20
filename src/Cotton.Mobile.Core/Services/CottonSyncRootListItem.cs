@@ -12,10 +12,11 @@ namespace Cotton.Mobile.Services
             DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
             IsPaused = isPaused;
             IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
-            StatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
-            IsReady = !isPaused && !IsUnsupportedLocalRoot && root.CanRunSync;
-            IsAttentionVisible = !isPaused && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync);
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
+            StatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot, CanRunNow);
+            IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
+            IsAttentionVisible = !isPaused
+                && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
             CanStopSync = true;
@@ -58,15 +59,21 @@ namespace Cotton.Mobile.Services
         private static string CreateStatusText(
             CottonSyncRootSnapshot root,
             bool isPaused,
-            bool isUnsupportedLocalRoot)
+            bool isUnsupportedLocalRoot,
+            bool canRunNow)
         {
             if (isPaused)
             {
                 return CottonSyncRootManagementText.PausedStatusText;
             }
 
-            return isUnsupportedLocalRoot
-                ? CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(root)
+            if (isUnsupportedLocalRoot)
+            {
+                return CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(root);
+            }
+
+            return !canRunNow && root.Direction == CottonSyncDirection.Bidirectional && root.CanRunSync
+                ? CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus
                 : root.StatusText;
         }
 

@@ -102,7 +102,7 @@ namespace Cotton.Mobile.Services
             CottonDeviceToCloudSyncRunOptions options,
             CancellationToken cancellationToken)
         {
-            if (root.Direction == CottonSyncDirection.CloudToDevice)
+            if (root.Direction != CottonSyncDirection.DeviceToCloud)
             {
                 return CottonDeviceToCloudSyncRootRunResult.SkippedUnsupportedDirection(root);
             }

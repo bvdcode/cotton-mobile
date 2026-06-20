@@ -88,7 +88,7 @@ namespace Cotton.Mobile.Tests
                 "Projects: 2 files, 3 KB. Ready to keep offline.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(ready));
             Assert.Equal(
-                "Cached estimate: Projects: 2 files, 3 KB. Ready to keep offline.",
+                "Cached estimate: Projects: 2 files, 3 KB. Connect to keep offline.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(ready, isCachedEstimate: true));
             Assert.Equal(
                 "Projects has no files to keep offline.",

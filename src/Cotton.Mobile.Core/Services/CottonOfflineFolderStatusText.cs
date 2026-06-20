@@ -31,8 +31,13 @@ namespace Cotton.Mobile.Services
                 CottonOfflineFolderPlanStatus.HasUnknownSize =>
                     $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, size unknown. Offline folder needs exact file sizes.",
                 _ =>
-                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {CottonFileSizeFormatter.Format(plan.KnownSizeBytes)}. Ready to keep offline.",
+                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {CottonFileSizeFormatter.Format(plan.KnownSizeBytes)}. {CreateReadyDetail(isCachedEstimate)}",
             };
+        }
+
+        private static string CreateReadyDetail(bool isCachedEstimate)
+        {
+            return isCachedEstimate ? "Connect to keep offline." : "Ready to keep offline.";
         }
 
         private static string FormatKnownSize(CottonOfflineFolderPlanSnapshot plan)

@@ -1936,11 +1936,12 @@ namespace Cotton.Mobile.ViewModels
                     folder.Id,
                     folder.Name,
                     CreateChildFolderPath(folder.Name));
-                await _cloudToDeviceSyncRootSetupService.EnableAppPrivateRootAsync(
-                    instanceUri,
-                    accountScopeKey,
-                    destination,
-                    fileActionCancellation.Token);
+                CottonCloudToDeviceSyncRootSetupResult setupResult =
+                    await _cloudToDeviceSyncRootSetupService.EnableAppPrivateRootAsync(
+                        instanceUri,
+                        accountScopeKey,
+                        destination,
+                        fileActionCancellation.Token);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
@@ -1948,7 +1949,10 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 CottonCloudToDeviceSyncRunSummary summary =
-                    await _cloudToDeviceSyncCoordinator.RunAsync(instanceUri, fileActionCancellation.Token);
+                    await _cloudToDeviceSyncCoordinator.RunRootAsync(
+                        instanceUri,
+                        setupResult.Root,
+                        fileActionCancellation.Token);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {

@@ -49,13 +49,42 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
-                results.Add(await RunRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false));
+                results.Add(await ExecuteRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false));
             }
 
             return new CottonCloudToDeviceSyncRunSummary(results);
         }
 
-        private async Task<CottonCloudToDeviceSyncRootRunResult> RunRootAsync(
+        public async Task<CottonCloudToDeviceSyncRunSummary> RunRootAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(root);
+            if (!Uri.Equals(root.InstanceUri, instanceUri))
+            {
+                throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
+            }
+
+            CottonCloudToDeviceSyncRootRunResult result;
+            if (root.Direction != CottonSyncDirection.CloudToDevice)
+            {
+                result = CottonCloudToDeviceSyncRootRunResult.SkippedUnsupportedDirection(root);
+            }
+            else if (!root.CanRunSync)
+            {
+                result = CottonCloudToDeviceSyncRootRunResult.SkippedNotReady(root);
+            }
+            else
+            {
+                result = await ExecuteRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+            }
+
+            return new CottonCloudToDeviceSyncRunSummary([result]);
+        }
+
+        private async Task<CottonCloudToDeviceSyncRootRunResult> ExecuteRootAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)

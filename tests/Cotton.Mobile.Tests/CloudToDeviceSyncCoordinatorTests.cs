@@ -80,6 +80,82 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_downloads_only_the_requested_root()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            CottonSyncRootSnapshot secondRoot = CreateRoot(SecondSyncRootId, SecondFolderId, "Archive");
+            CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
+            CottonFileBrowserEntry secondFile = CreateFile(SecondFileId, "beta.txt", "\"etag-2\"");
+            await _rootStore.SaveAsync(InstanceUri, [root, secondRoot]);
+            _folderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, file));
+            _folderContentSource.SetContent(secondRoot.CloudFolder.FolderId, CreateContent(secondRoot, secondFile));
+
+            CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            Assert.Equal(1, summary.RootCount);
+            Assert.Equal(1, summary.CompletedRootCount);
+            Assert.Equal(1, summary.DownloadedCount);
+            Assert.Equal([FolderId], _folderContentSource.RequestedFolderIds);
+            Assert.Equal([FirstFileId], _fileOperator.DownloadedIds);
+            Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
+            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, secondRoot));
+        }
+
+        [Fact]
+        public async Task Run_root_skips_not_ready_and_unsupported_direction_without_remote_reads()
+        {
+            CottonSyncRootSnapshot notReady = CreateRoot(
+                SyncRootId,
+                FolderId,
+                "Projects",
+                CottonSyncRootPermissionStatus.Unavailable,
+                CottonSyncDirection.CloudToDevice);
+            CottonSyncRootSnapshot deviceToCloud = CreateRoot(
+                SecondSyncRootId,
+                SecondFolderId,
+                "Archive",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.DeviceToCloud);
+
+            CottonCloudToDeviceSyncRunSummary notReadySummary =
+                await _coordinator.RunRootAsync(InstanceUri, notReady);
+            CottonCloudToDeviceSyncRunSummary deviceToCloudSummary =
+                await _coordinator.RunRootAsync(InstanceUri, deviceToCloud);
+
+            Assert.Equal(
+                CottonCloudToDeviceSyncRootRunStatus.SkippedNotReady,
+                Assert.Single(notReadySummary.RootResults).Status);
+            Assert.Equal(
+                CottonCloudToDeviceSyncRootRunStatus.SkippedUnsupportedDirection,
+                Assert.Single(deviceToCloudSummary.RootResults).Status);
+            Assert.Empty(_folderContentSource.RequestedFolderIds);
+            Assert.Empty(_fileOperator.DownloadedIds);
+        }
+
+        [Fact]
+        public async Task Run_root_rejects_root_from_another_instance()
+        {
+            var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
+            CottonSyncRootSnapshot root = new(
+                SyncRootId,
+                otherInstanceUri,
+                "account-1",
+                new CottonUploadDestinationSnapshot(
+                    FolderId,
+                    "Projects",
+                    "Files / Projects"),
+                new CottonSyncLocalRootSnapshot(
+                    CottonSyncRootStorageKind.AppPrivateDirectory,
+                    $"app-private-sync-root-{FolderId:N}",
+                    "On this device",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.CloudToDevice);
+
+            await Assert.ThrowsAsync<ArgumentException>(
+                () => _coordinator.RunRootAsync(InstanceUri, root));
+        }
+
+        [Fact]
         public async Task Run_keeps_existing_manifest_file_without_file_operations()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");

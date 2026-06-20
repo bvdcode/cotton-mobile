@@ -15,10 +15,8 @@
                      Command="{Binding OpenExternallyCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="*,Auto"
-          BackgroundColor="{StaticResource OffBlack}">
+    <Grid BackgroundColor="{StaticResource OffBlack}">
         <Grid x:Name="ImageSurface"
-              Padding="16"
               BackgroundColor="{StaticResource OffBlack}">
             <Image x:Name="PreviewImage"
                    Source="{Binding ImageSource}"
@@ -34,45 +32,27 @@
             </Image>
         </Grid>
 
-        <Grid Grid.Row="1"
-              Padding="16,12"
-              ColumnDefinitions="*,Auto"
-              ColumnSpacing="12"
-              BackgroundColor="{StaticResource OffBlack}">
-            <VerticalStackLayout Spacing="2"
-                                 VerticalOptions="Center">
-                <Label Text="{Binding Title}"
-                       FontSize="15"
-                       FontAttributes="Bold"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{StaticResource White}" />
+        <Label Text="{Binding Status}"
+               IsVisible="{Binding IsStatusVisible}"
+               Margin="16,0,104,16"
+               FontSize="12"
+               MaxLines="1"
+               LineBreakMode="TailTruncation"
+               TextColor="{StaticResource Gray200}"
+               HorizontalOptions="Start"
+               VerticalOptions="End" />
 
-                <Label Text="{Binding Details}"
-                       FontSize="12"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{StaticResource Gray200}" />
-
-                <Label Text="{Binding Status}"
-                       IsVisible="{Binding IsStatusVisible}"
-                       FontSize="12"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{StaticResource Gray200}" />
-            </VerticalStackLayout>
-
-            <Button Grid.Column="1"
-                    x:Name="ResetButton"
-                    Text="Reset"
-                    Clicked="OnResetClicked"
-                    Style="{StaticResource FileChromeButton}"
-                    IsVisible="False"
-                    Padding="12,0"
-                    HeightRequest="44"
-                    MinimumHeightRequest="44"
-                    MinimumWidthRequest="72"
-                    VerticalOptions="Center" />
-        </Grid>
+        <Button x:Name="ResetButton"
+                Text="Reset"
+                Clicked="OnResetClicked"
+                Style="{StaticResource FileChromeButton}"
+                IsVisible="False"
+                Margin="16"
+                Padding="12,0"
+                HeightRequest="44"
+                MinimumHeightRequest="44"
+                MinimumWidthRequest="72"
+                HorizontalOptions="End"
+                VerticalOptions="End" />
     </Grid>
 </ContentPage>

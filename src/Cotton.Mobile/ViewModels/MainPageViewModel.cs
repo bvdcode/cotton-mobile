@@ -14,7 +14,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
         private const string OfflineCachedSessionStatus =
             "Offline. Showing saved files until your session can refresh.";
-        private const string ReadyStatus = "Ready to connect.";
+        private const string ReadyStatus = "";
         private const string AccountCancelAction = "Cancel";
         private const string AccountActivityAction = "Activity";
         private const string AccountDiagnosticsAction = "Diagnostics";
@@ -26,7 +26,6 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountSecurityAction = "Security";
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
-        private const string AccountSyncAction = "Sync";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationClearCacheMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
@@ -748,7 +747,6 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
-                AccountSyncAction,
                 AccountSecurityAction,
                 AccountNotificationsAction,
                 AccountActivityAction,
@@ -772,9 +770,6 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
-                    break;
-                case AccountSyncAction:
-                    await OpenSyncAsync();
                     break;
                 case AccountSecurityAction:
                     await OpenSecurityAsync();

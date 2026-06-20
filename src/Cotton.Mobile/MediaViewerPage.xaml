@@ -16,8 +16,7 @@
                      Command="{Binding OpenExternallyCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid RowDefinitions="*,Auto"
-          BackgroundColor="{StaticResource OffBlack}">
+    <Grid BackgroundColor="{StaticResource OffBlack}">
         <Grid BackgroundColor="{StaticResource OffBlack}">
             <toolkit:MediaElement x:Name="MediaPlayer"
                                   Source="{Binding MediaSourcePath}"
@@ -47,29 +46,14 @@
 
         </Grid>
 
-        <VerticalStackLayout Grid.Row="1"
-                             Padding="16,12"
-                             Spacing="2"
-                             BackgroundColor="{StaticResource OffBlack}">
-            <Label Text="{Binding Title}"
-                   FontSize="15"
-                   FontAttributes="Bold"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource White}" />
-
-            <Label Text="{Binding Details}"
-                   FontSize="12"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource Gray200}" />
-
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   FontSize="12"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource Gray200}" />
-        </VerticalStackLayout>
+        <Label Text="{Binding Status}"
+               IsVisible="{Binding IsStatusVisible}"
+               Margin="16"
+               FontSize="12"
+               MaxLines="1"
+               LineBreakMode="TailTruncation"
+               TextColor="{StaticResource Gray200}"
+               HorizontalOptions="Start"
+               VerticalOptions="End" />
     </Grid>
 </ContentPage>

@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Services
                 $"Type: {KindText}",
                 $"Size: {SizeText}",
                 $"Updated: {UpdatedText}",
-                $"Saved on this device: {OnDeviceText}");
+                $"On this device: {OnDeviceText}");
         }
 
         public string Title { get; }
@@ -77,7 +77,7 @@ namespace Cotton.Mobile.Services
         {
             if (localFile is null)
             {
-                return "Not saved";
+                return "No";
             }
 
             string localSize = CottonFileSizeFormatter.Format(localFile.SizeBytes);
@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Services
                 return $"Needs refresh ({localSize})";
             }
 
-            return "Saved";
+            return "Yes";
         }
     }
 }

@@ -35,7 +35,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
                            SemanticProperties.HeadingLevel="Level1" />
 
-                    <Label Text="Sign in to your Cotton instance"
+                    <Label Text="Sign in to your Cotton Cloud"
                            FontSize="16"
                            TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                 </VerticalStackLayout>
@@ -54,7 +54,7 @@
                                      Spacing="16"
                                      MaximumWidthRequest="520">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Instance URL"
+                        <Label Text="Server URL"
                                FontSize="13"
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
@@ -69,7 +69,7 @@
                                    ClearButtonVisibility="WhileEditing"
                                    IsEnabled="{Binding Display.IsInputEnabled}"
                                    ReturnCommand="{Binding ConnectCommand}"
-                                   SemanticProperties.Hint="Cotton instance URL" />
+                                   SemanticProperties.Hint="Cotton Cloud server URL" />
                         </Border>
 
                         <Label Text="{Binding Display.Status}"

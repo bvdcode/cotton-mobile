@@ -27,11 +27,6 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Device-to-cloud local item name is invalid.", nameof(displayName));
             }
 
-            if (itemType == CottonFileBrowserEntryType.File && !sizeBytes.HasValue)
-            {
-                throw new ArgumentException("Device-to-cloud local files require a size.", nameof(sizeBytes));
-            }
-
             if (sizeBytes is < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(sizeBytes), "Device-to-cloud local item size cannot be negative.");
@@ -61,7 +56,7 @@ namespace Cotton.Mobile.Services
             string displayName,
             string relativePath,
             DateTime localUpdatedAtUtc,
-            long sizeBytes,
+            long? sizeBytes,
             string? contentType = null)
         {
             return new CottonDeviceToCloudLocalItemSnapshot(

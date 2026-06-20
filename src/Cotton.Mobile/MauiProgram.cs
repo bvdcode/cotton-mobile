@@ -138,11 +138,15 @@ namespace Cotton.Mobile
 				ICottonSyncLocalRootPickerService,
 				AndroidDocumentTreeSyncLocalRootPickerService>();
 			builder.Services.AddSingleton<
+				ICottonDeviceToCloudLocalTreeReader,
+				AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
+			builder.Services.AddSingleton<
 				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
 				AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
 #else
 			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
 			builder.Services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
+			builder.Services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
 			builder.Services.AddSingleton<
 				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
 				DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();

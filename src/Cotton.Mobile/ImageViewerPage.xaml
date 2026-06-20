@@ -18,6 +18,7 @@
     <Grid RowDefinitions="*,Auto"
           BackgroundColor="{StaticResource OffBlack}">
         <Grid x:Name="ImageSurface"
+              Padding="16"
               BackgroundColor="{StaticResource OffBlack}">
             <Image x:Name="PreviewImage"
                    Source="{Binding ImageSource}"

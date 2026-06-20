@@ -29,34 +29,17 @@
                                   VerticalOptions="Fill" />
 
             <VerticalStackLayout x:Name="StartOverlay"
-                                 Spacing="16"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
-                <Border IsVisible="{Binding IsAudioPreview}"
-                        WidthRequest="96"
-                        HeightRequest="96"
-                        Stroke="{StaticResource Primary}"
-                        StrokeShape="RoundRectangle 48"
-                        StrokeThickness="2"
-                        BackgroundColor="{StaticResource Gray950}"
-                        HorizontalOptions="Center">
-                    <Label Text="♪"
-                           FontSize="44"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center"
-                           TextColor="{StaticResource Primary}" />
-                </Border>
-
                 <Button Text="▶"
                         Clicked="OnPlayClicked"
-                        WidthRequest="72"
-                        HeightRequest="72"
-                        MinimumWidthRequest="72"
-                        MinimumHeightRequest="72"
-                        CornerRadius="36"
+                        WidthRequest="60"
+                        HeightRequest="60"
+                        MinimumWidthRequest="60"
+                        MinimumHeightRequest="60"
+                        CornerRadius="30"
                         Padding="0"
-                        FontSize="26"
+                        FontSize="22"
                         FontAttributes="Bold"
                         HorizontalOptions="Center"
                         SemanticProperties.Description="Play media" />

@@ -124,7 +124,7 @@ namespace Cotton.Mobile.Services
             CottonFileBrowserEntry file,
             CottonFileDownloadResult downloadedFile)
         {
-            string details = CreateDetails(file, downloadedFile);
+            string details = CreateDetails(file);
             var viewModel = ActivatorUtilities.CreateInstance<ImageViewerViewModel>(
                 _serviceProvider,
                 file.Name,
@@ -138,7 +138,7 @@ namespace Cotton.Mobile.Services
             CottonFileDownloadResult downloadedFile,
             CottonFilePreviewKind previewKind)
         {
-            string details = CreateDetails(file, downloadedFile);
+            string details = CreateDetails(file);
             var viewModel = ActivatorUtilities.CreateInstance<MediaViewerViewModel>(
                 _serviceProvider,
                 file.Name,
@@ -180,10 +180,9 @@ namespace Cotton.Mobile.Services
             return ActivatorUtilities.CreateInstance<TextViewerPage>(_serviceProvider, viewModel);
         }
 
-        private static string CreateDetails(CottonFileBrowserEntry file, CottonFileDownloadResult downloadedFile)
+        private static string CreateDetails(CottonFileBrowserEntry file)
         {
-            string size = CottonFileSizeFormatter.Format(downloadedFile.SizeBytes);
-            return $"{file.Kind} · {size}";
+            return string.IsNullOrWhiteSpace(file.Kind) ? "File" : file.Kind.Trim();
         }
 
         private static void EnsureFileExists(CottonFileDownloadResult file)

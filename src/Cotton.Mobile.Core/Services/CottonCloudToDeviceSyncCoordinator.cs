@@ -106,9 +106,8 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            CottonFolderContent remoteContent = await _folderContentSource
-                .LoadAsync(instanceUri, root.CloudFolder.ToFolderHandle(), cancellationToken)
-                .ConfigureAwait(false);
+            CottonFolderContent remoteContent =
+                await LoadRecursiveContentAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             IReadOnlyList<CottonSyncedFileSnapshot> localFiles =
                 await _manifestStore.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             CottonCloudToDeviceSyncPlanSnapshot plan =
@@ -117,6 +116,43 @@ namespace Cotton.Mobile.Services
                 await _planExecutor.ExecuteAsync(instanceUri, root, plan, cancellationToken).ConfigureAwait(false);
 
             return CottonCloudToDeviceSyncRootRunResult.Completed(root, plan, executionResult);
+        }
+
+        private async Task<CottonFolderContent> LoadRecursiveContentAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken)
+        {
+            var files = new List<CottonFileBrowserEntry>();
+            var folders = new Queue<CottonFolderHandle>();
+            var visitedFolderIds = new HashSet<Guid>();
+
+            folders.Enqueue(root.CloudFolder.ToFolderHandle());
+            while (folders.Count > 0)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                CottonFolderHandle folder = folders.Dequeue();
+                if (!visitedFolderIds.Add(folder.Id))
+                {
+                    continue;
+                }
+
+                CottonFolderContent content = await _folderContentSource
+                    .LoadAsync(instanceUri, folder, cancellationToken)
+                    .ConfigureAwait(false);
+                foreach (CottonFileBrowserEntry entry in content.Entries)
+                {
+                    if (entry.Type == CottonFileBrowserEntryType.Folder)
+                    {
+                        folders.Enqueue(new CottonFolderHandle(entry.Id, entry.Name));
+                        continue;
+                    }
+
+                    files.Add(entry);
+                }
+            }
+
+            return new CottonFolderContent(root.CloudFolder.FolderId, root.CloudFolder.FolderName, files);
         }
     }
 }

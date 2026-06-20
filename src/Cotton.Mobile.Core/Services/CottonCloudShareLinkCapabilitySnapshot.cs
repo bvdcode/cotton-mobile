@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Services
                 supportsGlobalFolderLinkInvalidate: false,
                 supportsPerLinkRevoke: false,
                 supportsPassword: false,
+                supportsSharePermissions: false,
                 supportsActivityFeed: false,
                 supportsSharedWithMe: false,
                 supportsAccessRequests: false);
@@ -25,6 +26,7 @@ namespace Cotton.Mobile.Services
             bool supportsGlobalFolderLinkInvalidate,
             bool supportsPerLinkRevoke,
             bool supportsPassword,
+            bool supportsSharePermissions,
             bool supportsActivityFeed,
             bool supportsSharedWithMe,
             bool supportsAccessRequests)
@@ -37,6 +39,7 @@ namespace Cotton.Mobile.Services
             SupportsGlobalFolderLinkInvalidate = supportsGlobalFolderLinkInvalidate;
             SupportsPerLinkRevoke = supportsPerLinkRevoke;
             SupportsPassword = supportsPassword;
+            SupportsSharePermissions = supportsSharePermissions;
             SupportsActivityFeed = supportsActivityFeed;
             SupportsSharedWithMe = supportsSharedWithMe;
             SupportsAccessRequests = supportsAccessRequests;
@@ -57,6 +60,8 @@ namespace Cotton.Mobile.Services
         public bool SupportsPerLinkRevoke { get; }
 
         public bool SupportsPassword { get; }
+
+        public bool SupportsSharePermissions { get; }
 
         public bool SupportsActivityFeed { get; }
 

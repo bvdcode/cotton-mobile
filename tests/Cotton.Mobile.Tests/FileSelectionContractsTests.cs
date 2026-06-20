@@ -196,6 +196,21 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.ShareLocalFiles);
         }
 
+        [Fact]
+        public void Selection_action_sheet_exposes_multi_file_remove_offline_when_any_file_is_local()
+        {
+            CottonFileBrowserEntry local = CreateFile("notes.txt")
+                .WithLocalFile(new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt));
+            CottonFileBrowserEntry remote = CreateFile("remote.txt");
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create([local, remote]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.RemoveOffline);
+            Assert.Equal("Remove offline", actions.Single(action => action.Kind == CottonFileBulkActionKind.RemoveOffline).Label);
+        }
+
         private static CottonFileBrowserEntry CreateFile(string name)
         {
             return CottonFileBrowserEntry.CreateFile(

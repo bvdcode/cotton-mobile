@@ -28,9 +28,13 @@ namespace Cotton.Mobile.Services
                 return selection.FileCount > 0 && !selection.HasFolders;
             }
 
+            if (action.Kind == CottonFileBulkActionKind.RemoveOffline)
+            {
+                return selection.FileCount > 0 && !selection.HasFolders;
+            }
+
             return selection.Count == 1
-                && action.Kind is (CottonFileBulkActionKind.RemoveOffline
-                    or CottonFileBulkActionKind.ShareLocalFiles);
+                && action.Kind == CottonFileBulkActionKind.ShareLocalFiles;
         }
     }
 }

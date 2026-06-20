@@ -51,8 +51,8 @@ namespace Cotton.Mobile.Tests
             AssertBucket(
                 summary.Buckets[3],
                 CottonOnDeviceStorageBucketKind.CachedFolderListings,
-                "Folder lists",
-                "Saved folder navigation.",
+                "Saved folder lists",
+                "Saved navigation for offline use.",
                 "1.5 KB",
                 "3 lists",
                 isAttentionVisible: false);

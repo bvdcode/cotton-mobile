@@ -97,7 +97,7 @@ namespace Cotton.Mobile.Services
             return new CottonStorageBudgetBucketSnapshot(
                 CottonStorageBudgetBucketKind.EvictableDownloads,
                 "Temporary downloads",
-                "Opened files that are not kept offline.",
+                "Opened files not saved offline.",
                 fileCount,
                 sizeBytes,
                 budgetBytes,
@@ -112,8 +112,8 @@ namespace Cotton.Mobile.Services
         {
             return new CottonStorageBudgetBucketSnapshot(
                 CottonStorageBudgetBucketKind.Thumbnails,
-                "Thumbnail cache",
-                "Regenerated while browsing.",
+                "Previews",
+                "Created again when needed.",
                 previewCount,
                 sizeBytes,
                 budgetBytes,
@@ -128,8 +128,8 @@ namespace Cotton.Mobile.Services
         {
             return new CottonStorageBudgetBucketSnapshot(
                 CottonStorageBudgetBucketKind.FolderListings,
-                "Folder list cache",
-                "Saved navigation for offline browsing.",
+                "Saved folder lists",
+                "Helps folders open offline.",
                 listCount,
                 sizeBytes,
                 budgetBytes,

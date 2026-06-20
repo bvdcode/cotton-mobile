@@ -72,8 +72,8 @@ namespace Cotton.Mobile.Services
             CottonCloudStorageQuotaStatus.Unavailable,
             usedBytes: null,
             limitBytes: null,
-            "Account storage unavailable.",
-            "This server does not report account quota.",
+            "Storage limit unavailable.",
+            "Storage limits are not shared by this server.",
             usageFraction: 0d);
 
         public static CottonCloudStorageQuotaSnapshot Unknown { get; } = new(

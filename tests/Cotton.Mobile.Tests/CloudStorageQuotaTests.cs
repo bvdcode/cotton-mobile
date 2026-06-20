@@ -54,8 +54,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("No account quota reported.", unlimited.DetailText);
             Assert.False(unlimited.IsProgressVisible);
             Assert.Equal(CottonCloudStorageQuotaStatus.Unavailable, CottonCloudStorageQuotaSnapshot.Unavailable.Status);
-            Assert.Equal("Account storage unavailable.", CottonCloudStorageQuotaSnapshot.Unavailable.SummaryText);
-            Assert.Equal("This server does not report account quota.", CottonCloudStorageQuotaSnapshot.Unavailable.DetailText);
+            Assert.Equal("Storage limit unavailable.", CottonCloudStorageQuotaSnapshot.Unavailable.SummaryText);
+            Assert.Equal("Storage limits are not shared by this server.", CottonCloudStorageQuotaSnapshot.Unavailable.DetailText);
             Assert.False(CottonCloudStorageQuotaSnapshot.Unavailable.IsProgressVisible);
         }
 

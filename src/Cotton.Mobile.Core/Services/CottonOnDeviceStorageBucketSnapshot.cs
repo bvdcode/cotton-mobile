@@ -114,8 +114,8 @@ namespace Cotton.Mobile.Services
         {
             return new CottonOnDeviceStorageBucketSnapshot(
                 CottonOnDeviceStorageBucketKind.CachedFolderListings,
-                "Folder lists",
-                "Saved folder navigation.",
+                "Saved folder lists",
+                "Saved navigation for offline use.",
                 sizeBytes,
                 listCount,
                 "list",

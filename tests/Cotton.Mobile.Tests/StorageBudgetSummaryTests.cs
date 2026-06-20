@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(4812, summary.TotalEvictableBytes);
             Assert.Equal(5024, summary.TotalBudgetBytes);
-            Assert.Equal("4.7 KB of 4.9 KB temporary cache used", summary.SummaryText);
+            Assert.Equal("4.7 KB of 4.9 KB temporary files used", summary.SummaryText);
             Assert.Equal("5 files kept offline, 4 KB stays on this device.", summary.ProtectedOfflineText);
             Assert.True(summary.IsAttentionVisible);
 
@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Tests
                 summary.Buckets[0],
                 CottonStorageBudgetBucketKind.EvictableDownloads,
                 "Temporary downloads",
-                "Opened files that are not kept offline.",
+                "Opened files not saved offline.",
                 "512 B of 1 KB",
                 0.5d,
                 "2 files",
@@ -40,8 +40,8 @@ namespace Cotton.Mobile.Tests
             AssertBucket(
                 summary.Buckets[1],
                 CottonStorageBudgetBucketKind.Thumbnails,
-                "Thumbnail cache",
-                "Regenerated while browsing.",
+                "Previews",
+                "Created again when needed.",
                 "1.8 KB of 2 KB",
                 0.9d,
                 "3 previews",
@@ -50,8 +50,8 @@ namespace Cotton.Mobile.Tests
             AssertBucket(
                 summary.Buckets[2],
                 CottonStorageBudgetBucketKind.FolderListings,
-                "Folder list cache",
-                "Saved navigation for offline browsing.",
+                "Saved folder lists",
+                "Helps folders open offline.",
                 "2.4 KB of 2 KB",
                 1d,
                 "4 lists",
@@ -64,9 +64,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonStorageBudgetSummary summary = CottonStorageBudgetSummary.Empty;
 
-            Assert.Equal("Temporary cache is empty.", summary.SummaryText);
+            Assert.Equal("No temporary files waiting for cleanup.", summary.SummaryText);
             Assert.Equal(
-                "No kept-offline files are stored separately from cleanup.",
+                "No offline files are saved separately.",
                 summary.ProtectedOfflineText);
             Assert.False(summary.IsAttentionVisible);
             Assert.All(summary.Buckets, bucket =>

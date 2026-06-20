@@ -37,6 +37,34 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Expiration_options_match_supported_backend_lifetimes()
+        {
+            IReadOnlyList<CottonCloudShareLinkExpirationOption> options =
+                CottonCloudShareLinkExpirationCatalog.CreateOptions();
+
+            Assert.Equal(
+                ["1 hour", "1 day", "7 days", "30 days", "1 year"],
+                options.Select(option => option.Label).ToArray());
+            Assert.Equal(
+                [60, 1440, 10080, 43200, CottonCloudShareLinkPolicy.MaxExpireAfterMinutes],
+                options.Select(option => option.ExpireAfterMinutes).ToArray());
+            CottonCloudShareLinkExpirationOption defaultOption =
+                Assert.Single(options, option => option.IsDefault);
+            Assert.Equal(CottonCloudShareLinkPolicy.DefaultExpireAfterMinutes, defaultOption.ExpireAfterMinutes);
+        }
+
+        [Fact]
+        public void Expiration_option_lookup_trims_label_and_rejects_unknown_values()
+        {
+            CottonCloudShareLinkExpirationOption? option =
+                CottonCloudShareLinkExpirationCatalog.FindByLabel(" 30 days ");
+
+            Assert.NotNull(option);
+            Assert.Equal(43200, option.ExpireAfterMinutes);
+            Assert.Null(CottonCloudShareLinkExpirationCatalog.FindByLabel("Never"));
+        }
+
+        [Fact]
         public void Request_supports_folder_targets()
         {
             CottonCloudShareLinkRequest request = CottonCloudShareLinkRequest.ForFolder(TargetId, expireAfterMinutes: 60);

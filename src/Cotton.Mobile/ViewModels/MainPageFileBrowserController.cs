@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
         private const string DownloadAction = "Download";
         private const string DownloadAgainAction = "Download again";
         private const string KeepOfflineAction = "Keep offline";
+        private const string LinkExpirationTitle = "Link expires";
         private const string OpenAction = CottonFileOpenRouter.OpenActionLabel;
         private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
@@ -2534,6 +2535,13 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CottonCloudShareLinkTargetKind targetKind = CreateCloudShareLinkTargetKind(entry);
+            CottonCloudShareLinkExpirationOption? expiration = await SelectCloudShareLinkExpirationAsync();
+            if (expiration is null)
+            {
+                _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CancelledStatus);
+                return;
+            }
+
             CancellationTokenSource fileActionCancellation = BeginFileAction(
                 CottonCloudShareLinkStatusText.CreateCreatingStatus(entry.Name));
             bool didCreateLink = false;
@@ -2542,7 +2550,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonCloudShareLinkSnapshot snapshot = await _cloudShareLinkService.CreateAsync(
                     instanceUri,
-                    CreateCloudShareLinkRequest(entry),
+                    CreateCloudShareLinkRequest(entry, expiration.ExpireAfterMinutes),
                     fileActionCancellation.Token);
                 didCreateLink = true;
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
@@ -2724,11 +2732,25 @@ namespace Cotton.Mobile.ViewModels
             return CottonFileOpenRouter.CreateRoute(file).ActionLabel;
         }
 
-        private static CottonCloudShareLinkRequest CreateCloudShareLinkRequest(CottonFileBrowserEntry entry)
+        private async Task<CottonCloudShareLinkExpirationOption?> SelectCloudShareLinkExpirationAsync()
+        {
+            IReadOnlyList<CottonCloudShareLinkExpirationOption> options =
+                CottonCloudShareLinkExpirationCatalog.CreateOptions();
+            string? action = await _dialogService.ShowActionSheetAsync(
+                LinkExpirationTitle,
+                CancelAction,
+                null,
+                options.Select(option => option.Label).ToArray());
+            return CottonCloudShareLinkExpirationCatalog.FindByLabel(action);
+        }
+
+        private static CottonCloudShareLinkRequest CreateCloudShareLinkRequest(
+            CottonFileBrowserEntry entry,
+            int expireAfterMinutes)
         {
             return entry.IsFolder
-                ? CottonCloudShareLinkRequest.ForFolder(entry.Id)
-                : CottonCloudShareLinkRequest.ForFile(entry.Id);
+                ? CottonCloudShareLinkRequest.ForFolder(entry.Id, expireAfterMinutes)
+                : CottonCloudShareLinkRequest.ForFile(entry.Id, expireAfterMinutes);
         }
 
         private static CottonCloudShareLinkTargetKind CreateCloudShareLinkTargetKind(CottonFileBrowserEntry entry)

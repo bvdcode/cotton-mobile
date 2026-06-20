@@ -108,6 +108,7 @@ namespace Cotton.Mobile.ViewModels
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
+            IDeviceStorageSpaceService deviceStorageSpaceService,
             ILogger<MainPageFileBrowserController> fileBrowserLogger,
             IMainPagePresentationService presentationService,
             ILogger<MainPageViewModel> logger)
@@ -150,6 +151,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
+            ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
             ArgumentNullException.ThrowIfNull(fileBrowserLogger);
             ArgumentNullException.ThrowIfNull(presentationService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -201,6 +203,7 @@ namespace Cotton.Mobile.ViewModels
                 thumbnailProvider,
                 networkAccess,
                 foregroundService,
+                deviceStorageSpaceService,
                 dialogService,
                 this,
                 fileBrowserLogger);

@@ -58,6 +58,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
+        private readonly IDeviceStorageSpaceService _deviceStorageSpaceService;
         private readonly IUserDialogService _dialogService;
         private readonly IFileBrowserSessionHandler _sessionHandler;
         private readonly ILogger<MainPageFileBrowserController> _logger;
@@ -94,6 +95,7 @@ namespace Cotton.Mobile.ViewModels
             IFileThumbnailProvider thumbnailProvider,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
+            IDeviceStorageSpaceService deviceStorageSpaceService,
             IUserDialogService dialogService,
             IFileBrowserSessionHandler sessionHandler,
             ILogger<MainPageFileBrowserController> logger)
@@ -115,6 +117,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
+            ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(sessionHandler);
             ArgumentNullException.ThrowIfNull(logger);
@@ -136,6 +139,7 @@ namespace Cotton.Mobile.ViewModels
             _thumbnailProvider = thumbnailProvider;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
+            _deviceStorageSpaceService = deviceStorageSpaceService;
             _dialogService = dialogService;
             _sessionHandler = sessionHandler;
             _logger = logger;
@@ -1587,6 +1591,13 @@ namespace Cotton.Mobile.ViewModels
             CancellationTokenSource fileActionCancellation)
         {
             CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(content);
+            if (!await ConfirmOfflineFolderStorageAsync(queue, fileActionCancellation.Token))
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonOfflineFolderStatusText.CancelledStatus);
+                return;
+            }
+
             _display.ShowFileActionLoading(CottonOfflineDownloadQueueStatusText.CreateQueuedStatus(queue));
             _display.ShowOfflinePackProgress(
                 CottonOfflinePackProgressSnapshot.CreateRunning(
@@ -1713,6 +1724,26 @@ namespace Cotton.Mobile.ViewModels
                         completedCount,
                         queue.TotalCount));
             }
+        }
+
+        private async Task<bool> ConfirmOfflineFolderStorageAsync(
+            CottonOfflineDownloadQueueSnapshot queue,
+            CancellationToken cancellationToken)
+        {
+            CottonDeviceStorageSpaceSnapshot storageSpace =
+                await _deviceStorageSpaceService.GetAppDataStorageSpaceAsync(cancellationToken);
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(queue, storageSpace);
+            if (!warning.ShouldWarn)
+            {
+                return true;
+            }
+
+            return await _dialogService.ShowConfirmationAsync(
+                warning.Title,
+                warning.Message,
+                CottonOfflineFolderFreeSpaceWarningText.AcceptAction,
+                CottonOfflineFolderFreeSpaceWarningText.CancelAction);
         }
 
         private static CottonOfflineDownloadQueueItem? GetNextOfflineQueueItem(

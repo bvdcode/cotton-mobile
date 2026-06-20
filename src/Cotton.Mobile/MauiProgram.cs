@@ -51,6 +51,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
 			builder.Services.AddSingleton<IDiagnosticsPageService, DiagnosticsPageService>();
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
+			builder.Services.AddSingleton<IDeviceStorageSpaceService, DeviceStorageSpaceService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<INotificationSettingsPageService, NotificationSettingsPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();

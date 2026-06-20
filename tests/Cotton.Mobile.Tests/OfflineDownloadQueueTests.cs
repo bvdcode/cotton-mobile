@@ -91,6 +91,104 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Free_space_warning_policy_skips_small_folder_when_space_is_healthy()
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(
+                CreateContent(CreateFile(FirstFileId, "alpha.txt", 1024)));
+
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(
+                    queue,
+                    CottonDeviceStorageSpaceSnapshot.Available(2L * 1024L * 1024L * 1024L));
+
+            Assert.False(warning.ShouldWarn);
+            Assert.Equal(CottonOfflineFolderFreeSpaceWarningKind.None, warning.Kind);
+        }
+
+        [Fact]
+        public void Free_space_warning_policy_warns_for_large_folder()
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(
+                CreateContent(CreateFile(
+                    FirstFileId,
+                    "movie.mp4",
+                    CottonOfflineFolderFreeSpaceWarningPolicy.LargeFolderWarningBytes)));
+
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(
+                    queue,
+                    CottonDeviceStorageSpaceSnapshot.Available(2L * 1024L * 1024L * 1024L));
+
+            Assert.True(warning.ShouldWarn);
+            Assert.Equal(CottonOfflineFolderFreeSpaceWarningKind.LargeFolder, warning.Kind);
+            Assert.Equal("Keep large folder offline?", warning.Title);
+            Assert.Equal(
+                "Projects will use 100 MB on this device. 2 GB is free.",
+                warning.Message);
+            Assert.Equal("Keep offline", CottonOfflineFolderFreeSpaceWarningText.AcceptAction);
+            Assert.Equal("Cancel", CottonOfflineFolderFreeSpaceWarningText.CancelAction);
+        }
+
+        [Fact]
+        public void Free_space_warning_policy_warns_when_folder_would_leave_low_space()
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(
+                CreateContent(CreateFile(FirstFileId, "archive.zip", 20L * 1024L * 1024L)));
+
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(
+                    queue,
+                    CottonDeviceStorageSpaceSnapshot.Available(520L * 1024L * 1024L));
+
+            Assert.True(warning.ShouldWarn);
+            Assert.Equal(CottonOfflineFolderFreeSpaceWarningKind.LowFreeSpaceAfterDownload, warning.Kind);
+            Assert.Equal("Free device space will be low", warning.Title);
+            Assert.Equal(
+                "Projects will use 20 MB and may leave only 500 MB free. 520 MB is free now.",
+                warning.Message);
+        }
+
+        [Fact]
+        public void Free_space_warning_policy_warns_when_folder_exceeds_reported_space()
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(
+                CreateContent(CreateFile(FirstFileId, "archive.zip", 2L * 1024L * 1024L * 1024L)));
+
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(
+                    queue,
+                    CottonDeviceStorageSpaceSnapshot.Available(1L * 1024L * 1024L * 1024L));
+
+            Assert.True(warning.ShouldWarn);
+            Assert.Equal(CottonOfflineFolderFreeSpaceWarningKind.NotEnoughFreeSpace, warning.Kind);
+            Assert.Equal("Device storage may be full", warning.Title);
+            Assert.Equal(
+                "Projects needs 2 GB, but this device reports 1 GB free. The download may fail.",
+                warning.Message);
+        }
+
+        [Fact]
+        public void Free_space_warning_policy_warns_for_large_folder_when_space_is_unknown()
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(
+                CreateContent(CreateFile(
+                    FirstFileId,
+                    "movie.mp4",
+                    CottonOfflineFolderFreeSpaceWarningPolicy.LargeFolderWarningBytes)));
+
+            CottonOfflineFolderFreeSpaceWarning warning =
+                CottonOfflineFolderFreeSpaceWarningPolicy.CreateWarning(
+                    queue,
+                    CottonDeviceStorageSpaceSnapshot.Unavailable("Not mounted."));
+
+            Assert.True(warning.ShouldWarn);
+            Assert.Equal(CottonOfflineFolderFreeSpaceWarningKind.UnknownFreeSpaceForLargeFolder, warning.Kind);
+            Assert.Equal(
+                "Projects will use 100 MB. Free device space could not be checked.",
+                warning.Message);
+        }
+
+        [Fact]
         public void Queue_item_rejects_folder_entries()
         {
             Assert.Throws<ArgumentException>(() => CottonOfflineDownloadQueueItem.Create(1, CreateFolder("Archive")));

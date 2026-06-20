@@ -11,7 +11,8 @@ namespace Cotton.Mobile.Services
             string? expectedRemoteETag,
             DateTime? localUpdatedAtUtc,
             long? sizeBytes,
-            string? contentType)
+            string? contentType,
+            string? localSourceId = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -49,6 +50,7 @@ namespace Cotton.Mobile.Services
                 : null;
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
         }
 
         public CottonDeviceToCloudSyncActionKind Action { get; }
@@ -68,6 +70,8 @@ namespace Cotton.Mobile.Services
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
+
+        public string? LocalSourceId { get; }
 
         public bool RequiresUpload =>
             Action is CottonDeviceToCloudSyncActionKind.UploadNewFile

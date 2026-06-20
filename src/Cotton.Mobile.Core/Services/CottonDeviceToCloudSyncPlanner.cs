@@ -260,7 +260,8 @@ namespace Cotton.Mobile.Services
                 expectedRemoteETag,
                 localItem.LocalUpdatedAtUtc,
                 localItem.SizeBytes,
-                localItem.ContentType);
+                localItem.ContentType,
+                localItem.LocalSourceId);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateManifestItem(

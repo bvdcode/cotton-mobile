@@ -8,7 +8,8 @@ namespace Cotton.Mobile.Services
             string relativePath,
             DateTime localUpdatedAtUtc,
             long? sizeBytes,
-            string? contentType)
+            string? contentType,
+            string? localSourceId = null)
         {
             if (!Enum.IsDefined(itemType))
             {
@@ -38,6 +39,7 @@ namespace Cotton.Mobile.Services
             LocalUpdatedAtUtc = CottonLocalFileFreshness.NormalizeUtc(localUpdatedAtUtc);
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
         }
 
         public CottonFileBrowserEntryType ItemType { get; }
@@ -52,12 +54,15 @@ namespace Cotton.Mobile.Services
 
         public string? ContentType { get; }
 
+        public string? LocalSourceId { get; }
+
         public static CottonDeviceToCloudLocalItemSnapshot CreateFile(
             string displayName,
             string relativePath,
             DateTime localUpdatedAtUtc,
             long? sizeBytes,
-            string? contentType = null)
+            string? contentType = null,
+            string? localSourceId = null)
         {
             return new CottonDeviceToCloudLocalItemSnapshot(
                 CottonFileBrowserEntryType.File,
@@ -65,13 +70,15 @@ namespace Cotton.Mobile.Services
                 relativePath,
                 localUpdatedAtUtc,
                 sizeBytes,
-                contentType);
+                contentType,
+                localSourceId);
         }
 
         public static CottonDeviceToCloudLocalItemSnapshot CreateFolder(
             string displayName,
             string relativePath,
-            DateTime localUpdatedAtUtc)
+            DateTime localUpdatedAtUtc,
+            string? localSourceId = null)
         {
             return new CottonDeviceToCloudLocalItemSnapshot(
                 CottonFileBrowserEntryType.Folder,
@@ -79,7 +86,8 @@ namespace Cotton.Mobile.Services
                 relativePath,
                 localUpdatedAtUtc,
                 sizeBytes: null,
-                contentType: null);
+                contentType: null,
+                localSourceId);
         }
 
         private static string NormalizeRelativePath(string displayName, string relativePath)

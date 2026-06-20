@@ -16,7 +16,7 @@ namespace Cotton.Mobile.Tests
         public void Planner_uploads_new_local_files()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42));
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
@@ -31,6 +31,7 @@ namespace Cotton.Mobile.Tests
             Assert.Null(item.CloudItemId);
             Assert.Null(item.ExpectedRemoteETag);
             Assert.Equal("alpha.txt", item.RelativePath);
+            Assert.Equal("document-alpha", item.LocalSourceId);
             Assert.Equal(1, plan.UploadCount);
             Assert.True(plan.HasExecutableChanges);
             Assert.False(plan.HasBlockingItems);
@@ -406,14 +407,16 @@ namespace Cotton.Mobile.Tests
             string name,
             string relativePath,
             DateTime updatedAt,
-            long sizeBytes)
+            long sizeBytes,
+            string? localSourceId = null)
         {
             return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                 name,
                 relativePath,
                 updatedAt,
                 sizeBytes,
-                "text/plain");
+                "text/plain",
+                localSourceId);
         }
 
         private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFolder(string name, string relativePath)

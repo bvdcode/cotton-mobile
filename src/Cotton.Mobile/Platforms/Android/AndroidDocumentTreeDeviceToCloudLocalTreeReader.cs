@@ -92,7 +92,8 @@ namespace Cotton.Mobile.Services
                     items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFolder(
                         child.DisplayName,
                         relativePath!,
-                        updatedAtUtc));
+                        updatedAtUtc,
+                        child.DocumentId));
                     ReadChildren(
                         resolver,
                         treeUri,
@@ -110,7 +111,8 @@ namespace Cotton.Mobile.Services
                     relativePath!,
                     updatedAtUtc,
                     ReadSizeBytes(cursor),
-                    child.MimeType));
+                    child.MimeType,
+                    child.DocumentId));
             }
         }
 

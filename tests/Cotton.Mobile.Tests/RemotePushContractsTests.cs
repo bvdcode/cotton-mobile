@@ -98,6 +98,7 @@ namespace Cotton.Mobile.Tests
             CottonNotificationSettings settings = CottonNotificationSettings.Default;
             CottonRemotePushCapabilitySnapshot capability =
                 CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend;
+            CottonRemotePushPreferences preferences = CottonRemotePushPreferences.Default;
 
             Assert.False(capability.EventCategories.Single(category =>
                 category.Category == CottonRemotePushEventCategory.SharedFile).IsEnabledByDefault(settings));
@@ -107,6 +108,11 @@ namespace Cotton.Mobile.Tests
                 category.Category == CottonRemotePushEventCategory.CommentMention).IsEnabledByDefault(settings));
             Assert.True(capability.EventCategories.Single(category =>
                 category.Category == CottonRemotePushEventCategory.SecuritySession).IsEnabledByDefault(settings));
+            Assert.False(preferences.SharedFile);
+            Assert.False(preferences.AccessRequest);
+            Assert.False(preferences.CommentMention);
+            Assert.True(preferences.SecuritySession);
+            Assert.Equal(1, preferences.EnabledCategoryCount);
         }
 
         [Fact]
@@ -121,6 +127,48 @@ namespace Cotton.Mobile.Tests
             Assert.False(policy.AllowsFolderNames);
             Assert.False(policy.AllowsAccountIdentifiers);
             Assert.False(policy.AllowsPublicShareTokens);
+        }
+
+        [Fact]
+        public void Remote_push_preferences_are_immutable_per_category()
+        {
+            CottonRemotePushPreferences original = CottonRemotePushPreferences.Default;
+            CottonRemotePushPreferences changed = original
+                .WithCategory(CottonRemotePushEventCategory.SharedFile, true)
+                .WithCategory(CottonRemotePushEventCategory.SecuritySession, false);
+
+            Assert.False(original.SharedFile);
+            Assert.True(original.SecuritySession);
+            Assert.True(changed.SharedFile);
+            Assert.False(changed.SecuritySession);
+            Assert.True(changed.IsEnabled(CottonRemotePushEventCategory.SharedFile));
+            Assert.False(changed.IsEnabled(CottonRemotePushEventCategory.SecuritySession));
+            Assert.Equal(1, changed.EnabledCategoryCount);
+        }
+
+        [Fact]
+        public void Remote_push_preference_display_keeps_stable_order_and_copy()
+        {
+            CottonRemotePushPreferences preferences = CottonRemotePushPreferences.Default
+                .WithCategory(CottonRemotePushEventCategory.SharedFile, true);
+
+            CottonRemotePushPreferenceDisplayState display =
+                CottonRemotePushPreferenceDisplayState.Create(preferences);
+
+            Assert.Equal("2 server push categories on", display.SummaryText);
+            Assert.Equal(
+                new[]
+                {
+                    CottonRemotePushEventCategory.SharedFile,
+                    CottonRemotePushEventCategory.AccessRequest,
+                    CottonRemotePushEventCategory.CommentMention,
+                    CottonRemotePushEventCategory.SecuritySession,
+                },
+                display.Items.Select(item => item.Category).ToArray());
+            Assert.Equal("Shared-file activity", display.Items[0].Title);
+            Assert.True(display.Items[0].IsEnabled);
+            Assert.Equal("Security and sessions", display.Items[3].Title);
+            Assert.True(display.Items[3].IsEnabled);
         }
     }
 }

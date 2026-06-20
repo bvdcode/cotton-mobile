@@ -148,6 +148,7 @@ namespace Cotton.Mobile
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
 			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
+			builder.Services.AddSingleton<ICottonRemotePushPreferenceService, CottonRemotePushPreferenceService>();
 #if ANDROID
 			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider, AndroidFirebaseMessagingTokenProvider>();
 #else

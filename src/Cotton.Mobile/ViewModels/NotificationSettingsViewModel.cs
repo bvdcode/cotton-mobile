@@ -78,11 +78,11 @@ namespace Cotton.Mobile.ViewModels
 
         public string EnabledCategoriesText => _remotePushPreferences is null
             ? $"{_settings.EnabledChannelCount:N0} local categories on"
-            : $"{_settings.EnabledChannelCount:N0} local · {_remotePushPreferences.EnabledCategoryCount:N0} server push";
+            : $"{_settings.EnabledChannelCount:N0} local · {CreateRemotePushDisplay().EnabledCategoryCount:N0} server push";
 
         public string RemotePushStatusText => _remotePushPreferences is null
             ? _remotePushFailureStatus ?? "Server push preferences not loaded."
-            : CottonRemotePushPreferenceDisplayState.Create(_remotePushPreferences).SummaryText;
+            : CreateRemotePushDisplay().SummaryText;
 
         public string? Status
         {
@@ -269,8 +269,7 @@ namespace Cotton.Mobile.ViewModels
 
             _remotePushPreferences = preferences;
             _remotePushFailureStatus = null;
-            CottonRemotePushPreferenceDisplayState display =
-                CottonRemotePushPreferenceDisplayState.Create(preferences);
+            CottonRemotePushPreferenceDisplayState display = CreateRemotePushDisplay();
             RemotePushPreferences.Clear();
             foreach (CottonRemotePushPreferenceDisplayItem item in display.Items)
             {
@@ -282,6 +281,13 @@ namespace Cotton.Mobile.ViewModels
 
             OnPropertyChanged(nameof(RemotePushStatusText));
             OnPropertyChanged(nameof(EnabledCategoriesText));
+        }
+
+        private CottonRemotePushPreferenceDisplayState CreateRemotePushDisplay()
+        {
+            return CottonRemotePushPreferenceDisplayState.Create(
+                _remotePushPreferences
+                    ?? throw new InvalidOperationException("Remote push preferences are not loaded."));
         }
 
         private void UpdateRemotePushToggleAvailability()

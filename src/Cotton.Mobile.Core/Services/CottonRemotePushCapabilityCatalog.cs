@@ -34,16 +34,6 @@ namespace Cotton.Mobile.Services
                 defaultEnabled: false,
                 requiresServerNotificationRow: true),
             new CottonRemotePushEventCategorySnapshot(
-                CottonRemotePushEventCategory.AccessRequest,
-                CottonNotificationChannelKind.Shares,
-                defaultEnabled: false,
-                requiresServerNotificationRow: true),
-            new CottonRemotePushEventCategorySnapshot(
-                CottonRemotePushEventCategory.CommentMention,
-                CottonNotificationChannelKind.Shares,
-                defaultEnabled: false,
-                requiresServerNotificationRow: true),
-            new CottonRemotePushEventCategorySnapshot(
                 CottonRemotePushEventCategory.SecuritySession,
                 CottonNotificationChannelKind.Security,
                 defaultEnabled: true,

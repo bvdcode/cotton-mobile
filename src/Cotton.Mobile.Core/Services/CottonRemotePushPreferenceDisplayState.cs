@@ -16,34 +16,51 @@ namespace Cotton.Mobile.Services
 
         public IReadOnlyList<CottonRemotePushPreferenceDisplayItem> Items { get; }
 
+        public int EnabledCategoryCount => Items.Count(item => item.IsEnabled);
+
         public static CottonRemotePushPreferenceDisplayState Create(CottonRemotePushPreferences preferences)
         {
+            return Create(
+                preferences,
+                CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend);
+        }
+
+        public static CottonRemotePushPreferenceDisplayState Create(
+            CottonRemotePushPreferences preferences,
+            CottonRemotePushCapabilitySnapshot capability)
+        {
             ArgumentNullException.ThrowIfNull(preferences);
+            ArgumentNullException.ThrowIfNull(capability);
+
+            CottonRemotePushPreferenceDisplayItem[] items = capability.EventCategories
+                .Select(category => CreateItem(preferences, category.Category))
+                .ToArray();
 
             return new CottonRemotePushPreferenceDisplayState(
-                FormatSummary(preferences.EnabledCategoryCount),
-                [
-                    new CottonRemotePushPreferenceDisplayItem(
-                        CottonRemotePushEventCategory.SharedFile,
-                        "Shared-file activity",
-                        "Shared links and file access activity.",
-                        preferences.SharedFile),
-                    new CottonRemotePushPreferenceDisplayItem(
-                        CottonRemotePushEventCategory.AccessRequest,
-                        "Access requests",
-                        "Requests for access to shared content.",
-                        preferences.AccessRequest),
-                    new CottonRemotePushPreferenceDisplayItem(
-                        CottonRemotePushEventCategory.CommentMention,
-                        "Comments and mentions",
-                        "Collaboration alerts when they are available.",
-                        preferences.CommentMention),
-                    new CottonRemotePushPreferenceDisplayItem(
-                        CottonRemotePushEventCategory.SecuritySession,
-                        "Security and sessions",
-                        "Sign-in and account security alerts.",
-                        preferences.SecuritySession),
-                ]);
+                FormatSummary(items.Count(item => item.IsEnabled)),
+                items);
+        }
+
+        private static CottonRemotePushPreferenceDisplayItem CreateItem(
+            CottonRemotePushPreferences preferences,
+            CottonRemotePushEventCategory category)
+        {
+            return category switch
+            {
+                CottonRemotePushEventCategory.SharedFile => new CottonRemotePushPreferenceDisplayItem(
+                    CottonRemotePushEventCategory.SharedFile,
+                    "Shared-file activity",
+                    "Shared links and file access activity.",
+                    preferences.SharedFile),
+                CottonRemotePushEventCategory.SecuritySession => new CottonRemotePushPreferenceDisplayItem(
+                    CottonRemotePushEventCategory.SecuritySession,
+                    "Security and sessions",
+                    "Sign-in and account security alerts.",
+                    preferences.SecuritySession),
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(category),
+                    "Remote push category cannot be displayed."),
+            };
         }
 
         private static string FormatSummary(int enabledCategoryCount)

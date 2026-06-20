@@ -71,17 +71,13 @@ namespace Cotton.Mobile.Tests
                 new[]
                 {
                     CottonRemotePushEventCategory.SharedFile,
-                    CottonRemotePushEventCategory.AccessRequest,
-                    CottonRemotePushEventCategory.CommentMention,
                     CottonRemotePushEventCategory.SecuritySession,
                 },
                 capability.EventCategories.Select(category => category.Category).ToArray());
-            Assert.All(
-                capability.EventCategories.Where(category =>
-                    category.Category is CottonRemotePushEventCategory.SharedFile
-                        or CottonRemotePushEventCategory.AccessRequest
-                        or CottonRemotePushEventCategory.CommentMention),
-                category => Assert.Equal(CottonNotificationChannelKind.Shares, category.ChannelKind));
+            Assert.Equal(
+                CottonNotificationChannelKind.Shares,
+                capability.EventCategories.Single(category =>
+                    category.Category == CottonRemotePushEventCategory.SharedFile).ChannelKind);
             Assert.Equal(
                 CottonNotificationChannelKind.Security,
                 capability.EventCategories.Single(category =>
@@ -102,10 +98,6 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(capability.EventCategories.Single(category =>
                 category.Category == CottonRemotePushEventCategory.SharedFile).IsEnabledByDefault(settings));
-            Assert.False(capability.EventCategories.Single(category =>
-                category.Category == CottonRemotePushEventCategory.AccessRequest).IsEnabledByDefault(settings));
-            Assert.False(capability.EventCategories.Single(category =>
-                category.Category == CottonRemotePushEventCategory.CommentMention).IsEnabledByDefault(settings));
             Assert.True(capability.EventCategories.Single(category =>
                 category.Category == CottonRemotePushEventCategory.SecuritySession).IsEnabledByDefault(settings));
             Assert.False(preferences.SharedFile);
@@ -145,16 +137,6 @@ namespace Cotton.Mobile.Tests
             CottonLocalNotificationKind.RemoteSharedFile,
             CottonNotificationChannelKind.Shares,
             "Shared-file activity needs attention.")]
-        [InlineData(
-            CottonRemotePushEventCategory.AccessRequest,
-            CottonLocalNotificationKind.RemoteAccessRequest,
-            CottonNotificationChannelKind.Shares,
-            "An access request needs attention.")]
-        [InlineData(
-            CottonRemotePushEventCategory.CommentMention,
-            CottonLocalNotificationKind.RemoteCommentMention,
-            CottonNotificationChannelKind.Shares,
-            "A comment or mention needs attention.")]
         [InlineData(
             CottonRemotePushEventCategory.SecuritySession,
             CottonLocalNotificationKind.RemoteSecuritySession,
@@ -208,6 +190,8 @@ namespace Cotton.Mobile.Tests
         [InlineData("11111111-2222-3333-4444-555555555555", "")]
         [InlineData("11111111-2222-3333-4444-555555555555", "Unknown")]
         [InlineData("11111111-2222-3333-4444-555555555555", "sharedfile")]
+        [InlineData("11111111-2222-3333-4444-555555555555", "AccessRequest")]
+        [InlineData("11111111-2222-3333-4444-555555555555", "CommentMention")]
         public void Remote_push_notification_factory_rejects_non_displayable_payloads(
             string notificationId,
             string eventCategory)
@@ -255,15 +239,40 @@ namespace Cotton.Mobile.Tests
                 new[]
                 {
                     CottonRemotePushEventCategory.SharedFile,
-                    CottonRemotePushEventCategory.AccessRequest,
-                    CottonRemotePushEventCategory.CommentMention,
                     CottonRemotePushEventCategory.SecuritySession,
                 },
                 display.Items.Select(item => item.Category).ToArray());
             Assert.Equal("Shared-file activity", display.Items[0].Title);
             Assert.True(display.Items[0].IsEnabled);
-            Assert.Equal("Security and sessions", display.Items[3].Title);
-            Assert.True(display.Items[3].IsEnabled);
+            Assert.Equal("Security and sessions", display.Items[1].Title);
+            Assert.True(display.Items[1].IsEnabled);
+            Assert.Equal(2, display.EnabledCategoryCount);
+        }
+
+        [Fact]
+        public void Remote_push_preference_display_hides_unsupported_collaboration_categories()
+        {
+            CottonRemotePushPreferences preferences = new CottonRemotePushPreferences(
+                sharedFile: true,
+                accessRequest: true,
+                commentMention: true,
+                securitySession: true);
+
+            CottonRemotePushPreferenceDisplayState display =
+                CottonRemotePushPreferenceDisplayState.Create(preferences);
+
+            Assert.Equal(2, display.EnabledCategoryCount);
+            Assert.Equal(
+                new[]
+                {
+                    CottonRemotePushEventCategory.SharedFile,
+                    CottonRemotePushEventCategory.SecuritySession,
+                },
+                display.Items.Select(item => item.Category).ToArray());
+            Assert.DoesNotContain(
+                display.Items,
+                item => item.Category is CottonRemotePushEventCategory.AccessRequest
+                    or CottonRemotePushEventCategory.CommentMention);
         }
 
         private static Dictionary<string, string> CreateRemotePushData(

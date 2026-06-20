@@ -18,11 +18,17 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
+            CottonRemotePushEventCategorySnapshot? categorySnapshot = GetCategorySnapshot(category);
+            if (categorySnapshot is null)
+            {
+                return null;
+            }
+
             CottonLocalNotificationKind kind = GetNotificationKind(category);
             return new CottonLocalNotificationSnapshot(
                 CreateNotificationId(notificationId, kind),
                 kind,
-                GetChannelKind(category),
+                categorySnapshot.ChannelKind,
                 Title,
                 GetMessage(category),
                 new CottonNotificationLaunchRequest(notificationId, category));
@@ -48,11 +54,11 @@ namespace Cotton.Mobile.Services
                 && Enum.IsDefined(category);
         }
 
-        private static CottonNotificationChannelKind GetChannelKind(CottonRemotePushEventCategory category)
+        private static CottonRemotePushEventCategorySnapshot? GetCategorySnapshot(
+            CottonRemotePushEventCategory category)
         {
             return CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend.EventCategories
-                .Single(snapshot => snapshot.Category == category)
-                .ChannelKind;
+                .SingleOrDefault(snapshot => snapshot.Category == category);
         }
 
         private static CottonLocalNotificationKind GetNotificationKind(CottonRemotePushEventCategory category)
@@ -60,8 +66,6 @@ namespace Cotton.Mobile.Services
             return category switch
             {
                 CottonRemotePushEventCategory.SharedFile => CottonLocalNotificationKind.RemoteSharedFile,
-                CottonRemotePushEventCategory.AccessRequest => CottonLocalNotificationKind.RemoteAccessRequest,
-                CottonRemotePushEventCategory.CommentMention => CottonLocalNotificationKind.RemoteCommentMention,
                 CottonRemotePushEventCategory.SecuritySession => CottonLocalNotificationKind.RemoteSecuritySession,
                 _ => throw new ArgumentOutOfRangeException(nameof(category), "Remote push category is not supported."),
             };
@@ -72,8 +76,6 @@ namespace Cotton.Mobile.Services
             return category switch
             {
                 CottonRemotePushEventCategory.SharedFile => "Shared-file activity needs attention.",
-                CottonRemotePushEventCategory.AccessRequest => "An access request needs attention.",
-                CottonRemotePushEventCategory.CommentMention => "A comment or mention needs attention.",
                 CottonRemotePushEventCategory.SecuritySession => "Security activity needs attention.",
                 _ => throw new ArgumentOutOfRangeException(nameof(category), "Remote push category is not supported."),
             };

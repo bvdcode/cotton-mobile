@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
             "Offline. Showing saved files until your session can refresh.";
         private const string ReadyStatus = "Ready to connect.";
         private const string AccountCancelAction = "Cancel";
+        private const string AccountActivityAction = "Activity";
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
@@ -45,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IBackupSetupPageService _backupSetupPageService;
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly INotificationSettingsPageService _notificationSettingsPageService;
+        private readonly IActivityFeedPageService _activityFeedPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonNotificationLaunchState _notificationLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
@@ -85,6 +87,7 @@ namespace Cotton.Mobile.ViewModels
             IBackupSetupPageService backupSetupPageService,
             ICaptureInboxPageService captureInboxPageService,
             INotificationSettingsPageService notificationSettingsPageService,
+            IActivityFeedPageService activityFeedPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonNotificationLaunchState notificationLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
@@ -129,6 +132,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(backupSetupPageService);
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
+            ArgumentNullException.ThrowIfNull(activityFeedPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(notificationLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
@@ -173,6 +177,7 @@ namespace Cotton.Mobile.ViewModels
             _backupSetupPageService = backupSetupPageService;
             _captureInboxPageService = captureInboxPageService;
             _notificationSettingsPageService = notificationSettingsPageService;
+            _activityFeedPageService = activityFeedPageService;
             _shareLaunchState = shareLaunchState;
             _notificationLaunchState = notificationLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
@@ -598,6 +603,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountLogoutAction,
                 AccountStorageAction,
                 AccountNotificationsAction,
+                AccountActivityAction,
                 AccountResetFileLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -621,6 +627,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountNotificationsAction:
                     await OpenNotificationsAsync();
+                    break;
+                case AccountActivityAction:
+                    await OpenActivityAsync();
                     break;
                 case AccountResetFileLinksAction:
                     await ResetFileLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
@@ -911,6 +920,32 @@ namespace Cotton.Mobile.ViewModels
         private async Task OpenNotificationsAsync()
         {
             await TryOpenNotificationsAsync(showAlertOnFailure: true);
+        }
+
+        private async Task OpenActivityAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Activity",
+                    "Could not open activity for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _activityFeedPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile activity page.");
+                await _dialogService.ShowAlertAsync(
+                    "Activity",
+                    "Could not load activity.",
+                    "OK");
+            }
         }
 
         private async Task<bool> TryOpenNotificationsAsync(bool showAlertOnFailure)

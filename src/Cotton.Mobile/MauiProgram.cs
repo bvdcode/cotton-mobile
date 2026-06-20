@@ -54,6 +54,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IDeviceStorageSpaceService, DeviceStorageSpaceService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
 			builder.Services.AddSingleton<INotificationSettingsPageService, NotificationSettingsPageService>();
+			builder.Services.AddSingleton<IActivityFeedPageService, ActivityFeedPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
 			builder.Services.AddSingleton<IBackupSetupPageService, BackupSetupPageService>();
 			builder.Services.AddSingleton<ICaptureInboxPageService, CaptureInboxPageService>();
@@ -183,6 +184,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<StoragePage>();
 			builder.Services.AddTransient<NotificationSettingsViewModel>();
 			builder.Services.AddTransient<NotificationSettingsPage>();
+			builder.Services.AddTransient<ActivityFeedViewModel>();
+			builder.Services.AddTransient<ActivityFeedPage>();
 			builder.Services.AddTransient<BackupSetupViewModel>();
 			builder.Services.AddTransient<BackupSetupPage>();
 			builder.Services.AddTransient<TransfersViewModel>();

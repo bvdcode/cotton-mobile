@@ -120,6 +120,8 @@ namespace Cotton.Mobile.ViewModels
             ICottonRemotePushSessionRegistrationService remotePushRegistrationService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
+            CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
+            CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
             IDeviceStorageSpaceService deviceStorageSpaceService,
@@ -168,6 +170,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(remotePushRegistrationService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
+            ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
@@ -225,6 +229,8 @@ namespace Cotton.Mobile.ViewModels
                 cloudShareLinkService,
                 cloudShareLinkInteractionService,
                 thumbnailProvider,
+                cloudToDeviceSyncRootSetupService,
+                cloudToDeviceSyncCoordinator,
                 networkAccess,
                 foregroundService,
                 deviceStorageSpaceService,
@@ -1564,7 +1570,12 @@ namespace Cotton.Mobile.ViewModels
                 ShowTransferActivityIndicators(restoredTransfers);
                 await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
                 await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(result.InstanceUri);
-                await _fileBrowser.InitializeAsync(result.InstanceUri);
+                string? accountScopeKey = CottonAccountScopeKey.TryCreateFromUsername(
+                    result.User.Username,
+                    out string resolvedAccountScopeKey)
+                        ? resolvedAccountScopeKey
+                        : null;
+                await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");
                 QueuePendingNotificationOpen("authenticated session");

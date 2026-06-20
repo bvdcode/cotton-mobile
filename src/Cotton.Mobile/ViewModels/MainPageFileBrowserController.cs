@@ -21,6 +21,7 @@ namespace Cotton.Mobile.ViewModels
         private const string RemoveOfflineAction = "Remove offline";
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
+        private const string SyncToDeviceAction = CottonCloudToDeviceSyncStatusText.ActionLabel;
         private const string NewFolderPromptTitle = "New folder";
         private const string NewFolderPromptMessage = "Folder name";
         private const string NewFolderCreateAction = "Create";
@@ -56,6 +57,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly ICloudShareLinkInteractionService _cloudShareLinkInteractionService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
+        private readonly CottonCloudToDeviceSyncRootSetupService _cloudToDeviceSyncRootSetupService;
+        private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceSyncCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
         private readonly IDeviceStorageSpaceService _deviceStorageSpaceService;
@@ -70,6 +73,7 @@ namespace Cotton.Mobile.ViewModels
         private CottonFileBrowserEntry? _retryFileActionEntry;
         private CottonFolderHandle? _currentFolder;
         private Uri? _instanceUri;
+        private string? _accountScopeKey;
         private bool _isFileLoadInProgress;
         private bool _isFolderNavigationInProgress;
         private bool _lastFileLoadFailed;
@@ -94,6 +98,8 @@ namespace Cotton.Mobile.ViewModels
             ICottonCloudShareLinkService cloudShareLinkService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
+            CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
+            CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
             IDeviceStorageSpaceService deviceStorageSpaceService,
@@ -117,6 +123,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
+            ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
@@ -140,6 +148,8 @@ namespace Cotton.Mobile.ViewModels
             _cloudShareLinkService = cloudShareLinkService;
             _cloudShareLinkInteractionService = cloudShareLinkInteractionService;
             _thumbnailProvider = thumbnailProvider;
+            _cloudToDeviceSyncRootSetupService = cloudToDeviceSyncRootSetupService;
+            _cloudToDeviceSyncCoordinator = cloudToDeviceSyncCoordinator;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
             _deviceStorageSpaceService = deviceStorageSpaceService;
@@ -151,11 +161,12 @@ namespace Cotton.Mobile.ViewModels
             _foregroundService.Resumed += ForegroundService_Resumed;
         }
 
-        public async Task InitializeAsync(Uri instanceUri)
+        public async Task InitializeAsync(Uri instanceUri, string? accountScopeKey)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             _instanceUri = instanceUri;
+            _accountScopeKey = string.IsNullOrWhiteSpace(accountScopeKey) ? null : accountScopeKey.Trim();
             _display.ApplyFileBrowserPreferences(LoadFileBrowserPreferences());
             await LoadRootFilesAsync();
         }
@@ -186,6 +197,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _instanceUri = instanceUri;
+            _accountScopeKey = null;
             _display.ApplyFileBrowserPreferences(LoadFileBrowserPreferences());
 
             CancellationTokenSource fileLoadCancellation = BeginFileLoad();
@@ -219,6 +231,7 @@ namespace Cotton.Mobile.ViewModels
         {
             CancelActiveWork();
             _instanceUri = null;
+            _accountScopeKey = null;
             _currentFolder = null;
             _lastFileLoadFailed = false;
             _lastFileLoadDisplayedCachedContent = false;
@@ -709,6 +722,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.ShareLink:
                     await ShareCloudShareLinkAsync(currentEntry);
                     break;
+                case MainPageFileAction.SyncFolderToDevice:
+                    await SyncFolderToDeviceAsync(currentEntry);
+                    break;
             }
         }
 
@@ -727,7 +743,8 @@ namespace Cotton.Mobile.ViewModels
                 OpenAction,
                 CopyLinkAction,
                 ShareLinkAction,
-                KeepOfflineAction);
+                KeepOfflineAction,
+                SyncToDeviceAction);
 
             CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
             if (currentFolder is null)
@@ -748,6 +765,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case KeepOfflineAction:
                     await PlanFolderOfflineAsync(currentFolder);
+                    break;
+                case SyncToDeviceAction:
+                    await SyncFolderToDeviceAsync(currentFolder);
                     break;
             }
         }
@@ -1877,6 +1897,114 @@ namespace Cotton.Mobile.ViewModels
             return plan;
         }
 
+        private async Task SyncFolderToDeviceAsync(CottonFileBrowserEntry folder)
+        {
+            if (!folder.IsFolder)
+            {
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to sync folders.");
+                return;
+            }
+
+            string? accountScopeKey = _accountScopeKey;
+            if (string.IsNullOrWhiteSpace(accountScopeKey))
+            {
+                _display.ShowFilesStatus(CottonCloudToDeviceSyncStatusText.AccountUnavailableStatus);
+                return;
+            }
+
+            if (ShowOfflineRetryIfNeeded(
+                    MainPageFileAction.SyncFolderToDevice,
+                    folder,
+                    CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus))
+            {
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction(CottonCloudToDeviceSyncStatusText.CreateStartingStatus(folder.Name));
+            bool shouldRunRecoveryRefresh = false;
+
+            try
+            {
+                var destination = new CottonUploadDestinationSnapshot(
+                    folder.Id,
+                    folder.Name,
+                    CreateChildFolderPath(folder.Name));
+                await _cloudToDeviceSyncRootSetupService.EnableAppPrivateRootAsync(
+                    instanceUri,
+                    accountScopeKey,
+                    destination,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                CottonCloudToDeviceSyncRunSummary summary =
+                    await _cloudToDeviceSyncCoordinator.RunAsync(instanceUri, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _display.ShowFilesStatus(CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(summary));
+                shouldRunRecoveryRefresh = summary.HasAppliedChanges;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile sync authorization failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile sync cancellation {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonCloudToDeviceSyncStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile sync failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to sync Cotton mobile folder to device {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.SyncFolderToDevice,
+                    folder,
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonCloudToDeviceSyncStatusText.FailedStatus,
+                        CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
         private async Task UploadPickedSourceAsync(
             Uri instanceUri,
             CottonFolderHandle folder,
@@ -2185,6 +2313,17 @@ namespace Cotton.Mobile.ViewModels
                     MainPageDisplayState.RootFilesTitle,
                     _fileNavigation,
                     currentFolderName));
+        }
+
+        private string CreateChildFolderPath(string childFolderName)
+        {
+            string normalizedChildName = string.IsNullOrWhiteSpace(childFolderName)
+                ? "Folder"
+                : childFolderName.Trim();
+            string parentPath = _currentFolder is null
+                ? MainPageDisplayState.RootFilesTitle
+                : CreatePath(_currentFolder.Name);
+            return $"{parentPath} / {normalizedChildName}";
         }
 
         private bool IsDisplayingRootFolder()

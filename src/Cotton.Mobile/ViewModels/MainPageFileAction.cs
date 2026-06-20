@@ -11,5 +11,6 @@ namespace Cotton.Mobile.ViewModels
         RemoveOffline,
         Share,
         ShareLink,
+        SyncFolderToDevice,
     }
 }

@@ -9,7 +9,7 @@
 
     <Grid x:Name="RootLayout"
           Padding="12,0,16,14"
-          RowDefinitions="*,Auto,Auto">
+          RowDefinitions="*,Auto,Auto,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
@@ -221,54 +221,6 @@
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
                                    FontSize="13"
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
-
-                            <Grid ColumnDefinitions="*,*,*,*"
-                                  ColumnSpacing="8"
-                                  IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}">
-                                <Button Grid.Column="0"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.TransfersNavigation.Label}"
-                                        Command="{Binding OpenTransfersCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        Padding="4,0"
-                                        FontSize="11"
-                                        HeightRequest="40"
-                                        MinimumHeightRequest="40"
-                                        SemanticProperties.Description="{Binding Display.TransfersNavigation.AccessibilityText}" />
-
-                                <Button Grid.Column="1"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.InboxNavigation.Label}"
-                                        Command="{Binding OpenCaptureInboxCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        Padding="4,0"
-                                        FontSize="11"
-                                        HeightRequest="40"
-                                        MinimumHeightRequest="40"
-                                        SemanticProperties.Description="{Binding Display.InboxNavigation.AccessibilityText}" />
-
-                                <Button Grid.Column="2"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.BackupNavigation.Label}"
-                                        Command="{Binding OpenBackupSetupCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        Padding="4,0"
-                                        FontSize="11"
-                                        HeightRequest="40"
-                                        MinimumHeightRequest="40"
-                                        SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
-
-                                <Button Grid.Column="3"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.SettingsNavigation.Label}"
-                                        Command="{Binding AccountCommand}"
-                                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                        Padding="4,0"
-                                        FontSize="11"
-                                        HeightRequest="40"
-                                        MinimumHeightRequest="40"
-                                        SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
-                            </Grid>
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
@@ -859,7 +811,70 @@
                 CornerRadius="26"
                 SemanticProperties.Description="Add files" />
 
-        <HorizontalStackLayout Grid.Row="2"
+        <Border Grid.Row="2"
+                IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
+                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                StrokeShape="RoundRectangle 8"
+                Padding="6"
+                Margin="0,0,0,8"
+                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Grid ColumnDefinitions="*,*,*,*"
+                  ColumnSpacing="6">
+                <Border Grid.Column="0"
+                        Stroke="{StaticResource Primary}"
+                        StrokeShape="RoundRectangle 8"
+                        Padding="6,0"
+                        HeightRequest="40"
+                        BackgroundColor="{StaticResource Primary}">
+                    <Label Text="Files"
+                           FontSize="12"
+                           FontAttributes="Bold"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           HorizontalTextAlignment="Center"
+                           VerticalTextAlignment="Center"
+                           TextColor="{StaticResource PrimaryDarkText}" />
+                </Border>
+
+                <Button Grid.Column="1"
+                        Style="{StaticResource FileChromeButton}"
+                        Text="Sync"
+                        Command="{Binding OpenSyncSettingsCommand}"
+                        IsEnabled="{Binding Display.IsProfileVisible}"
+                        Padding="4,0"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        HeightRequest="40"
+                        MinimumHeightRequest="40"
+                        SemanticProperties.Description="Open sync folders" />
+
+                <Button Grid.Column="2"
+                        Style="{StaticResource FileChromeButton}"
+                        Text="{Binding Display.BackupNavigation.Label}"
+                        Command="{Binding OpenBackupSetupCommand}"
+                        IsEnabled="{Binding Display.IsProfileVisible}"
+                        Padding="4,0"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        HeightRequest="40"
+                        MinimumHeightRequest="40"
+                        SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
+
+                <Button Grid.Column="3"
+                        Style="{StaticResource FileChromeButton}"
+                        Text="More"
+                        Command="{Binding AccountCommand}"
+                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
+                        Padding="4,0"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        HeightRequest="40"
+                        MinimumHeightRequest="40"
+                        SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
+            </Grid>
+        </Border>
+
+        <HorizontalStackLayout Grid.Row="3"
                                Spacing="12"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"

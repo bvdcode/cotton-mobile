@@ -344,6 +344,10 @@ namespace Cotton.Mobile.ViewModels
                 OpenBackupSetupAsync,
                 LogUnhandledCommandException,
                 () => Display.IsProfileVisible);
+            OpenSyncSettingsCommand = new AsyncCommand(
+                OpenSyncAsync,
+                LogUnhandledCommandException,
+                () => Display.IsProfileVisible);
             OpenNotificationsCommand = new AsyncCommand(
                 OpenNotificationsAsync,
                 LogUnhandledCommandException,
@@ -396,6 +400,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand OpenCaptureInboxCommand { get; }
 
         public AsyncCommand OpenBackupSetupCommand { get; }
+
+        public AsyncCommand OpenSyncSettingsCommand { get; }
 
         public AsyncCommand OpenNotificationsCommand { get; }
 
@@ -1949,6 +1955,7 @@ namespace Cotton.Mobile.ViewModels
             OpenTransfersCommand.RaiseCanExecuteChanged();
             OpenCaptureInboxCommand.RaiseCanExecuteChanged();
             OpenBackupSetupCommand.RaiseCanExecuteChanged();
+            OpenSyncSettingsCommand.RaiseCanExecuteChanged();
             OpenNotificationsCommand.RaiseCanExecuteChanged();
         }
 
@@ -1973,6 +1980,7 @@ namespace Cotton.Mobile.ViewModels
                     OpenTransfersCommand.RaiseCanExecuteChanged();
                     OpenCaptureInboxCommand.RaiseCanExecuteChanged();
                     OpenBackupSetupCommand.RaiseCanExecuteChanged();
+                    OpenSyncSettingsCommand.RaiseCanExecuteChanged();
                     OpenNotificationsCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.IsFileUpButtonEnabled):

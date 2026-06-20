@@ -2736,17 +2736,21 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _logger.LogWarning(exception, "Failed to keep Cotton mobile folder offline {FolderId}.", folder.Id);
+                string failedStatus = CottonOfflineDownloadQueueStatusText.CreateFailedStatus(
+                    completedCount,
+                    queue.TotalCount);
+                string failureDetail = CottonOfflineDownloadQueueStatusText.CreateFailureDetail(
+                    _networkAccess.HasInternetAccess);
                 _display.ShowOfflinePackProgress(
                     CottonOfflinePackProgressSnapshot.CreateFailed(
                         queue,
                         completedCount,
-                        completedBytes));
+                        completedBytes,
+                        failureDetail));
                 ShowFileActionRetry(
                     MainPageFileAction.KeepFolderOffline,
                     folder,
-                    CottonOfflineDownloadQueueStatusText.CreateFailedStatus(
-                        completedCount,
-                        queue.TotalCount));
+                    failedStatus);
                 return false;
             }
         }

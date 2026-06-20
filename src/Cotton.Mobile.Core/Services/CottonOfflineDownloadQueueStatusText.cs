@@ -39,6 +39,13 @@ namespace Cotton.Mobile.Services
             return $"Keep folder offline failed after {FormatProgress(completedCount, totalCount)}.";
         }
 
+        public static string CreateFailureDetail(bool hasInternetAccess)
+        {
+            return hasInternetAccess
+                ? "Download failed."
+                : CottonOfflineFolderStatusText.OfflineUnavailableStatus;
+        }
+
         private static string FormatProgress(int completedCount, int totalCount)
         {
             if (completedCount < 0)

@@ -105,6 +105,12 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Keep folder offline failed after 1/2 files.",
                 CottonOfflineDownloadQueueStatusText.CreateFailedStatus(1, queue.TotalCount));
+            Assert.Equal(
+                "Download failed.",
+                CottonOfflineDownloadQueueStatusText.CreateFailureDetail(hasInternetAccess: true));
+            Assert.Equal(
+                "Offline. Folder offline needs internet.",
+                CottonOfflineDownloadQueueStatusText.CreateFailureDetail(hasInternetAccess: false));
         }
 
         [Fact]

@@ -74,7 +74,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Projects offline cancelled", cancelled.Text);
             Assert.Equal("1/2 files saved", cancelled.Details);
             Assert.Equal("Projects offline failed", failed.Text);
+            Assert.Equal("Network lost", failed.FailureText);
             Assert.Equal("1/2 files saved · Network lost", failed.Details);
+            Assert.Equal("Projects offline failed. 1/2 files saved · Network lost.", failed.AccessibilityText);
         }
 
         [Fact]

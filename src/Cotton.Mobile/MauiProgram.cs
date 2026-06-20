@@ -176,6 +176,7 @@ namespace Cotton.Mobile
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
 			builder.Services.AddSingleton<ICottonActivityFeedService, CottonActivityFeedService>();
+			builder.Services.AddSingleton<ICottonAccountSessionService, CottonAccountSessionService>();
 			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
 			builder.Services.AddSingleton<ICottonRemotePushPreferenceService, CottonRemotePushPreferenceService>();
 #if ANDROID

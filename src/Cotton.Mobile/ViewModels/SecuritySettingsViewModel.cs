@@ -1,3 +1,4 @@
+using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -8,7 +9,9 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly ICottonAppLockSettingsStore _settingsStore;
         private readonly ICottonAppLockRuntimeStateStore _runtimeStateStore;
+        private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonLogoutCacheCleanupSettingsStore _logoutCleanupSettingsStore;
+        private readonly ICottonAccountSessionService _accountSessionService;
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ICottonWindowPrivacyService _windowPrivacyService;
@@ -30,7 +33,9 @@ namespace Cotton.Mobile.ViewModels
         public SecuritySettingsViewModel(
             ICottonAppLockSettingsStore settingsStore,
             ICottonAppLockRuntimeStateStore runtimeStateStore,
+            ICottonInstanceStore instanceStore,
             ICottonLogoutCacheCleanupSettingsStore logoutCleanupSettingsStore,
+            ICottonAccountSessionService accountSessionService,
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
             ICottonWindowPrivacyService windowPrivacyService,
@@ -38,7 +43,9 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(runtimeStateStore);
+            ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(logoutCleanupSettingsStore);
+            ArgumentNullException.ThrowIfNull(accountSessionService);
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(windowPrivacyService);
@@ -46,7 +53,9 @@ namespace Cotton.Mobile.ViewModels
 
             _settingsStore = settingsStore;
             _runtimeStateStore = runtimeStateStore;
+            _instanceStore = instanceStore;
             _logoutCleanupSettingsStore = logoutCleanupSettingsStore;
+            _accountSessionService = accountSessionService;
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
             _windowPrivacyService = windowPrivacyService;
@@ -59,11 +68,15 @@ namespace Cotton.Mobile.ViewModels
             ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
             ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
             ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
+            ShowAccountSessions(
+                CottonAccountSessionListDisplayState.Unavailable("Account sessions have not been loaded."));
         }
 
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand VerifyDeviceUnlockCommand { get; }
+
+        public ObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];
 
         public bool IsBusy
         {
@@ -121,6 +134,20 @@ namespace Cotton.Mobile.ViewModels
 
         public bool CanToggleLogoutCacheCleanup => !IsBusy;
 
+        public string AccountSessionsTitle => AccountSessionDisplay.Title;
+
+        public string AccountSessionsStatusText => AccountSessionDisplay.StatusText;
+
+        public string AccountSessionsDetailText => AccountSessionDisplay.DetailText;
+
+        public string AccountSessionsEmptyTitle => AccountSessionDisplay.EmptyTitle;
+
+        public string AccountSessionsEmptyDetails => AccountSessionDisplay.EmptyDetails;
+
+        public bool IsAccountSessionsListVisible => AccountSessionDisplay.HasItems;
+
+        public bool IsAccountSessionsEmptyVisible => AccountSessionDisplay.IsEmptyVisible;
+
         public bool IsAppLockEnabled
         {
             get => _isAppLockEnabled;
@@ -167,6 +194,9 @@ namespace Cotton.Mobile.ViewModels
         private CottonLogoutCacheCleanupDisplayState LogoutCleanupDisplay { get; set; } =
             CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default);
 
+        private CottonAccountSessionListDisplayState AccountSessionDisplay { get; set; } =
+            CottonAccountSessionListDisplayState.Unavailable("Account sessions have not been loaded.");
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -192,9 +222,12 @@ namespace Cotton.Mobile.ViewModels
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
                 ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
+                bool loadedAccountSessions = await TryLoadAccountSessionsAsync();
                 Status = disabledUnavailableAppLock
                     ? "App lock was turned off because device unlock is unavailable."
-                    : _capability.CanEnable ? null : "App lock is unavailable.";
+                    : _capability.CanEnable
+                        ? loadedAccountSessions ? null : "Could not load account sessions."
+                        : "App lock is unavailable.";
                 if (disabledUnavailableAppLock)
                 {
                     _ = _windowPrivacyService.ApplyAsync();
@@ -209,12 +242,40 @@ namespace Cotton.Mobile.ViewModels
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
                     CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Could not inspect device unlock.")));
                 ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default));
+                ShowAccountSessions(CottonAccountSessionListDisplayState.Unavailable(
+                    "Could not load signed-in devices."));
                 Status = "Could not inspect security settings.";
             }
             finally
             {
                 IsBusy = false;
             }
+        }
+
+        private async Task<bool> TryLoadAccountSessionsAsync()
+        {
+            try
+            {
+                Uri instanceUri = await GetCurrentInstanceUriAsync();
+                IReadOnlyList<CottonAccountSessionSnapshot> sessions =
+                    await _accountSessionService.GetActiveSessionsAsync(instanceUri);
+                ShowAccountSessions(CottonAccountSessionListDisplayState.Create(sessions));
+                return true;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile account sessions.");
+                ShowAccountSessions(CottonAccountSessionListDisplayState.Unavailable(
+                    "Could not load signed-in devices."));
+                return false;
+            }
+        }
+
+        private async Task<Uri> GetCurrentInstanceUriAsync()
+        {
+            Uri? instanceUri = await _instanceStore.GetAsync();
+            return instanceUri
+                ?? throw new InvalidOperationException("A signed-in Cotton instance is required.");
         }
 
         private async Task SaveAppLockAsync(bool isEnabled)
@@ -366,6 +427,26 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(LogoutCacheCleanupStatusText));
             OnPropertyChanged(nameof(LogoutCacheCleanupDetailText));
             OnPropertyChanged(nameof(CanToggleLogoutCacheCleanup));
+        }
+
+        private void ShowAccountSessions(CottonAccountSessionListDisplayState display)
+        {
+            ArgumentNullException.ThrowIfNull(display);
+
+            AccountSessionDisplay = display;
+            AccountSessions.Clear();
+            foreach (CottonAccountSessionListItem item in display.Items)
+            {
+                AccountSessions.Add(item);
+            }
+
+            OnPropertyChanged(nameof(AccountSessionsTitle));
+            OnPropertyChanged(nameof(AccountSessionsStatusText));
+            OnPropertyChanged(nameof(AccountSessionsDetailText));
+            OnPropertyChanged(nameof(AccountSessionsEmptyTitle));
+            OnPropertyChanged(nameof(AccountSessionsEmptyDetails));
+            OnPropertyChanged(nameof(IsAccountSessionsListVisible));
+            OnPropertyChanged(nameof(IsAccountSessionsEmptyVisible));
         }
 
         private void ApplyAppLockSourceValue(bool isEnabled)

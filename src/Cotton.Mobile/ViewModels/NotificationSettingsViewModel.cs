@@ -78,22 +78,24 @@ namespace Cotton.Mobile.ViewModels
         public bool NeedsAttention => _permissionDisplay.NeedsAttention;
 
         public string EnabledCategoriesText => _remotePushPreferences is null
-            ? $"{_settings.EnabledChannelCount:N0} local categories on"
-            : $"{_settings.EnabledChannelCount:N0} local · {CreateRemotePushDisplay().EnabledCategoryCount:N0} server push";
+            ? FormatLocalNotificationSummary(_settings.EnabledChannelCount)
+            : $"{FormatLocalNotificationSummary(_settings.EnabledChannelCount)} · {CreateRemotePushDisplay().SummaryText}";
 
         public bool HasRemotePushPreferences => _remotePushPreferences is not null;
 
         public bool IsRemotePushUnavailable => _remotePushPreferences is null;
 
-        public string RemotePushUnavailableTitle => _remotePushFailureStatus ?? "Server push preferences not loaded.";
+        public string RemotePushUnavailableTitle => _remotePushFailureStatus ?? "Server alerts not loaded.";
 
         public string RemotePushUnavailableDetail => _remotePushFailureStatus is null
-            ? "Refresh this page to load server push controls."
-            : "Local notifications still work. Retry when the server is reachable.";
+            ? "Retry to load server alerts."
+            : "Notifications on this device still work. Retry when Cotton Cloud is reachable.";
 
         public string RemotePushStatusText => _remotePushPreferences is null
-            ? _remotePushFailureStatus ?? "Server push preferences not loaded."
+            ? _remotePushFailureStatus ?? "Server alerts not loaded."
             : CreateRemotePushDisplay().SummaryText;
+
+        public bool IsRemotePushStatusVisible => HasRemotePushPreferences;
 
         public string? Status => _status;
 
@@ -129,7 +131,7 @@ namespace Cotton.Mobile.ViewModels
                 if (!await TryLoadRemotePushPreferencesAsync())
                 {
                     failureStatus = failureStatus is null
-                        ? "Could not load push preferences."
+                        ? "Could not load notification settings."
                         : "Could not inspect notifications.";
                 }
 
@@ -187,7 +189,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile push notification preferences.");
                 _remotePushPreferences = null;
-                _remotePushFailureStatus = "Server push unavailable.";
+                _remotePushFailureStatus = "Server alerts unavailable.";
                 RemotePushPreferences.Clear();
                 RaiseRemotePushPresentationChanged();
                 return false;
@@ -233,7 +235,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to update Cotton mobile push notification preferences.");
                 ShowRemotePushPreferences(previous);
-                ShowStatus("Could not update push preferences.", isAttention: true);
+                ShowStatus("Could not update server alerts.", isAttention: true);
             }
             finally
             {
@@ -341,8 +343,16 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(EnabledCategoriesText));
             OnPropertyChanged(nameof(HasRemotePushPreferences));
             OnPropertyChanged(nameof(IsRemotePushUnavailable));
+            OnPropertyChanged(nameof(IsRemotePushStatusVisible));
             OnPropertyChanged(nameof(RemotePushUnavailableTitle));
             OnPropertyChanged(nameof(RemotePushUnavailableDetail));
+        }
+
+        private static string FormatLocalNotificationSummary(int enabledChannelCount)
+        {
+            return enabledChannelCount == 0
+                ? "Notifications off on this device"
+                : "Notifications on this device";
         }
 
         private void RaiseCommandStatesChanged()

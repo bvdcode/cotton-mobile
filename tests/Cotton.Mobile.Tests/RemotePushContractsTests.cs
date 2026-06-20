@@ -234,7 +234,7 @@ namespace Cotton.Mobile.Tests
             CottonRemotePushPreferenceDisplayState display =
                 CottonRemotePushPreferenceDisplayState.Create(preferences);
 
-            Assert.Equal("2 server push categories on", display.SummaryText);
+            Assert.Equal("2 server alerts on", display.SummaryText);
             Assert.Equal(
                 new[]
                 {

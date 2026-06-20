@@ -66,10 +66,10 @@ namespace Cotton.Mobile.Services
         private static string FormatSummary(int enabledCategoryCount)
         {
             return enabledCategoryCount == 1
-                ? "1 server push category on"
+                ? "1 server alert on"
                 : string.Format(
                     CultureInfo.InvariantCulture,
-                    "{0:N0} server push categories on",
+                    "{0:N0} server alerts on",
                     enabledCategoryCount);
         }
     }

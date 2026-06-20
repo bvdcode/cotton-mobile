@@ -18,7 +18,7 @@ namespace Cotton.Mobile.Services
             DetailText = detailText.Trim();
         }
 
-        public string Title => "Permission ledger";
+        public string Title => "Device access";
 
         public IReadOnlyList<CottonPermissionLedgerItem> Items { get; }
 
@@ -48,17 +48,17 @@ namespace Cotton.Mobile.Services
                 CreateAppLockItem(appLockSettings, appLockCapability, deviceUnlockAvailability),
                 new CottonPermissionLedgerItem(
                     "Selected files",
-                    "Scoped",
+                    "Private",
                     "Manual uploads and shared items use only files selected or shared by the user.",
                     needsAttention: false),
                 new CottonPermissionLedgerItem(
                     "Document scan",
-                    "System scanner",
+                    "No camera access",
                     "Scans are returned by Android's document scanner; Cotton does not request camera permission.",
                     needsAttention: false),
                 new CottonPermissionLedgerItem(
                     "Network",
-                    "Allowed",
+                    "Online access",
                     "Internet and network-state access are used to connect to Cotton and show offline state.",
                     needsAttention: false),
             ];
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Services
             return new CottonPermissionLedgerDisplayState(
                 items,
                 CreateStatusText(items),
-                "Current device access used by Cotton features.");
+                "Permissions Cotton uses on this device.");
         }
 
         public static CottonPermissionLedgerDisplayState Unavailable(string detailText)
@@ -81,7 +81,7 @@ namespace Cotton.Mobile.Services
                         detailText,
                         needsAttention: true),
                 ],
-                "Needs review",
+                "Review needed",
                 detailText);
         }
 
@@ -145,9 +145,9 @@ namespace Cotton.Mobile.Services
         {
             int attentionCount = items.Count(item => item.NeedsAttention);
             return attentionCount == 0
-                ? "All clear"
+                ? "Looks good"
                 : attentionCount.ToString("N0", CultureInfo.InvariantCulture)
-                    + (attentionCount == 1 ? " review" : " reviews");
+                    + (attentionCount == 1 ? " item needs review" : " items need review");
         }
     }
 }

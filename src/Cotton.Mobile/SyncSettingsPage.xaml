@@ -9,14 +9,6 @@
              Shell.NavBarIsVisible="True"
              Title="Sync"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
-
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Run all"
-                     Command="{Binding RunAllCommand}" />
-        <ToolbarItem Text="Refresh"
-                     Command="{Binding LoadCommand}" />
-    </ContentPage.ToolbarItems>
-
     <ScrollView>
         <VerticalStackLayout Padding="16"
                              Spacing="14">
@@ -31,6 +23,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
                     <Label Text="{Binding SummaryText}"
+                           IsVisible="{Binding IsSummaryVisible}"
                            FontSize="13"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"

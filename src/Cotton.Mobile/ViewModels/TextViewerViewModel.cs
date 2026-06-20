@@ -8,8 +8,13 @@ namespace Cotton.Mobile.ViewModels
 {
     public class TextViewerViewModel : ViewModelBase
     {
+        private const string MoreCancelAction = "Cancel";
+        private const string MoreCopyAction = "Copy text";
+        private const string MoreOpenAction = "Open in another app";
+
         private readonly CottonFileDownloadResult _file;
         private readonly IFileInteractionService _fileInteractionService;
+        private readonly IUserDialogService _dialogService;
         private readonly IClipboard _clipboard;
         private readonly ILogger<TextViewerViewModel> _logger;
         private bool _isBusy;
@@ -21,6 +26,7 @@ namespace Cotton.Mobile.ViewModels
             string content,
             CottonFileDownloadResult file,
             IFileInteractionService fileInteractionService,
+            IUserDialogService dialogService,
             IClipboard clipboard,
             ILogger<TextViewerViewModel> logger)
         {
@@ -29,6 +35,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(content);
             ArgumentNullException.ThrowIfNull(file);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(clipboard);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -37,11 +44,13 @@ namespace Cotton.Mobile.ViewModels
             Content = content;
             _file = file;
             _fileInteractionService = fileInteractionService;
+            _dialogService = dialogService;
             _clipboard = clipboard;
             _logger = logger;
             CopyCommand = new AsyncCommand(CopyAsync, LogUnhandledCommandException, () => !IsBusy && Content.Length > 0);
             ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException, () => !IsBusy);
             OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException, () => !IsBusy);
+            MoreCommand = new AsyncCommand(ShowMoreAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
         public string Title { get; }
@@ -55,6 +64,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ShareCommand { get; }
 
         public AsyncCommand OpenExternallyCommand { get; }
+
+        public AsyncCommand MoreCommand { get; }
 
         public bool IsBusy
         {
@@ -129,6 +140,26 @@ namespace Cotton.Mobile.ViewModels
                 "Failed to open text viewer file {FilePath}.");
         }
 
+        private async Task ShowMoreAsync()
+        {
+            string? action = await _dialogService.ShowActionSheetAsync(
+                Title,
+                MoreCancelAction,
+                null,
+                MoreCopyAction,
+                MoreOpenAction);
+
+            switch (action)
+            {
+                case MoreCopyAction:
+                    await CopyAsync();
+                    break;
+                case MoreOpenAction:
+                    await OpenExternallyAsync();
+                    break;
+            }
+        }
+
         private async Task RunViewerActionAsync(
             string busyStatus,
             Func<Task> actionAsync,
@@ -162,6 +193,7 @@ namespace Cotton.Mobile.ViewModels
             CopyCommand.RaiseCanExecuteChanged();
             ShareCommand.RaiseCanExecuteChanged();
             OpenExternallyCommand.RaiseCanExecuteChanged();
+            MoreCommand.RaiseCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

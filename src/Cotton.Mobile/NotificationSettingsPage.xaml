@@ -139,6 +139,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushStatusText}"
+                               IsVisible="{Binding IsRemotePushStatusVisible}"
                                FontSize="13"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"

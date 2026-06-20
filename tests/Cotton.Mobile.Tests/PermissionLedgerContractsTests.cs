@@ -15,9 +15,9 @@ namespace Cotton.Mobile.Tests
                 CottonAppLockCapabilitySnapshot.Available,
                 CottonDeviceUnlockAvailabilitySnapshot.Available);
 
-            Assert.Equal("Permission ledger", display.Title);
-            Assert.Equal("All clear", display.StatusText);
-            Assert.Equal("Current device access used by Cotton features.", display.DetailText);
+            Assert.Equal("Device access", display.Title);
+            Assert.Equal("Looks good", display.StatusText);
+            Assert.Equal("Permissions Cotton uses on this device.", display.DetailText);
             Assert.True(display.HasItems);
             Assert.False(display.HasAttention);
             Assert.Equal(6, display.Items.Count);
@@ -42,17 +42,17 @@ namespace Cotton.Mobile.Tests
                 item => AssertLedgerItem(
                     item,
                     "Selected files",
-                    "Scoped",
+                    "Private",
                     needsAttention: false),
                 item => AssertLedgerItem(
                     item,
                     "Document scan",
-                    "System scanner",
+                    "No camera access",
                     needsAttention: false),
                 item => AssertLedgerItem(
                     item,
                     "Network",
-                    "Allowed",
+                    "Online access",
                     needsAttention: false));
         }
 
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Tests
                 CottonAppLockCapabilitySnapshot.Unavailable("Set a screen lock first."),
                 CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Set a screen lock first."));
 
-            Assert.Equal("3 reviews", display.StatusText);
+            Assert.Equal("3 items need review", display.StatusText);
             Assert.True(display.HasAttention);
 
             AssertLedgerItem(display.Items[0], "Notifications", "Denied", needsAttention: true);
@@ -82,7 +82,7 @@ namespace Cotton.Mobile.Tests
             CottonPermissionLedgerDisplayState display =
                 CottonPermissionLedgerDisplayState.Unavailable("Could not inspect device access.");
 
-            Assert.Equal("Needs review", display.StatusText);
+            Assert.Equal("Review needed", display.StatusText);
             Assert.True(display.HasAttention);
             CottonPermissionLedgerItem item = Assert.Single(display.Items);
             AssertLedgerItem(item, "Device access", "Unavailable", needsAttention: true);

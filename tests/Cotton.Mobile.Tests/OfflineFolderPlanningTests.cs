@@ -94,7 +94,7 @@ namespace Cotton.Mobile.Tests
                 "Projects has no files to keep offline.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(empty));
             Assert.Equal(
-                "Projects: 1 file, 1 folder, 1 KB. Recursive offline folders are coming next.",
+                "Projects: 1 file, 1 folder, 1 KB. Nested folders need scanning before offline download.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(recursive));
             Assert.Equal(
                 "Projects: 1 file, size unknown. Offline folder downloads are coming next.",

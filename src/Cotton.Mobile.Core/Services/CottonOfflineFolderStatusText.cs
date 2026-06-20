@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Services
                 CottonOfflineFolderPlanStatus.Empty =>
                     $"{prefix}{plan.FolderName} has no files to keep offline.",
                 CottonOfflineFolderPlanStatus.ContainsFolders =>
-                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {FormatFolderCount(plan.FolderCount)}, {FormatKnownSize(plan)}. Recursive offline folders are coming next.",
+                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {FormatFolderCount(plan.FolderCount)}, {FormatKnownSize(plan)}. Nested folders need scanning before offline download.",
                 CottonOfflineFolderPlanStatus.HasUnknownSize =>
                     $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, size unknown. Offline folder downloads are coming next.",
                 _ =>

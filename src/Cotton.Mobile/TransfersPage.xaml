@@ -24,18 +24,12 @@
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
-                    <Label Text="Transfers"
+                    <Label Text="{Binding SummaryText}"
                            FontSize="28"
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
-
-                    <Label Text="{Binding SummaryText}"
-                           FontSize="13"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"

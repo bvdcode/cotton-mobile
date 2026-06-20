@@ -80,6 +80,14 @@ namespace Cotton.Mobile.Tests
                 "Files removed from the selected device folder may be moved to trash in Cotton Cloud for this sync root.",
                 CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage);
             Assert.Equal("Sync", CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction);
+            Assert.Equal("Move cloud files to trash?", CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle);
+            Assert.Equal("Move to trash", CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction);
+            Assert.Equal(
+                "This sync will move 1 cloud file to trash because it is missing from the selected device folder.",
+                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(1));
+            Assert.Equal(
+                "This sync will move 2 cloud files to trash because they are missing from the selected device folder.",
+                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(2));
             Assert.Equal(
                 "Sync complete. Everything is up to date.",
                 CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary));

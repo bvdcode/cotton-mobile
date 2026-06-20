@@ -274,6 +274,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, result.Plan.RemoteDeleteCount);
             Assert.Equal(1, summary.SkippedRootCount);
             Assert.Equal(0, summary.DeletedRemoteFileCount);
+            Assert.True(summary.NeedsDestructiveReview);
+            Assert.Equal(1, summary.DestructiveReviewRemoteDeleteCount);
             Assert.True(summary.HasBlockedItems);
             Assert.Empty(_fileOperator.DeletedFileIds);
             Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
@@ -306,6 +308,8 @@ namespace Cotton.Mobile.Tests
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
             Assert.Equal(1, summary.DeletedRemoteFileCount);
+            Assert.False(summary.NeedsDestructiveReview);
+            Assert.Equal(0, summary.DestructiveReviewRemoteDeleteCount);
             Assert.True(summary.HasAppliedChanges);
             Assert.Equal([FirstFileId], _fileOperator.DeletedFileIds);
             Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));

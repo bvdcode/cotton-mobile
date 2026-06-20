@@ -31,9 +31,28 @@ namespace Cotton.Mobile.Services
 
         public static string ConfirmDestructiveAction { get; } = "Sync";
 
+        public static string ConfirmRemoteDeleteTitle { get; } = "Move cloud files to trash?";
+
+        public static string ConfirmRemoteDeleteAction { get; } = "Move to trash";
+
         public static string CreateStartingStatus(string folderName)
         {
             return $"Syncing {NormalizeFolderName(folderName)}...";
+        }
+
+        public static string CreateConfirmRemoteDeleteMessage(int fileCount)
+        {
+            if (fileCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fileCount), "Remote delete count must be positive.");
+            }
+
+            if (fileCount == 1)
+            {
+                return "This sync will move 1 cloud file to trash because it is missing from the selected device folder.";
+            }
+
+            return $"This sync will move {fileCount} cloud files to trash because they are missing from the selected device folder.";
         }
 
         public static string CreateCompletedStatus(CottonDeviceToCloudSyncRunSummary summary)

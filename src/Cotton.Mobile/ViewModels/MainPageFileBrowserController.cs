@@ -2122,13 +2122,6 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            bool confirmed = await ConfirmDeviceToCloudSyncAsync();
-            if (!confirmed)
-            {
-                _display.ShowFilesStatus(CottonDeviceToCloudSyncStatusText.CancelledStatus);
-                return;
-            }
-
             CancellationTokenSource fileActionCancellation =
                 BeginFileAction(CottonDeviceToCloudSyncStatusText.CreateStartingStatus(folder.Name));
             bool shouldRunRecoveryRefresh = false;
@@ -2163,12 +2156,35 @@ namespace Cotton.Mobile.ViewModels
                     await _deviceToCloudSyncCoordinator.RunRootAsync(
                         instanceUri,
                         setupResult.Root,
-                        CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes,
                         fileActionCancellation.Token);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
                     return;
+                }
+
+                if (summary.NeedsDestructiveReview)
+                {
+                    _display.ShowFileActionLoading(CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus);
+                    bool confirmed = await ConfirmDeviceToCloudRemoteDeletesAsync(
+                        summary.DestructiveReviewRemoteDeleteCount);
+                    if (!confirmed)
+                    {
+                        ClearFileActionRetry();
+                        _display.ShowFilesStatus(CottonDeviceToCloudSyncStatusText.CancelledStatus);
+                        return;
+                    }
+
+                    summary = await _deviceToCloudSyncCoordinator.RunRootAsync(
+                        instanceUri,
+                        setupResult.Root,
+                        CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes,
+                        fileActionCancellation.Token);
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
                 }
 
                 _display.ShowFilesStatus(CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary));
@@ -2220,12 +2236,12 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task<bool> ConfirmDeviceToCloudSyncAsync()
+        private async Task<bool> ConfirmDeviceToCloudRemoteDeletesAsync(int fileCount)
         {
             return await _dialogService.ShowConfirmationAsync(
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveTitle,
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage,
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction,
+                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
+                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(fileCount),
+                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
                 CancelAction);
         }
 

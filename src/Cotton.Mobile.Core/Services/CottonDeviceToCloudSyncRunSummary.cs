@@ -32,10 +32,16 @@ namespace Cotton.Mobile.Services
 
         public int BlockedItemCount => RootResults.Sum(result => result.ExecutionResult?.BlockedCount ?? 0);
 
+        public int DestructiveReviewRemoteDeleteCount => RootResults
+            .Where(result => result.Status == CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired)
+            .Sum(result => result.Plan?.RemoteDeleteCount ?? 0);
+
         public bool HasAppliedChanges => RootResults.Any(result => result.HasAppliedChanges);
 
         public bool HasBlockedItems => RootResults.Any(result => result.HasBlockedItems);
 
         public bool HasSkippedRoots => SkippedRootCount > 0;
+
+        public bool NeedsDestructiveReview => DestructiveReviewRemoteDeleteCount > 0;
     }
 }

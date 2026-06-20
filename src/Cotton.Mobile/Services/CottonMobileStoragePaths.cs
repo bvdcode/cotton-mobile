@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Services
         private const string CameraBackupMetadataDirectoryName = "CottonCameraBackup";
         private const string OfflineFileMetadataDirectoryName = "CottonOfflineFiles";
         private const string SyncedFileManifestDirectoryName = "CottonSyncedFiles";
+        private const string SyncRootMetadataDirectoryName = "CottonSyncRoots";
         private const string ShareIntakeDirectoryName = "CottonShareInbox";
         private const string TemporaryDownloadDirectoryName = ".temp";
         private const string TemporaryDownloadFileExtension = ".download";
@@ -95,6 +96,18 @@ namespace Cotton.Mobile.Services
                 CreateSyncedFileManifestRootDirectory(),
                 CreateInstanceStorageKey(instanceUri),
                 root.StableKey);
+        }
+
+        public static string CreateSyncRootMetadataRootDirectory()
+        {
+            return Path.Combine(FileSystem.AppDataDirectory, SyncRootMetadataDirectoryName);
+        }
+
+        public static string CreateSyncRootMetadataDirectory(Uri instanceUri)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            return Path.Combine(CreateSyncRootMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
         }
 
         public static string CreateTransferStagingDirectory(Uri instanceUri)

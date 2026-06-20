@@ -85,7 +85,7 @@ namespace Cotton.Mobile.Services
                 : PendingIntent.GetActivity(
                     context,
                     notification.Id,
-                    launchIntent,
+                    AddLaunchExtras(launchIntent, notification),
                     flags);
 
             builder
@@ -102,6 +102,25 @@ namespace Cotton.Mobile.Services
             }
 
             return builder.Build();
+        }
+
+        private static Intent AddLaunchExtras(
+            Intent launchIntent,
+            CottonLocalNotificationSnapshot notification)
+        {
+            if (notification.LaunchRequest is null)
+            {
+                return launchIntent;
+            }
+
+            launchIntent.PutExtra(AndroidNotificationIntentExtras.IsNotificationLaunch, true);
+            launchIntent.PutExtra(
+                AndroidNotificationIntentExtras.NotificationId,
+                notification.LaunchRequest.NotificationId.ToString("D"));
+            launchIntent.PutExtra(
+                AndroidNotificationIntentExtras.EventCategory,
+                notification.LaunchRequest.Category.ToString());
+            return launchIntent;
         }
     }
 }

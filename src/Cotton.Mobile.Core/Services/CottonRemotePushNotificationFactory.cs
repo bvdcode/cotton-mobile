@@ -24,7 +24,8 @@ namespace Cotton.Mobile.Services
                 kind,
                 GetChannelKind(category),
                 Title,
-                GetMessage(category));
+                GetMessage(category),
+                new CottonNotificationLaunchRequest(notificationId, category));
         }
 
         private static bool TryReadNotificationId(

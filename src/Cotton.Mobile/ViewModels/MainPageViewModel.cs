@@ -45,6 +45,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly INotificationSettingsPageService _notificationSettingsPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
+        private readonly ICottonNotificationLaunchState _notificationLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
         private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
@@ -63,6 +64,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isSessionRestoreInProgress;
         private bool _isSessionRestoreRetryQueued;
         private bool _isCaptureInboxOpenQueued;
+        private bool _isNotificationOpenQueued;
         private bool _shouldRetrySessionRestoreWhenOnline;
         private bool _shouldRetrySessionRestoreOnResume;
         private bool _isShowingCachedOfflineSession;
@@ -83,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
             ICaptureInboxPageService captureInboxPageService,
             INotificationSettingsPageService notificationSettingsPageService,
             ICottonShareLaunchState shareLaunchState,
+            ICottonNotificationLaunchState notificationLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
             IAndroidApiLevelProvider androidApiLevelProvider,
@@ -124,6 +127,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
+            ArgumentNullException.ThrowIfNull(notificationLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
             ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
@@ -165,6 +169,7 @@ namespace Cotton.Mobile.ViewModels
             _captureInboxPageService = captureInboxPageService;
             _notificationSettingsPageService = notificationSettingsPageService;
             _shareLaunchState = shareLaunchState;
+            _notificationLaunchState = notificationLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _backgroundTransferCoordinator = backgroundTransferCoordinator;
             _androidApiLevelProvider = androidApiLevelProvider;
@@ -201,6 +206,7 @@ namespace Cotton.Mobile.ViewModels
                 fileBrowserLogger);
             _storageManagementService.DownloadedFilesCleared += StorageManagementService_DownloadedFilesCleared;
             _shareLaunchState.ShareStaged += ShareLaunchState_ShareStaged;
+            _notificationLaunchState.NotificationLaunchRequested += NotificationLaunchState_NotificationLaunchRequested;
             _transferActivitySignal.TransferActivityChanged += TransferActivitySignal_TransferActivityChanged;
             ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(
@@ -397,6 +403,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _isSessionRestoreInProgress = false;
                 QueuePendingCaptureInboxOpen("session restore finished");
+                QueuePendingNotificationOpen("session restore finished");
             }
         }
 
@@ -448,6 +455,7 @@ namespace Cotton.Mobile.ViewModels
 
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("cached offline session");
+                QueuePendingNotificationOpen("cached offline session");
                 AnnounceStatus(OfflineCachedSessionStatus);
                 return true;
             }
@@ -891,17 +899,28 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenNotificationsAsync()
         {
+            await TryOpenNotificationsAsync(showAlertOnFailure: true);
+        }
+
+        private async Task<bool> TryOpenNotificationsAsync(bool showAlertOnFailure)
+        {
             try
             {
                 await _notificationSettingsPageService.OpenAsync();
+                return true;
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to open Cotton mobile notifications page.");
-                await _dialogService.ShowAlertAsync(
-                    "Notifications",
-                    "Could not inspect notifications.",
-                    "OK");
+                if (showAlertOnFailure)
+                {
+                    await _dialogService.ShowAlertAsync(
+                        "Notifications",
+                        "Could not inspect notifications.",
+                        "OK");
+                }
+
+                return false;
             }
         }
 
@@ -1003,6 +1022,11 @@ namespace Cotton.Mobile.ViewModels
             QueuePendingCaptureInboxOpen("share launch");
         }
 
+        private void NotificationLaunchState_NotificationLaunchRequested(object? sender, EventArgs e)
+        {
+            QueuePendingNotificationOpen("notification launch");
+        }
+
         private void TransferActivitySignal_TransferActivityChanged(object? sender, EventArgs e)
         {
             _ = RunTransferActivityRefreshAfterSignalAsync();
@@ -1070,6 +1094,59 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 _isCaptureInboxOpenQueued = false;
+            }
+        }
+
+        private void QueuePendingNotificationOpen(string reason)
+        {
+            if (_isNotificationOpenQueued || _notificationLaunchState.PendingNotificationLaunchCount == 0)
+            {
+                return;
+            }
+
+            _isNotificationOpenQueued = true;
+            _ = RunQueuedNotificationOpenAsync(reason);
+        }
+
+        private async Task RunQueuedNotificationOpenAsync(string reason)
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(() => OpenPendingNotificationsAfterLaunchAsync(reason));
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to queue Cotton mobile Notifications open after {Reason}.",
+                    reason);
+                _isNotificationOpenQueued = false;
+            }
+        }
+
+        private async Task OpenPendingNotificationsAfterLaunchAsync(string reason)
+        {
+            try
+            {
+                if (_isSessionRestoreInProgress || !Display.IsProfileVisible)
+                {
+                    return;
+                }
+
+                if (_notificationLaunchState.PendingNotificationLaunchCount == 0)
+                {
+                    return;
+                }
+
+                _logger.LogInformation("Opening Cotton mobile Notifications after {Reason}.", reason);
+                if (await TryOpenNotificationsAsync(showAlertOnFailure: false))
+                {
+                    _notificationLaunchState.ClearPendingNotificationLaunches();
+                }
+            }
+            finally
+            {
+                _isNotificationOpenQueued = false;
             }
         }
 
@@ -1311,6 +1388,7 @@ namespace Cotton.Mobile.ViewModels
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");
+                QueuePendingNotificationOpen("authenticated session");
                 return;
             }
 

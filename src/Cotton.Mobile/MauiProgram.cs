@@ -113,6 +113,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferJobRunner, CottonAndroidBackgroundTransferJobRunner>();
 			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
 			builder.Services.AddSingleton<ICottonShareLaunchState, CottonShareLaunchState>();
+			builder.Services.AddSingleton<ICottonNotificationLaunchState, CottonNotificationLaunchState>();
 			builder.Services.AddSingleton<ICottonShareIntakeStore, FileSystemCottonShareIntakeStore>();
 			builder.Services.AddSingleton<ICottonShareContentStagingStore, FileSystemCottonShareContentStagingStore>();
 			builder.Services.AddSingleton<ICottonShareTransferEnqueueCoordinator, CottonShareTransferEnqueueCoordinator>();

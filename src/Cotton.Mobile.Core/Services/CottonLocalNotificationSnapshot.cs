@@ -9,7 +9,8 @@ namespace Cotton.Mobile.Services
             CottonLocalNotificationKind kind,
             CottonNotificationChannelKind channelKind,
             string title,
-            string message)
+            string message,
+            CottonNotificationLaunchRequest? launchRequest = null)
         {
             if (!Enum.IsDefined(kind))
             {
@@ -36,6 +37,7 @@ namespace Cotton.Mobile.Services
             ChannelKind = channelKind;
             Title = title.Trim();
             Message = message.Trim();
+            LaunchRequest = launchRequest;
         }
 
         public int Id { get; }
@@ -47,5 +49,7 @@ namespace Cotton.Mobile.Services
         public string Title { get; }
 
         public string Message { get; }
+
+        public CottonNotificationLaunchRequest? LaunchRequest { get; }
     }
 }

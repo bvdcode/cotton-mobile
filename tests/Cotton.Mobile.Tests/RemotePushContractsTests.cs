@@ -177,6 +177,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Cotton Cloud", notification.Title);
             Assert.Equal(expectedMessage, notification.Message);
             Assert.True(notification.Id > 0);
+            Assert.NotNull(notification.LaunchRequest);
+            CottonNotificationLaunchRequest launchRequest = notification.LaunchRequest!;
+            Assert.Equal(Guid.Parse("11111111-2222-3333-4444-555555555555"), launchRequest.NotificationId);
+            Assert.Equal(category, launchRequest.Category);
         }
 
         [Fact]

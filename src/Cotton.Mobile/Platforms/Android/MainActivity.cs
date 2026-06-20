@@ -16,6 +16,7 @@ namespace Cotton.Mobile
     public class MainActivity : MauiAppCompatActivity
     {
         private const string ShareIntentLogTag = "CottonShare";
+        private const string NotificationIntentLogTag = "CottonNotification";
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
@@ -23,6 +24,7 @@ namespace Cotton.Mobile
 
             ApplySystemBars();
             StageShareIntent(Intent);
+            StageNotificationIntent(Intent);
         }
 
         protected override void OnNewIntent(Intent? intent)
@@ -30,6 +32,7 @@ namespace Cotton.Mobile
             base.OnNewIntent(intent);
 
             StageShareIntent(intent);
+            StageNotificationIntent(intent);
         }
 
         protected override void OnResume()
@@ -91,6 +94,54 @@ namespace Cotton.Mobile
             {
                 Log.Warn(ShareIntentLogTag, $"Failed to stage Android share intent. {exception}");
             }
+        }
+
+        private void StageNotificationIntent(Intent? intent)
+        {
+            CottonNotificationLaunchRequest? request = TryCreateNotificationLaunchRequest(intent);
+            if (request is null)
+            {
+                return;
+            }
+
+            ICottonNotificationLaunchState? launchState = IPlatformApplication.Current?.Services
+                .GetService<ICottonNotificationLaunchState>();
+            if (launchState is null)
+            {
+                Log.Info(
+                    NotificationIntentLogTag,
+                    "Deferred notification launch; launch state is unavailable.");
+                return;
+            }
+
+            launchState.NotifyNotificationOpened(request);
+            ClearNotificationLaunchExtras(intent);
+            Log.Info(
+                NotificationIntentLogTag,
+                $"Staged notification launch. Id={request.NotificationId:D}; Category={request.Category}.");
+        }
+
+        private static CottonNotificationLaunchRequest? TryCreateNotificationLaunchRequest(Intent? intent)
+        {
+            if (intent is null || !intent.GetBooleanExtra(AndroidNotificationIntentExtras.IsNotificationLaunch, false))
+            {
+                return null;
+            }
+
+            string? notificationId = intent.GetStringExtra(AndroidNotificationIntentExtras.NotificationId);
+            string? eventCategory = intent.GetStringExtra(AndroidNotificationIntentExtras.EventCategory);
+            return Guid.TryParse(notificationId, out Guid parsedNotificationId)
+                && Enum.TryParse(eventCategory, ignoreCase: false, out CottonRemotePushEventCategory parsedCategory)
+                && Enum.IsDefined(parsedCategory)
+                    ? new CottonNotificationLaunchRequest(parsedNotificationId, parsedCategory)
+                    : null;
+        }
+
+        private static void ClearNotificationLaunchExtras(Intent? intent)
+        {
+            intent?.RemoveExtra(AndroidNotificationIntentExtras.IsNotificationLaunch);
+            intent?.RemoveExtra(AndroidNotificationIntentExtras.NotificationId);
+            intent?.RemoveExtra(AndroidNotificationIntentExtras.EventCategory);
         }
 
         private void ApplySystemBars()

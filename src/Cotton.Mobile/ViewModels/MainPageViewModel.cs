@@ -66,16 +66,19 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly ICottonAccountSessionService _accountSessionService;
         private readonly ICottonRemotePushSessionRegistrationService _remotePushRegistrationService;
+        private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceSyncCoordinator;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
         private readonly ILogger<MainPageViewModel> _logger;
 
         private CancellationTokenSource? _authorizationCancellation;
+        private CancellationTokenSource? _cloudToDeviceSyncRestoreCancellation;
         private bool _didRestoreSession;
         private bool _isSessionRestoreInProgress;
         private bool _isSessionRestoreRetryQueued;
         private bool _isCaptureInboxOpenQueued;
         private bool _isNotificationOpenQueued;
+        private bool _isCloudToDeviceSyncRestoreInProgress;
         private bool _shouldRetrySessionRestoreWhenOnline;
         private bool _shouldRetrySessionRestoreOnResume;
         private bool _isShowingCachedOfflineSession;
@@ -213,6 +216,7 @@ namespace Cotton.Mobile.ViewModels
             _cloudShareLinkService = cloudShareLinkService;
             _accountSessionService = accountSessionService;
             _remotePushRegistrationService = remotePushRegistrationService;
+            _cloudToDeviceSyncCoordinator = cloudToDeviceSyncCoordinator;
             _presentationService = presentationService;
             _logger = logger;
 
@@ -586,6 +590,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ClearSessionRestoreRetry();
             _fileBrowser.CancelActiveWork();
+            CancelCloudToDeviceSyncRestore();
             ShowLoading("Signing out...");
 
             try
@@ -621,6 +626,7 @@ namespace Cotton.Mobile.ViewModels
 
             ClearSessionRestoreRetry();
             _fileBrowser.CancelActiveWork();
+            CancelCloudToDeviceSyncRestore();
             ShowLoading("Revoking session...");
 
             try
@@ -902,6 +908,8 @@ namespace Cotton.Mobile.ViewModels
 
         private void NetworkAccess_InternetAccessRestored(object? sender, EventArgs e)
         {
+            QueueCloudToDeviceSyncRestoreForCurrentSession("internet access restored");
+
             if (!_shouldRetrySessionRestoreWhenOnline && !_shouldRetrySessionRestoreOnResume)
             {
                 return;
@@ -912,6 +920,8 @@ namespace Cotton.Mobile.ViewModels
 
         private void ForegroundService_Resumed(object? sender, EventArgs e)
         {
+            QueueCloudToDeviceSyncRestoreForCurrentSession("foreground resume");
+
             if (!_shouldRetrySessionRestoreOnResume)
             {
                 return;
@@ -983,6 +993,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ClearLocalSessionAndProfileAsync(string reason)
         {
+            CancelCloudToDeviceSyncRestore();
+
             try
             {
                 await _sessionService.ClearLocalSessionAsync();
@@ -1611,6 +1623,7 @@ namespace Cotton.Mobile.ViewModels
                         ? resolvedAccountScopeKey
                         : null;
                 await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
+                QueueCloudToDeviceSyncRestore(result.InstanceUri, "authenticated session");
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");
                 QueuePendingNotificationOpen("authenticated session");
@@ -1697,6 +1710,108 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private void QueueCloudToDeviceSyncRestoreForCurrentSession(string reason)
+        {
+            if (!Display.IsProfileVisible || _isShowingCachedOfflineSession)
+            {
+                return;
+            }
+
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                return;
+            }
+
+            QueueCloudToDeviceSyncRestore(instanceUri, reason);
+        }
+
+        private void QueueCloudToDeviceSyncRestore(Uri instanceUri, string reason)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+
+            if (!_networkAccess.HasInternetAccess || _isCloudToDeviceSyncRestoreInProgress)
+            {
+                return;
+            }
+
+            var cancellation = new CancellationTokenSource();
+            _cloudToDeviceSyncRestoreCancellation = cancellation;
+            _isCloudToDeviceSyncRestoreInProgress = true;
+            _ = RunCloudToDeviceSyncRestoreBestEffortAsync(instanceUri, reason, cancellation);
+        }
+
+        private async Task RunCloudToDeviceSyncRestoreBestEffortAsync(
+            Uri instanceUri,
+            string reason,
+            CancellationTokenSource cancellation)
+        {
+            try
+            {
+                CottonCloudToDeviceSyncRunSummary summary =
+                    await _cloudToDeviceSyncCoordinator.RunAsync(instanceUri, cancellation.Token);
+                cancellation.Token.ThrowIfCancellationRequested();
+
+                if (summary.RootCount == 0)
+                {
+                    return;
+                }
+
+                _logger.LogInformation(
+                    "Restored Cotton mobile cloud-to-device sync roots after {Reason}: {RootCount} roots, {CompletedRootCount} completed, {SkippedRootCount} skipped, {DownloadedCount} downloaded, {RefreshedCount} refreshed, {RenamedCount} renamed, {RemovedCount} removed, {BlockedItemCount} blocked.",
+                    reason,
+                    summary.RootCount,
+                    summary.CompletedRootCount,
+                    summary.SkippedRootCount,
+                    summary.DownloadedCount,
+                    summary.RefreshedCount,
+                    summary.RenamedCount,
+                    summary.RemovedCount,
+                    summary.BlockedItemCount);
+                if (summary.HasAppliedChanges)
+                {
+                    _fileBrowser.RefreshLocalFileMarkersAfterStorageChange();
+                }
+            }
+            catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+            {
+                _logger.LogDebug(
+                    "Cancelled Cotton mobile cloud-to-device sync restore after {Reason}.",
+                    reason);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to restore Cotton mobile cloud-to-device sync roots after {Reason}.",
+                    reason);
+            }
+            finally
+            {
+                if (ReferenceEquals(_cloudToDeviceSyncRestoreCancellation, cancellation))
+                {
+                    _cloudToDeviceSyncRestoreCancellation = null;
+                    _isCloudToDeviceSyncRestoreInProgress = false;
+                }
+
+                cancellation.Dispose();
+            }
+        }
+
+        private void CancelCloudToDeviceSyncRestore()
+        {
+            CancellationTokenSource? cancellation = _cloudToDeviceSyncRestoreCancellation;
+            if (cancellation is null)
+            {
+                _isCloudToDeviceSyncRestoreInProgress = false;
+                return;
+            }
+
+            _cloudToDeviceSyncRestoreCancellation = null;
+            _isCloudToDeviceSyncRestoreInProgress = false;
+            cancellation.Cancel();
+        }
+
         private void ShowLoading(string message)
         {
             Display.ShowLoading(message);
@@ -1706,6 +1821,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSignIn(string? status)
         {
+            CancelCloudToDeviceSyncRestore();
             _isShowingCachedOfflineSession = false;
             Display.ShowSignIn(status);
             RefreshCommands();

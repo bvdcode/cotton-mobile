@@ -423,6 +423,7 @@ namespace Cotton.Mobile.Tests
                 Uri instanceUri,
                 CottonSyncRootSnapshot root,
                 CottonDeviceToCloudSyncPlanItem item,
+                CottonFolderHandle parentFolder,
                 CancellationToken cancellationToken = default)
             {
                 ChangedUploadCalls.Add(new UpdateCall(instanceUri, item));

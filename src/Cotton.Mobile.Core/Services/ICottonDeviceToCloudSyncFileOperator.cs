@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            CottonFolderHandle parentFolder,
             CancellationToken cancellationToken = default);
 
         Task<CottonFileBrowserEntry> CreateFolderAsync(

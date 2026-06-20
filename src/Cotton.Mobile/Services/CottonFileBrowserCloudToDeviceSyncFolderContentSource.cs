@@ -1,6 +1,8 @@
 namespace Cotton.Mobile.Services
 {
-    public class CottonFileBrowserCloudToDeviceSyncFolderContentSource : ICottonCloudToDeviceSyncFolderContentSource
+    public class CottonFileBrowserCloudToDeviceSyncFolderContentSource :
+        ICottonCloudToDeviceSyncFolderContentSource,
+        ICottonDeviceToCloudRemoteFolderContentSource
     {
         private readonly ICottonFileBrowserService _fileBrowserService;
 

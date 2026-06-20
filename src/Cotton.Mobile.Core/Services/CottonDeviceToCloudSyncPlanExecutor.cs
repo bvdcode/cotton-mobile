@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Services
                         break;
 
                     case CottonDeviceToCloudSyncActionKind.UploadChangedFile:
-                        await UploadChangedFileAsync(instanceUri, root, item, cancellationToken)
+                        await UploadChangedFileAsync(instanceUri, root, item, foldersByPath, cancellationToken)
                             .ConfigureAwait(false);
                         refreshedCount++;
                         break;
@@ -131,10 +131,12 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CottonDeviceToCloudSyncPlanItem item,
+            IReadOnlyDictionary<string, CottonFolderHandle> foldersByPath,
             CancellationToken cancellationToken)
         {
+            CottonFolderHandle parentFolder = ResolveParentFolder(item, foldersByPath);
             CottonFileBrowserEntry uploadedFile = await _fileOperator
-                .UploadChangedFileAsync(instanceUri, root, item, cancellationToken)
+                .UploadChangedFileAsync(instanceUri, root, item, parentFolder, cancellationToken)
                 .ConfigureAwait(false);
             await SaveManifestItemAsync(instanceUri, root, item, uploadedFile, cancellationToken)
                 .ConfigureAwait(false);

@@ -461,6 +461,7 @@ namespace Cotton.Mobile.Tests
                 Uri instanceUri,
                 CottonSyncRootSnapshot root,
                 CottonDeviceToCloudSyncPlanItem item,
+                CottonFolderHandle parentFolder,
                 CancellationToken cancellationToken = default)
             {
                 throw new NotSupportedException("Changed uploads are not used by these tests.");

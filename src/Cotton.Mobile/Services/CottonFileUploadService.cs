@@ -27,6 +27,67 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(source);
 
             await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+            CottonFileUploadResult result = await UploadContentAsync(
+                client,
+                source,
+                progress,
+                cancellationToken).ConfigureAwait(false);
+
+            CreateFileFromChunksRequestDto request = CreateFileFromChunksRequest(
+                folder,
+                source,
+                result);
+            NodeFileManifestDto createdFile = await client.Files.CreateFromChunksAsync(request, cancellationToken)
+                .ConfigureAwait(false);
+            return CottonFileBrowserEntry.FromFile(createdFile);
+        }
+
+        public async Task<CottonFileBrowserEntry> UpdateContentAsync(
+            Uri instanceUri,
+            Guid fileId,
+            CottonFolderHandle folder,
+            string expectedETag,
+            CottonFileUploadSource source,
+            IProgress<long>? progress = null,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(folder);
+            ArgumentNullException.ThrowIfNull(source);
+            if (fileId == Guid.Empty)
+            {
+                throw new ArgumentException("File id cannot be empty.", nameof(fileId));
+            }
+
+            if (string.IsNullOrWhiteSpace(expectedETag))
+            {
+                throw new ArgumentException("Expected file ETag is required.", nameof(expectedETag));
+            }
+
+            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+            CottonFileUploadResult result = await UploadContentAsync(
+                client,
+                source,
+                progress,
+                cancellationToken).ConfigureAwait(false);
+
+            CreateFileFromChunksRequestDto request = CreateFileFromChunksRequest(
+                folder,
+                source,
+                result,
+                fileId);
+            NodeFileManifestDto updatedFile = await client.Files
+                .UpdateContentAsync(fileId, request, expectedETag.Trim(), cancellationToken)
+                .ConfigureAwait(false);
+            return CottonFileBrowserEntry.FromFile(updatedFile);
+        }
+
+        private static async Task<CottonFileUploadResult> UploadContentAsync(
+            ICottonCloudClient client,
+            CottonFileUploadSource source,
+            IProgress<long>? progress,
+            CancellationToken cancellationToken)
+        {
             var serverSettings = await client.Settings.GetAsync(cancellationToken).ConfigureAwait(false);
             var uploadSettings = new CottonFileUploadSettings(
                 serverSettings.MaxChunkSizeBytes,
@@ -39,21 +100,26 @@ namespace Cotton.Mobile.Services
                 uploadSettings,
                 progress,
                 cancellationToken).ConfigureAwait(false);
+            return result;
+        }
 
-            var request = new CreateFileFromChunksRequestDto
+        private static CreateFileFromChunksRequestDto CreateFileFromChunksRequest(
+            CottonFolderHandle folder,
+            CottonFileUploadSource source,
+            CottonFileUploadResult result,
+            Guid? originalNodeFileId = null)
+        {
+            return new CreateFileFromChunksRequestDto
             {
                 NodeId = folder.Id,
                 ChunkHashes = result.ChunkHashes,
                 Name = source.Snapshot.Name,
                 ContentType = source.Snapshot.ContentType,
                 Hash = result.ContentHash,
+                OriginalNodeFileId = originalNodeFileId,
                 Metadata = new Dictionary<string, string>(source.Snapshot.Metadata, StringComparer.Ordinal),
                 Validate = true,
             };
-
-            NodeFileManifestDto createdFile = await client.Files.CreateFromChunksAsync(request, cancellationToken)
-                .ConfigureAwait(false);
-            return CottonFileBrowserEntry.FromFile(createdFile);
         }
 
         private static async Task<CottonFileUploadResult> UploadChunksAsync(

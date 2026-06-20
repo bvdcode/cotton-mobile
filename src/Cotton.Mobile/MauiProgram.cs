@@ -161,15 +161,26 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<
 				ICottonCloudToDeviceSyncFolderContentSource,
 				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+			builder.Services.AddSingleton<
+				ICottonDeviceToCloudRemoteFolderContentSource,
+				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
 			builder.Services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
 			builder.Services.AddSingleton<
 				ICottonCloudToDeviceSyncFileOperator,
 				CottonCloudToDeviceSyncFileOperatorRouter>();
+			builder.Services.AddSingleton<
+				ICottonDeviceToCloudSyncFileOperator,
+				CottonDeviceToCloudSyncFileOperator>();
 			builder.Services.AddSingleton(services =>
 				new CottonCloudToDeviceSyncPlanExecutor(
 					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
 					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
+			builder.Services.AddSingleton(services =>
+				new CottonDeviceToCloudSyncPlanExecutor(
+					services.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
+					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
 			builder.Services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
+			builder.Services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncCoordinator, CottonAndroidBackgroundSyncCoordinator>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncJobRunner, CottonAndroidBackgroundSyncJobRunner>();
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();

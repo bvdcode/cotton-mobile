@@ -26,6 +26,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountSecurityAction = "Security";
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
+        private const string AccountSyncAction = "Sync";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationClearCacheMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
@@ -46,6 +47,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IStorageManagementService _storageManagementService;
         private readonly ICottonLogoutCacheCleanupSettingsStore _logoutCleanupSettingsStore;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
+        private readonly ISyncSettingsPageService _syncSettingsPageService;
         private readonly ISecuritySettingsPageService _securitySettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
         private readonly IBackupSetupPageService _backupSetupPageService;
@@ -90,6 +92,7 @@ namespace Cotton.Mobile.ViewModels
             IStorageManagementService storageManagementService,
             ICottonLogoutCacheCleanupSettingsStore logoutCleanupSettingsStore,
             IStorageSettingsPageService storageSettingsPageService,
+            ISyncSettingsPageService syncSettingsPageService,
             ISecuritySettingsPageService securitySettingsPageService,
             ITransfersPageService transfersPageService,
             IBackupSetupPageService backupSetupPageService,
@@ -140,6 +143,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(logoutCleanupSettingsStore);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
+            ArgumentNullException.ThrowIfNull(syncSettingsPageService);
             ArgumentNullException.ThrowIfNull(securitySettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
             ArgumentNullException.ThrowIfNull(backupSetupPageService);
@@ -190,6 +194,7 @@ namespace Cotton.Mobile.ViewModels
             _storageManagementService = storageManagementService;
             _logoutCleanupSettingsStore = logoutCleanupSettingsStore;
             _storageSettingsPageService = storageSettingsPageService;
+            _syncSettingsPageService = syncSettingsPageService;
             _securitySettingsPageService = securitySettingsPageService;
             _transfersPageService = transfersPageService;
             _backupSetupPageService = backupSetupPageService;
@@ -694,6 +699,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
+                AccountSyncAction,
                 AccountSecurityAction,
                 AccountNotificationsAction,
                 AccountActivityAction,
@@ -717,6 +723,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
+                    break;
+                case AccountSyncAction:
+                    await OpenSyncAsync();
                     break;
                 case AccountSecurityAction:
                     await OpenSecurityAsync();
@@ -1017,6 +1026,32 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Storage",
                     "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenSyncAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Sync",
+                    "Could not inspect sync folders for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _syncSettingsPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile sync page.");
+                await _dialogService.ShowAlertAsync(
+                    "Sync",
+                    "Could not inspect sync folders.",
                     "OK");
             }
         }

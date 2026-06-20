@@ -488,6 +488,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFileBrowserChromeEnabled => IsProfileVisible && !IsFileBrowserBusy;
 
+        public bool CanRefreshFiles => IsProfileVisible && !IsFilesLoading && !IsFileActionInProgress;
+
         public bool IsBrandHeaderVisible => _state != MainPageViewState.Profile;
 
         public bool IsLegalFooterVisible => _state != MainPageViewState.Profile;
@@ -1026,6 +1028,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(CanRefreshFiles));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
@@ -1067,6 +1070,7 @@ namespace Cotton.Mobile.ViewModels
         private void NotifyFileBrowserChromeStateChanged()
         {
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(CanRefreshFiles));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(FileUpButtonOpacity));
             OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));

@@ -151,6 +151,34 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Refresh_request_keeps_refresh_available_without_enabling_file_actions()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.IsFilesRefreshing = true;
+
+            Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.True(display.CanRefreshFiles);
+            Assert.True(display.IsAccountActionEnabled);
+
+            display.StopFilesRefreshing();
+
+            Assert.True(display.IsFileBrowserChromeEnabled);
+            Assert.True(display.CanRefreshFiles);
+
+            display.ShowFileActionLoading("Uploading notes.txt...");
+
+            Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.False(display.CanRefreshFiles);
+            Assert.False(display.IsAccountActionEnabled);
+
+            display.ShowFilesLoading("Loading files...");
+
+            Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.False(display.CanRefreshFiles);
+        }
+
+        [Fact]
         public void Transfer_activity_indicator_is_visible_only_for_signed_in_active_work()
         {
             MainPageDisplayState display = CreateSignedInDisplay();

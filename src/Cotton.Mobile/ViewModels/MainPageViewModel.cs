@@ -283,7 +283,7 @@ namespace Cotton.Mobile.ViewModels
             RefreshFilesCommand = new AsyncCommand(
                 _fileBrowser.RefreshAsync,
                 LogUnhandledCommandException,
-                () => Display.IsFileBrowserChromeEnabled);
+                () => Display.CanRefreshFiles);
             NavigateFilesUpCommand = new AsyncCommand(
                 _fileBrowser.NavigateUpAsync,
                 LogUnhandledCommandException,
@@ -1956,6 +1956,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case nameof(MainPageDisplayState.IsFileUpButtonEnabled):
                     NavigateFilesUpCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.CanRefreshFiles):
+                    RefreshFilesCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.IsFileBrowserChromeEnabled):
                     RefreshFilesCommand.RaiseCanExecuteChanged();

@@ -126,7 +126,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Unsupported_local_root_is_attention_state_and_cannot_run_now()
+        public void User_selected_document_tree_root_is_ready_and_runnable()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -140,11 +140,11 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
-            Assert.Equal("Local sync target unsupported", item.StatusText);
-            Assert.True(item.IsUnsupportedLocalRoot);
-            Assert.False(item.IsReady);
-            Assert.True(item.IsAttentionVisible);
-            Assert.False(item.CanRunNow);
+            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.False(item.IsUnsupportedLocalRoot);
+            Assert.True(item.IsReady);
+            Assert.False(item.IsAttentionVisible);
+            Assert.True(item.CanRunNow);
             Assert.True(item.CanPauseSync);
             Assert.True(item.CanStopSync);
         }

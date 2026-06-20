@@ -137,17 +137,24 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<
 				ICottonSyncLocalRootPickerService,
 				AndroidDocumentTreeSyncLocalRootPickerService>();
+			builder.Services.AddSingleton<
+				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
+				AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
 #else
 			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
 			builder.Services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
+			builder.Services.AddSingleton<
+				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
+				DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<
 				ICottonCloudToDeviceSyncFolderContentSource,
 				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+			builder.Services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
 			builder.Services.AddSingleton<
 				ICottonCloudToDeviceSyncFileOperator,
-				CottonAppPrivateCloudToDeviceSyncFileOperator>();
+				CottonCloudToDeviceSyncFileOperatorRouter>();
 			builder.Services.AddSingleton(services =>
 				new CottonCloudToDeviceSyncPlanExecutor(
 					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),

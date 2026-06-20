@@ -16,9 +16,16 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot first = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot second = CreateRoot(SecondRootId, SecondFolderId, "Archive");
+            CottonSyncRootSnapshot third = CreateRoot(
+                Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                "Device",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.CloudToDevice,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             var host = new FakeBackgroundSyncHost();
             var coordinator = new CottonAndroidBackgroundSyncCoordinator(
-                new FakeSyncRootStore([first, second]),
+                new FakeSyncRootStore([first, second, third]),
                 new FakeSyncRootPauseStore(new HashSet<Guid>()),
                 host);
 
@@ -26,7 +33,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(result.IsScheduled);
             CottonAndroidBackgroundSyncRequest request = Assert.Single(host.Requests);
-            Assert.Equal(2, request.EligibleRootCount);
+            Assert.Equal(3, request.EligibleRootCount);
             Assert.Equal("cotton-sync-d20f82574bbbb5a5", request.ScheduleIdentity.UniqueWorkName);
             Assert.Equal(request.ScheduleIdentity.UniqueWorkName, request.ScheduleIdentity.SyncTag);
             Assert.DoesNotContain("app.cottoncloud.dev", request.ScheduleIdentity.UniqueWorkName);
@@ -50,16 +57,9 @@ namespace Cotton.Mobile.Tests
                 "Upload",
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.DeviceToCloud);
-            CottonSyncRootSnapshot unsupportedLocalRoot = CreateRoot(
-                Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                Guid.Parse("44444444-4444-4444-4444-444444444444"),
-                "Device",
-                CottonSyncRootPermissionStatus.Available,
-                CottonSyncDirection.CloudToDevice,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             var host = new FakeBackgroundSyncHost();
             var coordinator = new CottonAndroidBackgroundSyncCoordinator(
-                new FakeSyncRootStore([paused, notReady, deviceToCloud, unsupportedLocalRoot]),
+                new FakeSyncRootStore([paused, notReady, deviceToCloud]),
                 new FakeSyncRootPauseStore(new HashSet<Guid> { paused.Id }),
                 host);
 

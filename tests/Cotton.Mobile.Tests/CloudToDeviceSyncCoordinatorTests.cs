@@ -152,7 +152,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_unsupported_local_root_without_remote_reads()
+        public async Task Run_root_downloads_user_selected_document_tree_roots()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -161,14 +161,15 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.CloudToDevice,
                 CottonSyncRootStorageKind.UserSelectedDocumentTree);
+            CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
+            _folderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, file));
 
             CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
 
             CottonCloudToDeviceSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.SkippedUnsupportedLocalRoot, result.Status);
-            Assert.Equal("Local sync target unsupported", result.StatusText);
-            Assert.Empty(_folderContentSource.RequestedFolderIds);
-            Assert.Empty(_fileOperator.DownloadedIds);
+            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.Completed, result.Status);
+            Assert.Equal([FolderId], _folderContentSource.RequestedFolderIds);
+            Assert.Equal([FirstFileId], _fileOperator.DownloadedIds);
         }
 
         [Fact]

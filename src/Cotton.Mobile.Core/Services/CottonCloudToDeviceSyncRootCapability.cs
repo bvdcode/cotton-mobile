@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Services
 
             return root.Direction == CottonSyncDirection.CloudToDevice
                 && root.CanRunSync
-                && root.LocalRoot.UsesAppPrivateStorage;
+                && HasSupportedLocalRoot(root);
         }
 
         public static bool HasUnsupportedLocalRoot(CottonSyncRootSnapshot root)
@@ -19,7 +19,12 @@ namespace Cotton.Mobile.Services
 
             return root.Direction == CottonSyncDirection.CloudToDevice
                 && root.CanRunSync
-                && !root.LocalRoot.UsesAppPrivateStorage;
+                && !HasSupportedLocalRoot(root);
+        }
+
+        private static bool HasSupportedLocalRoot(CottonSyncRootSnapshot root)
+        {
+            return root.LocalRoot.UsesAppPrivateStorage || root.LocalRoot.RequiresPersistedUserGrant;
         }
     }
 }

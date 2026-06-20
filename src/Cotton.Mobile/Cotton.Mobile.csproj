@@ -127,4 +127,19 @@
 			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
 	</ItemGroup>
 
+	<Target
+		Name="ValidateComputedAndroidReleaseVersion"
+		BeforeTargets="Build"
+		Condition="'$(RequireComputedAndroidReleaseVersion)' == 'true' and '$(Configuration)' == 'Release' and '$(TargetPlatformIdentifier)' == 'Android'">
+		<Error
+			Condition="'$(ApplicationDisplayVersion)' == '' or '$(ApplicationDisplayVersion)' == '1.0'"
+			Text="Computed Android ApplicationDisplayVersion is required for signed release builds." />
+		<Error
+			Condition="'$(ApplicationVersion)' == '' or '$(ApplicationVersion)' == '1'"
+			Text="Computed Android ApplicationVersion is required for signed release builds." />
+		<Message
+			Importance="high"
+			Text="Using Android release version $(ApplicationDisplayVersion) ($(ApplicationVersion))." />
+	</Target>
+
 </Project>

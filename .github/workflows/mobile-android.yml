@@ -343,6 +343,7 @@ jobs:
             -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
             -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
             -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD" \
+            -p:RequireComputedAndroidReleaseVersion=true \
             -p:ApplicationDisplayVersion="$APPLICATION_DISPLAY_VERSION" \
             -p:ApplicationVersion="$ANDROID_VERSION_CODE"
 

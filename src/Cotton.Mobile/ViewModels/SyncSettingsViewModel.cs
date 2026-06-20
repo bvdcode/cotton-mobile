@@ -12,6 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonSyncedFileManifestStore _manifestStore;
         private readonly CottonCloudToDeviceSyncCoordinator _syncCoordinator;
         private readonly CottonDeviceToCloudSyncCoordinator _deviceToCloudSyncCoordinator;
+        private readonly CottonBidirectionalSyncCoordinator _bidirectionalSyncCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<SyncSettingsViewModel> _logger;
@@ -27,6 +28,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonSyncedFileManifestStore manifestStore,
             CottonCloudToDeviceSyncCoordinator syncCoordinator,
             CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
+            CottonBidirectionalSyncCoordinator bidirectionalSyncCoordinator,
             INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             ILogger<SyncSettingsViewModel> logger)
@@ -36,6 +38,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(syncCoordinator);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(bidirectionalSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -45,6 +48,7 @@ namespace Cotton.Mobile.ViewModels
             _manifestStore = manifestStore;
             _syncCoordinator = syncCoordinator;
             _deviceToCloudSyncCoordinator = deviceToCloudSyncCoordinator;
+            _bidirectionalSyncCoordinator = bidirectionalSyncCoordinator;
             _networkAccess = networkAccess;
             _dialogService = dialogService;
             _logger = logger;
@@ -235,14 +239,16 @@ namespace Cotton.Mobile.ViewModels
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
                 (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
-                    CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary) summaries =
+                    CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
+                    CottonBidirectionalSyncRunSummary BidirectionalSummary) summaries =
                     await RunAllRootsAsync(instanceUri, roots);
                 IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 ShowRoots(refreshedRoots, refreshedPausedIds);
                 Status = CottonSyncSettingsRunStatusText.CreateCompletedStatus(
                     summaries.CloudToDeviceSummary,
-                    summaries.DeviceToCloudSummary);
+                    summaries.DeviceToCloudSummary,
+                    summaries.BidirectionalSummary);
             }
             catch (Exception exception)
             {
@@ -368,26 +374,38 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonSyncRootSnapshot root)
         {
-            if (root.Direction == CottonSyncDirection.CloudToDevice)
+            switch (root.Direction)
             {
-                CottonCloudToDeviceSyncRunSummary cloudSummary =
-                    await _syncCoordinator.RunRootAsync(instanceUri, root);
-                return CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(cloudSummary);
-            }
+                case CottonSyncDirection.CloudToDevice:
+                    CottonCloudToDeviceSyncRunSummary cloudSummary =
+                        await _syncCoordinator.RunRootAsync(instanceUri, root);
+                    return CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(cloudSummary);
 
-            CottonDeviceToCloudSyncRunSummary deviceSummary =
-                await RunDeviceToCloudRootAsync(instanceUri, root);
-            return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
+                case CottonSyncDirection.DeviceToCloud:
+                    CottonDeviceToCloudSyncRunSummary deviceSummary =
+                        await RunDeviceToCloudRootAsync(instanceUri, root);
+                    return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
+
+                case CottonSyncDirection.Bidirectional:
+                    CottonBidirectionalSyncRunSummary bidirectionalSummary =
+                        await RunBidirectionalRootAsync(instanceUri, root);
+                    return CottonBidirectionalSyncStatusText.CreateCompletedStatus(bidirectionalSummary);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported.");
+            }
         }
 
         private async Task<(
             CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
-            CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary)> RunAllRootsAsync(
+            CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
+            CottonBidirectionalSyncRunSummary BidirectionalSummary)> RunAllRootsAsync(
             Uri instanceUri,
             IReadOnlyList<CottonSyncRootSnapshot> roots)
         {
             var cloudResults = new List<CottonCloudToDeviceSyncRootRunResult>();
             var deviceResults = new List<CottonDeviceToCloudSyncRootRunResult>();
+            var bidirectionalResults = new List<CottonBidirectionalSyncRootRunResult>();
             foreach (CottonSyncRootSnapshot root in roots)
             {
                 if (root.Direction == CottonSyncDirection.CloudToDevice)
@@ -398,6 +416,14 @@ namespace Cotton.Mobile.ViewModels
                     continue;
                 }
 
+                if (root.Direction == CottonSyncDirection.Bidirectional)
+                {
+                    CottonBidirectionalSyncRunSummary bidirectionalSummary =
+                        await RunBidirectionalRootAsync(instanceUri, root);
+                    bidirectionalResults.AddRange(bidirectionalSummary.RootResults);
+                    continue;
+                }
+
                 CottonDeviceToCloudSyncRunSummary deviceSummary =
                     await RunDeviceToCloudRootAsync(instanceUri, root);
                 deviceResults.AddRange(deviceSummary.RootResults);
@@ -405,14 +431,22 @@ namespace Cotton.Mobile.ViewModels
 
             return (
                 new CottonCloudToDeviceSyncRunSummary(cloudResults),
-                new CottonDeviceToCloudSyncRunSummary(deviceResults));
+                new CottonDeviceToCloudSyncRunSummary(deviceResults),
+                new CottonBidirectionalSyncRunSummary(bidirectionalResults));
         }
 
         private static string CreateStartingStatus(CottonSyncRootSnapshot root)
         {
-            return root.Direction == CottonSyncDirection.CloudToDevice
-                ? CottonCloudToDeviceSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName)
-                : CottonDeviceToCloudSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName);
+            return root.Direction switch
+            {
+                CottonSyncDirection.CloudToDevice =>
+                    CottonCloudToDeviceSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
+                CottonSyncDirection.DeviceToCloud =>
+                    CottonDeviceToCloudSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
+                CottonSyncDirection.Bidirectional =>
+                    CottonBidirectionalSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
+                _ => throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported."),
+            };
         }
 
         private async Task<CottonDeviceToCloudSyncRunSummary> RunDeviceToCloudRootAsync(
@@ -446,6 +480,45 @@ namespace Cotton.Mobile.ViewModels
                 CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
                 CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(fileCount),
                 CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
+                CottonSyncRootManagementText.CancelAction);
+        }
+
+        private async Task<CottonBidirectionalSyncRunSummary> RunBidirectionalRootAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root)
+        {
+            CottonBidirectionalSyncRunSummary summary =
+                await _bidirectionalSyncCoordinator.RunRootAsync(instanceUri, root);
+            if (!summary.NeedsDestructiveReview)
+            {
+                return summary;
+            }
+
+            Status = CottonBidirectionalSyncStatusText.DestructiveReviewRequiredStatus;
+            bool confirmed = await ConfirmBidirectionalDestructiveChangesAsync(
+                summary.DestructiveReviewLocalDeleteCount,
+                summary.DestructiveReviewRemoteDeleteCount);
+            if (!confirmed)
+            {
+                return summary;
+            }
+
+            return await _bidirectionalSyncCoordinator.RunRootAsync(
+                instanceUri,
+                root,
+                CottonBidirectionalSyncRunOptions.AllowDestructiveDeletes);
+        }
+
+        private async Task<bool> ConfirmBidirectionalDestructiveChangesAsync(
+            int localDeleteCount,
+            int remoteDeleteCount)
+        {
+            return await _dialogService.ShowConfirmationAsync(
+                CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle,
+                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(
+                    localDeleteCount,
+                    remoteDeleteCount),
+                CottonBidirectionalSyncStatusText.ConfirmDestructiveAction,
                 CottonSyncRootManagementText.CancelAction);
         }
 

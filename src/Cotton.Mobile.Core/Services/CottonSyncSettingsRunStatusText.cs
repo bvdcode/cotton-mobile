@@ -6,12 +6,15 @@ namespace Cotton.Mobile.Services
 
         public static string CreateCompletedStatus(
             CottonCloudToDeviceSyncRunSummary cloudToDeviceSummary,
-            CottonDeviceToCloudSyncRunSummary deviceToCloudSummary)
+            CottonDeviceToCloudSyncRunSummary deviceToCloudSummary,
+            CottonBidirectionalSyncRunSummary? bidirectionalSummary = null)
         {
             ArgumentNullException.ThrowIfNull(cloudToDeviceSummary);
             ArgumentNullException.ThrowIfNull(deviceToCloudSummary);
 
-            int rootCount = cloudToDeviceSummary.RootCount + deviceToCloudSummary.RootCount;
+            int rootCount = cloudToDeviceSummary.RootCount
+                + deviceToCloudSummary.RootCount
+                + (bidirectionalSummary?.RootCount ?? 0);
             if (rootCount == 0)
             {
                 return "No folders are set to sync.";
@@ -24,19 +27,25 @@ namespace Cotton.Mobile.Services
             AddCount(parts, cloudToDeviceSummary.RemovedCount, "removed");
             AddCount(parts, deviceToCloudSummary.UploadedCount, "uploaded");
             AddCount(parts, deviceToCloudSummary.RefreshedCount, "updated");
+            AddCount(parts, bidirectionalSummary?.DownloadedCount ?? 0, "bidirectional downloaded");
+            AddCount(parts, bidirectionalSummary?.RefreshedLocalCount ?? 0, "bidirectional refreshed locally");
+            AddCount(parts, bidirectionalSummary?.RenamedLocalCount ?? 0, "bidirectional renamed locally");
+            AddCount(parts, bidirectionalSummary?.RemovedLocalCount ?? 0, "bidirectional removed locally");
+            AddCount(parts, bidirectionalSummary?.UploadedCount ?? 0, "bidirectional uploaded");
+            AddCount(parts, bidirectionalSummary?.RefreshedRemoteCount ?? 0, "bidirectional updated in cloud");
             AddCount(
                 parts,
-                deviceToCloudSummary.CreatedFolderCount,
+                deviceToCloudSummary.CreatedFolderCount + (bidirectionalSummary?.CreatedFolderCount ?? 0),
                 "folder created",
                 "folders created");
             AddCount(
                 parts,
-                deviceToCloudSummary.DeletedRemoteFileCount,
+                deviceToCloudSummary.DeletedRemoteFileCount + (bidirectionalSummary?.DeletedRemoteFileCount ?? 0),
                 "remote file removed",
                 "remote files removed");
             AddCount(
                 parts,
-                deviceToCloudSummary.RemovedManifestCount,
+                deviceToCloudSummary.RemovedManifestCount + (bidirectionalSummary?.RemovedManifestCount ?? 0),
                 "record cleaned",
                 "records cleaned");
             AddCount(
@@ -44,8 +53,32 @@ namespace Cotton.Mobile.Services
                 deviceToCloudSummary.DestructiveReviewRemoteDeleteCount,
                 "cloud removal needs review",
                 "cloud removals need review");
-            AddCount(parts, cloudToDeviceSummary.BlockedItemCount + deviceToCloudSummary.BlockedItemCount, "blocked");
-            AddRootCount(parts, cloudToDeviceSummary.SkippedRootCount + deviceToCloudSummary.SkippedRootCount);
+            AddCount(
+                parts,
+                bidirectionalSummary?.ConflictReviewCount ?? 0,
+                "bidirectional conflict needs review",
+                "bidirectional conflicts need review");
+            AddCount(
+                parts,
+                bidirectionalSummary?.DestructiveReviewLocalDeleteCount ?? 0,
+                "bidirectional local removal needs review",
+                "bidirectional local removals need review");
+            AddCount(
+                parts,
+                bidirectionalSummary?.DestructiveReviewRemoteDeleteCount ?? 0,
+                "bidirectional cloud removal needs review",
+                "bidirectional cloud removals need review");
+            AddCount(
+                parts,
+                cloudToDeviceSummary.BlockedItemCount
+                    + deviceToCloudSummary.BlockedItemCount
+                    + (bidirectionalSummary?.BlockedItemCount ?? 0),
+                "blocked");
+            AddRootCount(
+                parts,
+                cloudToDeviceSummary.SkippedRootCount
+                    + deviceToCloudSummary.SkippedRootCount
+                    + (bidirectionalSummary?.SkippedRootCount ?? 0));
 
             if (parts.Count == 0)
             {

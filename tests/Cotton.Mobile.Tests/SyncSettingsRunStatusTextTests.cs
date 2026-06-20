@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Tests
         private static readonly Uri InstanceUri = new("https://app.cottoncloud.dev");
         private static readonly Guid CloudRootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
         private static readonly Guid DeviceRootId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
+        private static readonly Guid BidirectionalRootId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
         private static readonly Guid SkippedDeviceRootId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
         private static readonly Guid FolderId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
@@ -51,6 +52,34 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Combined_status_reports_bidirectional_results()
+        {
+            CottonBidirectionalSyncRunSummary bidirectionalSummary = CreateBidirectionalSummary(
+                new CottonCloudToDeviceSyncExecutionResult(
+                    downloadedCount: 1,
+                    refreshedCount: 0,
+                    renamedCount: 0,
+                    removedCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0),
+                new CottonDeviceToCloudSyncExecutionResult(
+                    uploadedCount: 2,
+                    refreshedCount: 0,
+                    createdFolderCount: 0,
+                    deletedRemoteFileCount: 0,
+                    removedManifestCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0));
+
+            Assert.Equal(
+                "Sync complete. 1 bidirectional downloaded, 2 bidirectional uploaded.",
+                CottonSyncSettingsRunStatusText.CreateCompletedStatus(
+                    new CottonCloudToDeviceSyncRunSummary([]),
+                    new CottonDeviceToCloudSyncRunSummary([]),
+                    bidirectionalSummary));
+        }
+
+        [Fact]
         public void Combined_status_reports_device_to_cloud_destructive_review()
         {
             CottonSyncRootSnapshot root = CreateDeviceRoot(DeviceRootId);
@@ -80,6 +109,44 @@ namespace Cotton.Mobile.Tests
                 CottonSyncSettingsRunStatusText.CreateCompletedStatus(
                     new CottonCloudToDeviceSyncRunSummary([]),
                     deviceSummary));
+        }
+
+        [Fact]
+        public void Bidirectional_status_copy_is_stable()
+        {
+            CottonBidirectionalSyncRunSummary summary = CreateBidirectionalSummary(
+                new CottonCloudToDeviceSyncExecutionResult(
+                    downloadedCount: 0,
+                    refreshedCount: 0,
+                    renamedCount: 0,
+                    removedCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0),
+                new CottonDeviceToCloudSyncExecutionResult(
+                    uploadedCount: 0,
+                    refreshedCount: 0,
+                    createdFolderCount: 0,
+                    deletedRemoteFileCount: 0,
+                    removedManifestCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0));
+
+            Assert.Equal("Syncing Projects both ways...", CottonBidirectionalSyncStatusText.CreateStartingStatus(" Projects "));
+            Assert.Equal("Run bidirectional sync?", CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle);
+            Assert.Equal("Sync", CottonBidirectionalSyncStatusText.ConfirmDestructiveAction);
+            Assert.Equal(
+                "This sync will remove 1 local file based on the selected folder and cloud state.",
+                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(1, 0));
+            Assert.Equal(
+                "This sync will move 2 cloud files to trash based on the selected folder and cloud state.",
+                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(0, 2));
+            Assert.Equal(
+                "This sync will remove 1 local file and move 2 cloud files to trash "
+                + "based on the selected folder and cloud state.",
+                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(1, 2));
+            Assert.Equal(
+                "Bidirectional sync complete. Everything is up to date.",
+                CottonBidirectionalSyncStatusText.CreateCompletedStatus(summary));
         }
 
         [Fact]
@@ -160,6 +227,46 @@ namespace Cotton.Mobile.Tests
             return new CottonDeviceToCloudSyncRunSummary(results);
         }
 
+        private static CottonBidirectionalSyncRunSummary CreateBidirectionalSummary(
+            CottonCloudToDeviceSyncExecutionResult cloudExecutionResult,
+            CottonDeviceToCloudSyncExecutionResult deviceExecutionResult)
+        {
+            CottonSyncRootSnapshot root = CreateBidirectionalRoot();
+            CottonBidirectionalSyncExecutionPlan executionPlan = CreateBidirectionalExecutionPlan(root);
+
+            return new CottonBidirectionalSyncRunSummary(
+                [
+                    CottonBidirectionalSyncRootRunResult.Completed(
+                        root,
+                        executionPlan,
+                        cloudExecutionResult,
+                        deviceExecutionResult),
+                ]);
+        }
+
+        private static CottonBidirectionalSyncExecutionPlan CreateBidirectionalExecutionPlan(
+            CottonSyncRootSnapshot root)
+        {
+            var preflightPlan = new CottonBidirectionalSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                []);
+
+            return new CottonBidirectionalSyncExecutionPlan(
+                preflightPlan,
+                new CottonCloudToDeviceSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []),
+                new CottonDeviceToCloudSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []));
+        }
+
         private static CottonSyncRootSnapshot CreateCloudRoot()
         {
             return new CottonSyncRootSnapshot(
@@ -194,6 +301,24 @@ namespace Cotton.Mobile.Tests
                     "Camera",
                     CottonSyncRootPermissionStatus.Available),
                 CottonSyncDirection.DeviceToCloud);
+        }
+
+        private static CottonSyncRootSnapshot CreateBidirectionalRoot()
+        {
+            return new CottonSyncRootSnapshot(
+                BidirectionalRootId,
+                InstanceUri,
+                "user:mobile-demo",
+                new CottonUploadDestinationSnapshot(
+                    FolderId,
+                    "Projects",
+                    "Files / Projects"),
+                new CottonSyncLocalRootSnapshot(
+                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                    "content://tree/projects",
+                    "Projects",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.Bidirectional);
         }
     }
 }

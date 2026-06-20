@@ -175,7 +175,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Bidirectional_root_is_visible_but_not_runnable_until_conflict_review_is_available()
+        public void Bidirectional_user_selected_document_tree_root_is_ready_and_runnable()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -190,11 +190,11 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
             Assert.Equal("Bidirectional · Device folder", item.DetailText);
-            Assert.Equal(CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus, item.StatusText);
+            Assert.Equal("Sync root ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);
-            Assert.False(item.IsReady);
-            Assert.True(item.IsAttentionVisible);
-            Assert.False(item.CanRunNow);
+            Assert.True(item.IsReady);
+            Assert.False(item.IsAttentionVisible);
+            Assert.True(item.CanRunNow);
             Assert.True(item.CanPauseSync);
             Assert.True(item.CanStopSync);
         }

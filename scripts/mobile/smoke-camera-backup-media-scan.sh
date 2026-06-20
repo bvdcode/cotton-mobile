@@ -553,7 +553,7 @@ if [[ "$install_debug" -eq 1 ]]; then
     exit 66
   fi
 
-  adb_device install --no-incremental -r "$COTTON_ANDROID_APK" > "$evidence_dir/02-install.txt"
+  cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/02-install.txt"
 fi
 
 if [[ "$grant_media" -eq 1 ]]; then

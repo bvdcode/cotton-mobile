@@ -460,7 +460,7 @@ run_reinstall_check() {
         exit 66
       fi
 
-      capture_text "60-reinstall.txt" adb_device install --no-incremental -r "$COTTON_ANDROID_APK"
+      capture_text "60-reinstall.txt" cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK"
       ;;
     fresh)
       if [[ ! -f "$COTTON_ANDROID_APK" ]]; then

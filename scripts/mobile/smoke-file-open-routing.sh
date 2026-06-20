@@ -434,7 +434,7 @@ if [[ "$install_debug" -eq 1 ]]; then
     exit 66
   fi
 
-  capture_text "03-install-debug.txt" adb_device install --no-incremental -r "$COTTON_ANDROID_APK"
+  capture_text "03-install-debug.txt" cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK"
 fi
 
 if ! adb_device shell pm path "$package_id" > "$evidence_dir/04-package.txt" 2>&1; then

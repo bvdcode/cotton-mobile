@@ -8,6 +8,26 @@ cotton_prepend_path() {
   fi
 }
 
+cotton_clear_android_fast_deployment_overrides() {
+  local serial="$1"
+  local package_id="$2"
+
+  if adb -s "$serial" shell run-as "$package_id" rm -rf files/.__override__ files/.__tools__ >/dev/null 2>&1; then
+    printf 'Cleared debug fast-deployment overrides for %s.\n' "$package_id"
+  else
+    printf 'Debug fast-deployment override cleanup skipped for %s.\n' "$package_id"
+  fi
+}
+
+cotton_install_android_apk() {
+  local serial="$1"
+  local package_id="$2"
+  local apk_path="$3"
+
+  adb -s "$serial" install --no-incremental -r "$apk_path"
+  cotton_clear_android_fast_deployment_overrides "$serial" "$package_id"
+}
+
 COTTON_REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 export COTTON_REPO_ROOT
 

@@ -28,7 +28,7 @@ if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
   exit 66
 fi
 
-adb -s "$COTTON_ADB_SERIAL" install --no-incremental -r "$COTTON_ANDROID_APK"
+cotton_install_android_apk "$COTTON_ADB_SERIAL" "$COTTON_ANDROID_PACKAGE_ID" "$COTTON_ANDROID_APK"
 
 if [[ "$launch_app" -eq 1 ]]; then
   adb -s "$COTTON_ADB_SERIAL" shell monkey -p "$COTTON_ANDROID_PACKAGE_ID" 1

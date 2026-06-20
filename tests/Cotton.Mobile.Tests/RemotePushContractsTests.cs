@@ -130,6 +130,97 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Remote_push_data_keys_match_backend_fcm_payload()
+        {
+            Assert.Equal("notificationId", CottonRemotePushMessageDataKeys.NotificationId);
+            Assert.Equal("eventCategory", CottonRemotePushMessageDataKeys.EventCategory);
+            Assert.Equal("priority", CottonRemotePushMessageDataKeys.Priority);
+            Assert.Equal("titleKey", CottonRemotePushMessageDataKeys.TitleKey);
+            Assert.Equal("contentKey", CottonRemotePushMessageDataKeys.ContentKey);
+        }
+
+        [Theory]
+        [InlineData(
+            CottonRemotePushEventCategory.SharedFile,
+            CottonLocalNotificationKind.RemoteSharedFile,
+            CottonNotificationChannelKind.Shares,
+            "Shared-file activity needs attention.")]
+        [InlineData(
+            CottonRemotePushEventCategory.AccessRequest,
+            CottonLocalNotificationKind.RemoteAccessRequest,
+            CottonNotificationChannelKind.Shares,
+            "An access request needs attention.")]
+        [InlineData(
+            CottonRemotePushEventCategory.CommentMention,
+            CottonLocalNotificationKind.RemoteCommentMention,
+            CottonNotificationChannelKind.Shares,
+            "A comment or mention needs attention.")]
+        [InlineData(
+            CottonRemotePushEventCategory.SecuritySession,
+            CottonLocalNotificationKind.RemoteSecuritySession,
+            CottonNotificationChannelKind.Security,
+            "Security activity needs attention.")]
+        public void Remote_push_notification_factory_builds_generic_visible_notifications(
+            CottonRemotePushEventCategory category,
+            CottonLocalNotificationKind expectedKind,
+            CottonNotificationChannelKind expectedChannel,
+            string expectedMessage)
+        {
+            IReadOnlyDictionary<string, string> data = CreateRemotePushData(category);
+
+            CottonLocalNotificationSnapshot? notification =
+                CottonRemotePushNotificationFactory.CreateVisibleNotification(data);
+
+            Assert.NotNull(notification);
+            Assert.Equal(expectedKind, notification.Kind);
+            Assert.Equal(expectedChannel, notification.ChannelKind);
+            Assert.Equal("Cotton Cloud", notification.Title);
+            Assert.Equal(expectedMessage, notification.Message);
+            Assert.True(notification.Id > 0);
+        }
+
+        [Fact]
+        public void Remote_push_notification_factory_ignores_template_keys_for_visible_copy()
+        {
+            Dictionary<string, string> data = CreateRemotePushData(CottonRemotePushEventCategory.SharedFile);
+            data[CottonRemotePushMessageDataKeys.TitleKey] = "private-file-name.pdf";
+            data[CottonRemotePushMessageDataKeys.ContentKey] = "<account>";
+
+            CottonLocalNotificationSnapshot? notification =
+                CottonRemotePushNotificationFactory.CreateVisibleNotification(data);
+
+            Assert.NotNull(notification);
+            Assert.DoesNotContain("private-file-name", notification.Title);
+            Assert.DoesNotContain("private-file-name", notification.Message);
+            Assert.DoesNotContain("<account>", notification.Title);
+            Assert.DoesNotContain("<account>", notification.Message);
+            Assert.Equal("Shared-file activity needs attention.", notification.Message);
+        }
+
+        [Theory]
+        [InlineData("", "SharedFile")]
+        [InlineData("00000000-0000-0000-0000-000000000000", "SharedFile")]
+        [InlineData("not-a-guid", "SharedFile")]
+        [InlineData("11111111-2222-3333-4444-555555555555", "")]
+        [InlineData("11111111-2222-3333-4444-555555555555", "Unknown")]
+        [InlineData("11111111-2222-3333-4444-555555555555", "sharedfile")]
+        public void Remote_push_notification_factory_rejects_non_displayable_payloads(
+            string notificationId,
+            string eventCategory)
+        {
+            Dictionary<string, string> data = new()
+            {
+                [CottonRemotePushMessageDataKeys.NotificationId] = notificationId,
+                [CottonRemotePushMessageDataKeys.EventCategory] = eventCategory,
+            };
+
+            CottonLocalNotificationSnapshot? notification =
+                CottonRemotePushNotificationFactory.CreateVisibleNotification(data);
+
+            Assert.Null(notification);
+        }
+
+        [Fact]
         public void Remote_push_preferences_are_immutable_per_category()
         {
             CottonRemotePushPreferences original = CottonRemotePushPreferences.Default;
@@ -169,6 +260,17 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.Items[0].IsEnabled);
             Assert.Equal("Security and sessions", display.Items[3].Title);
             Assert.True(display.Items[3].IsEnabled);
+        }
+
+        private static Dictionary<string, string> CreateRemotePushData(
+            CottonRemotePushEventCategory category)
+        {
+            return new Dictionary<string, string>
+            {
+                [CottonRemotePushMessageDataKeys.NotificationId] = "11111111-2222-3333-4444-555555555555",
+                [CottonRemotePushMessageDataKeys.EventCategory] = category.ToString(),
+                [CottonRemotePushMessageDataKeys.Priority] = "Normal",
+            };
         }
     }
 }

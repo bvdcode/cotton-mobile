@@ -14,6 +14,31 @@ namespace Cotton.Mobile
     {
         private const string LogTag = "CottonPush";
 
+        public override void OnMessageReceived(RemoteMessage message)
+        {
+            base.OnMessageReceived(message);
+
+            ArgumentNullException.ThrowIfNull(message);
+
+            CottonLocalNotificationSnapshot? notification =
+                CottonRemotePushNotificationFactory.CreateVisibleNotification(ReadMessageData(message));
+            if (notification is null)
+            {
+                Log.Info(LogTag, "Skipped Cotton remote push message; payload is not displayable.");
+                return;
+            }
+
+            ICottonLocalNotificationService? localNotificationService = IPlatformApplication.Current?.Services
+                .GetService<ICottonLocalNotificationService>();
+            if (localNotificationService is null)
+            {
+                Log.Warn(LogTag, "Skipped Cotton remote push message; local notification service is unavailable.");
+                return;
+            }
+
+            _ = ShowRemoteNotificationAsync(localNotificationService, notification);
+        }
+
         public override void OnNewToken(string token)
         {
             base.OnNewToken(token);
@@ -40,6 +65,34 @@ namespace Cotton.Mobile
             catch (Exception exception)
             {
                 Log.Warn(LogTag, $"Failed to handle Cotton remote push token refresh. {exception}");
+            }
+        }
+
+        private static IReadOnlyDictionary<string, string> ReadMessageData(RemoteMessage message)
+        {
+            Dictionary<string, string> data = new(StringComparer.Ordinal);
+            foreach (KeyValuePair<string, string> item in message.Data)
+            {
+                if (!string.IsNullOrWhiteSpace(item.Key) && item.Value is not null)
+                {
+                    data[item.Key] = item.Value;
+                }
+            }
+
+            return data;
+        }
+
+        private static async Task ShowRemoteNotificationAsync(
+            ICottonLocalNotificationService localNotificationService,
+            CottonLocalNotificationSnapshot notification)
+        {
+            try
+            {
+                await localNotificationService.ShowAsync(notification).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                Log.Warn(LogTag, $"Failed to show Cotton remote push notification. {exception}");
             }
         }
     }

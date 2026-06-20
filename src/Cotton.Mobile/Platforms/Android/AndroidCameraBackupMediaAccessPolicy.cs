@@ -127,13 +127,19 @@ namespace Cotton.Mobile.Services
                     {
                         return
                         [
+                            (Manifest.Permission.ReadMediaImages, true),
+                            (Manifest.Permission.ReadMediaVideo, true),
                             (ReadMediaVisualUserSelectedPermission, true),
                         ];
                     }
 
                     if (OperatingSystem.IsAndroidVersionAtLeast(33))
                     {
-                        return [];
+                        return
+                        [
+                            (Manifest.Permission.ReadMediaImages, true),
+                            (Manifest.Permission.ReadMediaVideo, true),
+                        ];
                     }
 
                     return

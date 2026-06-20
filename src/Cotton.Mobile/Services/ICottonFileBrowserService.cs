@@ -9,6 +9,12 @@ namespace Cotton.Mobile.Services
             CottonFolderHandle folder,
             CancellationToken cancellationToken = default);
 
+        Task<CottonFileBrowserEntry> CreateFolderAsync(
+            Uri instanceUri,
+            CottonFolderHandle parentFolder,
+            string folderName,
+            CancellationToken cancellationToken = default);
+
         Task<CottonFileDownloadResult> DownloadAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,

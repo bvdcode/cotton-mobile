@@ -20,11 +20,9 @@ namespace Cotton.Mobile.ViewModels
         private const string RemoveOfflineAction = "Remove offline";
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
-        private const string UploadPhotoAction = "Upload photo";
-        private const string UploadPhotoToFolderAction = "Upload photo to folder";
-        private const string UploadVideoAction = "Upload video";
-        private const string UploadVideoToFolderAction = "Upload video to folder";
-        private const string UploadFileAction = "Upload file";
+        private const string NewFolderPromptTitle = "New folder";
+        private const string NewFolderPromptMessage = "Folder name";
+        private const string NewFolderCreateAction = "Create";
         private const string SortNameAction = "Name";
         private const string SortUpdatedAction = "Updated";
         private const string SortSizeAction = "Size";
@@ -432,14 +430,10 @@ namespace Cotton.Mobile.ViewModels
             }
 
             string? action = await _dialogService.ShowActionSheetAsync(
-                "Add",
-                CancelAction,
+                CottonFileAddActionSheet.CreateTitle(folder),
+                CottonFileAddActionSheet.CancelAction,
                 null,
-                UploadPhotoAction,
-                UploadVideoAction,
-                UploadPhotoToFolderAction,
-                UploadVideoToFolderAction,
-                UploadFileAction);
+                CottonFileAddActionSheet.CreateActions().ToArray());
 
             if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
             {
@@ -447,7 +441,11 @@ namespace Cotton.Mobile.ViewModels
             }
 
             string? normalizedAction = NormalizeAction(action);
-            if (normalizedAction == UploadPhotoAction)
+            if (normalizedAction == CottonFileAddActionSheet.NewFolderAction)
+            {
+                await CreateFolderAsync(instanceUri, folder);
+            }
+            else if (normalizedAction == CottonFileAddActionSheet.UploadPhotoAction)
             {
                 await UploadPickedSourceAsync(
                     instanceUri,
@@ -456,7 +454,7 @@ namespace Cotton.Mobile.ViewModels
                     "photo",
                     "Could not choose photo.");
             }
-            else if (normalizedAction == UploadPhotoToFolderAction)
+            else if (normalizedAction == CottonFileAddActionSheet.UploadPhotoToFolderAction)
             {
                 await UploadPickedSourceToDestinationAsync(
                     instanceUri,
@@ -464,7 +462,7 @@ namespace Cotton.Mobile.ViewModels
                     "photo",
                     "Could not choose photo.");
             }
-            else if (normalizedAction == UploadVideoAction)
+            else if (normalizedAction == CottonFileAddActionSheet.UploadVideoAction)
             {
                 await UploadPickedSourceAsync(
                     instanceUri,
@@ -473,7 +471,7 @@ namespace Cotton.Mobile.ViewModels
                     "video",
                     "Could not choose video.");
             }
-            else if (normalizedAction == UploadVideoToFolderAction)
+            else if (normalizedAction == CottonFileAddActionSheet.UploadVideoToFolderAction)
             {
                 await UploadPickedSourceToDestinationAsync(
                     instanceUri,
@@ -481,7 +479,7 @@ namespace Cotton.Mobile.ViewModels
                     "video",
                     "Could not choose video.");
             }
-            else if (normalizedAction == UploadFileAction)
+            else if (normalizedAction == CottonFileAddActionSheet.UploadFileAction)
             {
                 await UploadPickedSourceAsync(
                     instanceUri,
@@ -489,6 +487,103 @@ namespace Cotton.Mobile.ViewModels
                     _fileUploadPickerService.PickFileAsync,
                     "file",
                     "Could not choose file.");
+            }
+        }
+
+        private async Task CreateFolderAsync(Uri instanceUri, CottonFolderHandle parentFolder)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(CottonFolderCreationStatusText.OfflineStatus);
+                return;
+            }
+
+            string? requestedName = await _dialogService.ShowPromptAsync(
+                NewFolderPromptTitle,
+                NewFolderPromptMessage,
+                NewFolderCreateAction,
+                CancelAction);
+            if (requestedName is null)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, parentFolder))
+            {
+                return;
+            }
+
+            if (!CottonFolderNameValidator.TryNormalize(
+                    requestedName,
+                    _display.AllFileEntries.Select(entry => entry.Name),
+                    out string folderName,
+                    out string validationStatus))
+            {
+                _display.ShowFilesStatus(validationStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction(CottonFolderCreationStatusText.CreateCreatingStatus(folderName));
+
+            try
+            {
+                await _fileBrowserService.CreateFolderAsync(
+                    instanceUri,
+                    parentFolder,
+                    folderName,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri)
+                    || !HasSameFolder(_currentFolder, parentFolder))
+                {
+                    return;
+                }
+
+                await RefreshAfterFolderCreatedAsync(
+                    instanceUri,
+                    parentFolder,
+                    folderName,
+                    fileActionCancellation);
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder creation authorization failure.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile folder creation cancellation.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFolderCreationStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder creation failure.");
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to create Cotton mobile folder.");
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CreateFolderCreationFailureStatus(exception));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
             }
         }
 
@@ -2045,6 +2140,29 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RefreshAfterFolderCreatedAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            string folderName,
+            CancellationTokenSource fileActionCancellation)
+        {
+            if (IsDisplayingRootFolder())
+            {
+                await LoadRootFilesAsync(isRefresh: true);
+            }
+            else
+            {
+                await LoadFolderAsync(folder, preserveHistory: true, isRefresh: true);
+            }
+
+            if (IsActiveFileAction(fileActionCancellation, instanceUri)
+                && HasSameFolder(_currentFolder, folder)
+                && !_lastFileLoadFailed)
+            {
+                _display.ShowFilesStatus(CottonFolderCreationStatusText.CreateCreatedStatus(folderName));
+            }
+        }
+
         private string CreatePath(string currentFolderName)
         {
             return string.Join(
@@ -3280,6 +3398,22 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return "Upload failed.";
+        }
+
+        private string CreateFolderCreationFailureStatus(Exception exception)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                return CottonFolderCreationStatusText.OfflineStatus;
+            }
+
+            if (exception is CottonApiException apiException
+                && apiException.StatusCode is HttpStatusCode.Conflict)
+            {
+                return CottonFolderCreationStatusText.DuplicateStatus;
+            }
+
+            return CottonFolderCreationStatusText.FailedStatus;
         }
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)

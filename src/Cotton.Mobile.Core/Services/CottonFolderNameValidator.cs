@@ -1,6 +1,6 @@
 namespace Cotton.Mobile.Services
 {
-    public static class CottonShareUploadNameValidator
+    public static class CottonFolderNameValidator
     {
         public static bool TryNormalize(
             string? value,
@@ -14,26 +14,26 @@ namespace Cotton.Mobile.Services
             errorMessage = string.Empty;
             if (string.IsNullOrWhiteSpace(value))
             {
-                errorMessage = "Enter a file name.";
+                errorMessage = "Enter a folder name.";
                 return false;
             }
 
             string name = value.Trim();
             if (CottonCloudItemNameRules.IsReservedPathSegment(name))
             {
-                errorMessage = "Use a file name, not a folder path.";
+                errorMessage = "Use a folder name, not a path.";
                 return false;
             }
 
             if (CottonCloudItemNameRules.ContainsInvalidCharacter(name))
             {
-                errorMessage = "File names cannot contain path separators or reserved characters.";
+                errorMessage = "Folder names cannot contain path separators or reserved characters.";
                 return false;
             }
 
             if (CottonCloudItemNameRules.ContainsDuplicateName(name, existingNames))
             {
-                errorMessage = "Another captured file already uses that upload name.";
+                errorMessage = CottonFolderCreationStatusText.DuplicateStatus;
                 return false;
             }
 

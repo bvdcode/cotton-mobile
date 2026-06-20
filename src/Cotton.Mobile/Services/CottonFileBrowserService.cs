@@ -47,6 +47,26 @@ namespace Cotton.Mobile.Services
             return await LoadFolderAsync(client, folder.Id, folder.Name, cancellationToken).ConfigureAwait(false);
         }
 
+        public async Task<CottonFileBrowserEntry> CreateFolderAsync(
+            Uri instanceUri,
+            CottonFolderHandle parentFolder,
+            string folderName,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(parentFolder);
+            if (string.IsNullOrWhiteSpace(folderName))
+            {
+                throw new ArgumentException("Folder name is required.", nameof(folderName));
+            }
+
+            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
+            NodeDto node = await client.Nodes
+                .CreateAsync(parentFolder.Id, folderName.Trim(), cancellationToken)
+                .ConfigureAwait(false);
+            return CottonFileBrowserEntry.FromNode(node);
+        }
+
         public async Task<CottonFileDownloadResult> DownloadAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,

@@ -596,7 +596,7 @@
                                                            FontAttributes="Bold"
                                                            HorizontalTextAlignment="Center"
                                                            VerticalTextAlignment="Center"
-                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource Primary}}" />
                                                 </Grid>
                                             </Border>
 
@@ -722,7 +722,7 @@
                                                                    FontAttributes="Bold"
                                                                    HorizontalTextAlignment="Center"
                                                                    VerticalTextAlignment="Center"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource Primary}}" />
                                                         </Grid>
                                                     </Border>
 
@@ -764,21 +764,21 @@
 
                                                             <Border Grid.Column="1"
                                                                     IsVisible="{Binding HasLocalCopy}"
-                                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                                    Stroke="{StaticResource Primary}"
                                                                     StrokeShape="RoundRectangle 8"
                                                                     Padding="5,1"
-                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
+                                                                    BackgroundColor="{StaticResource Primary}">
                                                                 <Label Text="{Binding LocalCopyStatus}"
                                                                        FontSize="9"
                                                                        FontAttributes="Bold"
                                                                        MaxLines="1"
                                                                        LineBreakMode="NoWrap"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                                       TextColor="{StaticResource PrimaryDarkText}" />
                                                             </Border>
 
                                                             <Border Grid.Column="2"
                                                                     IsVisible="{Binding IsOfflineAttentionVisible}"
-                                                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                                                    Stroke="{StaticResource Danger}"
                                                                     StrokeShape="RoundRectangle 8"
                                                                     Padding="5,1"
                                                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}">
@@ -787,7 +787,7 @@
                                                                        FontAttributes="Bold"
                                                                        MaxLines="1"
                                                                        LineBreakMode="NoWrap"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                                                       TextColor="{StaticResource Danger}" />
                                                             </Border>
                                                         </Grid>
                                                     </VerticalStackLayout>

@@ -3,7 +3,6 @@ namespace Cotton.Mobile.Services
     public class CottonFileDetailsDisplayState
     {
         private const string UnknownText = "Unknown";
-        private const string NoLocalCopyText = "No";
 
         private CottonFileDetailsDisplayState(
             string title,
@@ -21,11 +20,10 @@ namespace Cotton.Mobile.Services
             OnDeviceText = onDeviceText;
             Message = string.Join(
                 Environment.NewLine,
-                $"Kind: {KindText}",
+                $"Type: {KindText}",
                 $"Size: {SizeText}",
                 $"Updated: {UpdatedText}",
-                $"Content type: {ContentTypeText}",
-                $"On device: {OnDeviceText}");
+                $"Saved on this device: {OnDeviceText}");
         }
 
         public string Title { get; }
@@ -79,7 +77,7 @@ namespace Cotton.Mobile.Services
         {
             if (localFile is null)
             {
-                return NoLocalCopyText;
+                return "Not saved";
             }
 
             string localSize = CottonFileSizeFormatter.Format(localFile.SizeBytes);
@@ -93,7 +91,7 @@ namespace Cotton.Mobile.Services
                 return $"Needs refresh ({localSize})";
             }
 
-            return $"Yes ({localSize})";
+            return $"Saved ({localSize})";
         }
     }
 }

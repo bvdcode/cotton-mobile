@@ -25,15 +25,14 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("42 B", details.SizeText);
             Assert.Equal("2026-06-18 15:00", details.UpdatedText);
             Assert.Equal("text/plain", details.ContentTypeText);
-            Assert.Equal("No", details.OnDeviceText);
+            Assert.Equal("Not saved", details.OnDeviceText);
             Assert.Equal(
                 string.Join(
                     Environment.NewLine,
-                    "Kind: Text",
+                    "Type: Text",
                     "Size: 42 B",
                     "Updated: 2026-06-18 15:00",
-                    "Content type: text/plain",
-                    "On device: No"),
+                    "Saved on this device: Not saved"),
                 details.Message);
         }
 
@@ -48,7 +47,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Unknown", details.SizeText);
             Assert.Equal("Unknown", details.ContentTypeText);
             Assert.Contains("Size: Unknown", details.Message, StringComparison.Ordinal);
-            Assert.Contains("Content type: Unknown", details.Message, StringComparison.Ordinal);
+            Assert.DoesNotContain("Content type:", details.Message, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -60,8 +59,8 @@ namespace Cotton.Mobile.Tests
             CottonFileDetailsDisplayState details =
                 CottonFileDetailsDisplayState.Create(file, localFile, TimeZoneInfo.Utc);
 
-            Assert.Equal("Yes (42 B)", details.OnDeviceText);
-            Assert.Contains("On device: Yes (42 B)", details.Message, StringComparison.Ordinal);
+            Assert.Equal("Saved (42 B)", details.OnDeviceText);
+            Assert.Contains("Saved on this device: Saved (42 B)", details.Message, StringComparison.Ordinal);
         }
 
         [Fact]

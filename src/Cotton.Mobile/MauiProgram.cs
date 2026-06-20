@@ -145,6 +145,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonAppLockSettingsStore, PreferencesCottonAppLockSettingsStore>();
 			builder.Services.AddSingleton<ICottonAppLockRuntimeStateStore, PreferencesCottonAppLockRuntimeStateStore>();
 			builder.Services.AddSingleton(CottonAppLockPolicy.Default);
+			builder.Services.AddSingleton<CottonAppSwitcherPrivacyPolicy>();
 			builder.Services.AddSingleton<ICottonAppLockCapabilityService, DeviceUnlockCottonAppLockCapabilityService>();
 			builder.Services.AddSingleton<IAppLockGateService, AppLockGateService>();
 			builder.Services.AddSingleton<ICottonAppLockCoordinator, CottonAppLockCoordinator>();
@@ -153,8 +154,10 @@ namespace Cotton.Mobile
 				IAndroidDeviceCredentialUnlockActivityResultBridge,
 				AndroidDeviceCredentialUnlockActivityResultBridge>();
 			builder.Services.AddSingleton<ICottonDeviceUnlockService, AndroidDeviceUnlockService>();
+			builder.Services.AddSingleton<ICottonWindowPrivacyService, AndroidCottonWindowPrivacyService>();
 #else
 			builder.Services.AddSingleton<ICottonDeviceUnlockService, UnavailableCottonDeviceUnlockService>();
+			builder.Services.AddSingleton<ICottonWindowPrivacyService, DisabledCottonWindowPrivacyService>();
 #endif
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();

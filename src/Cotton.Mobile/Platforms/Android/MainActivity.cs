@@ -64,6 +64,13 @@ namespace Cotton.Mobile
             IPlatformApplication.Current?.Services
                 .GetService<IApplicationForegroundService>()
                 ?.NotifyResumed();
+
+            ICottonWindowPrivacyService? windowPrivacyService = IPlatformApplication.Current?.Services
+                .GetService<ICottonWindowPrivacyService>();
+            if (windowPrivacyService is not null)
+            {
+                _ = windowPrivacyService.ApplyAsync();
+            }
         }
 
         protected override void OnStop()

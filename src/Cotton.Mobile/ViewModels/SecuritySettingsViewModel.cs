@@ -10,6 +10,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonAppLockRuntimeStateStore _runtimeStateStore;
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
+        private readonly ICottonWindowPrivacyService _windowPrivacyService;
         private readonly ILogger<SecuritySettingsViewModel> _logger;
         private CottonAppLockSettings _settings = CottonAppLockSettings.Disabled;
         private CottonAppLockCapabilitySnapshot _capability =
@@ -26,18 +27,21 @@ namespace Cotton.Mobile.ViewModels
             ICottonAppLockRuntimeStateStore runtimeStateStore,
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
+            ICottonWindowPrivacyService windowPrivacyService,
             ILogger<SecuritySettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
             ArgumentNullException.ThrowIfNull(runtimeStateStore);
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
+            ArgumentNullException.ThrowIfNull(windowPrivacyService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _settingsStore = settingsStore;
             _runtimeStateStore = runtimeStateStore;
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
+            _windowPrivacyService = windowPrivacyService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             VerifyDeviceUnlockCommand = new AsyncCommand(
@@ -153,6 +157,10 @@ namespace Cotton.Mobile.ViewModels
                 Status = disabledUnavailableAppLock
                     ? "App lock was turned off because device unlock is unavailable."
                     : _capability.CanEnable ? null : "App lock is unavailable.";
+                if (disabledUnavailableAppLock)
+                {
+                    await _windowPrivacyService.ApplyAsync();
+                }
             }
             catch (Exception exception)
             {
@@ -206,6 +214,7 @@ namespace Cotton.Mobile.ViewModels
 
                 _settings = _settings.WithEnabled(isEnabled);
                 await _settingsStore.SaveAsync(_settings);
+                await _windowPrivacyService.ApplyAsync();
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 Status = isEnabled ? "App lock enabled." : "App lock disabled.";
             }

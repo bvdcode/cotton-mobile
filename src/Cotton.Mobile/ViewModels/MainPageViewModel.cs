@@ -129,6 +129,7 @@ namespace Cotton.Mobile.ViewModels
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
+            ICottonSyncLocalRootPickerService syncLocalRootPickerService,
             CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
@@ -181,6 +182,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(syncLocalRootPickerService);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
@@ -243,6 +245,7 @@ namespace Cotton.Mobile.ViewModels
                 cloudShareLinkInteractionService,
                 thumbnailProvider,
                 cloudToDeviceSyncRootSetupService,
+                syncLocalRootPickerService,
                 cloudToDeviceSyncCoordinator,
                 networkAccess,
                 foregroundService,

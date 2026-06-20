@@ -6,6 +6,8 @@ namespace Cotton.Mobile.Services
 
         public const string ActionLabel = "Sync to this device";
 
+        public const string ChooseFolderActionLabel = "Sync to folder";
+
         public const string StartingAllStatus = "Syncing folders...";
 
         public static string AccountUnavailableStatus { get; } = "Sync needs a fresh account session.";

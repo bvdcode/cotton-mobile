@@ -22,6 +22,7 @@ namespace Cotton.Mobile.ViewModels
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
         private const string SyncToDeviceAction = CottonCloudToDeviceSyncStatusText.ActionLabel;
+        private const string SyncToSelectedFolderAction = CottonCloudToDeviceSyncStatusText.ChooseFolderActionLabel;
         private const string NewFolderPromptTitle = "New folder";
         private const string NewFolderPromptMessage = "Folder name";
         private const string NewFolderCreateAction = "Create";
@@ -58,6 +59,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICloudShareLinkInteractionService _cloudShareLinkInteractionService;
         private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly CottonCloudToDeviceSyncRootSetupService _cloudToDeviceSyncRootSetupService;
+        private readonly ICottonSyncLocalRootPickerService _syncLocalRootPickerService;
         private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceSyncCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
@@ -99,6 +101,7 @@ namespace Cotton.Mobile.ViewModels
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
+            ICottonSyncLocalRootPickerService syncLocalRootPickerService,
             CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
@@ -124,6 +127,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(syncLocalRootPickerService);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
@@ -149,6 +153,7 @@ namespace Cotton.Mobile.ViewModels
             _cloudShareLinkInteractionService = cloudShareLinkInteractionService;
             _thumbnailProvider = thumbnailProvider;
             _cloudToDeviceSyncRootSetupService = cloudToDeviceSyncRootSetupService;
+            _syncLocalRootPickerService = syncLocalRootPickerService;
             _cloudToDeviceSyncCoordinator = cloudToDeviceSyncCoordinator;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
@@ -725,6 +730,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.SyncFolderToDevice:
                     await SyncFolderToDeviceAsync(currentEntry);
                     break;
+                case MainPageFileAction.SyncFolderToSelectedFolder:
+                    await SyncFolderToDeviceAsync(currentEntry, useSelectedFolder: true);
+                    break;
             }
         }
 
@@ -736,15 +744,24 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            string? action = await _dialogService.ShowActionSheetAsync(
-                folder.Name,
-                CancelAction,
-                null,
+            var actions = new List<string>
+            {
                 OpenAction,
                 CopyLinkAction,
                 ShareLinkAction,
                 KeepOfflineAction,
-                SyncToDeviceAction);
+                SyncToDeviceAction,
+            };
+            if (_syncLocalRootPickerService.IsAvailable)
+            {
+                actions.Add(SyncToSelectedFolderAction);
+            }
+
+            string? action = await _dialogService.ShowActionSheetAsync(
+                folder.Name,
+                CancelAction,
+                null,
+                actions.ToArray());
 
             CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
             if (currentFolder is null)
@@ -768,6 +785,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case SyncToDeviceAction:
                     await SyncFolderToDeviceAsync(currentFolder);
+                    break;
+                case SyncToSelectedFolderAction:
+                    await SyncFolderToDeviceAsync(currentFolder, useSelectedFolder: true);
                     break;
             }
         }
@@ -1897,7 +1917,7 @@ namespace Cotton.Mobile.ViewModels
             return plan;
         }
 
-        private async Task SyncFolderToDeviceAsync(CottonFileBrowserEntry folder)
+        private async Task SyncFolderToDeviceAsync(CottonFileBrowserEntry folder, bool useSelectedFolder = false)
         {
             if (!folder.IsFolder)
             {
@@ -1918,12 +1938,36 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            MainPageFileAction retryAction = useSelectedFolder
+                ? MainPageFileAction.SyncFolderToSelectedFolder
+                : MainPageFileAction.SyncFolderToDevice;
             if (ShowOfflineRetryIfNeeded(
-                    MainPageFileAction.SyncFolderToDevice,
+                    retryAction,
                     folder,
                     CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus))
             {
                 return;
+            }
+
+            CottonSyncLocalRootSnapshot? selectedLocalRoot = null;
+            if (useSelectedFolder)
+            {
+                try
+                {
+                    selectedLocalRoot = await _syncLocalRootPickerService.PickUserSelectedDocumentTreeAsync();
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Failed to pick Cotton mobile sync local folder.");
+                    _display.ShowFilesStatus(CottonCloudToDeviceSyncStatusText.FailedStatus);
+                    return;
+                }
+
+                if (selectedLocalRoot is null)
+                {
+                    _display.ShowFilesStatus(CottonCloudToDeviceSyncStatusText.CancelledStatus);
+                    return;
+                }
             }
 
             CancellationTokenSource fileActionCancellation =
@@ -1936,11 +1980,17 @@ namespace Cotton.Mobile.ViewModels
                     folder.Id,
                     folder.Name,
                     CreateChildFolderPath(folder.Name));
-                CottonCloudToDeviceSyncRootSetupResult setupResult =
-                    await _cloudToDeviceSyncRootSetupService.EnableAppPrivateRootAsync(
+                CottonCloudToDeviceSyncRootSetupResult setupResult = selectedLocalRoot is null
+                    ? await _cloudToDeviceSyncRootSetupService.EnableAppPrivateRootAsync(
                         instanceUri,
                         accountScopeKey,
                         destination,
+                        fileActionCancellation.Token)
+                    : await _cloudToDeviceSyncRootSetupService.EnableUserSelectedDocumentTreeRootAsync(
+                        instanceUri,
+                        accountScopeKey,
+                        destination,
+                        selectedLocalRoot,
                         fileActionCancellation.Token);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
@@ -1996,7 +2046,7 @@ namespace Cotton.Mobile.ViewModels
 
                 _logger.LogWarning(exception, "Failed to sync Cotton mobile folder to device {FolderId}.", folder.Id);
                 ShowFileActionRetry(
-                    MainPageFileAction.SyncFolderToDevice,
+                    retryAction,
                     folder,
                     CreateFileActionFailureStatus(
                         exception,

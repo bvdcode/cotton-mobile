@@ -3,7 +3,7 @@ namespace Cotton.Mobile.Services
     public class CottonCaptureInboxListSnapshot
     {
         private const string EmptyMessageText = "No captured items";
-        private const string EmptyDetailsText = "Shared files and text will appear here.";
+        private const string EmptyDetailsText = "Share files or text to Cotton Cloud to save them here.";
 
         private CottonCaptureInboxListSnapshot(IReadOnlyList<CottonCaptureInboxListItem> items)
         {

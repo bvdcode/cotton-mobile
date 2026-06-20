@@ -50,7 +50,8 @@
                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
             <Grid ColumnDefinitions="*,*,*"
-                  ColumnSpacing="10">
+                  ColumnSpacing="10"
+                  IsVisible="{Binding IsActionBarVisible}">
                 <Button Text="Destination"
                         Command="{Binding DestinationCommand}"
                         FontAttributes="Bold"

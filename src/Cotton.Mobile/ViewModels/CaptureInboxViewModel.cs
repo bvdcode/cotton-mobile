@@ -133,6 +133,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool CanEnqueueCapturedFiles => Items.Any(item => item.CanEnqueue);
 
+        public bool IsActionBarVisible => CanChooseDestination || CanRenameCapturedFiles || CanEnqueueCapturedFiles;
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -404,6 +406,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(CanChooseDestination));
             OnPropertyChanged(nameof(CanRenameCapturedFiles));
             OnPropertyChanged(nameof(CanEnqueueCapturedFiles));
+            OnPropertyChanged(nameof(IsActionBarVisible));
             DestinationCommand.RaiseCanExecuteChanged();
             RenameCommand.RaiseCanExecuteChanged();
             EnqueueCommand.RaiseCanExecuteChanged();

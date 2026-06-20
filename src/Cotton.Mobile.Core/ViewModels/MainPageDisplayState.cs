@@ -276,7 +276,7 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsTransferActivityIndicatorVisible =>
-            IsProfileVisible && TransferActivityIndicator.IsVisible;
+            IsProfileVisible && !IsFileSearchVisible && TransferActivityIndicator.IsVisible;
 
         public CottonCameraBackupActivityIndicator BackupActivityIndicator
         {
@@ -291,7 +291,7 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsBackupActivityIndicatorVisible =>
-            IsProfileVisible && BackupActivityIndicator.IsVisible;
+            IsProfileVisible && !IsFileSearchVisible && BackupActivityIndicator.IsVisible;
 
         public CottonOfflinePackProgressSnapshot OfflinePackProgress
         {
@@ -306,7 +306,7 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsOfflinePackProgressVisible =>
-            IsProfileVisible && OfflinePackProgress.IsVisible;
+            IsProfileVisible && !IsFileSearchVisible && OfflinePackProgress.IsVisible;
 
         public CottonFileSelectionSnapshot FileSelection
         {
@@ -509,6 +509,8 @@ namespace Cotton.Mobile.ViewModels
         public bool IsAccountActionEnabled => IsProfileVisible && !IsFileActionInProgress;
 
         public bool IsFileBrowserChromeEnabled => IsProfileVisible && !IsFileBrowserBusy;
+
+        public bool IsFileBrowserQuickNavigationVisible => IsProfileVisible && !IsFileSearchVisible;
 
         public bool CanRefreshFiles => IsProfileVisible && !IsFilesLoading && !IsFileActionInProgress;
 
@@ -1097,6 +1099,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
             OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
             OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
+            OnPropertyChanged(nameof(IsFileBrowserQuickNavigationVisible));
             OnPropertyChanged(nameof(IsFileSelectionBarVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
@@ -1177,6 +1180,10 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
             OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
+            OnPropertyChanged(nameof(IsFileBrowserQuickNavigationVisible));
+            OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
+            OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
+            OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
         }
 
         private void NotifyFileBrowserChromeStateChanged()

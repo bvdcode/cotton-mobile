@@ -223,7 +223,8 @@
                                    TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                             <Grid ColumnDefinitions="*,*,*,*"
-                                  ColumnSpacing="8">
+                                  ColumnSpacing="8"
+                                  IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}">
                                 <Button Grid.Column="0"
                                         Style="{StaticResource FileChromeButton}"
                                         Text="{Binding Display.TransfersNavigation.Label}"

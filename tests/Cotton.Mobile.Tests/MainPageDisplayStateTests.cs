@@ -61,6 +61,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(["alpha.png"], VisibleNames(display));
             Assert.True(display.IsFileSearchVisible);
             Assert.True(display.IsFileSearchActive);
+            Assert.False(display.IsFileBrowserQuickNavigationVisible);
             Assert.Equal("1 match · A-Z", display.FilesStatus);
             Assert.False(display.IsFilesEmptyVisible);
 
@@ -196,6 +197,14 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsTransferActivityIndicatorVisible);
             Assert.Equal("1 transfer waiting", display.TransferActivityIndicator.Text);
 
+            display.FileSearchText = "photo";
+
+            Assert.False(display.IsTransferActivityIndicatorVisible);
+
+            display.FileSearchText = string.Empty;
+
+            Assert.True(display.IsTransferActivityIndicatorVisible);
+
             display.ShowSignIn("Signed out.");
 
             Assert.False(display.IsTransferActivityIndicatorVisible);
@@ -215,6 +224,14 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(display.IsBackupActivityIndicatorVisible);
             Assert.Equal("1 backup waiting", display.BackupActivityIndicator.Text);
+
+            display.FileSearchText = "photo";
+
+            Assert.False(display.IsBackupActivityIndicatorVisible);
+
+            display.FileSearchText = string.Empty;
+
+            Assert.True(display.IsBackupActivityIndicatorVisible);
 
             display.ShowSignIn("Signed out.");
 
@@ -282,6 +299,14 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsOfflinePackProgressVisible);
             Assert.Equal("Keeping Projects offline", display.OfflinePackProgress.Text);
             Assert.Equal("4 items · A-Z", display.FilesStatus);
+
+            display.FileSearchText = "alpha";
+
+            Assert.False(display.IsOfflinePackProgressVisible);
+
+            display.FileSearchText = string.Empty;
+
+            Assert.True(display.IsOfflinePackProgressVisible);
 
             display.ShowSignIn("Signed out.");
 

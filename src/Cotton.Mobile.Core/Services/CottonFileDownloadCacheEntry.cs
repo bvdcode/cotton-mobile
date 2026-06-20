@@ -5,7 +5,8 @@ namespace Cotton.Mobile.Services
         public CottonFileDownloadCacheEntry(
             string path,
             long sizeBytes,
-            DateTime activityUtc)
+            DateTime activityUtc,
+            bool requiresSensitiveEviction)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
@@ -20,6 +21,7 @@ namespace Cotton.Mobile.Services
             Path = path;
             SizeBytes = sizeBytes;
             ActivityUtc = activityUtc;
+            RequiresSensitiveEviction = requiresSensitiveEviction;
         }
 
         public string Path { get; }
@@ -27,5 +29,7 @@ namespace Cotton.Mobile.Services
         public long SizeBytes { get; }
 
         public DateTime ActivityUtc { get; }
+
+        public bool RequiresSensitiveEviction { get; }
     }
 }

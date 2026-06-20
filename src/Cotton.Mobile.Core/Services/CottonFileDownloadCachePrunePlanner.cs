@@ -22,6 +22,22 @@ namespace Cotton.Mobile.Services
                 .ToHashSet(StringComparer.Ordinal);
             long totalBytes = entries.Sum(entry => entry.SizeBytes);
             var deletePaths = new List<string>();
+
+            foreach (CottonFileDownloadCacheEntry entry in entries
+                .OrderBy(entry => entry.ActivityUtc)
+                .ThenBy(entry => entry.Path, StringComparer.Ordinal))
+            {
+                if (!CottonSensitiveFileCachePolicy.RequiresSensitiveCacheEviction(entry)
+                    || IsProtected(entry.Path, normalizedProtectedPath, normalizedProtectedDirectories))
+                {
+                    continue;
+                }
+
+                deletePaths.Add(entry.Path);
+                totalBytes -= entry.SizeBytes;
+            }
+
+            HashSet<string> selectedPaths = deletePaths.ToHashSet(StringComparer.Ordinal);
             foreach (CottonFileDownloadCacheEntry entry in entries
                 .OrderBy(entry => entry.ActivityUtc)
                 .ThenBy(entry => entry.Path, StringComparer.Ordinal))
@@ -31,12 +47,14 @@ namespace Cotton.Mobile.Services
                     break;
                 }
 
-                if (IsProtected(entry.Path, normalizedProtectedPath, normalizedProtectedDirectories))
+                if (selectedPaths.Contains(entry.Path)
+                    || IsProtected(entry.Path, normalizedProtectedPath, normalizedProtectedDirectories))
                 {
                     continue;
                 }
 
                 deletePaths.Add(entry.Path);
+                selectedPaths.Add(entry.Path);
                 totalBytes -= entry.SizeBytes;
             }
 

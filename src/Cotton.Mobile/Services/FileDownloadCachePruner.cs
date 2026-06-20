@@ -84,7 +84,8 @@ namespace Cotton.Mobile.Services
                 .Select(file => new CottonFileDownloadCacheEntry(
                     file.FullName,
                     file.Length,
-                    ResolvePruneTimestamp(file)))
+                    ResolvePruneTimestamp(file),
+                    CottonSensitiveFileCachePolicy.IsSensitiveFile(file.Name, contentType: null)))
                 .ToList();
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 entries,

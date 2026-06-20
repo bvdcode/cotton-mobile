@@ -279,6 +279,11 @@ namespace Cotton.Mobile.Services
 
         private static FileInfo? GetReusableLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
         {
+            if (!CottonSensitiveFileCachePolicy.CanReuseUnpinnedLocalCopy(file))
+            {
+                return null;
+            }
+
             FileInfo? info = GetLocalDownloadFile(instanceUri, file);
             if (info is null || !IsReusableLocalDownload(file, info))
             {

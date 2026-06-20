@@ -212,6 +212,37 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(DateTimeKind.Utc, CottonLocalFileFreshness.NormalizeUtc(localWithinTolerance).Kind);
         }
 
+        [Theory]
+        [InlineData(".env", null, true)]
+        [InlineData(".env.production", null, true)]
+        [InlineData("service-account.pem", null, true)]
+        [InlineData("vault.kdbx", null, true)]
+        [InlineData("access-token.txt", null, true)]
+        [InlineData("tokenizer.cs", null, false)]
+        [InlineData("photo.jpg", "image/jpeg", false)]
+        [InlineData("bundle", "application/x-pkcs12; charset=binary", true)]
+        public void Sensitive_file_cache_policy_identifies_secret_material(
+            string fileName,
+            string? contentType,
+            bool expectedSensitive)
+        {
+            Assert.Equal(
+                expectedSensitive,
+                CottonSensitiveFileCachePolicy.IsSensitiveFile(fileName, contentType));
+        }
+
+        [Fact]
+        public void Sensitive_file_cache_policy_blocks_unpinned_reusable_local_copy()
+        {
+            CottonFileBrowserEntry sensitiveEntry = CottonFileBrowserEntry.FromFile(
+                CreateFile("private-key.pem", "application/x-pem-file", 42));
+            CottonFileBrowserEntry normalEntry = CottonFileBrowserEntry.FromFile(
+                CreateFile("notes.txt", "text/plain", 42));
+
+            Assert.False(CottonSensitiveFileCachePolicy.CanReuseUnpinnedLocalCopy(sensitiveEntry));
+            Assert.True(CottonSensitiveFileCachePolicy.CanReuseUnpinnedLocalCopy(normalEntry));
+        }
+
         [Fact]
         public void Local_file_snapshot_requires_file_name()
         {

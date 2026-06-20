@@ -16,8 +16,8 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 [
-                    new CottonFileDownloadCacheEntry(oldFile, 80, Older),
-                    new CottonFileDownloadCacheEntry(newFile, 80, Newer),
+                    new CottonFileDownloadCacheEntry(oldFile, 80, Older, requiresSensitiveEviction: false),
+                    new CottonFileDownloadCacheEntry(newFile, 80, Newer, requiresSensitiveEviction: false),
                 ],
                 maxCacheBytes: 100,
                 protectedPath: null,
@@ -35,8 +35,8 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 [
-                    new CottonFileDownloadCacheEntry(protectedFile, 80, Older),
-                    new CottonFileDownloadCacheEntry(oldFile, 80, Newer),
+                    new CottonFileDownloadCacheEntry(protectedFile, 80, Older, requiresSensitiveEviction: false),
+                    new CottonFileDownloadCacheEntry(oldFile, 80, Newer, requiresSensitiveEviction: false),
                 ],
                 maxCacheBytes: 100,
                 protectedPath: protectedFile,
@@ -59,8 +59,8 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 [
-                    new CottonFileDownloadCacheEntry(pinnedFile, 80, Older),
-                    new CottonFileDownloadCacheEntry(evictableFile, 80, Newer),
+                    new CottonFileDownloadCacheEntry(pinnedFile, 80, Older, requiresSensitiveEviction: false),
+                    new CottonFileDownloadCacheEntry(evictableFile, 80, Newer, requiresSensitiveEviction: false),
                 ],
                 maxCacheBytes: 100,
                 protectedPath: null,
@@ -79,8 +79,8 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 [
-                    new CottonFileDownloadCacheEntry(siblingFile, 80, Older),
-                    new CottonFileDownloadCacheEntry(newerFile, 80, Newer),
+                    new CottonFileDownloadCacheEntry(siblingFile, 80, Older, requiresSensitiveEviction: false),
+                    new CottonFileDownloadCacheEntry(newerFile, 80, Newer, requiresSensitiveEviction: false),
                 ],
                 maxCacheBytes: 100,
                 protectedPath: null,
@@ -97,8 +97,56 @@ namespace Cotton.Mobile.Tests
             string pinnedFile = Path.Combine(pinnedDirectory, "report.pdf");
 
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
-                [new CottonFileDownloadCacheEntry(pinnedFile, 200, Older)],
+                [new CottonFileDownloadCacheEntry(pinnedFile, 200, Older, requiresSensitiveEviction: false)],
                 maxCacheBytes: 100,
+                protectedPath: null,
+                protectedDirectories: [pinnedDirectory]);
+
+            Assert.Empty(deletePaths);
+        }
+
+        [Fact]
+        public void Select_files_to_delete_evicts_sensitive_unpinned_files_before_budget_pressure()
+        {
+            string sensitiveFile = CreatePath("downloads", "instance", "secret", "service-account.pem");
+            string normalFile = CreatePath("downloads", "instance", "normal", "photo.jpg");
+
+            IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
+                [
+                    new CottonFileDownloadCacheEntry(sensitiveFile, 80, Older, requiresSensitiveEviction: true),
+                    new CottonFileDownloadCacheEntry(normalFile, 80, Newer, requiresSensitiveEviction: false),
+                ],
+                maxCacheBytes: 1000,
+                protectedPath: null,
+                protectedDirectories: []);
+
+            string deletePath = Assert.Single(deletePaths);
+            Assert.Equal(sensitiveFile, deletePath);
+        }
+
+        [Fact]
+        public void Select_files_to_delete_preserves_protected_sensitive_path()
+        {
+            string sensitiveFile = CreatePath("downloads", "instance", "secret", "service-account.pem");
+
+            IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
+                [new CottonFileDownloadCacheEntry(sensitiveFile, 80, Older, requiresSensitiveEviction: true)],
+                maxCacheBytes: 1000,
+                protectedPath: sensitiveFile,
+                protectedDirectories: []);
+
+            Assert.Empty(deletePaths);
+        }
+
+        [Fact]
+        public void Select_files_to_delete_preserves_sensitive_pinned_directory()
+        {
+            string pinnedDirectory = CreatePath("downloads", "instance", "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
+            string sensitiveFile = Path.Combine(pinnedDirectory, "service-account.pem");
+
+            IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
+                [new CottonFileDownloadCacheEntry(sensitiveFile, 80, Older, requiresSensitiveEviction: true)],
+                maxCacheBytes: 1000,
                 protectedPath: null,
                 protectedDirectories: [pinnedDirectory]);
 

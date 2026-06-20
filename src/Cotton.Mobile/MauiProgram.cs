@@ -133,8 +133,13 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IAndroidShareIntentStagingService, AndroidShareIntentStagingService>();
 			builder.Services.AddSingleton<IAndroidDocumentScanActivityResultBridge, AndroidDocumentScanActivityResultBridge>();
 			builder.Services.AddSingleton<IDocumentScanService, AndroidDocumentScanService>();
+			builder.Services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
+			builder.Services.AddSingleton<
+				ICottonSyncLocalRootPickerService,
+				AndroidDocumentTreeSyncLocalRootPickerService>();
 #else
 			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
+			builder.Services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<

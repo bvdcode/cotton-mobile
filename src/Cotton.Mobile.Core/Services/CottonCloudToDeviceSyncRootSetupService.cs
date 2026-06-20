@@ -24,7 +24,60 @@ namespace Cotton.Mobile.Services
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
             ArgumentNullException.ThrowIfNull(cloudFolder);
 
-            CottonSyncRootSnapshot candidate = CreateRoot(Guid.NewGuid(), instanceUri, accountScopeKey, cloudFolder);
+            return await EnableRootAsync(
+                    instanceUri,
+                    accountScopeKey,
+                    cloudFolder,
+                    CreateAppPrivateLocalRoot(),
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<CottonCloudToDeviceSyncRootSetupResult> EnableUserSelectedDocumentTreeRootAsync(
+            Uri instanceUri,
+            string accountScopeKey,
+            CottonUploadDestinationSnapshot cloudFolder,
+            CottonSyncLocalRootSnapshot localRoot,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(localRoot);
+            if (!localRoot.RequiresPersistedUserGrant)
+            {
+                throw new ArgumentException("User-selected sync roots require a document tree local root.", nameof(localRoot));
+            }
+
+            if (!localRoot.CanReadWrite)
+            {
+                throw new ArgumentException("User-selected sync roots require an available folder grant.", nameof(localRoot));
+            }
+
+            return await EnableRootAsync(
+                    instanceUri,
+                    accountScopeKey,
+                    cloudFolder,
+                    localRoot,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task<CottonCloudToDeviceSyncRootSetupResult> EnableRootAsync(
+            Uri instanceUri,
+            string accountScopeKey,
+            CottonUploadDestinationSnapshot cloudFolder,
+            CottonSyncLocalRootSnapshot localRoot,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
+            ArgumentNullException.ThrowIfNull(cloudFolder);
+            ArgumentNullException.ThrowIfNull(localRoot);
+
+            CottonSyncRootSnapshot candidate = CreateRoot(
+                Guid.NewGuid(),
+                instanceUri,
+                accountScopeKey,
+                cloudFolder,
+                localRoot);
             IReadOnlyList<CottonSyncRootSnapshot> existingRoots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonSyncRootSnapshot? existingRoot = existingRoots
@@ -39,7 +92,7 @@ namespace Cotton.Mobile.Services
 
             CottonSyncRootSnapshot rootToSave = existingRoot is null
                 ? candidate
-                : CreateRoot(existingRoot.Id, instanceUri, accountScopeKey, cloudFolder);
+                : CreateRoot(existingRoot.Id, instanceUri, accountScopeKey, cloudFolder, localRoot);
             await _rootStore.AddOrReplaceAsync(instanceUri, rootToSave, cancellationToken).ConfigureAwait(false);
 
             return new CottonCloudToDeviceSyncRootSetupResult(
@@ -53,19 +106,25 @@ namespace Cotton.Mobile.Services
             Guid id,
             Uri instanceUri,
             string accountScopeKey,
-            CottonUploadDestinationSnapshot cloudFolder)
+            CottonUploadDestinationSnapshot cloudFolder,
+            CottonSyncLocalRootSnapshot localRoot)
         {
             return new CottonSyncRootSnapshot(
                 id,
                 instanceUri,
                 accountScopeKey,
                 cloudFolder,
-                new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.AppPrivateDirectory,
-                    AppPrivateCloudToDeviceRootKey,
-                    AppPrivateCloudToDeviceDisplayName,
-                    CottonSyncRootPermissionStatus.Available),
+                localRoot,
                 CottonSyncDirection.CloudToDevice);
+        }
+
+        private static CottonSyncLocalRootSnapshot CreateAppPrivateLocalRoot()
+        {
+            return new CottonSyncLocalRootSnapshot(
+                CottonSyncRootStorageKind.AppPrivateDirectory,
+                AppPrivateCloudToDeviceRootKey,
+                AppPrivateCloudToDeviceDisplayName,
+                CottonSyncRootPermissionStatus.Available);
         }
     }
 }

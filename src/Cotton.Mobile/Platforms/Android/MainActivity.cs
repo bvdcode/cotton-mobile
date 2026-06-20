@@ -52,6 +52,14 @@ namespace Cotton.Mobile
                 return;
             }
 
+            IAndroidDocumentTreeActivityResultBridge? documentTreeResultBridge =
+                IPlatformApplication.Current?.Services
+                    .GetService<IAndroidDocumentTreeActivityResultBridge>();
+            if (documentTreeResultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
+            {
+                return;
+            }
+
             base.OnActivityResult(requestCode, resultCode, data);
         }
 

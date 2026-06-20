@@ -123,6 +123,16 @@ jobs:
             exit 1
           fi
 
+          if [ "${{ inputs.upload_to_google_play }}" = "true" ]; then
+            ref_type="${GITHUB_REF_TYPE:-${{ github.ref_type }}}"
+            ref_name="${GITHUB_REF_NAME:-${{ github.ref_name }}}"
+
+            if [ "$ref_type" != "tag" ] || ! [[ "$ref_name" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "upload_to_google_play requires running this workflow from a SemVer tag such as v0.2.0." >&2
+              exit 1
+            fi
+          fi
+
   yaml-configs:
     name: Validate YAML Configs
     runs-on: ubuntu-latest
@@ -266,50 +276,8 @@ jobs:
         uses: gittools/actions/gitversion/execute@v4.5.0
         id: gitversion
 
-      - name: Compute Android version code
-        run: |
-          application_display_version="${{ steps.gitversion.outputs.majorMinorPatch }}"
-          if [ -z "$application_display_version" ]; then
-            echo "GitVersion MajorMinorPatch output is required." >&2
-            exit 1
-          fi
-          if [[ "$application_display_version" == *-* || "$application_display_version" == *+* ]]; then
-            echo "Google Play display version must not include prerelease or metadata labels." >&2
-            exit 1
-          fi
-
-          run_number="${GITHUB_RUN_NUMBER:-}"
-          run_attempt="${GITHUB_RUN_ATTEMPT:-1}"
-          if ! [[ "$run_number" =~ ^[0-9]+$ ]]; then
-            echo "GITHUB_RUN_NUMBER must be numeric for Android versionCode." >&2
-            exit 1
-          fi
-          if ! [[ "$run_attempt" =~ ^[0-9]+$ ]]; then
-            echo "GITHUB_RUN_ATTEMPT must be numeric for Android versionCode." >&2
-            exit 1
-          fi
-          if ! [[ "$ANDROID_VERSION_CODE_BASE" =~ ^[0-9]+$ ]]; then
-            echo "ANDROID_VERSION_CODE_BASE must be numeric." >&2
-            exit 1
-          fi
-          if ! [[ "$ANDROID_VERSION_CODE_PUBLISHED_FLOOR" =~ ^[0-9]+$ ]]; then
-            echo "ANDROID_VERSION_CODE_PUBLISHED_FLOOR must be numeric." >&2
-            exit 1
-          fi
-
-          android_version_code=$((ANDROID_VERSION_CODE_BASE + run_number * 1000 + run_attempt))
-          if [ "$android_version_code" -le "$ANDROID_VERSION_CODE_PUBLISHED_FLOOR" ]; then
-            echo "Computed Android versionCode must be greater than the latest published floor $ANDROID_VERSION_CODE_PUBLISHED_FLOOR." >&2
-            exit 1
-          fi
-          if [ "$android_version_code" -gt 2100000000 ]; then
-            echo "Computed Android versionCode must not exceed the Google Play maximum 2100000000." >&2
-            exit 1
-          fi
-          echo "APPLICATION_DISPLAY_VERSION=$application_display_version" >> "$GITHUB_ENV"
-          echo "ANDROID_VERSION_CODE=$android_version_code" >> "$GITHUB_ENV"
-          echo "GitVersion display version: $application_display_version"
-          echo "Android versionCode: $android_version_code"
+      - name: Compute Android release version
+        run: scripts/mobile/compute-android-release-version.sh "${{ steps.gitversion.outputs.majorMinorPatch }}"
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
@@ -475,7 +443,6 @@ jobs:
             exit 1
           fi
 
-          release_name="Cotton Mobile ${APPLICATION_DISPLAY_VERSION} (${ANDROID_VERSION_CODE})"
           changes_not_sent_flag=()
           if [ "${{ inputs.google_play_changes_not_sent_for_review }}" = "true" ]; then
             changes_not_sent_flag+=(--changes-not-sent-for-review)
@@ -486,7 +453,7 @@ jobs:
             --bundle "$aab_path" \
             --track "${{ inputs.google_play_track }}" \
             --release-status "${{ inputs.google_play_release_status }}" \
-            --release-name "$release_name" \
+            --release-name "$GOOGLE_PLAY_RELEASE_NAME" \
             --release-notes-file store/google-play/default-listing/release-notes.txt \
             "${changes_not_sent_flag[@]}"
 

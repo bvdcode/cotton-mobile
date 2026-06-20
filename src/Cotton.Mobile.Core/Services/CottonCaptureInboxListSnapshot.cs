@@ -1,5 +1,7 @@
 namespace Cotton.Mobile.Services
 {
+    using System.Globalization;
+
     public class CottonCaptureInboxListSnapshot
     {
         private const string EmptyMessageText = "No captured items";
@@ -159,20 +161,7 @@ namespace Cotton.Mobile.Services
             CottonShareIntakeSnapshot snapshot,
             CottonShareIntakeItemSnapshot item)
         {
-            List<string> parts = [];
-            if (item.StagedSizeBytes is long sizeBytes)
-            {
-                parts.Add(CottonFileSizeFormatter.Format(sizeBytes));
-            }
-
-            string? mimeType = item.MimeType ?? snapshot.SourceMimeType;
-            if (!string.IsNullOrWhiteSpace(mimeType))
-            {
-                parts.Add(mimeType);
-            }
-
-            parts.Add(snapshot.ReceivedAtUtc.ToLocalTime().ToString("g"));
-            return string.Join(" · ", parts);
+            return $"Received {snapshot.ReceivedAtUtc.ToLocalTime().ToString("MMM d, yyyy", CultureInfo.InvariantCulture)}";
         }
 
         private static string FormatDestination(

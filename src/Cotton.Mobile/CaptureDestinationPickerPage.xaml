@@ -27,6 +27,7 @@
                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
                     <Label Text="{Binding PathText}"
+                           IsVisible="{Binding IsPathTextVisible}"
                            FontSize="13"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
@@ -58,7 +59,7 @@
                         TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
                 <Button Grid.Column="1"
-                        Text="{Binding CurrentFolderName, StringFormat='Choose {0}'}"
+                        Text="Choose this folder"
                         Command="{Binding ChooseCommand}"
                         FontAttributes="Bold"
                         HeightRequest="42"

@@ -91,13 +91,25 @@ namespace Cotton.Mobile.ViewModels
         public string CurrentFolderName
         {
             get => _currentFolderName;
-            private set => SetProperty(ref _currentFolderName, value);
+            private set
+            {
+                if (SetProperty(ref _currentFolderName, value))
+                {
+                    OnPropertyChanged(nameof(IsPathTextVisible));
+                }
+            }
         }
 
         public string PathText
         {
             get => _pathText;
-            private set => SetProperty(ref _pathText, value);
+            private set
+            {
+                if (SetProperty(ref _pathText, value))
+                {
+                    OnPropertyChanged(nameof(IsPathTextVisible));
+                }
+            }
         }
 
         public string SummaryText
@@ -119,6 +131,9 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public bool IsPathTextVisible =>
+            !string.Equals(CurrentFolderName, PathText, StringComparison.OrdinalIgnoreCase);
 
         public bool CanNavigateUp => _path.Count > 1;
 

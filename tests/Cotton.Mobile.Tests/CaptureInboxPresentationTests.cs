@@ -87,7 +87,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(missingItem.CanSelectDestination);
             Assert.False(missingItem.CanRename);
             Assert.False(missingItem.CanEnqueue);
-            Assert.Contains("application/pdf", missingItem.MetadataText, StringComparison.Ordinal);
+            Assert.StartsWith("Received ", missingItem.MetadataText, StringComparison.Ordinal);
             Assert.True(missingItem.IsFailureVisible);
             Assert.Equal("Android revoked access to the shared content.", missingItem.FailureMessage);
 
@@ -107,7 +107,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(fileItem.IsDestinationVisible);
             Assert.True(fileItem.CanSelectDestination);
             Assert.False(fileItem.CanEnqueue);
-            Assert.Contains("12 B", fileItem.MetadataText, StringComparison.Ordinal);
+            Assert.DoesNotContain("12 B", fileItem.MetadataText, StringComparison.Ordinal);
             Assert.False(fileItem.IsFailureVisible);
         }
 
@@ -137,7 +137,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Image", item.KindText);
             Assert.Equal("Needs access", item.StatusText);
             Assert.Equal("Android access was not granted", item.DetailText);
-            Assert.Contains("image/png", item.MetadataText, StringComparison.Ordinal);
+            Assert.StartsWith("Received ", item.MetadataText, StringComparison.Ordinal);
             Assert.False(item.IsDestinationVisible);
             Assert.Equal(string.Empty, item.DestinationText);
             Assert.False(item.CanSelectDestination);
@@ -233,8 +233,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Ready", imageItem.StatusText);
             Assert.Equal("Copied to this device", imageItem.DetailText);
             Assert.Equal("Destination: Default", imageItem.DestinationText);
-            Assert.Contains("68 B", imageItem.MetadataText, StringComparison.Ordinal);
-            Assert.Contains("image/jpeg", imageItem.MetadataText, StringComparison.Ordinal);
+            Assert.StartsWith("Received ", imageItem.MetadataText, StringComparison.Ordinal);
+            Assert.DoesNotContain("image/jpeg", imageItem.MetadataText, StringComparison.Ordinal);
             Assert.True(imageItem.CanSelectDestination);
             Assert.True(imageItem.CanRename);
             Assert.True(imageItem.CanEnqueue);
@@ -276,8 +276,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Ready", documentItem.StatusText);
             Assert.Equal("Copied to this device", documentItem.DetailText);
             Assert.Equal("Destination: Default", documentItem.DestinationText);
-            Assert.Contains(CottonFileSizeFormatter.Format(sizeBytes), documentItem.MetadataText, StringComparison.Ordinal);
-            Assert.Contains(mimeType, documentItem.MetadataText, StringComparison.Ordinal);
+            Assert.StartsWith("Received ", documentItem.MetadataText, StringComparison.Ordinal);
+            Assert.DoesNotContain(CottonFileSizeFormatter.Format(sizeBytes), documentItem.MetadataText, StringComparison.Ordinal);
+            Assert.DoesNotContain(mimeType, documentItem.MetadataText, StringComparison.Ordinal);
             Assert.True(documentItem.CanSelectDestination);
             Assert.True(documentItem.CanRename);
             Assert.True(documentItem.CanEnqueue);

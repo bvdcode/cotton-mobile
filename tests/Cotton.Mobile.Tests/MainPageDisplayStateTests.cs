@@ -374,7 +374,8 @@ namespace Cotton.Mobile.Tests
                 Newer,
                 null,
                 null,
-                null);
+                null,
+                eTag: null);
         }
 
         private static CottonFileBrowserEntry CreateFile(string name, string kind, long? sizeBytes, DateTime updatedAtUtc)
@@ -393,7 +394,8 @@ namespace Cotton.Mobile.Tests
                 updatedAtUtc,
                 sizeBytes,
                 null,
-                null);
+                null,
+                eTag: null);
         }
 
         private static CottonTransferQueueItem CreateCameraBackupUpload()

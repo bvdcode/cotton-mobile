@@ -23,5 +23,7 @@ namespace Cotton.Mobile.Services
         public string? ContentType { get; set; }
 
         public string? PreviewHashEncryptedHex { get; set; }
+
+        public string? ETag { get; set; }
     }
 }

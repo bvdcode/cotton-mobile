@@ -5,7 +5,7 @@ namespace Cotton.Mobile.Services
 {
     public class FileSystemCottonFolderContentCache : ICottonFolderContentCache
     {
-        private const int SchemaVersion = 1;
+        private const int SchemaVersion = 2;
         private const string RootCacheFileName = "root.json";
         private const string FolderCacheFileExtension = ".json";
         private const string TemporaryCacheFileExtension = ".tmp";
@@ -211,6 +211,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes = entry.SizeBytes,
                 ContentType = entry.ContentType,
                 PreviewHashEncryptedHex = entry.PreviewHashEncryptedHex,
+                ETag = entry.ETag,
             };
         }
 
@@ -239,7 +240,8 @@ namespace Cotton.Mobile.Services
                     entry.UpdatedAtUtc,
                     entry.SizeBytes,
                     entry.ContentType,
-                    entry.PreviewHashEncryptedHex))
+                    entry.PreviewHashEncryptedHex,
+                    entry.ETag))
                 .ToList();
             var content = new CottonFolderContent(cachedContent.FolderId, cachedContent.FolderName, entries);
             return new CottonCachedFolderContentSnapshot(content, cachedContent.CachedAtUtc);

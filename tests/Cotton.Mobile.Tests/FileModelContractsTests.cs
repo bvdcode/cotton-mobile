@@ -52,11 +52,17 @@ namespace Cotton.Mobile.Tests
         public void From_file_normalizes_content_type_and_preview_hash()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(
-                CreateFile(" photo.png ", " image/png ", sizeBytes: 100, previewHashEncryptedHex: " abc123 "));
+                CreateFile(
+                    " photo.png ",
+                    " image/png ",
+                    sizeBytes: 100,
+                    previewHashEncryptedHex: " abc123 ",
+                    eTag: " \"file-revision\" "));
 
             Assert.Equal("photo.png", entry.Name);
             Assert.Equal("image/png", entry.ContentType);
             Assert.Equal("abc123", entry.PreviewHashEncryptedHex);
+            Assert.Equal("\"file-revision\"", entry.ETag);
             Assert.Equal("Image", entry.Kind);
         }
 
@@ -286,7 +292,8 @@ namespace Cotton.Mobile.Tests
             string name,
             string contentType,
             long sizeBytes,
-            string? previewHashEncryptedHex = null)
+            string? previewHashEncryptedHex = null,
+            string? eTag = null)
         {
             return new NodeFileManifestDto
             {
@@ -295,6 +302,7 @@ namespace Cotton.Mobile.Tests
                 ContentType = contentType,
                 SizeBytes = sizeBytes,
                 PreviewHashEncryptedHex = previewHashEncryptedHex ?? string.Empty,
+                ETag = eTag ?? string.Empty,
                 UpdatedAt = UpdatedAt,
             };
         }

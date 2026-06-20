@@ -212,7 +212,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 sizeBytes,
                 "text/plain",
-                previewHashEncryptedHex: null);
+                previewHashEncryptedHex: null,
+                eTag: null);
         }
 
         private static CottonFileBrowserEntry CreateFolder(string name)
@@ -228,7 +229,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 sizeBytes: null,
                 contentType: null,
-                previewHashEncryptedHex: null);
+                previewHashEncryptedHex: null,
+                eTag: null);
         }
     }
 }

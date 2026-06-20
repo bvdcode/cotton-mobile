@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
+            string? eTag,
             CottonOfflineFileAvailabilitySnapshot? offlineAvailability = null,
             CottonLocalFileSnapshot? localFile = null,
             CottonFileThumbnailSnapshot? thumbnail = null)
@@ -36,6 +37,7 @@ namespace Cotton.Mobile.Services
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
                 ? null
                 : previewHashEncryptedHex.Trim();
+            ETag = string.IsNullOrWhiteSpace(eTag) ? null : eTag.Trim();
             OfflineAvailability = offlineAvailability ?? CottonOfflineFileAvailabilitySnapshot.NotPinned;
             LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
@@ -88,6 +90,8 @@ namespace Cotton.Mobile.Services
 
         public string? PreviewHashEncryptedHex { get; }
 
+        public string? ETag { get; }
+
         public CottonLocalFileSnapshot? LocalFile { get; }
 
         public CottonFileThumbnailSnapshot Thumbnail { get; }
@@ -123,6 +127,7 @@ namespace Cotton.Mobile.Services
                 null,
                 null,
                 null,
+                null,
                 null);
         }
 
@@ -146,6 +151,7 @@ namespace Cotton.Mobile.Services
                 file.SizeBytes,
                 contentType,
                 file.PreviewHashEncryptedHex,
+                file.ETag,
                 null,
                 null);
         }
@@ -161,7 +167,8 @@ namespace Cotton.Mobile.Services
             DateTime updatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            string? previewHashEncryptedHex)
+            string? previewHashEncryptedHex,
+            string? eTag)
         {
             return new CottonFileBrowserEntry(
                 id,
@@ -175,6 +182,7 @@ namespace Cotton.Mobile.Services
                 sizeBytes,
                 contentType,
                 previewHashEncryptedHex,
+                eTag,
                 null,
                 null);
         }
@@ -209,6 +217,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                ETag,
                 OfflineAvailability,
                 LocalFile,
                 thumbnail);
@@ -230,6 +239,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                ETag,
                 OfflineAvailability,
                 localFile,
                 Thumbnail);
@@ -251,6 +261,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                ETag,
                 offlineAvailability,
                 LocalFile,
                 Thumbnail);
@@ -275,6 +286,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 PreviewHashEncryptedHex,
+                ETag,
                 OfflineAvailability,
                 null,
                 Thumbnail);

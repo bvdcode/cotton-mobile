@@ -126,7 +126,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 sizeBytes,
                 "text/plain",
-                previewHashEncryptedHex: null);
+                previewHashEncryptedHex: null,
+                eTag: null);
         }
     }
 }

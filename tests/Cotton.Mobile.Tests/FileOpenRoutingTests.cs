@@ -129,7 +129,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 null,
                 null,
-                null);
+                null,
+                eTag: null);
 
             Assert.Throws<ArgumentException>(() => CottonFileOpenRouter.CreateRoute(folder));
         }

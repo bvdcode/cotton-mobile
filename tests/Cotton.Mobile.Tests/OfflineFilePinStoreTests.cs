@@ -204,7 +204,8 @@ namespace Cotton.Mobile.Tests
                 RemoteUpdatedAt,
                 2048,
                 " application/pdf ",
-                previewHashEncryptedHex: null);
+                previewHashEncryptedHex: null,
+                eTag: null);
 
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(file, PinnedAt);
 
@@ -230,7 +231,8 @@ namespace Cotton.Mobile.Tests
                 RemoteUpdatedAt,
                 sizeBytes: null,
                 contentType: null,
-                previewHashEncryptedHex: null);
+                previewHashEncryptedHex: null,
+                eTag: null);
 
             Assert.Throws<ArgumentException>(() => CottonOfflineFilePinSnapshot.Create(folder, PinnedAt));
         }

@@ -196,6 +196,85 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Camera_backup_activity_indicator_tracks_only_active_backup_transfers()
+        {
+            CottonTransferQueueItem manualQueued = CreateUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "manual.jpg");
+            CottonTransferQueueItem shareInboxQueued = CottonTransferQueueItem.CreateUpload(
+                Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                "shared.jpg",
+                100,
+                CreatedAt,
+                destination: null,
+                contentType: "image/jpeg",
+                source: CottonTransferSourceSnapshot.CreateShareInbox(
+                    Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                    CreatedAt,
+                    100));
+            CottonTransferQueueItem completedBackup = CreateCameraBackupUpload(
+                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    "done.jpg")
+                .Start(CreatedAt.AddSeconds(1))
+                .Complete(CreatedAt.AddSeconds(2));
+            CottonTransferQueueItem cancelledBackup = CreateCameraBackupUpload(
+                    Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    "cancelled.jpg")
+                .Cancel(CreatedAt.AddSeconds(3));
+            CottonTransferQueueItem queuedBackup = CreateCameraBackupUpload(
+                Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                "camera.jpg");
+
+            CottonCameraBackupActivityIndicator indicator = CottonCameraBackupActivityIndicator.Create(
+                [manualQueued, shareInboxQueued, completedBackup, cancelledBackup, queuedBackup]);
+
+            Assert.True(indicator.IsVisible);
+            Assert.Equal(1, indicator.ActiveCount);
+            Assert.Equal("1 backup waiting", indicator.Text);
+            Assert.Equal("Tap for backup", indicator.Details);
+        }
+
+        [Fact]
+        public void Camera_backup_activity_indicator_prioritizes_failed_then_running_then_waiting_state()
+        {
+            CottonTransferQueueItem queued = CreateCameraBackupUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "queued.jpg");
+            CottonTransferQueueItem running = CreateCameraBackupUpload(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    "running.jpg")
+                .Start(CreatedAt.AddSeconds(1));
+            CottonTransferQueueItem paused = CreateCameraBackupUpload(
+                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    "paused.jpg")
+                .Start(CreatedAt.AddSeconds(2))
+                .Pause(CreatedAt.AddSeconds(3));
+            CottonTransferQueueItem failed = CreateCameraBackupUpload(
+                    Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    "failed.jpg")
+                .Start(CreatedAt.AddSeconds(4))
+                .Fail("Offline", CreatedAt.AddSeconds(5));
+
+            CottonCameraBackupActivityIndicator failedIndicator =
+                CottonCameraBackupActivityIndicator.Create([queued, running, failed]);
+            CottonCameraBackupActivityIndicator runningIndicator =
+                CottonCameraBackupActivityIndicator.Create([queued, running]);
+            CottonCameraBackupActivityIndicator pausedIndicator =
+                CottonCameraBackupActivityIndicator.Create([paused]);
+
+            Assert.True(failedIndicator.IsVisible);
+            Assert.True(failedIndicator.HasFailures);
+            Assert.Equal("1 backup failed", failedIndicator.Text);
+            Assert.Equal("1 running", failedIndicator.Details);
+
+            Assert.Equal("Backing up 1 item", runningIndicator.Text);
+            Assert.Equal("1 running, 1 waiting", runningIndicator.Details);
+
+            Assert.Equal("1 backup paused", pausedIndicator.Text);
+            Assert.Equal("Paused", pausedIndicator.Details);
+        }
+
+        [Fact]
         public void History_cleanup_plan_removes_only_completed_and_cancelled_transfers()
         {
             CottonTransferQueueItem queued = CreateUpload(
@@ -269,6 +348,23 @@ namespace Cotton.Mobile.Tests
         private static CottonTransferQueueItem CreateUpload(Guid id, string displayName)
         {
             return CottonTransferQueueItem.CreateUpload(id, displayName, 100, CreatedAt);
+        }
+
+        private static CottonTransferQueueItem CreateCameraBackupUpload(Guid id, string displayName)
+        {
+            return CottonTransferQueueItem.CreateUpload(
+                id,
+                displayName,
+                100,
+                CreatedAt,
+                destination: null,
+                contentType: "image/jpeg",
+                source: new CottonTransferSourceSnapshot(
+                    CottonTransferSourceKind.CameraBackup,
+                    $"content://media/external/images/media/{id:N}",
+                    CreatedAt,
+                    100,
+                    CreatedAt));
         }
     }
 }

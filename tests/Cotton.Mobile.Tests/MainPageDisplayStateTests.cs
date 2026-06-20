@@ -175,6 +175,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Backup_activity_indicator_is_visible_only_for_signed_in_backup_work()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            CottonCameraBackupActivityIndicator indicator = CottonCameraBackupActivityIndicator.Create(
+                [
+                    CreateCameraBackupUpload(),
+                ]);
+
+            display.ShowBackupActivity(indicator);
+
+            Assert.True(display.IsBackupActivityIndicatorVisible);
+            Assert.Equal("1 backup waiting", display.BackupActivityIndicator.Text);
+
+            display.ShowSignIn("Signed out.");
+
+            Assert.False(display.IsBackupActivityIndicatorVisible);
+            Assert.False(display.BackupActivityIndicator.IsVisible);
+        }
+
+        [Fact]
         public void Profile_status_can_report_cached_offline_session()
         {
             MainPageDisplayState display = CreateSignedInDisplay();
@@ -374,6 +394,23 @@ namespace Cotton.Mobile.Tests
                 sizeBytes,
                 null,
                 null);
+        }
+
+        private static CottonTransferQueueItem CreateCameraBackupUpload()
+        {
+            return CottonTransferQueueItem.CreateUpload(
+                Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
+                "photo.jpg",
+                100,
+                Older,
+                destination: null,
+                contentType: "image/jpeg",
+                source: new CottonTransferSourceSnapshot(
+                    CottonTransferSourceKind.CameraBackup,
+                    "content://media/external/images/media/100",
+                    Older,
+                    100,
+                    Older));
         }
 
         private static string[] VisibleNames(MainPageDisplayState display)

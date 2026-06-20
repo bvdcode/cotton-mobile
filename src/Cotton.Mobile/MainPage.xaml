@@ -307,6 +307,44 @@
                                 </Grid>
                             </Border>
 
+                            <Border IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
+                                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                    StrokeShape="RoundRectangle 8"
+                                    Padding="10,6"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"
+                                    SemanticProperties.Description="{Binding Display.BackupActivityIndicator.AccessibilityText}">
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding OpenBackupSetupCommand}" />
+                                </Border.GestureRecognizers>
+
+                                <Grid ColumnDefinitions="Auto,*,*"
+                                      ColumnSpacing="8"
+                                      HeightRequest="28">
+                                    <Label Text="↥"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Display.BackupActivityIndicator.Text}"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Grid.Column="2"
+                                           Text="{Binding Display.BackupActivityIndicator.Details}"
+                                           FontSize="11"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                </Grid>
+                            </Border>
+
                             <Border IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
                                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                                     StrokeShape="RoundRectangle 8"

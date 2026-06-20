@@ -354,7 +354,7 @@ namespace Cotton.Mobile.ViewModels
 
             IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
                 await RestoreTransferQueueBestEffortAsync(instanceUri);
-            Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
+            ShowTransferActivityIndicators(restoredTransfers);
         }
 
         public async Task HandleFileBrowserSessionExpiredAsync(Uri? instanceUri)
@@ -451,7 +451,7 @@ namespace Cotton.Mobile.ViewModels
 
                 IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
                     await RestoreTransferQueueBestEffortAsync(instanceUri);
-                Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
+                ShowTransferActivityIndicators(restoredTransfers);
 
                 if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri))
                 {
@@ -1393,7 +1393,7 @@ namespace Cotton.Mobile.ViewModels
                 ShowProfile(profile);
                 IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
                     await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
-                Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(restoredTransfers));
+                ShowTransferActivityIndicators(restoredTransfers);
                 await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
                 await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(result.InstanceUri);
                 await _fileBrowser.InitializeAsync(result.InstanceUri);
@@ -1440,6 +1440,12 @@ namespace Cotton.Mobile.ViewModels
                     or CottonSessionResultStatus.TimedOut
                     or CottonSessionResultStatus.AuthorizationFailed
                     or CottonSessionResultStatus.SessionExpired;
+        }
+
+        private void ShowTransferActivityIndicators(IReadOnlyList<CottonTransferQueueItem> transfers)
+        {
+            Display.ShowTransferActivity(CottonTransferActivityIndicator.Create(transfers));
+            Display.ShowBackupActivity(CottonCameraBackupActivityIndicator.Create(transfers));
         }
 
         private async Task<IReadOnlyList<CottonTransferQueueItem>> RestoreTransferQueueBestEffortAsync(Uri instanceUri)

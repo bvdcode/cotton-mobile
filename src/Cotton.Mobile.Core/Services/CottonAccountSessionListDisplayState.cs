@@ -6,12 +6,14 @@ namespace Cotton.Mobile.Services
     {
         private CottonAccountSessionListDisplayState(
             IReadOnlyList<CottonAccountSessionListItem> items,
+            string? currentSessionId,
             string statusText,
             string detailText,
             string emptyTitle,
             string emptyDetails)
         {
             Items = items;
+            CurrentSessionId = currentSessionId;
             StatusText = statusText;
             DetailText = detailText;
             EmptyTitle = emptyTitle;
@@ -21,6 +23,8 @@ namespace Cotton.Mobile.Services
         public string Title => "Devices and sessions";
 
         public IReadOnlyList<CottonAccountSessionListItem> Items { get; }
+
+        public string? CurrentSessionId { get; }
 
         public string StatusText { get; }
 
@@ -34,6 +38,10 @@ namespace Cotton.Mobile.Services
 
         public bool IsEmptyVisible => !HasItems;
 
+        public bool CanRevokeCurrentSession => !string.IsNullOrWhiteSpace(CurrentSessionId);
+
+        public string CurrentSessionRevokeActionText => "Revoke current session";
+
         public static CottonAccountSessionListDisplayState Create(
             IEnumerable<CottonAccountSessionSnapshot> sessions)
         {
@@ -44,9 +52,14 @@ namespace Cotton.Mobile.Services
                 .ThenByDescending(session => session.LastSeenAt)
                 .Select(session => new CottonAccountSessionListItem(session))
                 .ToArray();
+            string? currentSessionId = items
+                .FirstOrDefault(item => item.IsCurrentSession)
+                ?.Session
+                .SessionId;
 
             return new CottonAccountSessionListDisplayState(
                 items,
+                currentSessionId,
                 CreateStatusText(items.Length),
                 items.Length == 0
                     ? "No active account sessions were returned by the server."
@@ -61,6 +74,7 @@ namespace Cotton.Mobile.Services
 
             return new CottonAccountSessionListDisplayState(
                 Array.Empty<CottonAccountSessionListItem>(),
+                currentSessionId: null,
                 "Unavailable",
                 detailText.Trim(),
                 "Sessions unavailable",

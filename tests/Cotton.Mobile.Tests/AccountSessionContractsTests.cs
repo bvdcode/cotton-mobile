@@ -93,6 +93,65 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task RevokeSessionAsync_sends_authorized_delete_with_escaped_session_id()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueJson(HttpStatusCode.OK, new { });
+            var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
+
+            await service.RevokeSessionAsync(InstanceUri, " session current/mobile?id=1 ");
+
+            RecordedRequest request = Assert.Single(handler.Requests);
+            Assert.Equal(HttpMethod.Delete, request.Method);
+            Assert.Equal(
+                "/api/v1/auth/sessions/session%20current%2Fmobile%3Fid%3D1",
+                request.Uri.PathAndQuery);
+            Assert.Equal("Bearer", request.AuthorizationScheme);
+            Assert.Equal("access", request.AuthorizationParameter);
+            Assert.Equal("Cotton-Mobile/1.0", request.UserAgent);
+            Assert.Equal("Test device", request.DeviceName);
+            Assert.Null(request.Content);
+        }
+
+        [Fact]
+        public async Task RevokeSessionAsync_refreshes_token_once_after_unauthorized_response()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueJson(HttpStatusCode.Unauthorized, new { error = "expired" });
+            handler.EnqueueJson(
+                HttpStatusCode.OK,
+                new TokenPairDto
+                {
+                    AccessToken = "new-access",
+                    RefreshToken = "new-refresh",
+                });
+            handler.EnqueueJson(HttpStatusCode.OK, new { });
+            var tokenStore = new FakeTokenStore("old-access", "old refresh");
+            var service = CreateService(handler, tokenStore);
+
+            await service.RevokeSessionAsync(InstanceUri, "session-current");
+
+            Assert.Equal("new-access", tokenStore.Tokens?.AccessToken);
+            Assert.Equal("new-refresh", tokenStore.Tokens?.RefreshToken);
+            Assert.Equal(3, handler.Requests.Count);
+            Assert.Equal(HttpMethod.Delete, handler.Requests[0].Method);
+            Assert.Equal("old-access", handler.Requests[0].AuthorizationParameter);
+            Assert.Null(handler.Requests[1].AuthorizationParameter);
+            Assert.Equal("/api/v1/auth/refresh?refreshToken=old%20refresh", handler.Requests[1].Uri.PathAndQuery);
+            Assert.Equal(HttpMethod.Delete, handler.Requests[2].Method);
+            Assert.Equal("new-access", handler.Requests[2].AuthorizationParameter);
+            Assert.Equal("/api/v1/auth/sessions/session-current", handler.Requests[2].Uri.PathAndQuery);
+        }
+
+        [Fact]
+        public async Task RevokeSessionAsync_rejects_blank_session_id()
+        {
+            var service = CreateService(new RecordingHttpMessageHandler(), new FakeTokenStore("access", "refresh"));
+
+            await Assert.ThrowsAsync<ArgumentException>(() => service.RevokeSessionAsync(InstanceUri, " "));
+        }
+
+        [Fact]
         public void DisplayState_sorts_current_session_first_and_formats_security_details()
         {
             CottonAccountSessionListDisplayState display = CottonAccountSessionListDisplayState.Create(
@@ -119,6 +178,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("2 active", display.StatusText);
             Assert.True(display.HasItems);
             Assert.False(display.IsEmptyVisible);
+            Assert.Equal("session-current", display.CurrentSessionId);
+            Assert.True(display.CanRevokeCurrentSession);
+            Assert.Equal("Revoke current session", display.CurrentSessionRevokeActionText);
             Assert.Equal("Signed-in account sessions reported by the server.", display.DetailText);
 
             CottonAccountSessionListItem current = display.Items[0];
@@ -144,6 +206,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("0 active", empty.StatusText);
             Assert.False(empty.HasItems);
             Assert.True(empty.IsEmptyVisible);
+            Assert.Null(empty.CurrentSessionId);
+            Assert.False(empty.CanRevokeCurrentSession);
             Assert.Equal("No active sessions", empty.EmptyTitle);
             Assert.Equal("The server did not return any active account sessions.", empty.EmptyDetails);
 
@@ -151,6 +215,8 @@ namespace Cotton.Mobile.Tests
                 CottonAccountSessionListDisplayState.Unavailable("Could not load signed-in devices.");
 
             Assert.Equal("Unavailable", unavailable.StatusText);
+            Assert.Null(unavailable.CurrentSessionId);
+            Assert.False(unavailable.CanRevokeCurrentSession);
             Assert.Equal("Sessions unavailable", unavailable.EmptyTitle);
             Assert.Equal("Could not load signed-in devices.", unavailable.EmptyDetails);
         }

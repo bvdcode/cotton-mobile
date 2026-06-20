@@ -7,6 +7,14 @@ namespace Cotton.Mobile.ViewModels
 {
     public class SecuritySettingsViewModel : ViewModelBase
     {
+        private const string RevokeCurrentSessionConfirmationTitle = "Revoke current session?";
+        private const string RevokeCurrentSessionClearCacheMessage =
+            "This device will be signed out and cached files on this device will be removed.";
+        private const string RevokeCurrentSessionKeepCacheMessage =
+            "This device will be signed out. Cached files on this device will stay here.";
+        private const string RevokeCurrentSessionAction = "Revoke";
+        private const string CancelAction = "Cancel";
+
         private readonly ICottonAppLockSettingsStore _settingsStore;
         private readonly ICottonAppLockRuntimeStateStore _runtimeStateStore;
         private readonly ICottonInstanceStore _instanceStore;
@@ -15,7 +23,9 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ICottonWindowPrivacyService _windowPrivacyService;
+        private readonly IUserDialogService _dialogService;
         private readonly ILogger<SecuritySettingsViewModel> _logger;
+        private ICottonCurrentSessionRevocationHandler? _currentSessionRevocationHandler;
         private CottonAppLockSettings _settings = CottonAppLockSettings.Disabled;
         private CottonAppLockCapabilitySnapshot _capability =
             CottonAppLockCapabilitySnapshot.Unavailable("App lock status has not been checked.");
@@ -39,6 +49,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
             ICottonWindowPrivacyService windowPrivacyService,
+            IUserDialogService dialogService,
             ILogger<SecuritySettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
@@ -49,6 +60,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(windowPrivacyService);
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _settingsStore = settingsStore;
@@ -59,12 +71,17 @@ namespace Cotton.Mobile.ViewModels
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
             _windowPrivacyService = windowPrivacyService;
+            _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             VerifyDeviceUnlockCommand = new AsyncCommand(
                 VerifyDeviceUnlockAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy && DeviceUnlockDisplay.CanVerify);
+            RevokeCurrentSessionCommand = new AsyncCommand(
+                RevokeCurrentSessionAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && CanRevokeCurrentSession);
             ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
             ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
             ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
@@ -75,6 +92,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand VerifyDeviceUnlockCommand { get; }
+
+        public AsyncCommand RevokeCurrentSessionCommand { get; }
 
         public ObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];
 
@@ -87,8 +106,10 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(CanToggleAppLock));
                     OnPropertyChanged(nameof(CanToggleLogoutCacheCleanup));
+                    OnPropertyChanged(nameof(CanRevokeCurrentSession));
                     LoadCommand.RaiseCanExecuteChanged();
                     VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
+                    RevokeCurrentSessionCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -148,6 +169,13 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsAccountSessionsEmptyVisible => AccountSessionDisplay.IsEmptyVisible;
 
+        public string RevokeCurrentSessionActionText => AccountSessionDisplay.CurrentSessionRevokeActionText;
+
+        public bool IsRevokeCurrentSessionVisible => _currentSessionRevocationHandler is not null
+            && AccountSessionDisplay.CanRevokeCurrentSession;
+
+        public bool CanRevokeCurrentSession => IsRevokeCurrentSessionVisible && !IsBusy;
+
         public bool IsAppLockEnabled
         {
             get => _isAppLockEnabled;
@@ -181,6 +209,17 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public void SetCurrentSessionRevocationHandler(
+            ICottonCurrentSessionRevocationHandler revocationHandler)
+        {
+            ArgumentNullException.ThrowIfNull(revocationHandler);
+
+            _currentSessionRevocationHandler = revocationHandler;
+            OnPropertyChanged(nameof(IsRevokeCurrentSessionVisible));
+            OnPropertyChanged(nameof(CanRevokeCurrentSession));
+            RevokeCurrentSessionCommand.RaiseCanExecuteChanged();
+        }
 
         private CottonAppLockSettingsDisplayState AppLockDisplay { get; set; } =
             CottonAppLockSettingsDisplayState.Create(
@@ -390,6 +429,44 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RevokeCurrentSessionAsync()
+        {
+            string? sessionId = AccountSessionDisplay.CurrentSessionId;
+            if (_currentSessionRevocationHandler is null || string.IsNullOrWhiteSpace(sessionId))
+            {
+                Status = "Current session is unavailable.";
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                RevokeCurrentSessionConfirmationTitle,
+                _logoutCleanupSettings.ClearCachedFilesOnLogout
+                    ? RevokeCurrentSessionClearCacheMessage
+                    : RevokeCurrentSessionKeepCacheMessage,
+                RevokeCurrentSessionAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                await _currentSessionRevocationHandler.RevokeCurrentSessionAsync(sessionId);
+                Status = "Current session revoked.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to revoke the current Cotton mobile account session.");
+                Status = "Could not revoke current session.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
         private void ShowAppLock(CottonAppLockSettingsDisplayState display)
         {
             ArgumentNullException.ThrowIfNull(display);
@@ -447,6 +524,10 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(AccountSessionsEmptyDetails));
             OnPropertyChanged(nameof(IsAccountSessionsListVisible));
             OnPropertyChanged(nameof(IsAccountSessionsEmptyVisible));
+            OnPropertyChanged(nameof(RevokeCurrentSessionActionText));
+            OnPropertyChanged(nameof(IsRevokeCurrentSessionVisible));
+            OnPropertyChanged(nameof(CanRevokeCurrentSession));
+            RevokeCurrentSessionCommand.RaiseCanExecuteChanged();
         }
 
         private void ApplyAppLockSourceValue(bool isEnabled)

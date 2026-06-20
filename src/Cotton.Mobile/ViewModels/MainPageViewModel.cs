@@ -8,7 +8,7 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageViewModel : IFileBrowserSessionHandler
+    public class MainPageViewModel : IFileBrowserSessionHandler, ICottonCurrentSessionRevocationHandler
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
@@ -62,6 +62,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
+        private readonly ICottonAccountSessionService _accountSessionService;
         private readonly ICottonRemotePushSessionRegistrationService _remotePushRegistrationService;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
@@ -115,6 +116,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             ICottonCloudShareLinkService cloudShareLinkService,
+            ICottonAccountSessionService accountSessionService,
             ICottonRemotePushSessionRegistrationService remotePushRegistrationService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
@@ -162,6 +164,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
+            ArgumentNullException.ThrowIfNull(accountSessionService);
             ArgumentNullException.ThrowIfNull(remotePushRegistrationService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
@@ -199,6 +202,7 @@ namespace Cotton.Mobile.ViewModels
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
             _cloudShareLinkService = cloudShareLinkService;
+            _accountSessionService = accountSessionService;
             _remotePushRegistrationService = remotePushRegistrationService;
             _presentationService = presentationService;
             _logger = logger;
@@ -598,6 +602,50 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        public async Task RevokeCurrentSessionAsync(
+            string sessionId,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
+
+            ClearSessionRestoreRetry();
+            _fileBrowser.CancelActiveWork();
+            ShowLoading("Revoking session...");
+
+            try
+            {
+                Uri? instanceUri = ResolveInstanceUri();
+                if (instanceUri is null)
+                {
+                    throw new InvalidOperationException("A signed-in Cotton instance is required.");
+                }
+
+                await _remotePushRegistrationService.RevokeCurrentSessionBestEffortAsync(
+                    instanceUri,
+                    cancellationToken);
+                await _accountSessionService.RevokeSessionAsync(
+                    instanceUri,
+                    sessionId,
+                    cancellationToken);
+                await ClearLocalSessionAndProfileAsync("current session revocation");
+                if (await ShouldClearCachedFilesOnLogoutAsync())
+                {
+                    await ClearCachedSensitiveStateAsync("current session revocation");
+                }
+
+                _fileBrowser.Clear();
+                Display.InstanceUrl = _options.DefaultInstanceUrl;
+                ShowSignIn("Current session revoked. Sign in again.");
+                await ReturnToSignedOutRootAsync();
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogError(exception, "Cotton mobile current session revocation failed.");
+                ShowProfileError("Session revoke failed. Try again.");
+                throw;
+            }
+        }
+
         private async Task<bool> ShouldClearCachedFilesOnLogoutAsync()
         {
             CottonLogoutCacheCleanupSettings settings =
@@ -914,6 +962,12 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task ClearLocalSessionAndCachedStateAsync(string reason)
         {
+            await ClearLocalSessionAndProfileAsync(reason);
+            await ClearCachedSensitiveStateAsync(reason);
+        }
+
+        private async Task ClearLocalSessionAndProfileAsync(string reason)
+        {
             try
             {
                 await _sessionService.ClearLocalSessionAsync();
@@ -931,8 +985,6 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to clear Cotton mobile cached profile during {Reason}.", reason);
             }
-
-            await ClearCachedSensitiveStateAsync(reason);
         }
 
         private async Task ClearCachedSensitiveStateAsync(string reason)
@@ -967,7 +1019,7 @@ namespace Cotton.Mobile.ViewModels
         {
             try
             {
-                await _securitySettingsPageService.OpenAsync();
+                await _securitySettingsPageService.OpenAsync(this);
             }
             catch (Exception exception)
             {
@@ -976,6 +1028,25 @@ namespace Cotton.Mobile.ViewModels
                     "Security",
                     "Could not inspect security settings.",
                     "OK");
+            }
+        }
+
+        private async Task ReturnToSignedOutRootAsync()
+        {
+            try
+            {
+                await MainThread.InvokeOnMainThreadAsync(async () =>
+                {
+                    var navigation = Shell.Current?.Navigation;
+                    if (navigation is not null && navigation.NavigationStack.Count > 1)
+                    {
+                        await navigation.PopToRootAsync();
+                    }
+                });
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to return Cotton mobile navigation to the signed-out root.");
             }
         }
 

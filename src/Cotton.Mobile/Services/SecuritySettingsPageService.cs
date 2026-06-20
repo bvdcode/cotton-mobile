@@ -15,8 +15,12 @@ namespace Cotton.Mobile.Services
             _serviceProvider = serviceProvider;
         }
 
-        public async Task OpenAsync(CancellationToken cancellationToken = default)
+        public async Task OpenAsync(
+            ICottonCurrentSessionRevocationHandler revocationHandler,
+            CancellationToken cancellationToken = default)
         {
+            ArgumentNullException.ThrowIfNull(revocationHandler);
+
             cancellationToken.ThrowIfCancellationRequested();
 
             await MainThread.InvokeOnMainThreadAsync(async () =>
@@ -25,11 +29,17 @@ namespace Cotton.Mobile.Services
                 if (Shell.Current.Navigation.NavigationStack.LastOrDefault() is SecuritySettingsPage currentPage
                     && currentPage.BindingContext is SecuritySettingsViewModel currentViewModel)
                 {
+                    currentViewModel.SetCurrentSessionRevocationHandler(revocationHandler);
                     currentViewModel.LoadCommand.Execute(null);
                     return;
                 }
 
                 var page = ActivatorUtilities.CreateInstance<SecuritySettingsPage>(_serviceProvider);
+                if (page.BindingContext is SecuritySettingsViewModel viewModel)
+                {
+                    viewModel.SetCurrentSessionRevocationHandler(revocationHandler);
+                }
+
                 await Shell.Current.Navigation.PushAsync(page);
             });
             cancellationToken.ThrowIfCancellationRequested();

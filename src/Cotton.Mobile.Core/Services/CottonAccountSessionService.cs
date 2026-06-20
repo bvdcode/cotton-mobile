@@ -4,6 +4,8 @@ namespace Cotton.Mobile.Services
 {
     public class CottonAccountSessionService : ICottonAccountSessionService
     {
+        private const string SessionsRoute = Routes.V1.Auth + "/sessions";
+
         private readonly CottonAuthenticatedApiClient _apiClient;
 
         public CottonAccountSessionService(CottonAuthenticatedApiClient apiClient)
@@ -21,13 +23,28 @@ namespace Cotton.Mobile.Services
                 .SendJsonAsync<List<SessionResponse>>(
                     instanceUri,
                     HttpMethod.Get,
-                    Routes.V1.Auth + "/sessions",
+                    SessionsRoute,
                     cancellationToken)
                 .ConfigureAwait(false);
 
             return response
                 .Select(session => session.ToSnapshot())
                 .ToArray();
+        }
+
+        public Task RevokeSessionAsync(
+            Uri instanceUri,
+            string sessionId,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(sessionId);
+
+            string path = SessionsRoute + "/" + Uri.EscapeDataString(sessionId.Trim());
+            return _apiClient.SendRequiredAsync(
+                instanceUri,
+                HttpMethod.Delete,
+                path,
+                cancellationToken);
         }
 
         private class SessionResponse

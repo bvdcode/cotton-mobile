@@ -157,6 +157,13 @@
                                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
                     </Grid>
 
+                    <Button Text="{Binding RevokeCurrentSessionActionText}"
+                            Command="{Binding RevokeCurrentSessionCommand}"
+                            IsEnabled="{Binding CanRevokeCurrentSession}"
+                            IsVisible="{Binding IsRevokeCurrentSessionVisible}"
+                            HorizontalOptions="Start"
+                            Style="{StaticResource DestructiveChromeButton}" />
+
                     <VerticalStackLayout Spacing="2"
                                          IsVisible="{Binding IsAccountSessionsEmptyVisible}">
                         <Label Text="{Binding AccountSessionsEmptyTitle}"

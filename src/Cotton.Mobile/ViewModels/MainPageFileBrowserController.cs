@@ -13,12 +13,13 @@ namespace Cotton.Mobile.ViewModels
         private const string DetailsAction = "Details";
         private const string DoneAction = "Done";
         private const string DownloadAction = "Download";
-        private const string DownloadAgainAction = "Download again";
+        private const string DownloadAgainAction = "Update local copy";
         private const string KeepOfflineAction = "Keep offline";
         private const string LinkExpirationTitle = "Link expires";
         private const string OpenAction = CottonFileOpenRouter.OpenActionLabel;
         private const string RefreshOfflineAction = "Refresh offline";
         private const string RemoveOfflineAction = "Remove offline";
+        private const string ShareAction = "Share...";
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
         private const string SyncFromSelectedFolderAction = CottonDeviceToCloudSyncStatusText.ActionLabel;
@@ -29,7 +30,7 @@ namespace Cotton.Mobile.ViewModels
         private const string NewFolderPromptMessage = "Folder name";
         private const string NewFolderCreateAction = "Create";
         private const string SortNameAction = "Name";
-        private const string SortUpdatedAction = "Updated";
+        private const string SortUpdatedAction = "Newest";
         private const string SortSizeAction = "Size";
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
@@ -474,7 +475,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CottonFileBulkActionSnapshot[] actions = selection.Actions
-                .Where(IsSupportedSelectionAction)
+                .Where(action => IsSupportedSelectionAction(selection, action))
                 .Where(action => action.IsEnabled)
                 .ToArray();
             if (actions.Length == 0)
@@ -504,6 +505,18 @@ namespace Cotton.Mobile.ViewModels
                 case CottonFileBulkActionKind.ShareLinks:
                     await ShareSelectionCloudShareLinksAsync(entries);
                     break;
+                case CottonFileBulkActionKind.DownloadFiles:
+                    await DownloadFileAsync(entries[0]);
+                    break;
+                case CottonFileBulkActionKind.KeepOffline:
+                    await KeepSelectedEntryOfflineAsync(entries[0]);
+                    break;
+                case CottonFileBulkActionKind.RemoveOffline:
+                    await RemoveFileOfflineAsync(entries[0]);
+                    break;
+                case CottonFileBulkActionKind.ShareLocalFiles:
+                    await ShareFileAsync(entries[0]);
+                    break;
             }
         }
 
@@ -518,9 +531,20 @@ namespace Cotton.Mobile.ViewModels
             return true;
         }
 
-        private static bool IsSupportedSelectionAction(CottonFileBulkActionSnapshot action)
+        private static bool IsSupportedSelectionAction(
+            CottonFileSelectionSnapshot selection,
+            CottonFileBulkActionSnapshot action)
         {
-            return action.Kind is CottonFileBulkActionKind.CopyLinks or CottonFileBulkActionKind.ShareLinks;
+            if (action.Kind is CottonFileBulkActionKind.CopyLinks or CottonFileBulkActionKind.ShareLinks)
+            {
+                return true;
+            }
+
+            return selection.Count == 1
+                && action.Kind is (CottonFileBulkActionKind.DownloadFiles
+                    or CottonFileBulkActionKind.KeepOffline
+                    or CottonFileBulkActionKind.RemoveOffline
+                    or CottonFileBulkActionKind.ShareLocalFiles);
         }
 
         public async Task ShowViewActionsAsync()
@@ -590,6 +614,21 @@ namespace Cotton.Mobile.ViewModels
             }
 
             string? normalizedAction = NormalizeAction(action);
+            if (normalizedAction == CottonFileAddActionSheet.UploadAction)
+            {
+                action = await _dialogService.ShowActionSheetAsync(
+                    "Upload",
+                    CottonFileAddActionSheet.CancelAction,
+                    null,
+                    CottonFileAddActionSheet.CreateUploadActions().ToArray());
+                if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
+                {
+                    return;
+                }
+
+                normalizedAction = NormalizeAction(action);
+            }
+
             if (normalizedAction == CottonFileAddActionSheet.NewFolderAction)
             {
                 await CreateFolderAsync(instanceUri, folder);
@@ -1019,9 +1058,7 @@ namespace Cotton.Mobile.ViewModels
                 actions.Add(KeepOfflineAction);
             }
 
-            actions.Add(CopyLinkAction);
-            actions.Add(ShareLinkAction);
-            actions.Add(ShareFileAction);
+            actions.Add(ShareAction);
             actions.Add(DetailsAction);
 
             string? action = await _dialogService.ShowActionSheetAsync(
@@ -1057,14 +1094,8 @@ namespace Cotton.Mobile.ViewModels
                 case RemoveOfflineAction:
                     await RemoveFileOfflineAsync(currentFile);
                     break;
-                case CopyLinkAction:
-                    await CopyCloudShareLinkAsync(currentFile);
-                    break;
-                case ShareLinkAction:
-                    await ShareCloudShareLinkAsync(currentFile);
-                    break;
-                case ShareFileAction:
-                    await ShareFileAsync(currentFile);
+                case ShareAction:
+                    await ShowFileShareActionsAsync(currentFile, instanceUri);
                     break;
                 case DetailsAction:
                     await ShowFileDetailsAsync(currentFile);
@@ -1533,6 +1564,13 @@ namespace Cotton.Mobile.ViewModels
                 CottonOfflineFileStatusText.CancelledStatus,
                 CottonOfflineFileStatusText.FailedStatus,
                 CottonOfflineFileStatusText.OfflineUnavailableStatus);
+        }
+
+        private Task KeepSelectedEntryOfflineAsync(CottonFileBrowserEntry entry)
+        {
+            return entry.Type == CottonFileBrowserEntryType.Folder
+                ? PlanFolderOfflineAsync(entry)
+                : KeepFileOfflineAsync(entry);
         }
 
         private Task RefreshOfflineFileAsync(CottonFileBrowserEntry file)
@@ -3463,6 +3501,36 @@ namespace Cotton.Mobile.ViewModels
                 details.Title,
                 details.Message,
                 "OK");
+        }
+
+        private async Task ShowFileShareActionsAsync(CottonFileBrowserEntry file, Uri instanceUri)
+        {
+            string? action = await _dialogService.ShowActionSheetAsync(
+                "Share",
+                CancelAction,
+                null,
+                CopyLinkAction,
+                ShareLinkAction,
+                ShareFileAction);
+
+            CottonFileBrowserEntry? currentFile = GetCurrentVisibleEntry(file, instanceUri);
+            if (currentFile is null)
+            {
+                return;
+            }
+
+            switch (action)
+            {
+                case CopyLinkAction:
+                    await CopyCloudShareLinkAsync(currentFile);
+                    break;
+                case ShareLinkAction:
+                    await ShareCloudShareLinkAsync(currentFile);
+                    break;
+                case ShareFileAction:
+                    await ShareFileAsync(currentFile);
+                    break;
+            }
         }
 
         private async Task<CottonFileDownloadResult> PrepareFileForOpenOrShareAsync(

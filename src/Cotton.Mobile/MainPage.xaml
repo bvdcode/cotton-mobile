@@ -619,6 +619,7 @@
                                                     Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                     CommandParameter="{Binding .}"
                                                     IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                    IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
                                                     SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
                                         </Grid>
                                     </DataTemplate>
@@ -779,6 +780,7 @@
                                                             Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                             CommandParameter="{Binding .}"
                                                             IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                            IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
                                                             SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
 
                                                 </Grid>

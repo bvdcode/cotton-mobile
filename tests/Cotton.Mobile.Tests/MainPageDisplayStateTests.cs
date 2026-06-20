@@ -408,6 +408,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsFileSelectionActive);
             Assert.True(display.IsFileSelectionBarVisible);
             Assert.False(display.IsFileAddButtonVisible);
+            Assert.False(display.IsFileEntryActionsVisible);
             Assert.False(display.IsFilesEmptyAddActionVisible);
             Assert.Equal("2 selected", display.FileSelection.TitleText);
             Assert.Equal("1 file · 1 folder", display.FileSelection.DetailText);
@@ -423,6 +424,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(display.IsFileSelectionActive);
             Assert.True(display.IsFileAddButtonVisible);
+            Assert.True(display.IsFileEntryActionsVisible);
             Assert.All(display.FileEntries, entry => Assert.False(entry.IsSelected));
         }
 

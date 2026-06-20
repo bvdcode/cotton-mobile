@@ -11,10 +11,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 [
                     CottonFileAddActionSheet.NewFolderAction,
-                    CottonFileAddActionSheet.UploadFileAction,
+                    CottonFileAddActionSheet.UploadAction,
                     CottonFileAddActionSheet.ScanDocumentAction,
-                    CottonFileAddActionSheet.UploadPhotoAction,
-                    CottonFileAddActionSheet.UploadVideoAction,
                 ],
                 CottonFileAddActionSheet.CreateActions());
         }
@@ -25,11 +23,21 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 [
                     CottonFileAddActionSheet.NewFolderAction,
+                    CottonFileAddActionSheet.UploadAction,
+                ],
+                CottonFileAddActionSheet.CreateActions(canScanDocument: false));
+        }
+
+        [Fact]
+        public void Add_action_sheet_keeps_upload_choices_in_second_step()
+        {
+            Assert.Equal(
+                [
                     CottonFileAddActionSheet.UploadFileAction,
                     CottonFileAddActionSheet.UploadPhotoAction,
                     CottonFileAddActionSheet.UploadVideoAction,
                 ],
-                CottonFileAddActionSheet.CreateActions(canScanDocument: false));
+                CottonFileAddActionSheet.CreateUploadActions());
         }
 
         [Fact]

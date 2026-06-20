@@ -294,7 +294,7 @@ namespace Cotton.Mobile.ViewModels
             ShowFileBrowserEntryActionsCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 _fileBrowser.ShowEntryActionsAsync,
                 LogUnhandledCommandException,
-                _ => Display.IsFileBrowserChromeEnabled);
+                _ => Display.IsFileEntryActionsVisible);
             BeginFileSelectionCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 _fileBrowser.BeginEntrySelectionAsync,
                 LogUnhandledCommandException,
@@ -1987,12 +1987,14 @@ namespace Cotton.Mobile.ViewModels
                 case nameof(MainPageDisplayState.IsFileBrowserChromeEnabled):
                     RefreshFilesCommand.RaiseCanExecuteChanged();
                     ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
-                    ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
                     BeginFileSelectionCommand.RaiseCanExecuteChanged();
                     ShowFileAddActionsCommand.RaiseCanExecuteChanged();
                     ToggleFileSearchCommand.RaiseCanExecuteChanged();
                     ShowFileViewActionsCommand.RaiseCanExecuteChanged();
                     ShowFileSortActionsCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsFileEntryActionsVisible):
+                    ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
                     break;
                 case nameof(MainPageDisplayState.CanCancelFileAction):
                     CancelFileActionCommand.RaiseCanExecuteChanged();
@@ -2004,6 +2006,7 @@ namespace Cotton.Mobile.ViewModels
                     ClearFileSelectionCommand.RaiseCanExecuteChanged();
                     ShowFileSelectionActionsCommand.RaiseCanExecuteChanged();
                     ShowFileAddActionsCommand.RaiseCanExecuteChanged();
+                    ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
                     break;
             }
         }

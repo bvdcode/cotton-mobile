@@ -92,6 +92,20 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Single_file_selection_uses_singular_action_labels()
+        {
+            CottonFileBrowserEntry file = CreateFile("notes.txt")
+                .WithLocalFile(new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt));
+
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create([file]);
+
+            Assert.Equal("Copy link", selection.GetAction(CottonFileBulkActionKind.CopyLinks).Label);
+            Assert.Equal("Share link", selection.GetAction(CottonFileBulkActionKind.ShareLinks).Label);
+            Assert.Equal("Download file", selection.GetAction(CottonFileBulkActionKind.DownloadFiles).Label);
+            Assert.Equal("Share file", selection.GetAction(CottonFileBulkActionKind.ShareLocalFiles).Label);
+        }
+
+        [Fact]
         public void Stale_offline_file_selection_can_remove_offline_but_not_share_local_file()
         {
             CottonFileBrowserEntry file = CreateFile("notes.txt");

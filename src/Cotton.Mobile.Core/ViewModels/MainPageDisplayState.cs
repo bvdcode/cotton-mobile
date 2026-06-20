@@ -317,6 +317,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsFileSelectionActive));
                     OnPropertyChanged(nameof(IsFileSelectionBarVisible));
+                    OnPropertyChanged(nameof(IsFileEntryActionsVisible));
                     OnPropertyChanged(nameof(IsFileAddButtonVisible));
                     NotifyFilesEmptyStateChanged();
                 }
@@ -521,6 +522,8 @@ namespace Cotton.Mobile.ViewModels
         public bool IsAccountActionEnabled => IsProfileVisible && !IsFileActionInProgress;
 
         public bool IsFileBrowserChromeEnabled => IsProfileVisible && !IsFileBrowserBusy;
+
+        public bool IsFileEntryActionsVisible => IsFileBrowserChromeEnabled && !IsFileSelectionActive;
 
         public bool IsFileBrowserQuickNavigationVisible => IsProfileVisible && !IsFileSearchVisible;
 
@@ -1119,6 +1122,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileSelectionBarVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(IsFileEntryActionsVisible));
             OnPropertyChanged(nameof(CanRefreshFiles));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(IsFileAddButtonVisible));
@@ -1205,6 +1209,7 @@ namespace Cotton.Mobile.ViewModels
         private void NotifyFileBrowserChromeStateChanged()
         {
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
+            OnPropertyChanged(nameof(IsFileEntryActionsVisible));
             OnPropertyChanged(nameof(CanRefreshFiles));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(FileUpButtonOpacity));

@@ -4,6 +4,7 @@ namespace Cotton.Mobile.Services
     {
         public const string CancelAction = "Cancel";
         public const string NewFolderAction = "New folder";
+        public const string UploadAction = "Upload...";
         public const string UploadFileAction = "Upload file";
         public const string ScanDocumentAction = "Scan document";
         public const string UploadPhotoAction = "Upload photo";
@@ -14,15 +15,18 @@ namespace Cotton.Mobile.Services
         private static readonly string[] ActionsWithDocumentScan =
         [
             NewFolderAction,
-            UploadFileAction,
+            UploadAction,
             ScanDocumentAction,
-            UploadPhotoAction,
-            UploadVideoAction,
         ];
 
         private static readonly string[] ActionsWithoutDocumentScan =
         [
             NewFolderAction,
+            UploadAction,
+        ];
+
+        private static readonly string[] UploadActions =
+        [
             UploadFileAction,
             UploadPhotoAction,
             UploadVideoAction,
@@ -31,6 +35,11 @@ namespace Cotton.Mobile.Services
         public static IReadOnlyList<string> CreateActions(bool canScanDocument = true)
         {
             return canScanDocument ? ActionsWithDocumentScan : ActionsWithoutDocumentScan;
+        }
+
+        public static IReadOnlyList<string> CreateUploadActions()
+        {
+            return UploadActions;
         }
 
         public static string CreateTitle(CottonFolderHandle folder)

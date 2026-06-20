@@ -23,9 +23,16 @@ namespace Cotton.Mobile.ViewModels
         private bool _wifiOnly = true;
         private bool _allowCellular;
         private bool _chargingOnly;
+        private bool _isDestinationStorageEstimateCurrent;
+        private CottonCameraBackupMediaAccessDisplayState _latestMediaAccessDisplay =
+            CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.NotRequested);
+        private CottonCameraBackupDestinationStorageEstimate _latestDestinationStorageEstimate =
+            CottonCameraBackupDestinationStorageEstimate.Empty;
         private string _destinationText = "No folder selected";
         private string _executionStatusText = "Choose a folder before camera backup can run.";
         private string _policySummaryText = "Photos only, Wi-Fi only, any battery state.";
+        private string _destinationStorageEstimateTitle = "Destination estimate";
+        private string _destinationStorageEstimateText = "Choose a folder to estimate backup storage.";
         private string _healthTitle = "Backup Health";
         private string _healthStatusText = "Backup health will appear after background backup is available.";
         private string _healthCountsText = "Pending 0 · Uploaded 0 · Failed 0 · Blocked 0";
@@ -192,6 +199,18 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _policySummaryText, value);
         }
 
+        public string DestinationStorageEstimateTitle
+        {
+            get => _destinationStorageEstimateTitle;
+            private set => SetProperty(ref _destinationStorageEstimateTitle, value);
+        }
+
+        public string DestinationStorageEstimateText
+        {
+            get => _destinationStorageEstimateText;
+            private set => SetProperty(ref _destinationStorageEstimateText, value);
+        }
+
         public string HealthTitle
         {
             get => _healthTitle;
@@ -278,8 +297,8 @@ namespace Cotton.Mobile.ViewModels
                 {
                     _settings = await _settingsStore.GetAsync(_instanceUri);
                     ShowSettings(_settings);
-                    await LoadPlanningHealthAsync();
-                    await LoadMediaAccessAsync();
+                    CottonCameraBackupMediaAccessDisplayState mediaAccess = await LoadMediaAccessAsync();
+                    await LoadPlanningHealthAsync(mediaAccess);
                     Status = null;
                 },
                 "Could not load camera backup setup.");
@@ -300,8 +319,8 @@ namespace Cotton.Mobile.ViewModels
                     _settings = CreateSettingsFromUi().WithDestination(destination);
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
-                    await LoadPlanningHealthAsync();
-                    await LoadMediaAccessAsync();
+                    CottonCameraBackupMediaAccessDisplayState mediaAccess = await LoadMediaAccessAsync();
+                    await LoadPlanningHealthAsync(mediaAccess);
                     Status = "Camera backup setup saved.";
                 },
                 "Could not choose backup folder.");
@@ -315,8 +334,8 @@ namespace Cotton.Mobile.ViewModels
                     _settings = CreateSettingsFromUi();
                     await _settingsStore.SaveAsync(_instanceUri, _settings);
                     ShowSettings(_settings);
-                    await LoadPlanningHealthAsync();
-                    await LoadMediaAccessAsync();
+                    CottonCameraBackupMediaAccessDisplayState mediaAccess = await LoadMediaAccessAsync();
+                    await LoadPlanningHealthAsync(mediaAccess);
                     Status = "Camera backup setup saved.";
                 },
                 "Could not save camera backup setup.");
@@ -331,7 +350,8 @@ namespace Cotton.Mobile.ViewModels
                     {
                         _reloadOnNextAppearing = true;
                         await _mediaAccessPolicy.OpenSettingsAsync();
-                        await LoadMediaAccessAsync();
+                        CottonCameraBackupMediaAccessDisplayState mediaAccess = await LoadMediaAccessAsync();
+                        await LoadPlanningHealthAsync(mediaAccess);
                         Status = "Android settings opened.";
                         return;
                     }
@@ -339,6 +359,7 @@ namespace Cotton.Mobile.ViewModels
                     CottonCameraBackupMediaAccessState state =
                         await _mediaAccessPolicy.RequestAccessAsync();
                     CottonCameraBackupMediaAccessDisplayState display = ShowMediaAccess(state);
+                    await LoadPlanningHealthAsync(display);
                     Status = display.CanScanFullLibrary
                         ? "Media access updated."
                         : "Automatic camera backup needs full media access.";
@@ -368,7 +389,7 @@ namespace Cotton.Mobile.ViewModels
                     {
                         Status = CottonCameraBackupQueueStatusText.CreateBlockedAccessStatus(mediaDisplay);
                         await ShowBackupBlockedNotificationAsync(Status);
-                        await LoadPlanningHealthAsync();
+                        await LoadPlanningHealthAsync(mediaDisplay);
                         return;
                     }
 
@@ -381,7 +402,7 @@ namespace Cotton.Mobile.ViewModels
 
                     CottonAndroidBackgroundTransferScheduleResult? scheduleResult =
                         await ScheduleQueuedCameraBackupBestEffortAsync(result);
-                    await LoadPlanningHealthAsync();
+                    await LoadPlanningHealthAsync(mediaDisplay);
                     Status = CreateQueueStatusText(result, scheduleResult);
                 },
                 "Could not queue camera backup uploads.");
@@ -481,9 +502,14 @@ namespace Cotton.Mobile.ViewModels
             HealthTitle = health.Title;
             HealthStatusText = health.StatusText;
             HealthCountsText = health.CountsText;
+            _isDestinationStorageEstimateCurrent = false;
+            ShowDestinationStorageEstimate(
+                settings,
+                _latestMediaAccessDisplay,
+                _latestDestinationStorageEstimate);
         }
 
-        private async Task LoadPlanningHealthAsync()
+        private async Task LoadPlanningHealthAsync(CottonCameraBackupMediaAccessDisplayState mediaAccess)
         {
             CottonCameraBackupPlanSnapshot plan =
                 await _planningService.PlanAsync(_instanceUri, _settings);
@@ -494,13 +520,19 @@ namespace Cotton.Mobile.ViewModels
             HealthTitle = health.Title;
             HealthStatusText = health.StatusText;
             HealthCountsText = health.CountsText;
+            _latestDestinationStorageEstimate = plan.DestinationStorageEstimate;
+            _isDestinationStorageEstimateCurrent = true;
+            ShowDestinationStorageEstimate(
+                _settings,
+                mediaAccess,
+                plan.DestinationStorageEstimate);
         }
 
-        private async Task LoadMediaAccessAsync()
+        private async Task<CottonCameraBackupMediaAccessDisplayState> LoadMediaAccessAsync()
         {
             CottonCameraBackupMediaAccessState state =
                 await _mediaAccessPolicy.GetAccessStateAsync();
-            _ = ShowMediaAccess(state);
+            return ShowMediaAccess(state);
         }
 
         private CottonCameraBackupMediaAccessDisplayState ShowMediaAccess(CottonCameraBackupMediaAccessState state)
@@ -513,7 +545,23 @@ namespace Cotton.Mobile.ViewModels
             MediaAccessActionText = display.ActionText;
             IsMediaAccessActionVisible = display.IsActionVisible;
             _mediaAccessShouldOpenSettings = display.ShouldOpenSettings;
+            _latestMediaAccessDisplay = display;
             return display;
+        }
+
+        private void ShowDestinationStorageEstimate(
+            CottonCameraBackupSettings settings,
+            CottonCameraBackupMediaAccessDisplayState mediaAccess,
+            CottonCameraBackupDestinationStorageEstimate estimate)
+        {
+            CottonCameraBackupDestinationStorageEstimateDisplayState display =
+                CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
+                    settings,
+                    mediaAccess,
+                    estimate,
+                    _isDestinationStorageEstimateCurrent);
+            DestinationStorageEstimateTitle = display.Title;
+            DestinationStorageEstimateText = display.SummaryText;
         }
 
         private async Task RunBackupActionAsync(Func<Task> actionAsync, string failureStatus)

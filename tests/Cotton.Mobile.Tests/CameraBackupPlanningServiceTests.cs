@@ -73,9 +73,13 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(1, photosOnly.Health.PendingCount);
             Assert.Equal(1, photosOnly.ScanResult.SkippedByPolicyCount);
+            Assert.Equal(1024, photosOnly.DestinationStorageEstimate.KnownSizeBytes);
+            Assert.Equal(1, photosOnly.DestinationStorageEstimate.PendingCount);
 
             Assert.Equal(2, photosAndVideos.Health.PendingCount);
             Assert.Equal(0, photosAndVideos.ScanResult.SkippedByPolicyCount);
+            Assert.Equal(2048, photosAndVideos.DestinationStorageEstimate.KnownSizeBytes);
+            Assert.Equal(2, photosAndVideos.DestinationStorageEstimate.PendingCount);
         }
 
         [Fact]

@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Services
             ScanResult = scanResult;
             UploadedMedia = uploadedMedia.ToArray();
             Health = health;
+            DestinationStorageEstimate = CottonCameraBackupDestinationStorageEstimate.Create(scanResult);
         }
 
         public CottonCameraBackupScanResult ScanResult { get; }
@@ -21,5 +22,7 @@ namespace Cotton.Mobile.Services
         public IReadOnlyList<CottonCameraBackupUploadedMediaSnapshot> UploadedMedia { get; }
 
         public CottonCameraBackupHealthSnapshot Health { get; }
+
+        public CottonCameraBackupDestinationStorageEstimate DestinationStorageEstimate { get; }
     }
 }

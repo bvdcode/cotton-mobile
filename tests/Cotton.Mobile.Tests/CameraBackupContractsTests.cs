@@ -332,6 +332,112 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Camera_backup_destination_storage_estimate_sums_known_pending_media_size()
+        {
+            var scanResult = new CottonCameraBackupScanResult(
+                [
+                    CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo),
+                    CreateCandidate("media://video/1", CottonCameraBackupMediaKind.Video),
+                ],
+                scannedCount: 2,
+                skippedAlreadyTrackedCount: 0,
+                skippedByPolicyCount: 0);
+
+            CottonCameraBackupDestinationStorageEstimate estimate =
+                CottonCameraBackupDestinationStorageEstimate.Create(scanResult);
+
+            Assert.Equal(2, estimate.PendingCount);
+            Assert.Equal(5120, estimate.KnownSizeBytes);
+            Assert.Equal(0, estimate.UnknownSizeCount);
+            Assert.Equal(2, estimate.KnownSizeCount);
+            Assert.True(estimate.HasPendingItems);
+            Assert.False(estimate.HasUnknownSizes);
+        }
+
+        [Fact]
+        public void Camera_backup_destination_storage_estimate_keeps_unknown_sizes_explicit()
+        {
+            var scanResult = new CottonCameraBackupScanResult(
+                [
+                    CreateCandidate("media://photo/1", CottonCameraBackupMediaKind.Photo),
+                    new CottonCameraBackupCandidate(
+                        new CottonCameraBackupMediaIdentity("media://photo/2", null, null),
+                        CottonCameraBackupMediaKind.Photo,
+                        "photo-2.jpg",
+                        "image/jpeg",
+                        null),
+                ],
+                scannedCount: 2,
+                skippedAlreadyTrackedCount: 0,
+                skippedByPolicyCount: 0);
+
+            CottonCameraBackupDestinationStorageEstimate estimate =
+                CottonCameraBackupDestinationStorageEstimate.Create(scanResult);
+
+            Assert.Equal(2, estimate.PendingCount);
+            Assert.Equal(1024, estimate.KnownSizeBytes);
+            Assert.Equal(1, estimate.UnknownSizeCount);
+            Assert.Equal(1, estimate.KnownSizeCount);
+            Assert.True(estimate.HasUnknownSizes);
+        }
+
+        [Fact]
+        public void Camera_backup_destination_storage_estimate_display_is_honest_before_setup_is_complete()
+        {
+            CottonCameraBackupMediaAccessDisplayState noAccess =
+                CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.NotRequested);
+            CottonCameraBackupMediaAccessDisplayState allowed =
+                CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.Allowed);
+
+            Assert.Equal(
+                "Choose a folder to estimate backup storage.",
+                CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
+                    CottonCameraBackupSettings.Default,
+                    allowed,
+                    CottonCameraBackupDestinationStorageEstimate.Empty,
+                    isCurrent: true).SummaryText);
+            Assert.Equal(
+                "Allow full media access to estimate backup storage.",
+                CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    noAccess,
+                    CottonCameraBackupDestinationStorageEstimate.Empty,
+                    isCurrent: true).SummaryText);
+            Assert.Equal(
+                "Save to refresh backup storage estimate.",
+                CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    allowed,
+                    CottonCameraBackupDestinationStorageEstimate.Empty,
+                    isCurrent: false).SummaryText);
+        }
+
+        [Theory]
+        [InlineData(2, 5120, 0, "2 new items · 5 KB estimated upload storage.")]
+        [InlineData(3, 5120, 1, "3 new items · at least 5 KB estimated upload storage; 1 item has unknown size.")]
+        [InlineData(2, 0, 2, "2 new items · backup size unknown until the device reports it.")]
+        [InlineData(0, 0, 0, "No new camera media needs backup storage.")]
+        public void Camera_backup_destination_storage_estimate_display_summarizes_pending_upload_size(
+            int pendingCount,
+            long knownSizeBytes,
+            int unknownSizeCount,
+            string expectedSummary)
+        {
+            CottonCameraBackupDestinationStorageEstimateDisplayState display =
+                CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.Allowed),
+                    new CottonCameraBackupDestinationStorageEstimate(
+                        pendingCount,
+                        knownSizeBytes,
+                        unknownSizeCount),
+                    isCurrent: true);
+
+            Assert.Equal("Destination estimate", display.Title);
+            Assert.Equal(expectedSummary, display.SummaryText);
+        }
+
+        [Fact]
         public void Camera_backup_health_display_stays_honest_while_backup_cannot_run()
         {
             CottonCameraBackupHealthDisplayState display =

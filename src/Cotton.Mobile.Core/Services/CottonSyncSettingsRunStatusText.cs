@@ -39,6 +39,11 @@ namespace Cotton.Mobile.Services
                 deviceToCloudSummary.RemovedManifestCount,
                 "record cleaned",
                 "records cleaned");
+            AddCount(
+                parts,
+                deviceToCloudSummary.DestructiveReviewRemoteDeleteCount,
+                "cloud removal needs review",
+                "cloud removals need review");
             AddCount(parts, cloudToDeviceSummary.BlockedItemCount + deviceToCloudSummary.BlockedItemCount, "blocked");
             AddRootCount(parts, cloudToDeviceSummary.SkippedRootCount + deviceToCloudSummary.SkippedRootCount);
 

@@ -51,6 +51,38 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Combined_status_reports_device_to_cloud_destructive_review()
+        {
+            CottonSyncRootSnapshot root = CreateDeviceRoot(DeviceRootId);
+            var plan = new CottonDeviceToCloudSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                [
+                    new CottonDeviceToCloudSyncPlanItem(
+                        CottonDeviceToCloudSyncActionKind.DeleteRemoteFile,
+                        CottonFileBrowserEntryType.File,
+                        "old.txt",
+                        "old.txt",
+                        Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                        "\"etag-old\"",
+                        localUpdatedAtUtc: null,
+                        sizeBytes: 12,
+                        contentType: "text/plain")
+                ]);
+            var deviceSummary = new CottonDeviceToCloudSyncRunSummary(
+                [
+                    CottonDeviceToCloudSyncRootRunResult.SkippedDestructiveReviewRequired(root, plan),
+                ]);
+
+            Assert.Equal(
+                "Sync complete. 1 cloud removal needs review, 1 root skipped.",
+                CottonSyncSettingsRunStatusText.CreateCompletedStatus(
+                    new CottonCloudToDeviceSyncRunSummary([]),
+                    deviceSummary));
+        }
+
+        [Fact]
         public void Device_to_cloud_status_copy_is_stable()
         {
             CottonDeviceToCloudSyncRunSummary summary = CreateDeviceSummary(

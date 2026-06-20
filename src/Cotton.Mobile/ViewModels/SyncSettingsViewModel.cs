@@ -197,13 +197,6 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 Status = CreateStartingStatus(root);
-                if (RequiresDeviceToCloudConfirmation(root)
-                    && !await ConfirmDeviceToCloudSyncAsync())
-                {
-                    Status = CottonDeviceToCloudSyncStatusText.CancelledStatus;
-                    return;
-                }
-
                 string completedStatus = await RunRootAndCreateCompletedStatusAsync(instanceUri, root);
                 IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
@@ -241,15 +234,6 @@ namespace Cotton.Mobile.ViewModels
             {
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
-                IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                if (RequiresDeviceToCloudConfirmation(roots, pausedRootIds)
-                    && !await ConfirmDeviceToCloudSyncAsync())
-                {
-                    ShowRoots(roots, pausedRootIds);
-                    Status = CottonDeviceToCloudSyncStatusText.CancelledStatus;
-                    return;
-                }
-
                 (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
                     CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary) summaries =
                     await RunAllRootsAsync(instanceUri, roots);
@@ -392,10 +376,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CottonDeviceToCloudSyncRunSummary deviceSummary =
-                await _deviceToCloudSyncCoordinator.RunRootAsync(
-                    instanceUri,
-                    root,
-                    CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
+                await RunDeviceToCloudRootAsync(instanceUri, root);
             return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
         }
 
@@ -418,10 +399,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 CottonDeviceToCloudSyncRunSummary deviceSummary =
-                    await _deviceToCloudSyncCoordinator.RunRootAsync(
-                        instanceUri,
-                        root,
-                        CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
+                    await RunDeviceToCloudRootAsync(instanceUri, root);
                 deviceResults.AddRange(deviceSummary.RootResults);
             }
 
@@ -437,26 +415,38 @@ namespace Cotton.Mobile.ViewModels
                 : CottonDeviceToCloudSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName);
         }
 
-        private async Task<bool> ConfirmDeviceToCloudSyncAsync()
+        private async Task<CottonDeviceToCloudSyncRunSummary> RunDeviceToCloudRootAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root)
+        {
+            CottonDeviceToCloudSyncRunSummary summary =
+                await _deviceToCloudSyncCoordinator.RunRootAsync(instanceUri, root);
+            if (!summary.NeedsDestructiveReview)
+            {
+                return summary;
+            }
+
+            Status = CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus;
+            bool confirmed = await ConfirmDeviceToCloudRemoteDeletesAsync(
+                summary.DestructiveReviewRemoteDeleteCount);
+            if (!confirmed)
+            {
+                return summary;
+            }
+
+            return await _deviceToCloudSyncCoordinator.RunRootAsync(
+                instanceUri,
+                root,
+                CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
+        }
+
+        private async Task<bool> ConfirmDeviceToCloudRemoteDeletesAsync(int fileCount)
         {
             return await _dialogService.ShowConfirmationAsync(
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveTitle,
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveMessage,
-                CottonDeviceToCloudSyncStatusText.ConfirmDestructiveAction,
+                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
+                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(fileCount),
+                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
                 CottonSyncRootManagementText.CancelAction);
-        }
-
-        private static bool RequiresDeviceToCloudConfirmation(CottonSyncRootSnapshot root)
-        {
-            return root.Direction is CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional
-                && CottonDeviceToCloudSyncRootCapability.CanRun(root);
-        }
-
-        private static bool RequiresDeviceToCloudConfirmation(
-            IReadOnlyList<CottonSyncRootSnapshot> roots,
-            IReadOnlySet<Guid> pausedRootIds)
-        {
-            return roots.Any(root => !pausedRootIds.Contains(root.Id) && RequiresDeviceToCloudConfirmation(root));
         }
 
         private void ShowRoots(IReadOnlyList<CottonSyncRootSnapshot> roots, IReadOnlySet<Guid> pausedRootIds)

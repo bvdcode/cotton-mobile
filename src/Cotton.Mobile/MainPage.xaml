@@ -275,6 +275,15 @@
                                     Padding="10,6"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}"
                                     SemanticProperties.Description="{Binding Display.TransferActivityIndicator.AccessibilityText}">
+                                <Border.Triggers>
+                                    <DataTrigger TargetType="Border"
+                                                 Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
+                                                 Value="True">
+                                        <Setter Property="Stroke"
+                                                Value="{StaticResource Danger}" />
+                                    </DataTrigger>
+                                </Border.Triggers>
+
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenTransfersCommand}" />
                                 </Border.GestureRecognizers>
@@ -286,7 +295,18 @@
                                            FontSize="14"
                                            FontAttributes="Bold"
                                            VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label"
+                                                         Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
+                                                         Value="True">
+                                                <Setter Property="Text"
+                                                        Value="!" />
+                                                <Setter Property="TextColor"
+                                                        Value="{StaticResource Danger}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.TransferActivityIndicator.Text}"
@@ -295,7 +315,16 @@
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
                                            VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}">
+                                        <Label.Triggers>
+                                            <DataTrigger TargetType="Label"
+                                                         Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
+                                                         Value="True">
+                                                <Setter Property="TextColor"
+                                                        Value="{StaticResource Danger}" />
+                                            </DataTrigger>
+                                        </Label.Triggers>
+                                    </Label>
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.TransferActivityIndicator.Details}"

@@ -141,6 +141,9 @@
 			Condition="'$(ApplicationDisplayVersion)' == '' or '$(ApplicationDisplayVersion)' == '1.0'"
 			Text="Computed Android ApplicationDisplayVersion is required for signed release builds." />
 		<Error
+			Condition="$([System.Text.RegularExpressions.Regex]::IsMatch('$(ApplicationDisplayVersion)', '^[0-9]+\.[0-9]+\.[0-9]+$')) != 'true'"
+			Text="Computed Android ApplicationDisplayVersion must be MAJOR.MINOR.PATCH without prerelease or build metadata." />
+		<Error
 			Condition="'$(ApplicationVersion)' == '' or '$(ApplicationVersion)' == '1'"
 			Text="Computed Android ApplicationVersion is required for signed release builds." />
 		<Message

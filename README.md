@@ -80,7 +80,9 @@ Signed Android builds are produced by the `Mobile Android` workflow.
 - Use `publish_github_release=true` to update the stable GitHub APK download.
 - Use `upload_to_google_play=true` only for intentional Play testing uploads.
 - `publish_github_release` and `upload_to_google_play` require `build_signed_release=true`; the workflow fails early if that combination is wrong.
-- Signed release display versions come from GitVersion `MajorMinorPatch`; run Play uploads from an intentional SemVer tag such as `v1.0.0`.
+- Signed release display versions come from `GitVersion.yml` `next-version` and existing `vX.Y.Z` release tags.
+- The first Play upload for a `next-version` value uses that exact version; later uploads increment the patch version until `next-version` is moved forward.
+- Successful Play uploads tag the commit as `vX.Y.Z` so the next upload can compute the next patch version.
 - Android `versionCode` is computed from the GitHub Actions run number and attempt, is guarded against reuse, and is not user-facing.
 - Signed release builds fail if the computed display version and Android version code were not applied.
 

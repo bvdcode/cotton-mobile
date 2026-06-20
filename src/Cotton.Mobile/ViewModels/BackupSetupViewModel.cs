@@ -36,6 +36,8 @@ namespace Cotton.Mobile.ViewModels
         private string _healthTitle = "Backup Health";
         private string _healthStatusText = "Backup health will appear after background backup is available.";
         private string _healthCountsText = "Pending 0 · Uploaded 0 · Failed 0 · Blocked 0";
+        private string _localMediaRetentionText =
+            CottonCameraBackupLocalMediaRetentionPolicy.Mvp.SetupSummaryText;
         private string _mediaAccessTitle = "Media Access";
         private string _mediaAccessStatusText = "Not requested";
         private string _mediaAccessDetailText = "Cotton will ask before scanning photos or videos.";
@@ -227,6 +229,12 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _healthCountsText;
             private set => SetProperty(ref _healthCountsText, value);
+        }
+
+        public string LocalMediaRetentionText
+        {
+            get => _localMediaRetentionText;
+            private set => SetProperty(ref _localMediaRetentionText, value);
         }
 
         public string MediaAccessTitle
@@ -481,6 +489,7 @@ namespace Cotton.Mobile.ViewModels
             DestinationText = display.DestinationText;
             ExecutionStatusText = display.ExecutionStatusText;
             PolicySummaryText = display.PolicySummaryText;
+            LocalMediaRetentionText = display.LocalMediaRetentionText;
             ShowHealth(settings);
         }
 

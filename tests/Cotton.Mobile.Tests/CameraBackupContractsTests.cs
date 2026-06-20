@@ -72,6 +72,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Camera_backup_mvp_keeps_local_media_on_device()
+        {
+            CottonCameraBackupLocalMediaRetentionPolicy policy =
+                CottonCameraBackupLocalMediaRetentionPolicy.Mvp;
+            CottonCameraBackupSetupDisplayState display =
+                CottonCameraBackupSetupDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()));
+
+            Assert.False(policy.DeletesSourceMedia);
+            Assert.False(policy.RequiresMediaDeletePermission);
+            Assert.Equal("Queue camera media to Cotton. Originals stay on this device.", policy.SetupSummaryText);
+            Assert.Equal(policy.SetupSummaryText, display.LocalMediaRetentionText);
+        }
+
+        [Fact]
         public void Camera_backup_policy_summary_tracks_media_network_and_charging_choices()
         {
             CottonCameraBackupSettings settings = CottonCameraBackupSettings.Default

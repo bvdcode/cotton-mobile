@@ -200,7 +200,7 @@
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
-                           Text="Choose which camera media is queued from this device."
+                           Text="{Binding LocalMediaRetentionText}"
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"

@@ -8,12 +8,14 @@ namespace Cotton.Mobile.Services
             string destinationText,
             string executionStatusText,
             string policySummaryText,
+            string localMediaRetentionText,
             bool isDestinationSelected,
             bool canEnableBackup)
         {
             DestinationText = destinationText;
             ExecutionStatusText = executionStatusText;
             PolicySummaryText = policySummaryText;
+            LocalMediaRetentionText = localMediaRetentionText;
             IsDestinationSelected = isDestinationSelected;
             CanEnableBackup = canEnableBackup;
         }
@@ -23,6 +25,8 @@ namespace Cotton.Mobile.Services
         public string ExecutionStatusText { get; }
 
         public string PolicySummaryText { get; }
+
+        public string LocalMediaRetentionText { get; }
 
         public bool IsDestinationSelected { get; }
 
@@ -37,11 +41,14 @@ namespace Cotton.Mobile.Services
                 ? "Setup saved. Background backup is not running yet."
                 : "Choose a folder before camera backup can run.";
             string policySummaryText = CreatePolicySummary(settings);
+            string localMediaRetentionText =
+                CottonCameraBackupLocalMediaRetentionPolicy.Mvp.SetupSummaryText;
 
             return new CottonCameraBackupSetupDisplayState(
                 destinationText,
                 executionStatusText,
                 policySummaryText,
+                localMediaRetentionText,
                 settings.HasDestination,
                 settings.CanRunBackup);
         }

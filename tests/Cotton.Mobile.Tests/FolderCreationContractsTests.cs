@@ -12,12 +12,28 @@ namespace Cotton.Mobile.Tests
                 [
                     CottonFileAddActionSheet.NewFolderAction,
                     CottonFileAddActionSheet.UploadFileAction,
+                    CottonFileAddActionSheet.ScanDocumentAction,
                     CottonFileAddActionSheet.UploadPhotoAction,
                     CottonFileAddActionSheet.UploadVideoAction,
                     CottonFileAddActionSheet.UploadPhotoToFolderAction,
                     CottonFileAddActionSheet.UploadVideoToFolderAction,
                 ],
                 CottonFileAddActionSheet.CreateActions());
+        }
+
+        [Fact]
+        public void Add_action_sheet_hides_scan_when_document_scanner_is_unavailable()
+        {
+            Assert.Equal(
+                [
+                    CottonFileAddActionSheet.NewFolderAction,
+                    CottonFileAddActionSheet.UploadFileAction,
+                    CottonFileAddActionSheet.UploadPhotoAction,
+                    CottonFileAddActionSheet.UploadVideoAction,
+                    CottonFileAddActionSheet.UploadPhotoToFolderAction,
+                    CottonFileAddActionSheet.UploadVideoToFolderAction,
+                ],
+                CottonFileAddActionSheet.CreateActions(canScanDocument: false));
         }
 
         [Fact]

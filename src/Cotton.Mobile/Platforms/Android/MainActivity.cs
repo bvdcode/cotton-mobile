@@ -35,6 +35,18 @@ namespace Cotton.Mobile
             StageNotificationIntent(intent);
         }
 
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+        {
+            IAndroidDocumentScanActivityResultBridge? scanResultBridge = IPlatformApplication.Current?.Services
+                .GetService<IAndroidDocumentScanActivityResultBridge>();
+            if (scanResultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
+            {
+                return;
+            }
+
+            base.OnActivityResult(requestCode, resultCode, data);
+        }
+
         protected override void OnResume()
         {
             base.OnResume();

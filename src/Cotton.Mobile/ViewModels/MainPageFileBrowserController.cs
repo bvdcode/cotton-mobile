@@ -46,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonOfflineFilePinStore _offlineFilePinStore;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileUploadPickerService _fileUploadPickerService;
+        private readonly IDocumentScanService _documentScanService;
         private readonly IPhotoUploadPickerService _photoUploadPickerService;
         private readonly IVideoUploadPickerService _videoUploadPickerService;
         private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
@@ -83,6 +84,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonOfflineFilePinStore offlineFilePinStore,
             IFileBrowserPreferenceStore preferenceStore,
             IFileUploadPickerService fileUploadPickerService,
+            IDocumentScanService documentScanService,
             IPhotoUploadPickerService photoUploadPickerService,
             IVideoUploadPickerService videoUploadPickerService,
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
@@ -105,6 +107,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(offlineFilePinStore);
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
+            ArgumentNullException.ThrowIfNull(documentScanService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
             ArgumentNullException.ThrowIfNull(videoUploadPickerService);
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
@@ -127,6 +130,7 @@ namespace Cotton.Mobile.ViewModels
             _offlineFilePinStore = offlineFilePinStore;
             _preferenceStore = preferenceStore;
             _fileUploadPickerService = fileUploadPickerService;
+            _documentScanService = documentScanService;
             _photoUploadPickerService = photoUploadPickerService;
             _videoUploadPickerService = videoUploadPickerService;
             _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
@@ -433,7 +437,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonFileAddActionSheet.CreateTitle(folder),
                 CottonFileAddActionSheet.CancelAction,
                 null,
-                CottonFileAddActionSheet.CreateActions().ToArray());
+                CottonFileAddActionSheet.CreateActions(_documentScanService.IsAvailable).ToArray());
 
             if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
             {
@@ -444,6 +448,24 @@ namespace Cotton.Mobile.ViewModels
             if (normalizedAction == CottonFileAddActionSheet.NewFolderAction)
             {
                 await CreateFolderAsync(instanceUri, folder);
+            }
+            else if (normalizedAction == CottonFileAddActionSheet.UploadFileAction)
+            {
+                await UploadPickedSourceAsync(
+                    instanceUri,
+                    folder,
+                    _fileUploadPickerService.PickFileAsync,
+                    "file",
+                    "Could not choose file.");
+            }
+            else if (normalizedAction == CottonFileAddActionSheet.ScanDocumentAction)
+            {
+                await UploadPickedSourceAsync(
+                    instanceUri,
+                    folder,
+                    _documentScanService.ScanDocumentAsync,
+                    "document",
+                    "Could not scan document.");
             }
             else if (normalizedAction == CottonFileAddActionSheet.UploadPhotoAction)
             {
@@ -478,15 +500,6 @@ namespace Cotton.Mobile.ViewModels
                     _videoUploadPickerService.PickVideoAsync,
                     "video",
                     "Could not choose video.");
-            }
-            else if (normalizedAction == CottonFileAddActionSheet.UploadFileAction)
-            {
-                await UploadPickedSourceAsync(
-                    instanceUri,
-                    folder,
-                    _fileUploadPickerService.PickFileAsync,
-                    "file",
-                    "Could not choose file.");
             }
         }
 

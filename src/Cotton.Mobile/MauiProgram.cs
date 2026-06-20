@@ -120,6 +120,10 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonShareTransferEnqueueCoordinator, CottonShareTransferEnqueueCoordinator>();
 #if ANDROID
 			builder.Services.AddSingleton<IAndroidShareIntentStagingService, AndroidShareIntentStagingService>();
+			builder.Services.AddSingleton<IAndroidDocumentScanActivityResultBridge, AndroidDocumentScanActivityResultBridge>();
+			builder.Services.AddSingleton<IDocumentScanService, AndroidDocumentScanService>();
+#else
+			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();

@@ -8,5 +8,8 @@ namespace Cotton.Mobile.Services
         public const string CompressionQuality = "cottonMobileCompressionQuality";
         public const string PreserveMetadata = "cottonMobilePreserveMetadata";
         public const string TransferPolicy = "cottonMobileTransferPolicy";
+        public const string DocumentScannerMode = "cottonMobileDocumentScannerMode";
+        public const string DocumentScannerResultFormat = "cottonMobileDocumentScannerResultFormat";
+        public const string DocumentScannerPageCount = "cottonMobileDocumentScannerPageCount";
     }
 }

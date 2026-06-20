@@ -125,6 +125,10 @@
 			Include="Xamarin.AndroidX.SavedState.SavedState.Ktx"
 			Version="1.5.0"
 			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
+		<PackageReference
+			Include="Net.Google.MLKit.DocumentScanner"
+			Version="16.1.0"
+			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'" />
 	</ItemGroup>
 
 	<Target

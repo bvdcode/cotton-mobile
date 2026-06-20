@@ -42,6 +42,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Sync root ready", item.StatusText);
             Assert.True(item.IsReady);
             Assert.False(item.IsAttentionVisible);
+            Assert.True(item.CanRunNow);
+            Assert.Equal("Run now", item.RunNowActionText);
         }
 
         [Fact]
@@ -62,6 +64,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Choose local folder", item.StatusText);
             Assert.False(item.IsReady);
             Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
         }
 
         [Fact]
@@ -87,6 +90,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("2 folders set to sync", state.SummaryText);
             Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
             Assert.Equal("Device to cloud · On this device", state.Items[0].DetailText);
+            Assert.False(state.Items[0].CanRunNow);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(

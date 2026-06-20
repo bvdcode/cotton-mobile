@@ -4,6 +4,7 @@
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.SyncSettingsPage"
+             x:Name="SyncPageRoot"
              x:DataType="viewModels:SyncSettingsViewModel"
              Shell.NavBarIsVisible="True"
              Title="Sync"
@@ -77,7 +78,7 @@
                                 Padding="14"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                             <Grid ColumnDefinitions="*,Auto"
-                                  RowDefinitions="Auto,Auto,Auto"
+                                  RowDefinitions="Auto,Auto,Auto,Auto"
                                   RowSpacing="4"
                                   ColumnSpacing="12">
                                 <Label Text="{Binding Title}"
@@ -109,6 +110,17 @@
                                        MaxLines="1"
                                        LineBreakMode="TailTruncation"
                                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                                <Button Grid.Row="3"
+                                        Grid.ColumnSpan="2"
+                                        Text="{Binding RunNowActionText}"
+                                        Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
+                                        CommandParameter="{Binding .}"
+                                        IsEnabled="{Binding CanRunNow}"
+                                        IsVisible="{Binding CanRunNow}"
+                                        Style="{StaticResource FileChromeButton}"
+                                        HeightRequest="40"
+                                        Margin="0,6,0,0" />
                             </Grid>
                         </Border>
                     </DataTemplate>

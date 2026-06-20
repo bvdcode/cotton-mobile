@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Services
             StatusText = root.StatusText;
             IsReady = root.CanRunSync;
             IsAttentionVisible = root.NeedsUserAction || !root.CanRunSync;
+            CanRunNow = root.CanRunSync && root.Direction == CottonSyncDirection.CloudToDevice;
         }
 
         public Guid Id { get; }
@@ -28,6 +29,10 @@ namespace Cotton.Mobile.Services
         public bool IsReady { get; }
 
         public bool IsAttentionVisible { get; }
+
+        public bool CanRunNow { get; }
+
+        public string RunNowActionText => "Run now";
 
         private static string CreateDirectionText(CottonSyncDirection direction)
         {

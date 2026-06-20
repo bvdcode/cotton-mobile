@@ -133,12 +133,16 @@ namespace Cotton.Mobile
 #endif
 			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
 			builder.Services.AddSingleton<
+				ICottonCloudToDeviceSyncFolderContentSource,
+				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+			builder.Services.AddSingleton<
 				ICottonCloudToDeviceSyncFileOperator,
 				CottonAppPrivateCloudToDeviceSyncFileOperator>();
 			builder.Services.AddSingleton(services =>
 				new CottonCloudToDeviceSyncPlanExecutor(
 					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
 					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
+			builder.Services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
 			builder.Services.AddSingleton<ICottonCameraBackupSettingsStore, PreferencesCottonCameraBackupSettingsStore>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();

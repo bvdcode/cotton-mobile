@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Services
         private const string ThumbnailCacheName = "Thumbnails";
         private const string FolderListingsName = "Folder listings";
         private const string DownloadedFilesName = "Downloaded files";
+        private const string TransferStagingName = "Pending uploads";
         private const string EvictableDownloadsName = "Evictable downloads";
         private const string TemporaryThumbnailFileExtension = ".tmp";
         private const long FolderListingBudgetBytes = 25 * Megabyte;
@@ -56,6 +57,7 @@ namespace Cotton.Mobile.Services
                         SearchOption.AllDirectories,
                         cancellationToken,
                         includeTemporaryDownloads: false);
+                    CottonStorageCategorySnapshot transferStaging = ScanTransferStaging(cancellationToken);
                     CottonOfflineStorageScan offlineFiles = ScanOfflineFiles(cancellationToken);
                     CottonStorageCategorySnapshot evictableDownloads = ScanDirectory(
                         EvictableDownloadsName,
@@ -74,6 +76,7 @@ namespace Cotton.Mobile.Services
                         thumbnails,
                         folderListings,
                         downloadedFiles,
+                        transferStaging,
                         CottonOnDeviceStorageSummary.Create(
                             offlineFiles.AvailableFileCount,
                             offlineFiles.AvailableBytes,
@@ -300,6 +303,47 @@ namespace Cotton.Mobile.Services
             }
 
             return new CottonStorageCategorySnapshot(name, sizeBytes, fileCount);
+        }
+
+        private CottonStorageCategorySnapshot ScanTransferStaging(CancellationToken cancellationToken)
+        {
+            string transferMetadataRootDirectory = CottonMobileStoragePaths.CreateTransferMetadataRootDirectory();
+            if (!Directory.Exists(transferMetadataRootDirectory))
+            {
+                return new CottonStorageCategorySnapshot(TransferStagingName, 0, 0);
+            }
+
+            long sizeBytes = 0;
+            int fileCount = 0;
+            try
+            {
+                foreach (string instanceDirectory in Directory.EnumerateDirectories(
+                    transferMetadataRootDirectory,
+                    "*",
+                    SearchOption.TopDirectoryOnly))
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    string stagingDirectory = Path.Combine(
+                        instanceDirectory,
+                        CottonMobileStoragePaths.TransferStagingDirectoryName);
+                    CottonStorageCategorySnapshot staging = ScanDirectory(
+                        TransferStagingName,
+                        stagingDirectory,
+                        SearchOption.AllDirectories,
+                        cancellationToken);
+                    sizeBytes += staging.SizeBytes;
+                    fileCount += staging.FileCount;
+                }
+            }
+            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
+            {
+                _logger.LogDebug(
+                    exception,
+                    "Failed to finish scanning Cotton mobile transfer staging root directory {Directory}.",
+                    transferMetadataRootDirectory);
+            }
+
+            return new CottonStorageCategorySnapshot(TransferStagingName, sizeBytes, fileCount);
         }
 
         private CottonOfflineStorageScan ScanOfflineFiles(CancellationToken cancellationToken)

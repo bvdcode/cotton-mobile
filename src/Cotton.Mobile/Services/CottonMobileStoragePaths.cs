@@ -14,12 +14,13 @@ namespace Cotton.Mobile.Services
         private const string TransferMetadataDirectoryName = "CottonTransfers";
         private const string CameraBackupMetadataDirectoryName = "CottonCameraBackup";
         private const string OfflineFileMetadataDirectoryName = "CottonOfflineFiles";
-        private const string TransferStagingDirectoryName = "Staged";
         private const string ShareIntakeDirectoryName = "CottonShareInbox";
         private const string TemporaryDownloadDirectoryName = ".temp";
         private const string TemporaryDownloadFileExtension = ".download";
 
         public const string DownloadDirectoryName = "CottonDownloads";
+
+        public const string TransferStagingDirectoryName = "Staged";
 
         public static string CreateDownloadsDirectory()
         {

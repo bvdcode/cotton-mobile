@@ -98,6 +98,7 @@ namespace Cotton.Mobile.Services
                 lines.Add($"Thumbnail cache: {FormatStorageCategory(context.StorageSummary.ThumbnailCache)}");
                 lines.Add($"Folder listings: {FormatStorageCategory(context.StorageSummary.FolderListings)}");
                 lines.Add($"Downloaded files: {FormatStorageCategory(context.StorageSummary.DownloadedFiles)}");
+                lines.Add($"Pending uploads: {FormatStorageCategory(context.StorageSummary.TransferStaging)}");
             }
 
             return string.Join(Environment.NewLine, lines);

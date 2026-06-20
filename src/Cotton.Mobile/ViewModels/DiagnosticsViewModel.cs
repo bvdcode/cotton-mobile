@@ -248,6 +248,7 @@ namespace Cotton.Mobile.ViewModels
                         CreateItem("Thumbnails", summary is null ? null : FormatStorageCategory(summary.ThumbnailCache)),
                         CreateItem("Folder lists", summary is null ? null : FormatStorageCategory(summary.FolderListings)),
                         CreateItem("Downloads", summary is null ? null : FormatStorageCategory(summary.DownloadedFiles)),
+                        CreateItem("Pending uploads", summary is null ? null : FormatStorageCategory(summary.TransferStaging)),
                     ]),
                 new DiagnosticsSectionViewModel(
                     "Remote push",

@@ -19,6 +19,8 @@ namespace Cotton.Mobile.ViewModels
         private string _folderListingFileCountText = "0 files";
         private string _downloadedSizeText = "0 B";
         private string _downloadedFileCountText = "0 files";
+        private string _transferStagingSizeText = "0 B";
+        private string _transferStagingFileCountText = "0 files";
         private string _onDeviceSummaryText = CottonOnDeviceStorageSummary.Empty.SummaryText;
         private string _storageBudgetSummaryText = CottonStorageBudgetSummary.Empty.SummaryText;
         private string _protectedOfflineText = CottonStorageBudgetSummary.Empty.ProtectedOfflineText;
@@ -123,6 +125,18 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _downloadedFileCountText;
             private set => SetProperty(ref _downloadedFileCountText, value);
+        }
+
+        public string TransferStagingSizeText
+        {
+            get => _transferStagingSizeText;
+            private set => SetProperty(ref _transferStagingSizeText, value);
+        }
+
+        public string TransferStagingFileCountText
+        {
+            get => _transferStagingFileCountText;
+            private set => SetProperty(ref _transferStagingFileCountText, value);
         }
 
         public string OnDeviceSummaryText
@@ -300,6 +314,8 @@ namespace Cotton.Mobile.ViewModels
             FolderListingFileCountText = FormatFileCount(summary.FolderListings.FileCount);
             DownloadedSizeText = CottonFileSizeFormatter.Format(summary.DownloadedFiles.SizeBytes);
             DownloadedFileCountText = FormatFileCount(summary.DownloadedFiles.FileCount);
+            TransferStagingSizeText = CottonFileSizeFormatter.Format(summary.TransferStaging.SizeBytes);
+            TransferStagingFileCountText = FormatFileCount(summary.TransferStaging.FileCount);
             ShowOnDeviceStorage(summary.OnDeviceStorage);
             ShowStorageBudget(summary.Budget);
         }

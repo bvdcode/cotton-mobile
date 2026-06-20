@@ -8,7 +8,9 @@ namespace Cotton.Mobile.Services
             Guid targetId,
             string displayName,
             string? remoteETag,
-            long? sizeBytes)
+            DateTime? remoteUpdatedAtUtc,
+            long? sizeBytes,
+            string? contentType)
         {
             if (!Enum.IsDefined(action))
             {
@@ -40,7 +42,11 @@ namespace Cotton.Mobile.Services
             TargetId = targetId;
             DisplayName = displayName.Trim();
             RemoteETag = string.IsNullOrWhiteSpace(remoteETag) ? null : remoteETag.Trim();
+            RemoteUpdatedAtUtc = remoteUpdatedAtUtc.HasValue
+                ? CottonLocalFileFreshness.NormalizeUtc(remoteUpdatedAtUtc.Value)
+                : null;
             SizeBytes = sizeBytes;
+            ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
         }
 
         public CottonCloudToDeviceSyncActionKind Action { get; }
@@ -53,7 +59,11 @@ namespace Cotton.Mobile.Services
 
         public string? RemoteETag { get; }
 
+        public DateTime? RemoteUpdatedAtUtc { get; }
+
         public long? SizeBytes { get; }
+
+        public string? ContentType { get; }
 
         public bool RequiresDownload =>
             Action is CottonCloudToDeviceSyncActionKind.DownloadNewFile
@@ -68,5 +78,27 @@ namespace Cotton.Mobile.Services
                 or CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision;
 
         public bool IsNoOp => Action == CottonCloudToDeviceSyncActionKind.KeepExistingFile;
+
+        public CottonSyncedFileSnapshot CreateManifestItem(DateTime syncedAtUtc)
+        {
+            if (TargetType != CottonFileBrowserEntryType.File)
+            {
+                throw new InvalidOperationException("Only file sync plan items can create synced-file metadata.");
+            }
+
+            if (string.IsNullOrWhiteSpace(RemoteETag) || !RemoteUpdatedAtUtc.HasValue)
+            {
+                throw new InvalidOperationException("Synced-file metadata requires a remote ETag and updated timestamp.");
+            }
+
+            return new CottonSyncedFileSnapshot(
+                TargetId,
+                DisplayName,
+                RemoteETag,
+                RemoteUpdatedAtUtc.Value,
+                SizeBytes,
+                ContentType,
+                syncedAtUtc);
+        }
     }
 }

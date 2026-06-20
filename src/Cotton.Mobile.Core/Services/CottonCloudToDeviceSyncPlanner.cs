@@ -44,7 +44,9 @@ namespace Cotton.Mobile.Services
                     localFile.FileId,
                     localFile.FileName,
                     localFile.ETag,
-                    localFile.SizeBytes));
+                    localFile.RemoteUpdatedAtUtc,
+                    localFile.SizeBytes,
+                    localFile.ContentType));
             }
 
             return new CottonCloudToDeviceSyncPlanSnapshot(
@@ -66,7 +68,9 @@ namespace Cotton.Mobile.Services
                     entry.Id,
                     entry.Name,
                     remoteETag: null,
-                    sizeBytes: null);
+                    remoteUpdatedAtUtc: null,
+                    sizeBytes: null,
+                    contentType: null);
             }
 
             if (string.IsNullOrWhiteSpace(entry.ETag))
@@ -77,7 +81,9 @@ namespace Cotton.Mobile.Services
                     entry.Id,
                     entry.Name,
                     remoteETag: null,
-                    entry.SizeBytes);
+                    entry.UpdatedAtUtc,
+                    entry.SizeBytes,
+                    entry.ContentType);
             }
 
             if (!localByFileId.TryGetValue(entry.Id, out CottonSyncedFileSnapshot? localFile))
@@ -108,7 +114,9 @@ namespace Cotton.Mobile.Services
                 entry.Id,
                 entry.Name,
                 entry.ETag,
-                entry.SizeBytes);
+                entry.UpdatedAtUtc,
+                entry.SizeBytes,
+                entry.ContentType);
         }
 
         private static Dictionary<Guid, CottonSyncedFileSnapshot> CreateLocalFileMap(

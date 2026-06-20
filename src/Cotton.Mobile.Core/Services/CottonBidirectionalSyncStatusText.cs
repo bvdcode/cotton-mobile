@@ -2,11 +2,25 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonBidirectionalSyncStatusText
     {
+        public const string ActionLabel = "Sync both ways";
+
         public const string ExecutionUnavailableStatus = "Bidirectional sync needs conflict review before it can run.";
         public const string ConflictReviewRequiredStatus = "Bidirectional sync needs conflict review.";
         public const string DestructiveReviewRequiredStatus = "Bidirectional sync needs review before removing files.";
         public const string ConfirmDestructiveTitle = "Run bidirectional sync?";
         public const string ConfirmDestructiveAction = "Sync";
+
+        public static string AccountUnavailableStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.AccountUnavailableStatus;
+
+        public static string OfflineUnavailableStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+
+        public static string CancelledStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.CancelledStatus;
+
+        public static string FailedStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.FailedStatus;
 
         public static string CreateStartingStatus(string folderName)
         {

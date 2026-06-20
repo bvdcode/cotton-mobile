@@ -130,9 +130,11 @@ namespace Cotton.Mobile.ViewModels
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
             CottonDeviceToCloudSyncRootSetupService deviceToCloudSyncRootSetupService,
+            CottonBidirectionalSyncRootSetupService bidirectionalSyncRootSetupService,
             ICottonSyncLocalRootPickerService syncLocalRootPickerService,
             CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
+            CottonBidirectionalSyncCoordinator bidirectionalSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
             IDeviceStorageSpaceService deviceStorageSpaceService,
@@ -185,9 +187,11 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(bidirectionalSyncRootSetupService);
             ArgumentNullException.ThrowIfNull(syncLocalRootPickerService);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(bidirectionalSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
@@ -250,9 +254,11 @@ namespace Cotton.Mobile.ViewModels
                 thumbnailProvider,
                 cloudToDeviceSyncRootSetupService,
                 deviceToCloudSyncRootSetupService,
+                bidirectionalSyncRootSetupService,
                 syncLocalRootPickerService,
                 cloudToDeviceSyncCoordinator,
                 deviceToCloudSyncCoordinator,
+                bidirectionalSyncCoordinator,
                 networkAccess,
                 foregroundService,
                 deviceStorageSpaceService,

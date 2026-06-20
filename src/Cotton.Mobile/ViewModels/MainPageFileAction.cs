@@ -12,6 +12,7 @@ namespace Cotton.Mobile.ViewModels
         Share,
         ShareLink,
         SyncFolderToDevice,
+        SyncFolderBothWays,
         SyncFolderFromSelectedFolder,
         SyncFolderToSelectedFolder,
     }

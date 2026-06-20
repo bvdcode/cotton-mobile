@@ -22,6 +22,7 @@ namespace Cotton.Mobile.ViewModels
         private const string ShareFileAction = "Share file";
         private const string ShareLinkAction = "Share link";
         private const string SyncFromSelectedFolderAction = CottonDeviceToCloudSyncStatusText.ActionLabel;
+        private const string SyncBothWaysAction = CottonBidirectionalSyncStatusText.ActionLabel;
         private const string SyncToDeviceAction = CottonCloudToDeviceSyncStatusText.ActionLabel;
         private const string SyncToSelectedFolderAction = CottonCloudToDeviceSyncStatusText.ChooseFolderActionLabel;
         private const string NewFolderPromptTitle = "New folder";
@@ -61,9 +62,11 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileThumbnailProvider _thumbnailProvider;
         private readonly CottonCloudToDeviceSyncRootSetupService _cloudToDeviceSyncRootSetupService;
         private readonly CottonDeviceToCloudSyncRootSetupService _deviceToCloudSyncRootSetupService;
+        private readonly CottonBidirectionalSyncRootSetupService _bidirectionalSyncRootSetupService;
         private readonly ICottonSyncLocalRootPickerService _syncLocalRootPickerService;
         private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceSyncCoordinator;
         private readonly CottonDeviceToCloudSyncCoordinator _deviceToCloudSyncCoordinator;
+        private readonly CottonBidirectionalSyncCoordinator _bidirectionalSyncCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IApplicationForegroundService _foregroundService;
         private readonly IDeviceStorageSpaceService _deviceStorageSpaceService;
@@ -105,9 +108,11 @@ namespace Cotton.Mobile.ViewModels
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
             CottonDeviceToCloudSyncRootSetupService deviceToCloudSyncRootSetupService,
+            CottonBidirectionalSyncRootSetupService bidirectionalSyncRootSetupService,
             ICottonSyncLocalRootPickerService syncLocalRootPickerService,
             CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
             CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
+            CottonBidirectionalSyncCoordinator bidirectionalSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
             IDeviceStorageSpaceService deviceStorageSpaceService,
@@ -133,9 +138,11 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(bidirectionalSyncRootSetupService);
             ArgumentNullException.ThrowIfNull(syncLocalRootPickerService);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(bidirectionalSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
@@ -161,9 +168,11 @@ namespace Cotton.Mobile.ViewModels
             _thumbnailProvider = thumbnailProvider;
             _cloudToDeviceSyncRootSetupService = cloudToDeviceSyncRootSetupService;
             _deviceToCloudSyncRootSetupService = deviceToCloudSyncRootSetupService;
+            _bidirectionalSyncRootSetupService = bidirectionalSyncRootSetupService;
             _syncLocalRootPickerService = syncLocalRootPickerService;
             _cloudToDeviceSyncCoordinator = cloudToDeviceSyncCoordinator;
             _deviceToCloudSyncCoordinator = deviceToCloudSyncCoordinator;
+            _bidirectionalSyncCoordinator = bidirectionalSyncCoordinator;
             _networkAccess = networkAccess;
             _foregroundService = foregroundService;
             _deviceStorageSpaceService = deviceStorageSpaceService;
@@ -742,6 +751,9 @@ namespace Cotton.Mobile.ViewModels
                 case MainPageFileAction.SyncFolderFromSelectedFolder:
                     await SyncFolderFromDeviceAsync(currentEntry);
                     break;
+                case MainPageFileAction.SyncFolderBothWays:
+                    await SyncFolderBothWaysAsync(currentEntry);
+                    break;
                 case MainPageFileAction.SyncFolderToSelectedFolder:
                     await SyncFolderToDeviceAsync(currentEntry, useSelectedFolder: true);
                     break;
@@ -768,6 +780,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 actions.Add(SyncToSelectedFolderAction);
                 actions.Add(SyncFromSelectedFolderAction);
+                actions.Add(SyncBothWaysAction);
             }
 
             string? action = await _dialogService.ShowActionSheetAsync(
@@ -804,6 +817,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case SyncFromSelectedFolderAction:
                     await SyncFolderFromDeviceAsync(currentFolder);
+                    break;
+                case SyncBothWaysAction:
+                    await SyncFolderBothWaysAsync(currentFolder);
                     break;
             }
         }
@@ -2242,6 +2258,175 @@ namespace Cotton.Mobile.ViewModels
                 CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
                 CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(fileCount),
                 CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
+                CancelAction);
+        }
+
+        private async Task SyncFolderBothWaysAsync(CottonFileBrowserEntry folder)
+        {
+            if (!folder.IsFolder)
+            {
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to sync folders.");
+                return;
+            }
+
+            string? accountScopeKey = _accountScopeKey;
+            if (string.IsNullOrWhiteSpace(accountScopeKey))
+            {
+                _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.AccountUnavailableStatus);
+                return;
+            }
+
+            if (ShowOfflineRetryIfNeeded(
+                    MainPageFileAction.SyncFolderBothWays,
+                    folder,
+                    CottonBidirectionalSyncStatusText.OfflineUnavailableStatus))
+            {
+                return;
+            }
+
+            CottonSyncLocalRootSnapshot? selectedLocalRoot;
+            try
+            {
+                selectedLocalRoot = await _syncLocalRootPickerService.PickUserSelectedDocumentTreeAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick Cotton mobile bidirectional sync folder.");
+                _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.FailedStatus);
+                return;
+            }
+
+            if (selectedLocalRoot is null)
+            {
+                _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.CancelledStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation =
+                BeginFileAction(CottonBidirectionalSyncStatusText.CreateStartingStatus(folder.Name));
+            bool shouldRunRecoveryRefresh = false;
+
+            try
+            {
+                var destination = new CottonUploadDestinationSnapshot(
+                    folder.Id,
+                    folder.Name,
+                    CreateChildFolderPath(folder.Name));
+                CottonBidirectionalSyncRootSetupResult setupResult =
+                    await _bidirectionalSyncRootSetupService.EnableUserSelectedDocumentTreeRootAsync(
+                        instanceUri,
+                        accountScopeKey,
+                        destination,
+                        selectedLocalRoot,
+                        fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                CottonBidirectionalSyncRunSummary summary =
+                    await _bidirectionalSyncCoordinator.RunRootAsync(
+                        instanceUri,
+                        setupResult.Root,
+                        fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                if (summary.NeedsDestructiveReview)
+                {
+                    _display.ShowFileActionLoading(CottonBidirectionalSyncStatusText.DestructiveReviewRequiredStatus);
+                    bool confirmed = await ConfirmBidirectionalDestructiveChangesAsync(
+                        summary.DestructiveReviewLocalDeleteCount,
+                        summary.DestructiveReviewRemoteDeleteCount);
+                    if (!confirmed)
+                    {
+                        ClearFileActionRetry();
+                        _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.CancelledStatus);
+                        return;
+                    }
+
+                    summary = await _bidirectionalSyncCoordinator.RunRootAsync(
+                        instanceUri,
+                        setupResult.Root,
+                        CottonBidirectionalSyncRunOptions.AllowDestructiveDeletes,
+                        fileActionCancellation.Token);
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+                }
+
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.CreateCompletedStatus(summary));
+                shouldRunRecoveryRefresh = summary.HasAppliedChanges;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile bidirectional sync authorization failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile bidirectional sync cancellation {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonBidirectionalSyncStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile bidirectional sync failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to sync Cotton mobile folder both ways {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.SyncFolderBothWays,
+                    folder,
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonBidirectionalSyncStatusText.FailedStatus,
+                        CottonBidirectionalSyncStatusText.OfflineUnavailableStatus));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task<bool> ConfirmBidirectionalDestructiveChangesAsync(
+            int localDeleteCount,
+            int remoteDeleteCount)
+        {
+            return await _dialogService.ShowConfirmationAsync(
+                CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle,
+                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(
+                    localDeleteCount,
+                    remoteDeleteCount),
+                CottonBidirectionalSyncStatusText.ConfirmDestructiveAction,
                 CancelAction);
         }
 

@@ -131,6 +131,11 @@ namespace Cotton.Mobile.Tests
                     skippedCount: 0,
                     blockedCount: 0));
 
+            Assert.Equal("Sync both ways", CottonBidirectionalSyncStatusText.ActionLabel);
+            Assert.Equal("Sync needs a fresh account session.", CottonBidirectionalSyncStatusText.AccountUnavailableStatus);
+            Assert.Equal("Offline. Sync needs internet.", CottonBidirectionalSyncStatusText.OfflineUnavailableStatus);
+            Assert.Equal("Sync cancelled.", CottonBidirectionalSyncStatusText.CancelledStatus);
+            Assert.Equal("Sync failed.", CottonBidirectionalSyncStatusText.FailedStatus);
             Assert.Equal("Syncing Projects both ways...", CottonBidirectionalSyncStatusText.CreateStartingStatus(" Projects "));
             Assert.Equal("Run bidirectional sync?", CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle);
             Assert.Equal("Sync", CottonBidirectionalSyncStatusText.ConfirmDestructiveAction);

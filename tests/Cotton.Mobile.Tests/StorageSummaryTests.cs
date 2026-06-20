@@ -14,12 +14,14 @@ namespace Cotton.Mobile.Tests
                 new CottonStorageCategorySnapshot("Downloaded files", 300, 3),
                 new CottonStorageCategorySnapshot("Pending uploads", 400, 4),
                 CottonOnDeviceStorageSummary.Empty,
-                CottonStorageBudgetSummary.Empty);
+                CottonStorageBudgetSummary.Empty,
+                CottonCloudStorageQuotaSnapshot.Unavailable);
 
             Assert.Equal(1000, summary.TotalSizeBytes);
             Assert.Equal(10, summary.TotalFileCount);
             Assert.Equal(400, summary.TransferStaging.SizeBytes);
             Assert.Equal(4, summary.TransferStaging.FileCount);
+            Assert.Equal(CottonCloudStorageQuotaStatus.Unavailable, summary.CloudQuota.Status);
         }
 
         [Fact]
@@ -32,7 +34,22 @@ namespace Cotton.Mobile.Tests
                     new CottonStorageCategorySnapshot("Downloaded files", 0, 0),
                     null!,
                     CottonOnDeviceStorageSummary.Empty,
-                    CottonStorageBudgetSummary.Empty));
+                    CottonStorageBudgetSummary.Empty,
+                    CottonCloudStorageQuotaSnapshot.Unavailable));
+        }
+
+        [Fact]
+        public void Storage_summary_requires_cloud_quota_state()
+        {
+            Assert.Throws<ArgumentNullException>(
+                () => new CottonStorageSummary(
+                    new CottonStorageCategorySnapshot("Thumbnails", 0, 0),
+                    new CottonStorageCategorySnapshot("Folder listings", 0, 0),
+                    new CottonStorageCategorySnapshot("Downloaded files", 0, 0),
+                    new CottonStorageCategorySnapshot("Pending uploads", 0, 0),
+                    CottonOnDeviceStorageSummary.Empty,
+                    CottonStorageBudgetSummary.Empty,
+                    null!));
         }
     }
 }

@@ -24,6 +24,11 @@ namespace Cotton.Mobile.ViewModels
         private string _onDeviceSummaryText = CottonOnDeviceStorageSummary.Empty.SummaryText;
         private string _storageBudgetSummaryText = CottonStorageBudgetSummary.Empty.SummaryText;
         private string _protectedOfflineText = CottonStorageBudgetSummary.Empty.ProtectedOfflineText;
+        private string _cloudQuotaTitle = CottonCloudStorageQuotaSnapshot.Unavailable.Title;
+        private string _cloudQuotaSummaryText = CottonCloudStorageQuotaSnapshot.Unavailable.SummaryText;
+        private string _cloudQuotaDetailText = CottonCloudStorageQuotaSnapshot.Unavailable.DetailText;
+        private double _cloudQuotaUsageFraction = CottonCloudStorageQuotaSnapshot.Unavailable.UsageFraction;
+        private bool _isCloudQuotaProgressVisible = CottonCloudStorageQuotaSnapshot.Unavailable.IsProgressVisible;
         private string? _status;
 
         public StorageSettingsViewModel(
@@ -55,6 +60,7 @@ namespace Cotton.Mobile.ViewModels
             ClearAllCommand = new AsyncCommand(ClearAllAsync, LogUnhandledCommandException, () => !IsBusy);
             ShowOnDeviceStorage(CottonOnDeviceStorageSummary.Empty);
             ShowStorageBudget(CottonStorageBudgetSummary.Empty);
+            ShowCloudQuota(CottonCloudStorageQuotaSnapshot.Unavailable);
         }
 
         public AsyncCommand LoadCommand { get; }
@@ -161,6 +167,36 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _protectedOfflineText;
             private set => SetProperty(ref _protectedOfflineText, value);
+        }
+
+        public string CloudQuotaTitle
+        {
+            get => _cloudQuotaTitle;
+            private set => SetProperty(ref _cloudQuotaTitle, value);
+        }
+
+        public string CloudQuotaSummaryText
+        {
+            get => _cloudQuotaSummaryText;
+            private set => SetProperty(ref _cloudQuotaSummaryText, value);
+        }
+
+        public string CloudQuotaDetailText
+        {
+            get => _cloudQuotaDetailText;
+            private set => SetProperty(ref _cloudQuotaDetailText, value);
+        }
+
+        public double CloudQuotaUsageFraction
+        {
+            get => _cloudQuotaUsageFraction;
+            private set => SetProperty(ref _cloudQuotaUsageFraction, value);
+        }
+
+        public bool IsCloudQuotaProgressVisible
+        {
+            get => _isCloudQuotaProgressVisible;
+            private set => SetProperty(ref _isCloudQuotaProgressVisible, value);
         }
 
         public string? Status
@@ -350,6 +386,7 @@ namespace Cotton.Mobile.ViewModels
             TransferStagingFileCountText = FormatFileCount(summary.TransferStaging.FileCount);
             ShowOnDeviceStorage(summary.OnDeviceStorage);
             ShowStorageBudget(summary.Budget);
+            ShowCloudQuota(summary.CloudQuota);
         }
 
         private void ShowOnDeviceStorage(CottonOnDeviceStorageSummary summary)
@@ -375,6 +412,17 @@ namespace Cotton.Mobile.ViewModels
             {
                 StorageBudgetBuckets.Add(bucket);
             }
+        }
+
+        private void ShowCloudQuota(CottonCloudStorageQuotaSnapshot quota)
+        {
+            ArgumentNullException.ThrowIfNull(quota);
+
+            CloudQuotaTitle = quota.Title;
+            CloudQuotaSummaryText = quota.SummaryText;
+            CloudQuotaDetailText = quota.DetailText;
+            CloudQuotaUsageFraction = quota.UsageFraction;
+            IsCloudQuotaProgressVisible = quota.IsProgressVisible;
         }
 
         private void RaiseCommandStatesChanged()

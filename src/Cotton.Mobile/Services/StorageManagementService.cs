@@ -110,7 +110,8 @@ namespace Cotton.Mobile.Services
                             folderListings.SizeBytes,
                             FolderListingBudgetBytes,
                             protectedOfflineFileCount,
-                            protectedOfflineBytes));
+                            protectedOfflineBytes),
+                        CottonCloudStorageQuotaSnapshot.Unavailable);
                 },
                 cancellationToken);
         }

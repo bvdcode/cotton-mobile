@@ -2359,11 +2359,12 @@ namespace Cotton.Mobile.ViewModels
                     return false;
                 }
 
-                CottonOfflineFolderPlanSnapshot plan = ShowFolderOfflinePlanStatus(
-                    content,
-                    isCachedEstimate: false);
+                CottonOfflineFolderPlanSnapshot plan = CottonOfflineFolderPlanSnapshot.Create(content);
                 if (plan.CanQueueDirectFiles)
                 {
+                    _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(
+                        plan,
+                        isCachedEstimate: false));
                     return await DownloadFolderDirectFilesOfflineAsync(
                         instanceUri,
                         folder,
@@ -2371,6 +2372,36 @@ namespace Cotton.Mobile.ViewModels
                         fileActionCancellation);
                 }
 
+                if (plan.Status == CottonOfflineFolderPlanStatus.ContainsFolders)
+                {
+                    _display.ShowFileActionLoading(CottonRecursiveOfflineFolderStatusText.ScanningStatus);
+                    CottonOfflineFolderTreeContent tree = await LoadFolderTreeForOfflinePlanAsync(
+                        instanceUri,
+                        content,
+                        fileActionCancellation.Token);
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return false;
+                    }
+
+                    CottonRecursiveOfflineFolderPlanSnapshot recursivePlan =
+                        ShowRecursiveFolderOfflinePlanStatus(tree, isCachedEstimate: false);
+                    if (recursivePlan.CanQueueRecursiveFiles)
+                    {
+                        return await DownloadFolderRecursiveFilesOfflineAsync(
+                            instanceUri,
+                            folder,
+                            tree,
+                            fileActionCancellation);
+                    }
+
+                    return true;
+                }
+
+                _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(
+                    plan,
+                    isCachedEstimate: false));
                 return true;
             }
             catch (Exception exception)
@@ -2447,6 +2478,59 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private Task<CottonOfflineFolderTreeContent> LoadFolderTreeForOfflinePlanAsync(
+            Uri instanceUri,
+            CottonFolderContent content,
+            CancellationToken cancellationToken)
+        {
+            return LoadFolderTreeForOfflinePlanAsync(
+                instanceUri,
+                content,
+                [],
+                cancellationToken);
+        }
+
+        private async Task<CottonOfflineFolderTreeContent> LoadFolderTreeForOfflinePlanAsync(
+            Uri instanceUri,
+            CottonFolderContent content,
+            HashSet<Guid> visitedFolderIds,
+            CancellationToken cancellationToken)
+        {
+            if (!visitedFolderIds.Add(content.FolderId))
+            {
+                throw new InvalidOperationException("Recursive folder offline plan cannot scan repeated folder ids.");
+            }
+
+            var childTrees = new List<CottonOfflineFolderTreeContent>();
+            List<CottonFileBrowserEntry> folders = content
+                .Entries
+                .Where(entry => entry.Type == CottonFileBrowserEntryType.Folder)
+                .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(entry => entry.Id)
+                .ToList();
+            foreach (CottonFileBrowserEntry folderEntry in folders)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var childHandle = new CottonFolderHandle(folderEntry.Id, folderEntry.Name);
+                CottonFolderContent childContent = await _fileBrowserService.GetFolderAsync(
+                    instanceUri,
+                    childHandle,
+                    cancellationToken);
+                cancellationToken.ThrowIfCancellationRequested();
+                await _folderContentCache.SaveFolderAsync(
+                    instanceUri,
+                    childContent,
+                    cancellationToken);
+                childTrees.Add(await LoadFolderTreeForOfflinePlanAsync(
+                    instanceUri,
+                    childContent,
+                    visitedFolderIds,
+                    cancellationToken));
+            }
+
+            return new CottonOfflineFolderTreeContent(content, childTrees);
+        }
+
         private async Task<bool> DownloadFolderDirectFilesOfflineAsync(
             Uri instanceUri,
             CottonFileBrowserEntry folder,
@@ -2454,6 +2538,40 @@ namespace Cotton.Mobile.ViewModels
             CancellationTokenSource fileActionCancellation)
         {
             CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(content);
+            IReadOnlyDictionary<Guid, CottonFileBrowserEntry> filesById =
+                CreateOfflineDownloadFileLookup(content.Entries);
+            return await DownloadFolderQueuedFilesOfflineAsync(
+                instanceUri,
+                folder,
+                queue,
+                filesById,
+                fileActionCancellation);
+        }
+
+        private async Task<bool> DownloadFolderRecursiveFilesOfflineAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry folder,
+            CottonOfflineFolderTreeContent tree,
+            CancellationTokenSource fileActionCancellation)
+        {
+            CottonOfflineDownloadQueueSnapshot queue = CottonOfflineDownloadQueueSnapshot.Create(tree);
+            IReadOnlyDictionary<Guid, CottonFileBrowserEntry> filesById =
+                CreateOfflineDownloadFileLookup(tree.GetFilesDepthFirst());
+            return await DownloadFolderQueuedFilesOfflineAsync(
+                instanceUri,
+                folder,
+                queue,
+                filesById,
+                fileActionCancellation);
+        }
+
+        private async Task<bool> DownloadFolderQueuedFilesOfflineAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry folder,
+            CottonOfflineDownloadQueueSnapshot queue,
+            IReadOnlyDictionary<Guid, CottonFileBrowserEntry> filesById,
+            CancellationTokenSource fileActionCancellation)
+        {
             if (!await ConfirmOfflineFolderStorageAsync(queue, fileActionCancellation.Token))
             {
                 ClearFileActionRetry();
@@ -2481,7 +2599,7 @@ namespace Cotton.Mobile.ViewModels
                         return false;
                     }
 
-                    CottonFileBrowserEntry file = content.Entries.Single(entry => entry.Id == item.FileId);
+                    CottonFileBrowserEntry file = filesById[item.FileId];
                     _display.ShowOfflinePackProgress(
                         CottonOfflinePackProgressSnapshot.CreateRunning(
                             queue,
@@ -2625,12 +2743,39 @@ namespace Cotton.Mobile.ViewModels
             return completedCount == queue.TotalCount ? null : queue.Items[completedCount];
         }
 
+        private static IReadOnlyDictionary<Guid, CottonFileBrowserEntry> CreateOfflineDownloadFileLookup(
+            IEnumerable<CottonFileBrowserEntry> entries)
+        {
+            var filesById = new Dictionary<Guid, CottonFileBrowserEntry>();
+            foreach (CottonFileBrowserEntry entry in entries.Where(entry => entry.Type == CottonFileBrowserEntryType.File))
+            {
+                if (!filesById.TryAdd(entry.Id, entry))
+                {
+                    throw new InvalidOperationException("Offline folder download queue cannot contain duplicate file ids.");
+                }
+            }
+
+            return filesById;
+        }
+
         private CottonOfflineFolderPlanSnapshot ShowFolderOfflinePlanStatus(
             CottonFolderContent content,
             bool isCachedEstimate)
         {
             CottonOfflineFolderPlanSnapshot plan = CottonOfflineFolderPlanSnapshot.Create(content);
             _display.ShowFilesStatus(CottonOfflineFolderStatusText.CreatePlanStatus(plan, isCachedEstimate));
+            return plan;
+        }
+
+        private CottonRecursiveOfflineFolderPlanSnapshot ShowRecursiveFolderOfflinePlanStatus(
+            CottonOfflineFolderTreeContent tree,
+            bool isCachedEstimate)
+        {
+            CottonRecursiveOfflineFolderPlanSnapshot plan =
+                CottonRecursiveOfflineFolderPlanSnapshot.Create(tree);
+            _display.ShowFilesStatus(CottonRecursiveOfflineFolderStatusText.CreatePlanStatus(
+                plan,
+                isCachedEstimate));
             return plan;
         }
 

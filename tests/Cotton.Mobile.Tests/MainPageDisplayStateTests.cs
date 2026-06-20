@@ -346,6 +346,53 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_selection_marks_visible_entries_and_hides_add_entry_point()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            CottonFileBrowserEntry file = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            CottonFileBrowserEntry folder = display.FileEntries.Single(entry => entry.Name == "Projects");
+
+            display.SelectFileEntry(file);
+            display.ToggleFileEntrySelection(folder);
+
+            Assert.True(display.IsFileSelectionActive);
+            Assert.True(display.IsFileSelectionBarVisible);
+            Assert.False(display.IsFileAddButtonVisible);
+            Assert.False(display.IsFilesEmptyAddActionVisible);
+            Assert.Equal("2 selected", display.FileSelection.TitleText);
+            Assert.Equal("1 file · 1 folder", display.FileSelection.DetailText);
+            Assert.True(display.FileEntries.Single(entry => entry.Name == "zeta.txt").IsSelected);
+            Assert.True(display.FileEntries.Single(entry => entry.Name == "Projects").IsSelected);
+
+            display.ToggleFileEntrySelection(file);
+
+            Assert.Equal("1 selected", display.FileSelection.TitleText);
+            Assert.False(display.FileEntries.Single(entry => entry.Name == "zeta.txt").IsSelected);
+
+            display.ClearFileSelection();
+
+            Assert.False(display.IsFileSelectionActive);
+            Assert.True(display.IsFileAddButtonVisible);
+            Assert.All(display.FileEntries, entry => Assert.False(entry.IsSelected));
+        }
+
+        [Fact]
+        public void File_selection_clears_when_new_files_load()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            display.SelectFileEntry(display.FileEntries.Single(entry => entry.Name == "zeta.txt"));
+
+            display.ShowFiles(
+                CreateContent(CreateFile("fresh.txt", "Text", 10, Newer)),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+
+            Assert.False(display.IsFileSelectionActive);
+            Assert.False(display.FileEntries.Single(entry => entry.Name == "fresh.txt").IsSelected);
+        }
+
+        [Fact]
         public void Preferences_apply_view_mode_and_sort_mode()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

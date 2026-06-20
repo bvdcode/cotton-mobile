@@ -105,6 +105,22 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Selection_marker_preserves_file_identity_and_local_state()
+        {
+            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            var localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
+
+            CottonFileBrowserEntry selected = entry.WithSelection(true).WithLocalFile(localFile);
+            CottonFileBrowserEntry cleared = selected.WithSelection(false);
+
+            Assert.Equal(entry.Id, selected.Id);
+            Assert.True(selected.IsSelected);
+            Assert.True(selected.HasLocalCopy);
+            Assert.False(cleared.IsSelected);
+            Assert.True(cleared.HasLocalCopy);
+        }
+
+        [Fact]
         public void Offline_file_availability_distinguishes_available_stale_and_missing_pins()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));

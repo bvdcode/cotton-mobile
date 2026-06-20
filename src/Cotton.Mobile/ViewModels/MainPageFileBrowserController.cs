@@ -43,6 +43,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenUnavailableStatus = CottonFileOpenRouter.OpenUnavailableStatus;
         private const int PayloadTooLargeStatusCode = 413;
         private const int InsufficientStorageStatusCode = 507;
+        private static readonly TimeSpan SelectionClearActivationSettleDuration = TimeSpan.FromMilliseconds(350);
 
         private readonly MainPageDisplayState _display;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -88,6 +89,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _lastFileLoadDisplayedCachedContent;
         private bool _isRecoveryRefreshInProgress;
         private string? _fileLoadRecoveryPendingAfterBusyReason;
+        private DateTimeOffset _ignoreEntryInteractionUntil = DateTimeOffset.MinValue;
 
         public MainPageFileBrowserController(
             MainPageDisplayState display,
@@ -386,6 +388,17 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            if (!_display.IsFileSelectionActive && ShouldIgnoreEntryInteraction())
+            {
+                return;
+            }
+
+            if (_display.IsFileSelectionActive)
+            {
+                _display.ToggleFileEntrySelection(currentEntry);
+                return;
+            }
+
             if (currentEntry.IsFolder)
             {
                 ClearFileActionRetry();
@@ -405,6 +418,17 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            if (!_display.IsFileSelectionActive && ShouldIgnoreEntryInteraction())
+            {
+                return;
+            }
+
+            if (_display.IsFileSelectionActive)
+            {
+                _display.ToggleFileEntrySelection(currentEntry);
+                return;
+            }
+
             if (currentEntry.IsFolder)
             {
                 ClearFileActionRetry();
@@ -413,6 +437,42 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await ShowFileActionsAsync(currentEntry);
+        }
+
+        public Task BeginEntrySelectionAsync(CottonFileBrowserEntry entry)
+        {
+            ArgumentNullException.ThrowIfNull(entry);
+            CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
+            if (currentEntry is null || !_display.IsFileBrowserChromeEnabled)
+            {
+                return Task.CompletedTask;
+            }
+
+            _display.SelectFileEntry(currentEntry);
+            _ignoreEntryInteractionUntil = DateTimeOffset.MinValue;
+            return Task.CompletedTask;
+        }
+
+        public Task ClearSelectionAsync()
+        {
+            if (_display.IsFileSelectionActive)
+            {
+                _ignoreEntryInteractionUntil = DateTimeOffset.UtcNow.Add(SelectionClearActivationSettleDuration);
+            }
+
+            _display.ClearFileSelection();
+            return Task.CompletedTask;
+        }
+
+        private bool ShouldIgnoreEntryInteraction()
+        {
+            if (_ignoreEntryInteractionUntil <= DateTimeOffset.UtcNow)
+            {
+                _ignoreEntryInteractionUntil = DateTimeOffset.MinValue;
+                return false;
+            }
+
+            return true;
         }
 
         public async Task ShowViewActionsAsync()

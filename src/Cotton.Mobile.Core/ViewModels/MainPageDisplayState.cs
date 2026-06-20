@@ -28,6 +28,7 @@ namespace Cotton.Mobile.ViewModels
         private CottonTransferActivityIndicator _transferActivityIndicator = CottonTransferActivityIndicator.Empty;
         private CottonCameraBackupActivityIndicator _backupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
         private CottonOfflinePackProgressSnapshot _offlinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
+        private CottonFileSelectionSnapshot _fileSelection = CottonFileSelectionSnapshot.Empty;
         private string _fileSearchText = string.Empty;
         private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
         private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
@@ -307,6 +308,25 @@ namespace Cotton.Mobile.ViewModels
         public bool IsOfflinePackProgressVisible =>
             IsProfileVisible && OfflinePackProgress.IsVisible;
 
+        public CottonFileSelectionSnapshot FileSelection
+        {
+            get => _fileSelection;
+            private set
+            {
+                if (SetProperty(ref _fileSelection, value))
+                {
+                    OnPropertyChanged(nameof(IsFileSelectionActive));
+                    OnPropertyChanged(nameof(IsFileSelectionBarVisible));
+                    OnPropertyChanged(nameof(IsFileAddButtonVisible));
+                    NotifyFilesEmptyStateChanged();
+                }
+            }
+        }
+
+        public bool IsFileSelectionActive => FileSelection.IsActive;
+
+        public bool IsFileSelectionBarVisible => IsProfileVisible && IsFileSelectionActive;
+
         public string FileSearchText
         {
             get => _fileSearchText;
@@ -456,7 +476,9 @@ namespace Cotton.Mobile.ViewModels
         public bool IsFilesEmptyVisible => !IsFilesLoading && !IsFilesNoticeVisible && FileEntries.Count == 0;
 
         public bool IsFilesEmptyAddActionVisible =>
-            IsFilesEmptyVisible && !IsFileSearchActive && IsFileBrowserChromeEnabled;
+            IsFilesEmptyVisible && !IsFileSearchActive && !IsFileSelectionActive && IsFileBrowserChromeEnabled;
+
+        public bool IsFileAddButtonVisible => IsProfileVisible && !IsFileSelectionActive;
 
         public bool IsInputEnabled
         {
@@ -527,6 +549,7 @@ namespace Cotton.Mobile.ViewModels
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
             BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
             OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
+            ClearFileSelection();
         }
 
         public void ShowSignIn(string? status)
@@ -577,6 +600,7 @@ namespace Cotton.Mobile.ViewModels
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
             BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
             OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
+            ClearFileSelection();
             _allFileEntries.Clear();
             FileEntries.Clear();
             NotifyFilesEmptyStateChanged();
@@ -594,6 +618,7 @@ namespace Cotton.Mobile.ViewModels
             TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
             BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
             OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
+            ClearFileSelection();
             FilesTitle = RootFilesTitle;
             FilesPath = string.Empty;
             FilesStatus = null;
@@ -631,6 +656,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowFilesLoading(string status)
         {
+            ClearFileSelection();
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             IsFileActionInProgress = false;
@@ -643,6 +669,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowFileActionLoading(string status)
         {
+            ClearFileSelection();
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             IsFileActionInProgress = true;
@@ -694,6 +721,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowFilesRefreshing(string status)
         {
+            ClearFileSelection();
             IsFilesLoading = false;
             IsFilesRefreshing = true;
             IsFileActionInProgress = false;
@@ -713,6 +741,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(content);
 
+            ClearFileSelection();
             FilesTitle = isRoot ? RootFilesTitle : content.FolderName;
             FilesPath = isRoot || string.Equals(path, FilesTitle, StringComparison.OrdinalIgnoreCase)
                 ? string.Empty
@@ -771,6 +800,48 @@ namespace Cotton.Mobile.ViewModels
         public void ClearOfflinePackProgress()
         {
             OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
+        }
+
+        public void SelectFileEntry(CottonFileBrowserEntry entry)
+        {
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (FindEntryIndex(_allFileEntries, entry.Id) < 0)
+            {
+                return;
+            }
+
+            HashSet<Guid> selectedIds = CreateSelectedFileEntryIdSet();
+            selectedIds.Add(entry.Id);
+            ApplyFileSelection(selectedIds);
+        }
+
+        public void ToggleFileEntrySelection(CottonFileBrowserEntry entry)
+        {
+            ArgumentNullException.ThrowIfNull(entry);
+
+            if (FindEntryIndex(_allFileEntries, entry.Id) < 0)
+            {
+                return;
+            }
+
+            HashSet<Guid> selectedIds = CreateSelectedFileEntryIdSet();
+            if (!selectedIds.Add(entry.Id))
+            {
+                selectedIds.Remove(entry.Id);
+            }
+
+            ApplyFileSelection(selectedIds);
+        }
+
+        public void ClearFileSelection()
+        {
+            if (!IsFileSelectionActive)
+            {
+                return;
+            }
+
+            ApplyFileSelection(new HashSet<Guid>());
         }
 
         public void ShowOfflineFilesNotice(
@@ -1026,10 +1097,12 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
             OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
             OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
+            OnPropertyChanged(nameof(IsFileSelectionBarVisible));
             OnPropertyChanged(nameof(IsAccountActionEnabled));
             OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
             OnPropertyChanged(nameof(CanRefreshFiles));
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
+            OnPropertyChanged(nameof(IsFileAddButtonVisible));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
             OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
@@ -1054,7 +1127,46 @@ namespace Cotton.Mobile.ViewModels
                 FilesStatus = CreateFilesStatus();
             }
 
+            RefreshFileSelectionSnapshot();
             NotifyFilesEmptyStateChanged();
+        }
+
+        private HashSet<Guid> CreateSelectedFileEntryIdSet()
+        {
+            return _allFileEntries
+                .Where(entry => entry.IsSelected)
+                .Select(entry => entry.Id)
+                .ToHashSet();
+        }
+
+        private void ApplyFileSelection(IReadOnlySet<Guid> selectedIds)
+        {
+            bool changed = false;
+            for (int index = 0; index < _allFileEntries.Count; index++)
+            {
+                CottonFileBrowserEntry entry = _allFileEntries[index];
+                bool shouldBeSelected = selectedIds.Contains(entry.Id);
+                if (entry.IsSelected == shouldBeSelected)
+                {
+                    continue;
+                }
+
+                _allFileEntries[index] = entry.WithSelection(shouldBeSelected);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ApplyFileFilters();
+                return;
+            }
+
+            RefreshFileSelectionSnapshot();
+        }
+
+        private void RefreshFileSelectionSnapshot()
+        {
+            FileSelection = CottonFileSelectionSnapshot.Create(_allFileEntries.Where(entry => entry.IsSelected));
         }
 
         private void NotifyFileSearchStateChanged()
@@ -1074,6 +1186,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileUpButtonEnabled));
             OnPropertyChanged(nameof(FileUpButtonOpacity));
             OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
+            OnPropertyChanged(nameof(IsFileAddButtonVisible));
         }
 
         private void NotifyFilesEmptyStateChanged()

@@ -22,7 +22,8 @@ namespace Cotton.Mobile.Services
             string? eTag,
             CottonOfflineFileAvailabilitySnapshot? offlineAvailability = null,
             CottonLocalFileSnapshot? localFile = null,
-            CottonFileThumbnailSnapshot? thumbnail = null)
+            CottonFileThumbnailSnapshot? thumbnail = null,
+            bool isSelected = false)
         {
             Id = id;
             Type = type;
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.Services
             OfflineAvailability = offlineAvailability ?? CottonOfflineFileAvailabilitySnapshot.NotPinned;
             LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
+            IsSelected = isSelected;
         }
 
         public Guid Id { get; }
@@ -95,6 +97,8 @@ namespace Cotton.Mobile.Services
         public CottonLocalFileSnapshot? LocalFile { get; }
 
         public CottonFileThumbnailSnapshot Thumbnail { get; }
+
+        public bool IsSelected { get; }
 
         public bool IsFolder => Type == CottonFileBrowserEntryType.Folder;
 
@@ -250,7 +254,8 @@ namespace Cotton.Mobile.Services
                 ETag,
                 OfflineAvailability,
                 LocalFile,
-                thumbnail);
+                thumbnail,
+                IsSelected);
         }
 
         public CottonFileBrowserEntry WithLocalFile(CottonLocalFileSnapshot localFile)
@@ -272,7 +277,8 @@ namespace Cotton.Mobile.Services
                 ETag,
                 OfflineAvailability,
                 localFile,
-                Thumbnail);
+                Thumbnail,
+                IsSelected);
         }
 
         public CottonFileBrowserEntry WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot offlineAvailability)
@@ -294,7 +300,8 @@ namespace Cotton.Mobile.Services
                 ETag,
                 offlineAvailability,
                 LocalFile,
-                Thumbnail);
+                Thumbnail,
+                IsSelected);
         }
 
         public CottonFileBrowserEntry WithoutLocalFile()
@@ -319,7 +326,34 @@ namespace Cotton.Mobile.Services
                 ETag,
                 OfflineAvailability,
                 null,
-                Thumbnail);
+                Thumbnail,
+                IsSelected);
+        }
+
+        public CottonFileBrowserEntry WithSelection(bool isSelected)
+        {
+            if (IsSelected == isSelected)
+            {
+                return this;
+            }
+
+            return new CottonFileBrowserEntry(
+                Id,
+                Type,
+                Name,
+                Kind,
+                Details,
+                ActionLabel,
+                BadgeText,
+                UpdatedAtUtc,
+                SizeBytes,
+                ContentType,
+                PreviewHashEncryptedHex,
+                ETag,
+                OfflineAvailability,
+                LocalFile,
+                Thumbnail,
+                isSelected);
         }
 
         private string CreateFallbackThumbnailCacheKey()

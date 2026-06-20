@@ -296,6 +296,14 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowser.ShowEntryActionsAsync,
                 LogUnhandledCommandException,
                 _ => Display.IsFileBrowserChromeEnabled);
+            BeginFileSelectionCommand = new AsyncCommand<CottonFileBrowserEntry>(
+                _fileBrowser.BeginEntrySelectionAsync,
+                LogUnhandledCommandException,
+                _ => Display.IsFileBrowserChromeEnabled);
+            ClearFileSelectionCommand = new AsyncCommand(
+                _fileBrowser.ClearSelectionAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileSelectionActive);
             ShowFileAddActionsCommand = new AsyncCommand(
                 _fileBrowser.ShowAddActionsAsync,
                 LogUnhandledCommandException,
@@ -360,6 +368,10 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand<CottonFileBrowserEntry> ActivateFileBrowserEntryCommand { get; }
 
         public AsyncCommand<CottonFileBrowserEntry> ShowFileBrowserEntryActionsCommand { get; }
+
+        public AsyncCommand<CottonFileBrowserEntry> BeginFileSelectionCommand { get; }
+
+        public AsyncCommand ClearFileSelectionCommand { get; }
 
         public AsyncCommand ShowFileAddActionsCommand { get; }
 
@@ -1919,6 +1931,8 @@ namespace Cotton.Mobile.ViewModels
             NavigateFilesUpCommand.RaiseCanExecuteChanged();
             ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
             ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
+            BeginFileSelectionCommand.RaiseCanExecuteChanged();
+            ClearFileSelectionCommand.RaiseCanExecuteChanged();
             ShowFileAddActionsCommand.RaiseCanExecuteChanged();
             CancelFileActionCommand.RaiseCanExecuteChanged();
             RetryFileActionCommand.RaiseCanExecuteChanged();
@@ -1964,6 +1978,7 @@ namespace Cotton.Mobile.ViewModels
                     RefreshFilesCommand.RaiseCanExecuteChanged();
                     ActivateFileBrowserEntryCommand.RaiseCanExecuteChanged();
                     ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
+                    BeginFileSelectionCommand.RaiseCanExecuteChanged();
                     ShowFileAddActionsCommand.RaiseCanExecuteChanged();
                     ToggleFileSearchCommand.RaiseCanExecuteChanged();
                     ShowFileViewActionsCommand.RaiseCanExecuteChanged();
@@ -1974,6 +1989,10 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case nameof(MainPageDisplayState.CanRetryFileAction):
                     RetryFileActionCommand.RaiseCanExecuteChanged();
+                    break;
+                case nameof(MainPageDisplayState.IsFileSelectionActive):
+                    ClearFileSelectionCommand.RaiseCanExecuteChanged();
+                    ShowFileAddActionsCommand.RaiseCanExecuteChanged();
                     break;
             }
         }

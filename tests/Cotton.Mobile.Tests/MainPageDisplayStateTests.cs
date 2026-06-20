@@ -128,6 +128,29 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Saved folder list is empty. Cached 1 day ago. Reconnect to refresh.",
                 display.FilesNoticeMessage);
+            Assert.True(display.IsFilesEmptyVisible);
+            Assert.Equal("No saved files here", display.FilesEmptyMessage);
+            Assert.Equal("Reconnect to refresh this folder.", display.FilesEmptyDetails);
+            Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.False(display.IsFilesEmptyAddActionVisible);
+        }
+
+        [Fact]
+        public void Offline_notice_replaces_empty_loader_with_saved_files_empty_state()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            display.ShowFilesLoading("Loading files...");
+
+            display.ShowOfflineFilesNotice();
+
+            Assert.False(display.IsFilesLoading);
+            Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.True(display.IsFilesNoticeVisible);
+            Assert.Equal("Reconnect to load this folder.", display.FilesNoticeMessage);
+            Assert.True(display.IsFilesEmptyVisible);
+            Assert.Equal("No saved files here", display.FilesEmptyMessage);
+            Assert.Equal("Files marked On device will appear here offline.", display.FilesEmptyDetails);
+            Assert.False(display.IsFilesEmptyAddActionVisible);
         }
 
         [Fact]

@@ -476,10 +476,19 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _canRetryFileAction, value);
         }
 
-        public bool IsFilesEmptyVisible => !IsFilesLoading && !IsFilesNoticeVisible && FileEntries.Count == 0;
+        public bool IsFilesEmptyVisible =>
+            !IsFilesLoading
+            && FileEntries.Count == 0
+            && (!IsFilesNoticeVisible || ShouldShowEmptyStateWithNotice);
 
         public bool IsFilesEmptyAddActionVisible =>
-            IsFilesEmptyVisible && !IsFileSearchActive && !IsFileSelectionActive && IsFileBrowserChromeEnabled;
+            IsFilesEmptyVisible
+            && !IsFilesNoticeVisible
+            && !IsFileSearchActive
+            && !IsFileSelectionActive
+            && IsFileBrowserChromeEnabled;
+
+        private bool ShouldShowEmptyStateWithNotice => IsFilesNoticeVisible && _allFileEntries.Count == 0;
 
         public bool IsFileAddButtonVisible => IsProfileVisible && !IsFileSelectionActive;
 
@@ -670,6 +679,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = status;
             ClearFilesNotice();
+            ResolveFilesEmptyState(FileEntries.Count);
             NotifyFilesEmptyStateChanged();
         }
 
@@ -862,6 +872,7 @@ namespace Cotton.Mobile.ViewModels
             FilesStatus = CreateFilesStatus();
             FilesNoticeTitle = "Offline";
             FilesNoticeMessage = CreateOfflineFilesNoticeMessage(isCachedListing, cachedAtUtc);
+            ResolveOfflineFilesEmptyState(isCachedListing);
             NotifyFilesEmptyStateChanged();
         }
 
@@ -874,6 +885,7 @@ namespace Cotton.Mobile.ViewModels
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();
             ClearFilesNotice();
+            ResolveFilesEmptyState(FileEntries.Count);
             NotifyFilesEmptyStateChanged();
         }
 
@@ -1359,6 +1371,20 @@ namespace Cotton.Mobile.ViewModels
 
             FilesEmptyMessage = string.Empty;
             FilesEmptyDetails = string.Empty;
+        }
+
+        private void ResolveOfflineFilesEmptyState(bool isCachedListing)
+        {
+            if (_allFileEntries.Count != 0)
+            {
+                ResolveFilesEmptyState(FileEntries.Count);
+                return;
+            }
+
+            FilesEmptyMessage = "No saved files here";
+            FilesEmptyDetails = isCachedListing
+                ? "Reconnect to refresh this folder."
+                : "Files marked On device will appear here offline.";
         }
 
         private void ClearFilesNotice()

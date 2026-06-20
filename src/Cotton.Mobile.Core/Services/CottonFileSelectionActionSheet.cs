@@ -22,10 +22,15 @@ namespace Cotton.Mobile.Services
                 return true;
             }
 
-            if (action.Kind == CottonFileBulkActionKind.DownloadFiles
-                || action.Kind == CottonFileBulkActionKind.KeepOffline)
+            if (action.Kind == CottonFileBulkActionKind.DownloadFiles)
             {
                 return selection.FileCount > 0 && !selection.HasFolders;
+            }
+
+            if (action.Kind == CottonFileBulkActionKind.KeepOffline)
+            {
+                return (selection.FileCount > 0 && !selection.HasFolders)
+                    || selection.Count == 1 && selection.FolderCount == 1;
             }
 
             if (action.Kind == CottonFileBulkActionKind.RemoveOffline)

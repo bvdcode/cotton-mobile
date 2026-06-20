@@ -181,6 +181,48 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Selection_action_sheet_exposes_single_folder_keep_offline()
+        {
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
+            [
+                CreateFolder("Projects"),
+            ]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Equal(
+                new[]
+                {
+                    CottonFileBulkActionKind.CopyLinks,
+                    CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.KeepOffline,
+                },
+                actions.Select(action => action.Kind));
+        }
+
+        [Fact]
+        public void Selection_action_sheet_keeps_multi_folder_selection_to_link_actions_only()
+        {
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
+            [
+                CreateFolder("Projects"),
+                CreateFolder("Archive"),
+            ]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Equal(
+                new[]
+                {
+                    CottonFileBulkActionKind.CopyLinks,
+                    CottonFileBulkActionKind.ShareLinks,
+                },
+                actions.Select(action => action.Kind));
+        }
+
+        [Fact]
         public void Selection_action_sheet_keeps_single_local_file_actions_visible()
         {
             CottonFileBrowserEntry file = CreateFile("notes.txt")

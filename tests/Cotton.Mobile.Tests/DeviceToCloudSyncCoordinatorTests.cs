@@ -247,6 +247,71 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_requires_review_before_destructive_remote_delete()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            CottonSyncedFileSnapshot manifestItem = new(
+                FirstFileId,
+                "old.txt",
+                "\"etag-old\"",
+                UpdatedAt,
+                42,
+                "text/plain",
+                SyncedAt,
+                "old.txt");
+            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
+            _localTreeReader.SetContent(root.Id, CreateLocalContent());
+            _remoteFolderContentSource.SetContent(
+                root.CloudFolder.FolderId,
+                CreateContent(root, CreateFile(FirstFileId, "old.txt", "\"etag-old\"")));
+
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired, result.Status);
+            Assert.Equal(CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus, result.StatusText);
+            Assert.NotNull(result.Plan);
+            Assert.Equal(1, result.Plan.RemoteDeleteCount);
+            Assert.Equal(1, summary.SkippedRootCount);
+            Assert.Equal(0, summary.DeletedRemoteFileCount);
+            Assert.True(summary.HasBlockedItems);
+            Assert.Empty(_fileOperator.DeletedFileIds);
+            Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
+        }
+
+        [Fact]
+        public async Task Run_root_executes_destructive_remote_delete_when_explicitly_allowed()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            CottonSyncedFileSnapshot manifestItem = new(
+                FirstFileId,
+                "old.txt",
+                "\"etag-old\"",
+                UpdatedAt,
+                42,
+                "text/plain",
+                SyncedAt,
+                "old.txt");
+            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
+            _localTreeReader.SetContent(root.Id, CreateLocalContent());
+            _remoteFolderContentSource.SetContent(
+                root.CloudFolder.FolderId,
+                CreateContent(root, CreateFile(FirstFileId, "old.txt", "\"etag-old\"")));
+
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(
+                InstanceUri,
+                root,
+                CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
+
+            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
+            Assert.Equal(1, summary.DeletedRemoteFileCount);
+            Assert.True(summary.HasAppliedChanges);
+            Assert.Equal([FirstFileId], _fileOperator.DeletedFileIds);
+            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
+        }
+
+        [Fact]
         public async Task Run_root_rejects_root_from_another_instance()
         {
             var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
@@ -446,6 +511,8 @@ namespace Cotton.Mobile.Tests
 
             public List<string> UploadedNewRelativePaths { get; } = [];
 
+            public List<Guid> DeletedFileIds { get; } = [];
+
             public Task<CottonFileBrowserEntry> UploadNewFileAsync(
                 Uri instanceUri,
                 CottonSyncRootSnapshot root,
@@ -483,7 +550,12 @@ namespace Cotton.Mobile.Tests
                 CottonDeviceToCloudSyncPlanItem item,
                 CancellationToken cancellationToken = default)
             {
-                throw new NotSupportedException("Remote delete is not used by these tests.");
+                if (item.CloudItemId.HasValue)
+                {
+                    DeletedFileIds.Add(item.CloudItemId.Value);
+                }
+
+                return Task.CompletedTask;
             }
         }
 

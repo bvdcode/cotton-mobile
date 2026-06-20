@@ -21,6 +21,9 @@ namespace Cotton.Mobile.Services
         public static string DirectionConflictStatus { get; } =
             "This local folder already syncs from cloud. Stop that sync first.";
 
+        public static string DestructiveReviewRequiredStatus { get; } =
+            "Sync needs review before removing cloud files.";
+
         public static string ConfirmDestructiveTitle { get; } = "Sync from device folder?";
 
         public static string ConfirmDestructiveMessage { get; } =

@@ -392,7 +392,10 @@ namespace Cotton.Mobile.ViewModels
             }
 
             CottonDeviceToCloudSyncRunSummary deviceSummary =
-                await _deviceToCloudSyncCoordinator.RunRootAsync(instanceUri, root);
+                await _deviceToCloudSyncCoordinator.RunRootAsync(
+                    instanceUri,
+                    root,
+                    CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
             return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
         }
 
@@ -415,7 +418,10 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 CottonDeviceToCloudSyncRunSummary deviceSummary =
-                    await _deviceToCloudSyncCoordinator.RunRootAsync(instanceUri, root);
+                    await _deviceToCloudSyncCoordinator.RunRootAsync(
+                        instanceUri,
+                        root,
+                        CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
                 deviceResults.AddRange(deviceSummary.RootResults);
             }
 

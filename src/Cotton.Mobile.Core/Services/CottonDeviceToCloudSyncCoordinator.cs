@@ -36,7 +36,17 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CancellationToken cancellationToken = default)
         {
+            return await RunAsync(instanceUri, CottonDeviceToCloudSyncRunOptions.Default, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
+            Uri instanceUri,
+            CottonDeviceToCloudSyncRunOptions options,
+            CancellationToken cancellationToken = default)
+        {
             ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(options);
 
             IReadOnlyList<CottonSyncRootSnapshot> roots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
@@ -47,7 +57,7 @@ namespace Cotton.Mobile.Services
             foreach (CottonSyncRootSnapshot root in roots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
+                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, options, cancellationToken)
                     .ConfigureAwait(false));
             }
 
@@ -59,8 +69,19 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)
         {
+            return await RunRootAsync(instanceUri, root, CottonDeviceToCloudSyncRunOptions.Default, cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        public async Task<CottonDeviceToCloudSyncRunSummary> RunRootAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncRunOptions options,
+            CancellationToken cancellationToken = default)
+        {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
+            ArgumentNullException.ThrowIfNull(options);
             if (!Uri.Equals(root.InstanceUri, instanceUri))
             {
                 throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
@@ -69,7 +90,8 @@ namespace Cotton.Mobile.Services
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonDeviceToCloudSyncRootRunResult result =
-                await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken).ConfigureAwait(false);
+                await RunRootCoreAsync(instanceUri, root, pausedRootIds, options, cancellationToken)
+                    .ConfigureAwait(false);
             return new CottonDeviceToCloudSyncRunSummary([result]);
         }
 
@@ -77,6 +99,7 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             IReadOnlySet<Guid> pausedRootIds,
+            CottonDeviceToCloudSyncRunOptions options,
             CancellationToken cancellationToken)
         {
             if (root.Direction == CottonSyncDirection.CloudToDevice)
@@ -99,12 +122,13 @@ namespace Cotton.Mobile.Services
                 return CottonDeviceToCloudSyncRootRunResult.SkippedNotReady(root);
             }
 
-            return await ExecuteRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+            return await ExecuteRootAsync(instanceUri, root, options, cancellationToken).ConfigureAwait(false);
         }
 
         private async Task<CottonDeviceToCloudSyncRootRunResult> ExecuteRootAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
+            CottonDeviceToCloudSyncRunOptions options,
             CancellationToken cancellationToken)
         {
             CottonDeviceToCloudLocalContentSnapshot localContent = await _localTreeReader
@@ -116,6 +140,11 @@ namespace Cotton.Mobile.Services
                 await _manifestStore.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             CottonDeviceToCloudSyncPlanSnapshot plan =
                 CottonDeviceToCloudSyncPlanner.Create(root, localContent, remoteContent, manifestFiles);
+            if (plan.HasDestructiveChanges && !options.AllowDestructiveRemoteDeletes)
+            {
+                return CottonDeviceToCloudSyncRootRunResult.SkippedDestructiveReviewRequired(root, plan);
+            }
+
             CottonDeviceToCloudSyncExecutionResult executionResult =
                 await _planExecutor.ExecuteAsync(instanceUri, root, plan, cancellationToken).ConfigureAwait(false);
 

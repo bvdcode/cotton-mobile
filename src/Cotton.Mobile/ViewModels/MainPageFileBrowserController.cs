@@ -2163,6 +2163,7 @@ namespace Cotton.Mobile.ViewModels
                     await _deviceToCloudSyncCoordinator.RunRootAsync(
                         instanceUri,
                         setupResult.Root,
+                        CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes,
                         fileActionCancellation.Token);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))

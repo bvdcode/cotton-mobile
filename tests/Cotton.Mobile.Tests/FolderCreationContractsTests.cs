@@ -41,6 +41,35 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Folder_sync_action_sheet_keeps_folder_menu_to_one_sync_entry()
+        {
+            Assert.Equal("Sync this folder", CottonFolderSyncActionSheet.MainAction);
+        }
+
+        [Fact]
+        public void Folder_sync_action_sheet_names_device_choices_in_plain_language()
+        {
+            Assert.Equal(
+                [
+                    CottonFolderSyncActionSheet.DownloadToDeviceAction,
+                    CottonFolderSyncActionSheet.ChooseDeviceFolderAction,
+                    CottonFolderSyncActionSheet.UploadFromDeviceFolderAction,
+                    CottonFolderSyncActionSheet.KeepBothFoldersInSyncAction,
+                ],
+                CottonFolderSyncActionSheet.CreateModeActions(canChooseDeviceFolder: true));
+        }
+
+        [Fact]
+        public void Folder_sync_action_sheet_hides_device_folder_choices_when_picker_is_unavailable()
+        {
+            Assert.Equal(
+                [
+                    CottonFolderSyncActionSheet.DownloadToDeviceAction,
+                ],
+                CottonFolderSyncActionSheet.CreateModeActions(canChooseDeviceFolder: false));
+        }
+
+        [Fact]
         public void Folder_name_validator_normalizes_safe_name()
         {
             bool valid = CottonFolderNameValidator.TryNormalize(

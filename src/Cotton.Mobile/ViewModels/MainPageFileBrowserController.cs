@@ -882,14 +882,8 @@ namespace Cotton.Mobile.ViewModels
                 CopyLinkAction,
                 ShareLinkAction,
                 KeepOfflineAction,
-                SyncToDeviceAction,
+                CottonFolderSyncActionSheet.MainAction,
             };
-            if (_syncLocalRootPickerService.IsAvailable)
-            {
-                actions.Add(SyncToSelectedFolderAction);
-                actions.Add(SyncFromSelectedFolderAction);
-                actions.Add(SyncBothWaysAction);
-            }
 
             string? action = await _dialogService.ShowActionSheetAsync(
                 folder.Name,
@@ -917,17 +911,35 @@ namespace Cotton.Mobile.ViewModels
                 case KeepOfflineAction:
                     await PlanFolderOfflineAsync(currentFolder);
                     break;
-                case SyncToDeviceAction:
-                    await SyncFolderToDeviceAsync(currentFolder);
+                case CottonFolderSyncActionSheet.MainAction:
+                    await ShowFolderSyncActionsAsync(currentFolder);
                     break;
-                case SyncToSelectedFolderAction:
-                    await SyncFolderToDeviceAsync(currentFolder, useSelectedFolder: true);
+            }
+        }
+
+        private async Task ShowFolderSyncActionsAsync(CottonFileBrowserEntry folder)
+        {
+            IReadOnlyList<string> actions =
+                CottonFolderSyncActionSheet.CreateModeActions(_syncLocalRootPickerService.IsAvailable);
+            string? action = await _dialogService.ShowActionSheetAsync(
+                CottonFolderSyncActionSheet.Title,
+                CancelAction,
+                null,
+                actions.ToArray());
+
+            switch (NormalizeAction(action))
+            {
+                case CottonFolderSyncActionSheet.DownloadToDeviceAction:
+                    await SyncFolderToDeviceAsync(folder);
                     break;
-                case SyncFromSelectedFolderAction:
-                    await SyncFolderFromDeviceAsync(currentFolder);
+                case CottonFolderSyncActionSheet.ChooseDeviceFolderAction:
+                    await SyncFolderToDeviceAsync(folder, useSelectedFolder: true);
                     break;
-                case SyncBothWaysAction:
-                    await SyncFolderBothWaysAsync(currentFolder);
+                case CottonFolderSyncActionSheet.UploadFromDeviceFolderAction:
+                    await SyncFolderFromDeviceAsync(folder);
+                    break;
+                case CottonFolderSyncActionSheet.KeepBothFoldersInSyncAction:
+                    await SyncFolderBothWaysAsync(folder);
                     break;
             }
         }

@@ -44,6 +44,8 @@ namespace Cotton.Mobile.Tests
             Assert.False(item.IsAttentionVisible);
             Assert.True(item.CanRunNow);
             Assert.Equal("Run now", item.RunNowActionText);
+            Assert.True(item.CanStopSync);
+            Assert.Equal("Stop syncing", item.StopSyncActionText);
         }
 
         [Fact]
@@ -91,6 +93,25 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
             Assert.Equal("Device to cloud · On this device", state.Items[0].DetailText);
             Assert.False(state.Items[0].CanRunNow);
+        }
+
+        [Fact]
+        public void Stop_sync_management_copy_is_explicit_about_local_files()
+        {
+            Assert.Equal("Stop syncing Projects?", CottonSyncRootManagementText.CreateStopTitle(" Projects "));
+            Assert.Equal(
+                "This stops future sync for this folder. Files already on this device are not deleted.",
+                CottonSyncRootManagementText.StopMessage);
+            Assert.Equal("Stopped syncing Projects.", CottonSyncRootManagementText.CreateStoppedStatus("Projects"));
+            Assert.Equal("Sync folder is no longer configured.", CottonSyncRootManagementText.RootMissingStatus);
+            Assert.Equal("Could not stop syncing this folder.", CottonSyncRootManagementText.StopFailedStatus);
+        }
+
+        [Fact]
+        public void Stop_sync_management_copy_handles_blank_folder_name()
+        {
+            Assert.Equal("Stop syncing this folder?", CottonSyncRootManagementText.CreateStopTitle(" "));
+            Assert.Equal("Stopped syncing this folder.", CottonSyncRootManagementText.CreateStoppedStatus(string.Empty));
         }
 
         private static CottonSyncRootSnapshot CreateRoot(

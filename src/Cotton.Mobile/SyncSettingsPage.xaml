@@ -111,16 +111,26 @@
                                        LineBreakMode="TailTruncation"
                                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-                                <Button Grid.Row="3"
-                                        Grid.ColumnSpan="2"
-                                        Text="{Binding RunNowActionText}"
-                                        Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
-                                        CommandParameter="{Binding .}"
-                                        IsEnabled="{Binding CanRunNow}"
-                                        IsVisible="{Binding CanRunNow}"
-                                        Style="{StaticResource FileChromeButton}"
-                                        HeightRequest="40"
-                                        Margin="0,6,0,0" />
+                                <VerticalStackLayout Grid.Row="3"
+                                                     Grid.ColumnSpan="2"
+                                                     Spacing="8"
+                                                     Margin="0,6,0,0">
+                                    <Button Text="{Binding RunNowActionText}"
+                                            Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanRunNow}"
+                                            IsVisible="{Binding CanRunNow}"
+                                            Style="{StaticResource FileChromeButton}"
+                                            HeightRequest="40" />
+
+                                    <Button Text="{Binding StopSyncActionText}"
+                                            Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanStopSync}"
+                                            IsVisible="{Binding CanStopSync}"
+                                            Style="{StaticResource DestructiveChromeButton}"
+                                            HeightRequest="40" />
+                                </VerticalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

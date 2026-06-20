@@ -8,8 +8,10 @@ namespace Cotton.Mobile.ViewModels
     public class SyncSettingsViewModel : ViewModelBase
     {
         private readonly ICottonSyncRootStore _rootStore;
+        private readonly ICottonSyncedFileManifestStore _manifestStore;
         private readonly CottonCloudToDeviceSyncCoordinator _syncCoordinator;
         private readonly INetworkAccessService _networkAccess;
+        private readonly IUserDialogService _dialogService;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private bool _isBusy;
@@ -19,29 +21,41 @@ namespace Cotton.Mobile.ViewModels
 
         public SyncSettingsViewModel(
             ICottonSyncRootStore rootStore,
+            ICottonSyncedFileManifestStore manifestStore,
             CottonCloudToDeviceSyncCoordinator syncCoordinator,
             INetworkAccessService networkAccess,
+            IUserDialogService dialogService,
             ILogger<SyncSettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
+            ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(syncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootStore = rootStore;
+            _manifestStore = manifestStore;
             _syncCoordinator = syncCoordinator;
             _networkAccess = networkAccess;
+            _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             RunRootCommand = new AsyncCommand<CottonSyncRootListItem>(
                 RunRootAsync,
                 LogUnhandledCommandException,
                 item => !IsBusy && item.CanRunNow);
+            StopRootCommand = new AsyncCommand<CottonSyncRootListItem>(
+                StopRootAsync,
+                LogUnhandledCommandException,
+                item => !IsBusy && item.CanStopSync);
         }
 
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand<CottonSyncRootListItem> RunRootCommand { get; }
+
+        public AsyncCommand<CottonSyncRootListItem> StopRootCommand { get; }
 
         public ObservableCollection<CottonSyncRootListItem> Roots { get; } = new();
 
@@ -54,6 +68,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     LoadCommand.RaiseCanExecuteChanged();
                     RunRootCommand.RaiseCanExecuteChanged();
+                    StopRootCommand.RaiseCanExecuteChanged();
                 }
             }
         }
@@ -156,6 +171,59 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to run Cotton mobile sync root.");
                 Status = CottonCloudToDeviceSyncStatusText.FailedStatus;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task StopRootAsync(CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                Status = CottonSyncRootManagementText.StopFailedStatus;
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
+                if (root is null)
+                {
+                    ShowRoots(roots);
+                    Status = CottonSyncRootManagementText.RootMissingStatus;
+                    return;
+                }
+
+                bool confirmed = await _dialogService.ShowConfirmationAsync(
+                    CottonSyncRootManagementText.CreateStopTitle(root.CloudFolder.FolderName),
+                    CottonSyncRootManagementText.StopMessage,
+                    CottonSyncRootManagementText.StopAction,
+                    CottonSyncRootManagementText.CancelAction);
+                if (!confirmed)
+                {
+                    Status = null;
+                    return;
+                }
+
+                bool removed = await _rootStore.RemoveAsync(instanceUri, root.Id);
+                await _manifestStore.ClearAsync(instanceUri, root);
+                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
+                ShowRoots(refreshedRoots);
+                Status = removed
+                    ? CottonSyncRootManagementText.CreateStoppedStatus(root.CloudFolder.FolderName)
+                    : CottonSyncRootManagementText.RootMissingStatus;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to stop Cotton mobile sync root.");
+                Status = CottonSyncRootManagementText.StopFailedStatus;
             }
             finally
             {

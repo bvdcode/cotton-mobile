@@ -53,6 +53,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
 			builder.Services.AddSingleton<IDeviceStorageSpaceService, DeviceStorageSpaceService>();
 			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
+			builder.Services.AddSingleton<ISecuritySettingsPageService, SecuritySettingsPageService>();
 			builder.Services.AddSingleton<INotificationSettingsPageService, NotificationSettingsPageService>();
 			builder.Services.AddSingleton<IActivityFeedPageService, ActivityFeedPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
@@ -141,6 +142,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
+			builder.Services.AddSingleton<ICottonAppLockSettingsStore, PreferencesCottonAppLockSettingsStore>();
+			builder.Services.AddSingleton<ICottonAppLockCapabilityService, UnavailableCottonAppLockCapabilityService>();
 			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
 			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
 			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
@@ -182,6 +185,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<MainPage>();
 			builder.Services.AddTransient<StorageSettingsViewModel>();
 			builder.Services.AddTransient<StoragePage>();
+			builder.Services.AddTransient<SecuritySettingsViewModel>();
+			builder.Services.AddTransient<SecuritySettingsPage>();
 			builder.Services.AddTransient<NotificationSettingsViewModel>();
 			builder.Services.AddTransient<NotificationSettingsPage>();
 			builder.Services.AddTransient<ActivityFeedViewModel>();

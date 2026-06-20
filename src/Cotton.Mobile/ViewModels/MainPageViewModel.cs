@@ -23,6 +23,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountResetFileLinksAction = "Reset file links";
+        private const string AccountSecurityAction = "Security";
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
         private const string LogoutConfirmationTitle = "Log out?";
@@ -42,6 +43,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IDiagnosticsPageService _diagnosticsPageService;
         private readonly IStorageManagementService _storageManagementService;
         private readonly IStorageSettingsPageService _storageSettingsPageService;
+        private readonly ISecuritySettingsPageService _securitySettingsPageService;
         private readonly ITransfersPageService _transfersPageService;
         private readonly IBackupSetupPageService _backupSetupPageService;
         private readonly ICaptureInboxPageService _captureInboxPageService;
@@ -83,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
             IDiagnosticsPageService diagnosticsPageService,
             IStorageManagementService storageManagementService,
             IStorageSettingsPageService storageSettingsPageService,
+            ISecuritySettingsPageService securitySettingsPageService,
             ITransfersPageService transfersPageService,
             IBackupSetupPageService backupSetupPageService,
             ICaptureInboxPageService captureInboxPageService,
@@ -128,6 +131,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(diagnosticsPageService);
             ArgumentNullException.ThrowIfNull(storageManagementService);
             ArgumentNullException.ThrowIfNull(storageSettingsPageService);
+            ArgumentNullException.ThrowIfNull(securitySettingsPageService);
             ArgumentNullException.ThrowIfNull(transfersPageService);
             ArgumentNullException.ThrowIfNull(backupSetupPageService);
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
@@ -173,6 +177,7 @@ namespace Cotton.Mobile.ViewModels
             _diagnosticsPageService = diagnosticsPageService;
             _storageManagementService = storageManagementService;
             _storageSettingsPageService = storageSettingsPageService;
+            _securitySettingsPageService = securitySettingsPageService;
             _transfersPageService = transfersPageService;
             _backupSetupPageService = backupSetupPageService;
             _captureInboxPageService = captureInboxPageService;
@@ -602,6 +607,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
+                AccountSecurityAction,
                 AccountNotificationsAction,
                 AccountActivityAction,
                 AccountResetFileLinksAction,
@@ -624,6 +630,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
+                    break;
+                case AccountSecurityAction:
+                    await OpenSecurityAsync();
                     break;
                 case AccountNotificationsAction:
                     await OpenNotificationsAsync();
@@ -913,6 +922,22 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Storage",
                     "Could not inspect app storage.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenSecurityAsync()
+        {
+            try
+            {
+                await _securitySettingsPageService.OpenAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile security page.");
+                await _dialogService.ShowAlertAsync(
+                    "Security",
+                    "Could not inspect security settings.",
                     "OK");
             }
         }

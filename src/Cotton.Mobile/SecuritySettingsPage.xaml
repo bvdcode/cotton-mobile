@@ -128,6 +128,75 @@
             <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                     StrokeShape="RoundRectangle 8"
                     Padding="14"
+                    IsVisible="{Binding IsPermissionLedgerVisible}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                <VerticalStackLayout Spacing="12">
+                    <Grid ColumnDefinitions="*,Auto"
+                          RowDefinitions="Auto,Auto"
+                          RowSpacing="6"
+                          ColumnSpacing="12">
+                        <Label Text="{Binding PermissionLedgerTitle}"
+                               FontSize="15"
+                               FontAttributes="Bold"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                        <Label Grid.Column="1"
+                               Text="{Binding PermissionLedgerStatusText}"
+                               FontSize="13"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                        <Label Grid.Row="1"
+                               Grid.ColumnSpan="2"
+                               Text="{Binding PermissionLedgerDetailText}"
+                               FontSize="12"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation"
+                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                    </Grid>
+
+                    <VerticalStackLayout Spacing="10"
+                                         BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
+                                <Grid ColumnDefinitions="*,Auto"
+                                      RowDefinitions="Auto,Auto"
+                                      RowSpacing="3"
+                                      ColumnSpacing="10">
+                                    <Label Text="{Binding Title}"
+                                           FontSize="13"
+                                           FontAttributes="Bold"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding StatusText}"
+                                           FontSize="12"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                                    <Label Grid.Row="1"
+                                           Grid.ColumnSpan="2"
+                                           Text="{Binding DetailText}"
+                                           FontSize="12"
+                                           MaxLines="2"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                </Grid>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                    StrokeShape="RoundRectangle 8"
+                    Padding="14"
                     BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"

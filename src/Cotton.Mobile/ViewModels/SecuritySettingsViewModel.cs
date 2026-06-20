@@ -23,6 +23,8 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ICottonWindowPrivacyService _windowPrivacyService;
+        private readonly ICottonNotificationPermissionService _notificationPermissionService;
+        private readonly ICottonCameraBackupMediaAccessPolicy _mediaAccessPolicy;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<SecuritySettingsViewModel> _logger;
         private ICottonCurrentSessionRevocationHandler? _currentSessionRevocationHandler;
@@ -49,6 +51,8 @@ namespace Cotton.Mobile.ViewModels
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
             ICottonWindowPrivacyService windowPrivacyService,
+            ICottonNotificationPermissionService notificationPermissionService,
+            ICottonCameraBackupMediaAccessPolicy mediaAccessPolicy,
             IUserDialogService dialogService,
             ILogger<SecuritySettingsViewModel> logger)
         {
@@ -60,6 +64,8 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(windowPrivacyService);
+            ArgumentNullException.ThrowIfNull(notificationPermissionService);
+            ArgumentNullException.ThrowIfNull(mediaAccessPolicy);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -71,6 +77,8 @@ namespace Cotton.Mobile.ViewModels
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
             _windowPrivacyService = windowPrivacyService;
+            _notificationPermissionService = notificationPermissionService;
+            _mediaAccessPolicy = mediaAccessPolicy;
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
@@ -85,6 +93,8 @@ namespace Cotton.Mobile.ViewModels
             ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
             ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
             ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
+            ShowPermissionLedger(
+                CottonPermissionLedgerDisplayState.Unavailable("Device access has not been checked."));
             ShowAccountSessions(
                 CottonAccountSessionListDisplayState.Unavailable("Account sessions have not been loaded."));
         }
@@ -96,6 +106,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand RevokeCurrentSessionCommand { get; }
 
         public ObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];
+
+        public ObservableCollection<CottonPermissionLedgerItem> PermissionLedgerItems { get; } = [];
 
         public bool IsBusy
         {
@@ -131,6 +143,14 @@ namespace Cotton.Mobile.ViewModels
         public bool CanVerifyDeviceUnlock => !IsBusy && DeviceUnlockDisplay.CanVerify;
 
         public bool IsDeviceUnlockActionVisible => DeviceUnlockDisplay.IsActionVisible;
+
+        public string PermissionLedgerTitle => PermissionLedgerDisplay.Title;
+
+        public string PermissionLedgerStatusText => PermissionLedgerDisplay.StatusText;
+
+        public string PermissionLedgerDetailText => PermissionLedgerDisplay.DetailText;
+
+        public bool IsPermissionLedgerVisible => PermissionLedgerDisplay.HasItems;
 
         public string LogoutCacheCleanupTitle => LogoutCleanupDisplay.Title;
 
@@ -233,6 +253,9 @@ namespace Cotton.Mobile.ViewModels
         private CottonLogoutCacheCleanupDisplayState LogoutCleanupDisplay { get; set; } =
             CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default);
 
+        private CottonPermissionLedgerDisplayState PermissionLedgerDisplay { get; set; } =
+            CottonPermissionLedgerDisplayState.Unavailable("Device access has not been checked.");
+
         private CottonAccountSessionListDisplayState AccountSessionDisplay { get; set; } =
             CottonAccountSessionListDisplayState.Unavailable("Account sessions have not been loaded.");
 
@@ -261,12 +284,15 @@ namespace Cotton.Mobile.ViewModels
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
                 ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
+                bool loadedPermissionLedger = await TryLoadPermissionLedgerAsync();
                 bool loadedAccountSessions = await TryLoadAccountSessionsAsync();
                 Status = disabledUnavailableAppLock
                     ? "App lock was turned off because device unlock is unavailable."
-                    : _capability.CanEnable
-                        ? loadedAccountSessions ? null : "Could not load account sessions."
-                        : "App lock is unavailable.";
+                    : !loadedPermissionLedger
+                        ? "Could not inspect device access."
+                        : _capability.CanEnable
+                            ? loadedAccountSessions ? null : "Could not load account sessions."
+                            : "App lock is unavailable.";
                 if (disabledUnavailableAppLock)
                 {
                     _ = _windowPrivacyService.ApplyAsync();
@@ -281,6 +307,8 @@ namespace Cotton.Mobile.ViewModels
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
                     CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Could not inspect device unlock.")));
                 ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(CottonLogoutCacheCleanupSettings.Default));
+                ShowPermissionLedger(CottonPermissionLedgerDisplayState.Unavailable(
+                    "Could not inspect device access."));
                 ShowAccountSessions(CottonAccountSessionListDisplayState.Unavailable(
                     "Could not load signed-in devices."));
                 Status = "Could not inspect security settings.";
@@ -288,6 +316,31 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+            }
+        }
+
+        private async Task<bool> TryLoadPermissionLedgerAsync()
+        {
+            try
+            {
+                CottonNotificationPermissionState notificationPermission =
+                    await _notificationPermissionService.GetPermissionStateAsync();
+                CottonCameraBackupMediaAccessState mediaAccess =
+                    await _mediaAccessPolicy.GetAccessStateAsync();
+                ShowPermissionLedger(CottonPermissionLedgerDisplayState.Create(
+                    notificationPermission,
+                    mediaAccess,
+                    _settings,
+                    _capability,
+                    _deviceUnlockAvailability));
+                return true;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to inspect Cotton mobile permission ledger.");
+                ShowPermissionLedger(CottonPermissionLedgerDisplayState.Unavailable(
+                    "Could not inspect device access."));
+                return false;
             }
         }
 
@@ -492,6 +545,23 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(CanVerifyDeviceUnlock));
             OnPropertyChanged(nameof(IsDeviceUnlockActionVisible));
             VerifyDeviceUnlockCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ShowPermissionLedger(CottonPermissionLedgerDisplayState display)
+        {
+            ArgumentNullException.ThrowIfNull(display);
+
+            PermissionLedgerDisplay = display;
+            PermissionLedgerItems.Clear();
+            foreach (CottonPermissionLedgerItem item in display.Items)
+            {
+                PermissionLedgerItems.Add(item);
+            }
+
+            OnPropertyChanged(nameof(PermissionLedgerTitle));
+            OnPropertyChanged(nameof(PermissionLedgerStatusText));
+            OnPropertyChanged(nameof(PermissionLedgerDetailText));
+            OnPropertyChanged(nameof(IsPermissionLedgerVisible));
         }
 
         private void ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState display)

@@ -259,6 +259,7 @@ jobs:
       ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ANDROID_FIREBASE_GOOGLE_SERVICES_JSON: ${{ secrets.ANDROID_FIREBASE_GOOGLE_SERVICES_JSON }}
       GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
       GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
     steps:
@@ -322,6 +323,24 @@ jobs:
             echo "ANDROID_KEY_PASSWORD is empty; using ANDROID_KEYSTORE_PASSWORD for the key password."
             echo "ANDROID_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
           fi
+
+      - name: Restore Firebase Android config
+        if: inputs.upload_to_google_play
+        run: |
+          if [ -z "${ANDROID_FIREBASE_GOOGLE_SERVICES_JSON:-}" ]; then
+            echo "ANDROID_FIREBASE_GOOGLE_SERVICES_JSON secret is required for Google Play upload." >&2
+            exit 1
+          fi
+
+          config_path="src/Cotton.Mobile/Platforms/Android/google-services.json"
+          mkdir -p "$(dirname "$config_path")"
+          printf '%s' "$ANDROID_FIREBASE_GOOGLE_SERVICES_JSON" > "$config_path"
+          chmod 600 "$config_path"
+
+          scripts/mobile/check-android-firebase-config.py \
+            --configuration Release \
+            --package-id "$GOOGLE_PLAY_PACKAGE_NAME" \
+            --config-file "$config_path"
 
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"

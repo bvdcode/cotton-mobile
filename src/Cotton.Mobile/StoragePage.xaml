@@ -168,7 +168,8 @@
                                 <Grid RowDefinitions="Auto,Auto"
                                       ColumnDefinitions="*,Auto"
                                       RowSpacing="2"
-                                      ColumnSpacing="10">
+                                      ColumnSpacing="10"
+                                      IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
                                            FontSize="13"
                                            FontAttributes="Bold"
@@ -238,7 +239,8 @@
                                 <Grid RowDefinitions="Auto,Auto,Auto"
                                       ColumnDefinitions="*,Auto"
                                       RowSpacing="2"
-                                      ColumnSpacing="10">
+                                      ColumnSpacing="10"
+                                      IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
                                            FontSize="13"
                                            FontAttributes="Bold"

@@ -28,11 +28,11 @@ namespace Cotton.Mobile.Services
             TotalEvictableBytes = buckets.Sum(bucket => bucket.SizeBytes);
             TotalBudgetBytes = buckets.Sum(bucket => bucket.BudgetBytes);
             SummaryText = TotalEvictableBytes == 0
-                ? "Evictable cache is empty."
-                : $"{CottonFileSizeFormatter.Format(TotalEvictableBytes)} of {CottonFileSizeFormatter.Format(TotalBudgetBytes)} evictable budget used";
+                ? "Temporary cache is empty."
+                : $"{CottonFileSizeFormatter.Format(TotalEvictableBytes)} of {CottonFileSizeFormatter.Format(TotalBudgetBytes)} temporary cache used";
             ProtectedOfflineText = protectedOfflineFileCount == 0
-                ? "No kept-offline files are protected from automatic cleanup."
-                : $"{FormatFileCount(protectedOfflineFileCount)} kept offline, {CottonFileSizeFormatter.Format(protectedOfflineBytes)} protected";
+                ? "No kept-offline files are stored separately from cleanup."
+                : $"{FormatFileCount(protectedOfflineFileCount)} kept offline, {CottonFileSizeFormatter.Format(protectedOfflineBytes)} stays on this device.";
         }
 
         public IReadOnlyList<CottonStorageBudgetBucketSnapshot> Buckets { get; }

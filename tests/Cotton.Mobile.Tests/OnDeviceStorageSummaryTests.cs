@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Tests
             AssertBucket(
                 summary.Buckets[1],
                 CottonOnDeviceStorageBucketKind.OfflineStale,
-                "Needs refresh",
+                "Refresh needed",
                 "Kept offline but older than cloud.",
                 "512 B",
                 "1 file",
@@ -43,8 +43,8 @@ namespace Cotton.Mobile.Tests
             AssertBucket(
                 summary.Buckets[2],
                 CottonOnDeviceStorageBucketKind.OfflineMissing,
-                "Missing offline files",
-                "Kept offline but not stored here.",
+                "Offline files missing",
+                "Marked offline but not saved here.",
                 "0 B",
                 "1 file",
                 isAttentionVisible: true);
@@ -81,6 +81,7 @@ namespace Cotton.Mobile.Tests
                 Assert.Equal("0 B", bucket.SizeText);
                 Assert.Equal(0, bucket.ItemCount);
                 Assert.False(bucket.IsAttentionVisible);
+                Assert.False(bucket.IsVisible);
             });
         }
 
@@ -108,6 +109,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(expectedSize, bucket.SizeText);
             Assert.Equal(expectedCount, bucket.CountText);
             Assert.Equal(isAttentionVisible, bucket.IsAttentionVisible);
+            Assert.True(bucket.IsVisible);
         }
     }
 }

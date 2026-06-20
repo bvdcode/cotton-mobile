@@ -87,6 +87,8 @@ namespace Cotton.Mobile.Services
 
         public bool IsAttentionVisible => Status is CottonStorageBudgetStatus.NearBudget or CottonStorageBudgetStatus.OverBudget;
 
+        public bool IsVisible => SizeBytes > 0 || ItemCount > 0 || IsAttentionVisible;
+
         public static CottonStorageBudgetBucketSnapshot CreateEvictableDownloads(
             int fileCount,
             long sizeBytes,
@@ -94,8 +96,8 @@ namespace Cotton.Mobile.Services
         {
             return new CottonStorageBudgetBucketSnapshot(
                 CottonStorageBudgetBucketKind.EvictableDownloads,
-                "Evictable downloads",
-                "Opened files not kept offline.",
+                "Temporary downloads",
+                "Opened files that are not kept offline.",
                 fileCount,
                 sizeBytes,
                 budgetBytes,
@@ -157,9 +159,9 @@ namespace Cotton.Mobile.Services
             return status switch
             {
                 CottonStorageBudgetStatus.Empty => "Empty",
-                CottonStorageBudgetStatus.WithinBudget => "Within budget",
-                CottonStorageBudgetStatus.NearBudget => "Near budget",
-                CottonStorageBudgetStatus.OverBudget => "Over budget",
+                CottonStorageBudgetStatus.WithinBudget => "Within limit",
+                CottonStorageBudgetStatus.NearBudget => "Near limit",
+                CottonStorageBudgetStatus.OverBudget => "Over limit",
                 _ => string.Empty,
             };
         }

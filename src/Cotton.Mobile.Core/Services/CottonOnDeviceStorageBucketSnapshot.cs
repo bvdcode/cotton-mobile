@@ -63,6 +63,8 @@ namespace Cotton.Mobile.Services
 
         public bool IsAttentionVisible { get; }
 
+        public bool IsVisible => SizeBytes > 0 || ItemCount > 0 || IsAttentionVisible;
+
         public static CottonOnDeviceStorageBucketSnapshot CreateAvailableOfflineFiles(
             int fileCount,
             long sizeBytes)
@@ -84,7 +86,7 @@ namespace Cotton.Mobile.Services
         {
             return new CottonOnDeviceStorageBucketSnapshot(
                 CottonOnDeviceStorageBucketKind.OfflineStale,
-                "Needs refresh",
+                "Refresh needed",
                 "Kept offline but older than cloud.",
                 sizeBytes,
                 fileCount,
@@ -97,8 +99,8 @@ namespace Cotton.Mobile.Services
         {
             return new CottonOnDeviceStorageBucketSnapshot(
                 CottonOnDeviceStorageBucketKind.OfflineMissing,
-                "Missing offline files",
-                "Kept offline but not stored here.",
+                "Offline files missing",
+                "Marked offline but not saved here.",
                 sizeBytes: 0,
                 fileCount,
                 "file",

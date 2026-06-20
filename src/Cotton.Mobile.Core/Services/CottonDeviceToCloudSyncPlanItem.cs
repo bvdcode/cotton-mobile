@@ -96,6 +96,49 @@ namespace Cotton.Mobile.Services
 
         public bool IsLocalProblem => Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
 
+        public CottonSyncedFileSnapshot CreateManifestItem(
+            CottonFileBrowserEntry uploadedFile,
+            DateTime syncedAtUtc)
+        {
+            ArgumentNullException.ThrowIfNull(uploadedFile);
+            if (!RequiresUpload)
+            {
+                throw new InvalidOperationException("Only upload sync plan items can create synced-file metadata.");
+            }
+
+            if (uploadedFile.Type != CottonFileBrowserEntryType.File)
+            {
+                throw new InvalidOperationException("Synced-file metadata requires an uploaded file item.");
+            }
+
+            if (!string.Equals(uploadedFile.Name, DisplayName, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Synced-file metadata requires the uploaded file name to match the plan item.");
+            }
+
+            if (Action == CottonDeviceToCloudSyncActionKind.UploadChangedFile
+                && CloudItemId.HasValue
+                && uploadedFile.Id != CloudItemId.Value)
+            {
+                throw new InvalidOperationException("Changed upload returned a different cloud file id.");
+            }
+
+            if (string.IsNullOrWhiteSpace(uploadedFile.ETag))
+            {
+                throw new InvalidOperationException("Synced-file metadata requires an uploaded file ETag.");
+            }
+
+            return new CottonSyncedFileSnapshot(
+                uploadedFile.Id,
+                uploadedFile.Name,
+                uploadedFile.ETag,
+                uploadedFile.UpdatedAtUtc,
+                uploadedFile.SizeBytes,
+                uploadedFile.ContentType,
+                syncedAtUtc,
+                RelativePath);
+        }
+
         private static string NormalizeRelativePath(
             CottonDeviceToCloudSyncActionKind action,
             string displayName,

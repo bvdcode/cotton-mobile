@@ -134,6 +134,66 @@ namespace Cotton.Mobile.Tests
                 selection.GetAction(CottonFileBulkActionKind.RemoveOffline).DisabledReason);
         }
 
+        [Fact]
+        public void Selection_action_sheet_exposes_multi_file_download_and_link_actions()
+        {
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
+            [
+                CreateFile("alpha.txt"),
+                CreateFile("beta.txt"),
+            ]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Equal(
+                new[]
+                {
+                    CottonFileBulkActionKind.CopyLinks,
+                    CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.DownloadFiles,
+                },
+                actions.Select(action => action.Kind));
+            Assert.Equal("Download files", actions.Single(action => action.Kind == CottonFileBulkActionKind.DownloadFiles).Label);
+        }
+
+        [Fact]
+        public void Selection_action_sheet_keeps_mixed_selection_to_link_actions_only()
+        {
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
+            [
+                CreateFile("alpha.txt"),
+                CreateFolder("Projects"),
+            ]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Equal(
+                new[]
+                {
+                    CottonFileBulkActionKind.CopyLinks,
+                    CottonFileBulkActionKind.ShareLinks,
+                },
+                actions.Select(action => action.Kind));
+        }
+
+        [Fact]
+        public void Selection_action_sheet_keeps_single_local_file_actions_visible()
+        {
+            CottonFileBrowserEntry file = CreateFile("notes.txt")
+                .WithLocalFile(new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt));
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create([file]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.DownloadFiles);
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.KeepOffline);
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.RemoveOffline);
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.ShareLocalFiles);
+        }
+
         private static CottonFileBrowserEntry CreateFile(string name)
         {
             return CottonFileBrowserEntry.CreateFile(

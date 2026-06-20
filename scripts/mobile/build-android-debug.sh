@@ -14,6 +14,12 @@ export LOGNAME="${COTTON_DOTNET_LOGNAME:-${LOGNAME:-$USER}}"
 
 cd "$COTTON_REPO_ROOT"
 
+if [[ "${COTTON_REQUIRE_FIREBASE_CONFIG:-0}" == "1" ]]; then
+  "$SCRIPT_DIR/check-android-firebase-config.py" \
+    --configuration "$COTTON_ANDROID_CONFIGURATION" \
+    --package-id "$COTTON_ANDROID_PACKAGE_ID"
+fi
+
 dotnet restore "$COTTON_MOBILE_PROJECT" \
   -p:AndroidSdkDirectory="$ANDROID_HOME" \
   -p:JavaSdkDirectory="$JAVA_HOME"

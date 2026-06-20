@@ -20,6 +20,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonNotificationPermissionState.Unavailable);
         private bool _isBusy;
         private string? _status;
+        private bool _isStatusAttention;
 
         public NotificationSettingsViewModel(
             ICottonInstanceStore instanceStore,
@@ -80,23 +81,27 @@ namespace Cotton.Mobile.ViewModels
             ? $"{_settings.EnabledChannelCount:N0} local categories on"
             : $"{_settings.EnabledChannelCount:N0} local · {CreateRemotePushDisplay().EnabledCategoryCount:N0} server push";
 
+        public bool HasRemotePushPreferences => _remotePushPreferences is not null;
+
+        public bool IsRemotePushUnavailable => _remotePushPreferences is null;
+
+        public string RemotePushUnavailableTitle => _remotePushFailureStatus ?? "Server push preferences not loaded.";
+
+        public string RemotePushUnavailableDetail => _remotePushFailureStatus is null
+            ? "Refresh this page to load server push controls."
+            : "Local notifications still work. Retry when the server is reachable.";
+
         public string RemotePushStatusText => _remotePushPreferences is null
             ? _remotePushFailureStatus ?? "Server push preferences not loaded."
             : CreateRemotePushDisplay().SummaryText;
 
-        public string? Status
-        {
-            get => _status;
-            private set
-            {
-                if (SetProperty(ref _status, value))
-                {
-                    OnPropertyChanged(nameof(IsStatusVisible));
-                }
-            }
-        }
+        public string? Status => _status;
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public bool IsAttentionStatusVisible => IsStatusVisible && _isStatusAttention;
+
+        public bool IsNeutralStatusVisible => IsStatusVisible && !_isStatusAttention;
 
         private async Task LoadAsync()
         {
@@ -128,7 +133,7 @@ namespace Cotton.Mobile.ViewModels
                         : "Could not inspect notifications.";
                 }
 
-                Status = failureStatus;
+                ShowStatus(failureStatus, failureStatus is not null);
             }
             finally
             {
@@ -144,17 +149,21 @@ namespace Cotton.Mobile.ViewModels
                     if (_permissionDisplay.ShouldOpenSettings)
                     {
                         await _permissionService.OpenSettingsAsync();
-                        Status = "Opened notification settings.";
+                        ShowStatus("Opened notification settings.");
                         return;
                     }
 
                     CottonNotificationPermissionState permissionState =
                         await _permissionService.RequestPermissionAsync();
                     ShowPermission(permissionState);
-                    Status = permissionState == CottonNotificationPermissionState.Allowed
-                        || permissionState == CottonNotificationPermissionState.NotRequired
-                            ? "Notifications allowed."
-                            : "Notifications not allowed.";
+                    if (permissionState == CottonNotificationPermissionState.Allowed
+                        || permissionState == CottonNotificationPermissionState.NotRequired)
+                    {
+                        ShowStatus("Notifications allowed.");
+                        return;
+                    }
+
+                    ShowStatus("Notifications not allowed.", isAttention: true);
                 },
                 "Could not update notifications.");
         }
@@ -180,8 +189,7 @@ namespace Cotton.Mobile.ViewModels
                 _remotePushPreferences = null;
                 _remotePushFailureStatus = "Server push unavailable.";
                 RemotePushPreferences.Clear();
-                OnPropertyChanged(nameof(RemotePushStatusText));
-                OnPropertyChanged(nameof(EnabledCategoriesText));
+                RaiseRemotePushPresentationChanged();
                 return false;
             }
         }
@@ -219,13 +227,13 @@ namespace Cotton.Mobile.ViewModels
                 CottonRemotePushPreferences updated =
                     await _remotePushPreferenceService.UpdateCurrentAsync(instanceUri, requested);
                 ShowRemotePushPreferences(updated);
-                Status = "Push preferences updated.";
+                ShowStatus("Push preferences updated.");
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to update Cotton mobile push notification preferences.");
                 ShowRemotePushPreferences(previous);
-                Status = "Could not update push preferences.";
+                ShowStatus("Could not update push preferences.", isAttention: true);
             }
             finally
             {
@@ -255,7 +263,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Cotton mobile notification settings action failed.");
-                Status = failureStatus;
+                ShowStatus(failureStatus, isAttention: true);
             }
             finally
             {
@@ -279,8 +287,7 @@ namespace Cotton.Mobile.ViewModels
                 RemotePushPreferences.Add(viewModel);
             }
 
-            OnPropertyChanged(nameof(RemotePushStatusText));
-            OnPropertyChanged(nameof(EnabledCategoriesText));
+            RaiseRemotePushPresentationChanged();
         }
 
         private CottonRemotePushPreferenceDisplayState CreateRemotePushDisplay()
@@ -311,6 +318,31 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(NeedsAttention));
             OnPropertyChanged(nameof(EnabledCategoriesText));
             RaiseCommandStatesChanged();
+        }
+
+        private void ShowStatus(string? status, bool isAttention = false)
+        {
+            if (_status == status && _isStatusAttention == isAttention)
+            {
+                return;
+            }
+
+            _status = status;
+            _isStatusAttention = isAttention;
+            OnPropertyChanged(nameof(Status));
+            OnPropertyChanged(nameof(IsStatusVisible));
+            OnPropertyChanged(nameof(IsAttentionStatusVisible));
+            OnPropertyChanged(nameof(IsNeutralStatusVisible));
+        }
+
+        private void RaiseRemotePushPresentationChanged()
+        {
+            OnPropertyChanged(nameof(RemotePushStatusText));
+            OnPropertyChanged(nameof(EnabledCategoriesText));
+            OnPropertyChanged(nameof(HasRemotePushPreferences));
+            OnPropertyChanged(nameof(IsRemotePushUnavailable));
+            OnPropertyChanged(nameof(RemotePushUnavailableTitle));
+            OnPropertyChanged(nameof(RemotePushUnavailableDetail));
         }
 
         private void RaiseCommandStatesChanged()

@@ -150,6 +150,51 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Device_to_cloud_user_selected_document_tree_root_is_ready_and_runnable()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Camera",
+                "Files / Camera",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.DeviceToCloud,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Equal("Device to cloud · Device folder", item.DetailText);
+            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.False(item.IsUnsupportedLocalRoot);
+            Assert.True(item.IsReady);
+            Assert.False(item.IsAttentionVisible);
+            Assert.True(item.CanRunNow);
+            Assert.True(item.CanPauseSync);
+            Assert.True(item.CanStopSync);
+        }
+
+        [Fact]
+        public void Device_to_cloud_app_private_root_shows_source_unsupported()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Camera",
+                "Files / Camera",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.DeviceToCloud);
+
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Equal("Local sync source unsupported", item.StatusText);
+            Assert.True(item.IsUnsupportedLocalRoot);
+            Assert.False(item.IsReady);
+            Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
+        }
+
+        [Fact]
         public void Stop_sync_management_copy_is_explicit_about_local_files()
         {
             Assert.Equal("Stop syncing Projects?", CottonSyncRootManagementText.CreateStopTitle(" Projects "));

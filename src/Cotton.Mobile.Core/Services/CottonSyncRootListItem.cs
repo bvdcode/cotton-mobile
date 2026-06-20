@@ -11,11 +11,11 @@ namespace Cotton.Mobile.Services
             PathText = root.CloudFolder.Path;
             DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
             IsPaused = isPaused;
-            IsUnsupportedLocalRoot = !isPaused && CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root);
+            IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
             StatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && root.CanRunSync;
             IsAttentionVisible = !isPaused && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync);
-            CanRunNow = !isPaused && CottonCloudToDeviceSyncRootCapability.CanRun(root);
+            CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
             CanStopSync = true;
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Services
             }
 
             return isUnsupportedLocalRoot
-                ? CottonCloudToDeviceSyncRootCapability.UnsupportedLocalRootStatusText
+                ? CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(root)
                 : root.StatusText;
         }
 

@@ -514,7 +514,7 @@ namespace Cotton.Mobile.ViewModels
                     await RemoveSelectionOfflineAsync(entries);
                     break;
                 case CottonFileBulkActionKind.ShareLocalFiles:
-                    await ShareFileAsync(entries[0]);
+                    await ShareSelectionLocalFilesAsync(entries);
                     break;
             }
         }
@@ -3622,6 +3622,95 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task ShareSelectionLocalFilesAsync(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            ArgumentNullException.ThrowIfNull(entries);
+
+            if (entries.Count == 1)
+            {
+                await ShareFileAsync(entries[0]);
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to share files.");
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedFiles = entries
+                .Select(entry => GetCurrentVisibleEntry(entry, instanceUri))
+                .Where(entry => entry is not null && entry.Type == CottonFileBrowserEntryType.File)
+                .Select(entry => entry!)
+                .ToArray();
+            if (selectedFiles.Length != entries.Count)
+            {
+                _display.ShowFilesStatus(CottonFileBulkShareLocalStatusText.UnavailableStatus);
+                return;
+            }
+
+            var localFiles = new List<CottonFileDownloadResult>();
+            foreach (CottonFileBrowserEntry file in selectedFiles)
+            {
+                CottonFileDownloadResult? localFile =
+                    _fileBrowserService.GetReusableLocalDownload(instanceUri, file);
+                if (localFile is null)
+                {
+                    await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                    _display.ShowFilesStatus(CottonFileBulkShareLocalStatusText.LocalFilesUnavailableStatus);
+                    return;
+                }
+
+                localFiles.Add(localFile);
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonFileBulkShareLocalStatusText.CreatePreparingStatus(localFiles.Count));
+
+            try
+            {
+                _display.ShowFileActionLoading(
+                    CottonFileBulkShareLocalStatusText.CreateSharingStatus(localFiles.Count));
+                await _fileInteractionService.ShareAsync(localFiles, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                _display.ShowFilesSummary();
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile selection share cancellation.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFileBulkShareLocalStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection share failure.");
+                    return;
+                }
+
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+                _logger.LogError(exception, "Failed to share Cotton mobile selection local files.");
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFileBulkShareLocalStatusText.FailedStatus);
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
             }
         }
 

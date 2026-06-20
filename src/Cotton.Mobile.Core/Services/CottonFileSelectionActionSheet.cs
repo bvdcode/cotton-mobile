@@ -33,8 +33,12 @@ namespace Cotton.Mobile.Services
                 return selection.FileCount > 0 && !selection.HasFolders;
             }
 
-            return selection.Count == 1
-                && action.Kind == CottonFileBulkActionKind.ShareLocalFiles;
+            if (action.Kind == CottonFileBulkActionKind.ShareLocalFiles)
+            {
+                return selection.FileCount > 0 && !selection.HasFolders;
+            }
+
+            return false;
         }
     }
 }

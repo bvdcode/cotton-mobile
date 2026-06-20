@@ -54,6 +54,42 @@ namespace Cotton.Mobile.Services
             cancellationToken.ThrowIfCancellationRequested();
         }
 
+        public async Task ShareAsync(
+            IReadOnlyList<CottonFileDownloadResult> files,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(files);
+            if (files.Count == 0)
+            {
+                throw new ArgumentException("At least one file is required.", nameof(files));
+            }
+
+            if (files.Count == 1)
+            {
+                await ShareAsync(files[0], cancellationToken);
+                return;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            foreach (CottonFileDownloadResult file in files)
+            {
+                ArgumentNullException.ThrowIfNull(file);
+                EnsureFileExists(file);
+            }
+
+            ShareFile[] shareFiles = files
+                .Select(file => new ShareFile(file.FilePath))
+                .ToArray();
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                await _share.RequestAsync(
+                    new ShareMultipleFilesRequest($"Share {shareFiles.Length} files", shareFiles));
+            });
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
         private static void EnsureFileExists(CottonFileDownloadResult file)
         {
             if (!File.Exists(file.FilePath))

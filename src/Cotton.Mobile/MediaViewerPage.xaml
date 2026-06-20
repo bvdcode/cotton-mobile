@@ -19,7 +19,6 @@
     <Grid BackgroundColor="{StaticResource OffBlack}">
         <Grid BackgroundColor="{StaticResource OffBlack}">
             <toolkit:MediaElement x:Name="MediaPlayer"
-                                  Source="{Binding MediaSourcePath}"
                                   Aspect="AspectFit"
                                   ShouldAutoPlay="False"
                                   ShouldLoopPlayback="False"

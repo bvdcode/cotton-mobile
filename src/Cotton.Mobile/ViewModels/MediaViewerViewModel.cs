@@ -37,7 +37,7 @@ namespace Cotton.Mobile.ViewModels
             _file = file;
             _fileInteractionService = fileInteractionService;
             _logger = logger;
-            MediaSourcePath = $"filesystem://{file.FilePath}";
+            MediaFilePath = file.FilePath;
             ShareCommand = new AsyncCommand(ShareAsync, LogUnhandledCommandException, () => !IsBusy);
             OpenExternallyCommand = new AsyncCommand(OpenExternallyAsync, LogUnhandledCommandException, () => !IsBusy);
         }
@@ -50,7 +50,7 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsAudioPreview => PreviewKind == CottonFilePreviewKind.Audio;
 
-        public string MediaSourcePath { get; }
+        public string MediaFilePath { get; }
 
         public AsyncCommand ShareCommand { get; }
 

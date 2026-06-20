@@ -53,6 +53,21 @@ namespace Cotton.Mobile.ViewModels
 
         public event EventHandler? FileSearchTextChanged;
 
+        public CottonFilesShellNavigationItem FilesNavigation { get; } =
+            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Files);
+
+        public CottonFilesShellNavigationItem TransfersNavigation { get; } =
+            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Transfers);
+
+        public CottonFilesShellNavigationItem InboxNavigation { get; } =
+            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Inbox);
+
+        public CottonFilesShellNavigationItem BackupNavigation { get; } =
+            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Backup);
+
+        public CottonFilesShellNavigationItem SettingsNavigation { get; } =
+            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Settings);
+
         public string InstanceUrl
         {
             get => _instanceUrl;

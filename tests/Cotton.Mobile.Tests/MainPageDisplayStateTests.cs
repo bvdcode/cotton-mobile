@@ -189,6 +189,33 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Files_shell_navigation_catalog_keeps_compact_entry_order()
+        {
+            Assert.Equal(
+                [
+                    CottonFilesShellNavigationDestination.Files,
+                    CottonFilesShellNavigationDestination.Transfers,
+                    CottonFilesShellNavigationDestination.Inbox,
+                    CottonFilesShellNavigationDestination.Backup,
+                    CottonFilesShellNavigationDestination.Settings,
+                ],
+                CottonFilesShellNavigationCatalog.CreateItems().Select(item => item.Destination));
+        }
+
+        [Fact]
+        public void Signed_in_display_exposes_files_first_navigation_copy()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+
+            Assert.Equal("Files", display.FilesNavigation.Label);
+            Assert.Equal("Transfers", display.TransfersNavigation.Label);
+            Assert.Equal("Inbox", display.InboxNavigation.Label);
+            Assert.Equal("Backup", display.BackupNavigation.Label);
+            Assert.Equal("Settings", display.SettingsNavigation.Label);
+            Assert.Equal("Open account and settings", display.SettingsNavigation.AccessibilityText);
+        }
+
+        [Fact]
         public void Offline_pack_progress_survives_file_summary_and_clears_on_sign_out()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

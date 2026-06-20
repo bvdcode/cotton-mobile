@@ -226,43 +226,47 @@
                                   ColumnSpacing="8">
                                 <Button Grid.Column="0"
                                         Style="{StaticResource FileChromeButton}"
-                                        Text="Transfers"
+                                        Text="{Binding Display.TransfersNavigation.Label}"
                                         Command="{Binding OpenTransfersCommand}"
                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                         Padding="4,0"
                                         FontSize="11"
                                         HeightRequest="40"
-                                        MinimumHeightRequest="40" />
+                                        MinimumHeightRequest="40"
+                                        SemanticProperties.Description="{Binding Display.TransfersNavigation.AccessibilityText}" />
 
                                 <Button Grid.Column="1"
                                         Style="{StaticResource FileChromeButton}"
-                                        Text="Inbox"
+                                        Text="{Binding Display.InboxNavigation.Label}"
                                         Command="{Binding OpenCaptureInboxCommand}"
                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                         Padding="4,0"
                                         FontSize="11"
                                         HeightRequest="40"
-                                        MinimumHeightRequest="40" />
+                                        MinimumHeightRequest="40"
+                                        SemanticProperties.Description="{Binding Display.InboxNavigation.AccessibilityText}" />
 
                                 <Button Grid.Column="2"
                                         Style="{StaticResource FileChromeButton}"
-                                        Text="Backup"
+                                        Text="{Binding Display.BackupNavigation.Label}"
                                         Command="{Binding OpenBackupSetupCommand}"
                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                         Padding="4,0"
                                         FontSize="11"
                                         HeightRequest="40"
-                                        MinimumHeightRequest="40" />
+                                        MinimumHeightRequest="40"
+                                        SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
 
                                 <Button Grid.Column="3"
                                         Style="{StaticResource FileChromeButton}"
-                                        Text="Alerts"
-                                        Command="{Binding OpenNotificationsCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                        Text="{Binding Display.SettingsNavigation.Label}"
+                                        Command="{Binding AccountCommand}"
+                                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
                                         Padding="4,0"
                                         FontSize="11"
                                         HeightRequest="40"
-                                        MinimumHeightRequest="40" />
+                                        MinimumHeightRequest="40"
+                                        SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
                             </Grid>
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"

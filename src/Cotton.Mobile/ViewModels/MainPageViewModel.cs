@@ -19,6 +19,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountDiagnosticsAction = "Diagnostics";
         private const string AccountFeedbackAction = "Send feedback";
         private const string AccountLogoutAction = "Log out";
+        private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
         private const string AccountResetShareLinksAction = "Reset shared links";
         private const string AccountResetShareLinksConfirmationAction = "Reset links";
@@ -593,6 +594,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountCancelAction,
                 AccountLogoutAction,
                 AccountStorageAction,
+                AccountNotificationsAction,
                 AccountResetShareLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -613,6 +615,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountStorageAction:
                     await OpenStorageAsync();
+                    break;
+                case AccountNotificationsAction:
+                    await OpenNotificationsAsync();
                     break;
                 case AccountResetShareLinksAction:
                     await ResetSharedLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);

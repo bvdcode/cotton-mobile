@@ -152,6 +152,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_skips_unsupported_local_root_without_remote_reads()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                SyncRootId,
+                FolderId,
+                "Projects",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.CloudToDevice,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
+
+            CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonCloudToDeviceSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.SkippedUnsupportedLocalRoot, result.Status);
+            Assert.Equal("Local sync target unsupported", result.StatusText);
+            Assert.Empty(_folderContentSource.RequestedFolderIds);
+            Assert.Empty(_fileOperator.DownloadedIds);
+        }
+
+        [Fact]
         public async Task Run_root_rejects_root_from_another_instance()
         {
             var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
@@ -285,7 +305,8 @@ namespace Cotton.Mobile.Tests
             Guid folderId,
             string folderName,
             CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available,
-            CottonSyncDirection direction = CottonSyncDirection.CloudToDevice)
+            CottonSyncDirection direction = CottonSyncDirection.CloudToDevice,
+            CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.AppPrivateDirectory)
         {
             return new CottonSyncRootSnapshot(
                 syncRootId,
@@ -296,9 +317,11 @@ namespace Cotton.Mobile.Tests
                     folderName,
                     $"Files / {folderName}"),
                 new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.AppPrivateDirectory,
+                    storageKind,
                     $"app-private-sync-root-{folderId:N}",
-                    "On this device",
+                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
+                        ? "On this device"
+                        : "Device folder",
                     permissionStatus),
                 direction);
         }

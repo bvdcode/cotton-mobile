@@ -31,8 +31,7 @@ namespace Cotton.Mobile.Services
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             int eligibleRootCount = roots.Count(root =>
-                root.Direction == CottonSyncDirection.CloudToDevice
-                && root.CanRunSync
+                CottonCloudToDeviceSyncRootCapability.CanRun(root)
                 && !pausedRootIds.Contains(root.Id));
             if (eligibleRootCount == 0)
             {

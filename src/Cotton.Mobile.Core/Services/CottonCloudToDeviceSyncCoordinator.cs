@@ -55,6 +55,12 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
+                if (CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root))
+                {
+                    results.Add(CottonCloudToDeviceSyncRootRunResult.SkippedUnsupportedLocalRoot(root));
+                    continue;
+                }
+
                 if (!root.CanRunSync)
                 {
                     results.Add(CottonCloudToDeviceSyncRootRunResult.SkippedNotReady(root));
@@ -88,6 +94,10 @@ namespace Cotton.Mobile.Services
                 .Contains(root.Id))
             {
                 result = CottonCloudToDeviceSyncRootRunResult.SkippedPaused(root);
+            }
+            else if (CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root))
+            {
+                result = CottonCloudToDeviceSyncRootRunResult.SkippedUnsupportedLocalRoot(root);
             }
             else if (!root.CanRunSync)
             {

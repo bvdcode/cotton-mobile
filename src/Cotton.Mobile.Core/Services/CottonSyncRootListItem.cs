@@ -11,10 +11,11 @@ namespace Cotton.Mobile.Services
             PathText = root.CloudFolder.Path;
             DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
             IsPaused = isPaused;
-            StatusText = isPaused ? CottonSyncRootManagementText.PausedStatusText : root.StatusText;
-            IsReady = !isPaused && root.CanRunSync;
-            IsAttentionVisible = !isPaused && (root.NeedsUserAction || !root.CanRunSync);
-            CanRunNow = !isPaused && root.CanRunSync && root.Direction == CottonSyncDirection.CloudToDevice;
+            IsUnsupportedLocalRoot = !isPaused && CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root);
+            StatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
+            IsReady = !isPaused && !IsUnsupportedLocalRoot && root.CanRunSync;
+            IsAttentionVisible = !isPaused && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync);
+            CanRunNow = !isPaused && CottonCloudToDeviceSyncRootCapability.CanRun(root);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
             CanStopSync = true;
@@ -40,6 +41,8 @@ namespace Cotton.Mobile.Services
 
         public bool IsPaused { get; }
 
+        public bool IsUnsupportedLocalRoot { get; }
+
         public bool CanPauseSync { get; }
 
         public string PauseSyncActionText => CottonSyncRootManagementText.PauseAction;
@@ -51,6 +54,21 @@ namespace Cotton.Mobile.Services
         public bool CanStopSync { get; }
 
         public string StopSyncActionText => CottonSyncRootManagementText.StopAction;
+
+        private static string CreateStatusText(
+            CottonSyncRootSnapshot root,
+            bool isPaused,
+            bool isUnsupportedLocalRoot)
+        {
+            if (isPaused)
+            {
+                return CottonSyncRootManagementText.PausedStatusText;
+            }
+
+            return isUnsupportedLocalRoot
+                ? CottonCloudToDeviceSyncRootCapability.UnsupportedLocalRootStatusText
+                : root.StatusText;
+        }
 
         private static string CreateDirectionText(CottonSyncDirection direction)
         {

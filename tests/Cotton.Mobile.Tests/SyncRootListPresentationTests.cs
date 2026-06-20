@@ -45,6 +45,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.CanRunNow);
             Assert.Equal("Run now", item.RunNowActionText);
             Assert.False(item.IsPaused);
+            Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.CanPauseSync);
             Assert.Equal("Pause", item.PauseSyncActionText);
             Assert.False(item.CanResumeSync);
@@ -121,6 +122,30 @@ namespace Cotton.Mobile.Tests
             Assert.False(item.CanRunNow);
             Assert.False(item.CanPauseSync);
             Assert.True(item.CanResumeSync);
+            Assert.True(item.CanStopSync);
+        }
+
+        [Fact]
+        public void Unsupported_local_root_is_attention_state_and_cannot_run_now()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.CloudToDevice,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Equal("Local sync target unsupported", item.StatusText);
+            Assert.True(item.IsUnsupportedLocalRoot);
+            Assert.False(item.IsReady);
+            Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
+            Assert.True(item.CanPauseSync);
             Assert.True(item.CanStopSync);
         }
 

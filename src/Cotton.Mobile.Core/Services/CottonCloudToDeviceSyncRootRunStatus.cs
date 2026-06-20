@@ -5,6 +5,7 @@ namespace Cotton.Mobile.Services
         Completed,
         SkippedPaused,
         SkippedNotReady,
+        SkippedUnsupportedLocalRoot,
         SkippedUnsupportedDirection,
     }
 }

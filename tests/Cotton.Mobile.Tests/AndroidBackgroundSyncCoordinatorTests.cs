@@ -50,9 +50,16 @@ namespace Cotton.Mobile.Tests
                 "Upload",
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.DeviceToCloud);
+            CottonSyncRootSnapshot unsupportedLocalRoot = CreateRoot(
+                Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd"),
+                Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                "Device",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.CloudToDevice,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             var host = new FakeBackgroundSyncHost();
             var coordinator = new CottonAndroidBackgroundSyncCoordinator(
-                new FakeSyncRootStore([paused, notReady, deviceToCloud]),
+                new FakeSyncRootStore([paused, notReady, deviceToCloud, unsupportedLocalRoot]),
                 new FakeSyncRootPauseStore(new HashSet<Guid> { paused.Id }),
                 host);
 
@@ -101,7 +108,8 @@ namespace Cotton.Mobile.Tests
             Guid folderId,
             string folderName,
             CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available,
-            CottonSyncDirection direction = CottonSyncDirection.CloudToDevice)
+            CottonSyncDirection direction = CottonSyncDirection.CloudToDevice,
+            CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.AppPrivateDirectory)
         {
             return new CottonSyncRootSnapshot(
                 rootId,
@@ -112,9 +120,11 @@ namespace Cotton.Mobile.Tests
                     folderName,
                     $"Files / {folderName}"),
                 new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.AppPrivateDirectory,
+                    storageKind,
                     $"app-private-sync-root-{folderId:N}",
-                    "On this device",
+                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
+                        ? "On this device"
+                        : "Device folder",
                     permissionStatus),
                 direction);
         }

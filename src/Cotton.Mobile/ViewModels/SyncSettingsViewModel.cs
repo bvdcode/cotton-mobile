@@ -45,6 +45,7 @@ namespace Cotton.Mobile.ViewModels
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, () => !IsBusy);
             RunRootCommand = new AsyncCommand<CottonSyncRootListItem>(
                 RunRootAsync,
                 LogUnhandledCommandException,
@@ -65,6 +66,8 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand LoadCommand { get; }
 
+        public AsyncCommand RunAllCommand { get; }
+
         public AsyncCommand<CottonSyncRootListItem> RunRootCommand { get; }
 
         public AsyncCommand<CottonSyncRootListItem> StopRootCommand { get; }
@@ -83,6 +86,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     LoadCommand.RaiseCanExecuteChanged();
+                    RunAllCommand.RaiseCanExecuteChanged();
                     RunRootCommand.RaiseCanExecuteChanged();
                     StopRootCommand.RaiseCanExecuteChanged();
                     PauseRootCommand.RaiseCanExecuteChanged();
@@ -198,6 +202,42 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to run Cotton mobile sync root.");
+                Status = CottonCloudToDeviceSyncStatusText.FailedStatus;
+            }
+            finally
+            {
+                IsBusy = false;
+            }
+        }
+
+        private async Task RunAllAsync()
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                Status = "Could not run sync for this instance.";
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                Status = CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                Status = CottonCloudToDeviceSyncStatusText.StartingAllStatus;
+                CottonCloudToDeviceSyncRunSummary summary = await _syncCoordinator.RunAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+                ShowRoots(refreshedRoots, refreshedPausedIds);
+                Status = CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(summary);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to run Cotton mobile sync roots.");
                 Status = CottonCloudToDeviceSyncStatusText.FailedStatus;
             }
             finally

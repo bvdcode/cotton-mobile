@@ -77,6 +77,7 @@ namespace Cotton.Mobile.Tests
         public void Sync_status_copy_is_stable()
         {
             Assert.Equal("Sync to this device", CottonCloudToDeviceSyncStatusText.ActionLabel);
+            Assert.Equal("Syncing folders...", CottonCloudToDeviceSyncStatusText.StartingAllStatus);
             Assert.Equal("Syncing Projects...", CottonCloudToDeviceSyncStatusText.CreateStartingStatus(" Projects "));
             Assert.Equal("Sync needs a fresh account session.", CottonCloudToDeviceSyncStatusText.AccountUnavailableStatus);
             Assert.Equal("Offline. Sync needs internet.", CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus);

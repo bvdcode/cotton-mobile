@@ -334,7 +334,8 @@ namespace Cotton.Mobile.Services
                 localItem.LocalUpdatedAtUtc,
                 remoteUpdatedAtUtc,
                 localItem.SizeBytes,
-                localItem.ContentType);
+                localItem.ContentType,
+                localItem.LocalSourceId);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateManifestItem(

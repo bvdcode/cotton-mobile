@@ -56,6 +56,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonBidirectionalSyncActionKind.UploadChangedFile, item.Action);
             Assert.True(item.RequiresUpload);
             Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
+            Assert.Equal("local:notes.txt", item.LocalSourceId);
             Assert.False(item.IsBlocked);
             Assert.Equal(1, plan.UploadCount);
         }

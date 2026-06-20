@@ -58,6 +58,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonNotificationLaunchState _notificationLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
         private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
+        private readonly ICottonAndroidBackgroundSyncCoordinator _backgroundSyncCoordinator;
         private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
         private readonly ICottonTransferActivitySignal _transferActivitySignal;
         private readonly IScreenReaderService _screenReader;
@@ -106,6 +107,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonNotificationLaunchState notificationLaunchState,
             ICottonTransferQueueRestoreCoordinator transferQueueRestoreCoordinator,
             ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
+            ICottonAndroidBackgroundSyncCoordinator backgroundSyncCoordinator,
             IAndroidApiLevelProvider androidApiLevelProvider,
             ICottonTransferActivitySignal transferActivitySignal,
             IScreenReaderService screenReader,
@@ -157,6 +159,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(notificationLaunchState);
             ArgumentNullException.ThrowIfNull(transferQueueRestoreCoordinator);
             ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
+            ArgumentNullException.ThrowIfNull(backgroundSyncCoordinator);
             ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
             ArgumentNullException.ThrowIfNull(transferActivitySignal);
             ArgumentNullException.ThrowIfNull(screenReader);
@@ -208,6 +211,7 @@ namespace Cotton.Mobile.ViewModels
             _notificationLaunchState = notificationLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
             _backgroundTransferCoordinator = backgroundTransferCoordinator;
+            _backgroundSyncCoordinator = backgroundSyncCoordinator;
             _androidApiLevelProvider = androidApiLevelProvider;
             _transferActivitySignal = transferActivitySignal;
             _screenReader = screenReader;
@@ -1624,6 +1628,7 @@ namespace Cotton.Mobile.ViewModels
                         : null;
                 await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
                 QueueCloudToDeviceSyncRestore(result.InstanceUri, "authenticated session");
+                _ = ScheduleCloudToDeviceBackgroundSyncBestEffortAsync(result.InstanceUri, "authenticated session");
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("authenticated session");
                 QueuePendingNotificationOpen("authenticated session");
@@ -1724,6 +1729,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             QueueCloudToDeviceSyncRestore(instanceUri, reason);
+            _ = ScheduleCloudToDeviceBackgroundSyncBestEffortAsync(instanceUri, reason);
         }
 
         private void QueueCloudToDeviceSyncRestore(Uri instanceUri, string reason)
@@ -1795,6 +1801,29 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 cancellation.Dispose();
+            }
+        }
+
+        private async Task ScheduleCloudToDeviceBackgroundSyncBestEffortAsync(Uri instanceUri, string reason)
+        {
+            try
+            {
+                CottonAndroidBackgroundSyncScheduleResult result =
+                    await _backgroundSyncCoordinator.ScheduleAsync(instanceUri);
+                if (result.IsScheduled)
+                {
+                    _logger.LogInformation(
+                        "Scheduled Cotton mobile cloud-to-device background sync after {Reason}: {StatusText}",
+                        reason,
+                        result.StatusText);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to schedule Cotton mobile cloud-to-device background sync after {Reason}.",
+                    reason);
             }
         }
 

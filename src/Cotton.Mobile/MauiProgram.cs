@@ -79,6 +79,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
 #if ANDROID
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost, AndroidBackgroundSyncHost>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
@@ -91,6 +92,7 @@ namespace Cotton.Mobile
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 #else
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, DisabledAndroidApiLevelProvider>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost>(_ => DisabledCottonAndroidBackgroundSyncHost.Instance);
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();
 			builder.Services.AddSingleton<ICottonNotificationPermissionService, DisabledCottonNotificationPermissionService>();
 			builder.Services.AddSingleton<ICottonLocalNotificationService>(_ => NullCottonLocalNotificationService.Instance);
@@ -146,6 +148,8 @@ namespace Cotton.Mobile
 					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
 					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
 			builder.Services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncCoordinator, CottonAndroidBackgroundSyncCoordinator>();
+			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncJobRunner, CottonAndroidBackgroundSyncJobRunner>();
 			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
 			builder.Services.AddSingleton<ICottonCameraBackupSettingsStore, PreferencesCottonCameraBackupSettingsStore>();
 			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();

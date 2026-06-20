@@ -10,6 +10,8 @@ serial="$COTTON_ADB_SERIAL"
 instance_uri="https://app.cottoncloud.dev"
 folder_name="Mobile smoke folder"
 offline_file_name=""
+nested_folder_name=""
+nested_file_name=""
 evidence_root="${COTTON_MOBILE_EVIDENCE_ROOT:-${TMPDIR:-/tmp}/cotton-mobile-evidence}"
 evidence_dir=""
 install_debug=0
@@ -30,7 +32,9 @@ Options:
   --serial SERIAL           ADB serial to use. Defaults to COTTON_ADB_SERIAL.
   --instance URI            Cotton instance URI. Defaults to $instance_uri.
   --folder NAME             Cached folder to navigate. Defaults to "$folder_name".
+  --nested-folder NAME      Optional cached child folder to navigate inside --folder.
   --offline-file NAME       On-device file to open offline. Defaults to a pinned root file.
+  --nested-file NAME        Optional file expected inside --nested-folder cache.
   --evidence-dir DIR        Evidence directory. Defaults to a timestamped directory.
   --install-debug           Install the current debug APK with -r before launch.
   --leave-network-disabled  Do not restore Wi-Fi/mobile data at the end.
@@ -75,12 +79,28 @@ while [[ $# -gt 0 ]]; do
       folder_name="$2"
       shift 2
       ;;
+    --nested-folder)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --nested-folder.\n' >&2
+        exit 64
+      fi
+      nested_folder_name="$2"
+      shift 2
+      ;;
     --offline-file)
       if [[ $# -lt 2 ]]; then
         printf 'Missing value for --offline-file.\n' >&2
         exit 64
       fi
       offline_file_name="$2"
+      shift 2
+      ;;
+    --nested-file)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --nested-file.\n' >&2
+        exit 64
+      fi
+      nested_file_name="$2"
       shift 2
       ;;
     --evidence-dir)
@@ -277,7 +297,9 @@ write_metadata() {
     printf 'instance=%s\n' "$instance_uri"
     printf 'instance_key=%s\n' "$instance_key"
     printf 'folder=%s\n' "$folder_name"
+    printf 'nested_folder=%s\n' "$nested_folder_name"
     printf 'offline_file=%s\n' "$offline_file_name"
+    printf 'nested_file=%s\n' "$nested_file_name"
     printf 'install_debug=%s\n' "$install_debug"
     printf 'git_head=%s\n' "$(git -C "$COTTON_REPO_ROOT" rev-parse --short HEAD 2>/dev/null || printf unknown)"
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
@@ -468,6 +490,69 @@ print(
 PY
 }
 
+select_nested_folder_target() {
+  local selected_tsv="$evidence_dir/32-selected-nested-folder.tsv"
+
+  python3 - \
+    "$evidence_dir/30-folder-cache.json" \
+    "$nested_folder_name" \
+    > "$selected_tsv" <<'PY'
+import json
+import sys
+
+cache_path, nested_folder_name = sys.argv[1:3]
+cache = json.load(open(cache_path, encoding="utf-8"))
+
+for entry in cache.get("entries") or []:
+    if entry.get("type") == 0 and entry.get("name") == nested_folder_name:
+        print(f"{entry['id']}\t{entry['name']}")
+        break
+else:
+    raise SystemExit(f"Nested folder not found in cached folder listing: {nested_folder_name}")
+PY
+
+  IFS=$'\t' read -r nested_folder_id nested_folder_name < "$selected_tsv"
+}
+
+validate_nested_folder_cache() {
+  python3 - \
+    "$evidence_dir/33-nested-folder-cache.json" \
+    "$nested_folder_id" \
+    "$nested_folder_name" \
+    "$nested_file_name" <<'PY'
+import json
+import sys
+
+cache_path, folder_id, folder_name, nested_file_name = sys.argv[1:5]
+cache = json.load(open(cache_path, encoding="utf-8"))
+
+if cache.get("schemaVersion") != 2:
+    raise SystemExit(f"Nested folder cache schema is {cache.get('schemaVersion')}, expected 2.")
+if cache.get("folderId") != folder_id:
+    raise SystemExit("Nested folder cache id does not match selected child folder.")
+if cache.get("folderName") != folder_name:
+    raise SystemExit("Nested folder cache name does not match selected child folder.")
+entries = cache.get("entries")
+if not isinstance(entries, list):
+    raise SystemExit("Nested folder cache entries are missing.")
+if nested_file_name and not any(entry.get("name") == nested_file_name for entry in entries):
+    raise SystemExit(f"Nested file not found in cached child folder listing: {nested_file_name}")
+
+print(
+    json.dumps(
+        {
+            "folderId": cache.get("folderId"),
+            "folderName": cache.get("folderName"),
+            "entryCount": len(entries),
+            "cachedAtUtc": cache.get("cachedAtUtc"),
+            "nestedFile": nested_file_name,
+        },
+        indent=2,
+    )
+)
+PY
+}
+
 trap restore_network EXIT
 
 instance_key="$(create_instance_key)"
@@ -516,12 +601,40 @@ sleep 5
 capture_screen "25-online-folder"
 require_xml_text "$evidence_dir/25-online-folder.xml" "Files / $folder_name" \
   "Online folder navigation did not open the selected folder."
+online_folder_xml="$evidence_dir/25-online-folder.xml"
 
 folder_cache_name="${folder_id//-/}.json"
 pull_app_file "files/CottonFolderListings/$instance_key/$folder_cache_name" "$evidence_dir/30-folder-cache.json"
 validate_folder_cache > "$evidence_dir/31-folder-cache-summary.json"
 
-tap_node_from_xml "$evidence_dir/25-online-folder.xml" "Up"
+if [[ -n "${nested_folder_name//[[:space:]]/}" ]]; then
+  select_nested_folder_target
+  write_metadata
+  require_xml_text "$online_folder_xml" "$nested_folder_name" \
+    "Selected nested folder is not visible in the online parent folder."
+
+  tap_node_from_xml "$online_folder_xml" "$nested_folder_name"
+  sleep 5
+  capture_screen "32-online-nested-folder"
+  require_xml_text "$evidence_dir/32-online-nested-folder.xml" "Files /" \
+    "Online nested folder navigation did not show a Files breadcrumb."
+  require_xml_text "$evidence_dir/32-online-nested-folder.xml" "$nested_folder_name" \
+    "Online nested folder navigation did not open the selected child folder."
+
+  nested_folder_cache_name="${nested_folder_id//-/}.json"
+  pull_app_file \
+    "files/CottonFolderListings/$instance_key/$nested_folder_cache_name" \
+    "$evidence_dir/33-nested-folder-cache.json"
+  validate_nested_folder_cache > "$evidence_dir/34-nested-folder-cache-summary.json"
+
+  tap_node_from_xml "$evidence_dir/32-online-nested-folder.xml" "Up"
+  wait_for_text "34-online-parent-return" "$folder_name"
+  online_folder_xml="$waited_xml"
+  require_xml_text "$online_folder_xml" "$nested_folder_name" \
+    "Online up navigation did not return to the parent folder."
+fi
+
+tap_node_from_xml "$online_folder_xml" "Up"
 wait_for_text "35-online-root-return" "$selected_file_name"
 online_root_return_xml="$waited_xml"
 require_xml_text "$online_root_return_xml" "$folder_name" "Online up navigation did not return to root."
@@ -552,8 +665,35 @@ require_xml_text "$evidence_dir/50-offline-folder.xml" "Files / $folder_name" \
 require_xml_text "$evidence_dir/50-offline-folder.xml" "Saved folder list cached" "Offline folder did not show cached-listing notice."
 require_xml_text "$evidence_dir/50-offline-folder.xml" "Files marked On device can still open" \
   "Offline folder did not show on-device-open guidance."
+offline_folder_xml="$evidence_dir/50-offline-folder.xml"
 
-tap_node_from_xml "$evidence_dir/50-offline-folder.xml" "Up"
+if [[ -n "${nested_folder_name//[[:space:]]/}" ]]; then
+  require_xml_text "$offline_folder_xml" "$nested_folder_name" \
+    "Selected nested folder is not visible in the offline parent folder."
+  tap_node_from_xml "$offline_folder_xml" "$nested_folder_name"
+  sleep 4
+  capture_screen "52-offline-nested-folder"
+  require_xml_text "$evidence_dir/52-offline-nested-folder.xml" "Files /" \
+    "Offline nested folder navigation did not show a Files breadcrumb."
+  require_xml_text "$evidence_dir/52-offline-nested-folder.xml" "$nested_folder_name" \
+    "Offline nested folder navigation did not open the cached child folder."
+  require_xml_text "$evidence_dir/52-offline-nested-folder.xml" "Saved folder list cached" \
+    "Offline nested folder did not show cached-listing notice."
+  require_xml_text "$evidence_dir/52-offline-nested-folder.xml" "Files marked On device can still open" \
+    "Offline nested folder did not show on-device-open guidance."
+  if [[ -n "${nested_file_name//[[:space:]]/}" ]]; then
+    require_xml_text "$evidence_dir/52-offline-nested-folder.xml" "$nested_file_name" \
+      "Expected nested file is not visible in the offline child folder."
+  fi
+
+  tap_node_from_xml "$evidence_dir/52-offline-nested-folder.xml" "Up"
+  wait_for_text "54-offline-parent-return" "$folder_name"
+  offline_folder_xml="$waited_xml"
+  require_xml_text "$offline_folder_xml" "$nested_folder_name" \
+    "Offline up navigation did not return to the parent cached folder."
+fi
+
+tap_node_from_xml "$offline_folder_xml" "Up"
 wait_for_text "55-offline-root-return" "$selected_file_name"
 offline_root_return_xml="$waited_xml"
 require_xml_text "$offline_root_return_xml" "$folder_name" \
@@ -581,6 +721,12 @@ capture_text "92-connectivity-after-restore.txt" adb_device shell dumpsys connec
   printf 'Package: %s\n' "$package_id"
   printf 'Instance key: %s\n' "$instance_key"
   printf 'Folder: %s\n' "$folder_name"
+  if [[ -n "${nested_folder_name//[[:space:]]/}" ]]; then
+    printf 'Nested folder: %s\n' "$nested_folder_name"
+  fi
   printf 'Offline file: %s\n' "$selected_file_name"
+  if [[ -n "${nested_file_name//[[:space:]]/}" ]]; then
+    printf 'Nested file: %s\n' "$nested_file_name"
+  fi
   printf 'Evidence: %s\n' "$evidence_dir"
 } | tee "$evidence_dir/99-summary.txt"

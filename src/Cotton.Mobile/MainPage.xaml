@@ -418,7 +418,7 @@
                                       ColumnSpacing="10">
                                     <Border WidthRequest="28"
                                             HeightRequest="28"
-                                            Stroke="{StaticResource Danger}"
+                                            Stroke="{StaticResource Primary}"
                                             StrokeShape="RoundRectangle 14"
                                             StrokeThickness="1"
                                             BackgroundColor="Transparent"
@@ -428,7 +428,7 @@
                                                FontAttributes="Bold"
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center"
-                                               TextColor="{StaticResource Danger}" />
+                                               TextColor="{StaticResource Primary}" />
                                     </Border>
 
                                     <VerticalStackLayout Grid.Column="1"

@@ -530,12 +530,12 @@ namespace Cotton.Mobile.Tests
                 return Task.CompletedTask;
             }
 
-            public Task CleanupAsync(
+            public Task<CottonTransferStagedFileCleanupResult> CleanupAsync(
                 Uri instanceUri,
                 IReadOnlyCollection<CottonTransferQueueItem> queueItems,
                 CancellationToken cancellationToken = default)
             {
-                return Task.CompletedTask;
+                return Task.FromResult(CottonTransferStagedFileCleanupResult.Empty);
             }
         }
 

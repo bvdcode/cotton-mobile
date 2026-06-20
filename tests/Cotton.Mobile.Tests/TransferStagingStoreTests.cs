@@ -112,9 +112,11 @@ namespace Cotton.Mobile.Tests
                 CreateUpload(queuedId),
             ];
 
-            await _store.CleanupAsync(InstanceUri, queueItems);
+            CottonTransferStagedFileCleanupResult result = await _store.CleanupAsync(InstanceUri, queueItems);
 
             IReadOnlyList<CottonTransferStagedFileSnapshot> stagedFiles = await _store.ListAsync(InstanceUri);
+            Assert.Equal(3, result.FileCount);
+            Assert.Equal(3, result.SizeBytes);
             Assert.Equal([failedId, queuedId], stagedFiles.Select(file => file.TransferId).Order().ToArray());
         }
 

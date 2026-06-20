@@ -192,7 +192,7 @@ namespace Cotton.Mobile.Tests
                 return Task.CompletedTask;
             }
 
-            public async Task CleanupAsync(
+            public async Task<CottonTransferStagedFileCleanupResult> CleanupAsync(
                 Uri instanceUri,
                 IReadOnlyCollection<CottonTransferQueueItem> queueItems,
                 CancellationToken cancellationToken = default)
@@ -202,10 +202,16 @@ namespace Cotton.Mobile.Tests
                     CottonTransferStagedFileCleanupPolicy.ResolveTransferIdsToDelete(
                         queueItems,
                         _stagedFiles.Keys.ToList());
+                long deletedBytes = transferIdsToDelete
+                    .Where(transferId => _stagedFiles.ContainsKey(transferId))
+                    .Sum(transferId => _stagedFiles[transferId].SizeBytes);
+                int deletedFileCount = transferIdsToDelete.Count(transferId => _stagedFiles.ContainsKey(transferId));
                 foreach (Guid transferId in transferIdsToDelete)
                 {
                     await DeleteAsync(instanceUri, transferId, cancellationToken);
                 }
+
+                return new CottonTransferStagedFileCleanupResult(deletedFileCount, deletedBytes);
             }
         }
 

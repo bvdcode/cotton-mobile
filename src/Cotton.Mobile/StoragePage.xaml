@@ -60,7 +60,7 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
 
-            <Grid RowDefinitions="Auto,Auto"
+            <Grid RowDefinitions="Auto,Auto,Auto"
                   ColumnDefinitions="*,*"
                   RowSpacing="10"
                   ColumnSpacing="10">
@@ -83,6 +83,13 @@
 
                 <Button Grid.Row="1"
                         Grid.Column="1"
+                        Text="Clear temp uploads"
+                        Command="{Binding ClearTemporaryUploadsCommand}"
+                        Style="{StaticResource FileChromeButton}"
+                        HeightRequest="44" />
+
+                <Button Grid.Row="2"
+                        Grid.ColumnSpan="2"
                         Text="Clear all"
                         Command="{Binding ClearAllCommand}"
                         Style="{StaticResource DestructiveChromeButton}"

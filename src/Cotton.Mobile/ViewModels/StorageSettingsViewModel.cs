@@ -44,6 +44,10 @@ namespace Cotton.Mobile.ViewModels
                 ClearFolderListingsAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy);
+            ClearTemporaryUploadsCommand = new AsyncCommand(
+                ClearTemporaryUploadsAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy);
             ClearDownloadedFilesCommand = new AsyncCommand(
                 ClearDownloadedFilesAsync,
                 LogUnhandledCommandException,
@@ -58,6 +62,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ClearThumbnailsCommand { get; }
 
         public AsyncCommand ClearFolderListingsCommand { get; }
+
+        public AsyncCommand ClearTemporaryUploadsCommand { get; }
 
         public AsyncCommand ClearDownloadedFilesCommand { get; }
 
@@ -213,6 +219,32 @@ namespace Cotton.Mobile.ViewModels
                 CottonStorageCleanupPolicyText.FolderListingsClearedStatus);
         }
 
+        private async Task ClearTemporaryUploadsAsync()
+        {
+            await RunStorageActionAsync(
+                async () =>
+                {
+                    bool confirmed = await _dialogService.ShowConfirmationAsync(
+                        CottonStorageCleanupPolicyText.ClearTemporaryUploadsTitle,
+                        CottonStorageCleanupPolicyText.ClearTemporaryUploadsMessage,
+                        CottonStorageCleanupPolicyText.ClearTemporaryUploadsAction,
+                        CottonStorageCleanupPolicyText.CancelAction);
+                    if (!confirmed)
+                    {
+                        Status = null;
+                        return;
+                    }
+
+                    CottonTransferStagedFileCleanupResult result =
+                        await _storageManagementService.ClearTemporaryUploadsAsync(CancellationToken.None);
+                    CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
+                    ShowSummary(summary);
+                    Status = CottonStorageCleanupPolicyText.CreateTemporaryUploadsClearedStatus(result);
+                },
+                "Could not clear temporary uploads.",
+                RefreshSummaryAfterClearFailureAsync);
+        }
+
         private Task ClearAllAsync()
         {
             return ClearAsync(
@@ -350,6 +382,7 @@ namespace Cotton.Mobile.ViewModels
             LoadCommand.RaiseCanExecuteChanged();
             ClearThumbnailsCommand.RaiseCanExecuteChanged();
             ClearFolderListingsCommand.RaiseCanExecuteChanged();
+            ClearTemporaryUploadsCommand.RaiseCanExecuteChanged();
             ClearDownloadedFilesCommand.RaiseCanExecuteChanged();
             ClearAllCommand.RaiseCanExecuteChanged();
         }

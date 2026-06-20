@@ -93,9 +93,13 @@ namespace Cotton.Mobile.Tests
         public void Cleanup_policy_copy_keeps_evictable_cache_distinct_from_kept_offline()
         {
             Assert.Equal("Clear downloads and kept-offline files", CottonStorageCleanupPolicyText.ClearDownloadedFilesTitle);
+            Assert.Equal("Clear temporary upload files", CottonStorageCleanupPolicyText.ClearTemporaryUploadsTitle);
             Assert.Equal(
                 "Opened downloads and files marked On device, including kept-offline files, will need internet to open again.",
                 CottonStorageCleanupPolicyText.ClearDownloadedFilesMessage);
+            Assert.Equal(
+                "Only completed, cancelled, or abandoned upload files for this account will be removed. Waiting, running, and failed uploads stay in Transfers.",
+                CottonStorageCleanupPolicyText.ClearTemporaryUploadsMessage);
             Assert.Equal(
                 "Only cached previews will be removed. Offline files stay on this device.",
                 CottonStorageCleanupPolicyText.ClearThumbnailsMessage);
@@ -105,6 +109,30 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Cached previews, saved folder lists, opened downloads, and kept-offline files will be removed from this device.",
                 CottonStorageCleanupPolicyText.ClearAllMessage);
+        }
+
+        [Fact]
+        public void Temporary_upload_cleanup_status_reports_empty_and_deleted_results()
+        {
+            Assert.Equal(
+                "No temporary upload files to clear.",
+                CottonStorageCleanupPolicyText.CreateTemporaryUploadsClearedStatus(
+                    CottonTransferStagedFileCleanupResult.Empty));
+            Assert.Equal(
+                "1 temporary upload file cleared (512 B).",
+                CottonStorageCleanupPolicyText.CreateTemporaryUploadsClearedStatus(
+                    new CottonTransferStagedFileCleanupResult(1, 512)));
+            Assert.Equal(
+                "2 temporary upload files cleared (2 KB).",
+                CottonStorageCleanupPolicyText.CreateTemporaryUploadsClearedStatus(
+                    new CottonTransferStagedFileCleanupResult(2, 2048)));
+        }
+
+        [Fact]
+        public void Temporary_upload_cleanup_result_rejects_negative_values()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CottonTransferStagedFileCleanupResult(-1, 0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => new CottonTransferStagedFileCleanupResult(0, -1));
         }
 
         private static void AssertBucket(

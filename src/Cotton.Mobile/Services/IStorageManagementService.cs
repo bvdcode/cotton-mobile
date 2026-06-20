@@ -12,6 +12,9 @@ namespace Cotton.Mobile.Services
 
         Task ClearDownloadedFilesAsync(CancellationToken cancellationToken = default);
 
+        Task<CottonTransferStagedFileCleanupResult> ClearTemporaryUploadsAsync(
+            CancellationToken cancellationToken = default);
+
         Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default);
     }
 }

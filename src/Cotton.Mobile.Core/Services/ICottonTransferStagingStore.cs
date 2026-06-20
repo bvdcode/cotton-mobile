@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Services
             Guid transferId,
             CancellationToken cancellationToken = default);
 
-        Task CleanupAsync(
+        Task<CottonTransferStagedFileCleanupResult> CleanupAsync(
             Uri instanceUri,
             IReadOnlyCollection<CottonTransferQueueItem> queueItems,
             CancellationToken cancellationToken = default);

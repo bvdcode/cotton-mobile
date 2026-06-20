@@ -143,7 +143,7 @@ namespace Cotton.Mobile.Services
             return Task.CompletedTask;
         }
 
-        public async Task CleanupAsync(
+        public async Task<CottonTransferStagedFileCleanupResult> CleanupAsync(
             Uri instanceUri,
             IReadOnlyCollection<CottonTransferQueueItem> queueItems,
             CancellationToken cancellationToken = default)
@@ -152,15 +152,30 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonTransferStagedFileSnapshot> stagedFiles =
                 await ListAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            Dictionary<Guid, CottonTransferStagedFileSnapshot> stagedFilesByTransferId =
+                stagedFiles.ToDictionary(file => file.TransferId);
             IReadOnlySet<Guid> transferIdsToDelete =
                 CottonTransferStagedFileCleanupPolicy.ResolveTransferIdsToDelete(
                     queueItems,
-                    stagedFiles.Select(file => file.TransferId).ToList());
+                    stagedFilesByTransferId.Keys.ToList());
             foreach (Guid transferId in transferIdsToDelete)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 await DeleteAsync(instanceUri, transferId, cancellationToken).ConfigureAwait(false);
             }
+
+            IReadOnlyList<CottonTransferStagedFileSnapshot> remainingStagedFiles =
+                await ListAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            HashSet<Guid> remainingTransferIds = remainingStagedFiles
+                .Select(file => file.TransferId)
+                .ToHashSet();
+            IReadOnlyList<CottonTransferStagedFileSnapshot> deletedFiles = transferIdsToDelete
+                .Where(transferId => !remainingTransferIds.Contains(transferId))
+                .Select(transferId => stagedFilesByTransferId[transferId])
+                .ToList();
+            return new CottonTransferStagedFileCleanupResult(
+                deletedFiles.Count,
+                deletedFiles.Sum(file => file.SizeBytes));
         }
 
         private static CottonTransferStagedFileSnapshot? ResolveStagedFile(Guid transferId, string transferDirectory)

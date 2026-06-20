@@ -16,19 +16,31 @@ namespace Cotton.Mobile.Services
 
         private readonly FileThumbnailCacheOptions _thumbnailOptions;
         private readonly FileDownloadCacheOptions _downloadOptions;
+        private readonly ICottonInstanceStore _instanceStore;
+        private readonly ICottonTransferMetadataStore _transferMetadataStore;
+        private readonly ICottonTransferStagingStore _transferStagingStore;
         private readonly ILogger<StorageManagementService> _logger;
 
         public StorageManagementService(
             FileThumbnailCacheOptions thumbnailOptions,
             FileDownloadCacheOptions downloadOptions,
+            ICottonInstanceStore instanceStore,
+            ICottonTransferMetadataStore transferMetadataStore,
+            ICottonTransferStagingStore transferStagingStore,
             ILogger<StorageManagementService> logger)
         {
             ArgumentNullException.ThrowIfNull(thumbnailOptions);
             ArgumentNullException.ThrowIfNull(downloadOptions);
+            ArgumentNullException.ThrowIfNull(instanceStore);
+            ArgumentNullException.ThrowIfNull(transferMetadataStore);
+            ArgumentNullException.ThrowIfNull(transferStagingStore);
             ArgumentNullException.ThrowIfNull(logger);
 
             _thumbnailOptions = thumbnailOptions;
             _downloadOptions = downloadOptions;
+            _instanceStore = instanceStore;
+            _transferMetadataStore = transferMetadataStore;
+            _transferStagingStore = transferStagingStore;
             _logger = logger;
         }
 
@@ -145,6 +157,22 @@ namespace Cotton.Mobile.Services
 
                 throw;
             }
+        }
+
+        public async Task<CottonTransferStagedFileCleanupResult> ClearTemporaryUploadsAsync(
+            CancellationToken cancellationToken = default)
+        {
+            Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (instanceUri is null)
+            {
+                return CottonTransferStagedFileCleanupResult.Empty;
+            }
+
+            IReadOnlyList<CottonTransferQueueItem> queueItems =
+                await _transferMetadataStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            return await _transferStagingStore
+                .CleanupAsync(instanceUri, queueItems, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public async Task ClearAllCachedFilesAsync(CancellationToken cancellationToken = default)

@@ -414,6 +414,10 @@ namespace Cotton.Mobile.ViewModels
             _ => FileSortMode.ToString(),
         };
 
+        public bool IsFileSortButtonVisible => !IsFileSearchVisible;
+
+        public bool IsFileViewButtonVisible => !IsFileSearchVisible;
+
         public bool IsFilesLoading
         {
             get => _isFilesLoading;
@@ -1199,6 +1203,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileSearchActive));
             OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
+            OnPropertyChanged(nameof(IsFileSortButtonVisible));
+            OnPropertyChanged(nameof(IsFileViewButtonVisible));
             OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
             OnPropertyChanged(nameof(IsFileBrowserQuickNavigationVisible));
             OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));

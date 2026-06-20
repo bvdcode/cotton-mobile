@@ -27,6 +27,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("3 items · A-Z", display.FilesStatus);
             Assert.False(display.IsFilesPathVisible);
             Assert.False(display.IsFileUpButtonVisible);
+            Assert.True(display.IsFileSortButtonVisible);
+            Assert.True(display.IsFileViewButtonVisible);
         }
 
         [Fact]
@@ -62,6 +64,8 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsFileSearchVisible);
             Assert.True(display.IsFileSearchActive);
             Assert.False(display.IsFileBrowserQuickNavigationVisible);
+            Assert.False(display.IsFileSortButtonVisible);
+            Assert.False(display.IsFileViewButtonVisible);
             Assert.Equal("1 match · A-Z", display.FilesStatus);
             Assert.False(display.IsFilesEmptyVisible);
 

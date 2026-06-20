@@ -11,7 +11,8 @@ namespace Cotton.Mobile.Services
             DateTime? remoteUpdatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            string? relativePath = null)
+            string? relativePath = null,
+            string? previousRelativePath = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -43,6 +44,7 @@ namespace Cotton.Mobile.Services
             TargetId = targetId;
             DisplayName = displayName.Trim();
             RelativePath = NormalizeRelativePath(TargetType, DisplayName, relativePath);
+            PreviousRelativePath = NormalizePreviousRelativePath(previousRelativePath);
             RemoteETag = string.IsNullOrWhiteSpace(remoteETag) ? null : remoteETag.Trim();
             RemoteUpdatedAtUtc = remoteUpdatedAtUtc.HasValue
                 ? CottonLocalFileFreshness.NormalizeUtc(remoteUpdatedAtUtc.Value)
@@ -60,6 +62,8 @@ namespace Cotton.Mobile.Services
         public string DisplayName { get; }
 
         public string RelativePath { get; }
+
+        public string? PreviousRelativePath { get; }
 
         public string? RemoteETag { get; }
 
@@ -82,6 +86,11 @@ namespace Cotton.Mobile.Services
                 or CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision;
 
         public bool IsNoOp => Action == CottonCloudToDeviceSyncActionKind.KeepExistingFile;
+
+        public bool ChangesRelativePath =>
+            RequiresLocalRename
+            && !string.IsNullOrWhiteSpace(PreviousRelativePath)
+            && !string.Equals(PreviousRelativePath, RelativePath, StringComparison.Ordinal);
 
         public CottonSyncedFileSnapshot CreateManifestItem(DateTime syncedAtUtc)
         {
@@ -126,6 +135,13 @@ namespace Cotton.Mobile.Services
             }
 
             return normalizedPath;
+        }
+
+        private static string? NormalizePreviousRelativePath(string? previousRelativePath)
+        {
+            return string.IsNullOrWhiteSpace(previousRelativePath)
+                ? null
+                : CottonSyncRelativePath.NormalizeFilePath(previousRelativePath, nameof(previousRelativePath));
         }
     }
 }

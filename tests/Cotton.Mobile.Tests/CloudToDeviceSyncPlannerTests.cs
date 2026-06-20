@@ -96,6 +96,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonCloudToDeviceSyncActionKind.RenameLocalFile, item.Action);
             Assert.True(item.RequiresLocalRename);
             Assert.Equal("renamed.txt", item.DisplayName);
+            Assert.Equal("alpha.txt", item.PreviousRelativePath);
+            Assert.True(item.ChangesRelativePath);
             Assert.Equal(1, plan.LocalRenameCount);
         }
 
@@ -125,6 +127,8 @@ namespace Cotton.Mobile.Tests
             CottonCloudToDeviceSyncPlanItem item = Assert.Single(plan.Items);
             Assert.Equal(CottonCloudToDeviceSyncActionKind.RenameLocalFile, item.Action);
             Assert.Equal("Nested/alpha.txt", item.RelativePath);
+            Assert.Equal("alpha.txt", item.PreviousRelativePath);
+            Assert.True(item.ChangesRelativePath);
             Assert.Equal(1, plan.LocalRenameCount);
         }
 

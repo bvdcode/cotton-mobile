@@ -114,7 +114,10 @@ namespace Cotton.Mobile.Services
             if (!string.Equals(localFile.FileName, entry.Name, StringComparison.Ordinal)
                 || !string.Equals(localFile.RelativePath, remoteItem.RelativePath, StringComparison.Ordinal))
             {
-                return CreateFileItem(CottonCloudToDeviceSyncActionKind.RenameLocalFile, remoteItem);
+                return CreateFileItem(
+                    CottonCloudToDeviceSyncActionKind.RenameLocalFile,
+                    remoteItem,
+                    localFile.RelativePath);
             }
 
             return CreateFileItem(CottonCloudToDeviceSyncActionKind.KeepExistingFile, remoteItem);
@@ -122,7 +125,8 @@ namespace Cotton.Mobile.Services
 
         private static CottonCloudToDeviceSyncPlanItem CreateFileItem(
             CottonCloudToDeviceSyncActionKind action,
-            CottonCloudToDeviceRemoteItemSnapshot remoteItem)
+            CottonCloudToDeviceRemoteItemSnapshot remoteItem,
+            string? previousRelativePath = null)
         {
             CottonFileBrowserEntry entry = remoteItem.Entry;
             return new CottonCloudToDeviceSyncPlanItem(
@@ -134,7 +138,8 @@ namespace Cotton.Mobile.Services
                 entry.UpdatedAtUtc,
                 entry.SizeBytes,
                 entry.ContentType,
-                remoteItem.RelativePath);
+                remoteItem.RelativePath,
+                previousRelativePath);
         }
 
         private static Dictionary<Guid, CottonSyncedFileSnapshot> CreateLocalFileMap(

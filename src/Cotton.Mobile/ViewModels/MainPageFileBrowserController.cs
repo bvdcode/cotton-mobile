@@ -3565,8 +3565,8 @@ namespace Cotton.Mobile.ViewModels
                 LinkExpirationTitle,
                 CancelAction,
                 null,
-                options.Select(option => option.Label).ToArray());
-            return CottonCloudShareLinkExpirationCatalog.FindByLabel(action);
+                options.Select(option => CreateCurrentActionLabel(option.Label, option.IsDefault)).ToArray());
+            return CottonCloudShareLinkExpirationCatalog.FindByLabel(NormalizeAction(action));
         }
 
         private static CottonCloudShareLinkRequest CreateCloudShareLinkRequest(

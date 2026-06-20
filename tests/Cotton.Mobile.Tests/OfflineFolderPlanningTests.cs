@@ -85,10 +85,10 @@ namespace Cotton.Mobile.Tests
                 "Checking Projects for offline use...",
                 CottonOfflineFolderStatusText.CreateStartingStatus(" Projects "));
             Assert.Equal(
-                "Projects: 2 files, 3 KB. Offline folder downloads are coming next.",
+                "Projects: 2 files, 3 KB. Ready to keep offline.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(ready));
             Assert.Equal(
-                "Cached estimate: Projects: 2 files, 3 KB. Offline folder downloads are coming next.",
+                "Cached estimate: Projects: 2 files, 3 KB. Ready to keep offline.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(ready, isCachedEstimate: true));
             Assert.Equal(
                 "Projects has no files to keep offline.",
@@ -97,7 +97,7 @@ namespace Cotton.Mobile.Tests
                 "Projects: 1 file, 1 folder, 1 KB. Nested folders need scanning before offline download.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(recursive));
             Assert.Equal(
-                "Projects: 1 file, size unknown. Offline folder downloads are coming next.",
+                "Projects: 1 file, size unknown. Offline folder needs exact file sizes.",
                 CottonOfflineFolderStatusText.CreatePlanStatus(unknownSize));
             Assert.Equal("Offline. Folder offline needs internet.", CottonOfflineFolderStatusText.OfflineUnavailableStatus);
             Assert.Equal("Keep folder offline cancelled.", CottonOfflineFolderStatusText.CancelledStatus);

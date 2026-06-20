@@ -29,9 +29,9 @@ namespace Cotton.Mobile.Services
                 CottonOfflineFolderPlanStatus.ContainsFolders =>
                     $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {FormatFolderCount(plan.FolderCount)}, {FormatKnownSize(plan)}. Nested folders need scanning before offline download.",
                 CottonOfflineFolderPlanStatus.HasUnknownSize =>
-                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, size unknown. Offline folder downloads are coming next.",
+                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, size unknown. Offline folder needs exact file sizes.",
                 _ =>
-                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {CottonFileSizeFormatter.Format(plan.KnownSizeBytes)}. Offline folder downloads are coming next.",
+                    $"{prefix}{plan.FolderName}: {FormatFileCount(plan.FileCount)}, {CottonFileSizeFormatter.Format(plan.KnownSizeBytes)}. Ready to keep offline.",
             };
         }
 

@@ -160,7 +160,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Selection_action_sheet_keeps_mixed_selection_to_link_actions_only()
+        public void Selection_action_sheet_exposes_mixed_selection_keep_offline()
         {
             CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
             [
@@ -176,6 +176,7 @@ namespace Cotton.Mobile.Tests
                 {
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.KeepOffline,
                 },
                 actions.Select(action => action.Kind));
         }

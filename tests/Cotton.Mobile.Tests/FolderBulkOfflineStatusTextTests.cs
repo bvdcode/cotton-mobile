@@ -25,9 +25,6 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Selection is no longer available.",
                 CottonFolderBulkOfflineStatusText.UnavailableStatus);
-            Assert.Equal(
-                "Select only files or only folders for this action.",
-                CottonFolderBulkOfflineStatusText.MixedSelectionUnavailableStatus);
         }
 
         [Fact]

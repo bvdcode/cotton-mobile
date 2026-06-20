@@ -6,9 +6,6 @@ namespace Cotton.Mobile.Services
 
         public static string UnavailableStatus { get; } = "Selection is no longer available.";
 
-        public static string MixedSelectionUnavailableStatus { get; } =
-            "Select only files or only folders for this action.";
-
         public static string CreateStartingStatus(int folderCount)
         {
             ValidateCount(folderCount, nameof(folderCount));

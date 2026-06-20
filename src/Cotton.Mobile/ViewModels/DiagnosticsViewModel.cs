@@ -294,7 +294,7 @@ namespace Cotton.Mobile.ViewModels
 
         private string CreateHeaderVersionText()
         {
-            return $"{CreateValue(_metadata.ApplicationName)} · {CreateVersionText()}";
+            return CreateValue(_metadata.ApplicationName);
         }
 
         private void LogUnhandledCommandException(Exception exception)

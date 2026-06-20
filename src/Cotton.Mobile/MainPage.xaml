@@ -462,7 +462,7 @@
                                     StrokeShape="RoundRectangle 8"
                                     Padding="10,6"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
-                                <Grid ColumnDefinitions="*,Auto"
+                                <Grid ColumnDefinitions="*,Auto,Auto"
                                       ColumnSpacing="8"
                                       HeightRequest="36">
                                     <VerticalStackLayout Spacing="1"
@@ -482,6 +482,16 @@
                                     </VerticalStackLayout>
 
                                     <Button Grid.Column="1"
+                                            Text="Actions"
+                                            Command="{Binding ShowFileSelectionActionsCommand}"
+                                            Style="{StaticResource FileChromeButton}"
+                                            Padding="10,0"
+                                            FontSize="12"
+                                            HeightRequest="36"
+                                            MinimumHeightRequest="36"
+                                            MinimumWidthRequest="72" />
+
+                                    <Button Grid.Column="2"
                                             Text="Cancel"
                                             Command="{Binding ClearFileSelectionCommand}"
                                             Style="{StaticResource FileChromeButton}"

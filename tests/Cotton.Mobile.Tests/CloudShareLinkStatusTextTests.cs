@@ -32,6 +32,16 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Bulk_status_texts_use_item_count()
+        {
+            Assert.Equal("Creating 3 links...", CottonCloudShareLinkStatusText.CreateCreatingStatus(3));
+            Assert.Equal("Creating link 2 of 3...", CottonCloudShareLinkStatusText.CreateCreatingItemStatus(2, 3));
+            Assert.Equal("Copying 3 links...", CottonCloudShareLinkStatusText.CreateCopyingStatus(3));
+            Assert.Equal("Sharing 3 links...", CottonCloudShareLinkStatusText.CreateSharingStatus(3));
+            Assert.Equal("3 links copied.", CottonCloudShareLinkStatusText.CreateCopiedStatus(3));
+        }
+
+        [Fact]
         public void Offline_creation_failure_uses_retryable_offline_copy()
         {
             string status = CottonCloudShareLinkStatusText.CreateCreationFailedStatus(
@@ -69,6 +79,20 @@ namespace Cotton.Mobile.Tests
                 hasInternetAccess: true);
 
             Assert.Equal("Could not create link. Server rejected this folder.", status);
+        }
+
+        [Fact]
+        public void Bulk_creation_failure_uses_selection_copy()
+        {
+            string missingStatus = CottonCloudShareLinkStatusText.CreateBulkCreationFailedStatus(
+                HttpStatusCode.NotFound,
+                hasInternetAccess: true);
+            string rejectedStatus = CottonCloudShareLinkStatusText.CreateBulkCreationFailedStatus(
+                HttpStatusCode.Conflict,
+                hasInternetAccess: true);
+
+            Assert.Equal("Could not create links. Some selected items are no longer available.", missingStatus);
+            Assert.Equal("Could not create links. Server rejected one of the selected items.", rejectedStatus);
         }
 
         [Fact]

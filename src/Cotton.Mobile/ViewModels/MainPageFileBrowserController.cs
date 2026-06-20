@@ -464,6 +464,49 @@ namespace Cotton.Mobile.ViewModels
             return Task.CompletedTask;
         }
 
+        public async Task ShowSelectionActionsAsync()
+        {
+            ClearFileActionRetry();
+            CottonFileSelectionSnapshot selection = _display.FileSelection;
+            if (!selection.IsActive)
+            {
+                return;
+            }
+
+            CottonFileBulkActionSnapshot[] actions = selection.Actions
+                .Where(IsSupportedSelectionAction)
+                .Where(action => action.IsEnabled)
+                .ToArray();
+            if (actions.Length == 0)
+            {
+                _display.ShowFilesStatus("No actions available for this selection.");
+                return;
+            }
+
+            string? selectedLabel = await _dialogService.ShowActionSheetAsync(
+                selection.TitleText,
+                CancelAction,
+                null,
+                actions.Select(action => action.Label).ToArray());
+            CottonFileBulkActionSnapshot? selectedAction = actions.FirstOrDefault(
+                action => string.Equals(action.Label, selectedLabel, StringComparison.Ordinal));
+            if (selectedAction is null)
+            {
+                return;
+            }
+
+            CottonFileBrowserEntry[] entries = selection.Entries.ToArray();
+            switch (selectedAction.Kind)
+            {
+                case CottonFileBulkActionKind.CopyLinks:
+                    await CopySelectionCloudShareLinksAsync(entries);
+                    break;
+                case CottonFileBulkActionKind.ShareLinks:
+                    await ShareSelectionCloudShareLinksAsync(entries);
+                    break;
+            }
+        }
+
         private bool ShouldIgnoreEntryInteraction()
         {
             if (_ignoreEntryInteractionUntil <= DateTimeOffset.UtcNow)
@@ -473,6 +516,11 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return true;
+        }
+
+        private static bool IsSupportedSelectionAction(CottonFileBulkActionSnapshot action)
+        {
+            return action.Kind is CottonFileBulkActionKind.CopyLinks or CottonFileBulkActionKind.ShareLinks;
         }
 
         public async Task ShowViewActionsAsync()
@@ -3142,6 +3190,154 @@ namespace Cotton.Mobile.ViewModels
                 CottonCloudShareLinkStatusText.ShareFailedStatus);
         }
 
+        private Task CopySelectionCloudShareLinksAsync(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            return UseSelectionCloudShareLinksAsync(
+                entries,
+                async (links, cancellationToken) =>
+                {
+                    _display.ShowFileActionLoading(CottonCloudShareLinkStatusText.CreateCopyingStatus(links.Count));
+                    await _cloudShareLinkInteractionService.CopyAsync(links, cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CreateCopiedStatus(links.Count));
+                },
+                CottonCloudShareLinkStatusText.CopyFailedStatus);
+        }
+
+        private Task ShareSelectionCloudShareLinksAsync(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            return UseSelectionCloudShareLinksAsync(
+                entries,
+                async (links, cancellationToken) =>
+                {
+                    _display.ShowFileActionLoading(CottonCloudShareLinkStatusText.CreateSharingStatus(links.Count));
+                    await _cloudShareLinkInteractionService.ShareAsync(
+                        links,
+                        links.Count == 1 ? "Share link" : $"Share {links.Count} links",
+                        cancellationToken);
+                    cancellationToken.ThrowIfCancellationRequested();
+                    _display.ShowFilesSummary();
+                },
+                CottonCloudShareLinkStatusText.ShareFailedStatus);
+        }
+
+        private async Task UseSelectionCloudShareLinksAsync(
+            IReadOnlyList<CottonFileBrowserEntry> entries,
+            Func<IReadOnlyList<CottonCloudShareLinkSnapshot>, CancellationToken, Task> useLinksAsync,
+            string interactionFailureStatus)
+        {
+            ArgumentNullException.ThrowIfNull(entries);
+            ArgumentNullException.ThrowIfNull(useLinksAsync);
+            ArgumentException.ThrowIfNullOrWhiteSpace(interactionFailureStatus);
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to create links.");
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(CottonCloudShareLinkStatusText.OfflineUnavailableStatus);
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedEntries = entries
+                .Select(entry => GetCurrentVisibleEntry(entry, instanceUri))
+                .Where(entry => entry is not null)
+                .Select(entry => entry!)
+                .ToArray();
+            if (selectedEntries.Length == 0)
+            {
+                _display.ShowFilesStatus("Selection is no longer available.");
+                return;
+            }
+
+            CottonCloudShareLinkExpirationOption? expiration = await SelectCloudShareLinkExpirationAsync();
+            if (expiration is null)
+            {
+                _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CancelledStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonCloudShareLinkStatusText.CreateCreatingStatus(selectedEntries.Length));
+            bool didCreateLink = false;
+
+            try
+            {
+                var links = new List<CottonCloudShareLinkSnapshot>();
+                for (int index = 0; index < selectedEntries.Length; index++)
+                {
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    _display.ShowFileActionLoading(
+                        CottonCloudShareLinkStatusText.CreateCreatingItemStatus(index + 1, selectedEntries.Length));
+                    CottonCloudShareLinkSnapshot link = await _cloudShareLinkService.CreateAsync(
+                        instanceUri,
+                        CreateCloudShareLinkRequest(selectedEntries[index], expiration.ExpireAfterMinutes),
+                        fileActionCancellation.Token);
+                    didCreateLink = true;
+                    links.Add(link);
+                }
+
+                if (links.Count == 0)
+                {
+                    _display.ShowFilesStatus("Selection is no longer available.");
+                    return;
+                }
+
+                await useLinksAsync(links, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection share-link authorization failure.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile selection share-link cancellation.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonCloudShareLinkStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection share-link failure.");
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to create or use Cotton mobile selection share links.");
+                _display.ShowFilesStatus(
+                    didCreateLink
+                        ? interactionFailureStatus
+                        : CreateBulkCloudShareLinkCreationFailureStatus(exception));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
         private async Task CreateCloudShareLinkAsync(
             CottonFileBrowserEntry entry,
             MainPageFileAction retryAction,
@@ -3404,6 +3600,17 @@ namespace Cotton.Mobile.ViewModels
 
             return CottonCloudShareLinkStatusText.CreateCreationFailedStatus(
                 targetKind,
+                statusCode,
+                _networkAccess.HasInternetAccess);
+        }
+
+        private string CreateBulkCloudShareLinkCreationFailureStatus(Exception exception)
+        {
+            HttpStatusCode? statusCode = exception is CottonApiException apiException
+                ? apiException.StatusCode
+                : null;
+
+            return CottonCloudShareLinkStatusText.CreateBulkCreationFailedStatus(
                 statusCode,
                 _networkAccess.HasInternetAccess);
         }

@@ -304,6 +304,10 @@ namespace Cotton.Mobile.ViewModels
                 _fileBrowser.ClearSelectionAsync,
                 LogUnhandledCommandException,
                 () => Display.IsFileSelectionActive);
+            ShowFileSelectionActionsCommand = new AsyncCommand(
+                _fileBrowser.ShowSelectionActionsAsync,
+                LogUnhandledCommandException,
+                () => Display.IsFileSelectionActive);
             ShowFileAddActionsCommand = new AsyncCommand(
                 _fileBrowser.ShowAddActionsAsync,
                 LogUnhandledCommandException,
@@ -372,6 +376,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand<CottonFileBrowserEntry> BeginFileSelectionCommand { get; }
 
         public AsyncCommand ClearFileSelectionCommand { get; }
+
+        public AsyncCommand ShowFileSelectionActionsCommand { get; }
 
         public AsyncCommand ShowFileAddActionsCommand { get; }
 
@@ -1933,6 +1939,7 @@ namespace Cotton.Mobile.ViewModels
             ShowFileBrowserEntryActionsCommand.RaiseCanExecuteChanged();
             BeginFileSelectionCommand.RaiseCanExecuteChanged();
             ClearFileSelectionCommand.RaiseCanExecuteChanged();
+            ShowFileSelectionActionsCommand.RaiseCanExecuteChanged();
             ShowFileAddActionsCommand.RaiseCanExecuteChanged();
             CancelFileActionCommand.RaiseCanExecuteChanged();
             RetryFileActionCommand.RaiseCanExecuteChanged();
@@ -1992,6 +1999,7 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case nameof(MainPageDisplayState.IsFileSelectionActive):
                     ClearFileSelectionCommand.RaiseCanExecuteChanged();
+                    ShowFileSelectionActionsCommand.RaiseCanExecuteChanged();
                     ShowFileAddActionsCommand.RaiseCanExecuteChanged();
                     break;
             }

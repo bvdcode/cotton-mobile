@@ -147,7 +147,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Recursive_queue_orders_all_loaded_tree_files_by_name()
+        public void Recursive_queue_orders_all_loaded_tree_files_by_display_path()
         {
             CottonOfflineDownloadQueueSnapshot queue =
                 CottonOfflineDownloadQueueSnapshot.Create(CreateLoadedTree());
@@ -158,10 +158,46 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(6144, queue.TotalSizeBytes);
             Assert.Equal(SecondFileId, queue.Items[0].FileId);
             Assert.Equal("archive.txt", queue.Items[0].FileName);
+            Assert.Equal("Archive/archive.txt", queue.Items[0].DisplayName);
             Assert.Equal(ThirdFileId, queue.Items[1].FileId);
             Assert.Equal("nested.txt", queue.Items[1].FileName);
+            Assert.Equal("Archive/Nested/nested.txt", queue.Items[1].DisplayName);
             Assert.Equal(FirstFileId, queue.Items[2].FileId);
             Assert.Equal("root.txt", queue.Items[2].FileName);
+            Assert.Equal("root.txt", queue.Items[2].DisplayName);
+        }
+
+        [Fact]
+        public void Recursive_queue_disambiguates_duplicate_file_names_with_display_paths()
+        {
+            CottonOfflineFolderTreeContent tree = CottonOfflineFolderTreeContent.Create(
+                CreateContent(
+                    RootFolderId,
+                    "Projects",
+                    CreateFile(FirstFileId, "notes.txt", 1024),
+                    CreateFolder(ArchiveFolderId, "Archive")),
+                CottonOfflineFolderTreeContent.Create(
+                    CreateContent(
+                        ArchiveFolderId,
+                        "Archive",
+                        CreateFile(SecondFileId, "notes.txt", 2048),
+                        CreateFolder(NestedFolderId, "Nested")),
+                    CottonOfflineFolderTreeContent.Create(CreateContent(
+                        NestedFolderId,
+                        "Nested",
+                        CreateFile(ThirdFileId, "notes.txt", 3072)))));
+
+            CottonOfflineDownloadQueueSnapshot queue =
+                CottonOfflineDownloadQueueSnapshot.Create(tree);
+
+            CottonOfflineDownloadQueueItem rootItem = queue.Items.Single(item => item.FileId == FirstFileId);
+            CottonOfflineDownloadQueueItem archiveItem = queue.Items.Single(item => item.FileId == SecondFileId);
+            CottonOfflineDownloadQueueItem nestedItem = queue.Items.Single(item => item.FileId == ThirdFileId);
+
+            Assert.All(queue.Items, item => Assert.Equal("notes.txt", item.FileName));
+            Assert.Equal("notes.txt", rootItem.DisplayName);
+            Assert.Equal("Archive/notes.txt", archiveItem.DisplayName);
+            Assert.Equal("Archive/Nested/notes.txt", nestedItem.DisplayName);
         }
 
         [Fact]

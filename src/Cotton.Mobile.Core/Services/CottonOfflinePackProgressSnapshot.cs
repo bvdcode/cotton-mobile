@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Services
                 queue.TotalCount,
                 completedBytes,
                 queue.TotalSizeBytes,
-                currentItem?.FileName);
+                currentItem?.DisplayName);
         }
 
         public static CottonOfflinePackProgressSnapshot CreateCompleted(CottonOfflineDownloadQueueSnapshot queue)

@@ -72,16 +72,19 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Only ready recursive offline folder plans can be queued.");
             }
 
-            List<CottonFileBrowserEntry> files = tree
-                .GetFilesDepthFirst()
-                .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(entry => entry.Id)
+            List<CottonOfflineFolderTreeFileSnapshot> files = tree
+                .GetFilesWithDisplayPathsDepthFirst()
+                .OrderBy(entry => entry.DisplayPath, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(entry => entry.File.Id)
                 .ToList();
             return new CottonOfflineDownloadQueueSnapshot(
                 tree.Content.FolderId,
                 tree.Content.FolderName,
                 files
-                    .Select((file, index) => CottonOfflineDownloadQueueItem.Create(index + 1, file))
+                    .Select((file, index) => CottonOfflineDownloadQueueItem.Create(
+                        index + 1,
+                        file.File,
+                        file.DisplayPath))
                     .ToList());
         }
     }

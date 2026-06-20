@@ -26,8 +26,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(3072, queue.TotalSizeBytes);
             Assert.Equal(FirstFileId, queue.Items[0].FileId);
             Assert.Equal("alpha.txt", queue.Items[0].FileName);
+            Assert.Equal("alpha.txt", queue.Items[0].DisplayName);
             Assert.Equal(1, queue.Items[0].Position);
             Assert.Equal(SecondFileId, queue.Items[1].FileId);
+            Assert.Equal("zeta.txt", queue.Items[1].DisplayName);
             Assert.Equal(2, queue.Items[1].Position);
         }
 
@@ -64,6 +66,21 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(UpdatedAt, pin.RemoteUpdatedAtUtc);
             Assert.Equal(1024, pin.SizeBytes);
             Assert.Equal("text/plain", pin.ContentType);
+        }
+
+        [Fact]
+        public void Queue_item_display_name_does_not_change_pin_file_name()
+        {
+            CottonOfflineDownloadQueueItem item = CottonOfflineDownloadQueueItem.Create(
+                position: 1,
+                CreateFile(FirstFileId, "alpha.txt", 1024),
+                displayName: "Archive/alpha.txt");
+
+            CottonOfflineFilePinSnapshot pin = item.CreatePin(PinnedAt);
+
+            Assert.Equal("alpha.txt", item.FileName);
+            Assert.Equal("Archive/alpha.txt", item.DisplayName);
+            Assert.Equal("alpha.txt", pin.FileName);
         }
 
         [Fact]

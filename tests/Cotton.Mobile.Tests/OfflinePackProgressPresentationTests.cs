@@ -32,6 +32,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Running_progress_uses_queue_item_display_name()
+        {
+            CottonOfflineDownloadQueueItem item = CottonOfflineDownloadQueueItem.Create(
+                position: 1,
+                CreateFile(FirstFileId, "notes.txt", 1024),
+                displayName: "Archive/notes.txt");
+            CottonOfflineDownloadQueueSnapshot queue = new(
+                FolderId,
+                "Projects",
+                [item]);
+
+            CottonOfflinePackProgressSnapshot progress =
+                CottonOfflinePackProgressSnapshot.CreateRunning(
+                    queue,
+                    completedCount: 0,
+                    completedBytes: 0,
+                    currentItem: item);
+
+            Assert.Equal("Archive/notes.txt", progress.CurrentFileName);
+            Assert.Equal("0/1 files · 0 B of 1 KB · Saving Archive/notes.txt", progress.Details);
+        }
+
+        [Fact]
         public void Terminal_progress_copy_keeps_results_visible()
         {
             CottonOfflineDownloadQueueSnapshot queue = CreateQueue();

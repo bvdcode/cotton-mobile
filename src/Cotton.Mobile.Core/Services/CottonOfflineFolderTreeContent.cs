@@ -39,6 +39,13 @@ namespace Cotton.Mobile.Services
             return files;
         }
 
+        public IReadOnlyList<CottonOfflineFolderTreeFileSnapshot> GetFilesWithDisplayPathsDepthFirst()
+        {
+            var files = new List<CottonOfflineFolderTreeFileSnapshot>();
+            AddFilesWithDisplayPathsDepthFirst(files, parentPath: null);
+            return files;
+        }
+
         public static CottonOfflineFolderTreeContent Create(
             CottonFolderContent content,
             params CottonOfflineFolderTreeContent[] childFolders)
@@ -53,6 +60,37 @@ namespace Cotton.Mobile.Services
             {
                 childFolder.AddFilesDepthFirst(files);
             }
+        }
+
+        private void AddFilesWithDisplayPathsDepthFirst(
+            List<CottonOfflineFolderTreeFileSnapshot> files,
+            string? parentPath)
+        {
+            files.AddRange(Content
+                .Entries
+                .Where(entry => entry.Type == CottonFileBrowserEntryType.File)
+                .Select(file => new CottonOfflineFolderTreeFileSnapshot(
+                    file,
+                    CreateDisplayPath(parentPath, file.Name))));
+
+            foreach (CottonOfflineFolderTreeContent childFolder in ChildFolders)
+            {
+                CottonFileBrowserEntry folderEntry = Content
+                    .Entries
+                    .First(entry => entry.Type == CottonFileBrowserEntryType.Folder
+                        && entry.Id == childFolder.Content.FolderId);
+                childFolder.AddFilesWithDisplayPathsDepthFirst(
+                    files,
+                    CreateDisplayPath(parentPath, folderEntry.Name));
+            }
+        }
+
+        private static string CreateDisplayPath(string? parentPath, string name)
+        {
+            string trimmedName = name.Trim();
+            return string.IsNullOrWhiteSpace(parentPath)
+                ? trimmedName
+                : $"{parentPath.Trim()}/{trimmedName}";
         }
     }
 }

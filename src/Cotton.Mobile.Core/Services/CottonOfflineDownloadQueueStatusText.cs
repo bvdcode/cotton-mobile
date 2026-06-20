@@ -19,7 +19,7 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(totalCount), "Total count must include the item position.");
             }
 
-            return $"Saving {item.Position} of {totalCount}: {item.FileName}...";
+            return $"Saving {item.Position} of {totalCount}: {item.DisplayName}...";
         }
 
         public static string CreateCompletedStatus(CottonOfflineDownloadQueueSnapshot queue)

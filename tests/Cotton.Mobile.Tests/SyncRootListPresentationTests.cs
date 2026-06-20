@@ -44,6 +44,11 @@ namespace Cotton.Mobile.Tests
             Assert.False(item.IsAttentionVisible);
             Assert.True(item.CanRunNow);
             Assert.Equal("Run now", item.RunNowActionText);
+            Assert.False(item.IsPaused);
+            Assert.True(item.CanPauseSync);
+            Assert.Equal("Pause", item.PauseSyncActionText);
+            Assert.False(item.CanResumeSync);
+            Assert.Equal("Resume", item.ResumeSyncActionText);
             Assert.True(item.CanStopSync);
             Assert.Equal("Stop syncing", item.StopSyncActionText);
         }
@@ -96,6 +101,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Paused_root_is_visible_but_not_runnable()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.CloudToDevice);
+
+            CottonSyncRootListItem item =
+                Assert.Single(CottonSyncRootListDisplayState.Create([root], new HashSet<Guid> { root.Id }).Items);
+
+            Assert.Equal("Paused", item.StatusText);
+            Assert.True(item.IsPaused);
+            Assert.False(item.IsReady);
+            Assert.False(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
+            Assert.False(item.CanPauseSync);
+            Assert.True(item.CanResumeSync);
+            Assert.True(item.CanStopSync);
+        }
+
+        [Fact]
         public void Stop_sync_management_copy_is_explicit_about_local_files()
         {
             Assert.Equal("Stop syncing Projects?", CottonSyncRootManagementText.CreateStopTitle(" Projects "));
@@ -104,7 +133,12 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootManagementText.StopMessage);
             Assert.Equal("Stopped syncing Projects.", CottonSyncRootManagementText.CreateStoppedStatus("Projects"));
             Assert.Equal("Sync folder is no longer configured.", CottonSyncRootManagementText.RootMissingStatus);
+            Assert.Equal("Sync paused. Resume this folder first.", CottonSyncRootManagementText.RootPausedStatus);
+            Assert.Equal("Could not pause syncing this folder.", CottonSyncRootManagementText.PauseFailedStatus);
+            Assert.Equal("Could not resume syncing this folder.", CottonSyncRootManagementText.ResumeFailedStatus);
             Assert.Equal("Could not stop syncing this folder.", CottonSyncRootManagementText.StopFailedStatus);
+            Assert.Equal("Paused syncing Projects.", CottonSyncRootManagementText.CreatePausedStatus("Projects"));
+            Assert.Equal("Resumed syncing Projects.", CottonSyncRootManagementText.CreateResumedStatus("Projects"));
         }
 
         [Fact]

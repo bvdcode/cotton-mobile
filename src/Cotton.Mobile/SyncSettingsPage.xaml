@@ -123,13 +123,33 @@
                                             Style="{StaticResource FileChromeButton}"
                                             HeightRequest="40" />
 
-                                    <Button Text="{Binding StopSyncActionText}"
-                                            Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanStopSync}"
-                                            IsVisible="{Binding CanStopSync}"
-                                            Style="{StaticResource DestructiveChromeButton}"
-                                            HeightRequest="40" />
+                                    <Grid ColumnDefinitions="*,*"
+                                          ColumnSpacing="8">
+                                        <Button Text="{Binding PauseSyncActionText}"
+                                                Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                CommandParameter="{Binding .}"
+                                                IsEnabled="{Binding CanPauseSync}"
+                                                IsVisible="{Binding CanPauseSync}"
+                                                Style="{StaticResource FileChromeButton}"
+                                                HeightRequest="40" />
+
+                                        <Button Text="{Binding ResumeSyncActionText}"
+                                                Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                CommandParameter="{Binding .}"
+                                                IsEnabled="{Binding CanResumeSync}"
+                                                IsVisible="{Binding CanResumeSync}"
+                                                Style="{StaticResource FileChromeButton}"
+                                                HeightRequest="40" />
+
+                                        <Button Grid.Column="1"
+                                                Text="{Binding StopSyncActionText}"
+                                                Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                CommandParameter="{Binding .}"
+                                                IsEnabled="{Binding CanStopSync}"
+                                                IsVisible="{Binding CanStopSync}"
+                                                Style="{StaticResource DestructiveChromeButton}"
+                                                HeightRequest="40" />
+                                    </Grid>
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>

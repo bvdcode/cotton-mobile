@@ -5,20 +5,24 @@ namespace Cotton.Mobile.Services
         private readonly ICottonCloudToDeviceSyncFolderContentSource _folderContentSource;
         private readonly CottonCloudToDeviceSyncPlanExecutor _planExecutor;
         private readonly ICottonSyncRootStore _rootStore;
+        private readonly ICottonSyncRootPauseStore _pauseStore;
         private readonly ICottonSyncedFileManifestStore _manifestStore;
 
         public CottonCloudToDeviceSyncCoordinator(
             ICottonSyncRootStore rootStore,
+            ICottonSyncRootPauseStore pauseStore,
             ICottonSyncedFileManifestStore manifestStore,
             ICottonCloudToDeviceSyncFolderContentSource folderContentSource,
             CottonCloudToDeviceSyncPlanExecutor planExecutor)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
+            ArgumentNullException.ThrowIfNull(pauseStore);
             ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(folderContentSource);
             ArgumentNullException.ThrowIfNull(planExecutor);
 
             _rootStore = rootStore;
+            _pauseStore = pauseStore;
             _manifestStore = manifestStore;
             _folderContentSource = folderContentSource;
             _planExecutor = planExecutor;
@@ -32,6 +36,8 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncRootSnapshot> roots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            IReadOnlySet<Guid> pausedRootIds =
+                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             var results = new List<CottonCloudToDeviceSyncRootRunResult>(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
@@ -40,6 +46,12 @@ namespace Cotton.Mobile.Services
                 if (root.Direction != CottonSyncDirection.CloudToDevice)
                 {
                     results.Add(CottonCloudToDeviceSyncRootRunResult.SkippedUnsupportedDirection(root));
+                    continue;
+                }
+
+                if (pausedRootIds.Contains(root.Id))
+                {
+                    results.Add(CottonCloudToDeviceSyncRootRunResult.SkippedPaused(root));
                     continue;
                 }
 
@@ -71,6 +83,11 @@ namespace Cotton.Mobile.Services
             if (root.Direction != CottonSyncDirection.CloudToDevice)
             {
                 result = CottonCloudToDeviceSyncRootRunResult.SkippedUnsupportedDirection(root);
+            }
+            else if ((await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false))
+                .Contains(root.Id))
+            {
+                result = CottonCloudToDeviceSyncRootRunResult.SkippedPaused(root);
             }
             else if (!root.CanRunSync)
             {

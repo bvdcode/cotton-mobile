@@ -20,13 +20,21 @@ namespace Cotton.Mobile.Services
 
         public static CottonSyncRootListDisplayState Create(IReadOnlyList<CottonSyncRootSnapshot> roots)
         {
+            return Create(roots, new HashSet<Guid>());
+        }
+
+        public static CottonSyncRootListDisplayState Create(
+            IReadOnlyList<CottonSyncRootSnapshot> roots,
+            IReadOnlySet<Guid> pausedRootIds)
+        {
             ArgumentNullException.ThrowIfNull(roots);
+            ArgumentNullException.ThrowIfNull(pausedRootIds);
 
             return new CottonSyncRootListDisplayState(
                 roots
                     .OrderBy(root => root.CloudFolder.Path, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(root => root.CloudFolder.FolderName, StringComparer.OrdinalIgnoreCase)
-                    .Select(root => new CottonSyncRootListItem(root))
+                    .Select(root => new CottonSyncRootListItem(root, pausedRootIds.Contains(root.Id)))
                     .ToArray());
         }
 

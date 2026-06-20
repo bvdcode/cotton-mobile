@@ -17,6 +17,7 @@ namespace Cotton.Mobile.Tests
 
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
+        private readonly FileSystemCottonSyncRootPauseStore _pauseStore;
         private readonly FileSystemCottonSyncedFileManifestStore _manifestStore;
         private readonly FakeCloudToDeviceFolderContentSource _folderContentSource;
         private readonly FakeCloudToDeviceFileOperator _fileOperator;
@@ -30,6 +31,8 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _rootStore = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
+            _pauseStore = new FileSystemCottonSyncRootPauseStore(
+                new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(Path.Combine(_directory, "manifest")));
             _folderContentSource = new FakeCloudToDeviceFolderContentSource();
@@ -40,6 +43,7 @@ namespace Cotton.Mobile.Tests
                 new FixedTimeProvider(SyncedAt));
             _coordinator = new CottonCloudToDeviceSyncCoordinator(
                 _rootStore,
+                _pauseStore,
                 _manifestStore,
                 _folderContentSource,
                 executor);
@@ -133,6 +137,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_skips_paused_root_without_remote_reads()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true);
+
+            CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonCloudToDeviceSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.SkippedPaused, result.Status);
+            Assert.Equal("Paused", result.StatusText);
+            Assert.Empty(_folderContentSource.RequestedFolderIds);
+            Assert.Empty(_fileOperator.DownloadedIds);
+        }
+
+        [Fact]
         public async Task Run_root_rejects_root_from_another_instance()
         {
             var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
@@ -203,6 +222,24 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(
                 summary.RootResults,
                 result => result.Status == CottonCloudToDeviceSyncRootRunStatus.SkippedUnsupportedDirection);
+            Assert.Empty(_folderContentSource.RequestedFolderIds);
+            Assert.Empty(_fileOperator.DownloadedIds);
+        }
+
+        [Fact]
+        public async Task Run_skips_paused_roots_without_remote_reads()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            await _rootStore.SaveAsync(InstanceUri, [root]);
+            await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true);
+
+            CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
+
+            CottonCloudToDeviceSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(1, summary.SkippedRootCount);
+            Assert.Equal(0, summary.CompletedRootCount);
+            Assert.True(summary.HasSkippedRoots);
+            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.SkippedPaused, result.Status);
             Assert.Empty(_folderContentSource.RequestedFolderIds);
             Assert.Empty(_fileOperator.DownloadedIds);
         }

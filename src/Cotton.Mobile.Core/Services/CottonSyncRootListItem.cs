@@ -2,7 +2,7 @@ namespace Cotton.Mobile.Services
 {
     public class CottonSyncRootListItem
     {
-        public CottonSyncRootListItem(CottonSyncRootSnapshot root)
+        public CottonSyncRootListItem(CottonSyncRootSnapshot root, bool isPaused = false)
         {
             ArgumentNullException.ThrowIfNull(root);
 
@@ -10,10 +10,13 @@ namespace Cotton.Mobile.Services
             Title = root.CloudFolder.FolderName;
             PathText = root.CloudFolder.Path;
             DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
-            StatusText = root.StatusText;
-            IsReady = root.CanRunSync;
-            IsAttentionVisible = root.NeedsUserAction || !root.CanRunSync;
-            CanRunNow = root.CanRunSync && root.Direction == CottonSyncDirection.CloudToDevice;
+            IsPaused = isPaused;
+            StatusText = isPaused ? CottonSyncRootManagementText.PausedStatusText : root.StatusText;
+            IsReady = !isPaused && root.CanRunSync;
+            IsAttentionVisible = !isPaused && (root.NeedsUserAction || !root.CanRunSync);
+            CanRunNow = !isPaused && root.CanRunSync && root.Direction == CottonSyncDirection.CloudToDevice;
+            CanPauseSync = !isPaused;
+            CanResumeSync = isPaused;
             CanStopSync = true;
         }
 
@@ -34,6 +37,16 @@ namespace Cotton.Mobile.Services
         public bool CanRunNow { get; }
 
         public string RunNowActionText => "Run now";
+
+        public bool IsPaused { get; }
+
+        public bool CanPauseSync { get; }
+
+        public string PauseSyncActionText => CottonSyncRootManagementText.PauseAction;
+
+        public bool CanResumeSync { get; }
+
+        public string ResumeSyncActionText => CottonSyncRootManagementText.ResumeAction;
 
         public bool CanStopSync { get; }
 

@@ -100,6 +100,20 @@ namespace Cotton.Mobile.Services
                 null);
         }
 
+        public static CottonCloudToDeviceSyncRootRunResult SkippedPaused(CottonSyncRootSnapshot root)
+        {
+            ArgumentNullException.ThrowIfNull(root);
+
+            return new CottonCloudToDeviceSyncRootRunResult(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                CottonCloudToDeviceSyncRootRunStatus.SkippedPaused,
+                CottonSyncRootManagementText.PausedStatusText,
+                null,
+                null);
+        }
+
         public static CottonCloudToDeviceSyncRootRunResult SkippedUnsupportedDirection(CottonSyncRootSnapshot root)
         {
             ArgumentNullException.ThrowIfNull(root);

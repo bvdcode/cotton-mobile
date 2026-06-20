@@ -37,6 +37,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
             Assert.Equal(FileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.FileName);
+            Assert.Equal("report.pdf", loaded.RelativePath);
             Assert.Equal("\"etag-1\"", loaded.ETag);
             Assert.Equal(RemoteUpdatedAt, loaded.RemoteUpdatedAtUtc);
             Assert.Equal(2048, loaded.SizeBytes);
@@ -109,7 +110,7 @@ namespace Cotton.Mobile.Tests
                 metadataPath,
                 """
                 {
-                  "schemaVersion": 1,
+                  "schemaVersion": 2,
                   "syncRootStableKey": "wrong-root",
                   "savedAtUtc": "2026-06-20T14:00:00Z",
                   "items": []
@@ -131,13 +132,14 @@ namespace Cotton.Mobile.Tests
                 metadataPath,
                 $$"""
                 {
-                  "schemaVersion": 1,
+                  "schemaVersion": 2,
                   "syncRootStableKey": "{{_syncRoot.StableKey}}",
                   "savedAtUtc": "2026-06-20T14:00:00Z",
                   "items": [
                     {
                       "fileId": "00000000-0000-0000-0000-000000000000",
                       "fileName": "bad.pdf",
+                      "relativePath": "bad.pdf",
                       "eTag": "\"bad\"",
                       "remoteUpdatedAtUtc": "2026-06-20T14:00:00Z",
                       "syncedAtUtc": "2026-06-20T14:05:00Z"
@@ -145,6 +147,7 @@ namespace Cotton.Mobile.Tests
                     {
                       "fileId": "cccccccc-cccc-cccc-cccc-cccccccccccc",
                       "fileName": "good.pdf",
+                      "relativePath": "Nested/good.pdf",
                       "eTag": "\"etag-1\"",
                       "remoteUpdatedAtUtc": "2026-06-20T14:00:00Z",
                       "sizeBytes": 2048,
@@ -159,6 +162,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(FileId, loaded.FileId);
             Assert.Equal("good.pdf", loaded.FileName);
+            Assert.Equal("Nested/good.pdf", loaded.RelativePath);
         }
 
         [Fact]

@@ -4,7 +4,7 @@ namespace Cotton.Mobile.Services
 {
     public class FileSystemCottonSyncedFileManifestStore : ICottonSyncedFileManifestStore
     {
-        private const int SchemaVersion = 1;
+        private const int SchemaVersion = 2;
         private const string TemporaryFileExtension = ".tmp";
 
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
@@ -210,6 +210,7 @@ namespace Cotton.Mobile.Services
             {
                 FileId = item.FileId,
                 FileName = item.FileName,
+                RelativePath = item.RelativePath,
                 ETag = item.ETag,
                 RemoteUpdatedAtUtc = item.RemoteUpdatedAtUtc,
                 SizeBytes = item.SizeBytes,
@@ -229,7 +230,8 @@ namespace Cotton.Mobile.Services
                     item.RemoteUpdatedAtUtc,
                     item.SizeBytes,
                     item.ContentType,
-                    item.SyncedAtUtc);
+                    item.SyncedAtUtc,
+                    item.RelativePath ?? string.Empty);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException)

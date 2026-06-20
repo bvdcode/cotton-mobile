@@ -290,6 +290,11 @@ namespace Cotton.Mobile.Tests
             Assert.False(summary.HasBlockedItems);
             Assert.Equal([FolderId, folder.Id], _folderContentSource.RequestedFolderIds);
             Assert.Equal([FirstFileId, nestedFile.Id], _fileOperator.DownloadedIds);
+            Assert.Equal(["alpha.txt", "Nested/nested.txt"], _fileOperator.DownloadedRelativePaths);
+
+            IReadOnlyList<CottonSyncedFileSnapshot> manifest = await _manifestStore.LoadAsync(InstanceUri, root);
+            Assert.Contains(manifest, item => item.FileId == FirstFileId && item.RelativePath == "alpha.txt");
+            Assert.Contains(manifest, item => item.FileId == nestedFile.Id && item.RelativePath == "Nested/nested.txt");
         }
 
         public void Dispose()
@@ -422,6 +427,8 @@ namespace Cotton.Mobile.Tests
         {
             public List<Guid> DownloadedIds { get; } = [];
 
+            public List<string> DownloadedRelativePaths { get; } = [];
+
             public List<Guid> RenamedIds { get; } = [];
 
             public List<Guid> RemovedIds { get; } = [];
@@ -433,6 +440,7 @@ namespace Cotton.Mobile.Tests
                 CancellationToken cancellationToken = default)
             {
                 DownloadedIds.Add(item.TargetId);
+                DownloadedRelativePaths.Add(item.RelativePath);
                 return Task.CompletedTask;
             }
 

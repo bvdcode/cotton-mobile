@@ -10,7 +10,8 @@ namespace Cotton.Mobile.Services
             string? remoteETag,
             DateTime? remoteUpdatedAtUtc,
             long? sizeBytes,
-            string? contentType)
+            string? contentType,
+            string? relativePath = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -41,6 +42,7 @@ namespace Cotton.Mobile.Services
             TargetType = targetType;
             TargetId = targetId;
             DisplayName = displayName.Trim();
+            RelativePath = NormalizeRelativePath(TargetType, DisplayName, relativePath);
             RemoteETag = string.IsNullOrWhiteSpace(remoteETag) ? null : remoteETag.Trim();
             RemoteUpdatedAtUtc = remoteUpdatedAtUtc.HasValue
                 ? CottonLocalFileFreshness.NormalizeUtc(remoteUpdatedAtUtc.Value)
@@ -56,6 +58,8 @@ namespace Cotton.Mobile.Services
         public Guid TargetId { get; }
 
         public string DisplayName { get; }
+
+        public string RelativePath { get; }
 
         public string? RemoteETag { get; }
 
@@ -98,7 +102,30 @@ namespace Cotton.Mobile.Services
                 RemoteUpdatedAtUtc.Value,
                 SizeBytes,
                 ContentType,
-                syncedAtUtc);
+                syncedAtUtc,
+                RelativePath);
+        }
+
+        private static string NormalizeRelativePath(
+            CottonFileBrowserEntryType targetType,
+            string displayName,
+            string? relativePath)
+        {
+            string normalizedPath = CottonSyncRelativePath.NormalizeFilePath(
+                string.IsNullOrWhiteSpace(relativePath) ? displayName : relativePath,
+                nameof(relativePath));
+            if (targetType == CottonFileBrowserEntryType.File
+                && !string.Equals(
+                    CottonSyncRelativePath.GetFileName(normalizedPath),
+                    displayName,
+                    StringComparison.Ordinal))
+            {
+                throw new ArgumentException(
+                    "Cloud-to-device sync relative path file name must match the display name.",
+                    nameof(relativePath));
+            }
+
+            return normalizedPath;
         }
     }
 }

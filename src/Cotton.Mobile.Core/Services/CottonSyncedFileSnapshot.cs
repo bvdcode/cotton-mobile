@@ -9,7 +9,8 @@ namespace Cotton.Mobile.Services
             DateTime remoteUpdatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            DateTime syncedAtUtc)
+            DateTime syncedAtUtc,
+            string? relativePath = null)
         {
             if (fileId == Guid.Empty)
             {
@@ -40,6 +41,7 @@ namespace Cotton.Mobile.Services
 
             FileId = fileId;
             FileName = normalizedName;
+            RelativePath = NormalizeRelativePath(normalizedName, relativePath);
             ETag = eTag.Trim();
             RemoteUpdatedAtUtc = CottonLocalFileFreshness.NormalizeUtc(remoteUpdatedAtUtc);
             SizeBytes = sizeBytes;
@@ -50,6 +52,8 @@ namespace Cotton.Mobile.Services
         public Guid FileId { get; }
 
         public string FileName { get; }
+
+        public string RelativePath { get; }
 
         public string ETag { get; }
 
@@ -82,6 +86,22 @@ namespace Cotton.Mobile.Services
                 file.SizeBytes,
                 file.ContentType,
                 syncedAtUtc);
+        }
+
+        private static string NormalizeRelativePath(string fileName, string? relativePath)
+        {
+            string normalizedPath = CottonSyncRelativePath.NormalizeFilePath(
+                string.IsNullOrWhiteSpace(relativePath) ? fileName : relativePath,
+                nameof(relativePath));
+            if (!string.Equals(
+                CottonSyncRelativePath.GetFileName(normalizedPath),
+                fileName,
+                StringComparison.Ordinal))
+            {
+                throw new ArgumentException("Synced file relative path file name must match the file name.", nameof(relativePath));
+            }
+
+            return normalizedPath;
         }
     }
 }

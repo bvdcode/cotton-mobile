@@ -26,6 +26,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonCloudToDeviceSyncActionKind.DownloadNewFile, item.Action);
             Assert.True(item.RequiresDownload);
             Assert.Equal("\"etag-1\"", item.RemoteETag);
+            Assert.Equal("alpha.txt", item.RelativePath);
             Assert.Equal(1, plan.DownloadCount);
             Assert.True(plan.HasExecutableChanges);
             Assert.False(plan.HasBlockingItems);
@@ -95,6 +96,35 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonCloudToDeviceSyncActionKind.RenameLocalFile, item.Action);
             Assert.True(item.RequiresLocalRename);
             Assert.Equal("renamed.txt", item.DisplayName);
+            Assert.Equal(1, plan.LocalRenameCount);
+        }
+
+        [Fact]
+        public void Planner_renames_local_file_when_relative_path_changes()
+        {
+            CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
+            var remote = new CottonCloudToDeviceRemoteContentSnapshot(
+                FolderId,
+                "Projects",
+                [new CottonCloudToDeviceRemoteItemSnapshot(remoteFile, "Nested/alpha.txt")]);
+            var localFile = new CottonSyncedFileSnapshot(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-1\"",
+                UpdatedAt,
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(1),
+                "alpha.txt");
+
+            CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
+                CreateReadyRoot(),
+                remote,
+                [localFile]);
+
+            CottonCloudToDeviceSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonCloudToDeviceSyncActionKind.RenameLocalFile, item.Action);
+            Assert.Equal("Nested/alpha.txt", item.RelativePath);
             Assert.Equal(1, plan.LocalRenameCount);
         }
 

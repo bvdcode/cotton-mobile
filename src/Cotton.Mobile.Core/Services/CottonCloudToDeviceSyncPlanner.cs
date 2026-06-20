@@ -7,6 +7,17 @@ namespace Cotton.Mobile.Services
             CottonFolderContent remoteContent,
             IEnumerable<CottonSyncedFileSnapshot> localFiles)
         {
+            return Create(
+                root,
+                CottonCloudToDeviceRemoteContentSnapshot.FromFolderContent(remoteContent),
+                localFiles);
+        }
+
+        public static CottonCloudToDeviceSyncPlanSnapshot Create(
+            CottonSyncRootSnapshot root,
+            CottonCloudToDeviceRemoteContentSnapshot remoteContent,
+            IEnumerable<CottonSyncedFileSnapshot> localFiles)
+        {
             ArgumentNullException.ThrowIfNull(root);
             ArgumentNullException.ThrowIfNull(remoteContent);
             ArgumentNullException.ThrowIfNull(localFiles);
@@ -22,20 +33,20 @@ namespace Cotton.Mobile.Services
             }
 
             Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId = CreateLocalFileMap(localFiles);
-            Dictionary<Guid, CottonFileBrowserEntry> remoteFilesById = CreateRemoteFileMap(remoteContent);
+            Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> remoteFilesById = CreateRemoteFileMap(remoteContent);
             List<CottonCloudToDeviceSyncPlanItem> items = [];
 
-            foreach (CottonFileBrowserEntry entry in remoteContent.Entries
-                .OrderBy(entry => entry.Type)
-                .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-                .ThenBy(entry => entry.Id))
+            foreach (CottonCloudToDeviceRemoteItemSnapshot item in remoteContent.Entries
+                .OrderBy(item => item.Entry.Type)
+                .ThenBy(item => item.RelativePath, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(item => item.Entry.Id))
             {
-                items.Add(CreateRemoteItem(entry, localByFileId));
+                items.Add(CreateRemoteItem(item, localByFileId));
             }
 
             foreach (CottonSyncedFileSnapshot localFile in localByFileId.Values
                 .Where(localFile => !remoteFilesById.ContainsKey(localFile.FileId))
-                .OrderBy(localFile => localFile.FileName, StringComparer.OrdinalIgnoreCase)
+                .OrderBy(localFile => localFile.RelativePath, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(localFile => localFile.FileId))
             {
                 items.Add(new CottonCloudToDeviceSyncPlanItem(
@@ -46,7 +57,8 @@ namespace Cotton.Mobile.Services
                     localFile.ETag,
                     localFile.RemoteUpdatedAtUtc,
                     localFile.SizeBytes,
-                    localFile.ContentType));
+                    localFile.ContentType,
+                    localFile.RelativePath));
             }
 
             return new CottonCloudToDeviceSyncPlanSnapshot(
@@ -57,9 +69,10 @@ namespace Cotton.Mobile.Services
         }
 
         private static CottonCloudToDeviceSyncPlanItem CreateRemoteItem(
-            CottonFileBrowserEntry entry,
+            CottonCloudToDeviceRemoteItemSnapshot remoteItem,
             IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId)
         {
+            CottonFileBrowserEntry entry = remoteItem.Entry;
             if (entry.Type == CottonFileBrowserEntryType.Folder)
             {
                 return new CottonCloudToDeviceSyncPlanItem(
@@ -70,7 +83,8 @@ namespace Cotton.Mobile.Services
                     remoteETag: null,
                     remoteUpdatedAtUtc: null,
                     sizeBytes: null,
-                    contentType: null);
+                    contentType: null,
+                    remoteItem.RelativePath);
             }
 
             if (string.IsNullOrWhiteSpace(entry.ETag))
@@ -83,31 +97,34 @@ namespace Cotton.Mobile.Services
                     remoteETag: null,
                     entry.UpdatedAtUtc,
                     entry.SizeBytes,
-                    entry.ContentType);
+                    entry.ContentType,
+                    remoteItem.RelativePath);
             }
 
             if (!localByFileId.TryGetValue(entry.Id, out CottonSyncedFileSnapshot? localFile))
             {
-                return CreateFileItem(CottonCloudToDeviceSyncActionKind.DownloadNewFile, entry);
+                return CreateFileItem(CottonCloudToDeviceSyncActionKind.DownloadNewFile, remoteItem);
             }
 
             if (!string.Equals(localFile.ETag, entry.ETag.Trim(), StringComparison.Ordinal))
             {
-                return CreateFileItem(CottonCloudToDeviceSyncActionKind.RefreshChangedFile, entry);
+                return CreateFileItem(CottonCloudToDeviceSyncActionKind.RefreshChangedFile, remoteItem);
             }
 
-            if (!string.Equals(localFile.FileName, entry.Name, StringComparison.Ordinal))
+            if (!string.Equals(localFile.FileName, entry.Name, StringComparison.Ordinal)
+                || !string.Equals(localFile.RelativePath, remoteItem.RelativePath, StringComparison.Ordinal))
             {
-                return CreateFileItem(CottonCloudToDeviceSyncActionKind.RenameLocalFile, entry);
+                return CreateFileItem(CottonCloudToDeviceSyncActionKind.RenameLocalFile, remoteItem);
             }
 
-            return CreateFileItem(CottonCloudToDeviceSyncActionKind.KeepExistingFile, entry);
+            return CreateFileItem(CottonCloudToDeviceSyncActionKind.KeepExistingFile, remoteItem);
         }
 
         private static CottonCloudToDeviceSyncPlanItem CreateFileItem(
             CottonCloudToDeviceSyncActionKind action,
-            CottonFileBrowserEntry entry)
+            CottonCloudToDeviceRemoteItemSnapshot remoteItem)
         {
+            CottonFileBrowserEntry entry = remoteItem.Entry;
             return new CottonCloudToDeviceSyncPlanItem(
                 action,
                 CottonFileBrowserEntryType.File,
@@ -116,7 +133,8 @@ namespace Cotton.Mobile.Services
                 entry.ETag,
                 entry.UpdatedAtUtc,
                 entry.SizeBytes,
-                entry.ContentType);
+                entry.ContentType,
+                remoteItem.RelativePath);
         }
 
         private static Dictionary<Guid, CottonSyncedFileSnapshot> CreateLocalFileMap(
@@ -134,12 +152,14 @@ namespace Cotton.Mobile.Services
             return result;
         }
 
-        private static Dictionary<Guid, CottonFileBrowserEntry> CreateRemoteFileMap(CottonFolderContent remoteContent)
+        private static Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> CreateRemoteFileMap(
+            CottonCloudToDeviceRemoteContentSnapshot remoteContent)
         {
-            var result = new Dictionary<Guid, CottonFileBrowserEntry>();
-            foreach (CottonFileBrowserEntry entry in remoteContent.Entries.Where(entry => entry.Type == CottonFileBrowserEntryType.File))
+            var result = new Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot>();
+            foreach (CottonCloudToDeviceRemoteItemSnapshot item in remoteContent.Entries
+                .Where(item => item.Entry.Type == CottonFileBrowserEntryType.File))
             {
-                if (!result.TryAdd(entry.Id, entry))
+                if (!result.TryAdd(item.Entry.Id, item))
                 {
                     throw new ArgumentException("Remote folder content contains duplicate file ids.", nameof(remoteContent));
                 }

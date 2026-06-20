@@ -6,6 +6,8 @@ namespace Cotton.Mobile.Services
 
         public string? FileName { get; set; }
 
+        public string? RelativePath { get; set; }
+
         public string? ETag { get; set; }
 
         public DateTime RemoteUpdatedAtUtc { get; set; }

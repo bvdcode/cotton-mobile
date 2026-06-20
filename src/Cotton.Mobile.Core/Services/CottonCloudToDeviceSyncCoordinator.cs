@@ -116,7 +116,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            CottonFolderContent remoteContent =
+            CottonCloudToDeviceRemoteContentSnapshot remoteContent =
                 await LoadRecursiveContentAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             IReadOnlyList<CottonSyncedFileSnapshot> localFiles =
                 await _manifestStore.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
@@ -128,20 +128,20 @@ namespace Cotton.Mobile.Services
             return CottonCloudToDeviceSyncRootRunResult.Completed(root, plan, executionResult);
         }
 
-        private async Task<CottonFolderContent> LoadRecursiveContentAsync(
+        private async Task<CottonCloudToDeviceRemoteContentSnapshot> LoadRecursiveContentAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            var files = new List<CottonFileBrowserEntry>();
-            var folders = new Queue<CottonFolderHandle>();
+            var files = new List<CottonCloudToDeviceRemoteItemSnapshot>();
+            var folders = new Queue<(CottonFolderHandle Folder, string RelativePath)>();
             var visitedFolderIds = new HashSet<Guid>();
 
-            folders.Enqueue(root.CloudFolder.ToFolderHandle());
+            folders.Enqueue((root.CloudFolder.ToFolderHandle(), string.Empty));
             while (folders.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                CottonFolderHandle folder = folders.Dequeue();
+                (CottonFolderHandle folder, string folderRelativePath) = folders.Dequeue();
                 if (!visitedFolderIds.Add(folder.Id))
                 {
                     continue;
@@ -154,15 +154,22 @@ namespace Cotton.Mobile.Services
                 {
                     if (entry.Type == CottonFileBrowserEntryType.Folder)
                     {
-                        folders.Enqueue(new CottonFolderHandle(entry.Id, entry.Name));
+                        folders.Enqueue((
+                            new CottonFolderHandle(entry.Id, entry.Name),
+                            CottonSyncRelativePath.CreateChildFolderPath(folderRelativePath, entry.Name)));
                         continue;
                     }
 
-                    files.Add(entry);
+                    files.Add(new CottonCloudToDeviceRemoteItemSnapshot(
+                        entry,
+                        CottonSyncRelativePath.CreateFilePath(folderRelativePath, entry.Name)));
                 }
             }
 
-            return new CottonFolderContent(root.CloudFolder.FolderId, root.CloudFolder.FolderName, files);
+            return new CottonCloudToDeviceRemoteContentSnapshot(
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                files);
         }
     }
 }

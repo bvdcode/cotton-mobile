@@ -69,6 +69,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal([FirstFileId, SecondFileId], manifest.Select(item => item.FileId).Order().ToArray());
             Assert.All(manifest, item => Assert.Equal(SyncedAt, item.SyncedAtUtc));
             Assert.Contains(manifest, item => item.FileId == SecondFileId && item.ETag == "\"etag-2\"");
+            Assert.All(manifest, item => Assert.Equal(item.FileName, item.RelativePath));
         }
 
         [Fact]
@@ -97,6 +98,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(InstanceUri, renamedInstanceUri);
             CottonSyncedFileSnapshot manifestItem = Assert.Single(await _manifestStore.LoadAsync(InstanceUri, _syncRoot));
             Assert.Equal("renamed.txt", manifestItem.FileName);
+            Assert.Equal("renamed.txt", manifestItem.RelativePath);
             Assert.Equal(SyncedAt, manifestItem.SyncedAtUtc);
         }
 

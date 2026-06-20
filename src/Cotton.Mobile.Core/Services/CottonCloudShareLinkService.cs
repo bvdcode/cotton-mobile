@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Services
             return CottonCloudShareLinkSnapshot.Create(request, instanceUri, backendLink);
         }
 
-        public async Task InvalidateAllAsync(
+        public async Task InvalidateAllFileLinksAsync(
             Uri instanceUri,
             CancellationToken cancellationToken = default)
         {

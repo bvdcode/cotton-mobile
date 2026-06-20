@@ -186,13 +186,13 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task InvalidateAllAsync_posts_authorized_request()
+        public async Task InvalidateAllFileLinksAsync_posts_authorized_request()
         {
             var handler = new RecordingHttpMessageHandler();
             handler.EnqueueStatus(HttpStatusCode.NoContent);
             var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
 
-            await service.InvalidateAllAsync(InstanceUri);
+            await service.InvalidateAllFileLinksAsync(InstanceUri);
 
             RecordedRequest request = Assert.Single(handler.Requests);
             Assert.Equal(HttpMethod.Post, request.Method);
@@ -204,7 +204,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task InvalidateAllAsync_refreshes_token_once_after_unauthorized_response()
+        public async Task InvalidateAllFileLinksAsync_refreshes_token_once_after_unauthorized_response()
         {
             var handler = new RecordingHttpMessageHandler();
             handler.EnqueueJson(HttpStatusCode.Unauthorized, new { error = "expired" });
@@ -219,7 +219,7 @@ namespace Cotton.Mobile.Tests
             var tokenStore = new FakeTokenStore("old-access", "old refresh");
             var service = CreateService(handler, tokenStore);
 
-            await service.InvalidateAllAsync(InstanceUri);
+            await service.InvalidateAllFileLinksAsync(InstanceUri);
 
             Assert.Equal("new-access", tokenStore.Tokens?.AccessToken);
             Assert.Equal("new-refresh", tokenStore.Tokens?.RefreshToken);
@@ -231,26 +231,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task InvalidateAllAsync_surfaces_forbidden_without_refresh()
+        public async Task InvalidateAllFileLinksAsync_surfaces_forbidden_without_refresh()
         {
             var handler = new RecordingHttpMessageHandler();
             handler.EnqueueJson(HttpStatusCode.Forbidden, new { error = "not allowed" });
             var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
 
             CottonApiException exception = await Assert.ThrowsAsync<CottonApiException>(
-                () => service.InvalidateAllAsync(InstanceUri));
+                () => service.InvalidateAllFileLinksAsync(InstanceUri));
 
             Assert.Equal(HttpStatusCode.Forbidden, exception.StatusCode);
             Assert.Single(handler.Requests);
         }
 
         [Fact]
-        public async Task InvalidateAllAsync_requires_supported_https_instance_uri()
+        public async Task InvalidateAllFileLinksAsync_requires_supported_https_instance_uri()
         {
             var service = CreateService(new RecordingHttpMessageHandler(), new FakeTokenStore("access", "refresh"));
 
             await Assert.ThrowsAsync<ArgumentException>(
-                () => service.InvalidateAllAsync(new Uri("http://cloud.example")));
+                () => service.InvalidateAllFileLinksAsync(new Uri("http://cloud.example")));
         }
 
         private static CottonCloudShareLinkService CreateService(

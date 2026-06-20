@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Tests
             Assert.True(capabilities.CanCreateLink(CottonCloudShareLinkTargetKind.Folder));
             Assert.True(capabilities.SupportsLinkExpiration);
             Assert.True(capabilities.SupportsGlobalInvalidate);
+            Assert.True(capabilities.SupportsGlobalFileLinkInvalidate);
+            Assert.False(capabilities.SupportsGlobalFolderLinkInvalidate);
             Assert.False(capabilities.SupportsPerLinkRevoke);
             Assert.False(capabilities.SupportsPassword);
             Assert.False(capabilities.SupportsActivityFeed);

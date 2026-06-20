@@ -21,15 +21,15 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountLogoutAction = "Log out";
         private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
-        private const string AccountResetShareLinksAction = "Reset shared links";
-        private const string AccountResetShareLinksConfirmationAction = "Reset links";
+        private const string AccountResetFileLinksAction = "Reset file links";
+        private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
-        private const string ResetShareLinksConfirmationTitle = "Reset shared links?";
-        private const string ResetShareLinksConfirmationMessage =
-            "All existing public links for this account will stop working. You can create new links later.";
+        private const string ResetFileLinksConfirmationTitle = "Reset file links?";
+        private const string ResetFileLinksConfirmationMessage =
+            "Existing public file links for this account will stop working. Folder links stay active.";
 
         private readonly ICottonSessionService _sessionService;
         private readonly ICottonInstanceStore _instanceStore;
@@ -598,7 +598,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountLogoutAction,
                 AccountStorageAction,
                 AccountNotificationsAction,
-                AccountResetShareLinksAction,
+                AccountResetFileLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
                 AccountPrivacyPolicyAction);
@@ -622,8 +622,8 @@ namespace Cotton.Mobile.ViewModels
                 case AccountNotificationsAction:
                     await OpenNotificationsAsync();
                     break;
-                case AccountResetShareLinksAction:
-                    await ResetSharedLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
+                case AccountResetFileLinksAction:
+                    await ResetFileLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
                     break;
                 case AccountDiagnosticsAction:
                     await OpenDiagnosticsAsync();
@@ -667,7 +667,7 @@ namespace Cotton.Mobile.ViewModels
             await LogoutAsync();
         }
 
-        private async Task ResetSharedLinksAsync(
+        private async Task ResetFileLinksAsync(
             string profileName,
             string? profileEmail,
             string profileInstance,
@@ -681,20 +681,20 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = CottonServerUrl.NormalizeOptional(instanceUrl);
             if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
             {
-                ShowProfileError(CottonCloudShareLinkStatusText.ResetAllUnavailableStatus);
+                ShowProfileError(CottonCloudShareLinkStatusText.ResetFileLinksUnavailableStatus);
                 return;
             }
 
             if (!_networkAccess.HasInternetAccess)
             {
-                ShowProfileError(CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus);
+                ShowProfileError(CottonCloudShareLinkStatusText.ResetFileLinksOfflineUnavailableStatus);
                 return;
             }
 
             bool confirmed = await _dialogService.ShowConfirmationAsync(
-                ResetShareLinksConfirmationTitle,
-                ResetShareLinksConfirmationMessage,
-                AccountResetShareLinksConfirmationAction,
+                ResetFileLinksConfirmationTitle,
+                ResetFileLinksConfirmationMessage,
+                AccountResetFileLinksConfirmationAction,
                 AccountCancelAction);
             if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
             {
@@ -703,21 +703,21 @@ namespace Cotton.Mobile.ViewModels
 
             if (!confirmed)
             {
-                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetFileLinksCancelledStatus);
                 return;
             }
 
-            ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllInProgressStatus);
+            ShowProfileStatus(CottonCloudShareLinkStatusText.ResetFileLinksInProgressStatus);
 
             try
             {
-                await _cloudShareLinkService.InvalidateAllAsync(instanceUri);
+                await _cloudShareLinkService.InvalidateAllFileLinksAsync(instanceUri);
                 if (!IsSameProfileContext(profileName, profileEmail, profileInstance, instanceUrl))
                 {
                     return;
                 }
 
-                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCompletedStatus);
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetFileLinksCompletedStatus);
             }
             catch (Exception exception)
                 when (IsAuthorizationFailure(exception))
@@ -739,7 +739,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+                ShowProfileStatus(CottonCloudShareLinkStatusText.ResetFileLinksCancelledStatus);
             }
             catch (Exception exception)
             {
@@ -753,7 +753,7 @@ namespace Cotton.Mobile.ViewModels
                 HttpStatusCode? statusCode = exception is CottonApiException apiException
                     ? apiException.StatusCode
                     : null;
-                ShowProfileError(CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+                ShowProfileError(CottonCloudShareLinkStatusText.CreateResetFileLinksFailedStatus(
                     statusCode,
                     _networkAccess.HasInternetAccess));
             }

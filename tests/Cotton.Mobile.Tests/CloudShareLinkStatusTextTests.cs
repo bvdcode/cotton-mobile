@@ -83,53 +83,53 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Reset_all_links_statuses_use_explicit_destructive_action_copy()
+        public void Reset_file_links_statuses_use_precise_destructive_action_copy()
         {
             Assert.Equal(
-                "Offline. Reset shared links needs internet.",
-                CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus);
+                "Offline. Reset file links needs internet.",
+                CottonCloudShareLinkStatusText.ResetFileLinksOfflineUnavailableStatus);
             Assert.Equal(
-                "Sign in to reset shared links.",
-                CottonCloudShareLinkStatusText.ResetAllUnavailableStatus);
+                "Sign in to reset file links.",
+                CottonCloudShareLinkStatusText.ResetFileLinksUnavailableStatus);
             Assert.Equal(
-                "Resetting shared links...",
-                CottonCloudShareLinkStatusText.ResetAllInProgressStatus);
+                "Resetting file links...",
+                CottonCloudShareLinkStatusText.ResetFileLinksInProgressStatus);
             Assert.Equal(
-                "Shared links reset.",
-                CottonCloudShareLinkStatusText.ResetAllCompletedStatus);
+                "File links reset.",
+                CottonCloudShareLinkStatusText.ResetFileLinksCompletedStatus);
             Assert.Equal(
-                "Reset shared links cancelled.",
-                CottonCloudShareLinkStatusText.ResetAllCancelledStatus);
+                "Reset file links cancelled.",
+                CottonCloudShareLinkStatusText.ResetFileLinksCancelledStatus);
         }
 
         [Fact]
-        public void Reset_all_failure_uses_offline_copy_when_network_is_unavailable()
+        public void Reset_file_links_failure_uses_offline_copy_when_network_is_unavailable()
         {
-            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+            string status = CottonCloudShareLinkStatusText.CreateResetFileLinksFailedStatus(
                 statusCode: null,
                 hasInternetAccess: false);
 
-            Assert.Equal(CottonCloudShareLinkStatusText.ResetAllOfflineUnavailableStatus, status);
+            Assert.Equal(CottonCloudShareLinkStatusText.ResetFileLinksOfflineUnavailableStatus, status);
         }
 
         [Fact]
-        public void Reset_all_failure_uses_sign_in_copy_for_forbidden_response()
+        public void Reset_file_links_failure_uses_sign_in_copy_for_forbidden_response()
         {
-            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+            string status = CottonCloudShareLinkStatusText.CreateResetFileLinksFailedStatus(
                 HttpStatusCode.Forbidden,
                 hasInternetAccess: true);
 
-            Assert.Equal("Could not reset shared links. Sign in again.", status);
+            Assert.Equal("Could not reset file links. Sign in again.", status);
         }
 
         [Fact]
-        public void Reset_all_failure_uses_generic_copy_for_unknown_response()
+        public void Reset_file_links_failure_uses_generic_copy_for_unknown_response()
         {
-            string status = CottonCloudShareLinkStatusText.CreateResetAllFailedStatus(
+            string status = CottonCloudShareLinkStatusText.CreateResetFileLinksFailedStatus(
                 HttpStatusCode.InternalServerError,
                 hasInternetAccess: true);
 
-            Assert.Equal("Could not reset shared links.", status);
+            Assert.Equal("Could not reset file links.", status);
         }
     }
 }

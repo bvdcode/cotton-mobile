@@ -6,7 +6,8 @@ namespace Cotton.Mobile.Services
 {
     public class CottonRemotePushSessionRegistrationService :
         ICottonRemotePushSessionRegistrationService,
-        ICottonRemotePushTokenRefreshHandler
+        ICottonRemotePushTokenRefreshHandler,
+        ICottonRemotePushSessionRegistrationStatusProvider
     {
         private readonly CottonRemotePushRegistrationCoordinator _registrationCoordinator;
         private readonly ICottonRemotePushDeviceTokenService _deviceTokenService;
@@ -14,6 +15,9 @@ namespace Cotton.Mobile.Services
         private readonly ICottonTokenStore _tokenStore;
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly ILogger<CottonRemotePushSessionRegistrationService> _logger;
+        private readonly object _registrationStateLock = new();
+        private CottonRemotePushRegistrationStatus? _lastRegistrationStatus;
+        private DateTimeOffset? _lastRegistrationAttemptedAtUtc;
 
         public CottonRemotePushSessionRegistrationService(
             CottonRemotePushRegistrationCoordinator registrationCoordinator,
@@ -38,6 +42,28 @@ namespace Cotton.Mobile.Services
             _logger = logger;
         }
 
+        public CottonRemotePushRegistrationStatus? LastRegistrationStatus
+        {
+            get
+            {
+                lock (_registrationStateLock)
+                {
+                    return _lastRegistrationStatus;
+                }
+            }
+        }
+
+        public DateTimeOffset? LastRegistrationAttemptedAtUtc
+        {
+            get
+            {
+                lock (_registrationStateLock)
+                {
+                    return _lastRegistrationAttemptedAtUtc;
+                }
+            }
+        }
+
         public async Task RegisterCurrentSessionBestEffortAsync(
             Uri instanceUri,
             CancellationToken cancellationToken = default)
@@ -52,6 +78,7 @@ namespace Cotton.Mobile.Services
                             _metadata.ApplicationVersion,
                             cancellationToken)
                         .ConfigureAwait(false);
+                RecordRegistrationStatus(result.Status);
                 LogRegistrationResult(result);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -60,6 +87,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
+                RecordRegistrationStatus(CottonRemotePushRegistrationStatus.Unavailable);
                 _logger.LogWarning(exception, "Failed to register the Cotton mobile remote push device token.");
             }
         }
@@ -121,6 +149,7 @@ namespace Cotton.Mobile.Services
                 await _deviceTokenService
                     .RegisterCurrentAsync(instanceUri, request, cancellationToken)
                     .ConfigureAwait(false);
+                RecordRegistrationStatus(CottonRemotePushRegistrationStatus.Registered);
                 _logger.LogInformation("Refreshed the Cotton mobile remote push token registration.");
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -129,7 +158,17 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
+                RecordRegistrationStatus(CottonRemotePushRegistrationStatus.Unavailable);
                 _logger.LogWarning(exception, "Failed to refresh the Cotton mobile remote push token registration.");
+            }
+        }
+
+        private void RecordRegistrationStatus(CottonRemotePushRegistrationStatus status)
+        {
+            lock (_registrationStateLock)
+            {
+                _lastRegistrationStatus = status;
+                _lastRegistrationAttemptedAtUtc = DateTimeOffset.UtcNow;
             }
         }
 

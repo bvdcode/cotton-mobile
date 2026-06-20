@@ -12,10 +12,12 @@ namespace Cotton.Mobile.ViewModels
         private readonly CottonDiagnosticsContext _context;
         private readonly ICottonMobileApplicationMetadata _metadata;
         private readonly IStorageManagementService _storageManagementService;
+        private readonly ICottonRemotePushDiagnosticsService _remotePushDiagnosticsService;
         private readonly IClipboard _clipboard;
         private readonly ILogger<DiagnosticsViewModel> _logger;
         private bool _isBusy;
         private bool _hasCacheDetails;
+        private bool _hasRemotePushDetails;
         private string _headerTitleText = "Diagnostics";
         private string _headerVersionText = "Not available";
         private string? _status;
@@ -24,18 +26,21 @@ namespace Cotton.Mobile.ViewModels
             CottonDiagnosticsContext context,
             ICottonMobileApplicationMetadata metadata,
             IStorageManagementService storageManagementService,
+            ICottonRemotePushDiagnosticsService remotePushDiagnosticsService,
             IClipboard clipboard,
             ILogger<DiagnosticsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(context);
             ArgumentNullException.ThrowIfNull(metadata);
             ArgumentNullException.ThrowIfNull(storageManagementService);
+            ArgumentNullException.ThrowIfNull(remotePushDiagnosticsService);
             ArgumentNullException.ThrowIfNull(clipboard);
             ArgumentNullException.ThrowIfNull(logger);
 
             _context = context;
             _metadata = metadata;
             _storageManagementService = storageManagementService;
+            _remotePushDiagnosticsService = remotePushDiagnosticsService;
             _clipboard = clipboard;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
@@ -97,14 +102,15 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                CottonStorageSummary summary = await _storageManagementService.GetSummaryAsync();
-                ShowDiagnostics(summary);
+                CottonStorageSummary? summary = await TryLoadStorageSummaryAsync();
+                CottonRemotePushDiagnosticsSnapshot? remotePush = await TryLoadRemotePushDiagnosticsAsync();
+                ShowDiagnostics(summary, remotePush);
                 Status = null;
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile diagnostics.");
-                ShowDiagnostics(null);
+                ShowDiagnostics(null, null);
                 Status = "Could not inspect local cache.";
             }
             finally
@@ -124,11 +130,12 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 bool copiedWithoutCacheDetails = false;
-                if (Sections.Count == 0 || !_hasCacheDetails)
+                if (Sections.Count == 0 || !_hasCacheDetails || !_hasRemotePushDetails)
                 {
-                    CottonStorageSummary? summary = await TryLoadStorageSummaryForCopyAsync();
+                    CottonStorageSummary? summary = await TryLoadStorageSummaryAsync();
+                    CottonRemotePushDiagnosticsSnapshot? remotePush = await TryLoadRemotePushDiagnosticsAsync();
                     copiedWithoutCacheDetails = summary is null;
-                    ShowDiagnostics(summary);
+                    ShowDiagnostics(summary, remotePush);
                 }
 
                 await CopyDiagnosticsTextAsync();
@@ -156,7 +163,7 @@ namespace Cotton.Mobile.ViewModels
             });
         }
 
-        private async Task<CottonStorageSummary?> TryLoadStorageSummaryForCopyAsync()
+        private async Task<CottonStorageSummary?> TryLoadStorageSummaryAsync()
         {
             try
             {
@@ -169,20 +176,41 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private void ShowDiagnostics(CottonStorageSummary? summary)
+        private async Task<CottonRemotePushDiagnosticsSnapshot?> TryLoadRemotePushDiagnosticsAsync()
+        {
+            try
+            {
+                return await _remotePushDiagnosticsService.GetSnapshotAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile remote push diagnostics.");
+                return null;
+            }
+        }
+
+        private void ShowDiagnostics(
+            CottonStorageSummary? summary,
+            CottonRemotePushDiagnosticsSnapshot? remotePush)
         {
             HeaderTitleText = "Diagnostics";
             HeaderVersionText = CreateHeaderVersionText();
             _hasCacheDetails = summary is not null;
+            _hasRemotePushDetails = remotePush is not null;
             Sections.Clear();
-            foreach (DiagnosticsSectionViewModel section in CreateSections(summary))
+            foreach (DiagnosticsSectionViewModel section in CreateSections(summary, remotePush))
             {
                 Sections.Add(section);
             }
         }
 
-        private IReadOnlyList<DiagnosticsSectionViewModel> CreateSections(CottonStorageSummary? summary)
+        private IReadOnlyList<DiagnosticsSectionViewModel> CreateSections(
+            CottonStorageSummary? summary,
+            CottonRemotePushDiagnosticsSnapshot? remotePush)
         {
+            CottonRemotePushDiagnosticsDisplayState? pushDisplay = remotePush is null
+                ? null
+                : CottonRemotePushDiagnosticsDisplayState.Create(remotePush);
             return
             [
                 new DiagnosticsSectionViewModel(
@@ -220,6 +248,17 @@ namespace Cotton.Mobile.ViewModels
                         CreateItem("Thumbnails", summary is null ? null : FormatStorageCategory(summary.ThumbnailCache)),
                         CreateItem("Folder lists", summary is null ? null : FormatStorageCategory(summary.FolderListings)),
                         CreateItem("Downloads", summary is null ? null : FormatStorageCategory(summary.DownloadedFiles)),
+                    ]),
+                new DiagnosticsSectionViewModel(
+                    "Remote push",
+                    [
+                        CreateItem("Provider", pushDisplay?.ProviderText),
+                        CreateItem("Platform", pushDisplay?.PlatformText),
+                        CreateItem("Backend", pushDisplay?.BackendText),
+                        CreateItem("Token", pushDisplay?.PlatformTokenText),
+                        CreateItem("Registration", pushDisplay?.SessionRegistrationText),
+                        CreateItem("Last attempt", pushDisplay?.LastAttemptText),
+                        CreateItem("Reason", pushDisplay?.ReasonText),
                     ]),
             ];
         }

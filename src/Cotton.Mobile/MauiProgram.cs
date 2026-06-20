@@ -164,6 +164,9 @@ namespace Cotton.Mobile
 				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
 			builder.Services.AddSingleton<ICottonRemotePushTokenRefreshHandler>(services =>
 				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
+			builder.Services.AddSingleton<ICottonRemotePushSessionRegistrationStatusProvider>(services =>
+				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
+			builder.Services.AddSingleton<ICottonRemotePushDiagnosticsService, CottonRemotePushDiagnosticsService>();
 			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddTransient<MainPageViewModel>();

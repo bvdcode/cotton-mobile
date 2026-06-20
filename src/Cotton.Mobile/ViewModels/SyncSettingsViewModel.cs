@@ -53,7 +53,8 @@ namespace Cotton.Mobile.ViewModels
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
-            RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, () => !IsBusy);
+            RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, CanRunAll);
+            OpenFilesCommand = new AsyncCommand(OpenFilesAsync, LogUnhandledCommandException, () => !IsBusy);
             RunRootCommand = new AsyncCommand<CottonSyncRootListItem>(
                 RunRootAsync,
                 LogUnhandledCommandException,
@@ -76,6 +77,8 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand RunAllCommand { get; }
 
+        public AsyncCommand OpenFilesCommand { get; }
+
         public AsyncCommand<CottonSyncRootListItem> RunRootCommand { get; }
 
         public AsyncCommand<CottonSyncRootListItem> StopRootCommand { get; }
@@ -95,6 +98,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     LoadCommand.RaiseCanExecuteChanged();
                     RunAllCommand.RaiseCanExecuteChanged();
+                    OpenFilesCommand.RaiseCanExecuteChanged();
                     RunRootCommand.RaiseCanExecuteChanged();
                     StopRootCommand.RaiseCanExecuteChanged();
                     PauseRootCommand.RaiseCanExecuteChanged();
@@ -259,6 +263,18 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
             }
+        }
+
+        private async Task OpenFilesAsync()
+        {
+            var navigation = Shell.Current.Navigation;
+            if (navigation.NavigationStack.Count <= 1)
+            {
+                Status = "Open Files from the main screen.";
+                return;
+            }
+
+            await navigation.PopAsync();
         }
 
         private async Task StopRootAsync(CottonSyncRootListItem item)
@@ -533,6 +549,12 @@ namespace Cotton.Mobile.ViewModels
 
             SummaryText = state.SummaryText;
             IsEmptyVisible = state.IsEmptyVisible;
+            RunAllCommand.RaiseCanExecuteChanged();
+        }
+
+        private bool CanRunAll()
+        {
+            return !IsBusy && Roots.Count > 0;
         }
 
         private void LogUnhandledCommandException(Exception exception)

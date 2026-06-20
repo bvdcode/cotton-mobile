@@ -14,6 +14,8 @@ namespace Cotton.Mobile
 			InitializeComponent();
 			serviceProvider.GetRequiredService<ICottonNotificationChannelProvisioningService>()
 				.EnsureChannels();
+			serviceProvider.GetRequiredService<ICottonAppLockCoordinator>()
+				.Start();
 			_appShell = serviceProvider.GetRequiredService<AppShell>();
 		}
 

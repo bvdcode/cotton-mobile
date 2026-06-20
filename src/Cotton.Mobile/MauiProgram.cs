@@ -143,7 +143,11 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
 			builder.Services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
 			builder.Services.AddSingleton<ICottonAppLockSettingsStore, PreferencesCottonAppLockSettingsStore>();
-			builder.Services.AddSingleton<ICottonAppLockCapabilityService, UnavailableCottonAppLockCapabilityService>();
+			builder.Services.AddSingleton<ICottonAppLockRuntimeStateStore, PreferencesCottonAppLockRuntimeStateStore>();
+			builder.Services.AddSingleton(CottonAppLockPolicy.Default);
+			builder.Services.AddSingleton<ICottonAppLockCapabilityService, DeviceUnlockCottonAppLockCapabilityService>();
+			builder.Services.AddSingleton<IAppLockGateService, AppLockGateService>();
+			builder.Services.AddSingleton<ICottonAppLockCoordinator, CottonAppLockCoordinator>();
 #if ANDROID
 			builder.Services.AddSingleton<
 				IAndroidDeviceCredentialUnlockActivityResultBridge,
@@ -191,6 +195,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<AppShell>();
 			builder.Services.AddTransient<MainPageViewModel>();
 			builder.Services.AddTransient<MainPage>();
+			builder.Services.AddTransient<AppLockGateViewModel>();
+			builder.Services.AddTransient<AppLockGatePage>();
 			builder.Services.AddTransient<StorageSettingsViewModel>();
 			builder.Services.AddTransient<StoragePage>();
 			builder.Services.AddTransient<SecuritySettingsViewModel>();

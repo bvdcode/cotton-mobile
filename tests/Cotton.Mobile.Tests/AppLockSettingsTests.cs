@@ -29,7 +29,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsEnabled);
             Assert.True(display.CanToggle);
             Assert.Equal("Off", display.StatusText);
-            Assert.Equal("Require device unlock before opening Cotton.", display.DetailText);
+            Assert.Equal("Require device unlock after 30 seconds in the background.", display.DetailText);
 
             CottonAppLockSettingsDisplayState enabled = CottonAppLockSettingsDisplayState.Create(
                 display.Settings.WithEnabled(true),

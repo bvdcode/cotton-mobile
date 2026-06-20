@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Services
         private readonly Lock _gate = new();
         private readonly ILogger<ApplicationForegroundService> _logger;
         private TaskCompletionSource _nextResume = CreateResumeSource();
+        private DateTimeOffset? _lastStoppedAtUtc;
         private long _resumeVersion;
 
         public ApplicationForegroundService(ILogger<ApplicationForegroundService> logger)
@@ -18,6 +19,8 @@ namespace Cotton.Mobile.Services
 
         public event EventHandler? Resumed;
 
+        public event EventHandler? Stopped;
+
         public long CurrentResumeVersion
         {
             get
@@ -25,6 +28,17 @@ namespace Cotton.Mobile.Services
                 lock (_gate)
                 {
                     return _resumeVersion;
+                }
+            }
+        }
+
+        public DateTimeOffset? LastStoppedAtUtc
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _lastStoppedAtUtc;
                 }
             }
         }
@@ -45,6 +59,16 @@ namespace Cotton.Mobile.Services
             return resumeTask.WaitAsync(cancellationToken);
         }
 
+        public void NotifyStopped()
+        {
+            lock (_gate)
+            {
+                _lastStoppedAtUtc = DateTimeOffset.UtcNow;
+            }
+
+            NotifyStoppedSubscribers();
+        }
+
         public void NotifyResumed()
         {
             TaskCompletionSource resume;
@@ -57,6 +81,27 @@ namespace Cotton.Mobile.Services
 
             resume.TrySetResult();
             NotifyResumedSubscribers();
+        }
+
+        private void NotifyStoppedSubscribers()
+        {
+            EventHandler? handlers = Stopped;
+            if (handlers is null)
+            {
+                return;
+            }
+
+            foreach (EventHandler handler in handlers.GetInvocationList().Cast<EventHandler>())
+            {
+                try
+                {
+                    handler.Invoke(this, EventArgs.Empty);
+                }
+                catch (Exception exception)
+                {
+                    _logger.LogWarning(exception, "Cotton mobile stopped subscriber failed.");
+                }
+            }
         }
 
         private void NotifyResumedSubscribers()

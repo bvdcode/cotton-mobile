@@ -7,6 +7,7 @@ namespace Cotton.Mobile.ViewModels
     public class SecuritySettingsViewModel : ViewModelBase
     {
         private readonly ICottonAppLockSettingsStore _settingsStore;
+        private readonly ICottonAppLockRuntimeStateStore _runtimeStateStore;
         private readonly ICottonAppLockCapabilityService _capabilityService;
         private readonly ICottonDeviceUnlockService _deviceUnlockService;
         private readonly ILogger<SecuritySettingsViewModel> _logger;
@@ -22,16 +23,19 @@ namespace Cotton.Mobile.ViewModels
 
         public SecuritySettingsViewModel(
             ICottonAppLockSettingsStore settingsStore,
+            ICottonAppLockRuntimeStateStore runtimeStateStore,
             ICottonAppLockCapabilityService capabilityService,
             ICottonDeviceUnlockService deviceUnlockService,
             ILogger<SecuritySettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(settingsStore);
+            ArgumentNullException.ThrowIfNull(runtimeStateStore);
             ArgumentNullException.ThrowIfNull(capabilityService);
             ArgumentNullException.ThrowIfNull(deviceUnlockService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _settingsStore = settingsStore;
+            _runtimeStateStore = runtimeStateStore;
             _capabilityService = capabilityService;
             _deviceUnlockService = deviceUnlockService;
             _logger = logger;
@@ -136,9 +140,19 @@ namespace Cotton.Mobile.ViewModels
                 _settings = await _settingsStore.GetAsync();
                 _capability = await _capabilityService.GetCapabilityAsync();
                 _deviceUnlockAvailability = await _deviceUnlockService.GetAvailabilityAsync();
+                bool disabledUnavailableAppLock = false;
+                if (_settings.IsEnabled && !_capability.CanEnable)
+                {
+                    _settings = _settings.WithEnabled(false);
+                    await _settingsStore.SaveAsync(_settings);
+                    disabledUnavailableAppLock = true;
+                }
+
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
-                Status = _capability.CanEnable ? null : "App lock is unavailable.";
+                Status = disabledUnavailableAppLock
+                    ? "App lock was turned off because device unlock is unavailable."
+                    : _capability.CanEnable ? null : "App lock is unavailable.";
             }
             catch (Exception exception)
             {
@@ -168,6 +182,28 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
+                if (isEnabled)
+                {
+                    CottonDeviceUnlockResult unlockResult = await _deviceUnlockService.RequestUnlockAsync();
+                    ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(
+                        _deviceUnlockAvailability,
+                        unlockResult));
+                    if (!unlockResult.IsSucceeded)
+                    {
+                        ApplyAppLockSourceValue(false);
+                        Status = unlockResult.Result switch
+                        {
+                            CottonDeviceUnlockResultKind.Cancelled => "App lock was not enabled.",
+                            CottonDeviceUnlockResultKind.Unavailable => "Device unlock is unavailable.",
+                            _ => "Could not enable app lock."
+                        };
+                        return;
+                    }
+
+                    CottonAppLockRuntimeState runtimeState = await _runtimeStateStore.GetAsync();
+                    await _runtimeStateStore.SaveAsync(runtimeState.WithUnlockedAt(DateTimeOffset.UtcNow));
+                }
+
                 _settings = _settings.WithEnabled(isEnabled);
                 await _settingsStore.SaveAsync(_settings);
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));

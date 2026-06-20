@@ -66,6 +66,15 @@ namespace Cotton.Mobile
                 ?.NotifyResumed();
         }
 
+        protected override void OnStop()
+        {
+            IPlatformApplication.Current?.Services
+                .GetService<IApplicationForegroundService>()
+                ?.NotifyStopped();
+
+            base.OnStop();
+        }
+
         public override void OnConfigurationChanged(Configuration newConfig)
         {
             base.OnConfigurationChanged(newConfig);

@@ -14,7 +14,7 @@ namespace Cotton.Mobile.Services
                 ? IsEnabled ? "On" : "Off"
                 : capability.StatusText;
             DetailText = capability.CanEnable
-                ? "Require device unlock before opening Cotton."
+                ? $"Require device unlock after {CottonAppLockPolicy.Default.BackgroundTimeoutText} in the background."
                 : capability.DetailText;
         }
 

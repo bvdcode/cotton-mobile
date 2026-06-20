@@ -208,6 +208,41 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_blocks_invalid_local_problem_without_skipping_valid_siblings()
+        {
+            var invalidName = new CottonDeviceToCloudLocalProblemSnapshot(
+                CottonDeviceToCloudLocalProblemKind.InvalidCloudName,
+                CottonFileBrowserEntryType.File,
+                "bad:name.txt",
+                "bad:name.txt",
+                "Name cannot be synced to the cloud.");
+            var local = new CottonDeviceToCloudLocalContentSnapshot(
+                "Projects",
+                [CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42)],
+                [invalidName]);
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                CreateRemoteContent(),
+                []);
+
+            Assert.Equal(2, plan.Items.Count);
+            CottonDeviceToCloudSyncPlanItem blocked =
+                Assert.Single(plan.Items, item => item.Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName);
+            CottonDeviceToCloudSyncPlanItem upload =
+                Assert.Single(plan.Items, item => item.Action == CottonDeviceToCloudSyncActionKind.UploadNewFile);
+            Assert.True(blocked.IsBlocked);
+            Assert.True(blocked.IsLocalProblem);
+            Assert.Equal("bad:name.txt", blocked.DisplayName);
+            Assert.Equal("bad:name.txt", blocked.RelativePath);
+            Assert.True(upload.RequiresUpload);
+            Assert.Equal(1, plan.BlockedCount);
+            Assert.Equal(1, plan.LocalProblemCount);
+            Assert.Equal(1, plan.UploadCount);
+        }
+
+        [Fact]
         public void Planner_creates_remote_folders_before_nested_uploads()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(

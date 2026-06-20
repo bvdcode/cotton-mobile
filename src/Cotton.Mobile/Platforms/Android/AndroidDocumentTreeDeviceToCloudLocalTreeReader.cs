@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Services
             AndroidUri treeUri = ParseTreeUri(root);
             AndroidUri rootUri = GetRootDocumentUri(treeUri);
             var items = new List<CottonDeviceToCloudLocalItemSnapshot>();
+            var problems = new List<CottonDeviceToCloudLocalProblemSnapshot>();
             DateTime scanStartedAtUtc = DateTime.UtcNow;
 
             ReadChildren(
@@ -47,10 +48,11 @@ namespace Cotton.Mobile.Services
                 rootUri,
                 parentPath: string.Empty,
                 items,
+                problems,
                 scanStartedAtUtc,
                 cancellationToken);
 
-            return new CottonDeviceToCloudLocalContentSnapshot(root.LocalRoot.DisplayName, items);
+            return new CottonDeviceToCloudLocalContentSnapshot(root.LocalRoot.DisplayName, items, problems);
         }
 
         private static void ReadChildren(
@@ -59,6 +61,7 @@ namespace Cotton.Mobile.Services
             AndroidUri parentUri,
             string parentPath,
             List<CottonDeviceToCloudLocalItemSnapshot> items,
+            List<CottonDeviceToCloudLocalProblemSnapshot> problems,
             DateTime scanStartedAtUtc,
             CancellationToken cancellationToken)
         {
@@ -76,21 +79,27 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AndroidDocumentTreeChild child = ReadChild(treeUri, cursor);
-                string relativePath = CottonSyncRelativePath.CreateFilePath(parentPath, child.DisplayName);
                 DateTime updatedAtUtc = ReadLastModifiedUtc(cursor, scanStartedAtUtc);
+                string rawRelativePath = CreateRawRelativePath(parentPath, child.DisplayName);
+                if (!TryCreateRelativePath(parentPath, child.DisplayName, out string? relativePath))
+                {
+                    problems.Add(CreateInvalidNameProblem(child, rawRelativePath));
+                    continue;
+                }
 
                 if (child.IsDirectory)
                 {
                     items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFolder(
                         child.DisplayName,
-                        relativePath,
+                        relativePath!,
                         updatedAtUtc));
                     ReadChildren(
                         resolver,
                         treeUri,
                         child.Uri,
-                        relativePath,
+                        relativePath!,
                         items,
+                        problems,
                         scanStartedAtUtc,
                         cancellationToken);
                     continue;
@@ -98,11 +107,50 @@ namespace Cotton.Mobile.Services
 
                 items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                     child.DisplayName,
-                    relativePath,
+                    relativePath!,
                     updatedAtUtc,
                     ReadSizeBytes(cursor),
                     child.MimeType));
             }
+        }
+
+        private static bool TryCreateRelativePath(string parentPath, string displayName, out string? relativePath)
+        {
+            try
+            {
+                relativePath = CottonSyncRelativePath.CreateFilePath(parentPath, displayName);
+                return true;
+            }
+            catch (ArgumentException)
+            {
+                relativePath = null;
+                return false;
+            }
+        }
+
+        private static CottonDeviceToCloudLocalProblemSnapshot CreateInvalidNameProblem(
+            AndroidDocumentTreeChild child,
+            string rawRelativePath)
+        {
+            return new CottonDeviceToCloudLocalProblemSnapshot(
+                CottonDeviceToCloudLocalProblemKind.InvalidCloudName,
+                child.IsDirectory ? CottonFileBrowserEntryType.Folder : CottonFileBrowserEntryType.File,
+                CreateProblemDisplayName(child.DisplayName),
+                rawRelativePath,
+                "Name cannot be synced to the cloud.");
+        }
+
+        private static string CreateProblemDisplayName(string displayName)
+        {
+            return string.IsNullOrWhiteSpace(displayName) ? "Unnamed" : displayName.Trim();
+        }
+
+        private static string CreateRawRelativePath(string parentPath, string displayName)
+        {
+            string trimmedName = CreateProblemDisplayName(displayName);
+            return string.IsNullOrWhiteSpace(parentPath)
+                ? trimmedName
+                : $"{parentPath}/{trimmedName}";
         }
 
         private static AndroidDocumentTreeChild ReadChild(AndroidUri treeUri, ICursor cursor)

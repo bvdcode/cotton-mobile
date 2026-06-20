@@ -34,6 +34,12 @@ namespace Cotton.Mobile.Services
             Dictionary<string, CottonSyncedFileSnapshot> manifestByPath = CreateManifestPathMap(manifestFiles);
             List<CottonDeviceToCloudSyncPlanItem> items = [];
 
+            foreach (CottonDeviceToCloudLocalProblemSnapshot problem in localContent.Problems
+                .OrderBy(problem => problem.RelativePath, StringComparer.OrdinalIgnoreCase))
+            {
+                items.Add(CreateLocalProblemItem(problem));
+            }
+
             foreach (CottonDeviceToCloudLocalItemSnapshot localItem in localContent.Items
                 .OrderBy(item => item.ItemType == CottonFileBrowserEntryType.Folder ? 0 : 1)
                 .ThenBy(item => GetPathDepth(item.RelativePath))
@@ -55,6 +61,21 @@ namespace Cotton.Mobile.Services
                 remoteContent.FolderId,
                 remoteContent.FolderName,
                 items);
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateLocalProblemItem(
+            CottonDeviceToCloudLocalProblemSnapshot problem)
+        {
+            return new CottonDeviceToCloudSyncPlanItem(
+                CottonDeviceToCloudSyncActionKind.BlockedLocalItemName,
+                problem.ItemType,
+                problem.DisplayName,
+                problem.RelativePath,
+                cloudItemId: null,
+                expectedRemoteETag: null,
+                localUpdatedAtUtc: null,
+                sizeBytes: null,
+                contentType: null);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateLocalItem(

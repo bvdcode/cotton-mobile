@@ -13,5 +13,6 @@ namespace Cotton.Mobile.Services
         RemoteRevisionChanged,
         RemoteTargetMissing,
         NeedsFreshServerRevision,
+        BlockedLocalItemName,
     }
 }

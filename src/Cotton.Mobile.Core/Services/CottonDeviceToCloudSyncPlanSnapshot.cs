@@ -49,6 +49,8 @@ namespace Cotton.Mobile.Services
 
         public int BlockedCount => Items.Count(item => item.IsBlocked);
 
+        public int LocalProblemCount => Items.Count(item => item.IsLocalProblem);
+
         public int NoOpCount => Items.Count(item => item.IsNoOp);
 
         public bool HasExecutableChanges => Items.Any(item =>

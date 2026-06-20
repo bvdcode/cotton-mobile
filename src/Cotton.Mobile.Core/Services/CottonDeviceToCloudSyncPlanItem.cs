@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Services
             Action = action;
             TargetType = targetType;
             DisplayName = displayName.Trim();
-            RelativePath = NormalizeRelativePath(DisplayName, relativePath);
+            RelativePath = NormalizeRelativePath(Action, DisplayName, relativePath);
             CloudItemId = cloudItemId;
             ExpectedRemoteETag = string.IsNullOrWhiteSpace(expectedRemoteETag) ? null : expectedRemoteETag.Trim();
             LocalUpdatedAtUtc = localUpdatedAtUtc.HasValue
@@ -91,10 +91,26 @@ namespace Cotton.Mobile.Services
             Action is CottonDeviceToCloudSyncActionKind.RemotePathConflict
                 or CottonDeviceToCloudSyncActionKind.RemoteRevisionChanged
                 or CottonDeviceToCloudSyncActionKind.RemoteTargetMissing
-                or CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision;
+                or CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision
+                or CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
 
-        private static string NormalizeRelativePath(string displayName, string relativePath)
+        public bool IsLocalProblem => Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
+
+        private static string NormalizeRelativePath(
+            CottonDeviceToCloudSyncActionKind action,
+            string displayName,
+            string relativePath)
         {
+            if (action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName)
+            {
+                if (string.IsNullOrWhiteSpace(relativePath))
+                {
+                    throw new ArgumentException("Device-to-cloud sync relative path is required.", nameof(relativePath));
+                }
+
+                return relativePath.Trim();
+            }
+
             string normalizedPath = CottonSyncRelativePath.NormalizeFilePath(relativePath, nameof(relativePath));
             if (!string.Equals(
                 CottonSyncRelativePath.GetFileName(normalizedPath),

@@ -129,8 +129,10 @@ namespace Cotton.Mobile.ViewModels
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
+            CottonDeviceToCloudSyncRootSetupService deviceToCloudSyncRootSetupService,
             ICottonSyncLocalRootPickerService syncLocalRootPickerService,
             CottonCloudToDeviceSyncCoordinator cloudToDeviceSyncCoordinator,
+            CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
             INetworkAccessService networkAccess,
             IApplicationForegroundService foregroundService,
             IDeviceStorageSpaceService deviceStorageSpaceService,
@@ -182,8 +184,10 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
+            ArgumentNullException.ThrowIfNull(deviceToCloudSyncRootSetupService);
             ArgumentNullException.ThrowIfNull(syncLocalRootPickerService);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(foregroundService);
             ArgumentNullException.ThrowIfNull(deviceStorageSpaceService);
@@ -245,8 +249,10 @@ namespace Cotton.Mobile.ViewModels
                 cloudShareLinkInteractionService,
                 thumbnailProvider,
                 cloudToDeviceSyncRootSetupService,
+                deviceToCloudSyncRootSetupService,
                 syncLocalRootPickerService,
                 cloudToDeviceSyncCoordinator,
+                deviceToCloudSyncCoordinator,
                 networkAccess,
                 foregroundService,
                 deviceStorageSpaceService,

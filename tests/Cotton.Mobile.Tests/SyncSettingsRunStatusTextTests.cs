@@ -63,7 +63,15 @@ namespace Cotton.Mobile.Tests
                     skippedCount: 2,
                     blockedCount: 0));
 
+            Assert.Equal("Sync from folder", CottonDeviceToCloudSyncStatusText.ActionLabel);
             Assert.Equal("Syncing Camera...", CottonDeviceToCloudSyncStatusText.CreateStartingStatus(" Camera "));
+            Assert.Equal("Sync needs a fresh account session.", CottonDeviceToCloudSyncStatusText.AccountUnavailableStatus);
+            Assert.Equal("Offline. Sync needs internet.", CottonDeviceToCloudSyncStatusText.OfflineUnavailableStatus);
+            Assert.Equal("Sync cancelled.", CottonDeviceToCloudSyncStatusText.CancelledStatus);
+            Assert.Equal("Sync failed.", CottonDeviceToCloudSyncStatusText.FailedStatus);
+            Assert.Equal(
+                "This local folder already syncs from cloud. Stop that sync first.",
+                CottonDeviceToCloudSyncStatusText.DirectionConflictStatus);
             Assert.Equal(
                 "Sync complete. Everything is up to date.",
                 CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary));

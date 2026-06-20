@@ -75,6 +75,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonSyncRootStore, FileSystemCottonSyncRootStore>();
 			builder.Services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
 			builder.Services.AddSingleton<CottonCloudToDeviceSyncRootSetupService>();
+			builder.Services.AddSingleton<CottonDeviceToCloudSyncRootSetupService>();
 			builder.Services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
 			builder.Services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
 #if ANDROID

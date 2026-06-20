@@ -195,6 +195,67 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("1 waiting", indicator.Details);
         }
 
+        [Fact]
+        public void History_cleanup_plan_removes_only_completed_and_cancelled_transfers()
+        {
+            CottonTransferQueueItem queued = CreateUpload(
+                Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                "queued.jpg");
+            CottonTransferQueueItem running = CreateUpload(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    "running.jpg")
+                .Start(CreatedAt.AddSeconds(1));
+            CottonTransferQueueItem paused = CreateUpload(
+                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    "paused.jpg")
+                .Start(CreatedAt.AddSeconds(2))
+                .Pause(CreatedAt.AddSeconds(3));
+            CottonTransferQueueItem failed = CreateUpload(
+                    Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    "failed.jpg")
+                .Start(CreatedAt.AddSeconds(4))
+                .Fail("Offline", CreatedAt.AddSeconds(5));
+            CottonTransferQueueItem completed = CreateUpload(
+                    Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                    "done.jpg")
+                .Start(CreatedAt.AddSeconds(6))
+                .Complete(CreatedAt.AddSeconds(7));
+            CottonTransferQueueItem cancelled = CreateUpload(
+                    Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                    "cancelled.jpg")
+                .Cancel(CreatedAt.AddSeconds(8));
+
+            CottonTransferHistoryCleanupPlan plan = CottonTransferHistoryCleanupPolicy.CreatePlan(
+                [queued, running, paused, failed, completed, cancelled]);
+
+            Assert.True(plan.HasRemovedItems);
+            Assert.Equal(2, plan.RemovedCount);
+            Assert.Equal(4, plan.RemainingCount);
+            Assert.Equal(
+                [queued.Id, running.Id, paused.Id, failed.Id],
+                plan.RetainedItems.Select(item => item.Id).ToArray());
+        }
+
+        [Fact]
+        public void History_cleanup_text_describes_safe_scope()
+        {
+            Assert.Equal(
+                "Completed and cancelled transfers will be removed from this device. Waiting, running, paused, and failed uploads stay in Transfers.",
+                CottonTransferHistoryCleanupText.ClearHistoryMessage);
+            Assert.Equal(
+                "No completed transfer history to clear.",
+                CottonTransferHistoryCleanupText.CreateClearedStatus(
+                    new CottonTransferHistoryCleanupPlan([], 0)));
+            Assert.Equal(
+                "1 transfer history item cleared.",
+                CottonTransferHistoryCleanupText.CreateClearedStatus(
+                    new CottonTransferHistoryCleanupPlan([], 1)));
+            Assert.Equal(
+                "2 transfer history items cleared.",
+                CottonTransferHistoryCleanupText.CreateClearedStatus(
+                    new CottonTransferHistoryCleanupPlan([], 2)));
+        }
+
         private static CottonTransferListItem Find(
             CottonTransferListSnapshot snapshot,
             string displayName,

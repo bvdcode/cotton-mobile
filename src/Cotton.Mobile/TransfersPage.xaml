@@ -12,6 +12,8 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Run"
                      Command="{Binding RunWaitingCommand}" />
+        <ToolbarItem Text="Clear"
+                     Command="{Binding ClearHistoryCommand}" />
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
     </ContentPage.ToolbarItems>

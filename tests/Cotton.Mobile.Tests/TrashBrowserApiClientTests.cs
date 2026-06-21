@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Tests
             RecordedRequest request = Assert.Single(handler.Requests);
             Assert.Equal(HttpMethod.Get, request.Method);
             Assert.Equal(
-                $"/api/v1/layouts/nodes/{TrashRootId}/children?nodeType=Trash&page=2&pageSize=50&depth=0",
+                $"/api/v1/layouts/nodes/{TrashRootId}/children?nodeType=Trash&page=2&pageSize=50&depth=1",
                 request.Uri.PathAndQuery);
             Assert.Equal("Bearer", request.AuthorizationScheme);
             Assert.Equal("access-token", request.AuthorizationParameter);

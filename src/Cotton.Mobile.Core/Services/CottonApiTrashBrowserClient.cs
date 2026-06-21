@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Services
             ArgumentOutOfRangeException.ThrowIfNegativeOrZero(pageSize);
 
             string path = $"{Routes.V1.Layouts}/nodes/{trashFolderId}/children"
-                + $"?nodeType={TrashNodeType}&page={page}&pageSize={pageSize}&depth=0";
+                + $"?nodeType={TrashNodeType}&page={page}&pageSize={pageSize}&depth=1";
             return _apiClient.SendJsonAsync<NodeContentDto>(
                 instanceUri,
                 HttpMethod.Get,

@@ -22,6 +22,11 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(summary);
 
+            if (summary.NeedsConflictReview)
+            {
+                return CottonBidirectionalSyncStatusText.ConflictReviewRequiredStatus;
+            }
+
             return summary.NeedsDestructiveReview
                 ? CottonBidirectionalSyncStatusText.CancelledStatus
                 : CottonBidirectionalSyncStatusText.CreateCompletedStatus(summary);

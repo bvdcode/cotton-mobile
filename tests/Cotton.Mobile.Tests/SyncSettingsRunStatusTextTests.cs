@@ -108,6 +108,15 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Single_root_status_reports_bidirectional_conflict_review()
+        {
+            Assert.Equal(
+                "Bidirectional sync needs conflict review.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(
+                    CreateBidirectionalConflictReviewSummary()));
+        }
+
+        [Fact]
         public void Single_root_status_reports_completed_results()
         {
             CottonCloudToDeviceSyncRunSummary cloudSummary = CreateCloudSummary(
@@ -379,6 +388,48 @@ namespace Cotton.Mobile.Tests
             return new CottonBidirectionalSyncRunSummary(
                 [
                     CottonBidirectionalSyncRootRunResult.SkippedDestructiveReviewRequired(
+                        root,
+                        executionPlan),
+                ]);
+        }
+
+        private static CottonBidirectionalSyncRunSummary CreateBidirectionalConflictReviewSummary()
+        {
+            CottonSyncRootSnapshot root = CreateBidirectionalRoot();
+            var preflightPlan = new CottonBidirectionalSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                [
+                    new CottonBidirectionalSyncPlanItem(
+                        CottonBidirectionalSyncActionKind.FileChangedOnBothSides,
+                        CottonFileBrowserEntryType.File,
+                        "conflict.txt",
+                        "conflict.txt",
+                        previousRelativePath: null,
+                        Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                        "\"etag-remote\"",
+                        localUpdatedAtUtc: DateTime.UtcNow.AddMinutes(-1),
+                        remoteUpdatedAtUtc: DateTime.UtcNow,
+                        sizeBytes: 12,
+                        contentType: "text/plain"),
+                ]);
+            var executionPlan = new CottonBidirectionalSyncExecutionPlan(
+                preflightPlan,
+                new CottonCloudToDeviceSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []),
+                new CottonDeviceToCloudSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []));
+
+            return new CottonBidirectionalSyncRunSummary(
+                [
+                    CottonBidirectionalSyncRootRunResult.SkippedConflictReviewRequired(
                         root,
                         executionPlan),
                 ]);

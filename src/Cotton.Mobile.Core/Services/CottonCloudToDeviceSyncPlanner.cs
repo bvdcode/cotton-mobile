@@ -27,6 +27,11 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Cloud-to-device sync requires a ready sync root.");
             }
 
+            if (root.Direction != CottonSyncDirection.CloudToDevice)
+            {
+                throw new InvalidOperationException("Cloud-to-device sync requires a cloud-to-device sync root.");
+            }
+
             if (root.CloudFolder.FolderId != remoteContent.FolderId)
             {
                 throw new ArgumentException("Remote folder content does not match the sync root cloud folder.", nameof(remoteContent));

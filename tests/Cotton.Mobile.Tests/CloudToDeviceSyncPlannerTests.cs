@@ -294,6 +294,23 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_rejects_non_cloud_to_device_roots()
+        {
+            CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
+
+            Assert.Throws<InvalidOperationException>(() =>
+                CottonCloudToDeviceSyncPlanner.Create(
+                    CreateRoot(CottonSyncRootPermissionStatus.Available, CottonSyncDirection.DeviceToCloud),
+                    remote,
+                    []));
+            Assert.Throws<InvalidOperationException>(() =>
+                CottonCloudToDeviceSyncPlanner.Create(
+                    CreateRoot(CottonSyncRootPermissionStatus.Available, CottonSyncDirection.Bidirectional),
+                    remote,
+                    []));
+        }
+
+        [Fact]
         public void Planner_rejects_duplicate_manifest_or_remote_file_ids()
         {
             CottonSyncedFileSnapshot first = CottonSyncedFileSnapshot.Create(
@@ -343,6 +360,13 @@ namespace Cotton.Mobile.Tests
 
         private static CottonSyncRootSnapshot CreateRoot(CottonSyncRootPermissionStatus permissionStatus)
         {
+            return CreateRoot(permissionStatus, CottonSyncDirection.CloudToDevice);
+        }
+
+        private static CottonSyncRootSnapshot CreateRoot(
+            CottonSyncRootPermissionStatus permissionStatus,
+            CottonSyncDirection direction)
+        {
             return new CottonSyncRootSnapshot(
                 SyncRootId,
                 new Uri("https://app.cottoncloud.dev"),
@@ -356,7 +380,7 @@ namespace Cotton.Mobile.Tests
                     "app-private-sync-root",
                     "On this device",
                     permissionStatus),
-                CottonSyncDirection.CloudToDevice);
+                direction);
         }
 
         private static CottonFolderContent CreateContent(params CottonFileBrowserEntry[] entries)

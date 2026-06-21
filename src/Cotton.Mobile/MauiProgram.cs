@@ -236,6 +236,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
 			builder.Services.AddSingleton<ICottonFileTrashClient, CottonSdkFileTrashClient>();
 			builder.Services.AddSingleton<ICottonFileTrashService, CottonFileTrashService>();
+			builder.Services.AddSingleton<ICottonTrashRestoreClient, CottonSdkTrashRestoreClient>();
+			builder.Services.AddSingleton<ICottonTrashRestoreService, CottonTrashRestoreService>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryClient, CottonSdkFileVersionHistoryClient>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryService, CottonFileVersionHistoryService>();
 			builder.Services.AddSingleton<ICottonActivityFeedService, CottonActivityFeedService>();

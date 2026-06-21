@@ -6,6 +6,48 @@ namespace Cotton.Mobile.Tests
     public class TrashEmptyStatusTextTests
     {
         [Fact]
+        public void Trash_empty_action_is_enabled_only_for_loaded_idle_trash()
+        {
+            CottonTrashEmptyActionSnapshot action = CottonTrashEmptyActionSnapshot.Create(
+                itemCount: 3,
+                isBusy: false,
+                isSelectionModeActive: false);
+
+            Assert.True(action.IsEnabled);
+            Assert.Equal(3, action.ItemCount);
+            Assert.Equal("Empty trash", action.Label);
+            Assert.Equal(string.Empty, action.DisabledReason);
+            Assert.Equal(
+                "Permanently delete all 3 trash items? This cannot be undone.",
+                action.ConfirmationMessage);
+        }
+
+        [Fact]
+        public void Trash_empty_action_explains_disabled_states()
+        {
+            CottonTrashEmptyActionSnapshot empty = CottonTrashEmptyActionSnapshot.Create(
+                itemCount: 0,
+                isBusy: false,
+                isSelectionModeActive: false);
+            CottonTrashEmptyActionSnapshot busy = CottonTrashEmptyActionSnapshot.Create(
+                itemCount: 2,
+                isBusy: true,
+                isSelectionModeActive: false);
+            CottonTrashEmptyActionSnapshot selecting = CottonTrashEmptyActionSnapshot.Create(
+                itemCount: 2,
+                isBusy: false,
+                isSelectionModeActive: true);
+
+            Assert.False(empty.IsEnabled);
+            Assert.Equal("Trash is empty.", empty.DisabledReason);
+            Assert.Equal(string.Empty, empty.ConfirmationMessage);
+            Assert.False(busy.IsEnabled);
+            Assert.Equal("Trash is busy.", busy.DisabledReason);
+            Assert.False(selecting.IsEnabled);
+            Assert.Equal("Finish selecting trash items first.", selecting.DisabledReason);
+        }
+
+        [Fact]
         public void Trash_empty_status_text_formats_confirmation_and_progress()
         {
             Assert.Equal("Empty trash?", CottonTrashEmptyStatusText.ConfirmTitle);
@@ -44,6 +86,8 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Trash_empty_status_text_rejects_invalid_counts()
         {
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => CottonTrashEmptyActionSnapshot.Create(-1, isBusy: false, isSelectionModeActive: false));
             Assert.Throws<ArgumentOutOfRangeException>(() => CottonTrashEmptyStatusText.CreateConfirmMessage(0));
             Assert.Throws<ArgumentOutOfRangeException>(() => CottonTrashEmptyStatusText.CreateDeletingStatus(-1));
             Assert.Throws<ArgumentOutOfRangeException>(

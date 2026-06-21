@@ -334,7 +334,12 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task EmptyTrashAsync()
         {
-            if (!CanEmptyTrash())
+            CottonFileBrowserEntry[] trashItems = _allItems.ToArray();
+            CottonTrashEmptyActionSnapshot emptyAction = CottonTrashEmptyActionSnapshot.Create(
+                trashItems.Length,
+                IsBusy,
+                IsSelectionModeActive);
+            if (!emptyAction.IsEnabled)
             {
                 return;
             }
@@ -345,11 +350,10 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CottonFileBrowserEntry[] trashItems = _allItems.ToArray();
             bool confirmed = await _dialogService.ShowConfirmationAsync(
                 CottonTrashEmptyStatusText.ConfirmTitle,
-                CottonTrashEmptyStatusText.CreateConfirmMessage(trashItems.Length),
-                CottonTrashEmptyStatusText.ConfirmAction,
+                emptyAction.ConfirmationMessage,
+                emptyAction.Label,
                 CancelAction);
             if (!confirmed)
             {
@@ -1119,7 +1123,11 @@ namespace Cotton.Mobile.ViewModels
 
         private bool CanEmptyTrash()
         {
-            return !IsBusy && !IsSelectionModeActive && _allItems.Count > 0;
+            return CottonTrashEmptyActionSnapshot.Create(
+                    _allItems.Count,
+                    IsBusy,
+                    IsSelectionModeActive)
+                .IsEnabled;
         }
 
         private CottonFileBrowserPreferences LoadPreferences()

@@ -169,6 +169,9 @@ jobs:
       - name: Check repository
         uses: actions/checkout@v5
 
+      - name: Test Android release version computation
+        run: scripts/ci/test-android-release-version.sh
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:

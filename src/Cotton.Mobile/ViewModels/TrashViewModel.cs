@@ -33,6 +33,8 @@ namespace Cotton.Mobile.ViewModels
         private string _summaryText = "Trash";
         private string _emptyMessage = "Trash is empty";
         private string _emptyDetails = "Deleted files and folders will appear here.";
+        private CottonTrashSelectionSnapshot _selection = CottonTrashSelectionSnapshot.Empty;
+        private bool _isSelectionModeActive;
         private string? _status;
 
         public TrashViewModel(
@@ -67,6 +69,23 @@ namespace Cotton.Mobile.ViewModels
             ToggleSearchCommand = new AsyncCommand(ToggleSearchAsync, LogUnhandledCommandException, () => !IsBusy);
             ShowSortActionsCommand = new AsyncCommand(ShowSortActionsAsync, LogUnhandledCommandException, () => !IsBusy);
             ShowViewActionsCommand = new AsyncCommand(ShowViewActionsAsync, LogUnhandledCommandException, () => !IsBusy);
+            ToggleSelectionModeCommand = new AsyncCommand(
+                ToggleSelectionModeAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy);
+            ToggleSelectionCommand = new AsyncCommand<CottonFileBrowserEntry>(
+                ToggleSelectionAsync,
+                LogUnhandledCommandException,
+                _ => !IsBusy);
+            CancelSelectionCommand = new AsyncCommand(CancelSelectionAsync, LogUnhandledCommandException, () => !IsBusy);
+            RestoreSelectionCommand = new AsyncCommand(
+                RestoreSelectionAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && Selection.IsActive);
+            DeleteForeverSelectionCommand = new AsyncCommand(
+                DeleteForeverSelectionAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && Selection.IsActive);
             RestoreCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 RestoreAsync,
                 LogUnhandledCommandException,
@@ -87,6 +106,16 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand ShowViewActionsCommand { get; }
 
+        public AsyncCommand ToggleSelectionModeCommand { get; }
+
+        public AsyncCommand<CottonFileBrowserEntry> ToggleSelectionCommand { get; }
+
+        public AsyncCommand CancelSelectionCommand { get; }
+
+        public AsyncCommand RestoreSelectionCommand { get; }
+
+        public AsyncCommand DeleteForeverSelectionCommand { get; }
+
         public AsyncCommand<CottonFileBrowserEntry> RestoreCommand { get; }
 
         public AsyncCommand<CottonFileBrowserEntry> DeleteForeverCommand { get; }
@@ -102,11 +131,18 @@ namespace Cotton.Mobile.ViewModels
                     ToggleSearchCommand.RaiseCanExecuteChanged();
                     ShowSortActionsCommand.RaiseCanExecuteChanged();
                     ShowViewActionsCommand.RaiseCanExecuteChanged();
+                    ToggleSelectionModeCommand.RaiseCanExecuteChanged();
+                    ToggleSelectionCommand.RaiseCanExecuteChanged();
+                    CancelSelectionCommand.RaiseCanExecuteChanged();
+                    RestoreSelectionCommand.RaiseCanExecuteChanged();
+                    DeleteForeverSelectionCommand.RaiseCanExecuteChanged();
                     RestoreCommand.RaiseCanExecuteChanged();
                     DeleteForeverCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                     OnPropertyChanged(nameof(IsListVisible));
                     OnPropertyChanged(nameof(IsTileVisible));
+                    OnPropertyChanged(nameof(IsSelectionBarVisible));
+                    OnPropertyChanged(nameof(IsBulkActionEnabled));
                 }
             }
         }
@@ -186,6 +222,50 @@ namespace Cotton.Mobile.ViewModels
 
         public string ViewButtonText => _viewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
+        public CottonTrashSelectionSnapshot Selection
+        {
+            get => _selection;
+            private set
+            {
+                if (SetProperty(ref _selection, value))
+                {
+                    OnPropertyChanged(nameof(SelectionTitleText));
+                    OnPropertyChanged(nameof(SelectionDetailText));
+                    OnPropertyChanged(nameof(IsBulkActionEnabled));
+                    RestoreSelectionCommand.RaiseCanExecuteChanged();
+                    DeleteForeverSelectionCommand.RaiseCanExecuteChanged();
+                }
+            }
+        }
+
+        public bool IsSelectionModeActive
+        {
+            get => _isSelectionModeActive;
+            private set
+            {
+                if (SetProperty(ref _isSelectionModeActive, value))
+                {
+                    OnPropertyChanged(nameof(IsSelectionBarVisible));
+                    OnPropertyChanged(nameof(IsTrashEntryActionsVisible));
+                    OnPropertyChanged(nameof(SelectionToolbarText));
+                    OnPropertyChanged(nameof(SelectionTitleText));
+                    OnPropertyChanged(nameof(SelectionDetailText));
+                }
+            }
+        }
+
+        public bool IsSelectionBarVisible => IsSelectionModeActive && !IsBusy;
+
+        public bool IsTrashEntryActionsVisible => !IsSelectionModeActive;
+
+        public bool IsBulkActionEnabled => Selection.IsActive && !IsBusy;
+
+        public string SelectionToolbarText => IsSelectionModeActive ? "Done" : "Select";
+
+        public string SelectionTitleText => Selection.IsActive ? Selection.TitleText : "Select trash items";
+
+        public string SelectionDetailText => Selection.IsActive ? Selection.DetailText : "Tap items to select them.";
+
         private Task ToggleSearchAsync()
         {
             if (!string.IsNullOrWhiteSpace(SearchText))
@@ -233,6 +313,44 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private Task ToggleSelectionModeAsync()
+        {
+            if (IsSelectionModeActive)
+            {
+                ClearSelection();
+                return Task.CompletedTask;
+            }
+
+            IsSelectionModeActive = true;
+            Status = "Tap trash items to select them.";
+            RefreshSelectionSnapshot();
+            return Task.CompletedTask;
+        }
+
+        private Task ToggleSelectionAsync(CottonFileBrowserEntry item)
+        {
+            if (!IsSelectionModeActive || item is null)
+            {
+                return Task.CompletedTask;
+            }
+
+            HashSet<Guid> selectedIds = CreateSelectedItemIdSet();
+            if (!selectedIds.Add(item.Id))
+            {
+                selectedIds.Remove(item.Id);
+            }
+
+            ApplySelection(selectedIds);
+            return Task.CompletedTask;
+        }
+
+        private Task CancelSelectionAsync()
+        {
+            ClearSelection();
+            Status = CottonTrashBulkStatusText.CancelledStatus;
+            return Task.CompletedTask;
+        }
+
         private async Task ShowViewActionsAsync()
         {
             string listAction = CreateCurrentActionLabel(ViewListAction, _viewMode == CottonFileBrowserViewMode.List);
@@ -262,6 +380,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            ClearSelection();
             IsBusy = true;
             Status = CottonTrashListStatusText.LoadingStatus;
             try
@@ -399,6 +518,173 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RestoreSelectionAsync()
+        {
+            if (IsBusy || !Selection.IsActive)
+            {
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedItems = ResolveSelectedItems();
+            if (selectedItems.Length == 0)
+            {
+                ClearSelection();
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                Status = CottonTrashBulkStatusText.RestoreOfflineUnavailableStatus;
+                return;
+            }
+
+            CottonTrashSelectionSnapshot selection = CottonTrashSelectionSnapshot.Create(selectedItems);
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonTrashBulkStatusText.RestoreTitle,
+                CottonTrashBulkStatusText.CreateRestoreConfirmMessage(selection.FileCount, selection.FolderCount),
+                CottonTrashBulkStatusText.RestoreAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                Status = CottonTrashBulkStatusText.CancelledStatus;
+                return;
+            }
+
+            IsBusy = true;
+            int restoredCount = 0;
+            try
+            {
+                Status = CottonTrashBulkStatusText.CreateRestoringStatus(selectedItems.Length);
+                for (int index = 0; index < selectedItems.Length; index++)
+                {
+                    CottonFileBrowserEntry item = selectedItems[index];
+                    Status = CottonTrashBulkStatusText.CreateRestoringItemStatus(
+                        index + 1,
+                        selectedItems.Length,
+                        item.Name);
+                    try
+                    {
+                        CottonTrashRestoreResult result = await _trashRestoreService.RestoreAsync(
+                            _instanceUri,
+                            item.Id,
+                            item.Type,
+                            CottonTrashRestoreRetryMode.None);
+                        if (result.IsRestored)
+                        {
+                            restoredCount++;
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogWarning(exception, "Cotton mobile trash bulk restore failed {ItemId}.", item.Id);
+                    }
+                }
+
+                await RefreshAfterBulkRestoreAsync(restoredCount, selectedItems.Length);
+            }
+            catch (OperationCanceledException exception)
+            {
+                _logger.LogInformation(exception, "Cotton mobile trash bulk restore cancelled.");
+                Status = CottonTrashBulkStatusText.CancelledStatus;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash bulk restore failed.");
+                Status = CottonTrashBulkStatusText.RestoreFailedStatus;
+            }
+            finally
+            {
+                ClearSelection();
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+            }
+        }
+
+        private async Task DeleteForeverSelectionAsync()
+        {
+            if (IsBusy || !Selection.IsActive)
+            {
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedItems = ResolveSelectedItems();
+            if (selectedItems.Length == 0)
+            {
+                ClearSelection();
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                Status = CottonTrashBulkStatusText.DeleteOfflineUnavailableStatus;
+                return;
+            }
+
+            CottonTrashSelectionSnapshot selection = CottonTrashSelectionSnapshot.Create(selectedItems);
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonTrashBulkStatusText.DeleteForeverTitle,
+                CottonTrashBulkStatusText.CreateDeleteForeverConfirmMessage(selection.FileCount, selection.FolderCount),
+                CottonTrashBulkStatusText.DeleteForeverAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                Status = CottonTrashBulkStatusText.CancelledStatus;
+                return;
+            }
+
+            IsBusy = true;
+            int deletedCount = 0;
+            try
+            {
+                Status = CottonTrashBulkStatusText.CreateDeletingStatus(selectedItems.Length);
+                for (int index = 0; index < selectedItems.Length; index++)
+                {
+                    CottonFileBrowserEntry item = selectedItems[index];
+                    Status = CottonTrashBulkStatusText.CreateDeletingItemStatus(
+                        index + 1,
+                        selectedItems.Length,
+                        item.Name);
+                    try
+                    {
+                        await _trashPermanentDeleteService.DeleteForeverAsync(_instanceUri, item);
+                        deletedCount++;
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        throw;
+                    }
+                    catch (Exception exception)
+                    {
+                        _logger.LogWarning(exception, "Cotton mobile trash bulk delete failed {ItemId}.", item.Id);
+                    }
+                }
+
+                await RefreshAfterBulkDeleteAsync(deletedCount, selectedItems.Length);
+            }
+            catch (OperationCanceledException exception)
+            {
+                _logger.LogInformation(exception, "Cotton mobile trash bulk delete cancelled.");
+                Status = CottonTrashBulkStatusText.CancelledStatus;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash bulk delete failed.");
+                Status = CottonTrashBulkStatusText.DeleteFailedStatus;
+            }
+            finally
+            {
+                ClearSelection();
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+            }
+        }
+
         private async Task RestoreItemAsync(
             CottonFileBrowserEntry item,
             CottonTrashRestoreRetryMode retryMode)
@@ -515,6 +801,46 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RefreshAfterBulkRestoreAsync(int restoredCount, int totalCount)
+        {
+            try
+            {
+                CottonTrashListSnapshot snapshot = await LoadSnapshotAsync();
+                ShowSnapshot(snapshot);
+                Status = CreateBulkRestoreResultStatus(restoredCount, totalCount);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash refresh after bulk restore failed.");
+                RemoveSelectedItems();
+                Status = CreateBulkRestoreResultStatus(restoredCount, totalCount);
+            }
+        }
+
+        private async Task RefreshAfterBulkDeleteAsync(int deletedCount, int totalCount)
+        {
+            try
+            {
+                CottonTrashListSnapshot snapshot = await LoadSnapshotAsync();
+                ShowSnapshot(snapshot);
+                Status = CreateBulkDeleteResultStatus(deletedCount, totalCount);
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash refresh after bulk delete failed.");
+                RemoveSelectedItems();
+                Status = CreateBulkDeleteResultStatus(deletedCount, totalCount);
+            }
+        }
+
         private async Task<CottonTrashListSnapshot> LoadSnapshotAsync()
         {
             CottonFolderContent content = await _trashBrowserService.GetRootAsync(_instanceUri);
@@ -540,12 +866,21 @@ namespace Cotton.Mobile.ViewModels
             EmptyMessage = "Trash unavailable offline";
             EmptyDetails = "Connect and refresh to view deleted items.";
             Status = CottonTrashListStatusText.OfflineUnavailableStatus;
+            Selection = CottonTrashSelectionSnapshot.Empty;
+            IsSelectionModeActive = false;
             NotifyPresentationStateChanged();
         }
 
         private void RemoveItem(CottonFileBrowserEntry item)
         {
             _allItems.RemoveAll(entry => entry.Id == item.Id);
+            ApplyPresentationState();
+        }
+
+        private void RemoveSelectedItems()
+        {
+            HashSet<Guid> selectedIds = CreateSelectedItemIdSet();
+            _allItems.RemoveAll(entry => selectedIds.Contains(entry.Id));
             ApplyPresentationState();
         }
 
@@ -566,6 +901,7 @@ namespace Cotton.Mobile.ViewModels
             SummaryText = state.SummaryText;
             EmptyMessage = state.EmptyMessage;
             EmptyDetails = state.EmptyDetails;
+            RefreshSelectionSnapshot();
             NotifyPresentationStateChanged();
         }
 
@@ -581,6 +917,88 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsViewButtonVisible));
             OnPropertyChanged(nameof(SortButtonText));
             OnPropertyChanged(nameof(ViewButtonText));
+            OnPropertyChanged(nameof(IsSelectionBarVisible));
+            OnPropertyChanged(nameof(IsTrashEntryActionsVisible));
+            OnPropertyChanged(nameof(SelectionToolbarText));
+            OnPropertyChanged(nameof(SelectionTitleText));
+            OnPropertyChanged(nameof(SelectionDetailText));
+            OnPropertyChanged(nameof(IsBulkActionEnabled));
+        }
+
+        private HashSet<Guid> CreateSelectedItemIdSet()
+        {
+            return _allItems
+                .Where(entry => entry.IsSelected)
+                .Select(entry => entry.Id)
+                .ToHashSet();
+        }
+
+        private void ApplySelection(IReadOnlySet<Guid> selectedIds)
+        {
+            bool changed = false;
+            for (int index = 0; index < _allItems.Count; index++)
+            {
+                CottonFileBrowserEntry item = _allItems[index];
+                bool shouldBeSelected = selectedIds.Contains(item.Id);
+                if (item.IsSelected == shouldBeSelected)
+                {
+                    continue;
+                }
+
+                _allItems[index] = item.WithSelection(shouldBeSelected);
+                changed = true;
+            }
+
+            if (changed)
+            {
+                ApplyPresentationState();
+                return;
+            }
+
+            RefreshSelectionSnapshot();
+        }
+
+        private void ClearSelection()
+        {
+            IsSelectionModeActive = false;
+            ApplySelection(new HashSet<Guid>());
+        }
+
+        private void RefreshSelectionSnapshot()
+        {
+            Selection = CottonTrashSelectionSnapshot.Create(_allItems.Where(entry => entry.IsSelected));
+        }
+
+        private CottonFileBrowserEntry[] ResolveSelectedItems()
+        {
+            HashSet<Guid> selectedIds = Selection.Entries.Select(entry => entry.Id).ToHashSet();
+            return _allItems
+                .Where(entry => selectedIds.Contains(entry.Id))
+                .ToArray();
+        }
+
+        private static string CreateBulkRestoreResultStatus(int restoredCount, int totalCount)
+        {
+            if (restoredCount == totalCount)
+            {
+                return CottonTrashBulkStatusText.CreateRestoredStatus(restoredCount);
+            }
+
+            return restoredCount == 0
+                ? CottonTrashBulkStatusText.RestoreFailedStatus
+                : CottonTrashBulkStatusText.CreatePartialRestoreStatus(restoredCount, totalCount);
+        }
+
+        private static string CreateBulkDeleteResultStatus(int deletedCount, int totalCount)
+        {
+            if (deletedCount == totalCount)
+            {
+                return CottonTrashBulkStatusText.CreateDeletedStatus(deletedCount);
+            }
+
+            return deletedCount == 0
+                ? CottonTrashBulkStatusText.DeleteFailedStatus
+                : CottonTrashBulkStatusText.CreatePartialDeleteStatus(deletedCount, totalCount);
         }
 
         private CottonFileBrowserPreferences LoadPreferences()

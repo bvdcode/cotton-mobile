@@ -13,10 +13,12 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
+        <ToolbarItem Text="{Binding SelectionToolbarText}"
+                     Command="{Binding ToggleSelectionModeCommand}" />
     </ContentPage.ToolbarItems>
 
     <Grid Padding="16"
-          RowDefinitions="Auto,Auto,Auto,*"
+          RowDefinitions="Auto,Auto,Auto,Auto,*"
           RowSpacing="14">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
               ColumnSpacing="8">
@@ -102,7 +104,62 @@
                LineBreakMode="TailTruncation"
                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-        <Grid Grid.Row="3">
+        <Border Grid.Row="3"
+                IsVisible="{Binding IsSelectionBarVisible}"
+                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                StrokeShape="RoundRectangle 8"
+                Padding="10,8"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
+            <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+                  ColumnSpacing="8">
+                <VerticalStackLayout Spacing="1"
+                                     VerticalOptions="Center">
+                    <Label Text="{Binding SelectionTitleText}"
+                           FontSize="13"
+                           FontAttributes="Bold"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                    <Label Text="{Binding SelectionDetailText}"
+                           FontSize="11"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                </VerticalStackLayout>
+
+                <Button Grid.Column="1"
+                        Text="Restore"
+                        Command="{Binding RestoreSelectionCommand}"
+                        IsEnabled="{Binding IsBulkActionEnabled}"
+                        FontSize="12"
+                        Padding="12,0"
+                        HeightRequest="36"
+                        MinimumHeightRequest="36"
+                        VerticalOptions="Center" />
+
+                <Button Grid.Column="2"
+                        Text="Delete forever"
+                        Command="{Binding DeleteForeverSelectionCommand}"
+                        IsEnabled="{Binding IsBulkActionEnabled}"
+                        FontSize="12"
+                        Padding="12,0"
+                        HeightRequest="36"
+                        MinimumHeightRequest="36"
+                        VerticalOptions="Center" />
+
+                <Button Grid.Column="3"
+                        Text="Cancel"
+                        Command="{Binding CancelSelectionCommand}"
+                        FontSize="12"
+                        Padding="12,0"
+                        HeightRequest="36"
+                        MinimumHeightRequest="36"
+                        VerticalOptions="Center" />
+            </Grid>
+        </Border>
+
+        <Grid Grid.Row="4">
             <Border IsVisible="{Binding IsEmpty}"
                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                     StrokeShape="RoundRectangle 8"
@@ -141,6 +198,22 @@
                                 StrokeShape="RoundRectangle 8"
                                 Padding="14"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding IsSelected}"
+                                             Value="True">
+                                    <Setter Property="Stroke"
+                                            Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray100}}" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                      CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="*,Auto"
                                   RowSpacing="8"
@@ -174,10 +247,29 @@
                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
                                 </Border>
 
+                                <Border Grid.Column="1"
+                                        IsVisible="{Binding IsSelected}"
+                                        WidthRequest="20"
+                                        HeightRequest="20"
+                                        Stroke="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                        StrokeThickness="1"
+                                        StrokeShape="RoundRectangle 10"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                        HorizontalOptions="End"
+                                        VerticalOptions="End">
+                                    <Label Text="✓"
+                                           FontSize="12"
+                                           FontAttributes="Bold"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+                                </Border>
+
                                 <HorizontalStackLayout Grid.Row="1"
                                                        Grid.ColumnSpan="2"
                                                        Spacing="8"
-                                                       HorizontalOptions="End">
+                                                       HorizontalOptions="End"
+                                                       IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
@@ -216,6 +308,22 @@
                                 Padding="12"
                                 HeightRequest="190"
                                 BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border"
+                                             Binding="{Binding IsSelected}"
+                                             Value="True">
+                                    <Setter Property="Stroke"
+                                            Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray100}}" />
+                                    <Setter Property="BackgroundColor"
+                                            Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}" />
+                                </DataTrigger>
+                            </Border.Triggers>
+
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                      CommandParameter="{Binding .}" />
+                            </Border.GestureRecognizers>
+
                             <Grid RowDefinitions="Auto,Auto,*,Auto"
                                   RowSpacing="6">
                                 <Grid ColumnDefinitions="*,Auto"
@@ -240,6 +348,24 @@
                                                LineBreakMode="NoWrap"
                                                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
                                     </Border>
+
+                                    <Border Grid.Column="1"
+                                            IsVisible="{Binding IsSelected}"
+                                            WidthRequest="20"
+                                            HeightRequest="20"
+                                            Stroke="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                            StrokeThickness="1"
+                                            StrokeShape="RoundRectangle 10"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                            HorizontalOptions="End"
+                                            VerticalOptions="End">
+                                        <Label Text="✓"
+                                               FontSize="12"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+                                    </Border>
                                 </Grid>
 
                                 <Label Grid.Row="1"
@@ -250,7 +376,8 @@
                                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
                                 <VerticalStackLayout Grid.Row="3"
-                                                     Spacing="6">
+                                                     Spacing="6"
+                                                     IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"

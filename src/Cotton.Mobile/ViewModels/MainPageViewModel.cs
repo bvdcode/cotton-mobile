@@ -725,7 +725,9 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     sessionId,
                     cancellationToken);
-                await ClearLocalSessionAndProfileAsync("current session revocation");
+                await ClearLocalSessionAndProfileAsync(
+                    "current session revocation",
+                    cancelRemotePushTokenRefresh: false);
                 if (await ShouldClearCachedFilesOnLogoutAsync())
                 {
                     await ClearCachedSensitiveStateAsync("current session revocation");
@@ -1076,9 +1078,15 @@ namespace Cotton.Mobile.ViewModels
             await ClearCachedSensitiveStateAsync(reason);
         }
 
-        private async Task ClearLocalSessionAndProfileAsync(string reason)
+        private async Task ClearLocalSessionAndProfileAsync(
+            string reason,
+            bool cancelRemotePushTokenRefresh = true)
         {
             CancelCloudToDeviceSyncRestore();
+            if (cancelRemotePushTokenRefresh)
+            {
+                await CancelRemotePushTokenRefreshBestEffortAsync(reason);
+            }
 
             try
             {

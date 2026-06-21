@@ -12,6 +12,8 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Run all"
                      Command="{Binding RunAllCommand}" />
+        <ToolbarItem Text="Refresh"
+                     Command="{Binding LoadCommand}" />
     </ContentPage.ToolbarItems>
 
     <ScrollView>

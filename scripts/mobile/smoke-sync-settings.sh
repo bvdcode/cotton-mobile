@@ -568,6 +568,8 @@ verify_sync_settings() {
     "Seeded sync-root summary is not visible."
   require_xml_text "$sync_settings_xml" "Run all" \
     "Sync settings did not expose the Run all toolbar action."
+  require_xml_text "$sync_settings_xml" "Refresh" \
+    "Sync settings did not expose the Refresh toolbar action."
   require_xml_text "$sync_settings_xml" "Smoke Downloads" \
     "Ready seeded sync root is not visible."
   require_xml_text "$sync_settings_xml" "Files / Smoke Downloads" \

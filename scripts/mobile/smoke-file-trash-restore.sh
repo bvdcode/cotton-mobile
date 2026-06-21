@@ -596,7 +596,7 @@ EOF
 ## Trash Page
 
 - [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
-- [ ] \`66-trash-page.xml\` shows the Trash page, target item, \`Restore\`, and \`Delete forever\`.
+- [ ] \`66-trash-page.xml\` shows the Trash page chrome, target item, \`Restore\`, and \`Delete forever\`.
 
 EOF
     fi
@@ -837,6 +837,9 @@ wait_for_trash_page_item() {
     xml_file="$evidence_dir/66-trash-page-$attempt.xml"
 
     if xml_has_text "$xml_file" "Trash" \
+      && xml_has_text "$xml_file" "Search trash" \
+      && xml_has_text "$xml_file" "Sort trash" \
+      && xml_has_text "$xml_file" "Change trash view" \
       && xml_has_text "$xml_file" "$target_name" \
       && xml_has_text "$xml_file" "Restore" \
       && xml_has_text "$xml_file" "Delete forever"; then

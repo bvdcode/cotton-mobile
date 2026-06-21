@@ -4716,7 +4716,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                EndFileActionBeforeFollowUp(fileActionCancellation);
                 didEndFileAction = true;
                 await RefreshAsync();
                 if (CanUseFileBrowserContext(instanceUri))
@@ -4849,7 +4849,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 await ClearTrashedFileLocalStateBestEffortAsync(instanceUri, currentFile);
-                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                EndFileActionBeforeFollowUp(fileActionCancellation);
                 didEndFileAction = true;
                 await RefreshAsync();
                 if (CanUseFileBrowserContext(instanceUri))
@@ -4996,7 +4996,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                EndFileActionBeforeFollowUp(fileActionCancellation);
                 didEndFileAction = true;
                 await HandleTrashRestoreOutcomeAsync(item, instanceUri, result);
             }
@@ -5808,6 +5808,12 @@ namespace Cotton.Mobile.ViewModels
             }
 
             QueuePendingFileLoadRecoveryRefreshAfterBusy();
+        }
+
+        private void EndFileActionBeforeFollowUp(CancellationTokenSource cancellation)
+        {
+            _display.ShowFileActionAwaitingFollowUp();
+            EndFileAction(cancellation, shouldRunRecoveryRefresh: false);
         }
 
         private void EndFileLoad(CancellationTokenSource cancellation)

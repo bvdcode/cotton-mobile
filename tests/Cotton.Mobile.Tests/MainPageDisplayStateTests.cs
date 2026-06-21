@@ -180,6 +180,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_action_awaiting_follow_up_clears_loading_and_cancel_state()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ShowFileActionLoading("Moving Projects to trash...");
+            display.ShowFileActionAwaitingFollowUp();
+
+            Assert.False(display.IsFilesLoading);
+            Assert.False(display.IsFilesRefreshing);
+            Assert.False(display.CanCancelFileAction);
+            Assert.False(display.CanRetryFileAction);
+            Assert.False(display.CanRefreshFiles);
+            Assert.False(display.IsFileBrowserChromeEnabled);
+            Assert.False(display.IsAccountActionEnabled);
+            Assert.Equal("4 items · A-Z", display.FilesStatus);
+        }
+
+        [Fact]
         public void File_action_follow_up_can_use_specific_button_text()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

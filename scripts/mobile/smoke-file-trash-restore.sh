@@ -23,6 +23,7 @@ restore_from_trash_page=0
 delete_forever_from_trash_page=0
 bulk_second_file=""
 bulk_second_folder=""
+create_bulk_second_disposable_folder=0
 bulk_selection=0
 bulk_second_kind=""
 bulk_second_name=""
@@ -48,6 +49,8 @@ Options:
                             Create a root-visible disposable folder first, then trash/restore it.
   --bulk-second-file NAME   Move the target plus this visible file row to trash as one selection.
   --bulk-second-folder NAME Move the target plus this visible folder row to trash as one selection.
+  --create-bulk-second-disposable-folder NAME
+                            Create a second root-visible disposable folder for bulk selection.
   --restore-from-trash-page Open Account -> Trash after moving the item, then restore it there.
   --delete-forever-from-trash-page
                             Open Account -> Trash after moving a disposable folder, then delete forever.
@@ -168,6 +171,19 @@ while [[ $# -gt 0 ]]; do
       bulk_second_folder="$2"
       shift 2
       ;;
+    --create-bulk-second-disposable-folder)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --create-bulk-second-disposable-folder.\n' >&2
+        exit 64
+      fi
+      if [[ -n "$bulk_second_file" || -n "$bulk_second_folder" ]]; then
+        printf 'Only one bulk second target option can be used.\n' >&2
+        exit 64
+      fi
+      create_bulk_second_disposable_folder=1
+      bulk_second_folder="$2"
+      shift 2
+      ;;
     --restore-from-trash-page)
       restore_from_trash_page=1
       shift
@@ -256,6 +272,11 @@ fi
 if [[ "$bulk_selection" -eq 1 \
   && ( "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ) ]]; then
   printf '%s\n' 'Bulk selection smoke verifies Trash page recoverability and cannot be combined with single-item Trash page actions.' >&2
+  exit 64
+fi
+
+if [[ "$create_bulk_second_disposable_folder" -eq 1 && "$create_disposable_folder" -ne 1 ]]; then
+  printf '%s\n' '--create-bulk-second-disposable-folder requires --create-disposable-folder.' >&2
   exit 64
 fi
 
@@ -694,6 +715,7 @@ write_metadata() {
     printf 'restore_from_trash_page=%s\n' "$restore_from_trash_page"
     printf 'delete_forever_from_trash_page=%s\n' "$delete_forever_from_trash_page"
     printf 'bulk_selection=%s\n' "$bulk_selection"
+    printf 'create_bulk_second_disposable_folder=%s\n' "$create_bulk_second_disposable_folder"
     printf 'bulk_second_kind=%s\n' "$bulk_second_kind"
     printf 'bulk_second_name=%s\n' "$bulk_second_name"
     printf 'bulk_second_file=%s\n' "$bulk_second_file"
@@ -727,6 +749,8 @@ Second target name: \`$bulk_second_name\`
 - [ ] Signed-in session is restored without clearing app data.
 - [ ] Both target rows are disposable or safe to leave in Trash after this run.
 - [ ] Both target rows are visible together in Files root before the selection begins.
+- [ ] If \`create_disposable_folder=1\`, \`28-created-folder.xml\` shows the primary disposable folder.
+- [ ] If \`create_bulk_second_disposable_folder=1\`, \`29-created-bulk-second-folder.xml\` shows the second disposable folder.
 
 ## Bulk Move To Trash
 
@@ -837,26 +861,54 @@ wait_for_files_root() {
 }
 
 create_disposable_target_folder() {
+  create_disposable_folder_named \
+    "$target_name" \
+    "25-add-actions" \
+    "26-new-folder-prompt" \
+    "27-new-folder-filled" \
+    "28-created-folder"
+}
+
+create_bulk_second_disposable_target_folder() {
+  create_disposable_folder_named \
+    "$bulk_second_name" \
+    "29-bulk-second-add-actions" \
+    "29-bulk-second-new-folder-prompt" \
+    "29-bulk-second-new-folder-filled" \
+    "29-created-bulk-second-folder"
+}
+
+create_disposable_folder_named() {
+  local folder_name="$1"
+  local add_actions_prefix="$2"
+  local prompt_prefix="$3"
+  local filled_prefix="$4"
+  local created_prefix="$5"
+
   tap_clickable_from_xml "$files_root_xml" "Add files" exact
   sleep 1
-  capture_screen "25-add-actions"
-  require_xml_text "$evidence_dir/25-add-actions.xml" "New folder" "Add action sheet did not expose New folder."
+  capture_screen "$add_actions_prefix"
+  require_xml_text "$evidence_dir/$add_actions_prefix.xml" "New folder" \
+    "Add action sheet did not expose New folder."
 
-  tap_clickable_from_xml "$evidence_dir/25-add-actions.xml" "New folder" exact
+  tap_clickable_from_xml "$evidence_dir/$add_actions_prefix.xml" "New folder" exact
   sleep 1
-  capture_screen "26-new-folder-prompt"
-  require_xml_text "$evidence_dir/26-new-folder-prompt.xml" "New folder" "New-folder prompt did not open."
-  require_xml_text "$evidence_dir/26-new-folder-prompt.xml" "Folder name" "New-folder prompt did not show the folder-name field."
+  capture_screen "$prompt_prefix"
+  require_xml_text "$evidence_dir/$prompt_prefix.xml" "New folder" "New-folder prompt did not open."
+  require_xml_text "$evidence_dir/$prompt_prefix.xml" "Folder name" \
+    "New-folder prompt did not show the folder-name field."
 
-  tap_editable_from_xml "$evidence_dir/26-new-folder-prompt.xml"
-  adb_input_text "$target_name"
+  tap_editable_from_xml "$evidence_dir/$prompt_prefix.xml"
+  adb_input_text "$folder_name"
   sleep 1
-  capture_screen "27-new-folder-filled"
-  tap_clickable_from_xml "$evidence_dir/27-new-folder-filled.xml" "Create" exact
-  wait_for_created_folder
+  capture_screen "$filled_prefix"
+  tap_clickable_from_xml "$evidence_dir/$filled_prefix.xml" "Create" exact
+  wait_for_created_folder "$folder_name" "$created_prefix"
 }
 
 wait_for_created_folder() {
+  local folder_name="$1"
+  local created_prefix="$2"
   local attempt_limit=$((wait_seconds / 3))
   local attempt=0
   local xml_file
@@ -867,13 +919,13 @@ wait_for_created_folder() {
 
   while [[ "$attempt" -le "$attempt_limit" ]]; do
     sleep 3
-    capture_screen "28-created-folder-$attempt"
-    xml_file="$evidence_dir/28-created-folder-$attempt.xml"
+    capture_screen "$created_prefix-$attempt"
+    xml_file="$evidence_dir/$created_prefix-$attempt.xml"
 
-    if xml_has_text "$xml_file" "Actions for $target_name"; then
-      cp "$xml_file" "$evidence_dir/28-created-folder.xml"
-      if [[ -f "$evidence_dir/28-created-folder-$attempt.png" ]]; then
-        cp "$evidence_dir/28-created-folder-$attempt.png" "$evidence_dir/28-created-folder.png"
+    if xml_has_text "$xml_file" "Actions for $folder_name"; then
+      cp "$xml_file" "$evidence_dir/$created_prefix.xml"
+      if [[ -f "$evidence_dir/$created_prefix-$attempt.png" ]]; then
+        cp "$evidence_dir/$created_prefix-$attempt.png" "$evidence_dir/$created_prefix.png"
       fi
       files_root_xml="$xml_file"
       return
@@ -891,7 +943,7 @@ wait_for_created_folder() {
     attempt=$((attempt + 1))
   done
 
-  cancel_after_timeout "$xml_file" "28-created-folder-timeout"
+  cancel_after_timeout "$xml_file" "$created_prefix-timeout"
   printf 'Timed out waiting for disposable folder creation.\n' >&2
   printf 'Evidence: %s\n' "$xml_file" >&2
   exit 68
@@ -1427,6 +1479,10 @@ fi
 
 if [[ "$create_disposable_folder" -eq 1 ]]; then
   create_disposable_target_folder
+fi
+
+if [[ "$create_bulk_second_disposable_folder" -eq 1 ]]; then
+  create_bulk_second_disposable_target_folder
 fi
 
 if [[ "$bulk_selection" -eq 1 ]]; then

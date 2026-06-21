@@ -20,7 +20,7 @@ Usage: $(basename "$0") [options]
 
 Runs a non-interactive file-open routing smoke against existing cotton-open-*
 files in a cached Cotton folder. It validates app-private local bytes, opens
-text/image/audio/video in Cotton viewers, and verifies PDF/document/archive/
+text/image/PDF/audio/video in Cotton viewers, and verifies document/archive/
 unknown files either launch a system handler or show the expected no-app copy.
 
 Options:
@@ -313,7 +313,7 @@ if folder.get("folderId") != folder_id or folder.get("folderName") != folder_nam
 required = {
     "text": ("cotton-open-text.txt", "text"),
     "image": ("cotton-open-image.png", "image"),
-    "pdf": ("cotton-open-doc.pdf", "system"),
+    "pdf": ("cotton-open-doc.pdf", "pdf"),
     "audio": ("cotton-open-audio.wav", "audio"),
     "video": ("cotton-open-video-valid.mp4", "video"),
     "office": ("cotton-open-office.docx", "system"),
@@ -439,6 +439,11 @@ validate_open_result() {
       require_xml_text "$xml_file" "$name" "Image file did not open in Cotton image viewer."
       require_xml_text "$xml_file" "Image" "Image viewer did not show image details."
       ;;
+    pdf)
+      require_xml_text "$xml_file" "$name" "PDF file did not open in Cotton PDF viewer."
+      require_xml_text "$xml_file" "PDF" "PDF viewer did not show PDF details."
+      require_xml_text "$xml_file" "Open" "PDF viewer did not expose external open action."
+      ;;
     audio)
       require_xml_text "$xml_file" "$name" "Audio file did not open in Cotton media viewer."
       require_xml_text "$xml_file" "Audio" "Audio viewer did not show audio details."
@@ -453,11 +458,6 @@ validate_open_result() {
       fi
 
       case "$key" in
-        pdf)
-          if xml_has_text "$xml_file" "No PDF app can open this file."; then
-            return
-          fi
-          ;;
         office)
           if xml_has_text "$xml_file" "No document app can open this file."; then
             return

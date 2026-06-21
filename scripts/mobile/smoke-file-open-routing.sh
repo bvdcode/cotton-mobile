@@ -200,7 +200,7 @@ write_checklist() {
 - [ ] Text opens in Cotton text viewer.
 - [ ] SVG appears as `SVG` and opens in Cotton text viewer without using WebView.
 - [ ] Image opens in Cotton image viewer.
-- [ ] PDF action label says `Open with system app` and launches/handles system PDF flow or honest no-app fallback.
+- [ ] PDF opens in Cotton PDF viewer and exposes `Open` for external handoff.
 - [ ] Audio opens in Cotton media viewer with playback controls.
 - [ ] Video opens in Cotton media viewer with playback controls.
 - [ ] Office document action label says `Open with system app` and launches/handles system document flow or honest no-app fallback.
@@ -501,7 +501,7 @@ prompt_capture "Upload all seeded cotton-open-* files from Android Downloads and
 prompt_capture "Open cotton-open-text.txt and verify Cotton text viewer." "40-text-open"
 prompt_capture "Return to Files, open cotton-open-vector.svg, and verify Cotton text viewer with SVG details." "41-svg-open"
 prompt_capture "Return to Files, open cotton-open-image.png, and verify Cotton image viewer." "42-image-open"
-prompt_capture "Return to Files, open cotton-open-doc.pdf, and verify system PDF flow or honest no-app fallback." "43-pdf-open"
+prompt_capture "Return to Files, open cotton-open-doc.pdf, and verify Cotton PDF viewer with external Open action." "43-pdf-open"
 prompt_capture "Return to Files, open cotton-open-audio.wav, and verify Cotton media viewer with playback controls." "44-audio-open"
 prompt_capture "Return to Files, open cotton-open-video.mp4, and verify Cotton media viewer with playback controls." "45-video-open"
 prompt_capture "Return to Files, open cotton-open-office.docx, and verify system Office flow or honest no-app fallback." "46-office-open"

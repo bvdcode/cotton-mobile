@@ -13,6 +13,7 @@ install_debug=0
 launch_app=1
 first_file="242.mp4"
 second_file="238.png"
+mixed_folder=""
 
 usage() {
   cat <<EOF
@@ -27,6 +28,7 @@ Options:
   --install-debug       Install the current debug APK with -r before launch.
   --first-file NAME     First visible Files row to select. Defaults to "$first_file".
   --second-file NAME    Second visible Files row to select. Defaults to "$second_file".
+  --mixed-folder NAME   Optional folder row to select with --first-file for mixed-selection actions.
   --no-launch           Do not launch the app before capture.
   --help, -h            Show this help.
 
@@ -82,6 +84,14 @@ while [[ $# -gt 0 ]]; do
       second_file="$2"
       shift 2
       ;;
+    --mixed-folder)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --mixed-folder.\n' >&2
+        exit 64
+      fi
+      mixed_folder="$2"
+      shift 2
+      ;;
     --no-launch)
       launch_app=0
       shift
@@ -104,6 +114,11 @@ fi
 
 if [[ "$first_file" == "$second_file" ]]; then
   printf 'Selected file names must be different.\n' >&2
+  exit 64
+fi
+
+if [[ -n "$mixed_folder" && -z "${mixed_folder//[[:space:]]/}" ]]; then
+  printf 'Mixed-selection folder name must not be blank.\n' >&2
   exit 64
 fi
 
@@ -379,7 +394,9 @@ write_metadata() {
     printf 'install_debug=%s\n' "$install_debug"
     printf 'first_file=%s\n' "$first_file"
     printf 'second_file=%s\n' "$second_file"
+    printf 'mixed_folder=%s\n' "$mixed_folder"
     printf 'maui_share_docs=https://learn.microsoft.com/en-us/dotnet/maui/platform-integration/data/share\n'
+    printf 'maui_action_sheet_docs=https://learn.microsoft.com/en-us/dotnet/maui/user-interface/pop-ups\n'
     printf 'maui_share_request_docs=https://learn.microsoft.com/en-us/dotnet/api/microsoft.maui.applicationmodel.datatransfer.share.requestasync\n'
     printf 'android_uiautomator_docs=https://developer.android.com/training/testing/other-components/ui-automator\n'
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
@@ -410,6 +427,10 @@ Files: \`$first_file\`, \`$second_file\`
 - [ ] \`80-share-files-sheet.xml\` shows \`Share files\`.
 - [ ] \`90-share-handoff-*.txt\` or \`90-share-handoff-*.xml\` shows Android system share UI handoff.
 - [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
+
+## Optional Mixed Selection
+
+- [ ] If \`mixed_folder\` is set, \`66-mixed-actions.xml\` shows \`Download file\`, \`Keep offline\`, \`Remove offline\`, and \`Share file\` for the selected file/folder pair.
 EOF
 }
 
@@ -436,12 +457,13 @@ select_two_files() {
 
 open_selection_actions() {
   local prefix="$1"
+  local download_label="${2:-Download files}"
 
   tap_node_from_xml "$selected_xml" "Actions" exact
   sleep 1
   capture_screen "$prefix"
   require_xml_text "$evidence_dir/$prefix.xml" "2 selected" "Selection action sheet did not open."
-  require_xml_text "$evidence_dir/$prefix.xml" "Download files" "Selection action sheet did not expose Download files."
+  require_xml_text "$evidence_dir/$prefix.xml" "$download_label" "Selection action sheet did not expose Download."
   require_xml_text "$evidence_dir/$prefix.xml" "Keep offline" "Selection action sheet did not expose Keep offline."
   actions_xml="$evidence_dir/$prefix.xml"
 }
@@ -487,6 +509,45 @@ ensure_selected_files_local() {
   tap_node_from_xml "$actions_xml" "Download files" exact
   sleep 4
   wait_for_local_files
+  wait_for_files_root
+}
+
+validate_mixed_selection_actions() {
+  if [[ -z "${mixed_folder//[[:space:]]/}" ]]; then
+    return
+  fi
+
+  capture_screen "65-mixed-root"
+  require_xml_text "$evidence_dir/65-mixed-root.xml" "$first_file" "Mixed-selection file is not visible in Files."
+  require_xml_text "$evidence_dir/65-mixed-root.xml" "$mixed_folder" "Mixed-selection folder is not visible in Files."
+
+  long_press_row_from_xml "$evidence_dir/65-mixed-root.xml" "$first_file"
+  sleep 2
+  capture_screen "65-mixed-first-selected"
+  require_xml_text "$evidence_dir/65-mixed-first-selected.xml" "1 selected" \
+    "Long press did not start mixed file selection."
+
+  tap_row_from_xml "$evidence_dir/65-mixed-first-selected.xml" "$mixed_folder"
+  sleep 1
+  capture_screen "65-mixed-two-selected"
+  require_xml_text "$evidence_dir/65-mixed-two-selected.xml" "2 selected" \
+    "Folder did not join the mixed selection."
+  require_xml_text "$evidence_dir/65-mixed-two-selected.xml" "1 file" \
+    "Mixed selection detail did not show one file."
+  require_xml_text "$evidence_dir/65-mixed-two-selected.xml" "1 folder" \
+    "Mixed selection detail did not show one folder."
+
+  selected_xml="$evidence_dir/65-mixed-two-selected.xml"
+  open_selection_actions "66-mixed-actions" "Download file"
+  require_xml_text "$actions_xml" "Copy links" "Mixed selection action sheet did not expose Copy links."
+  require_xml_text "$actions_xml" "Share links" "Mixed selection action sheet did not expose Share links."
+  require_xml_text "$actions_xml" "Download file" "Mixed selection action sheet did not expose file-scoped Download file."
+  require_xml_text "$actions_xml" "Keep offline" "Mixed selection action sheet did not expose Keep offline."
+  require_xml_text "$actions_xml" "Remove offline" "Mixed selection action sheet did not expose file-scoped Remove offline."
+  require_xml_text "$actions_xml" "Share file" "Mixed selection action sheet did not expose file-scoped Share file."
+
+  tap_node_from_xml "$actions_xml" "Cancel" exact
+  sleep 1
   wait_for_files_root
 }
 
@@ -551,6 +612,8 @@ fi
 wait_for_files_root
 ensure_selected_files_local
 wait_for_files_root
+validate_mixed_selection_actions
+wait_for_files_root
 select_two_files "70"
 open_selection_actions "80-share-files-sheet"
 require_xml_text "$actions_xml" "Share files" "Selection action sheet did not expose Share files for local files."
@@ -571,6 +634,7 @@ fi
 {
   printf 'first_file=%s\n' "$first_file"
   printf 'second_file=%s\n' "$second_file"
+  printf 'mixed_folder=%s\n' "$mixed_folder"
   printf 'share_handoff=%s\n' "$share_handoff"
 } > "$evidence_dir/result.env"
 

@@ -115,6 +115,32 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Selected_media_upload_uses_user_initiated_host_on_android_14_plus()
+        {
+            CottonTransferQueueItem transfer = CreateQueuedUpload(
+                source: new CottonTransferSourceSnapshot(
+                    CottonTransferSourceKind.SelectedMedia,
+                    "selected-media-source",
+                    CreatedAt.AddMinutes(-5),
+                    sizeBytes: 789,
+                    capturedAtUtc: CreatedAt));
+            var host = new FakeBackgroundTransferHost();
+            CottonAndroidBackgroundTransferCoordinator coordinator = CreateCoordinator(
+                [transfer],
+                host);
+
+            CottonAndroidBackgroundTransferScheduleResult result =
+                await coordinator.ScheduleNextQueuedUploadAsync(InstanceUri, androidApiLevel: 34);
+
+            Assert.True(result.IsScheduled);
+            CottonAndroidBackgroundTransferRequest request = Assert.Single(host.Requests);
+            Assert.Equal(CottonAndroidTransferWorkKind.SelectedMediaUpload, request.WorkKind);
+            Assert.Equal(CottonAndroidTransferExecutionHost.UserInitiatedDataTransfer, request.Host);
+            Assert.Equal(789, request.EstimatedUploadBytes);
+            Assert.True(request.RequiresNetwork);
+        }
+
+        [Fact]
         public void Schedule_identity_is_stable_and_transfer_scoped()
         {
             CottonAndroidBackgroundTransferScheduleIdentity first =

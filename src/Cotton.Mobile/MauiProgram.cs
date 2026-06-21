@@ -110,6 +110,9 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupScanner, CottonCameraBackupScanner>();
 			builder.Services.AddSingleton<ICottonCameraBackupPlanningService, CottonCameraBackupPlanningService>();
 			builder.Services.AddSingleton<ICottonCameraBackupTransferEnqueueCoordinator, CottonCameraBackupTransferEnqueueCoordinator>();
+			builder.Services.AddSingleton<
+				ICottonSelectedMediaTransferEnqueueCoordinator,
+				CottonSelectedMediaTransferEnqueueCoordinator>();
 			builder.Services.AddSingleton<ICottonTransferStagingPathProvider, CottonTransferStagingPathProvider>();
 			builder.Services.AddSingleton<ICottonTransferStagingStore, FileSystemCottonTransferStagingStore>();
 			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();

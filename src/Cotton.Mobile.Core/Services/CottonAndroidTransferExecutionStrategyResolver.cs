@@ -18,8 +18,8 @@ namespace Cotton.Mobile.Services
                 CottonAndroidTransferWorkKind.CameraBackupUpload => CreateCameraBackupStrategy(workKind),
                 CottonAndroidTransferWorkKind.ManualUpload
                     or CottonAndroidTransferWorkKind.ManualDownload
-                    or CottonAndroidTransferWorkKind.ShareInboxUpload => CreateUserStartedStrategy(workKind, androidApiLevel),
-                CottonAndroidTransferWorkKind.SelectedMediaUpload => CreateSelectedMediaStrategy(workKind),
+                    or CottonAndroidTransferWorkKind.ShareInboxUpload
+                    or CottonAndroidTransferWorkKind.SelectedMediaUpload => CreateUserStartedStrategy(workKind, androidApiLevel),
                 _ => throw new ArgumentOutOfRangeException(nameof(workKind), "Transfer work kind is not supported."),
             };
         }
@@ -52,21 +52,6 @@ namespace Cotton.Mobile.Services
                 supportsChargingConstraint: false,
                 supportsUnmeteredNetworkConstraint: false,
                 "Run user-started file transfers from the foreground queue on this Android version.");
-        }
-
-        private static CottonAndroidTransferExecutionStrategy CreateSelectedMediaStrategy(
-            CottonAndroidTransferWorkKind workKind)
-        {
-            return new CottonAndroidTransferExecutionStrategy(
-                workKind,
-                CottonAndroidTransferExecutionHost.ForegroundManual,
-                requiresUserInitiation: true,
-                requiresUserVisibleNotification: false,
-                supportsRetry: false,
-                supportsNetworkConstraint: false,
-                supportsChargingConstraint: false,
-                supportsUnmeteredNetworkConstraint: false,
-                "Selected media imports stay direct foreground until they move into the durable transfer queue.");
         }
 
         private static CottonAndroidTransferExecutionStrategy CreateCameraBackupStrategy(

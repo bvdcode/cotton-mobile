@@ -6,13 +6,13 @@ namespace Cotton.Mobile.Services
 
         public const string QueueBackedMetadataValue = "queueBacked";
 
-        public static string CurrentMetadataValue => DirectForegroundMetadataValue;
+        public static string CurrentMetadataValue => QueueBackedMetadataValue;
 
-        public static bool UsesDurableQueue => false;
+        public static bool UsesDurableQueue => true;
 
-        public static bool RequiresDurableQueueBeforeCameraBackup => true;
+        public static bool RequiresDurableQueueBeforeCameraBackup => false;
 
         public static string ReleaseRiskText =>
-            "Selected media imports upload immediately in the foreground. Durable queued retry/background upload is required before camera backup.";
+            "Selected media imports are staged into the durable transfer queue before upload.";
     }
 }

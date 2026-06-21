@@ -15,18 +15,27 @@ namespace Cotton.Mobile.Services
 
         public async Task<CottonFileUploadSource?> PickVideoAsync(CancellationToken cancellationToken = default)
         {
+            return (await PickVideosAsync(cancellationToken).ConfigureAwait(false)).FirstOrDefault();
+        }
+
+        public async Task<IReadOnlyList<CottonFileUploadSource>> PickVideosAsync(
+            CancellationToken cancellationToken = default)
+        {
             IReadOnlyList<FileResult> results = await _mediaPicker.PickVideosAsync(
                 new MediaPickerOptions
                 {
-                    SelectionLimit = 1,
+                    SelectionLimit = CottonSelectedMediaUploadLimits.VideoSelectionLimit,
                 });
             cancellationToken.ThrowIfCancellationRequested();
-            FileResult? result = results.FirstOrDefault();
-            if (result is null)
-            {
-                return null;
-            }
 
+            return results
+                .Take(CottonSelectedMediaUploadLimits.VideoSelectionLimit)
+                .Select(CreateSource)
+                .ToList();
+        }
+
+        private static CottonFileUploadSource CreateSource(FileResult result)
+        {
             var snapshot = new CottonFileUploadSourceSnapshot(
                 result.FileName,
                 result.ContentType,

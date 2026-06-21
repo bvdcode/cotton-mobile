@@ -68,7 +68,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(missingDestination.CanEnableBackup);
 
             Assert.Equal("Setup saved. Background backup is not running yet.", withDestination.ExecutionStatusText);
-            Assert.False(withDestination.CanEnableBackup);
+            Assert.True(withDestination.CanEnableBackup);
         }
 
         [Fact]
@@ -144,16 +144,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Camera_backup_rejects_enabled_state_before_durable_queue_is_available()
+        public void Camera_backup_rejects_enabled_state_without_destination()
         {
             Assert.Throws<InvalidOperationException>(() =>
                 new CottonCameraBackupSettings(
+                    isEnabled: true,
+                    destination: null,
+                    photosOnly: true,
+                    wifiOnly: true,
+                    allowCellular: false,
+                    chargingOnly: false));
+
+            var settings = new CottonCameraBackupSettings(
                     isEnabled: true,
                     CreateDestination(),
                     photosOnly: true,
                     wifiOnly: true,
                     allowCellular: false,
-                    chargingOnly: false));
+                    chargingOnly: false);
+
+            Assert.True(settings.IsEnabled);
         }
 
         [Fact]
@@ -453,7 +463,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Camera_backup_health_display_stays_honest_while_backup_cannot_run()
+        public void Camera_backup_health_display_stays_honest_before_activity_exists()
         {
             CottonCameraBackupHealthDisplayState display =
                 CottonCameraBackupHealthDisplayState.Create(
@@ -462,10 +472,10 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal("Backup Health", display.Title);
             Assert.Equal(
-                "Backup health will appear after background backup is available.",
+                "No backup activity yet.",
                 display.StatusText);
             Assert.Equal("Pending 0 · Uploaded 0 · Failed 0 · Blocked 0", display.CountsText);
-            Assert.True(display.IsBlocked);
+            Assert.False(display.IsBlocked);
             Assert.False(display.HasActivity);
         }
 

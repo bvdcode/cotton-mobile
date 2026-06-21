@@ -58,6 +58,10 @@ namespace Cotton.Mobile.ViewModels
         private readonly IDocumentScanService _documentScanService;
         private readonly IPhotoUploadPickerService _photoUploadPickerService;
         private readonly IVideoUploadPickerService _videoUploadPickerService;
+        private readonly ICottonSelectedMediaTransferEnqueueCoordinator _selectedMediaTransferEnqueueCoordinator;
+        private readonly ICottonAndroidBackgroundTransferCoordinator _backgroundTransferCoordinator;
+        private readonly IAndroidApiLevelProvider _androidApiLevelProvider;
+        private readonly ICottonTransferActivitySignal _transferActivitySignal;
         private readonly IUploadDestinationPickerPageService _uploadDestinationPickerPageService;
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
@@ -107,6 +111,10 @@ namespace Cotton.Mobile.ViewModels
             IDocumentScanService documentScanService,
             IPhotoUploadPickerService photoUploadPickerService,
             IVideoUploadPickerService videoUploadPickerService,
+            ICottonSelectedMediaTransferEnqueueCoordinator selectedMediaTransferEnqueueCoordinator,
+            ICottonAndroidBackgroundTransferCoordinator backgroundTransferCoordinator,
+            IAndroidApiLevelProvider androidApiLevelProvider,
+            ICottonTransferActivitySignal transferActivitySignal,
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
@@ -139,6 +147,10 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(documentScanService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
             ArgumentNullException.ThrowIfNull(videoUploadPickerService);
+            ArgumentNullException.ThrowIfNull(selectedMediaTransferEnqueueCoordinator);
+            ArgumentNullException.ThrowIfNull(backgroundTransferCoordinator);
+            ArgumentNullException.ThrowIfNull(androidApiLevelProvider);
+            ArgumentNullException.ThrowIfNull(transferActivitySignal);
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
@@ -171,6 +183,10 @@ namespace Cotton.Mobile.ViewModels
             _documentScanService = documentScanService;
             _photoUploadPickerService = photoUploadPickerService;
             _videoUploadPickerService = videoUploadPickerService;
+            _selectedMediaTransferEnqueueCoordinator = selectedMediaTransferEnqueueCoordinator;
+            _backgroundTransferCoordinator = backgroundTransferCoordinator;
+            _androidApiLevelProvider = androidApiLevelProvider;
+            _transferActivitySignal = transferActivitySignal;
             _uploadDestinationPickerPageService = uploadDestinationPickerPageService;
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
@@ -651,35 +667,35 @@ namespace Cotton.Mobile.ViewModels
             }
             else if (normalizedAction == CottonFileAddActionSheet.UploadPhotoAction)
             {
-                await UploadPickedSourceAsync(
+                await QueuePickedMediaSourcesAsync(
                     instanceUri,
                     folder,
-                    _photoUploadPickerService.PickPhotoAsync,
+                    _photoUploadPickerService.PickPhotosAsync,
                     "photo",
                     "Could not choose photo.");
             }
             else if (normalizedAction == CottonFileAddActionSheet.UploadPhotoToFolderAction)
             {
-                await UploadPickedSourceToDestinationAsync(
+                await QueuePickedMediaSourcesToDestinationAsync(
                     instanceUri,
-                    _photoUploadPickerService.PickPhotoAsync,
+                    _photoUploadPickerService.PickPhotosAsync,
                     "photo",
                     "Could not choose photo.");
             }
             else if (normalizedAction == CottonFileAddActionSheet.UploadVideoAction)
             {
-                await UploadPickedSourceAsync(
+                await QueuePickedMediaSourcesAsync(
                     instanceUri,
                     folder,
-                    _videoUploadPickerService.PickVideoAsync,
+                    _videoUploadPickerService.PickVideosAsync,
                     "video",
                     "Could not choose video.");
             }
             else if (normalizedAction == CottonFileAddActionSheet.UploadVideoToFolderAction)
             {
-                await UploadPickedSourceToDestinationAsync(
+                await QueuePickedMediaSourcesToDestinationAsync(
                     instanceUri,
-                    _videoUploadPickerService.PickVideoAsync,
+                    _videoUploadPickerService.PickVideosAsync,
                     "video",
                     "Could not choose video.");
             }
@@ -3457,6 +3473,131 @@ namespace Cotton.Mobile.ViewModels
                 refreshCurrentFolderAfterUpload);
         }
 
+        private async Task QueuePickedMediaSourcesAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            Func<CancellationToken, Task<IReadOnlyList<CottonFileUploadSource>>> pickSourcesAsync,
+            string sourceKind,
+            string pickFailureStatus)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(OfflineUploadStatus);
+                return;
+            }
+
+            IReadOnlyList<CottonFileUploadSource> sources = await PickUploadSourcesAsync(
+                pickSourcesAsync,
+                sourceKind,
+                pickFailureStatus);
+            if (sources.Count == 0)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri) || !HasSameFolder(_currentFolder, folder))
+            {
+                return;
+            }
+
+            IReadOnlyList<CottonFileUploadSource> resolvedSources = ResolveUniqueUploadSources(
+                sources,
+                _display.AllFileEntries);
+            await QueueSelectedMediaSourcesToFolderAsync(
+                instanceUri,
+                folder,
+                resolvedSources,
+                sourceKind,
+                destinationPath: null);
+        }
+
+        private async Task QueuePickedMediaSourcesToDestinationAsync(
+            Uri instanceUri,
+            Func<CancellationToken, Task<IReadOnlyList<CottonFileUploadSource>>> pickSourcesAsync,
+            string sourceKind,
+            string pickFailureStatus)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(OfflineUploadStatus);
+                return;
+            }
+
+            CottonUploadDestinationSnapshot? destination;
+            try
+            {
+                destination = await _uploadDestinationPickerPageService.PickAsync(instanceUri);
+            }
+            catch (TaskCanceledException)
+            {
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload destination.");
+                _display.ShowFilesStatus("Could not choose destination.");
+                return;
+            }
+
+            if (destination is null)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
+
+            CottonFolderHandle destinationFolder = destination.ToFolderHandle();
+            IReadOnlyList<CottonFileBrowserEntry> destinationEntries;
+            try
+            {
+                destinationEntries = HasSameFolder(_currentFolder, destinationFolder)
+                    ? _display.AllFileEntries
+                    : (await _fileBrowserService.GetFolderAsync(instanceUri, destinationFolder)).Entries;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                await HandleSessionExpiredAsync(exception);
+                return;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to load Cotton mobile upload destination {FolderId}.",
+                    destinationFolder.Id);
+                _display.ShowFilesStatus("Could not load destination.");
+                return;
+            }
+
+            IReadOnlyList<CottonFileUploadSource> sources = await PickUploadSourcesAsync(
+                pickSourcesAsync,
+                sourceKind,
+                pickFailureStatus);
+            if (sources.Count == 0)
+            {
+                return;
+            }
+
+            if (!CanUseFileBrowserContext(instanceUri))
+            {
+                return;
+            }
+
+            IReadOnlyList<CottonFileUploadSource> resolvedSources = ResolveUniqueUploadSources(
+                sources,
+                destinationEntries);
+            await QueueSelectedMediaSourcesToFolderAsync(
+                instanceUri,
+                destinationFolder,
+                resolvedSources,
+                sourceKind,
+                destination.Path);
+        }
+
         private async Task<CottonFileUploadSource?> PickUploadSourceAsync(
             Func<CancellationToken, Task<CottonFileUploadSource?>> pickSourceAsync,
             string sourceKind,
@@ -3474,6 +3615,118 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to pick a Cotton mobile upload {SourceKind}.", sourceKind);
                 _display.ShowFilesStatus(pickFailureStatus);
+                return null;
+            }
+        }
+
+        private async Task<IReadOnlyList<CottonFileUploadSource>> PickUploadSourcesAsync(
+            Func<CancellationToken, Task<IReadOnlyList<CottonFileUploadSource>>> pickSourcesAsync,
+            string sourceKind,
+            string pickFailureStatus)
+        {
+            try
+            {
+                return await pickSourcesAsync(CancellationToken.None);
+            }
+            catch (TaskCanceledException)
+            {
+                return [];
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to pick Cotton mobile upload media {SourceKind}.", sourceKind);
+                _display.ShowFilesStatus(pickFailureStatus);
+                return [];
+            }
+        }
+
+        private async Task QueueSelectedMediaSourcesToFolderAsync(
+            Uri instanceUri,
+            CottonFolderHandle folder,
+            IReadOnlyList<CottonFileUploadSource> sources,
+            string sourceKind,
+            string? destinationPath)
+        {
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonSelectedMediaUploadStatusText.CreateQueueingStatus(
+                    sourceKind,
+                    sources.Count,
+                    sources.FirstOrDefault()?.Snapshot.Name ?? string.Empty));
+
+            try
+            {
+                CottonSelectedMediaTransferEnqueueResult result =
+                    await _selectedMediaTransferEnqueueCoordinator.EnqueueAsync(
+                        instanceUri,
+                        folder,
+                        destinationPath,
+                        sources,
+                        fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                if (result.HasQueuedTransfers)
+                {
+                    _transferActivitySignal.NotifyTransferActivityChanged();
+                }
+
+                CottonAndroidBackgroundTransferScheduleResult? scheduleResult =
+                    await ScheduleQueuedSelectedMediaBestEffortAsync(instanceUri, fileActionCancellation.Token);
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                _display.ShowFilesStatus(
+                    CottonSelectedMediaUploadStatusText.CreateResultStatus(sourceKind, result, scheduleResult));
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile selected-media queue cancellation.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonSelectedMediaUploadStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selected-media queue failure.");
+                    return;
+                }
+
+                _logger.LogError(exception, "Failed to queue Cotton mobile selected media.");
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonSelectedMediaUploadStatusText.FailedStatus);
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
+        private async Task<CottonAndroidBackgroundTransferScheduleResult?> ScheduleQueuedSelectedMediaBestEffortAsync(
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _backgroundTransferCoordinator.ScheduleNextQueuedUploadAsync(
+                    instanceUri,
+                    _androidApiLevelProvider.CurrentApiLevel,
+                    cancellationToken);
+            }
+            catch (Exception exception)
+                when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(exception, "Cotton mobile selected-media background schedule failed.");
                 return null;
             }
         }
@@ -3584,6 +3837,30 @@ namespace Cotton.Mobile.ViewModels
             return string.Equals(resolvedName, source.Snapshot.Name, StringComparison.Ordinal)
                 ? source
                 : source.WithSnapshot(source.Snapshot.WithName(resolvedName));
+        }
+
+        private static IReadOnlyList<CottonFileUploadSource> ResolveUniqueUploadSources(
+            IReadOnlyList<CottonFileUploadSource> sources,
+            IEnumerable<CottonFileBrowserEntry> entries)
+        {
+            var usedNames = entries
+                .Where(entry => entry.Type == CottonFileBrowserEntryType.File)
+                .Select(entry => entry.Name)
+                .ToList();
+            var resolvedSources = new List<CottonFileUploadSource>(sources.Count);
+            foreach (CottonFileUploadSource source in sources)
+            {
+                string resolvedName = CottonFileUploadNameResolver.ResolveUniqueName(
+                    source.Snapshot.Name,
+                    usedNames);
+                usedNames.Add(resolvedName);
+                resolvedSources.Add(
+                    string.Equals(resolvedName, source.Snapshot.Name, StringComparison.Ordinal)
+                        ? source
+                        : source.WithSnapshot(source.Snapshot.WithName(resolvedName)));
+            }
+
+            return resolvedSources;
         }
 
         private async Task RefreshAfterUploadAsync(

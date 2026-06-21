@@ -125,6 +125,11 @@ namespace Cotton.Mobile.Services
                 return CottonAndroidTransferWorkKind.ShareInboxUpload;
             }
 
+            if (transfer.Source?.Kind == CottonTransferSourceKind.SelectedMedia)
+            {
+                return CottonAndroidTransferWorkKind.SelectedMediaUpload;
+            }
+
             return CottonAndroidTransferWorkKind.ManualUpload;
         }
     }

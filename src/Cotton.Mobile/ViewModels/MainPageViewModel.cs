@@ -120,6 +120,7 @@ namespace Cotton.Mobile.ViewModels
             IDocumentScanService documentScanService,
             IPhotoUploadPickerService photoUploadPickerService,
             IVideoUploadPickerService videoUploadPickerService,
+            ICottonSelectedMediaTransferEnqueueCoordinator selectedMediaTransferEnqueueCoordinator,
             IUploadDestinationPickerPageService uploadDestinationPickerPageService,
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
@@ -179,6 +180,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(documentScanService);
             ArgumentNullException.ThrowIfNull(photoUploadPickerService);
             ArgumentNullException.ThrowIfNull(videoUploadPickerService);
+            ArgumentNullException.ThrowIfNull(selectedMediaTransferEnqueueCoordinator);
             ArgumentNullException.ThrowIfNull(uploadDestinationPickerPageService);
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
@@ -249,6 +251,10 @@ namespace Cotton.Mobile.ViewModels
                 documentScanService,
                 photoUploadPickerService,
                 videoUploadPickerService,
+                selectedMediaTransferEnqueueCoordinator,
+                backgroundTransferCoordinator,
+                androidApiLevelProvider,
+                transferActivitySignal,
                 uploadDestinationPickerPageService,
                 fileInteractionService,
                 filePreviewService,

@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonAndroidTransferWorkKind.ManualUpload)]
         [InlineData(CottonAndroidTransferWorkKind.ManualDownload)]
         [InlineData(CottonAndroidTransferWorkKind.ShareInboxUpload)]
+        [InlineData(CottonAndroidTransferWorkKind.SelectedMediaUpload)]
         public void User_started_long_transfers_use_uidt_on_android_14_plus(
             CottonAndroidTransferWorkKind workKind)
         {
@@ -30,6 +31,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonAndroidTransferWorkKind.ManualUpload)]
         [InlineData(CottonAndroidTransferWorkKind.ManualDownload)]
         [InlineData(CottonAndroidTransferWorkKind.ShareInboxUpload)]
+        [InlineData(CottonAndroidTransferWorkKind.SelectedMediaUpload)]
         public void User_started_long_transfers_fall_back_to_foreground_manual_before_android_14(
             CottonAndroidTransferWorkKind workKind)
         {
@@ -63,18 +65,18 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Selected_media_imports_remain_foreground_until_queue_backed()
+        public void Selected_media_imports_are_queue_backed_user_started_transfers()
         {
             CottonAndroidTransferExecutionStrategy strategy =
                 CottonAndroidTransferExecutionStrategyResolver.Resolve(
                     CottonAndroidTransferWorkKind.SelectedMediaUpload,
-                    androidApiLevel: 36);
+                    androidApiLevel: 34);
 
-            Assert.Equal(CottonAndroidTransferExecutionHost.ForegroundManual, strategy.Host);
+            Assert.Equal(CottonAndroidTransferExecutionHost.UserInitiatedDataTransfer, strategy.Host);
             Assert.True(strategy.RequiresUserInitiation);
-            Assert.False(strategy.RequiresUserVisibleNotification);
-            Assert.False(strategy.SupportsRetry);
-            Assert.False(strategy.IsBackgroundHost);
+            Assert.True(strategy.RequiresUserVisibleNotification);
+            Assert.True(strategy.SupportsRetry);
+            Assert.True(strategy.IsBackgroundHost);
         }
 
         [Fact]

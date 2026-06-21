@@ -1,3 +1,6 @@
+using System.Globalization;
+using System.Text;
+
 namespace Cotton.Mobile.Services
 {
     public sealed class CottonTransferSourceSnapshot
@@ -71,6 +74,20 @@ namespace Cotton.Mobile.Services
                 receivedAtUtc);
         }
 
+        public static CottonTransferSourceSnapshot CreateSelectedMedia(
+            CottonFileUploadSourceSnapshot source,
+            DateTime selectedAtUtc)
+        {
+            ArgumentNullException.ThrowIfNull(source);
+
+            return new CottonTransferSourceSnapshot(
+                CottonTransferSourceKind.SelectedMedia,
+                CreateSelectedMediaSourceId(source),
+                TryGetOriginalLastModifiedUtc(source),
+                source.SizeBytes,
+                selectedAtUtc);
+        }
+
         public bool MatchesCameraBackupIdentity(CottonCameraBackupMediaIdentity identity)
         {
             ArgumentNullException.ThrowIfNull(identity);
@@ -79,6 +96,46 @@ namespace Cotton.Mobile.Services
                 && string.Equals(SourceId, identity.SourceId, StringComparison.Ordinal)
                 && LastModifiedUtc == identity.LastModifiedUtc
                 && SizeBytes == identity.SizeBytes;
+        }
+
+        private static string CreateSelectedMediaSourceId(CottonFileUploadSourceSnapshot source)
+        {
+            string sourceKind = source.Metadata.TryGetValue(CottonFileUploadMetadataKeys.Source, out string? kind)
+                ? kind
+                : string.Empty;
+            string originalLastModifiedUtc = source.Metadata.TryGetValue(
+                CottonFileUploadMetadataKeys.OriginalLastModifiedUtc,
+                out string? value)
+                ? value
+                : string.Empty;
+            string size = source.SizeBytes?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+            string sourceMaterial = string.Join(
+                "|",
+                "selected-media",
+                sourceKind,
+                source.Name,
+                source.ContentType,
+                size,
+                originalLastModifiedUtc);
+            return CottonFileUploadHash.CreateSha256Hex(Encoding.UTF8.GetBytes(sourceMaterial));
+        }
+
+        private static DateTime? TryGetOriginalLastModifiedUtc(CottonFileUploadSourceSnapshot source)
+        {
+            if (!source.Metadata.TryGetValue(
+                    CottonFileUploadMetadataKeys.OriginalLastModifiedUtc,
+                    out string? value))
+            {
+                return null;
+            }
+
+            return DateTime.TryParse(
+                    value,
+                    CultureInfo.InvariantCulture,
+                    DateTimeStyles.RoundtripKind,
+                    out DateTime parsed)
+                ? NormalizeUtc(parsed)
+                : null;
         }
 
         private static DateTime? NormalizeUtc(DateTime? value)

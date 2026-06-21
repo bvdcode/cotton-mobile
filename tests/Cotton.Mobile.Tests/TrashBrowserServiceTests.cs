@@ -81,6 +81,85 @@ namespace Cotton.Mobile.Tests
             Assert.Equal([1], client.RequestedPages);
         }
 
+        [Fact]
+        public async Task GetRootAsync_continues_after_full_page_when_total_count_understates_available_pages()
+        {
+            List<NodeFileManifestDto> firstPageFiles = Enumerable.Range(1, 100)
+                .Select(index => CreateFile(
+                    Guid.Parse($"55555555-5555-4555-8555-{index:000000000000}"),
+                    $"Page 1 item {index:000}.txt",
+                    CreatedAt.AddMinutes(index)))
+                .ToList();
+            var client = new FakeTrashBrowserClient(
+                CreateRoot(),
+                [
+                    new NodeContentDto
+                    {
+                        TotalCount = 50,
+                        Files = firstPageFiles,
+                    },
+                    new NodeContentDto
+                    {
+                        TotalCount = 50,
+                        Files =
+                        [
+                            CreateFile(
+                                Guid.Parse("66666666-6666-4666-8666-666666666666"),
+                                "Second page item.txt",
+                                CreatedAt.AddMinutes(101)),
+                        ],
+                    },
+                ]);
+            var service = new CottonTrashBrowserService(client);
+
+            CottonFolderContent content = await service.GetRootAsync(InstanceUri);
+
+            Assert.Equal(101, content.Entries.Count);
+            Assert.Contains(content.Entries, entry => entry.Name == "Second page item.txt");
+            Assert.Equal([1, 2], client.RequestedPages);
+        }
+
+        [Fact]
+        public async Task GetRootAsync_stops_after_empty_continuation_page_when_total_count_overstates_available_pages()
+        {
+            var client = new FakeTrashBrowserClient(
+                CreateRoot(),
+                [
+                    new NodeContentDto
+                    {
+                        TotalCount = 250,
+                        Files =
+                        [
+                            CreateFile(
+                                Guid.Parse("77777777-7777-4777-8777-777777777777"),
+                                "Only item.txt",
+                                CreatedAt.AddMinutes(1)),
+                        ],
+                    },
+                    new NodeContentDto
+                    {
+                        TotalCount = 250,
+                    },
+                    new NodeContentDto
+                    {
+                        TotalCount = 250,
+                        Files =
+                        [
+                            CreateFile(
+                                Guid.Parse("88888888-8888-4888-8888-888888888888"),
+                                "Should not load.txt",
+                                CreatedAt.AddMinutes(2)),
+                        ],
+                    },
+                ]);
+            var service = new CottonTrashBrowserService(client);
+
+            CottonFolderContent content = await service.GetRootAsync(InstanceUri);
+
+            Assert.Equal(["Only item.txt"], content.Entries.Select(entry => entry.Name).ToArray());
+            Assert.Equal([1, 2], client.RequestedPages);
+        }
+
         private static NodeDto CreateRoot()
         {
             return CreateNode(TrashRootId, string.Empty, CreatedAt);

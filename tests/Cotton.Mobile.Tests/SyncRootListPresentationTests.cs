@@ -20,6 +20,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("No folders syncing", state.SummaryText);
             Assert.True(state.IsEmptyVisible);
             Assert.False(state.HasItems);
+            Assert.False(state.CanRunAny);
         }
 
         [Fact]
@@ -33,8 +34,10 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.CloudToDevice);
 
-            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([root]);
+            CottonSyncRootListItem item = Assert.Single(state.Items);
 
+            Assert.True(state.CanRunAny);
             Assert.Equal(FirstRootId, item.Id);
             Assert.Equal(CottonSyncDirection.CloudToDevice, item.Direction);
             Assert.Equal("Projects", item.Title);
@@ -68,8 +71,10 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootStorageKind.UserSelectedDocumentTree,
                 "Device folder");
 
-            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([root]);
+            CottonSyncRootListItem item = Assert.Single(state.Items);
 
+            Assert.False(state.CanRunAny);
             Assert.Equal("Choose local folder", item.StatusText);
             Assert.False(item.IsReady);
             Assert.True(item.IsAttentionVisible);
@@ -97,6 +102,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([second, first]);
 
             Assert.Equal("2 folders set to sync", state.SummaryText);
+            Assert.True(state.CanRunAny);
             Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
             Assert.Equal(CottonSyncDirection.DeviceToCloud, state.Items[0].Direction);
             Assert.Equal("Device to cloud · On this device", state.Items[0].DetailText);
@@ -114,9 +120,11 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.CloudToDevice);
 
-            CottonSyncRootListItem item =
-                Assert.Single(CottonSyncRootListDisplayState.Create([root], new HashSet<Guid> { root.Id }).Items);
+            CottonSyncRootListDisplayState state =
+                CottonSyncRootListDisplayState.Create([root], new HashSet<Guid> { root.Id });
+            CottonSyncRootListItem item = Assert.Single(state.Items);
 
+            Assert.False(state.CanRunAny);
             Assert.Equal("Paused", item.StatusText);
             Assert.True(item.IsPaused);
             Assert.False(item.IsReady);
@@ -213,8 +221,10 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.DeviceToCloud);
 
-            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([root]);
+            CottonSyncRootListItem item = Assert.Single(state.Items);
 
+            Assert.False(state.CanRunAny);
             Assert.Equal("Local sync source unsupported", item.StatusText);
             Assert.True(item.IsUnsupportedLocalRoot);
             Assert.False(item.IsReady);

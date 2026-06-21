@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private bool _isBusy;
+        private bool _canRunAll;
         private string _summaryText = "No folders syncing";
         private string? _status;
         private bool _isEmptyVisible = true;
@@ -551,12 +552,13 @@ namespace Cotton.Mobile.ViewModels
 
             SummaryText = state.SummaryText;
             IsEmptyVisible = state.IsEmptyVisible;
+            _canRunAll = state.CanRunAny;
             RunAllCommand.RaiseCanExecuteChanged();
         }
 
         private bool CanRunAll()
         {
-            return !IsBusy && Roots.Count > 0;
+            return !IsBusy && _canRunAll;
         }
 
         private void LogUnhandledCommandException(Exception exception)

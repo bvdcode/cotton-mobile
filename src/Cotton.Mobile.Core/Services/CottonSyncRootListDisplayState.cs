@@ -16,6 +16,8 @@ namespace Cotton.Mobile.Services
 
         public bool HasItems => Items.Count > 0;
 
+        public bool CanRunAny => Items.Any(item => item.CanRunNow);
+
         public bool IsEmptyVisible => !HasItems;
 
         public static CottonSyncRootListDisplayState Create(IReadOnlyList<CottonSyncRootSnapshot> roots)

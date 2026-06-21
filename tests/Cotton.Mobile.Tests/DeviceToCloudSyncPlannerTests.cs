@@ -128,6 +128,32 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_blocks_remote_replacement_at_same_path_without_upload_or_delete()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(1), 42));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(SecondFileId, "alpha.txt", "alpha.txt", "\"etag-2\""));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                [manifest]);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoteTargetMissing, item.Action);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresUpload);
+            Assert.False(item.RequiresRemoteDelete);
+            Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
+            Assert.Equal(1, plan.BlockedCount);
+            Assert.Equal(0, plan.RemoteDeleteCount);
+        }
+
+        [Fact]
         public void Planner_marks_missing_remote_etag_as_fresh_revision_needed()
         {
             CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
@@ -186,6 +212,28 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.RemovesManifestOnly);
             Assert.False(item.RequiresServerMutation);
             Assert.Equal(1, plan.ManifestRemovalCount);
+        }
+
+        [Fact]
+        public void Planner_removes_manifest_only_when_remote_replacement_exists_for_missing_local_file()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(SecondFileId, "alpha.txt", "alpha.txt", "\"etag-2\""));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                CreateLocalContent(),
+                remote,
+                [manifest]);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan, item.Action);
+            Assert.True(item.RemovesManifestOnly);
+            Assert.False(item.RequiresRemoteDelete);
+            Assert.Equal(0, plan.RemoteDeleteCount);
+            Assert.Equal(1, plan.ManifestRemovalCount);
+            Assert.False(plan.HasDestructiveChanges);
         }
 
         [Fact]

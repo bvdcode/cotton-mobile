@@ -22,6 +22,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountLogoutAction = "Log out";
         private const string AccountNotificationsAction = "Notifications";
         private const string AccountPrivacyPolicyAction = "Privacy";
+        private const string AccountRecentFilesAction = "Recent files";
         private const string AccountResetFileLinksAction = "Reset file links";
         private const string AccountSecurityAction = "Security";
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
@@ -53,6 +54,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICaptureInboxPageService _captureInboxPageService;
         private readonly INotificationSettingsPageService _notificationSettingsPageService;
         private readonly IActivityFeedPageService _activityFeedPageService;
+        private readonly IRecentFilesPageService _recentFilesPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonNotificationLaunchState _notificationLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
@@ -102,6 +104,7 @@ namespace Cotton.Mobile.ViewModels
             ICaptureInboxPageService captureInboxPageService,
             INotificationSettingsPageService notificationSettingsPageService,
             IActivityFeedPageService activityFeedPageService,
+            IRecentFilesPageService recentFilesPageService,
             IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonNotificationLaunchState notificationLaunchState,
@@ -165,6 +168,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(captureInboxPageService);
             ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
             ArgumentNullException.ThrowIfNull(activityFeedPageService);
+            ArgumentNullException.ThrowIfNull(recentFilesPageService);
             ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(notificationLaunchState);
@@ -228,6 +232,7 @@ namespace Cotton.Mobile.ViewModels
             _captureInboxPageService = captureInboxPageService;
             _notificationSettingsPageService = notificationSettingsPageService;
             _activityFeedPageService = activityFeedPageService;
+            _recentFilesPageService = recentFilesPageService;
             _shareLaunchState = shareLaunchState;
             _notificationLaunchState = notificationLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
@@ -771,6 +776,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountSecurityAction,
                 AccountNotificationsAction,
                 AccountActivityAction,
+                AccountRecentFilesAction,
                 AccountResetFileLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -800,6 +806,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountActivityAction:
                     await OpenActivityAsync();
+                    break;
+                case AccountRecentFilesAction:
+                    await OpenRecentFilesAsync();
                     break;
                 case AccountResetFileLinksAction:
                     await ResetFileLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
@@ -1189,6 +1198,32 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Activity",
                     "Could not load activity.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenRecentFilesAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Recent files",
+                    "Could not open recent files for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _recentFilesPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile recent files page.");
+                await _dialogService.ShowAlertAsync(
+                    "Recent files",
+                    "Could not inspect recent files.",
                     "OK");
             }
         }

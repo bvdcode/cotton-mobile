@@ -58,6 +58,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ISecuritySettingsPageService, SecuritySettingsPageService>();
 			builder.Services.AddSingleton<INotificationSettingsPageService, NotificationSettingsPageService>();
 			builder.Services.AddSingleton<IActivityFeedPageService, ActivityFeedPageService>();
+			builder.Services.AddSingleton<IRecentFilesPageService, RecentFilesPageService>();
 			builder.Services.AddSingleton<IFileVersionHistoryPageService, FileVersionHistoryPageService>();
 			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
 			builder.Services.AddSingleton<IBackupSetupPageService, BackupSetupPageService>();
@@ -287,6 +288,8 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<NotificationSettingsPage>();
 			builder.Services.AddTransient<ActivityFeedViewModel>();
 			builder.Services.AddTransient<ActivityFeedPage>();
+			builder.Services.AddTransient<RecentFilesViewModel>();
+			builder.Services.AddTransient<RecentFilesPage>();
 			builder.Services.AddTransient<FileVersionHistoryViewModel>();
 			builder.Services.AddTransient<FileVersionHistoryPage>();
 			builder.Services.AddTransient<BackupSetupViewModel>();

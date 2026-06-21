@@ -289,6 +289,20 @@ namespace Cotton.Mobile.Tests
                 });
         }
 
+        [Fact]
+        public void List_snapshot_orders_matching_timestamps_by_file_name()
+        {
+            CottonRecentFileListSnapshot list = CottonRecentFileListSnapshot.Create([
+                CreateRecent(OtherFileId, "zebra.pdf", UsedAt),
+                CreateRecent(FileId, "alpha.pdf", UsedAt),
+            ]);
+
+            Assert.Collection(
+                list.Items,
+                first => Assert.Equal("alpha.pdf", first.FileName),
+                second => Assert.Equal("zebra.pdf", second.FileName));
+        }
+
         public void Dispose()
         {
             if (Directory.Exists(_rootDirectory))

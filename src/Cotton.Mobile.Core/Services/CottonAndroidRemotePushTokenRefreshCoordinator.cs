@@ -19,5 +19,12 @@ namespace Cotton.Mobile.Services
                 CottonAndroidRemotePushTokenRefreshRequest.CreateDefault();
             return await _host.ScheduleAsync(request, cancellationToken).ConfigureAwait(false);
         }
+
+        public async Task<CottonAndroidRemotePushTokenRefreshCancelResult> CancelAsync(
+            CancellationToken cancellationToken = default)
+        {
+            var identity = new CottonAndroidRemotePushTokenRefreshScheduleIdentity();
+            return await _host.CancelAsync(identity, cancellationToken).ConfigureAwait(false);
+        }
     }
 }

@@ -39,6 +39,24 @@ namespace Cotton.Mobile.Services
                     "Scheduled Android remote push token refresh."));
         }
 
+        public Task<CottonAndroidRemotePushTokenRefreshCancelResult> CancelAsync(
+            CottonAndroidRemotePushTokenRefreshScheduleIdentity scheduleIdentity,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(scheduleIdentity);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            Context context = Android.App.Application.Context;
+            WorkManager workManager = WorkManager.GetInstance(context)
+                ?? throw new InvalidOperationException("Android WorkManager is unavailable.");
+            _ = workManager.CancelUniqueWork(scheduleIdentity.UniqueWorkName);
+
+            Log.Info(
+                LogTag,
+                $"Cancelled Android WorkManager remote push token refresh {scheduleIdentity.UniqueWorkName}.");
+            return Task.FromResult(CottonAndroidRemotePushTokenRefreshCancelResult.Cancelled());
+        }
+
         private static PeriodicWorkRequest CreateWorkManagerRequest(
             CottonAndroidRemotePushTokenRefreshRequest request)
         {

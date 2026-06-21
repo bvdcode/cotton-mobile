@@ -20,5 +20,15 @@ namespace Cotton.Mobile.Services
                     request,
                     "Android remote push token refresh is unavailable on this platform."));
         }
+
+        public Task<CottonAndroidRemotePushTokenRefreshCancelResult> CancelAsync(
+            CottonAndroidRemotePushTokenRefreshScheduleIdentity scheduleIdentity,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(scheduleIdentity);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            return Task.FromResult(CottonAndroidRemotePushTokenRefreshCancelResult.Unsupported());
+        }
     }
 }

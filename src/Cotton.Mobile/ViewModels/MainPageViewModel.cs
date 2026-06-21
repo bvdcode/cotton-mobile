@@ -678,6 +678,7 @@ namespace Cotton.Mobile.ViewModels
                     await _remotePushRegistrationService.RevokeCurrentSessionBestEffortAsync(instanceUri);
                 }
 
+                await CancelRemotePushTokenRefreshBestEffortAsync("logout");
                 await _sessionService.LogoutAsync();
                 if (await ShouldClearCachedFilesOnLogoutAsync())
                 {
@@ -716,6 +717,9 @@ namespace Cotton.Mobile.ViewModels
 
                 await _remotePushRegistrationService.RevokeCurrentSessionBestEffortAsync(
                     instanceUri,
+                    cancellationToken);
+                await CancelRemotePushTokenRefreshBestEffortAsync(
+                    "current session revocation",
                     cancellationToken);
                 await _accountSessionService.RevokeSessionAsync(
                     instanceUri,
@@ -1976,6 +1980,31 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(
                     exception,
                     "Failed to schedule Cotton mobile remote push token refresh after {Reason}.",
+                    reason);
+            }
+        }
+
+        private async Task CancelRemotePushTokenRefreshBestEffortAsync(
+            string reason,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                CottonAndroidRemotePushTokenRefreshCancelResult result =
+                    await _remotePushTokenRefreshCoordinator.CancelAsync(cancellationToken);
+                if (result.IsCancelled)
+                {
+                    _logger.LogInformation(
+                        "Cancelled Cotton mobile remote push token refresh after {Reason}: {StatusText}",
+                        reason,
+                        result.StatusText);
+                }
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to cancel Cotton mobile remote push token refresh after {Reason}.",
                     reason);
             }
         }

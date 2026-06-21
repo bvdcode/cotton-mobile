@@ -43,6 +43,36 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Cancels_stable_periodic_refresh_identity()
+        {
+            var host = new FakeRemotePushTokenRefreshHost();
+            var coordinator = new CottonAndroidRemotePushTokenRefreshCoordinator(host);
+
+            CottonAndroidRemotePushTokenRefreshCancelResult result =
+                await coordinator.CancelAsync();
+
+            Assert.True(result.IsCancelled);
+            CottonAndroidRemotePushTokenRefreshScheduleIdentity identity = Assert.Single(host.Cancellations);
+            Assert.Equal(CottonAndroidRemotePushTokenRefreshScheduleIdentity.WorkName, identity.UniqueWorkName);
+            Assert.Equal(identity.UniqueWorkName, identity.RefreshTag);
+        }
+
+        [Fact]
+        public async Task Disabled_host_returns_unsupported_cancel_result()
+        {
+            var coordinator = new CottonAndroidRemotePushTokenRefreshCoordinator(
+                DisabledCottonAndroidRemotePushTokenRefreshHost.Instance);
+
+            CottonAndroidRemotePushTokenRefreshCancelResult result =
+                await coordinator.CancelAsync();
+
+            Assert.False(result.IsCancelled);
+            Assert.Equal(
+                "Android remote push token refresh cancellation is unavailable on this platform.",
+                result.StatusText);
+        }
+
+        [Fact]
         public void Request_rejects_interval_below_workmanager_periodic_minimum()
         {
             Assert.Throws<ArgumentOutOfRangeException>(
@@ -57,6 +87,8 @@ namespace Cotton.Mobile.Tests
         {
             public List<CottonAndroidRemotePushTokenRefreshRequest> Requests { get; } = [];
 
+            public List<CottonAndroidRemotePushTokenRefreshScheduleIdentity> Cancellations { get; } = [];
+
             public Task<CottonAndroidRemotePushTokenRefreshScheduleResult> ScheduleAsync(
                 CottonAndroidRemotePushTokenRefreshRequest request,
                 CancellationToken cancellationToken = default)
@@ -67,6 +99,15 @@ namespace Cotton.Mobile.Tests
                     CottonAndroidRemotePushTokenRefreshScheduleResult.Scheduled(
                         request,
                         "Scheduled."));
+            }
+
+            public Task<CottonAndroidRemotePushTokenRefreshCancelResult> CancelAsync(
+                CottonAndroidRemotePushTokenRefreshScheduleIdentity scheduleIdentity,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                Cancellations.Add(scheduleIdentity);
+                return Task.FromResult(CottonAndroidRemotePushTokenRefreshCancelResult.Cancelled());
             }
         }
     }

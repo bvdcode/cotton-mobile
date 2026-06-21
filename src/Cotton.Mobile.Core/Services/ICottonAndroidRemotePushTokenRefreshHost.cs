@@ -5,5 +5,9 @@ namespace Cotton.Mobile.Services
         Task<CottonAndroidRemotePushTokenRefreshScheduleResult> ScheduleAsync(
             CottonAndroidRemotePushTokenRefreshRequest request,
             CancellationToken cancellationToken = default);
+
+        Task<CottonAndroidRemotePushTokenRefreshCancelResult> CancelAsync(
+            CottonAndroidRemotePushTokenRefreshScheduleIdentity scheduleIdentity,
+            CancellationToken cancellationToken = default);
     }
 }

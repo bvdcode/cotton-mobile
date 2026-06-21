@@ -122,6 +122,56 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Enqueue_writes_destination_ready_text_share_into_transfer_queue()
+        {
+            var textItem = new CottonShareIntakeItemSnapshot(
+                ItemId,
+                CottonShareIntakeItemType.Text,
+                "hello capture",
+                displayName: null,
+                mimeType: "text/plain");
+            CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot
+                .CreatePending(
+                    IntakeId,
+                    CottonShareIntakeKind.Send,
+                    "text/plain",
+                    [textItem],
+                    CreatedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        DestinationFolderId,
+                        "Default",
+                        "Default"));
+            await _shareIntakeStore.SaveAsync([snapshot]);
+
+            CottonShareTransferEnqueueResult result = await CreateCoordinator().EnqueueAsync(InstanceUri);
+
+            Assert.True(result.HasQueuedTransfers);
+            Assert.Equal(1, result.QueuedCount);
+            Assert.Equal(0, result.RemainingCaptureCount);
+
+            CottonTransferQueueItem transfer = Assert.Single(await _transferMetadataStore.LoadAsync(InstanceUri));
+            Assert.Equal(TransferId, transfer.Id);
+            Assert.Equal("Shared text.txt", transfer.DisplayName);
+            Assert.Equal(CottonTransferStatus.Queued, transfer.Status);
+            Assert.Equal(13, transfer.Progress.TotalBytes);
+            Assert.Equal("text/plain", transfer.ContentType);
+            Assert.Equal(DestinationFolderId, transfer.Destination?.FolderId);
+            Assert.Equal(CottonTransferSourceKind.ShareInbox, transfer.Source?.Kind);
+            Assert.Equal(ItemId.ToString("D"), transfer.Source?.SourceId);
+            Assert.Equal(13, transfer.Source?.SizeBytes);
+
+            CottonTransferStagedFileSnapshot stagedTransfer =
+                Assert.Single(await _transferStagingStore.ListAsync(InstanceUri));
+            Assert.Equal(TransferId, stagedTransfer.TransferId);
+            Assert.Equal("Shared text.txt", stagedTransfer.FileName);
+            Assert.Equal("hello capture", await File.ReadAllTextAsync(stagedTransfer.Path));
+
+            Assert.Empty(await _shareIntakeStore.LoadAsync());
+            Assert.Empty(await _shareStagingStore.ListAsync());
+        }
+
+        [Fact]
         public async Task Enqueue_leaves_text_and_missing_destination_captures_in_inbox()
         {
             CottonShareStagedContentSnapshot staged = await _shareStagingStore.StageAsync(

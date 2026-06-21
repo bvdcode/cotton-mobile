@@ -89,7 +89,7 @@ namespace Cotton.Mobile.Services
         public bool CanStageForCaptureInbox => Status == CottonShareIntakeStatus.Pending;
 
         public bool CanSelectCaptureDestination => Status == CottonShareIntakeStatus.Pending
-            && Items.Any(item => item.Type == CottonShareIntakeItemType.Uri && item.HasStagedContent);
+            && Items.Any(item => item.CanUploadFromCaptureInbox);
 
         public static CottonShareIntakeSnapshot CreatePending(
             Guid id,

@@ -125,9 +125,7 @@ namespace Cotton.Mobile.Services
                 return "Not staged";
             }
 
-            if (item.Type == CottonShareIntakeItemType.Uri
-                && item.HasStagedContent
-                && snapshot.Destination is null)
+            if (item.CanUploadFromCaptureInbox && snapshot.Destination is null)
             {
                 return "Choose folder";
             }
@@ -183,8 +181,7 @@ namespace Cotton.Mobile.Services
             CottonShareIntakeItemSnapshot item)
         {
             return snapshot.Status == CottonShareIntakeStatus.Pending
-                && item.Type == CottonShareIntakeItemType.Uri
-                && item.HasStagedContent;
+                && item.CanUploadFromCaptureInbox;
         }
 
         private static bool CanSelectDestination(
@@ -207,7 +204,9 @@ namespace Cotton.Mobile.Services
             CottonShareIntakeSnapshot snapshot,
             CottonShareIntakeItemSnapshot item)
         {
-            return CanRename(snapshot, item) && snapshot.Destination is not null;
+            return snapshot.Status == CottonShareIntakeStatus.Pending
+                && item.CanUploadFromCaptureInbox
+                && snapshot.Destination is not null;
         }
 
         private static bool IsFailureVisible(

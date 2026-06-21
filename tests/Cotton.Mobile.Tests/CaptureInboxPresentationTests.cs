@@ -93,10 +93,13 @@ namespace Cotton.Mobile.Tests
 
             CottonCaptureInboxListItem textItem = Find(snapshot, "hello from another app");
             Assert.Equal("Text", textItem.KindText);
-            Assert.Equal("Ready", textItem.StatusText);
+            Assert.Equal("Choose folder", textItem.StatusText);
             Assert.Equal("Text share captured", textItem.DetailText);
-            Assert.False(textItem.IsDestinationVisible);
-            Assert.False(textItem.CanSelectDestination);
+            Assert.Equal("No destination selected", textItem.DestinationText);
+            Assert.True(textItem.IsDestinationVisible);
+            Assert.True(textItem.CanSelectDestination);
+            Assert.False(textItem.CanRename);
+            Assert.False(textItem.CanEnqueue);
             Assert.False(textItem.IsFailureVisible);
 
             CottonCaptureInboxListItem fileItem = Find(snapshot, "photo.jpg");
@@ -109,6 +112,44 @@ namespace Cotton.Mobile.Tests
             Assert.False(fileItem.CanEnqueue);
             Assert.DoesNotContain("12 B", fileItem.MetadataText, StringComparison.Ordinal);
             Assert.False(fileItem.IsFailureVisible);
+        }
+
+        [Fact]
+        public void Snapshot_allows_destination_and_queue_for_text_share()
+        {
+            CottonShareIntakeSnapshot textShare = CottonShareIntakeSnapshot
+                .CreatePending(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    CottonShareIntakeKind.Send,
+                    "text/plain",
+                    [
+                        new CottonShareIntakeItemSnapshot(
+                            Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                            CottonShareIntakeItemType.Text,
+                            "hello from another app",
+                            displayName: null,
+                            mimeType: "text/plain")
+                    ],
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Notes",
+                        "Files / Notes"));
+
+            CottonCaptureInboxListItem textItem =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([textShare]).Items);
+
+            Assert.Equal("hello from another app", textItem.DisplayName);
+            Assert.Equal("Text", textItem.KindText);
+            Assert.Equal("Ready", textItem.StatusText);
+            Assert.Equal("Text share captured", textItem.DetailText);
+            Assert.Equal("Destination: Files / Notes", textItem.DestinationText);
+            Assert.True(textItem.IsDestinationVisible);
+            Assert.True(textItem.CanSelectDestination);
+            Assert.False(textItem.CanRename);
+            Assert.True(textItem.CanEnqueue);
+            Assert.False(textItem.IsFailureVisible);
         }
 
         [Fact]

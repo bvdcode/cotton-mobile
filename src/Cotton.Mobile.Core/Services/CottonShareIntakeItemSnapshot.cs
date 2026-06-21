@@ -116,6 +116,10 @@ namespace Cotton.Mobile.Services
 
         public bool HasStagedContent => StagedPath is not null;
 
+        public bool CanUploadFromCaptureInbox =>
+            Type == CottonShareIntakeItemType.Text
+            || (Type == CottonShareIntakeItemType.Uri && HasStagedContent);
+
         public CottonShareIntakeItemSnapshot WithStagedContent(CottonShareStagedContentSnapshot stagedContent)
         {
             ArgumentNullException.ThrowIfNull(stagedContent);

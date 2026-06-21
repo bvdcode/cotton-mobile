@@ -1,7 +1,12 @@
+using System.Text;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonShareTransferEnqueueCoordinator : ICottonShareTransferEnqueueCoordinator
     {
+        private const string DefaultTextUploadName = "Shared text.txt";
+        private const string TextContentType = "text/plain";
+
         private readonly ICottonShareIntakeStore _shareIntakeStore;
         private readonly ICottonShareContentStagingStore _shareContentStagingStore;
         private readonly ICottonTransferMetadataStore _transferMetadataStore;
@@ -58,31 +63,26 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 Guid transferId = CreateTransferId();
-                await using var content = new FileStream(
-                    candidate.Item.StagedPath!,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read,
-                    bufferSize: 81920,
-                    useAsync: true);
+                await using Stream content = CreateUploadContentStream(candidate.Item);
+                string uploadDisplayName = CreateUploadDisplayName(candidate.Item);
                 CottonTransferStagedFileSnapshot stagedFile =
                     await _transferStagingStore.StageAsync(
                         instanceUri,
                         transferId,
-                        candidate.Item.EffectiveUploadDisplayName,
+                        uploadDisplayName,
                         content,
                         cancellationToken).ConfigureAwait(false);
                 queuedTransfers.Add(
                     CottonTransferQueueItem.CreateUpload(
                         transferId,
-                        candidate.Item.EffectiveUploadDisplayName,
+                        uploadDisplayName,
                         stagedFile.SizeBytes,
                         createdAtUtc,
                         new CottonTransferDestinationSnapshot(
                             candidate.Snapshot.Destination!.FolderId,
                             candidate.Snapshot.Destination.FolderName,
                             candidate.Snapshot.Destination.Path),
-                        candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType,
+                        CreateContentType(candidate),
                         CottonTransferSourceSnapshot.CreateShareInbox(
                             candidate.Item.Id,
                             candidate.Snapshot.ReceivedAtUtc,
@@ -129,7 +129,11 @@ namespace Cotton.Mobile.Services
 
             foreach (CottonShareIntakeItemSnapshot item in snapshot.Items)
             {
-                if (item.Type == CottonShareIntakeItemType.Uri
+                if (item.Type == CottonShareIntakeItemType.Text)
+                {
+                    yield return new CaptureEnqueueCandidate(snapshot, item);
+                }
+                else if (item.Type == CottonShareIntakeItemType.Uri
                     && item.HasStagedContent
                     && File.Exists(item.StagedPath))
                 {
@@ -166,6 +170,54 @@ namespace Cotton.Mobile.Services
             }
 
             return remaining;
+        }
+
+        private static Stream CreateUploadContentStream(CottonShareIntakeItemSnapshot item)
+        {
+            if (item.Type == CottonShareIntakeItemType.Text)
+            {
+                return new MemoryStream(Encoding.UTF8.GetBytes(item.Value));
+            }
+
+            return new FileStream(
+                item.StagedPath!,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 81920,
+                useAsync: true);
+        }
+
+        private static string CreateUploadDisplayName(CottonShareIntakeItemSnapshot item)
+        {
+            return item.Type == CottonShareIntakeItemType.Text
+                ? CreateTextUploadDisplayName(item)
+                : item.EffectiveUploadDisplayName;
+        }
+
+        private static string CreateTextUploadDisplayName(CottonShareIntakeItemSnapshot item)
+        {
+            string? requestedName = item.UploadDisplayName ?? item.DisplayName;
+            if (string.IsNullOrWhiteSpace(requestedName))
+            {
+                return DefaultTextUploadName;
+            }
+
+            string name = requestedName.Trim();
+            if (CottonCloudItemNameRules.IsReservedPathSegment(name)
+                || CottonCloudItemNameRules.ContainsInvalidCharacter(name))
+            {
+                return DefaultTextUploadName;
+            }
+
+            return Path.HasExtension(name) ? name : $"{name}.txt";
+        }
+
+        private static string? CreateContentType(CaptureEnqueueCandidate candidate)
+        {
+            return candidate.Item.Type == CottonShareIntakeItemType.Text
+                ? TextContentType
+                : candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType;
         }
 
         private sealed class CaptureEnqueueCandidate

@@ -14,6 +14,7 @@ launch_app=1
 preflight_only=0
 seed_only=0
 skip_source_app_file=0
+queue_text_share=0
 expected_version_code=""
 expected_version_name=""
 share_text=""
@@ -37,6 +38,7 @@ Options:
   --preflight-only          Capture device/package/version state and exit.
   --seed-only               Seed the Android Downloads source-share file and exit.
   --skip-source-app-file    Skip the interactive source-app file-share capture.
+  --queue-text-share        After automated text intake, choose the current folder and queue it.
   --no-launch               Do not launch the app before capture.
   --help, -h                Show this help.
 
@@ -120,6 +122,10 @@ while [[ $# -gt 0 ]]; do
       skip_source_app_file=1
       shift
       ;;
+    --queue-text-share)
+      queue_text_share=1
+      shift
+      ;;
     --no-launch)
       launch_app=0
       shift
@@ -161,6 +167,11 @@ fi
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
+  exit 127
+fi
+
+if [[ "$queue_text_share" -eq 1 ]] && ! command -v python3 >/dev/null 2>&1; then
+  printf 'python3 was not found.\n' >&2
   exit 127
 fi
 
@@ -217,6 +228,79 @@ require_xml_text() {
   fi
 }
 
+tap_node_from_xml() {
+  local xml_file="$1"
+  local needle="$2"
+  local mode="${3:-exact}"
+  local point_file="$evidence_dir/tap-point.txt"
+
+  python3 - "$xml_file" "$needle" "$mode" > "$point_file" <<'PY'
+import re
+import sys
+from xml.etree import ElementTree
+
+xml_file, needle, mode = sys.argv[1:4]
+root = ElementTree.parse(xml_file).getroot()
+
+def center(bounds: str) -> tuple[int, int]:
+    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
+    if match is None:
+        raise ValueError(bounds)
+    left, top, right, bottom = (int(value) for value in match.groups())
+    return ((left + right) // 2, (top + bottom) // 2)
+
+def matches(value: str) -> bool:
+    return value == needle if mode == "exact" else needle in value
+
+for node in root.iter("node"):
+    values = (
+        node.attrib.get("text", ""),
+        node.attrib.get("content-desc", ""),
+        node.attrib.get("hint", ""),
+    )
+    if any(matches(value) for value in values):
+        print(*center(node.attrib["bounds"]))
+        raise SystemExit(0)
+
+raise SystemExit(f"Could not find UI node: {needle}")
+PY
+
+  read -r tap_x tap_y < "$point_file"
+  adb_device shell input tap "$tap_x" "$tap_y"
+}
+
+wait_for_text_capture() {
+  local prefix="$1"
+  local needle="$2"
+  local message="$3"
+  local attempt
+  local attempt_prefix
+  local attempt_xml
+
+  for attempt in 0 1 2 3 4 5 6 7 8 9; do
+    attempt_prefix="$prefix-$attempt"
+    capture_screen "$attempt_prefix"
+    attempt_xml="$evidence_dir/$attempt_prefix.xml"
+    if [[ -f "$attempt_xml" ]] && grep -Fq "$needle" "$attempt_xml"; then
+      cp "$attempt_xml" "$evidence_dir/$prefix.xml"
+      if [[ -f "$evidence_dir/$attempt_prefix.png" ]]; then
+        cp "$evidence_dir/$attempt_prefix.png" "$evidence_dir/$prefix.png"
+      fi
+      if [[ -f "$evidence_dir/$attempt_prefix-window.txt" ]]; then
+        cp "$evidence_dir/$attempt_prefix-window.txt" "$evidence_dir/$prefix-window.txt"
+      fi
+      return
+    fi
+
+    sleep 2
+  done
+
+  printf '%s\n' "$message" >&2
+  printf 'Timed out waiting for text: %s\n' "$needle" >&2
+  printf 'Evidence: %s\n' "$evidence_dir" >&2
+  exit 66
+}
+
 verify_expected_version() {
   if [[ -n "$expected_version_code" ]] \
     && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/05-package-version.txt"; then
@@ -242,6 +326,7 @@ write_metadata() {
     printf 'preflight_only=%s\n' "$preflight_only"
     printf 'seed_only=%s\n' "$seed_only"
     printf 'skip_source_app_file=%s\n' "$skip_source_app_file"
+    printf 'queue_text_share=%s\n' "$queue_text_share"
     printf 'expected_version_code=%s\n' "$expected_version_code"
     printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'share_text=%s\n' "$share_text"
@@ -273,7 +358,13 @@ Seeded file: \`$share_file_name\`
 
 - [ ] \`20-text-share-inbox.png\` / \`20-text-share-inbox.xml\` show \`Capture Inbox\`.
 - [ ] The captured item shows \`$share_text\`.
-- [ ] The captured item shows \`Text share captured\`, \`Ready\`, and \`Text\`.
+- [ ] The captured item shows \`Text share captured\`, \`Choose folder\`, \`No destination selected\`, and \`Text\`.
+
+## Automated Text Queue
+
+- [ ] If \`--queue-text-share\` was used, \`21-text-share-destination.xml\` shows \`Choose Destination\`.
+- [ ] If \`--queue-text-share\` was used, \`22-text-share-destination-saved.xml\` shows \`Ready\` and \`Destination:\`.
+- [ ] If \`--queue-text-share\` was used, \`23-text-share-queued.xml\` shows queued upload status.
 
 ## Shell URI Edge Cases
 
@@ -294,6 +385,9 @@ Seeded file: \`$share_file_name\`
 - \`05-package-version.txt\`
 - \`06-seed-share-file.txt\`
 - \`20-text-share-inbox.png\` / \`20-text-share-inbox.xml\`
+- \`21-text-share-destination.png\` / \`21-text-share-destination.xml\`
+- \`22-text-share-destination-saved.png\` / \`22-text-share-destination-saved.xml\`
+- \`23-text-share-queued.png\` / \`23-text-share-queued.xml\`
 - \`30-shell-content-uri-edge.png\` / \`30-shell-content-uri-edge.xml\`
 - \`40-file-uri-edge.png\` / \`40-file-uri-edge.xml\`
 - \`50-source-app-file-share.png\` / \`50-source-app-file-share.xml\`
@@ -422,8 +516,32 @@ capture_screen "20-text-share-inbox"
 require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Capture Inbox" "Capture Inbox did not open for text share."
 require_xml_text "$evidence_dir/20-text-share-inbox.xml" "$share_text" "Text share payload is not visible in Capture Inbox."
 require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text share captured" "Text share detail is not visible."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Ready" "Text share is not marked ready."
+require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Choose folder" "Text share is not waiting for a destination."
+require_xml_text "$evidence_dir/20-text-share-inbox.xml" "No destination selected" "Text share destination state is not visible."
 require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text" "Text share kind is not visible."
+
+if [[ "$queue_text_share" -eq 1 ]]; then
+  tap_node_from_xml "$evidence_dir/20-text-share-inbox.xml" "Destination" exact
+  wait_for_text_capture \
+    "21-text-share-destination" \
+    "Choose Destination" \
+    "Destination picker did not open for text share."
+  require_xml_text "$evidence_dir/21-text-share-destination.xml" "Choose this folder" "Destination picker did not expose current-folder selection."
+
+  tap_node_from_xml "$evidence_dir/21-text-share-destination.xml" "Choose this folder" exact
+  wait_for_text_capture \
+    "22-text-share-destination-saved" \
+    "Destination:" \
+    "Capture Inbox did not show saved text-share destination."
+  require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "$share_text" "Text share payload was lost after destination selection."
+  require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "Ready" "Text share was not ready after destination selection."
+
+  tap_node_from_xml "$evidence_dir/22-text-share-destination-saved.xml" "Queue" exact
+  wait_for_text_capture \
+    "23-text-share-queued" \
+    "Queued" \
+    "Text share did not show queued upload status."
+fi
 
 seed_content_uri="$(content_uri_for_seeded_file)"
 start_content_uri_edge_share "$seed_content_uri"

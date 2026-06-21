@@ -308,20 +308,9 @@ jobs:
       - name: Restore Firebase Android config
         if: inputs.upload_to_google_play
         run: |
-          if [ -z "${ANDROID_FIREBASE_GOOGLE_SERVICES_JSON:-}" ]; then
-            echo "ANDROID_FIREBASE_GOOGLE_SERVICES_JSON secret is required for Google Play upload." >&2
-            exit 1
-          fi
-
-          config_path="src/Cotton.Mobile/Platforms/Android/google-services.json"
-          mkdir -p "$(dirname "$config_path")"
-          printf '%s' "$ANDROID_FIREBASE_GOOGLE_SERVICES_JSON" > "$config_path"
-          chmod 600 "$config_path"
-
-          scripts/mobile/check-android-firebase-config.py \
+          scripts/mobile/restore-android-firebase-config.sh \
             --configuration Release \
-            --package-id "$GOOGLE_PLAY_PACKAGE_NAME" \
-            --config-file "$config_path"
+            --package-id "$GOOGLE_PLAY_PACKAGE_NAME"
 
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"

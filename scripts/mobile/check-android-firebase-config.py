@@ -8,6 +8,7 @@ import os
 import sys
 import xml.etree.ElementTree as ElementTree
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TypeAlias, cast
 
@@ -22,6 +23,13 @@ JsonValue: TypeAlias = (
 )
 
 LOGGER = logging.getLogger("cotton.firebase_config")
+
+
+@dataclass(frozen=True)
+class FirebaseAndroidConfigSnapshot:
+    package_names: list[str]
+    selected_package_name: str
+    api_key_count: int
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -54,24 +62,26 @@ def main(argv: Sequence[str] | None = None) -> int:
     if not expected_package:
         expected_package = resolve_project_package_id(project_path, configuration)
 
-    client_packages = collect_client_package_names(load_json_object(config_path))
-    if not client_packages:
-        LOGGER.error("Firebase Android config has no Android client package names: %s", config_path)
+    snapshot, validation_errors = validate_android_config(
+        load_json_object(config_path),
+        expected_package,
+    )
+    if validation_errors:
+        for error in validation_errors:
+            LOGGER.error("%s", error)
         return 65
 
-    if expected_package not in client_packages:
-        LOGGER.error(
-            "Firebase Android config does not contain package %s for %s builds.",
-            expected_package,
-            configuration,
-        )
-        LOGGER.error("Config package names: %s", ", ".join(client_packages))
+    if snapshot is None:
+        LOGGER.error("Firebase Android config validation failed without details.")
         return 65
 
     LOGGER.info("Firebase Android config is present: %s", config_path)
     LOGGER.info("Android configuration: %s", configuration)
     LOGGER.info("Expected package: %s", expected_package)
-    LOGGER.info("Config package names: %s", ", ".join(client_packages))
+    LOGGER.info("Config package names: %s", ", ".join(snapshot.package_names))
+    LOGGER.info("Selected package: %s", snapshot.selected_package_name)
+    LOGGER.info("Selected client Firebase resources are present.")
+    LOGGER.info("Selected client API keys: %s", snapshot.api_key_count)
     return 0
 
 
@@ -185,20 +195,139 @@ def load_json_object(config_path: Path) -> Mapping[str, JsonValue]:
     return data
 
 
-def collect_client_package_names(config: Mapping[str, JsonValue]) -> list[str]:
+def validate_android_config(
+    config: Mapping[str, JsonValue],
+    expected_package: str,
+) -> tuple[FirebaseAndroidConfigSnapshot | None, list[str]]:
+    errors: list[str] = []
+
+    project_info = get_object(config, "project_info")
+    project_number = get_required_string(
+        project_info,
+        "project_number",
+        "project_info/project_number",
+        errors,
+    )
+    get_required_string(
+        project_info,
+        "project_id",
+        "project_info/project_id",
+        errors,
+    )
+
     clients = config.get("client")
     if not isinstance(clients, list):
-        return []
+        errors.append("Firebase Android config must contain a client array.")
+        clients = []
 
+    package_names = collect_client_package_names(clients)
+    if not package_names:
+        errors.append("Firebase Android config has no Android client package names.")
+    elif expected_package not in package_names:
+        errors.append(
+            "Firebase Android config does not contain package "
+            f"{expected_package}. Config package names: {', '.join(package_names)}"
+        )
+
+    selected_client = find_client_by_package(clients, expected_package)
+    if selected_client is None:
+        return None, errors
+
+    selected_client_info = get_object(selected_client, "client_info")
+    mobile_sdk_app_id = get_required_string(
+        selected_client_info,
+        "mobilesdk_app_id",
+        f"client[{expected_package}]/client_info/mobilesdk_app_id",
+        errors,
+    )
+    api_key_count = count_api_keys(selected_client)
+    if api_key_count == 0:
+        errors.append(
+            "Firebase Android config selected client has no api_key/current_key values."
+        )
+
+    if project_number and not project_number.isdigit():
+        errors.append("Firebase Android config project_info/project_number must contain only digits.")
+
+    if mobile_sdk_app_id and project_number:
+        expected_app_id_prefix = f"1:{project_number}:android:"
+        if not mobile_sdk_app_id.startswith(expected_app_id_prefix):
+            errors.append(
+                "Firebase Android config selected client mobilesdk_app_id does not match "
+                "project_info/project_number."
+            )
+
+    if errors:
+        return None, errors
+
+    return FirebaseAndroidConfigSnapshot(
+        package_names=package_names,
+        selected_package_name=expected_package,
+        api_key_count=api_key_count,
+    ), []
+
+
+def collect_client_package_names(clients: Sequence[JsonValue]) -> list[str]:
     package_names: list[str] = []
     for client in clients:
-        client_info = get_object(client, "client_info")
-        android_client_info = get_object(client_info, "android_client_info")
-        package_name = get_string(android_client_info, "package_name")
+        if not isinstance(client, dict):
+            continue
+
+        package_name = get_client_package_name(client)
         if package_name is not None and package_name not in package_names:
             package_names.append(package_name)
 
     return package_names
+
+
+def find_client_by_package(
+    clients: Sequence[JsonValue],
+    package_name: str,
+) -> Mapping[str, JsonValue] | None:
+    for client in clients:
+        if not isinstance(client, dict):
+            continue
+
+        if get_client_package_name(client) == package_name:
+            return client
+
+    return None
+
+
+def get_client_package_name(client: Mapping[str, JsonValue]) -> str | None:
+    client_info = get_object(client, "client_info")
+    android_client_info = get_object(client_info, "android_client_info")
+    return get_string(android_client_info, "package_name")
+
+
+def count_api_keys(client: Mapping[str, JsonValue]) -> int:
+    api_keys = client.get("api_key")
+    if not isinstance(api_keys, list):
+        return 0
+
+    count = 0
+    for api_key in api_keys:
+        if not isinstance(api_key, dict):
+            continue
+
+        if get_string(api_key, "current_key") is not None:
+            count += 1
+
+    return count
+
+
+def get_required_string(
+    value: Mapping[str, JsonValue] | None,
+    key: str,
+    field_path: str,
+    errors: list[str],
+) -> str:
+    child = get_string(value, key)
+    if child is None:
+        errors.append(f"Firebase Android config is missing {field_path}.")
+        return ""
+
+    return child
 
 
 def get_object(value: JsonValue | None, key: str) -> Mapping[str, JsonValue] | None:

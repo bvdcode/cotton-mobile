@@ -183,6 +183,9 @@ jobs:
       - name: Test Android release version computation
         run: scripts/ci/test-android-release-version.sh
 
+      - name: Test Android Firebase config validation
+        run: scripts/ci/test-android-firebase-config.sh
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:

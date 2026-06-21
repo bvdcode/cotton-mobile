@@ -21,6 +21,7 @@ target_folder=""
 create_disposable_folder=0
 restore_from_trash_page=0
 delete_forever_from_trash_page=0
+restore_bulk_from_trash_page=0
 bulk_second_file=""
 bulk_second_folder=""
 create_bulk_second_disposable_folder=0
@@ -54,6 +55,8 @@ Options:
   --restore-from-trash-page Open Account -> Trash after moving the item, then restore it there.
   --delete-forever-from-trash-page
                             Open Account -> Trash after moving a disposable folder, then delete forever.
+  --restore-bulk-from-trash-page
+                            After bulk move-to-trash proof, select both Trash rows and restore them together.
   --wait-seconds N          Seconds to wait for each server mutation. Defaults to $wait_seconds.
   --no-cancel-on-timeout    Leave the app in its current state when a mutation times out.
   --preflight-only          Capture device/package/root state and exit.
@@ -64,7 +67,8 @@ The app must already have a signed-in session. Use a disposable test file/folder
 or a known smoke fixture because this script performs a real server
 trash/restore cycle when the backend responds successfully. Bulk selection
 proof moves both selected items to Trash and then verifies they are recoverable
-from the Trash page; it does not restore them automatically.
+from the Trash page. Add --restore-bulk-from-trash-page to clean up both
+items through Trash page selection restore.
 EOF
 }
 
@@ -192,6 +196,10 @@ while [[ $# -gt 0 ]]; do
       delete_forever_from_trash_page=1
       shift
       ;;
+    --restore-bulk-from-trash-page)
+      restore_bulk_from_trash_page=1
+      shift
+      ;;
     --wait-seconds)
       if [[ $# -lt 2 ]]; then
         printf 'Missing value for --wait-seconds.\n' >&2
@@ -249,7 +257,9 @@ if [[ "$restore_from_trash_page" -eq 1 && "$delete_forever_from_trash_page" -eq 
 fi
 
 if [[ "$preflight_only" -eq 1 \
-  && ( "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ) ]]; then
+  && ( "$restore_from_trash_page" -eq 1 \
+    || "$delete_forever_from_trash_page" -eq 1 \
+    || "$restore_bulk_from_trash_page" -eq 1 ) ]]; then
   printf '%s\n' 'Trash page action options cannot be combined with --preflight-only.' >&2
   exit 64
 fi
@@ -272,6 +282,11 @@ fi
 if [[ "$bulk_selection" -eq 1 \
   && ( "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ) ]]; then
   printf '%s\n' 'Bulk selection smoke verifies Trash page recoverability and cannot be combined with single-item Trash page actions.' >&2
+  exit 64
+fi
+
+if [[ "$restore_bulk_from_trash_page" -eq 1 && "$bulk_selection" -ne 1 ]]; then
+  printf '%s\n' '--restore-bulk-from-trash-page requires a bulk selection target.' >&2
   exit 64
 fi
 
@@ -714,6 +729,7 @@ write_metadata() {
     printf 'create_disposable_folder=%s\n' "$create_disposable_folder"
     printf 'restore_from_trash_page=%s\n' "$restore_from_trash_page"
     printf 'delete_forever_from_trash_page=%s\n' "$delete_forever_from_trash_page"
+    printf 'restore_bulk_from_trash_page=%s\n' "$restore_bulk_from_trash_page"
     printf 'bulk_selection=%s\n' "$bulk_selection"
     printf 'create_bulk_second_disposable_folder=%s\n' "$create_bulk_second_disposable_folder"
     printf 'bulk_second_kind=%s\n' "$bulk_second_kind"
@@ -766,6 +782,7 @@ Second target name: \`$bulk_second_name\`
 
 - [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
 - [ ] \`66-trash-page.xml\` shows the Trash page chrome, both target items, \`Restore\`, and \`Delete forever\`.
+- [ ] If \`restore_bulk_from_trash_page=1\`, \`69-trash-bulk-two-selected.xml\` shows \`2 selected\`, \`70-trash-bulk-restore-confirm.xml\` shows the restore confirmation, and \`80-after-trash-bulk-restore.xml\` shows \`2 selected items restored.\`.
 - [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
 EOF
       return
@@ -1193,6 +1210,88 @@ wait_for_bulk_trash_page_items() {
   exit 68
 }
 
+restore_bulk_from_trash_page() {
+  local selection_text
+
+  tap_clickable_from_xml "$evidence_dir/66-trash-page.xml" "Select" exact
+  sleep 1
+  capture_screen "67-trash-bulk-select-mode"
+  require_xml_text "$evidence_dir/67-trash-bulk-select-mode.xml" "Select trash items" \
+    "Trash page selection mode did not open."
+  require_xml_text "$evidence_dir/67-trash-bulk-select-mode.xml" "Tap items to select them." \
+    "Trash page selection mode did not explain item selection."
+
+  tap_row_from_xml "$evidence_dir/67-trash-bulk-select-mode.xml" "$target_name"
+  sleep 1
+  capture_screen "68-trash-bulk-first-selected"
+  require_xml_text "$evidence_dir/68-trash-bulk-first-selected.xml" "1 selected" \
+    "Primary Trash row did not become selected."
+
+  tap_row_from_xml "$evidence_dir/68-trash-bulk-first-selected.xml" "$bulk_second_name"
+  sleep 1
+  capture_screen "69-trash-bulk-two-selected"
+  require_xml_text "$evidence_dir/69-trash-bulk-two-selected.xml" "2 selected" \
+    "Second Trash row did not join the selection."
+  require_xml_text "$evidence_dir/69-trash-bulk-two-selected.xml" "Restore" \
+    "Trash selection bar did not expose Restore."
+  require_xml_text "$evidence_dir/69-trash-bulk-two-selected.xml" "Delete forever" \
+    "Trash selection bar did not expose Delete forever."
+
+  tap_clickable_from_xml "$evidence_dir/69-trash-bulk-two-selected.xml" "Restore" exact
+  sleep 1
+  capture_screen "70-trash-bulk-restore-confirm"
+  selection_text="$(format_bulk_selection_text)"
+  require_xml_text "$evidence_dir/70-trash-bulk-restore-confirm.xml" "Restore selected items?" \
+    "Trash bulk restore confirmation did not open."
+  require_xml_text "$evidence_dir/70-trash-bulk-restore-confirm.xml" \
+    "Restore 2 selected items to their original locations?" \
+    "Trash bulk restore confirmation did not describe the selected item count."
+  tap_clickable_from_xml "$evidence_dir/70-trash-bulk-restore-confirm.xml" "Restore" exact
+
+  wait_for_bulk_trash_restore_completion "$selection_text"
+}
+
+wait_for_bulk_trash_restore_completion() {
+  local selection_text="$1"
+  local attempt_limit=$((wait_seconds / 3))
+  local attempt=0
+  local xml_file
+
+  if [[ "$attempt_limit" -lt 1 ]]; then
+    attempt_limit=1
+  fi
+
+  while [[ "$attempt" -le "$attempt_limit" ]]; do
+    sleep 3
+    capture_screen "80-after-trash-bulk-restore-$attempt"
+    xml_file="$evidence_dir/80-after-trash-bulk-restore-$attempt.xml"
+
+    if xml_has_text "$xml_file" "2 selected items restored."; then
+      cp "$xml_file" "$evidence_dir/80-after-trash-bulk-restore.xml"
+      if [[ -f "$evidence_dir/80-after-trash-bulk-restore-$attempt.png" ]]; then
+        cp "$evidence_dir/80-after-trash-bulk-restore-$attempt.png" \
+          "$evidence_dir/80-after-trash-bulk-restore.png"
+      fi
+      return
+    fi
+
+    if xml_has_text "$xml_file" "Could not restore selected items." \
+      || xml_has_text "$xml_file" "Offline. Restore needs internet." \
+      || xml_has_text "$xml_file" "Selection action cancelled." \
+      || xml_has_text "$xml_file" "0 of 2 selected items restored."; then
+      printf 'Trash page bulk restore did not complete successfully for %s.\n' "$selection_text" >&2
+      printf 'Evidence: %s\n' "$xml_file" >&2
+      exit 68
+    fi
+
+    attempt=$((attempt + 1))
+  done
+
+  printf 'Timed out waiting for Trash page bulk restore completion.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 68
+}
+
 open_target_actions() {
   tap_clickable_from_xml "$target_xml" "Actions for $target_name" exact
   sleep 1
@@ -1491,8 +1590,15 @@ if [[ "$bulk_selection" -eq 1 ]]; then
   confirm_bulk_move_to_trash
   wait_for_bulk_trash_completion
   open_bulk_trash_page
+  if [[ "$restore_bulk_from_trash_page" -eq 1 ]]; then
+    restore_bulk_from_trash_page
+  fi
   capture_text "99-logcat.txt" adb_device logcat -d -v time
-  printf 'Files bulk selection trash evidence captured in %s\n' "$evidence_dir"
+  if [[ "$restore_bulk_from_trash_page" -eq 1 ]]; then
+    printf 'Files bulk selection trash and Trash restore evidence captured in %s\n' "$evidence_dir"
+  else
+    printf 'Files bulk selection trash evidence captured in %s\n' "$evidence_dir"
+  fi
   exit 0
 fi
 

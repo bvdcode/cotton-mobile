@@ -405,17 +405,17 @@ namespace Cotton.Mobile.ViewModels
                 case CottonSyncRootRunRoute.CloudToDevice:
                     CottonCloudToDeviceSyncRunSummary cloudSummary =
                         await _syncCoordinator.RunRootAsync(instanceUri, root);
-                    return CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(cloudSummary);
+                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(cloudSummary);
 
                 case CottonSyncRootRunRoute.DeviceToCloud:
                     CottonDeviceToCloudSyncRunSummary deviceSummary =
                         await RunDeviceToCloudRootAsync(instanceUri, root);
-                    return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
+                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary);
 
                 case CottonSyncRootRunRoute.Bidirectional:
                     CottonBidirectionalSyncRunSummary bidirectionalSummary =
                         await RunBidirectionalRootAsync(instanceUri, root);
-                    return CottonBidirectionalSyncStatusText.CreateCompletedStatus(bidirectionalSummary);
+                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(bidirectionalSummary);
 
                 default:
                     throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported.");

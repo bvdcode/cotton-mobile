@@ -85,33 +85,74 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Combined_status_reports_device_to_cloud_destructive_review()
         {
-            CottonSyncRootSnapshot root = CreateDeviceRoot(DeviceRootId);
-            var plan = new CottonDeviceToCloudSyncPlanSnapshot(
-                root.Id,
-                root.CloudFolder.FolderId,
-                root.CloudFolder.FolderName,
-                [
-                    new CottonDeviceToCloudSyncPlanItem(
-                        CottonDeviceToCloudSyncActionKind.DeleteRemoteFile,
-                        CottonFileBrowserEntryType.File,
-                        "old.txt",
-                        "old.txt",
-                        Guid.Parse("99999999-9999-9999-9999-999999999999"),
-                        "\"etag-old\"",
-                        localUpdatedAtUtc: null,
-                        sizeBytes: 12,
-                        contentType: "text/plain")
-                ]);
-            var deviceSummary = new CottonDeviceToCloudSyncRunSummary(
-                [
-                    CottonDeviceToCloudSyncRootRunResult.SkippedDestructiveReviewRequired(root, plan),
-                ]);
+            CottonDeviceToCloudSyncRunSummary deviceSummary = CreateDeviceDestructiveReviewSummary();
 
             Assert.Equal(
                 "Sync complete. 1 cloud removal needs review, 1 root skipped.",
                 CottonSyncSettingsRunStatusText.CreateCompletedStatus(
                     new CottonCloudToDeviceSyncRunSummary([]),
                     deviceSummary));
+        }
+
+        [Fact]
+        public void Single_root_status_reports_destructive_review_cancellation()
+        {
+            Assert.Equal(
+                "Sync cancelled.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(
+                    CreateDeviceDestructiveReviewSummary()));
+            Assert.Equal(
+                "Sync cancelled.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(
+                    CreateBidirectionalDestructiveReviewSummary()));
+        }
+
+        [Fact]
+        public void Single_root_status_reports_completed_results()
+        {
+            CottonCloudToDeviceSyncRunSummary cloudSummary = CreateCloudSummary(
+                new CottonCloudToDeviceSyncExecutionResult(
+                    downloadedCount: 1,
+                    refreshedCount: 0,
+                    renamedCount: 0,
+                    removedCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0));
+            CottonDeviceToCloudSyncRunSummary deviceSummary = CreateDeviceSummary(
+                new CottonDeviceToCloudSyncExecutionResult(
+                    uploadedCount: 1,
+                    refreshedCount: 0,
+                    createdFolderCount: 0,
+                    deletedRemoteFileCount: 0,
+                    removedManifestCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0));
+            CottonBidirectionalSyncRunSummary bidirectionalSummary = CreateBidirectionalSummary(
+                new CottonCloudToDeviceSyncExecutionResult(
+                    downloadedCount: 0,
+                    refreshedCount: 0,
+                    renamedCount: 0,
+                    removedCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0),
+                new CottonDeviceToCloudSyncExecutionResult(
+                    uploadedCount: 1,
+                    refreshedCount: 0,
+                    createdFolderCount: 0,
+                    deletedRemoteFileCount: 0,
+                    removedManifestCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 0));
+
+            Assert.Equal(
+                "Sync complete. 1 downloaded.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(cloudSummary));
+            Assert.Equal(
+                "Sync complete. 1 uploaded.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary));
+            Assert.Equal(
+                "Bidirectional sync complete. 1 uploaded.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(bidirectionalSummary));
         }
 
         [Fact]
@@ -235,6 +276,32 @@ namespace Cotton.Mobile.Tests
             return new CottonDeviceToCloudSyncRunSummary(results);
         }
 
+        private static CottonDeviceToCloudSyncRunSummary CreateDeviceDestructiveReviewSummary()
+        {
+            CottonSyncRootSnapshot root = CreateDeviceRoot(DeviceRootId);
+            var plan = new CottonDeviceToCloudSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                [
+                    new CottonDeviceToCloudSyncPlanItem(
+                        CottonDeviceToCloudSyncActionKind.DeleteRemoteFile,
+                        CottonFileBrowserEntryType.File,
+                        "old.txt",
+                        "old.txt",
+                        Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                        "\"etag-old\"",
+                        localUpdatedAtUtc: null,
+                        sizeBytes: 12,
+                        contentType: "text/plain"),
+                ]);
+
+            return new CottonDeviceToCloudSyncRunSummary(
+                [
+                    CottonDeviceToCloudSyncRootRunResult.SkippedDestructiveReviewRequired(root, plan),
+                ]);
+        }
+
         private static CottonBidirectionalSyncRunSummary CreateBidirectionalSummary(
             CottonCloudToDeviceSyncExecutionResult cloudExecutionResult,
             CottonDeviceToCloudSyncExecutionResult deviceExecutionResult)
@@ -273,6 +340,48 @@ namespace Cotton.Mobile.Tests
                     root.CloudFolder.FolderId,
                     root.CloudFolder.FolderName,
                     []));
+        }
+
+        private static CottonBidirectionalSyncRunSummary CreateBidirectionalDestructiveReviewSummary()
+        {
+            CottonSyncRootSnapshot root = CreateBidirectionalRoot();
+            var preflightPlan = new CottonBidirectionalSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                [
+                    new CottonBidirectionalSyncPlanItem(
+                        CottonBidirectionalSyncActionKind.DeleteRemoteFile,
+                        CottonFileBrowserEntryType.File,
+                        "old.txt",
+                        "old.txt",
+                        previousRelativePath: null,
+                        Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                        "\"etag-old\"",
+                        localUpdatedAtUtc: null,
+                        remoteUpdatedAtUtc: DateTime.UtcNow,
+                        sizeBytes: 12,
+                        contentType: "text/plain"),
+                ]);
+            var executionPlan = new CottonBidirectionalSyncExecutionPlan(
+                preflightPlan,
+                new CottonCloudToDeviceSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []),
+                new CottonDeviceToCloudSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []));
+
+            return new CottonBidirectionalSyncRunSummary(
+                [
+                    CottonBidirectionalSyncRootRunResult.SkippedDestructiveReviewRequired(
+                        root,
+                        executionPlan),
+                ]);
         }
 
         private static CottonSyncRootSnapshot CreateCloudRoot()

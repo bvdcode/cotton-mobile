@@ -833,9 +833,11 @@ trap capture_failure_evidence EXIT
 
 wait_for_files_root() {
   local attempt
+  local attempt_limit
   local xml_file
 
-  for attempt in 0 1 2 3 4 5 6 7 8 9; do
+  attempt_limit=$(( (wait_seconds + 2) / 3 ))
+  for attempt in $(seq 0 "$((attempt_limit - 1))"); do
     capture_screen "20-files-root-$attempt"
     xml_file="$evidence_dir/20-files-root-$attempt.xml"
     if xml_has_text "$xml_file" "Files" \
@@ -849,10 +851,7 @@ wait_for_files_root() {
       return
     fi
 
-    adb_device shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
-    sleep 1
-    adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/20-relaunch-$attempt.txt" || true
-    sleep 2
+    sleep 3
   done
 
   printf 'Files root with signed-in chrome is not visible.\n' >&2

@@ -150,6 +150,47 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
         }
 
+        [Fact]
+        public async Task Run_root_skips_roots_that_cannot_run()
+        {
+            CottonSyncRootSnapshot notReady = CreateRoot(
+                permissionStatus: CottonSyncRootPermissionStatus.NeedsUserGrant);
+            CottonSyncRootSnapshot appPrivateRoot = CreateRoot(
+                rootId: Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                storageKind: CottonSyncRootStorageKind.AppPrivateDirectory,
+                rootKey: "app-private-bidirectional");
+            CottonSyncRootSnapshot cloudToDevice = CreateRoot(
+                rootId: Guid.Parse("88888888-8888-8888-8888-888888888888"),
+                direction: CottonSyncDirection.CloudToDevice);
+            await _pauseStore.SetPausedAsync(InstanceUri, notReady.Id, isPaused: true);
+
+            CottonBidirectionalSyncRunSummary pausedSummary = await _coordinator.RunRootAsync(InstanceUri, notReady);
+            CottonBidirectionalSyncRunSummary notReadySummary = await _coordinator.RunRootAsync(
+                InstanceUri,
+                CreateRoot(
+                    rootId: Guid.Parse("99999999-9999-9999-9999-999999999999"),
+                    permissionStatus: CottonSyncRootPermissionStatus.NeedsUserGrant));
+            CottonBidirectionalSyncRunSummary appPrivateSummary =
+                await _coordinator.RunRootAsync(InstanceUri, appPrivateRoot);
+            CottonBidirectionalSyncRunSummary cloudToDeviceSummary =
+                await _coordinator.RunRootAsync(InstanceUri, cloudToDevice);
+
+            Assert.Equal(
+                CottonBidirectionalSyncRootRunStatus.SkippedPaused,
+                Assert.Single(pausedSummary.RootResults).Status);
+            Assert.Equal(
+                CottonBidirectionalSyncRootRunStatus.SkippedNotReady,
+                Assert.Single(notReadySummary.RootResults).Status);
+            Assert.Equal(
+                CottonBidirectionalSyncRootRunStatus.SkippedUnsupportedLocalRoot,
+                Assert.Single(appPrivateSummary.RootResults).Status);
+            Assert.Equal(
+                CottonBidirectionalSyncRootRunStatus.SkippedUnsupportedDirection,
+                Assert.Single(cloudToDeviceSummary.RootResults).Status);
+            Assert.Empty(_cloudToDeviceFileOperator.DownloadedRelativePaths);
+            Assert.Empty(_deviceToCloudFileOperator.UploadedNewRelativePaths);
+        }
+
         public void Dispose()
         {
             if (Directory.Exists(_directory))
@@ -158,19 +199,24 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private static CottonSyncRootSnapshot CreateRoot()
+        private static CottonSyncRootSnapshot CreateRoot(
+            Guid? rootId = null,
+            CottonSyncDirection direction = CottonSyncDirection.Bidirectional,
+            CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree,
+            string rootKey = "content://tree/projects",
+            CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available)
         {
             return new CottonSyncRootSnapshot(
-                SyncRootId,
+                rootId ?? SyncRootId,
                 InstanceUri,
                 "account-1",
                 new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
                 new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                    "content://tree/projects",
+                    storageKind,
+                    rootKey,
                     "Projects",
-                    CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.Bidirectional);
+                    permissionStatus),
+                direction);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(

@@ -860,8 +860,8 @@ namespace Cotton.Mobile.ViewModels
                 return Task.CompletedTask;
             }
 
-            _display.ShowFileActionCancelling("Cancelling...");
-            _fileActionCancellation.Cancel();
+            CancelCurrentFileAction();
+            _display.ShowFilesStatus("File action cancelled.");
             return Task.CompletedTask;
         }
 

@@ -254,6 +254,17 @@ capture_screen() {
   fi
 }
 
+capture_failure_evidence() {
+  local exit_code=$?
+
+  if [[ "$exit_code" -ne 0 && -d "$evidence_dir" ]]; then
+    capture_screen "98-failure" || true
+    capture_text "99-logcat.txt" adb_device logcat -d -v time || true
+  fi
+
+  exit "$exit_code"
+}
+
 xml_has_text() {
   local xml_file="$1"
   local needle="$2"
@@ -313,7 +324,19 @@ for node in root.iter("node"):
         print(*center(parse_bounds(node.attrib["bounds"])))
         raise SystemExit(0)
 
-raise SystemExit(f"Could not find clickable UI node: {needle}")
+for node in root.iter("node"):
+    if node.attrib.get("enabled") != "true":
+        continue
+    values = (
+        node.attrib.get("text", ""),
+        node.attrib.get("content-desc", ""),
+        node.attrib.get("hint", ""),
+    )
+    if any(matches(value) for value in values):
+        print(*center(parse_bounds(node.attrib["bounds"])))
+        raise SystemExit(0)
+
+raise SystemExit(f"Could not find UI node: {needle}")
 PY
 
   read -r tap_x tap_y < "$point_file"
@@ -444,6 +467,8 @@ Target name: \`$target_name\`
 - [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
 EOF
 }
+
+trap capture_failure_evidence EXIT
 
 wait_for_files_root() {
   local attempt
@@ -618,6 +643,7 @@ wait_for_trash_follow_up() {
     if xml_has_text "$xml_file" "Could not move file to trash." \
       || xml_has_text "$xml_file" "Could not move folder to trash." \
       || xml_has_text "$xml_file" "Offline. Move to trash needs internet." \
+      || xml_has_text "$xml_file" "Move to trash is taking longer than expected. Refresh and try again." \
       || xml_has_text "$xml_file" "Move to trash cancelled."; then
       printf 'Move to trash did not complete successfully.\n' >&2
       printf 'Evidence: %s\n' "$xml_file" >&2
@@ -667,6 +693,7 @@ wait_for_restore_completion() {
 
     if xml_has_text "$xml_file" "Could not restore item." \
       || xml_has_text "$xml_file" "Offline. Restore needs internet." \
+      || xml_has_text "$xml_file" "Restore is taking longer than expected. Refresh and try again." \
       || xml_has_text "$xml_file" "Restore cancelled."; then
       printf 'Restore did not complete successfully.\n' >&2
       printf 'Evidence: %s\n' "$xml_file" >&2

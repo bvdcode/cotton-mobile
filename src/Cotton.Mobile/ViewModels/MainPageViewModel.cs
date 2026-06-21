@@ -70,6 +70,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly ICottonAccountSessionService _accountSessionService;
         private readonly ICottonRemotePushSessionRegistrationService _remotePushRegistrationService;
+        private readonly CottonAndroidRemotePushTokenRefreshCoordinator _remotePushTokenRefreshCoordinator;
         private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceSyncCoordinator;
         private readonly MainPageFileBrowserController _fileBrowser;
         private readonly IMainPagePresentationService _presentationService;
@@ -137,6 +138,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonCloudShareLinkService cloudShareLinkService,
             ICottonAccountSessionService accountSessionService,
             ICottonRemotePushSessionRegistrationService remotePushRegistrationService,
+            CottonAndroidRemotePushTokenRefreshCoordinator remotePushTokenRefreshCoordinator,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
             IFileThumbnailProvider thumbnailProvider,
             CottonCloudToDeviceSyncRootSetupService cloudToDeviceSyncRootSetupService,
@@ -202,6 +204,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
             ArgumentNullException.ThrowIfNull(accountSessionService);
             ArgumentNullException.ThrowIfNull(remotePushRegistrationService);
+            ArgumentNullException.ThrowIfNull(remotePushTokenRefreshCoordinator);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
             ArgumentNullException.ThrowIfNull(thumbnailProvider);
             ArgumentNullException.ThrowIfNull(cloudToDeviceSyncRootSetupService);
@@ -251,6 +254,7 @@ namespace Cotton.Mobile.ViewModels
             _cloudShareLinkService = cloudShareLinkService;
             _accountSessionService = accountSessionService;
             _remotePushRegistrationService = remotePushRegistrationService;
+            _remotePushTokenRefreshCoordinator = remotePushTokenRefreshCoordinator;
             _cloudToDeviceSyncCoordinator = cloudToDeviceSyncCoordinator;
             _presentationService = presentationService;
             _logger = logger;
@@ -1746,6 +1750,7 @@ namespace Cotton.Mobile.ViewModels
                 ShowTransferActivityIndicators(restoredTransfers);
                 await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
                 await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(result.InstanceUri);
+                _ = ScheduleRemotePushTokenRefreshBestEffortAsync("authenticated session");
                 string? accountScopeKey = CottonAccountScopeKey.TryCreateFromUsername(
                     result.User.Username,
                     out string resolvedAccountScopeKey)
@@ -1948,6 +1953,29 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(
                     exception,
                     "Failed to schedule Cotton mobile cloud-to-device background sync after {Reason}.",
+                    reason);
+            }
+        }
+
+        private async Task ScheduleRemotePushTokenRefreshBestEffortAsync(string reason)
+        {
+            try
+            {
+                CottonAndroidRemotePushTokenRefreshScheduleResult result =
+                    await _remotePushTokenRefreshCoordinator.ScheduleAsync();
+                if (result.IsScheduled)
+                {
+                    _logger.LogInformation(
+                        "Scheduled Cotton mobile remote push token refresh after {Reason}: {StatusText}",
+                        reason,
+                        result.StatusText);
+                }
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to schedule Cotton mobile remote push token refresh after {Reason}.",
                     reason);
             }
         }

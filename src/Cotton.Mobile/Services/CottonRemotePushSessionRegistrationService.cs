@@ -116,6 +116,38 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public async Task RefreshCurrentSessionBestEffortAsync(
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
+                if (instanceUri is null)
+                {
+                    return;
+                }
+
+                TokenPairDto? tokens = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
+                if (tokens is null
+                    || string.IsNullOrWhiteSpace(tokens.AccessToken)
+                    || string.IsNullOrWhiteSpace(tokens.RefreshToken))
+                {
+                    return;
+                }
+
+                await RegisterCurrentSessionBestEffortAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                RecordRegistrationStatus(CottonRemotePushRegistrationStatus.Unavailable);
+                _logger.LogWarning(exception, "Failed to refresh Cotton mobile remote push token registration from the saved session.");
+            }
+        }
+
         public async Task HandleNewTokenAsync(
             string token,
             CancellationToken cancellationToken = default)

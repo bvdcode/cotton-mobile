@@ -6,6 +6,9 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CancellationToken cancellationToken = default);
 
+        Task RefreshCurrentSessionBestEffortAsync(
+            CancellationToken cancellationToken = default);
+
         Task RevokeCurrentSessionBestEffortAsync(
             Uri instanceUri,
             CancellationToken cancellationToken = default);

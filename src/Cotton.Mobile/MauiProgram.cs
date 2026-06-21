@@ -263,6 +263,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonRemotePushPreferenceService, CottonRemotePushPreferenceService>();
 #if ANDROID
 			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider, AndroidFirebaseMessagingTokenProvider>();
+			builder.Services.AddSingleton<ICottonAndroidRemotePushTokenRefreshHost, AndroidRemotePushTokenRefreshHost>();
 #else
 			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider>(_ =>
 				new CottonStaticRemotePushPlatformTokenProvider(
@@ -270,8 +271,11 @@ namespace Cotton.Mobile
 						CottonRemotePushProviderKind.FirebaseCloudMessaging,
 						CottonRemotePushMobilePlatform.Ios,
 						"Remote push token provider is not configured for this platform.")));
+			builder.Services.AddSingleton<ICottonAndroidRemotePushTokenRefreshHost>(_ =>
+				DisabledCottonAndroidRemotePushTokenRefreshHost.Instance);
 #endif
 			builder.Services.AddSingleton<CottonRemotePushRegistrationCoordinator>();
+			builder.Services.AddSingleton<CottonAndroidRemotePushTokenRefreshCoordinator>();
 			builder.Services.AddSingleton<CottonRemotePushSessionRegistrationService>();
 			builder.Services.AddSingleton<ICottonRemotePushSessionRegistrationService>(services =>
 				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());

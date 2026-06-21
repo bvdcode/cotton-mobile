@@ -502,6 +502,7 @@ write_result() {
     printf 'registered_log_count=%s\n' "$(grep -c 'Registered the Cotton mobile remote push token for the current session.' "$evidence_dir/90-remote-push-log.txt" || true)"
     printf 'not_configured_log_count=%s\n' "$(grep -c 'not configured' "$evidence_dir/90-remote-push-log.txt" || true)"
     printf 'unavailable_log_count=%s\n' "$(grep -c 'unavailable' "$evidence_dir/90-remote-push-log.txt" || true)"
+    printf 'periodic_refresh_schedule_log_count=%s\n' "$(grep -c 'remote push token refresh' "$evidence_dir/90-remote-push-log.txt" || true)"
   } > "$evidence_dir/91-result.txt"
 }
 
@@ -576,7 +577,7 @@ sleep "$wait_seconds"
 capture_window "20-after-launch"
 
 adb_device logcat -d -v threadtime |
-  awk '/Cotton mobile remote push|remote push token registration|Firebase Cloud Messaging|Google Play services/' \
+  awk '/Cotton mobile remote push|remote push token registration|remote push token refresh|Firebase Cloud Messaging|Google Play services/' \
     > "$evidence_dir/90-remote-push-log.txt"
 
 registration_status="no_signal"

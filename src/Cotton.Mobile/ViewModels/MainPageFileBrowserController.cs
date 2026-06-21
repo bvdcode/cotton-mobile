@@ -67,6 +67,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
         private readonly ICottonFileTrashService _fileTrashService;
+        private readonly ICottonFolderTrashService _folderTrashService;
         private readonly ICottonTrashRestoreService _trashRestoreService;
         private readonly IFileVersionHistoryPageService _fileVersionHistoryPageService;
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
@@ -121,6 +122,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             ICottonFileTrashService fileTrashService,
+            ICottonFolderTrashService folderTrashService,
             ICottonTrashRestoreService trashRestoreService,
             IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonCloudShareLinkService cloudShareLinkService,
@@ -158,6 +160,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(fileTrashService);
+            ArgumentNullException.ThrowIfNull(folderTrashService);
             ArgumentNullException.ThrowIfNull(trashRestoreService);
             ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
@@ -195,6 +198,7 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
             _fileTrashService = fileTrashService;
+            _folderTrashService = folderTrashService;
             _trashRestoreService = trashRestoreService;
             _fileVersionHistoryPageService = fileVersionHistoryPageService;
             _cloudShareLinkService = cloudShareLinkService;
@@ -903,7 +907,15 @@ namespace Cotton.Mobile.ViewModels
                     await KeepFileOfflineAsync(currentEntry);
                     break;
                 case MainPageFileAction.MoveToTrash:
-                    await MoveFileToTrashAsync(currentEntry);
+                    if (currentEntry.Type == CottonFileBrowserEntryType.Folder)
+                    {
+                        await MoveFolderToTrashAsync(currentEntry);
+                    }
+                    else
+                    {
+                        await MoveFileToTrashAsync(currentEntry);
+                    }
+
                     break;
                 case MainPageFileAction.Open:
                     await OpenFileAsync(currentEntry);
@@ -955,7 +967,7 @@ namespace Cotton.Mobile.ViewModels
             string? action = await _dialogService.ShowActionSheetAsync(
                 folder.Name,
                 CancelAction,
-                null,
+                MoveToTrashAction,
                 actions.ToArray());
 
             CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
@@ -980,6 +992,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case CottonFolderSyncActionSheet.MainAction:
                     await ShowFolderSyncActionsAsync(currentFolder);
+                    break;
+                case MoveToTrashAction:
+                    await MoveFolderToTrashAsync(currentFolder, instanceUri);
                     break;
             }
         }
@@ -4630,6 +4645,143 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await MoveFileToTrashAsync(file, instanceUri);
+        }
+
+        private async Task MoveFolderToTrashAsync(CottonFileBrowserEntry folder)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to move folders to trash.");
+                return;
+            }
+
+            await MoveFolderToTrashAsync(folder, instanceUri);
+        }
+
+        private async Task MoveFolderToTrashAsync(CottonFileBrowserEntry folder, Uri instanceUri)
+        {
+            if (ShowOfflineRetryIfNeeded(
+                MainPageFileAction.MoveToTrash,
+                folder,
+                CottonFolderTrashStatusText.OfflineUnavailableStatus))
+            {
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonFolderTrashStatusText.ConfirmTitle,
+                CottonFolderTrashStatusText.CreateConfirmMessage(folder.Name),
+                CottonFolderTrashStatusText.ConfirmAction,
+                CancelAction);
+
+            CottonFileBrowserEntry? currentFolder = GetCurrentVisibleEntry(folder, instanceUri);
+            if (currentFolder is null)
+            {
+                return;
+            }
+
+            if (!confirmed)
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFolderTrashStatusText.CancelledStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonFolderTrashStatusText.CreateMovingStatus(currentFolder.Name));
+            bool didEndFileAction = false;
+
+            try
+            {
+                CottonFolderTrashMoveResult result = await AwaitFileServerMutationAsync(
+                    _folderTrashService.MoveFolderToTrashAsync(
+                        instanceUri,
+                        currentFolder,
+                        fileActionCancellation.Token),
+                    fileActionCancellation,
+                    CottonFolderTrashStatusText.TimedOutStatus);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                didEndFileAction = true;
+                await RefreshAsync();
+                if (CanUseFileBrowserContext(instanceUri))
+                {
+                    ShowFileActionRetry(
+                        MainPageFileAction.RestoreFromTrash,
+                        currentFolder,
+                        result.StatusText,
+                        CottonTrashRestoreStatusText.RestoreAction);
+                }
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder trash authorization failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    didEndFileAction = true;
+                    _logger.LogDebug("Ignored stale Cotton mobile folder trash cancellation {FolderId}.", folder.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFolderTrashStatusText.CancelledStatus);
+            }
+            catch (TimeoutException exception)
+            {
+                didEndFileAction = true;
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder trash timeout {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Timed out moving Cotton mobile folder to trash {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.MoveToTrash,
+                    folder,
+                    exception.Message);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile folder trash failure {FolderId}.", folder.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to move Cotton mobile folder to trash {FolderId}.", folder.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.MoveToTrash,
+                    folder,
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonFolderTrashStatusText.FailedStatus,
+                        CottonFolderTrashStatusText.OfflineUnavailableStatus));
+            }
+            finally
+            {
+                if (!didEndFileAction)
+                {
+                    EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                }
+            }
         }
 
         private async Task MoveFileToTrashAsync(CottonFileBrowserEntry file, Uri instanceUri)

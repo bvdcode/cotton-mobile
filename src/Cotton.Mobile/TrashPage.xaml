@@ -15,6 +15,10 @@
                      Command="{Binding LoadCommand}" />
         <ToolbarItem Text="{Binding SelectionToolbarText}"
                      Command="{Binding ToggleSelectionModeCommand}" />
+        <ToolbarItem Text="Empty"
+                     Order="Secondary"
+                     Priority="10"
+                     Command="{Binding EmptyTrashCommand}" />
     </ContentPage.ToolbarItems>
 
     <Grid Padding="16"

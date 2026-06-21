@@ -767,6 +767,8 @@ write_metadata() {
     printf 'target_file=%s\n' "$target_file"
     printf 'target_folder=%s\n' "$target_folder"
     printf 'maui_popups_docs=https://learn.microsoft.com/en-us/dotnet/maui/user-interface/pop-ups\n'
+    printf 'maui_toolbar_docs=https://learn.microsoft.com/en-us/dotnet/maui/user-interface/toolbaritem\n'
+    printf 'maui_commanding_docs=https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/data-binding/commanding\n'
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
     printf 'android_uiautomator_docs=https://developer.android.com/training/testing/other-components/ui-automator\n'
   } > "$evidence_dir/metadata.env"
@@ -808,6 +810,7 @@ Second target name: \`$bulk_second_name\`
 
 - [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
 - [ ] \`66-trash-page.xml\` shows the Trash page chrome, both target items, \`Restore\`, and \`Delete forever\`.
+- [ ] \`66-trash-overflow.xml\` shows the \`Empty\` toolbar overflow action without executing it.
 - [ ] If \`restore_bulk_from_trash_page=1\`, \`69-trash-bulk-two-selected.xml\` shows \`2 selected\`, \`70-trash-bulk-restore-confirm.xml\` shows the restore confirmation, and \`80-after-trash-bulk-restore.xml\` shows \`2 selected items restored.\`.
 - [ ] If \`delete_bulk_forever_from_trash_page=1\`, \`69-trash-bulk-two-selected.xml\` shows \`2 selected\`, \`70-trash-bulk-delete-forever-confirm.xml\` shows the permanent-delete confirmation, and \`80-after-trash-bulk-delete-forever.xml\` shows \`2 selected items deleted forever.\`.
 - [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
@@ -849,6 +852,7 @@ EOF
 
 - [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
 - [ ] \`66-trash-page.xml\` shows the Trash page chrome, target item, \`Restore\`, and \`Delete forever\`.
+- [ ] \`66-trash-overflow.xml\` shows the \`Empty\` toolbar overflow action without executing it.
 
 EOF
     fi
@@ -1189,6 +1193,7 @@ open_bulk_trash_page() {
   tap_clickable_from_xml "$evidence_dir/65-account-actions.xml" "Trash" exact
   sleep 2
   wait_for_bulk_trash_page_items
+  verify_empty_trash_overflow_action
 }
 
 wait_for_bulk_trash_page_items() {
@@ -1235,6 +1240,18 @@ wait_for_bulk_trash_page_items() {
   printf 'Timed out waiting for both bulk target rows on Trash page.\n' >&2
   printf 'Evidence: %s\n' "$xml_file" >&2
   exit 68
+}
+
+verify_empty_trash_overflow_action() {
+  require_xml_text "$evidence_dir/66-trash-page.xml" "More" \
+    "Trash page did not expose the toolbar overflow for Empty."
+  tap_clickable_from_xml "$evidence_dir/66-trash-page.xml" "More" contains
+  sleep 1
+  capture_screen "66-trash-overflow"
+  require_xml_text "$evidence_dir/66-trash-overflow.xml" "Empty" \
+    "Trash page overflow did not expose Empty."
+  adb_device shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
+  sleep 1
 }
 
 restore_bulk_from_trash_page() {
@@ -1485,6 +1502,7 @@ open_trash_page() {
   tap_clickable_from_xml "$evidence_dir/65-account-actions.xml" "Trash" exact
   sleep 2
   wait_for_trash_page_item
+  verify_empty_trash_overflow_action
 }
 
 wait_for_trash_page_item() {

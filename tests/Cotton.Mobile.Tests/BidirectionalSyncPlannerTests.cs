@@ -87,6 +87,78 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Remote_recreated_same_path_refreshes_unchanged_local_file()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 42, updatedAtUtc: SyncedAt.AddSeconds(-1)));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(NewRemoteFileId, "notes.txt", "notes.txt", "\"etag-new\"", sizeBytes: 99));
+
+            CottonBidirectionalSyncPlanSnapshot plan = CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                remote,
+                [manifest]);
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonBidirectionalSyncActionKind.RefreshLocalFile, item.Action);
+            Assert.True(item.RequiresDownload);
+            Assert.False(item.IsDestructive);
+            Assert.False(item.IsBlocked);
+            Assert.Equal(NewRemoteFileId, item.CloudItemId);
+            Assert.Equal("\"etag-new\"", item.ExpectedRemoteETag);
+            Assert.Equal(1, plan.DownloadCount);
+            Assert.Equal(0, plan.LocalDeleteCount);
+        }
+
+        [Fact]
+        public void Remote_recreated_same_path_blocks_when_local_file_changed()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 84, updatedAtUtc: SyncedAt.AddMinutes(1)));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(NewRemoteFileId, "notes.txt", "notes.txt", "\"etag-new\"", sizeBytes: 99));
+
+            CottonBidirectionalSyncPlanSnapshot plan = CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                remote,
+                [manifest]);
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonBidirectionalSyncActionKind.FileChangedOnBothSides, item.Action);
+            Assert.True(item.IsConflict);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresDownload);
+            Assert.False(item.RequiresUpload);
+            Assert.Equal(NewRemoteFileId, item.CloudItemId);
+        }
+
+        [Fact]
+        public void Remote_recreated_same_path_without_etag_requires_fresh_revision()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 42, updatedAtUtc: SyncedAt.AddSeconds(-1)));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(NewRemoteFileId, "notes.txt", "notes.txt", eTag: null, sizeBytes: 99));
+
+            CottonBidirectionalSyncPlanSnapshot plan = CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                remote,
+                [manifest]);
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonBidirectionalSyncActionKind.NeedsFreshServerRevision, item.Action);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresDownload);
+            Assert.Equal(NewRemoteFileId, item.CloudItemId);
+        }
+
+        [Fact]
         public void Local_and_remote_change_same_file_blocks_as_conflict()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);

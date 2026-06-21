@@ -57,13 +57,10 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                return stored.Items
+                return DeduplicateItems(stored.Items
                     .Select(TryCreateSyncedFile)
                     .Where(item => item is not null)
-                    .Select(item => item!)
-                    .GroupBy(item => item.FileId)
-                    .Select(group => group.Last())
-                    .ToList();
+                    .Select(item => item!));
             }
             catch (OperationCanceledException)
             {
@@ -135,7 +132,9 @@ namespace Cotton.Mobile.Services
             IReadOnlyList<CottonSyncedFileSnapshot> current =
                 await LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             List<CottonSyncedFileSnapshot> updated = current
-                .Where(existing => existing.FileId != item.FileId)
+                .Where(existing =>
+                    existing.FileId != item.FileId
+                    && !string.Equals(existing.RelativePath, item.RelativePath, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             updated.Add(item);
 
@@ -196,12 +195,31 @@ namespace Cotton.Mobile.Services
                 SchemaVersion = SchemaVersion,
                 SyncRootStableKey = root.StableKey,
                 SavedAtUtc = DateTime.UtcNow,
-                Items = items
-                    .GroupBy(item => item.FileId)
-                    .Select(group => group.Last())
+                Items = DeduplicateItems(items)
                     .Select(CreateStoredItem)
                     .ToList(),
             };
+        }
+
+        private static IReadOnlyList<CottonSyncedFileSnapshot> DeduplicateItems(
+            IEnumerable<CottonSyncedFileSnapshot> items)
+        {
+            List<CottonSyncedFileSnapshot> source = items.ToList();
+            var fileIds = new HashSet<Guid>();
+            var relativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var result = new List<CottonSyncedFileSnapshot>(source.Count);
+
+            for (int index = source.Count - 1; index >= 0; index--)
+            {
+                CottonSyncedFileSnapshot item = source[index];
+                if (fileIds.Add(item.FileId) && relativePaths.Add(item.RelativePath))
+                {
+                    result.Add(item);
+                }
+            }
+
+            result.Reverse();
+            return result;
         }
 
         private static CottonStoredSyncedFileItem CreateStoredItem(CottonSyncedFileSnapshot item)

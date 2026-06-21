@@ -68,6 +68,22 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Add_or_replace_updates_existing_manifest_item_at_same_relative_path()
+        {
+            Guid replacementFileId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+            CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
+            CottonSyncedFileSnapshot replacement = CreateSyncedFile(replacementFileId, "report.pdf", "\"etag-2\"");
+
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, first);
+            await _store.AddOrReplaceAsync(InstanceUri, _syncRoot, replacement);
+
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            Assert.Equal(replacementFileId, loaded.FileId);
+            Assert.Equal("report.pdf", loaded.RelativePath);
+            Assert.Equal("\"etag-2\"", loaded.ETag);
+        }
+
+        [Fact]
         public async Task Save_filters_duplicate_file_ids_by_last_entry()
         {
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
@@ -77,6 +93,21 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
             Assert.Equal("report-new.pdf", loaded.FileName);
+            Assert.Equal("\"etag-2\"", loaded.ETag);
+        }
+
+        [Fact]
+        public async Task Save_filters_duplicate_relative_paths_by_last_entry()
+        {
+            Guid replacementFileId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+            CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
+            CottonSyncedFileSnapshot replacement = CreateSyncedFile(replacementFileId, "report.pdf", "\"etag-2\"");
+
+            await _store.SaveAsync(InstanceUri, _syncRoot, [first, replacement]);
+
+            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
+            Assert.Equal(replacementFileId, loaded.FileId);
+            Assert.Equal("report.pdf", loaded.RelativePath);
             Assert.Equal("\"etag-2\"", loaded.ETag);
         }
 

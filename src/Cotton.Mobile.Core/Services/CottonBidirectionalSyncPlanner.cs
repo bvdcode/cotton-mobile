@@ -131,6 +131,13 @@ namespace Cotton.Mobile.Services
             bool localChanged = !LocalMatchesManifest(localItem, manifestItem);
             if (!remoteById.TryGetValue(manifestItem.FileId, out CottonDeviceToCloudRemoteItemSnapshot? remoteItem))
             {
+                if (remoteByPath.TryGetValue(
+                    localItem.RelativePath,
+                    out CottonDeviceToCloudRemoteItemSnapshot? replacementRemoteItem))
+                {
+                    return CreateRemoteReplacementItem(localItem, replacementRemoteItem, localChanged);
+                }
+
                 return localChanged
                     ? CreatePlanItem(
                         CottonBidirectionalSyncActionKind.RemoteTargetMissing,
@@ -197,6 +204,42 @@ namespace Cotton.Mobile.Services
             }
 
             return CreateRemoteFileItem(CottonBidirectionalSyncActionKind.KeepExistingFile, remoteItem);
+        }
+
+        private static CottonBidirectionalSyncPlanItem CreateRemoteReplacementItem(
+            CottonDeviceToCloudLocalItemSnapshot localItem,
+            CottonDeviceToCloudRemoteItemSnapshot remoteItem,
+            bool localChanged)
+        {
+            if (remoteItem.Entry.Type != CottonFileBrowserEntryType.File)
+            {
+                return CreatePlanItem(
+                    CottonBidirectionalSyncActionKind.RemotePathConflict,
+                    CottonFileBrowserEntryType.File,
+                    localItem.DisplayName,
+                    localItem.RelativePath,
+                    remoteItem.Entry.Id,
+                    remoteItem.Entry.ETag,
+                    localItem,
+                    remoteItem.Entry.UpdatedAtUtc);
+            }
+
+            if (localChanged)
+            {
+                return CreatePlanItem(
+                    CottonBidirectionalSyncActionKind.FileChangedOnBothSides,
+                    CottonFileBrowserEntryType.File,
+                    localItem.DisplayName,
+                    localItem.RelativePath,
+                    remoteItem.Entry.Id,
+                    remoteItem.Entry.ETag,
+                    localItem,
+                    remoteItem.Entry.UpdatedAtUtc);
+            }
+
+            return string.IsNullOrWhiteSpace(remoteItem.Entry.ETag)
+                ? CreateRemoteFileItem(CottonBidirectionalSyncActionKind.NeedsFreshServerRevision, remoteItem)
+                : CreateRemoteFileItem(CottonBidirectionalSyncActionKind.RefreshLocalFile, remoteItem);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateLocalFolderItem(

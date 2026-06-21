@@ -15,9 +15,11 @@ install_debug=0
 launch_app=1
 preflight_only=0
 require_registered=1
+capture_diagnostics_ui=0
 wait_seconds=10
 expected_version_code=""
 expected_version_name=""
+diagnostics_xml=""
 
 usage() {
   cat <<EOF
@@ -36,6 +38,7 @@ Options:
   --expected-version-code N Require the installed package to have this Android versionCode.
   --expected-version-name V Require the installed package to have this versionName.
   --wait-seconds N          Seconds to wait after launch for session restore and token registration.
+  --diagnostics-ui          Open Diagnostics and validate the Remote push section after launch.
   --allow-unregistered      Capture evidence without failing when registration is not proven.
   --preflight-only          Validate package/config/device state and exit before launching.
   --no-launch               Do not launch the app automatically.
@@ -123,6 +126,10 @@ while [[ $# -gt 0 ]]; do
       require_registered=0
       shift
       ;;
+    --diagnostics-ui)
+      capture_diagnostics_ui=1
+      shift
+      ;;
     --preflight-only)
       preflight_only=1
       shift
@@ -185,11 +192,13 @@ write_metadata() {
     printf 'launch_app=%s\n' "$launch_app"
     printf 'preflight_only=%s\n' "$preflight_only"
     printf 'require_registered=%s\n' "$require_registered"
+    printf 'capture_diagnostics_ui=%s\n' "$capture_diagnostics_ui"
     printf 'wait_seconds=%s\n' "$wait_seconds"
     printf 'expected_version_code=%s\n' "$expected_version_code"
     printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'firebase_android_setup_docs=https://firebase.google.com/docs/android/setup\n'
     printf 'firebase_messaging_android_docs=https://firebase.google.com/docs/cloud-messaging/android/get-started\n'
+    printf 'firebase_token_management_docs=https://firebase.google.com/docs/cloud-messaging/manage-tokens\n'
     printf 'google_services_plugin_docs=https://developers.google.com/android/guides/google-services-plugin\n'
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
     printf 'android_logcat_docs=https://developer.android.com/tools/logcat\n'
@@ -228,6 +237,209 @@ capture_window() {
     adb_device shell cat /sdcard/cotton-window.xml > "$evidence_dir/$prefix.xml" || true
     adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
   fi
+}
+
+xml_has_text() {
+  local xml_file="$1"
+  local needle="$2"
+
+  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
+}
+
+require_xml_text() {
+  local xml_file="$1"
+  local needle="$2"
+  local message="$3"
+
+  if ! xml_has_text "$xml_file" "$needle"; then
+    printf '%s\n' "$message" >&2
+    printf 'Missing text: %s\n' "$needle" >&2
+    printf 'Evidence: %s\n' "$xml_file" >&2
+    exit 66
+  fi
+}
+
+tap_node_from_xml() {
+  local xml_file="$1"
+  local needle="$2"
+  local mode="${3:-exact}"
+  local point_file="$evidence_dir/tap-point.txt"
+
+  python3 - "$xml_file" "$needle" "$mode" > "$point_file" <<'PY'
+import re
+import sys
+from xml.etree import ElementTree
+
+xml_file, needle, mode = sys.argv[1:4]
+root = ElementTree.parse(xml_file).getroot()
+
+def center(bounds: str) -> tuple[int, int]:
+    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
+    if match is None:
+        raise ValueError(bounds)
+    left, top, right, bottom = [int(value) for value in match.groups()]
+    return ((left + right) // 2, (top + bottom) // 2)
+
+matches = []
+for node in root.iter("node"):
+    values = [
+        node.attrib.get("text", ""),
+        node.attrib.get("content-desc", ""),
+    ]
+    if any((value == needle if mode == "exact" else needle in value) for value in values):
+        try:
+            matches.append(center(node.attrib["bounds"]))
+        except (KeyError, ValueError):
+            pass
+
+if not matches:
+    raise SystemExit(f"Could not find UI node: {needle}")
+
+print(matches[0][0], matches[0][1])
+PY
+
+  read -r tap_x tap_y < "$point_file"
+  adb_device shell input tap "$tap_x" "$tap_y"
+}
+
+find_account_entry_text() {
+  local xml_file="$1"
+
+  python3 - "$xml_file" <<'PY'
+import sys
+from xml.etree import ElementTree
+
+xml_file = sys.argv[1]
+root = ElementTree.parse(xml_file).getroot()
+candidates = ("Account", "More")
+
+for candidate in candidates:
+    for node in root.iter("node"):
+        if node.attrib.get("clickable") != "true":
+            continue
+
+        values = (
+            node.attrib.get("text", ""),
+            node.attrib.get("content-desc", ""),
+        )
+        if candidate in values:
+            print(candidate)
+            raise SystemExit(0)
+
+raise SystemExit(1)
+PY
+}
+
+capture_files_screen_for_diagnostics() {
+  local current_xml="$evidence_dir/20-after-launch.xml"
+  local attempt
+  local entry_text
+
+  for attempt in 0 1 2 3; do
+    if [[ -f "$current_xml" ]] && entry_text="$(find_account_entry_text "$current_xml")"; then
+      printf 'files_xml=%s\naccount_entry=%s\n' "$current_xml" "$entry_text" \
+        > "$evidence_dir/21-files-navigation-result.txt"
+      return 0
+    fi
+
+    if [[ "$attempt" -lt 3 ]]; then
+      adb_device shell input keyevent KEYCODE_BACK
+      sleep 2
+      capture_window "21-files-navigation-$attempt"
+      current_xml="$evidence_dir/21-files-navigation-$attempt.xml"
+    fi
+  done
+
+  printf 'Files screen account action is not visible before Diagnostics validation.\n' >&2
+  printf 'Evidence: %s\n' "$evidence_dir" >&2
+  exit 66
+}
+
+capture_and_validate_diagnostics() {
+  local source_xml="$evidence_dir/20-after-launch.xml"
+  local account_entry
+  if [[ ! -f "$source_xml" ]]; then
+    printf 'Launch UI XML was not captured before Diagnostics validation.\n' >&2
+    printf 'Evidence: %s\n' "$evidence_dir" >&2
+    exit 66
+  fi
+
+  capture_files_screen_for_diagnostics
+  source_xml="$(sed -n 's/^files_xml=//p' "$evidence_dir/21-files-navigation-result.txt" | head -1)"
+  account_entry="$(sed -n 's/^account_entry=//p' "$evidence_dir/21-files-navigation-result.txt" | head -1)"
+
+  tap_node_from_xml "$source_xml" "$account_entry" exact
+  sleep 2
+  capture_window "30-account-actions"
+  require_xml_text "$evidence_dir/30-account-actions.xml" "Diagnostics" "Diagnostics action is not visible."
+  tap_node_from_xml "$evidence_dir/30-account-actions.xml" "Diagnostics" exact
+
+  local attempt
+  local xml_file
+  for attempt in 0 1 2 3 4 5 6 7 8; do
+    sleep 2
+    capture_window "40-diagnostics-$attempt"
+    xml_file="$evidence_dir/40-diagnostics-$attempt.xml"
+    if xml_has_text "$xml_file" "Remote push"; then
+      diagnostics_xml="$xml_file"
+      break
+    fi
+
+    if [[ "$attempt" -lt 8 ]]; then
+      adb_device shell input swipe 540 2100 540 850 450
+    fi
+  done
+
+  if [[ -z "$diagnostics_xml" ]]; then
+    printf 'Diagnostics Remote push section was not visible.\n' >&2
+    printf 'Evidence: %s\n' "$evidence_dir" >&2
+    exit 66
+  fi
+
+  require_xml_text "$diagnostics_xml" "Firebase Cloud Messaging" "Remote push provider is not visible."
+  require_xml_text "$diagnostics_xml" "Android" "Remote push platform is not visible."
+  require_xml_text "$diagnostics_xml" "Token" "Remote push token row is not visible."
+  require_xml_text "$diagnostics_xml" "Registration" "Remote push registration row is not visible."
+
+  if [[ "$registration_status" == "registered" ]]; then
+    require_xml_text "$diagnostics_xml" "Available" "Diagnostics did not show an available platform token."
+    require_xml_text "$diagnostics_xml" "Registered" "Diagnostics did not show registered session state."
+  fi
+
+  if python3 - "$diagnostics_xml" "$evidence_dir/42-diagnostics-token-leak-check.txt" <<'PY'
+import re
+import sys
+from xml.etree import ElementTree
+
+xml_file, result_file = sys.argv[1:3]
+pattern = re.compile(r"[A-Za-z0-9_-]{80,}")
+root = ElementTree.parse(xml_file).getroot()
+matches = []
+
+for node in root.iter("node"):
+    for attribute in ("text", "content-desc"):
+        value = node.attrib.get(attribute, "")
+        if pattern.search(value):
+            matches.append(f"{attribute}={value}")
+
+if matches:
+    with open(result_file, "w", encoding="utf-8") as output:
+        output.write("\n".join(matches))
+        output.write("\n")
+    raise SystemExit(1)
+
+with open(result_file, "w", encoding="utf-8") as output:
+    output.write("No long token-like visible text found.\n")
+PY
+  then
+    :
+  else
+    printf 'Diagnostics XML contains an unexpected long token-like value.\n' >&2
+    printf 'Evidence: %s\n' "$evidence_dir/42-diagnostics-token-leak-check.txt" >&2
+    exit 66
+  fi
+
+  printf 'diagnostics_xml=%s\n' "$diagnostics_xml" > "$evidence_dir/41-diagnostics-result.txt"
 }
 
 write_result() {
@@ -325,6 +537,10 @@ elif grep -q 'unavailable' "$evidence_dir/90-remote-push-log.txt"; then
 fi
 
 write_result "$registration_status"
+
+if [[ "$capture_diagnostics_ui" -eq 1 ]]; then
+  capture_and_validate_diagnostics
+fi
 
 if [[ "$require_registered" -eq 1 && "$registration_status" != "registered" ]]; then
   printf 'Remote-push token registration was not proven: %s. Evidence: %s\n' \

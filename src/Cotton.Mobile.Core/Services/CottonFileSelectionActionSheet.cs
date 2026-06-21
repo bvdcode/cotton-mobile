@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Services
 
             if (action.Kind == CottonFileBulkActionKind.DownloadFiles)
             {
-                return selection.FileCount > 0 && !selection.HasFolders;
+                return selection.FileCount > 0;
             }
 
             if (action.Kind == CottonFileBulkActionKind.KeepOffline)
@@ -34,12 +34,12 @@ namespace Cotton.Mobile.Services
 
             if (action.Kind == CottonFileBulkActionKind.RemoveOffline)
             {
-                return selection.FileCount > 0 && !selection.HasFolders;
+                return selection.FileCount > 0;
             }
 
             if (action.Kind == CottonFileBulkActionKind.ShareLocalFiles)
             {
-                return selection.FileCount > 0 && !selection.HasFolders;
+                return selection.FileCount > 0;
             }
 
             return false;

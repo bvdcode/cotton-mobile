@@ -4273,12 +4273,13 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            int requestedFileCount = entries.Count(entry => entry.Type == CottonFileBrowserEntryType.File);
             CottonFileBrowserEntry[] selectedFiles = entries
                 .Select(entry => GetCurrentVisibleEntry(entry, instanceUri))
                 .Where(entry => entry is not null && entry.Type == CottonFileBrowserEntryType.File)
                 .Select(entry => entry!)
                 .ToArray();
-            if (selectedFiles.Length != entries.Count)
+            if (requestedFileCount == 0 || selectedFiles.Length != requestedFileCount)
             {
                 _display.ShowFilesStatus(CottonFileBulkShareLocalStatusText.UnavailableStatus);
                 return;

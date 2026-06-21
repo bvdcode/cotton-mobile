@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Mixed_selection_keeps_link_and_offline_actions_but_blocks_file_only_actions()
+        public void Mixed_selection_enables_file_scoped_download_and_offline_actions()
         {
             CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
             [
@@ -68,12 +68,12 @@ namespace Cotton.Mobile.Tests
             Assert.True(selection.GetAction(CottonFileBulkActionKind.CopyLinks).IsEnabled);
             Assert.True(selection.GetAction(CottonFileBulkActionKind.ShareLinks).IsEnabled);
             Assert.True(selection.GetAction(CottonFileBulkActionKind.KeepOffline).IsEnabled);
-            Assert.False(selection.GetAction(CottonFileBulkActionKind.DownloadFiles).IsEnabled);
+            Assert.True(selection.GetAction(CottonFileBulkActionKind.DownloadFiles).IsEnabled);
             Assert.False(selection.GetAction(CottonFileBulkActionKind.RemoveOffline).IsEnabled);
             Assert.False(selection.GetAction(CottonFileBulkActionKind.ShareLocalFiles).IsEnabled);
             Assert.Equal(
-                "Select only files for this action.",
-                selection.GetAction(CottonFileBulkActionKind.DownloadFiles).DisabledReason);
+                "No selected files are stored on this device.",
+                selection.GetAction(CottonFileBulkActionKind.RemoveOffline).DisabledReason);
         }
 
         [Fact]
@@ -160,7 +160,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Selection_action_sheet_exposes_mixed_selection_keep_offline()
+        public void Selection_action_sheet_exposes_mixed_selection_file_download_and_keep_offline()
         {
             CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
             [
@@ -176,9 +176,39 @@ namespace Cotton.Mobile.Tests
                 {
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.DownloadFiles,
                     CottonFileBulkActionKind.KeepOffline,
                 },
                 actions.Select(action => action.Kind));
+            Assert.Equal("Download file", actions.Single(action => action.Kind == CottonFileBulkActionKind.DownloadFiles).Label);
+        }
+
+        [Fact]
+        public void Selection_action_sheet_exposes_mixed_selection_local_file_actions()
+        {
+            CottonFileBrowserEntry localFile = CreateFile("notes.txt")
+                .WithLocalFile(new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt));
+            CottonFileSelectionSnapshot selection = CottonFileSelectionSnapshot.Create(
+            [
+                localFile,
+                CreateFolder("Projects"),
+            ]);
+
+            IReadOnlyList<CottonFileBulkActionSnapshot> actions =
+                CottonFileSelectionActionSheet.CreateActions(selection);
+
+            Assert.Equal(
+                new[]
+                {
+                    CottonFileBulkActionKind.CopyLinks,
+                    CottonFileBulkActionKind.ShareLinks,
+                    CottonFileBulkActionKind.DownloadFiles,
+                    CottonFileBulkActionKind.KeepOffline,
+                    CottonFileBulkActionKind.RemoveOffline,
+                    CottonFileBulkActionKind.ShareLocalFiles,
+                },
+                actions.Select(action => action.Kind));
+            Assert.Equal("Share file", actions.Single(action => action.Kind == CottonFileBulkActionKind.ShareLocalFiles).Label);
         }
 
         [Fact]

@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Services
                 return Array.Empty<CottonFileBulkActionSnapshot>();
             }
 
-            bool fileOnlySelection = FileCount > 0 && FolderCount == 0;
+            bool hasFiles = FileCount > 0;
             bool hasOfflineFile = LocalFileCount > 0 || OfflineAttentionCount > 0;
 
             string copyLinkLabel = Count == 1 ? "Copy link" : "Copy links";
@@ -103,8 +103,8 @@ namespace Cotton.Mobile.Services
                 new CottonFileBulkActionSnapshot(
                     CottonFileBulkActionKind.DownloadFiles,
                     downloadFilesLabel,
-                    fileOnlySelection,
-                    fileOnlySelection ? string.Empty : SelectFilesOnlyReason),
+                    hasFiles,
+                    hasFiles ? string.Empty : SelectFilesOnlyReason),
                 new CottonFileBulkActionSnapshot(
                     CottonFileBulkActionKind.KeepOffline,
                     "Keep offline",
@@ -113,13 +113,13 @@ namespace Cotton.Mobile.Services
                 new CottonFileBulkActionSnapshot(
                     CottonFileBulkActionKind.RemoveOffline,
                     "Remove offline",
-                    fileOnlySelection && hasOfflineFile,
-                    ResolveRemoveOfflineDisabledReason(fileOnlySelection, hasOfflineFile)),
+                    hasFiles && hasOfflineFile,
+                    ResolveRemoveOfflineDisabledReason(hasFiles, hasOfflineFile)),
                 new CottonFileBulkActionSnapshot(
                     CottonFileBulkActionKind.ShareLocalFiles,
                     shareFilesLabel,
-                    fileOnlySelection && LocalFileCount == FileCount,
-                    ResolveShareLocalFilesDisabledReason(fileOnlySelection, LocalFileCount == FileCount)),
+                    hasFiles && LocalFileCount == FileCount,
+                    ResolveShareLocalFilesDisabledReason(hasFiles, LocalFileCount == FileCount)),
             ];
         }
 

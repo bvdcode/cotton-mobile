@@ -38,7 +38,8 @@ namespace Cotton.Mobile.Services
 
         public int BlockedItemCount => RootResults.Sum(result =>
             (result.CloudToDeviceExecutionResult?.BlockedCount ?? 0)
-            + (result.DeviceToCloudExecutionResult?.BlockedCount ?? 0));
+            + (result.DeviceToCloudExecutionResult?.BlockedCount ?? 0)
+            + CreatePreflightBlockedCount(result));
 
         public int ConflictReviewCount => RootResults
             .Where(result => result.Status == CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired)
@@ -62,5 +63,17 @@ namespace Cotton.Mobile.Services
 
         public bool NeedsDestructiveReview =>
             DestructiveReviewLocalDeleteCount + DestructiveReviewRemoteDeleteCount > 0;
+
+        private static int CreatePreflightBlockedCount(CottonBidirectionalSyncRootRunResult result)
+        {
+            if (result.Status != CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired)
+            {
+                return 0;
+            }
+
+            int blockedCount = result.PreflightPlan?.BlockedCount ?? 0;
+            int conflictCount = result.PreflightPlan?.ConflictCount ?? 0;
+            return Math.Max(0, blockedCount - conflictCount);
+        }
     }
 }

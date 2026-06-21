@@ -117,6 +117,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Single_root_status_reports_bidirectional_blocked_review()
+        {
+            Assert.Equal(
+                "Bidirectional sync needs review before it can run.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(
+                    CreateBidirectionalBlockedReviewSummary()));
+        }
+
+        [Fact]
+        public void Combined_status_reports_bidirectional_blocked_review()
+        {
+            Assert.Equal(
+                "Sync complete. 1 blocked, 1 root skipped.",
+                CottonSyncSettingsRunStatusText.CreateCompletedStatus(
+                    new CottonCloudToDeviceSyncRunSummary([]),
+                    new CottonDeviceToCloudSyncRunSummary([]),
+                    CreateBidirectionalBlockedReviewSummary()));
+        }
+
+        [Fact]
         public void Single_root_status_reports_completed_results()
         {
             CottonCloudToDeviceSyncRunSummary cloudSummary = CreateCloudSummary(
@@ -190,6 +210,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Sync cancelled.", CottonBidirectionalSyncStatusText.CancelledStatus);
             Assert.Equal("Sync failed.", CottonBidirectionalSyncStatusText.FailedStatus);
             Assert.Equal("Syncing Projects both ways...", CottonBidirectionalSyncStatusText.CreateStartingStatus(" Projects "));
+            Assert.Equal(
+                "Bidirectional sync needs review before it can run.",
+                CottonBidirectionalSyncStatusText.BlockedReviewRequiredStatus);
             Assert.Equal("Run bidirectional sync?", CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle);
             Assert.Equal("Sync", CottonBidirectionalSyncStatusText.ConfirmDestructiveAction);
             Assert.Equal(
@@ -410,6 +433,48 @@ namespace Cotton.Mobile.Tests
                         Guid.Parse("88888888-8888-8888-8888-888888888888"),
                         "\"etag-remote\"",
                         localUpdatedAtUtc: DateTime.UtcNow.AddMinutes(-1),
+                        remoteUpdatedAtUtc: DateTime.UtcNow,
+                        sizeBytes: 12,
+                        contentType: "text/plain"),
+                ]);
+            var executionPlan = new CottonBidirectionalSyncExecutionPlan(
+                preflightPlan,
+                new CottonCloudToDeviceSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []),
+                new CottonDeviceToCloudSyncPlanSnapshot(
+                    root.Id,
+                    root.CloudFolder.FolderId,
+                    root.CloudFolder.FolderName,
+                    []));
+
+            return new CottonBidirectionalSyncRunSummary(
+                [
+                    CottonBidirectionalSyncRootRunResult.SkippedConflictReviewRequired(
+                        root,
+                        executionPlan),
+                ]);
+        }
+
+        private static CottonBidirectionalSyncRunSummary CreateBidirectionalBlockedReviewSummary()
+        {
+            CottonSyncRootSnapshot root = CreateBidirectionalRoot();
+            var preflightPlan = new CottonBidirectionalSyncPlanSnapshot(
+                root.Id,
+                root.CloudFolder.FolderId,
+                root.CloudFolder.FolderName,
+                [
+                    new CottonBidirectionalSyncPlanItem(
+                        CottonBidirectionalSyncActionKind.NeedsFreshServerRevision,
+                        CottonFileBrowserEntryType.File,
+                        "needs-fresh.txt",
+                        "needs-fresh.txt",
+                        previousRelativePath: null,
+                        Guid.Parse("77777777-7777-7777-7777-777777777777"),
+                        expectedRemoteETag: null,
+                        localUpdatedAtUtc: null,
                         remoteUpdatedAtUtc: DateTime.UtcNow,
                         sizeBytes: 12,
                         contentType: "text/plain"),

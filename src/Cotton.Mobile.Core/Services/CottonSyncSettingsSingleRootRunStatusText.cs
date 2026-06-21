@@ -27,8 +27,13 @@ namespace Cotton.Mobile.Services
                 return CottonBidirectionalSyncStatusText.ConflictReviewRequiredStatus;
             }
 
-            return summary.NeedsDestructiveReview
-                ? CottonBidirectionalSyncStatusText.CancelledStatus
+            if (summary.NeedsDestructiveReview)
+            {
+                return CottonBidirectionalSyncStatusText.CancelledStatus;
+            }
+
+            return summary.BlockedItemCount > 0
+                ? CottonBidirectionalSyncStatusText.BlockedReviewRequiredStatus
                 : CottonBidirectionalSyncStatusText.CreateCompletedStatus(summary);
         }
     }

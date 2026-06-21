@@ -6,6 +6,7 @@ namespace Cotton.Mobile.Services
 
         public const string ExecutionUnavailableStatus = "Bidirectional sync needs conflict review before it can run.";
         public const string ConflictReviewRequiredStatus = "Bidirectional sync needs conflict review.";
+        public const string BlockedReviewRequiredStatus = "Bidirectional sync needs review before it can run.";
         public const string DestructiveReviewRequiredStatus = "Bidirectional sync needs review before removing files.";
         public const string ConfirmDestructiveTitle = "Run bidirectional sync?";
         public const string ConfirmDestructiveAction = "Sync";

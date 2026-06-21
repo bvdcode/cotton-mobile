@@ -17,6 +17,8 @@ evidence_dir=""
 install_debug=0
 leave_network_disabled=0
 network_disabled=0
+expected_version_code=""
+expected_version_name=""
 
 usage() {
   cat <<EOF
@@ -37,6 +39,8 @@ Options:
   --nested-file NAME        Optional file expected inside --nested-folder cache.
   --evidence-dir DIR        Evidence directory. Defaults to a timestamped directory.
   --install-debug           Install the current debug APK with -r before launch.
+  --expected-version-code N Require the installed package to have this Android versionCode.
+  --expected-version-name V Require the installed package to have this versionName.
   --leave-network-disabled  Do not restore Wi-Fi/mobile data at the end.
   --help, -h                Show this help.
 
@@ -115,6 +119,22 @@ while [[ $# -gt 0 ]]; do
       install_debug=1
       shift
       ;;
+    --expected-version-code)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --expected-version-code.\n' >&2
+        exit 64
+      fi
+      expected_version_code="$2"
+      shift 2
+      ;;
+    --expected-version-name)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --expected-version-name.\n' >&2
+        exit 64
+      fi
+      expected_version_name="$2"
+      shift 2
+      ;;
     --leave-network-disabled)
       leave_network_disabled=1
       shift
@@ -129,6 +149,31 @@ while [[ $# -gt 0 ]]; do
       ;;
   esac
 done
+
+validate_plain_name() {
+  local label="$1"
+  local value="$2"
+  local is_required="$3"
+
+  if [[ -z "${value//[[:space:]]/}" ]]; then
+    if [[ "$is_required" -eq 1 ]]; then
+      printf '%s must not be blank.\n' "$label" >&2
+      exit 64
+    fi
+
+    return
+  fi
+
+  if [[ "$value" == *"/"* ]]; then
+    printf '%s must not contain a slash.\n' "$label" >&2
+    exit 64
+  fi
+}
+
+validate_plain_name "Folder name" "$folder_name" 1
+validate_plain_name "Nested folder name" "$nested_folder_name" 0
+validate_plain_name "Offline file name" "$offline_file_name" 0
+validate_plain_name "Nested file name" "$nested_file_name" 0
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
@@ -281,6 +326,20 @@ wait_for_text() {
   exit 66
 }
 
+verify_expected_version() {
+  if [[ -n "$expected_version_code" ]] \
+    && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/03-package-version.txt"; then
+    printf 'Installed versionCode does not match expected value %s.\n' "$expected_version_code" >&2
+    exit 67
+  fi
+
+  if [[ -n "$expected_version_name" ]] \
+    && ! grep -Fq "versionName=$expected_version_name" "$evidence_dir/03-package-version.txt"; then
+    printf 'Installed versionName does not match expected value %s.\n' "$expected_version_name" >&2
+    exit 67
+  fi
+}
+
 restore_network() {
   if [[ "$network_disabled" -eq 1 && "$leave_network_disabled" -eq 0 ]]; then
     adb_device shell svc wifi enable >/dev/null 2>&1 || true
@@ -301,6 +360,8 @@ write_metadata() {
     printf 'offline_file=%s\n' "$offline_file_name"
     printf 'nested_file=%s\n' "$nested_file_name"
     printf 'install_debug=%s\n' "$install_debug"
+    printf 'expected_version_code=%s\n' "$expected_version_code"
+    printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'git_head=%s\n' "$(git -C "$COTTON_REPO_ROOT" rev-parse --short HEAD 2>/dev/null || printf unknown)"
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
     printf 'android_uiautomator_docs=https://developer.android.com/training/testing/other-components/ui-automator\n'
@@ -570,6 +631,9 @@ if [[ "$install_debug" -eq 1 ]]; then
 fi
 
 capture_text "03-package.txt" adb_device shell dumpsys package "$package_id"
+capture_text "03-package-version.txt" bash -lc \
+  "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
+verify_expected_version
 
 adb_device shell svc wifi enable >/dev/null 2>&1 || true
 adb_device shell svc data enable >/dev/null 2>&1 || true

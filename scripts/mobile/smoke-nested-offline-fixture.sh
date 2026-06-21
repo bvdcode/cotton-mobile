@@ -387,6 +387,14 @@ run_auto_offline_proof() {
     args+=(--install-debug)
   fi
 
+  if [[ -n "$expected_version_code" ]]; then
+    args+=(--expected-version-code "$expected_version_code")
+  fi
+
+  if [[ -n "$expected_version_name" ]]; then
+    args+=(--expected-version-name "$expected_version_name")
+  fi
+
   if [[ "$leave_network_disabled" -eq 1 ]]; then
     args+=(--leave-network-disabled)
   fi

@@ -17,6 +17,7 @@ install_debug=0
 preflight_only=0
 launch_app=1
 require_logout_revoke=1
+require_logout_refresh_cancel=1
 capture_diagnostics_ui=0
 reinstall_mode="update"
 token_wait_seconds=10
@@ -45,6 +46,8 @@ Options:
   --diagnostics-ui          Validate the Diagnostics Remote push section during token proof.
   --reinstall-mode MODE     Post-logout reinstall check: none, update, or fresh. Defaults to update.
   --allow-missing-revoke    Capture logout evidence without failing on a missing revoke log.
+  --allow-missing-refresh-cancel
+                            Capture logout evidence without failing on a missing refresh-cancel log.
   --preflight-only          Validate package/config/device state and exit before manual prompts.
   --no-launch               Do not launch the app in the token registration step.
   --help, -h                Show this help.
@@ -155,6 +158,10 @@ while [[ $# -gt 0 ]]; do
       require_logout_revoke=0
       shift
       ;;
+    --allow-missing-refresh-cancel)
+      require_logout_refresh_cancel=0
+      shift
+      ;;
     --diagnostics-ui)
       capture_diagnostics_ui=1
       shift
@@ -245,6 +252,7 @@ write_metadata() {
     printf 'launch_app=%s\n' "$launch_app"
     printf 'preflight_only=%s\n' "$preflight_only"
     printf 'require_logout_revoke=%s\n' "$require_logout_revoke"
+    printf 'require_logout_refresh_cancel=%s\n' "$require_logout_refresh_cancel"
     printf 'capture_diagnostics_ui=%s\n' "$capture_diagnostics_ui"
     printf 'reinstall_mode=%s\n' "$reinstall_mode"
     printf 'token_wait_seconds=%s\n' "$token_wait_seconds"
@@ -252,6 +260,7 @@ write_metadata() {
     printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'android_notification_permission_docs=https://developer.android.com/develop/ui/views/notifications/notification-permission\n'
     printf 'firebase_messaging_android_docs=https://firebase.google.com/docs/cloud-messaging/android/get-started\n'
+    printf 'android_workmanager_manage_work_docs=https://developer.android.com/develop/background-work/background-tasks/persistent/how-to/manage-work\n'
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
     printf 'android_logcat_docs=https://developer.android.com/tools/logcat\n'
   } > "$evidence_dir/00-metadata.txt"
@@ -292,7 +301,7 @@ Post-logout reinstall mode: \`$reinstall_mode\`
 
 - [ ] Log out from the account menu after token registration has been proven.
 - [ ] \`50-after-logout.png\` and \`50-after-logout.xml\` show the signed-out state.
-- [ ] \`90-remote-push-lifecycle-log.txt\` shows current-session token revocation and no fatal runtime crash.
+- [ ] \`90-remote-push-lifecycle-log.txt\` shows current-session token revocation, periodic refresh cancellation, and no fatal runtime crash.
 
 ## Reinstall / Update
 
@@ -456,6 +465,8 @@ capture_remote_push_lifecycle_log() {
 
 write_result() {
   local logout_revocation_status="no_signal"
+  local logout_refresh_cancel_status="no_signal"
+  local logout_refresh_cancel_log_count
   local fatal_count
   local sign_in_xml_count="0"
 
@@ -467,6 +478,17 @@ write_result() {
     logout_revocation_status="failed"
   fi
 
+  if grep -q 'Cancelled .*remote push token refresh' \
+    "$evidence_dir/90-remote-push-lifecycle-log.txt"; then
+    logout_refresh_cancel_status="cancelled"
+  elif grep -q 'Failed to cancel Cotton mobile remote push token refresh' \
+    "$evidence_dir/90-remote-push-lifecycle-log.txt"; then
+    logout_refresh_cancel_status="failed"
+  fi
+
+  logout_refresh_cancel_log_count="$(
+    grep -c 'Cancelled .*remote push token refresh' "$evidence_dir/90-remote-push-lifecycle-log.txt" || true
+  )"
   fatal_count="$(grep -c 'FATAL EXCEPTION' "$evidence_dir/90-remote-push-lifecycle-log.txt" || true)"
   if [[ -f "$evidence_dir/60-after-reinstall.xml" ]]; then
     sign_in_xml_count="$(
@@ -479,6 +501,8 @@ write_result() {
       sed -n 's/^registration_status=//p' "$evidence_dir/10-token-registration/91-result.txt" 2>/dev/null | head -1
     )"
     printf 'logout_revocation_status=%s\n' "$logout_revocation_status"
+    printf 'logout_refresh_cancel_status=%s\n' "$logout_refresh_cancel_status"
+    printf 'logout_refresh_cancel_log_count=%s\n' "$logout_refresh_cancel_log_count"
     printf 'fatal_log_count=%s\n' "$fatal_count"
     printf 'reinstall_mode=%s\n' "$reinstall_mode"
     printf 'reinstall_signed_out_xml_match_count=%s\n' "$sign_in_xml_count"
@@ -492,6 +516,12 @@ write_result() {
   if [[ "$require_logout_revoke" -eq 1 && "$logout_revocation_status" != "revoked" ]]; then
     printf 'Logout remote-push token revocation was not proven: %s. Evidence: %s\n' \
       "$logout_revocation_status" "$evidence_dir" >&2
+    exit 65
+  fi
+
+  if [[ "$require_logout_refresh_cancel" -eq 1 && "$logout_refresh_cancel_status" != "cancelled" ]]; then
+    printf 'Logout remote-push token refresh cancellation was not proven: %s. Evidence: %s\n' \
+      "$logout_refresh_cancel_status" "$evidence_dir" >&2
     exit 65
   fi
 }

@@ -4,9 +4,6 @@ namespace Cotton.Mobile.Services
 {
     public class CottonShareTransferEnqueueCoordinator : ICottonShareTransferEnqueueCoordinator
     {
-        private const string DefaultTextUploadName = "Shared text.txt";
-        private const string TextContentType = "text/plain";
-
         private readonly ICottonShareIntakeStore _shareIntakeStore;
         private readonly ICottonShareContentStagingStore _shareContentStagingStore;
         private readonly ICottonTransferMetadataStore _transferMetadataStore;
@@ -190,33 +187,13 @@ namespace Cotton.Mobile.Services
 
         private static string CreateUploadDisplayName(CottonShareIntakeItemSnapshot item)
         {
-            return item.Type == CottonShareIntakeItemType.Text
-                ? CreateTextUploadDisplayName(item)
-                : item.EffectiveUploadDisplayName;
-        }
-
-        private static string CreateTextUploadDisplayName(CottonShareIntakeItemSnapshot item)
-        {
-            string? requestedName = item.UploadDisplayName ?? item.DisplayName;
-            if (string.IsNullOrWhiteSpace(requestedName))
-            {
-                return DefaultTextUploadName;
-            }
-
-            string name = requestedName.Trim();
-            if (CottonCloudItemNameRules.IsReservedPathSegment(name)
-                || CottonCloudItemNameRules.ContainsInvalidCharacter(name))
-            {
-                return DefaultTextUploadName;
-            }
-
-            return Path.HasExtension(name) ? name : $"{name}.txt";
+            return CottonShareCaptureUploadName.Create(item);
         }
 
         private static string? CreateContentType(CaptureEnqueueCandidate candidate)
         {
             return candidate.Item.Type == CottonShareIntakeItemType.Text
-                ? TextContentType
+                ? CottonShareTextUploadName.TextContentType
                 : candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType;
         }
 

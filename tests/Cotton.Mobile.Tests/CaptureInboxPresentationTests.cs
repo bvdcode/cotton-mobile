@@ -98,7 +98,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("No destination selected", textItem.DestinationText);
             Assert.True(textItem.IsDestinationVisible);
             Assert.True(textItem.CanSelectDestination);
-            Assert.False(textItem.CanRename);
+            Assert.True(textItem.CanRename);
             Assert.False(textItem.CanEnqueue);
             Assert.False(textItem.IsFailureVisible);
 
@@ -147,9 +147,41 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Destination: Files / Notes", textItem.DestinationText);
             Assert.True(textItem.IsDestinationVisible);
             Assert.True(textItem.CanSelectDestination);
-            Assert.False(textItem.CanRename);
+            Assert.True(textItem.CanRename);
             Assert.True(textItem.CanEnqueue);
             Assert.False(textItem.IsFailureVisible);
+        }
+
+        [Fact]
+        public void Snapshot_uses_upload_display_name_for_renamed_text_share()
+        {
+            CottonShareIntakeItemSnapshot textItem = new CottonShareIntakeItemSnapshot(
+                    Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    CottonShareIntakeItemType.Text,
+                    "hello from another app",
+                    displayName: null,
+                    mimeType: "text/plain")
+                .WithUploadDisplayName("Meeting notes");
+            CottonShareIntakeSnapshot textShare = CottonShareIntakeSnapshot
+                .CreatePending(
+                    Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    CottonShareIntakeKind.Send,
+                    "text/plain",
+                    [textItem],
+                    NewReceivedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"),
+                        "Notes",
+                        "Files / Notes"));
+
+            CottonCaptureInboxListItem item =
+                Assert.Single(CottonCaptureInboxListSnapshot.Create([textShare]).Items);
+
+            Assert.Equal("Meeting notes.txt", item.DisplayName);
+            Assert.Equal("Ready", item.StatusText);
+            Assert.True(item.CanRename);
+            Assert.True(item.CanEnqueue);
         }
 
         [Fact]

@@ -172,6 +172,43 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Enqueue_uses_renamed_text_share_upload_name()
+        {
+            CottonShareIntakeItemSnapshot textItem = new CottonShareIntakeItemSnapshot(
+                    ItemId,
+                    CottonShareIntakeItemType.Text,
+                    "meeting notes",
+                    displayName: null,
+                    mimeType: "text/plain")
+                .WithUploadDisplayName("Team notes");
+            CottonShareIntakeSnapshot snapshot = CottonShareIntakeSnapshot
+                .CreatePending(
+                    IntakeId,
+                    CottonShareIntakeKind.Send,
+                    "text/plain",
+                    [textItem],
+                    CreatedAt)
+                .WithDestination(
+                    new CottonShareDestinationSnapshot(
+                        DestinationFolderId,
+                        "Default",
+                        "Default"));
+            await _shareIntakeStore.SaveAsync([snapshot]);
+
+            CottonShareTransferEnqueueResult result = await CreateCoordinator().EnqueueAsync(InstanceUri);
+
+            Assert.True(result.HasQueuedTransfers);
+            CottonTransferQueueItem transfer = Assert.Single(await _transferMetadataStore.LoadAsync(InstanceUri));
+            Assert.Equal("Team notes.txt", transfer.DisplayName);
+            Assert.Equal("text/plain", transfer.ContentType);
+
+            CottonTransferStagedFileSnapshot stagedTransfer =
+                Assert.Single(await _transferStagingStore.ListAsync(InstanceUri));
+            Assert.Equal("Team notes.txt", stagedTransfer.FileName);
+            Assert.Equal("meeting notes", await File.ReadAllTextAsync(stagedTransfer.Path));
+        }
+
+        [Fact]
         public async Task Enqueue_leaves_text_and_missing_destination_captures_in_inbox()
         {
             CottonShareStagedContentSnapshot staged = await _shareStagingStore.StageAsync(

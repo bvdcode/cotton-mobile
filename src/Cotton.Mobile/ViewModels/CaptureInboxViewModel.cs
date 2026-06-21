@@ -249,12 +249,14 @@ namespace Cotton.Mobile.ViewModels
                 IReadOnlyList<string> otherUploadNames = snapshots
                     .SelectMany(snapshot => snapshot.Items.Select(item => new { Snapshot = snapshot, Item = item }))
                     .Where(entry => entry.Item.Id != selectedItem.ItemId && CanRename(entry.Snapshot, entry.Item))
-                    .Select(entry => entry.Item.EffectiveUploadDisplayName)
+                    .Select(entry => CottonShareCaptureUploadName.Create(entry.Item))
                     .ToList();
-                if (!CottonShareUploadNameValidator.TryNormalize(
+                if (!CottonShareCaptureUploadName.TryNormalizeRename(
+                        targetItem,
                         requestedName,
                         otherUploadNames,
                         out string normalizedName,
+                        out string uploadName,
                         out string errorMessage))
                 {
                     Status = errorMessage;
@@ -262,8 +264,8 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 if (string.Equals(
-                        normalizedName,
-                        targetItem.EffectiveUploadDisplayName,
+                        uploadName,
+                        CottonShareCaptureUploadName.Create(targetItem),
                         StringComparison.Ordinal))
                 {
                     Status = "Upload name unchanged.";
@@ -277,7 +279,7 @@ namespace Cotton.Mobile.ViewModels
                     .ToList();
                 await _intakeStore.SaveAsync(updatedSnapshots);
                 ShowSnapshot(CottonCaptureInboxListSnapshot.Create(updatedSnapshots));
-                Status = $"Renamed to {normalizedName}.";
+                Status = $"Renamed to {uploadName}.";
             }
             catch (Exception exception)
             {
@@ -364,8 +366,7 @@ namespace Cotton.Mobile.ViewModels
             CottonShareIntakeItemSnapshot item)
         {
             return snapshot.Status == CottonShareIntakeStatus.Pending
-                && item.Type == CottonShareIntakeItemType.Uri
-                && item.HasStagedContent;
+                && item.CanUploadFromCaptureInbox;
         }
 
         private static CottonShareIntakeSnapshot ReplaceItem(

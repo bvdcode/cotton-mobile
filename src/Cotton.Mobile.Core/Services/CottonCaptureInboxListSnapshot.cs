@@ -69,6 +69,12 @@ namespace Cotton.Mobile.Services
                 return item.EffectiveUploadDisplayName;
             }
 
+            if (item.Type == CottonShareIntakeItemType.Text
+                && !string.IsNullOrWhiteSpace(item.UploadDisplayName))
+            {
+                return CottonShareCaptureUploadName.Create(item);
+            }
+
             if (!string.IsNullOrWhiteSpace(item.DisplayName))
             {
                 return item.DisplayName;
@@ -196,8 +202,7 @@ namespace Cotton.Mobile.Services
             CottonShareIntakeItemSnapshot item)
         {
             return snapshot.Status == CottonShareIntakeStatus.Pending
-                && item.Type == CottonShareIntakeItemType.Uri
-                && item.HasStagedContent;
+                && item.CanUploadFromCaptureInbox;
         }
 
         private static bool CanEnqueue(

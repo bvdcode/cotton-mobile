@@ -370,9 +370,11 @@ require_xml_text "$diagnostics_copy_xml" "Diagnostics copied" "Diagnostics copy 
 
 ensure_text_with_scroll "$diagnostics_copy_xml" "60-diagnostics-local-cache" "Local cache"
 local_cache_xml="$ensured_xml"
-ensure_text_with_scroll "$local_cache_xml" "61-diagnostics-pending-uploads" "Pending uploads"
+ensure_text_with_scroll "$local_cache_xml" "61-diagnostics-account-storage" "Account storage"
+account_storage_xml="$ensured_xml"
+ensure_text_with_scroll "$account_storage_xml" "62-diagnostics-pending-uploads" "Pending uploads"
 pending_uploads_xml="$ensured_xml"
-ensure_text_with_scroll "$pending_uploads_xml" "62-diagnostics-remote-push" "Remote push"
+ensure_text_with_scroll "$pending_uploads_xml" "63-diagnostics-remote-push" "Remote push"
 remote_push_xml="$ensured_xml"
 require_xml_text "$remote_push_xml" "Token" "Diagnostics remote push section omits token status."
 require_xml_text "$remote_push_xml" "Registration" "Diagnostics remote push section omits registration status."

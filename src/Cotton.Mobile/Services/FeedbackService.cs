@@ -99,6 +99,7 @@ namespace Cotton.Mobile.Services
                 lines.Add($"Folder listings: {FormatStorageCategory(context.StorageSummary.FolderListings)}");
                 lines.Add($"Downloaded files: {FormatStorageCategory(context.StorageSummary.DownloadedFiles)}");
                 lines.Add($"Pending uploads: {FormatStorageCategory(context.StorageSummary.TransferStaging)}");
+                lines.Add($"Account storage: {FormatCloudQuota(context.StorageSummary.CloudQuota)}");
             }
 
             return string.Join(Environment.NewLine, lines);
@@ -174,6 +175,11 @@ namespace Cotton.Mobile.Services
         private static string FormatStorageCategory(CottonStorageCategorySnapshot category)
         {
             return $"{CottonFileSizeFormatter.Format(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
+        }
+
+        private static string FormatCloudQuota(CottonCloudStorageQuotaSnapshot quota)
+        {
+            return CottonCloudStorageQuotaDiagnosticText.Create(quota);
         }
 
         private static string FormatFileCount(int fileCount)

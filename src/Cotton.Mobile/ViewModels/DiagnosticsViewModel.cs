@@ -249,6 +249,7 @@ namespace Cotton.Mobile.ViewModels
                         CreateItem("Folder lists", summary is null ? null : FormatStorageCategory(summary.FolderListings)),
                         CreateItem("Downloads", summary is null ? null : FormatStorageCategory(summary.DownloadedFiles)),
                         CreateItem("Pending uploads", summary is null ? null : FormatStorageCategory(summary.TransferStaging)),
+                        CreateItem("Account storage", summary is null ? null : FormatCloudQuota(summary.CloudQuota)),
                     ]),
                 new DiagnosticsSectionViewModel(
                     "Remote push",
@@ -325,6 +326,11 @@ namespace Cotton.Mobile.ViewModels
         private static string FormatStorageCategory(CottonStorageCategorySnapshot category)
         {
             return $"{CottonFileSizeFormatter.Format(category.SizeBytes)} · {FormatFileCount(category.FileCount)}";
+        }
+
+        private static string FormatCloudQuota(CottonCloudStorageQuotaSnapshot quota)
+        {
+            return CottonCloudStorageQuotaDiagnosticText.Create(quota);
         }
 
         private static string FormatFileCount(int fileCount)

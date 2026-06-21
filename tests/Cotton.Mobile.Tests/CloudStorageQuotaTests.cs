@@ -69,6 +69,18 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Cloud_quota_diagnostic_text_combines_summary_and_detail()
+        {
+            CottonCloudStorageQuotaSnapshot quota = CottonCloudStorageQuotaSnapshot.Create(
+                usedBytes: 1024,
+                limitBytes: 4096);
+
+            string text = CottonCloudStorageQuotaDiagnosticText.Create(quota);
+
+            Assert.Equal("1 KB of 4 KB used · 3 KB available", text);
+        }
+
+        [Fact]
         public void Cloud_quota_rejects_negative_values()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>

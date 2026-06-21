@@ -205,6 +205,13 @@ Requested Android permission setup: \`$permission_state\`
 - [ ] The page does not show the permission action button.
 - [ ] Enabled category copy stays compact and truthful.
 
+## Server Push Preferences
+
+- [ ] The page shows the \`Server push\` section.
+- [ ] If preferences load, the page shows \`Shared-file activity\` and \`Security and sessions\`.
+- [ ] If preferences cannot load, the page shows \`Server alerts unavailable.\` and \`Retry\`.
+- [ ] The server-push state matches the backend profile being tested.
+
 ## Channels And Evidence
 
 - [ ] Notification dumpsys diagnostics include Transfers, Backup, Shares, and Security after channels are provisioned.
@@ -286,6 +293,63 @@ prompt_capture() {
   printf 'Press Enter to capture %s... ' "$prefix"
   read -r _
   capture_device_state "$prefix"
+}
+
+xml_has_text() {
+  local xml_file="$1"
+  local needle="$2"
+
+  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
+}
+
+require_xml_text() {
+  local xml_file="$1"
+  local needle="$2"
+  local message="$3"
+
+  if ! xml_has_text "$xml_file" "$needle"; then
+    printf '%s\n' "$message" >&2
+    printf 'Missing text: %s\n' "$needle" >&2
+    printf 'Evidence: %s\n' "$xml_file" >&2
+    exit 66
+  fi
+}
+
+require_notification_page_state() {
+  local xml_file="$1"
+  local state_xml="$xml_file"
+  local attempt
+
+  require_xml_text "$xml_file" "Notifications" "Notifications page title is missing."
+  require_xml_text "$xml_file" "Refresh" "Notifications page did not expose Refresh."
+
+  for attempt in 0 1 2; do
+    if xml_has_text "$state_xml" "Server push"; then
+      if xml_has_text "$state_xml" "Shared-file activity" \
+        || xml_has_text "$state_xml" "Security and sessions"; then
+        require_xml_text "$state_xml" "Shared-file activity" \
+          "Server push preferences did not show shared-file activity."
+        require_xml_text "$state_xml" "Security and sessions" \
+          "Server push preferences did not show security/session alerts."
+        return
+      fi
+
+      if xml_has_text "$state_xml" "Server alerts unavailable."; then
+        require_xml_text "$state_xml" "Retry" \
+          "Server push unavailable state did not expose Retry."
+        return
+      fi
+    fi
+
+    adb_device shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
+    sleep 1
+    capture_device_state "21-notifications-server-push-$attempt"
+    state_xml="$evidence_dir/21-notifications-server-push-$attempt.xml"
+  done
+
+  printf 'Notifications page did not show loaded or unavailable server-push preferences.\n' >&2
+  printf 'Evidence: %s\n' "$state_xml" >&2
+  exit 66
 }
 
 apply_permission_state() {
@@ -405,6 +469,7 @@ fi
 
 prompt_capture "Open Account -> Notifications. Verify the page matches the requested permission path." \
   "20-notifications-page"
+require_notification_page_state "$evidence_dir/20-notifications-page.xml"
 
 prompt_capture "If applicable, tap Allow or Settings and leave the Android dialog/settings destination visible." \
   "30-permission-action"

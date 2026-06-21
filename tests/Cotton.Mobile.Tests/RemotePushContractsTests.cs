@@ -82,6 +82,12 @@ namespace Cotton.Mobile.Tests
                 CottonNotificationChannelKind.Security,
                 capability.EventCategories.Single(category =>
                     category.Category == CottonRemotePushEventCategory.SecuritySession).ChannelKind);
+            Assert.NotNull(capability.FindVisibleEventCategory(CottonRemotePushEventCategory.SharedFile));
+            Assert.NotNull(capability.FindVisibleEventCategory(CottonRemotePushEventCategory.SecuritySession));
+            Assert.True(capability.SupportsVisibleEventCategory(CottonRemotePushEventCategory.SharedFile));
+            Assert.True(capability.SupportsVisibleEventCategory(CottonRemotePushEventCategory.SecuritySession));
+            Assert.False(capability.SupportsVisibleEventCategory(CottonRemotePushEventCategory.AccessRequest));
+            Assert.False(capability.SupportsVisibleEventCategory(CottonRemotePushEventCategory.CommentMention));
             Assert.DoesNotContain(
                 capability.EventCategories,
                 category => category.ChannelKind is CottonNotificationChannelKind.Transfers

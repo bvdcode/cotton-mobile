@@ -174,11 +174,13 @@ namespace Cotton.Mobile
 
             string? notificationId = intent.GetStringExtra(AndroidNotificationIntentExtras.NotificationId);
             string? eventCategory = intent.GetStringExtra(AndroidNotificationIntentExtras.EventCategory);
-            return Guid.TryParse(notificationId, out Guid parsedNotificationId)
-                && Enum.TryParse(eventCategory, ignoreCase: false, out CottonRemotePushEventCategory parsedCategory)
-                && Enum.IsDefined(parsedCategory)
-                    ? new CottonNotificationLaunchRequest(parsedNotificationId, parsedCategory)
-                    : null;
+            if (!Guid.TryParse(notificationId, out Guid parsedNotificationId)
+                || !Enum.TryParse(eventCategory, ignoreCase: false, out CottonRemotePushEventCategory parsedCategory))
+            {
+                return null;
+            }
+
+            return CottonNotificationLaunchRequest.TryCreate(parsedNotificationId, parsedCategory);
         }
 
         private static void ClearNotificationLaunchExtras(Intent? intent)

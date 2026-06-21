@@ -57,8 +57,8 @@ namespace Cotton.Mobile.Services
         private static CottonRemotePushEventCategorySnapshot? GetCategorySnapshot(
             CottonRemotePushEventCategory category)
         {
-            return CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend.EventCategories
-                .SingleOrDefault(snapshot => snapshot.Category == category);
+            return CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend
+                .FindVisibleEventCategory(category);
         }
 
         private static CottonLocalNotificationKind GetNotificationKind(CottonRemotePushEventCategory category)

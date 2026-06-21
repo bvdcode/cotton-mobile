@@ -63,5 +63,18 @@ namespace Cotton.Mobile.Services
                 CottonRemotePushServerCapabilityKind.DeviceTokenRefreshUpsert);
 
         public bool CanDeliverRemotePush => MissingServerCapabilities.Count == 0;
+
+        public CottonRemotePushEventCategorySnapshot? FindVisibleEventCategory(
+            CottonRemotePushEventCategory category)
+        {
+            return Enum.IsDefined(category)
+                ? EventCategories.SingleOrDefault(snapshot => snapshot.Category == category)
+                : null;
+        }
+
+        public bool SupportsVisibleEventCategory(CottonRemotePushEventCategory category)
+        {
+            return FindVisibleEventCategory(category) is not null;
+        }
     }
 }

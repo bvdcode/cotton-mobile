@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
                 CottonRemotePushEventCategory.SharedFile);
             var second = new CottonNotificationLaunchRequest(
                 Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee"),
-                CottonRemotePushEventCategory.AccessRequest);
+                CottonRemotePushEventCategory.SecuritySession);
             state.NotifyNotificationOpened(first);
             state.NotifyNotificationOpened(second);
 
@@ -55,7 +55,43 @@ namespace Cotton.Mobile.Tests
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => new CottonNotificationLaunchRequest(
                     Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                    CottonRemotePushEventCategory.AccessRequest));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new CottonNotificationLaunchRequest(
+                    Guid.Parse("11111111-2222-3333-4444-555555555555"),
+                    CottonRemotePushEventCategory.CommentMention));
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new CottonNotificationLaunchRequest(
+                    Guid.Parse("11111111-2222-3333-4444-555555555555"),
                     (CottonRemotePushEventCategory)42));
+        }
+
+        [Fact]
+        public void TryCreateNotificationLaunchRequest_ignores_empty_or_unsupported_payload()
+        {
+            Guid notificationId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+
+            Assert.Null(CottonNotificationLaunchRequest.TryCreate(
+                Guid.Empty,
+                CottonRemotePushEventCategory.SharedFile));
+            Assert.Null(CottonNotificationLaunchRequest.TryCreate(
+                notificationId,
+                CottonRemotePushEventCategory.AccessRequest));
+            Assert.Null(CottonNotificationLaunchRequest.TryCreate(
+                notificationId,
+                CottonRemotePushEventCategory.CommentMention));
+            Assert.Null(CottonNotificationLaunchRequest.TryCreate(
+                notificationId,
+                (CottonRemotePushEventCategory)42));
+
+            CottonNotificationLaunchRequest? request =
+                CottonNotificationLaunchRequest.TryCreate(
+                    notificationId,
+                    CottonRemotePushEventCategory.SecuritySession);
+
+            Assert.NotNull(request);
+            Assert.Equal(notificationId, request.NotificationId);
+            Assert.Equal(CottonRemotePushEventCategory.SecuritySession, request.Category);
         }
 
         [Fact]

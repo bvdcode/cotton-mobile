@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Notification id is required.", nameof(notificationId));
             }
 
-            if (!Enum.IsDefined(category))
+            if (!IsSupportedCategory(category))
             {
                 throw new ArgumentOutOfRangeException(nameof(category), "Remote push category is not supported.");
             }
@@ -23,5 +23,20 @@ namespace Cotton.Mobile.Services
         public Guid NotificationId { get; }
 
         public CottonRemotePushEventCategory Category { get; }
+
+        public static CottonNotificationLaunchRequest? TryCreate(
+            Guid notificationId,
+            CottonRemotePushEventCategory category)
+        {
+            return notificationId != Guid.Empty && IsSupportedCategory(category)
+                ? new CottonNotificationLaunchRequest(notificationId, category)
+                : null;
+        }
+
+        private static bool IsSupportedCategory(CottonRemotePushEventCategory category)
+        {
+            return CottonRemotePushCapabilityCatalog.AndroidClosedTestingCurrentBackend
+                .SupportsVisibleEventCategory(category);
+        }
     }
 }

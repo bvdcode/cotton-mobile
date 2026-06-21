@@ -8,15 +8,28 @@ namespace Cotton.Mobile.ViewModels
     public class TrashViewModel : ViewModelBase
     {
         private const string CancelAction = "Cancel";
+        private const string SortNameAction = "Name";
+        private const string SortUpdatedAction = "Newest";
+        private const string SortSizeAction = "Size";
+        private const string SortTypeAction = "Type";
+        private const string ViewListAction = "List";
+        private const string ViewTilesAction = "Tiles";
+        private const string CurrentActionPrefix = "✓ ";
 
         private readonly Uri _instanceUri;
         private readonly ICottonTrashBrowserService _trashBrowserService;
         private readonly ICottonTrashRestoreService _trashRestoreService;
         private readonly ICottonTrashPermanentDeleteService _trashPermanentDeleteService;
+        private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<TrashViewModel> _logger;
+        private readonly List<CottonFileBrowserEntry> _allItems = [];
         private bool _isBusy;
+        private string _searchText = string.Empty;
+        private bool _isSearchOpen;
+        private CottonFileBrowserSortMode _sortMode = CottonFileBrowserSortMode.Name;
+        private CottonFileBrowserViewMode _viewMode = CottonFileBrowserViewMode.List;
         private string _summaryText = "Trash";
         private string _emptyMessage = "Trash is empty";
         private string _emptyDetails = "Deleted files and folders will appear here.";
@@ -27,6 +40,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonTrashBrowserService trashBrowserService,
             ICottonTrashRestoreService trashRestoreService,
             ICottonTrashPermanentDeleteService trashPermanentDeleteService,
+            IFileBrowserPreferenceStore preferenceStore,
             INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             ILogger<TrashViewModel> logger)
@@ -35,6 +49,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(trashBrowserService);
             ArgumentNullException.ThrowIfNull(trashRestoreService);
             ArgumentNullException.ThrowIfNull(trashPermanentDeleteService);
+            ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -43,10 +58,15 @@ namespace Cotton.Mobile.ViewModels
             _trashBrowserService = trashBrowserService;
             _trashRestoreService = trashRestoreService;
             _trashPermanentDeleteService = trashPermanentDeleteService;
+            _preferenceStore = preferenceStore;
             _networkAccess = networkAccess;
             _dialogService = dialogService;
             _logger = logger;
+            ApplyPreferences(LoadPreferences());
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            ToggleSearchCommand = new AsyncCommand(ToggleSearchAsync, LogUnhandledCommandException, () => !IsBusy);
+            ShowSortActionsCommand = new AsyncCommand(ShowSortActionsAsync, LogUnhandledCommandException, () => !IsBusy);
+            ShowViewActionsCommand = new AsyncCommand(ShowViewActionsAsync, LogUnhandledCommandException, () => !IsBusy);
             RestoreCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 RestoreAsync,
                 LogUnhandledCommandException,
@@ -61,6 +81,12 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand LoadCommand { get; }
 
+        public AsyncCommand ToggleSearchCommand { get; }
+
+        public AsyncCommand ShowSortActionsCommand { get; }
+
+        public AsyncCommand ShowViewActionsCommand { get; }
+
         public AsyncCommand<CottonFileBrowserEntry> RestoreCommand { get; }
 
         public AsyncCommand<CottonFileBrowserEntry> DeleteForeverCommand { get; }
@@ -73,10 +99,26 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     LoadCommand.RaiseCanExecuteChanged();
+                    ToggleSearchCommand.RaiseCanExecuteChanged();
+                    ShowSortActionsCommand.RaiseCanExecuteChanged();
+                    ShowViewActionsCommand.RaiseCanExecuteChanged();
                     RestoreCommand.RaiseCanExecuteChanged();
                     DeleteForeverCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                     OnPropertyChanged(nameof(IsListVisible));
+                    OnPropertyChanged(nameof(IsTileVisible));
+                }
+            }
+        }
+
+        public string SearchText
+        {
+            get => _searchText;
+            set
+            {
+                if (SetProperty(ref _searchText, value ?? string.Empty))
+                {
+                    ApplyPresentationState();
                 }
             }
         }
@@ -115,7 +157,103 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
-        public bool IsListVisible => Items.Count > 0;
+        public bool IsListVisible => Items.Count > 0 && _viewMode == CottonFileBrowserViewMode.List;
+
+        public bool IsTileVisible => Items.Count > 0 && _viewMode == CottonFileBrowserViewMode.Tiles;
+
+        public bool IsSearchVisible => _isSearchOpen || !string.IsNullOrWhiteSpace(SearchText);
+
+        public string SearchButtonText => IsSearchVisible ? "×" : "⌕";
+
+        public string SearchButtonDescription
+        {
+            get
+            {
+                if (!string.IsNullOrWhiteSpace(SearchText))
+                {
+                    return "Clear trash search";
+                }
+
+                return _isSearchOpen ? "Close trash search" : "Search trash";
+            }
+        }
+
+        public bool IsSortButtonVisible => !IsSearchVisible;
+
+        public bool IsViewButtonVisible => !IsSearchVisible;
+
+        public string SortButtonText => CottonTrashListDisplayState.FormatSortButtonText(_sortMode);
+
+        public string ViewButtonText => _viewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
+
+        private Task ToggleSearchAsync()
+        {
+            if (!string.IsNullOrWhiteSpace(SearchText))
+            {
+                SearchText = string.Empty;
+                return Task.CompletedTask;
+            }
+
+            _isSearchOpen = !_isSearchOpen;
+            ApplyPresentationState();
+            return Task.CompletedTask;
+        }
+
+        private async Task ShowSortActionsAsync()
+        {
+            string nameAction = CreateCurrentActionLabel(SortNameAction, _sortMode == CottonFileBrowserSortMode.Name);
+            string updatedAction = CreateCurrentActionLabel(
+                SortUpdatedAction,
+                _sortMode == CottonFileBrowserSortMode.Updated);
+            string typeAction = CreateCurrentActionLabel(SortTypeAction, _sortMode == CottonFileBrowserSortMode.Type);
+            string sizeAction = CreateCurrentActionLabel(SortSizeAction, _sortMode == CottonFileBrowserSortMode.Size);
+            string? action = await _dialogService.ShowActionSheetAsync(
+                "Sort trash by",
+                CancelAction,
+                null,
+                nameAction,
+                updatedAction,
+                typeAction,
+                sizeAction);
+
+            switch (NormalizeAction(action))
+            {
+                case SortNameAction:
+                    SetSortMode(CottonFileBrowserSortMode.Name);
+                    break;
+                case SortUpdatedAction:
+                    SetSortMode(CottonFileBrowserSortMode.Updated);
+                    break;
+                case SortTypeAction:
+                    SetSortMode(CottonFileBrowserSortMode.Type);
+                    break;
+                case SortSizeAction:
+                    SetSortMode(CottonFileBrowserSortMode.Size);
+                    break;
+            }
+        }
+
+        private async Task ShowViewActionsAsync()
+        {
+            string listAction = CreateCurrentActionLabel(ViewListAction, _viewMode == CottonFileBrowserViewMode.List);
+            string tilesAction = CreateCurrentActionLabel(ViewTilesAction, _viewMode == CottonFileBrowserViewMode.Tiles);
+            string? action = await _dialogService.ShowActionSheetAsync(
+                "View trash as",
+                CancelAction,
+                null,
+                listAction,
+                tilesAction);
+
+            switch (NormalizeAction(action))
+            {
+                case ViewListAction:
+                    SetViewMode(CottonFileBrowserViewMode.List);
+                    break;
+                case ViewTilesAction:
+                    SetViewMode(CottonFileBrowserViewMode.Tiles);
+                    break;
+            }
+        }
 
         private async Task LoadAsync()
         {
@@ -347,10 +485,8 @@ namespace Cotton.Mobile.ViewModels
                     exception,
                     "Cotton mobile trash refresh after restore failed {ItemId}.",
                     item.Id);
-                Items.Remove(item);
+                RemoveItem(item);
                 Status = CottonTrashRestoreStatusText.CreateRestoredNeedsRefreshStatus(item.Name);
-                OnPropertyChanged(nameof(IsEmpty));
-                OnPropertyChanged(nameof(IsListVisible));
             }
         }
 
@@ -374,10 +510,8 @@ namespace Cotton.Mobile.ViewModels
                     exception,
                     "Cotton mobile trash refresh after permanent delete failed {ItemId}.",
                     item.Id);
-                Items.Remove(item);
+                RemoveItem(item);
                 Status = CottonTrashPermanentDeleteStatusText.CreateDeletedNeedsRefreshStatus(item.Name);
-                OnPropertyChanged(nameof(IsEmpty));
-                OnPropertyChanged(nameof(IsListVisible));
             }
         }
 
@@ -389,28 +523,140 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSnapshot(CottonTrashListSnapshot snapshot)
         {
-            Items.Clear();
+            _allItems.Clear();
             foreach (CottonFileBrowserEntry item in snapshot.Items)
             {
-                Items.Add(item);
+                _allItems.Add(item);
             }
 
-            SummaryText = snapshot.SummaryText;
-            EmptyMessage = snapshot.EmptyMessage;
-            EmptyDetails = snapshot.EmptyDetails;
-            OnPropertyChanged(nameof(IsEmpty));
-            OnPropertyChanged(nameof(IsListVisible));
+            ApplyPresentationState();
         }
 
         private void ShowOfflineState()
         {
+            _allItems.Clear();
             Items.Clear();
             SummaryText = "Trash needs internet";
             EmptyMessage = "Trash unavailable offline";
             EmptyDetails = "Connect and refresh to view deleted items.";
             Status = CottonTrashListStatusText.OfflineUnavailableStatus;
+            NotifyPresentationStateChanged();
+        }
+
+        private void RemoveItem(CottonFileBrowserEntry item)
+        {
+            _allItems.RemoveAll(entry => entry.Id == item.Id);
+            ApplyPresentationState();
+        }
+
+        private void ApplyPresentationState()
+        {
+            CottonTrashListDisplayState state = CottonTrashListDisplayState.Create(
+                _allItems,
+                SearchText,
+                _isSearchOpen,
+                _sortMode,
+                _viewMode);
+            Items.Clear();
+            foreach (CottonFileBrowserEntry item in state.Items)
+            {
+                Items.Add(item);
+            }
+
+            SummaryText = state.SummaryText;
+            EmptyMessage = state.EmptyMessage;
+            EmptyDetails = state.EmptyDetails;
+            NotifyPresentationStateChanged();
+        }
+
+        private void NotifyPresentationStateChanged()
+        {
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsListVisible));
+            OnPropertyChanged(nameof(IsTileVisible));
+            OnPropertyChanged(nameof(IsSearchVisible));
+            OnPropertyChanged(nameof(SearchButtonText));
+            OnPropertyChanged(nameof(SearchButtonDescription));
+            OnPropertyChanged(nameof(IsSortButtonVisible));
+            OnPropertyChanged(nameof(IsViewButtonVisible));
+            OnPropertyChanged(nameof(SortButtonText));
+            OnPropertyChanged(nameof(ViewButtonText));
+        }
+
+        private CottonFileBrowserPreferences LoadPreferences()
+        {
+            try
+            {
+                return _preferenceStore.Get();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to load Cotton mobile trash browser preferences.");
+                return new CottonFileBrowserPreferences(
+                    CottonFileBrowserViewMode.List,
+                    CottonFileBrowserSortMode.Name);
+            }
+        }
+
+        private void ApplyPreferences(CottonFileBrowserPreferences preferences)
+        {
+            _viewMode = preferences.ViewMode;
+            _sortMode = preferences.SortMode;
+        }
+
+        private void SetSortMode(CottonFileBrowserSortMode sortMode)
+        {
+            _sortMode = sortMode;
+            ApplyPresentationState();
+            SaveSortModePreference(sortMode);
+        }
+
+        private void SetViewMode(CottonFileBrowserViewMode viewMode)
+        {
+            _viewMode = viewMode;
+            ApplyPresentationState();
+            SaveViewModePreference(viewMode);
+        }
+
+        private void SaveSortModePreference(CottonFileBrowserSortMode sortMode)
+        {
+            try
+            {
+                _preferenceStore.SaveSortMode(sortMode);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile trash sort mode preference.");
+            }
+        }
+
+        private void SaveViewModePreference(CottonFileBrowserViewMode viewMode)
+        {
+            try
+            {
+                _preferenceStore.SaveViewMode(viewMode);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to save Cotton mobile trash view mode preference.");
+            }
+        }
+
+        private static string CreateCurrentActionLabel(string label, bool isCurrent)
+        {
+            return isCurrent ? CurrentActionPrefix + label : label;
+        }
+
+        private static string? NormalizeAction(string? action)
+        {
+            if (action is null)
+            {
+                return null;
+            }
+
+            return action.StartsWith(CurrentActionPrefix, StringComparison.Ordinal)
+                ? action[CurrentActionPrefix.Length..]
+                : action;
         }
 
         private void LogUnhandledCommandException(Exception exception)

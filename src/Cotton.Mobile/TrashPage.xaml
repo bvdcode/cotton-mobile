@@ -16,10 +16,10 @@
     </ContentPage.ToolbarItems>
 
     <Grid Padding="16"
-          RowDefinitions="Auto,Auto,*"
+          RowDefinitions="Auto,Auto,Auto,*"
           RowSpacing="14">
-        <Grid ColumnDefinitions="*,Auto"
-              ColumnSpacing="12">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
+              ColumnSpacing="8">
             <VerticalStackLayout Spacing="2">
                 <Label Text="Trash"
                        FontSize="28"
@@ -35,13 +35,66 @@
                        TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
             </VerticalStackLayout>
 
-            <ActivityIndicator Grid.Column="1"
+            <Button Grid.Column="1"
+                    Style="{StaticResource FileChromeButton}"
+                    Text="{Binding SearchButtonText}"
+                    Command="{Binding ToggleSearchCommand}"
+                    Padding="0"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    HeightRequest="44"
+                    MinimumHeightRequest="44"
+                    MinimumWidthRequest="44"
+                    WidthRequest="44"
+                    VerticalOptions="Center"
+                    SemanticProperties.Description="{Binding SearchButtonDescription}" />
+
+            <Button Grid.Column="2"
+                    Style="{StaticResource FileChromeButton}"
+                    Text="{Binding SortButtonText}"
+                    Command="{Binding ShowSortActionsCommand}"
+                    IsVisible="{Binding IsSortButtonVisible}"
+                    Padding="0"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    HeightRequest="44"
+                    MinimumHeightRequest="44"
+                    MinimumWidthRequest="44"
+                    WidthRequest="44"
+                    VerticalOptions="Center"
+                    SemanticProperties.Description="Sort trash" />
+
+            <Button Grid.Column="3"
+                    Style="{StaticResource FileChromeButton}"
+                    Text="{Binding ViewButtonText}"
+                    Command="{Binding ShowViewActionsCommand}"
+                    IsVisible="{Binding IsViewButtonVisible}"
+                    Padding="0"
+                    FontSize="15"
+                    FontAttributes="Bold"
+                    HeightRequest="44"
+                    MinimumHeightRequest="44"
+                    MinimumWidthRequest="44"
+                    WidthRequest="44"
+                    VerticalOptions="Center"
+                    SemanticProperties.Description="Change trash view" />
+
+            <ActivityIndicator Grid.Column="4"
                                IsRunning="{Binding IsBusy}"
                                IsVisible="{Binding IsBusy}"
                                VerticalOptions="Center" />
         </Grid>
 
-        <Label Grid.Row="1"
+        <SearchBar Grid.Row="1"
+                   Text="{Binding SearchText, Mode=TwoWay}"
+                   IsVisible="{Binding IsSearchVisible}"
+                   Placeholder="Search trash"
+                   HeightRequest="40"
+                   FontSize="13"
+                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                   PlaceholderColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+
+        <Label Grid.Row="2"
                Text="{Binding Status}"
                IsVisible="{Binding IsStatusVisible}"
                FontSize="13"
@@ -49,7 +102,7 @@
                LineBreakMode="TailTruncation"
                TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
 
-        <Grid Grid.Row="2">
+        <Grid Grid.Row="3">
             <Border IsVisible="{Binding IsEmpty}"
                     Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
                     StrokeShape="RoundRectangle 8"
@@ -139,6 +192,79 @@
                                             Padding="14,6"
                                             HeightRequest="36" />
                                 </HorizontalStackLayout>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <CollectionView ItemsSource="{Binding Items}"
+                            IsVisible="{Binding IsTileVisible}"
+                            SelectionMode="None"
+                            ItemSizingStrategy="MeasureFirstItem">
+                <CollectionView.ItemsLayout>
+                    <GridItemsLayout Orientation="Vertical"
+                                     Span="2"
+                                     HorizontalItemSpacing="10"
+                                     VerticalItemSpacing="10" />
+                </CollectionView.ItemsLayout>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="services:CottonFileBrowserEntry">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                StrokeShape="RoundRectangle 8"
+                                Padding="12"
+                                HeightRequest="190"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                            <Grid RowDefinitions="Auto,Auto,*,Auto"
+                                  RowSpacing="6">
+                                <Grid ColumnDefinitions="*,Auto"
+                                      ColumnSpacing="8">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="14"
+                                           FontAttributes="Bold"
+                                           MaxLines="2"
+                                           LineBreakMode="TailTruncation"
+                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+
+                                    <Border Grid.Column="1"
+                                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
+                                            StrokeShape="RoundRectangle 8"
+                                            Padding="6,2"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                            VerticalOptions="Start">
+                                        <Label Text="{Binding BadgeText}"
+                                               FontSize="10"
+                                               FontAttributes="Bold"
+                                               MaxLines="1"
+                                               LineBreakMode="NoWrap"
+                                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                    </Border>
+                                </Grid>
+
+                                <Label Grid.Row="1"
+                                       Text="{Binding DisplayDetails}"
+                                       FontSize="11"
+                                       MaxLines="2"
+                                       LineBreakMode="TailTruncation"
+                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+
+                                <VerticalStackLayout Grid.Row="3"
+                                                     Spacing="6">
+                                    <Button Text="Delete forever"
+                                            Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            FontSize="12"
+                                            Padding="10,0"
+                                            HeightRequest="34" />
+
+                                    <Button Text="Restore"
+                                            Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            FontSize="12"
+                                            Padding="10,0"
+                                            HeightRequest="34" />
+                                </VerticalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

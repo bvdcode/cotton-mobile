@@ -73,6 +73,36 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Executor_refreshes_remote_replacement_and_replaces_manifest_path()
+        {
+            CottonSyncedFileSnapshot oldLocal = new(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-old\"",
+                UpdatedAt.AddHours(-1),
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(-30));
+            await _manifestStore.SaveAsync(InstanceUri, _syncRoot, [oldLocal]);
+            CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
+                _syncRoot,
+                CreateContent(CreateFile(SecondFileId, "alpha.txt", "\"etag-new\"")),
+                [oldLocal]);
+
+            CottonCloudToDeviceSyncExecutionResult result =
+                await _executor.ExecuteAsync(InstanceUri, _syncRoot, plan);
+
+            Assert.Equal(1, result.RefreshedCount);
+            Assert.Equal([SecondFileId], _fileOperator.DownloadedIds);
+            Assert.Empty(_fileOperator.RemovedIds);
+            CottonSyncedFileSnapshot manifestItem = Assert.Single(await _manifestStore.LoadAsync(InstanceUri, _syncRoot));
+            Assert.Equal(SecondFileId, manifestItem.FileId);
+            Assert.Equal("alpha.txt", manifestItem.RelativePath);
+            Assert.Equal("\"etag-new\"", manifestItem.ETag);
+            Assert.Equal(SyncedAt, manifestItem.SyncedAtUtc);
+        }
+
+        [Fact]
         public async Task Executor_renames_local_file_and_updates_manifest()
         {
             CottonSyncedFileSnapshot localFile = new(

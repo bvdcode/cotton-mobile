@@ -75,6 +75,82 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_refreshes_remote_replacement_at_same_relative_path_without_local_orphan_removal()
+        {
+            CottonFileBrowserEntry remoteFile = CreateFile(SecondFileId, "alpha.txt", "\"etag-2\"");
+            CottonSyncedFileSnapshot localFile = new(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-1\"",
+                UpdatedAt.AddMinutes(-5),
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(-1));
+
+            CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
+                CreateReadyRoot(),
+                CreateContent(remoteFile),
+                [localFile]);
+
+            CottonCloudToDeviceSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonCloudToDeviceSyncActionKind.RefreshChangedFile, item.Action);
+            Assert.Equal(SecondFileId, item.TargetId);
+            Assert.True(item.RequiresDownload);
+            Assert.False(item.RemovesLocalFile);
+            Assert.Equal(1, plan.DownloadCount);
+            Assert.Equal(0, plan.LocalRemovalCount);
+        }
+
+        [Fact]
+        public void Planner_blocks_remote_replacement_without_etag_without_local_orphan_removal()
+        {
+            CottonFileBrowserEntry remoteFile = CreateFile(SecondFileId, "alpha.txt", eTag: null);
+            CottonSyncedFileSnapshot localFile = new(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-1\"",
+                UpdatedAt.AddMinutes(-5),
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(-1));
+
+            CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
+                CreateReadyRoot(),
+                CreateContent(remoteFile),
+                [localFile]);
+
+            CottonCloudToDeviceSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision, item.Action);
+            Assert.Equal(SecondFileId, item.TargetId);
+            Assert.True(item.IsBlocked);
+            Assert.Equal(0, plan.LocalRemovalCount);
+        }
+
+        [Fact]
+        public void Planner_blocks_remote_folder_replacement_without_local_orphan_removal()
+        {
+            CottonFileBrowserEntry remoteFolder = CreateFolder("alpha.txt");
+            CottonSyncedFileSnapshot localFile = new(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-1\"",
+                UpdatedAt.AddMinutes(-5),
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(-1));
+
+            CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
+                CreateReadyRoot(),
+                CreateContent(remoteFolder),
+                [localFile]);
+
+            CottonCloudToDeviceSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonCloudToDeviceSyncActionKind.BlockedFolder, item.Action);
+            Assert.True(item.IsBlocked);
+            Assert.Equal(0, plan.LocalRemovalCount);
+        }
+
+        [Fact]
         public void Planner_renames_local_file_when_etag_matches_but_name_changes()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "renamed.txt", "\"etag-1\"");
@@ -234,6 +310,22 @@ namespace Cotton.Mobile.Tests
 
             Assert.Throws<ArgumentException>(() =>
                 CottonCloudToDeviceSyncPlanner.Create(CreateReadyRoot(), CreateContent(), [first, duplicate]));
+
+            Assert.Throws<ArgumentException>(() =>
+                CottonCloudToDeviceSyncPlanner.Create(
+                    CreateReadyRoot(),
+                    CreateContent(),
+                    [
+                        first,
+                        new CottonSyncedFileSnapshot(
+                            SecondFileId,
+                            "alpha.txt",
+                            "\"etag-2\"",
+                            UpdatedAt,
+                            42,
+                            "text/plain",
+                            UpdatedAt),
+                    ]));
 
             Assert.Throws<ArgumentException>(() =>
                 CottonCloudToDeviceSyncPlanner.Create(

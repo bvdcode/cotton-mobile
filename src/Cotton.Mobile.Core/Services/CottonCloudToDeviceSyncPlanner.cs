@@ -32,8 +32,11 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Remote folder content does not match the sync root cloud folder.", nameof(remoteContent));
             }
 
-            Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId = CreateLocalFileMap(localFiles);
+            IReadOnlyList<CottonSyncedFileSnapshot> localFileList = localFiles.ToArray();
+            Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId = CreateLocalFileMap(localFileList);
+            Dictionary<string, CottonSyncedFileSnapshot> localByRelativePath = CreateLocalPathMap(localFileList);
             Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> remoteFilesById = CreateRemoteFileMap(remoteContent);
+            var handledLocalFileIds = new HashSet<Guid>();
             List<CottonCloudToDeviceSyncPlanItem> items = [];
 
             foreach (CottonCloudToDeviceRemoteItemSnapshot item in remoteContent.Entries
@@ -41,11 +44,14 @@ namespace Cotton.Mobile.Services
                 .ThenBy(item => item.RelativePath, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(item => item.Entry.Id))
             {
-                items.Add(CreateRemoteItem(item, localByFileId));
+                items.Add(CreateRemoteItem(item, localByFileId, localByRelativePath));
+                MarkHandledLocalFile(item, localByFileId, localByRelativePath, handledLocalFileIds);
             }
 
             foreach (CottonSyncedFileSnapshot localFile in localByFileId.Values
-                .Where(localFile => !remoteFilesById.ContainsKey(localFile.FileId))
+                .Where(localFile =>
+                    !handledLocalFileIds.Contains(localFile.FileId)
+                    && !remoteFilesById.ContainsKey(localFile.FileId))
                 .OrderBy(localFile => localFile.RelativePath, StringComparer.OrdinalIgnoreCase)
                 .ThenBy(localFile => localFile.FileId))
             {
@@ -70,7 +76,8 @@ namespace Cotton.Mobile.Services
 
         private static CottonCloudToDeviceSyncPlanItem CreateRemoteItem(
             CottonCloudToDeviceRemoteItemSnapshot remoteItem,
-            IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId)
+            IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
+            IReadOnlyDictionary<string, CottonSyncedFileSnapshot> localByRelativePath)
         {
             CottonFileBrowserEntry entry = remoteItem.Entry;
             if (entry.Type == CottonFileBrowserEntryType.Folder)
@@ -103,6 +110,11 @@ namespace Cotton.Mobile.Services
 
             if (!localByFileId.TryGetValue(entry.Id, out CottonSyncedFileSnapshot? localFile))
             {
+                if (localByRelativePath.ContainsKey(remoteItem.RelativePath))
+                {
+                    return CreateFileItem(CottonCloudToDeviceSyncActionKind.RefreshChangedFile, remoteItem);
+                }
+
                 return CreateFileItem(CottonCloudToDeviceSyncActionKind.DownloadNewFile, remoteItem);
             }
 
@@ -142,6 +154,26 @@ namespace Cotton.Mobile.Services
                 previousRelativePath);
         }
 
+        private static void MarkHandledLocalFile(
+            CottonCloudToDeviceRemoteItemSnapshot remoteItem,
+            IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
+            IReadOnlyDictionary<string, CottonSyncedFileSnapshot> localByRelativePath,
+            ISet<Guid> handledLocalFileIds)
+        {
+            if (localByFileId.ContainsKey(remoteItem.Entry.Id))
+            {
+                handledLocalFileIds.Add(remoteItem.Entry.Id);
+                return;
+            }
+
+            if (localByRelativePath.TryGetValue(
+                remoteItem.RelativePath,
+                out CottonSyncedFileSnapshot? replacedLocalFile))
+            {
+                handledLocalFileIds.Add(replacedLocalFile.FileId);
+            }
+        }
+
         private static Dictionary<Guid, CottonSyncedFileSnapshot> CreateLocalFileMap(
             IEnumerable<CottonSyncedFileSnapshot> localFiles)
         {
@@ -151,6 +183,21 @@ namespace Cotton.Mobile.Services
                 if (!result.TryAdd(localFile.FileId, localFile))
                 {
                     throw new ArgumentException("Local sync manifest contains duplicate file ids.", nameof(localFiles));
+                }
+            }
+
+            return result;
+        }
+
+        private static Dictionary<string, CottonSyncedFileSnapshot> CreateLocalPathMap(
+            IEnumerable<CottonSyncedFileSnapshot> localFiles)
+        {
+            var result = new Dictionary<string, CottonSyncedFileSnapshot>(StringComparer.OrdinalIgnoreCase);
+            foreach (CottonSyncedFileSnapshot localFile in localFiles)
+            {
+                if (!result.TryAdd(localFile.RelativePath, localFile))
+                {
+                    throw new ArgumentException("Local sync manifest contains duplicate relative paths.", nameof(localFiles));
                 }
             }
 

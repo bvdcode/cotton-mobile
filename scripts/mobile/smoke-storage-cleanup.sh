@@ -201,6 +201,19 @@ require_xml_text() {
   fi
 }
 
+require_storage_quota_state() {
+  local xml_file="$1"
+
+  require_xml_text "$xml_file" "Account storage" "Storage page did not expose account storage."
+  if grep -Eq '([0-9][^"]* used|No account quota reported\.|Account storage not checked\.|Storage limit unavailable\.)' "$xml_file"; then
+    return
+  fi
+
+  printf 'Storage page did not show a recognized account storage state.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 66
+}
+
 tap_node_from_xml() {
   local xml_file="$1"
   local needle="$2"
@@ -662,6 +675,7 @@ open_storage_page() {
   sleep 4
   wait_for_text "40-storage" "Cleanup"
   storage_xml="$waited_xml"
+  require_storage_quota_state "$storage_xml"
   require_xml_text "$storage_xml" "Free space" "Storage page did not expose Free space."
   require_xml_text "$storage_xml" "Clear temp uploads" "Storage page did not expose Clear temp uploads."
 }

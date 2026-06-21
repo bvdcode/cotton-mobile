@@ -4,6 +4,7 @@
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.RecentFilesPage"
+             x:Name="RecentFilesRoot"
              x:DataType="viewModels:RecentFilesViewModel"
              Shell.NavBarIsVisible="True"
              Title="Recent files"
@@ -90,6 +91,11 @@
                             StrokeShape="RoundRectangle 8"
                             Padding="14"
                             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
+                                                  CommandParameter="{Binding .}" />
+                        </Border.GestureRecognizers>
+
                         <Grid RowDefinitions="Auto,Auto"
                               ColumnDefinitions="*,Auto"
                               RowSpacing="6"

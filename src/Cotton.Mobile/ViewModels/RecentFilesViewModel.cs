@@ -9,6 +9,9 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonRecentFileStore _recentFileStore;
+        private readonly ICottonFileBrowserService _fileBrowserService;
+        private readonly IFilePreviewService _filePreviewService;
+        private readonly IFileInteractionService _fileInteractionService;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<RecentFilesViewModel> _logger;
         private bool _isBusy;
@@ -20,16 +23,25 @@ namespace Cotton.Mobile.ViewModels
         public RecentFilesViewModel(
             Uri instanceUri,
             ICottonRecentFileStore recentFileStore,
+            ICottonFileBrowserService fileBrowserService,
+            IFilePreviewService filePreviewService,
+            IFileInteractionService fileInteractionService,
             IUserDialogService dialogService,
             ILogger<RecentFilesViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(recentFileStore);
+            ArgumentNullException.ThrowIfNull(fileBrowserService);
+            ArgumentNullException.ThrowIfNull(filePreviewService);
+            ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _recentFileStore = recentFileStore;
+            _fileBrowserService = fileBrowserService;
+            _filePreviewService = filePreviewService;
+            _fileInteractionService = fileInteractionService;
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
@@ -37,6 +49,10 @@ namespace Cotton.Mobile.ViewModels
                 ClearRecentFilesAsync,
                 LogUnhandledCommandException,
                 () => CanClearRecentFiles);
+            OpenRecentFileCommand = new AsyncCommand<CottonRecentFileListItem>(
+                OpenRecentFileAsync,
+                LogUnhandledCommandException,
+                _ => !IsBusy);
         }
 
         public ObservableCollection<CottonRecentFileListItem> Items { get; } = [];
@@ -44,6 +60,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand LoadCommand { get; }
 
         public AsyncCommand ClearRecentFilesCommand { get; }
+
+        public AsyncCommand<CottonRecentFileListItem> OpenRecentFileCommand { get; }
 
         public bool IsBusy
         {
@@ -54,6 +72,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     LoadCommand.RaiseCanExecuteChanged();
                     ClearRecentFilesCommand.RaiseCanExecuteChanged();
+                    OpenRecentFileCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                     OnPropertyChanged(nameof(CanClearRecentFiles));
                 }
@@ -164,6 +183,71 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task OpenRecentFileAsync(CottonRecentFileListItem item)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            CottonFileBrowserEntry file = CreateFileEntry(item);
+            IsBusy = true;
+            Status = $"Opening {file.Name}...";
+            try
+            {
+                CottonFileDownloadResult localOrDownloadedFile = await PrepareFileForOpenAsync(file);
+                if (_filePreviewService.CanPreview(file, localOrDownloadedFile))
+                {
+                    await _filePreviewService.OpenAsync(file, localOrDownloadedFile);
+                }
+                else
+                {
+                    await _fileInteractionService.OpenAsync(localOrDownloadedFile);
+                }
+
+                await _recentFileStore.RecordAsync(
+                    _instanceUri,
+                    CottonRecentFileSnapshot.Create(file, CottonRecentFileActionKind.Opened, DateTime.UtcNow));
+                IReadOnlyList<CottonRecentFileSnapshot> recentFiles = await _recentFileStore.LoadAsync(_instanceUri);
+                ShowSnapshot(CottonRecentFileListSnapshot.Create(recentFiles));
+                Status = $"Opened {file.Name}.";
+            }
+            catch (FileOpenUnavailableException exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile recent file open unavailable {FileId}.", file.Id);
+                Status = CottonFileOpenRouter.CreateRoute(file, item.SizeBytes).UnavailableStatus;
+            }
+            catch (FileNotFoundException exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile recent file local copy missing {FileId}.", file.Id);
+                Status = "File no longer available on this device.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile recent file open failed {FileId}.", file.Id);
+                Status = "Could not open recent file.";
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+                OnPropertyChanged(nameof(CanClearRecentFiles));
+            }
+        }
+
+        private async Task<CottonFileDownloadResult> PrepareFileForOpenAsync(CottonFileBrowserEntry file)
+        {
+            CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(_instanceUri, file);
+            if (localFile is not null)
+            {
+                return localFile;
+            }
+
+            Status = $"Downloading {file.Name}...";
+            return await _fileBrowserService.DownloadAsync(_instanceUri, file);
+        }
+
         private void ShowSnapshot(CottonRecentFileListSnapshot snapshot)
         {
             Items.Clear();
@@ -179,6 +263,28 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanClearRecentFiles));
             ClearRecentFilesCommand.RaiseCanExecuteChanged();
+        }
+
+        private static CottonFileBrowserEntry CreateFileEntry(CottonRecentFileListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+
+            string details = item.SizeBytes.HasValue
+                ? $"{CottonFileSizeFormatter.Format(item.SizeBytes.Value)} · {item.Kind}"
+                : item.Kind;
+            return CottonFileBrowserEntry.CreateCached(
+                item.FileId,
+                CottonFileBrowserEntryType.File,
+                item.FileName,
+                item.Kind,
+                details,
+                CottonFileOpenRouter.OpenActionLabel,
+                item.BadgeText,
+                item.RemoteUpdatedAtUtc,
+                item.SizeBytes,
+                item.ContentType,
+                previewHashEncryptedHex: null,
+                eTag: null);
         }
 
         private void LogUnhandledCommandException(Exception exception)

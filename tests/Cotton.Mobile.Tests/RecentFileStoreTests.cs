@@ -278,6 +278,10 @@ namespace Cotton.Mobile.Tests
                 first =>
                 {
                     Assert.Equal("photo.jpg", first.FileName);
+                    Assert.Equal("PDF", first.Kind);
+                    Assert.Equal(RemoteUpdatedAt, first.RemoteUpdatedAtUtc);
+                    Assert.Equal(2048, first.SizeBytes);
+                    Assert.Equal("application/pdf", first.ContentType);
                     Assert.Equal("2 KB · PDF · Shared 2026-06-21 12:01 UTC", first.DetailText);
                     Assert.Equal("Shared", first.LastActionText);
                 },

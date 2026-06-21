@@ -8,7 +8,11 @@ namespace Cotton.Mobile.Services
 
             FileId = file.FileId;
             FileName = file.FileName;
+            Kind = file.Kind;
             BadgeText = file.BadgeText;
+            RemoteUpdatedAtUtc = file.RemoteUpdatedAtUtc;
+            SizeBytes = file.SizeBytes;
+            ContentType = file.ContentType;
             DetailText = CreateDetailText(file);
             LastActionText = CreateActionText(file.LastAction);
             LastUsedText = FormatDate(file.LastUsedAtUtc);
@@ -18,7 +22,15 @@ namespace Cotton.Mobile.Services
 
         public string FileName { get; }
 
+        public string Kind { get; }
+
         public string BadgeText { get; }
+
+        public DateTime RemoteUpdatedAtUtc { get; }
+
+        public long? SizeBytes { get; }
+
+        public string? ContentType { get; }
 
         public string DetailText { get; }
 

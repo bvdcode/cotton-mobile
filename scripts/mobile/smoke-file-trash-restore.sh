@@ -21,6 +21,11 @@ target_folder=""
 create_disposable_folder=0
 restore_from_trash_page=0
 delete_forever_from_trash_page=0
+bulk_second_file=""
+bulk_second_folder=""
+bulk_selection=0
+bulk_second_kind=""
+bulk_second_name=""
 target_kind=""
 target_name=""
 
@@ -41,6 +46,8 @@ Options:
   --target-folder NAME      Existing Cotton Files folder row to move to trash and restore.
   --create-disposable-folder NAME
                             Create a root-visible disposable folder first, then trash/restore it.
+  --bulk-second-file NAME   Move the target plus this visible file row to trash as one selection.
+  --bulk-second-folder NAME Move the target plus this visible folder row to trash as one selection.
   --restore-from-trash-page Open Account -> Trash after moving the item, then restore it there.
   --delete-forever-from-trash-page
                             Open Account -> Trash after moving a disposable folder, then delete forever.
@@ -52,7 +59,9 @@ Options:
 
 The app must already have a signed-in session. Use a disposable test file/folder
 or a known smoke fixture because this script performs a real server
-trash/restore cycle when the backend responds successfully.
+trash/restore cycle when the backend responds successfully. Bulk selection
+proof moves both selected items to Trash and then verifies they are recoverable
+from the Trash page; it does not restore them automatically.
 EOF
 }
 
@@ -135,6 +144,30 @@ while [[ $# -gt 0 ]]; do
       target_folder="$2"
       shift 2
       ;;
+    --bulk-second-file)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --bulk-second-file.\n' >&2
+        exit 64
+      fi
+      if [[ -n "$bulk_second_file" || -n "$bulk_second_folder" ]]; then
+        printf 'Only one bulk second target option can be used.\n' >&2
+        exit 64
+      fi
+      bulk_second_file="$2"
+      shift 2
+      ;;
+    --bulk-second-folder)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --bulk-second-folder.\n' >&2
+        exit 64
+      fi
+      if [[ -n "$bulk_second_file" || -n "$bulk_second_folder" ]]; then
+        printf 'Only one bulk second target option can be used.\n' >&2
+        exit 64
+      fi
+      bulk_second_folder="$2"
+      shift 2
+      ;;
     --restore-from-trash-page)
       restore_from_trash_page=1
       shift
@@ -205,6 +238,27 @@ if [[ "$preflight_only" -eq 1 \
   exit 64
 fi
 
+if [[ -n "$bulk_second_file" ]]; then
+  bulk_selection=1
+  bulk_second_kind="file"
+  bulk_second_name="$bulk_second_file"
+elif [[ -n "$bulk_second_folder" ]]; then
+  bulk_selection=1
+  bulk_second_kind="folder"
+  bulk_second_name="$bulk_second_folder"
+fi
+
+if [[ "$bulk_selection" -eq 1 && "$preflight_only" -eq 1 ]]; then
+  printf '%s\n' 'Bulk selection options cannot be combined with --preflight-only.' >&2
+  exit 64
+fi
+
+if [[ "$bulk_selection" -eq 1 \
+  && ( "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ) ]]; then
+  printf '%s\n' 'Bulk selection smoke verifies Trash page recoverability and cannot be combined with single-item Trash page actions.' >&2
+  exit 64
+fi
+
 if [[ "$delete_forever_from_trash_page" -eq 1 && "$create_disposable_folder" -ne 1 ]]; then
   printf '%s\n' '--delete-forever-from-trash-page requires --create-disposable-folder.' >&2
   exit 64
@@ -230,6 +284,18 @@ if [[ -n "$target_kind" ]]; then
   fi
 fi
 
+if [[ "$bulk_selection" -eq 1 ]]; then
+  if [[ -z "${bulk_second_name//[[:space:]]/}" || "$bulk_second_name" == *"/"* ]]; then
+    printf 'Bulk second %s name must not be blank and must not contain a slash.\n' "$bulk_second_kind" >&2
+    exit 64
+  fi
+
+  if [[ "$bulk_second_name" == "$target_name" ]]; then
+    printf 'Bulk second target name must be different from the primary target name.\n' >&2
+    exit 64
+  fi
+fi
+
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
   exit 127
@@ -243,7 +309,9 @@ fi
 if [[ -z "$evidence_dir" ]]; then
   timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
   if [[ -n "$target_kind" ]]; then
-    if [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
+    if [[ "$bulk_selection" -eq 1 ]]; then
+      evidence_dir="$evidence_root/$timestamp-selection-trash"
+    elif [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
       evidence_dir="$evidence_root/$timestamp-$target_kind-trash-delete-forever"
     elif [[ "$restore_from_trash_page" -eq 1 ]]; then
       evidence_dir="$evidence_root/$timestamp-$target_kind-trash-page-restore"
@@ -420,6 +488,80 @@ tap_clickable_from_xml() {
   adb_device shell input tap "$tap_x" "$tap_y"
 }
 
+point_for_row_text() {
+  local xml_file="$1"
+  local needle="$2"
+  local point_file="$evidence_dir/row-point.txt"
+
+  python3 - "$xml_file" "$needle" > "$point_file" <<'PY'
+import re
+import sys
+from xml.etree import ElementTree
+
+xml_file, needle = sys.argv[1:3]
+root = ElementTree.parse(xml_file).getroot()
+
+def parse_bounds(bounds: str) -> tuple[int, int, int, int]:
+    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
+    if match is None:
+        raise ValueError(bounds)
+    return tuple(int(value) for value in match.groups())
+
+target_bounds = None
+for node in root.iter("node"):
+    if node.attrib.get("text", "") == needle:
+        target_bounds = parse_bounds(node.attrib["bounds"])
+        break
+
+if target_bounds is None:
+    raise SystemExit(f"Could not find row text: {needle}")
+
+target_left, target_top, target_right, target_bottom = target_bounds
+target_y = (target_top + target_bottom) // 2
+target_x = (target_left + target_right) // 2
+best = None
+
+for node in root.iter("node"):
+    if node.attrib.get("long-clickable") != "true" and node.attrib.get("clickable") != "true":
+        continue
+
+    left, top, right, bottom = parse_bounds(node.attrib["bounds"])
+    if top <= target_y <= bottom and left <= target_x <= right:
+        height = bottom - top
+        width = right - left
+        candidate = (height, width, left, top, right, bottom)
+        if best is None or candidate < best:
+            best = candidate
+
+if best is None:
+    print(target_x, target_y)
+    raise SystemExit(0)
+
+_, _, left, top, right, bottom = best
+row_y = (top + bottom) // 2
+row_x = min(max(left + 88, left + 1), right - 1)
+print(row_x, row_y)
+PY
+
+  read -r tap_x tap_y < "$point_file"
+}
+
+tap_row_from_xml() {
+  local xml_file="$1"
+  local needle="$2"
+
+  point_for_row_text "$xml_file" "$needle"
+  adb_device shell input tap "$tap_x" "$tap_y"
+}
+
+long_press_row_from_xml() {
+  local xml_file="$1"
+  local needle="$2"
+
+  point_for_row_text "$xml_file" "$needle"
+  adb_device shell input touchscreen swipe "$tap_x" "$tap_y" "$tap_x" "$tap_y" 1800
+}
+
 point_for_target_row_action() {
   local xml_file="$1"
   local item_name="$2"
@@ -551,6 +693,11 @@ write_metadata() {
     printf 'create_disposable_folder=%s\n' "$create_disposable_folder"
     printf 'restore_from_trash_page=%s\n' "$restore_from_trash_page"
     printf 'delete_forever_from_trash_page=%s\n' "$delete_forever_from_trash_page"
+    printf 'bulk_selection=%s\n' "$bulk_selection"
+    printf 'bulk_second_kind=%s\n' "$bulk_second_kind"
+    printf 'bulk_second_name=%s\n' "$bulk_second_name"
+    printf 'bulk_second_file=%s\n' "$bulk_second_file"
+    printf 'bulk_second_folder=%s\n' "$bulk_second_folder"
     printf 'target_kind=%s\n' "$target_kind"
     printf 'target_name=%s\n' "$target_name"
     printf 'target_file=%s\n' "$target_file"
@@ -563,6 +710,43 @@ write_metadata() {
 
 write_checklist() {
   {
+    if [[ "$bulk_selection" -eq 1 ]]; then
+      cat <<EOF
+# Files Bulk Trash Smoke
+
+Package: \`$package_id\`
+Device: \`$serial\`
+Primary target kind: \`$target_kind\`
+Primary target name: \`$target_name\`
+Second target kind: \`$bulk_second_kind\`
+Second target name: \`$bulk_second_name\`
+
+## Preconditions
+
+- [ ] Package/version in \`05-package-version.txt\` matches the build under test.
+- [ ] Signed-in session is restored without clearing app data.
+- [ ] Both target rows are disposable or safe to leave in Trash after this run.
+- [ ] Both target rows are visible together in Files root before the selection begins.
+
+## Bulk Move To Trash
+
+- [ ] \`20-files-root-ready.xml\` shows Files root chrome.
+- [ ] \`30-bulk-targets-visible.xml\` shows both target item rows.
+- [ ] \`35-bulk-first-selected.xml\` shows \`1 selected\`.
+- [ ] \`36-bulk-two-selected.xml\` shows \`2 selected\`.
+- [ ] \`40-file-actions.xml\` shows the selection action sheet and \`Move to trash\`.
+- [ ] \`50-trash-confirm.xml\` shows \`Move selection to trash?\` and names the selected item kinds.
+- [ ] \`60-after-trash.xml\` shows \`2 items moved to trash.\`.
+
+## Trash Page Recoverability
+
+- [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
+- [ ] \`66-trash-page.xml\` shows the Trash page chrome, both target items, \`Restore\`, and \`Delete forever\`.
+- [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
+EOF
+      return
+    fi
+
     cat <<EOF
 # Files Trash Smoke
 
@@ -731,6 +915,231 @@ ensure_target_visible() {
 
   require_xml_text "$xml_file" "Actions for $target_name" "Target $target_kind row is not visible in Files."
   target_xml="$xml_file"
+}
+
+bulk_file_count() {
+  local count=0
+
+  if [[ "$target_kind" == "file" ]]; then
+    count=$((count + 1))
+  fi
+
+  if [[ "$bulk_second_kind" == "file" ]]; then
+    count=$((count + 1))
+  fi
+
+  printf '%s\n' "$count"
+}
+
+bulk_folder_count() {
+  local count=0
+
+  if [[ "$target_kind" == "folder" ]]; then
+    count=$((count + 1))
+  fi
+
+  if [[ "$bulk_second_kind" == "folder" ]]; then
+    count=$((count + 1))
+  fi
+
+  printf '%s\n' "$count"
+}
+
+format_bulk_selection_text() {
+  local file_count
+  local folder_count
+  local parts=()
+
+  file_count="$(bulk_file_count)"
+  folder_count="$(bulk_folder_count)"
+  if [[ "$file_count" -gt 0 ]]; then
+    if [[ "$file_count" -eq 1 ]]; then
+      parts+=("1 file")
+    else
+      parts+=("$file_count files")
+    fi
+  fi
+
+  if [[ "$folder_count" -gt 0 ]]; then
+    if [[ "$folder_count" -eq 1 ]]; then
+      parts+=("1 folder")
+    else
+      parts+=("$folder_count folders")
+    fi
+  fi
+
+  if [[ "${#parts[@]}" -eq 1 ]]; then
+    printf '%s\n' "${parts[0]}"
+  else
+    printf '%s and %s\n' "${parts[0]}" "${parts[1]}"
+  fi
+}
+
+ensure_bulk_targets_visible() {
+  capture_screen "30-bulk-targets-visible"
+  bulk_target_xml="$evidence_dir/30-bulk-targets-visible.xml"
+
+  require_xml_text "$bulk_target_xml" "Actions for $target_name" \
+    "Primary bulk target $target_kind row is not visible in Files."
+  require_xml_text "$bulk_target_xml" "Actions for $bulk_second_name" \
+    "Second bulk target $bulk_second_kind row is not visible in Files."
+}
+
+select_bulk_targets() {
+  long_press_row_from_xml "$bulk_target_xml" "$target_name"
+  sleep 2
+  capture_screen "35-bulk-first-selected"
+  require_xml_text "$evidence_dir/35-bulk-first-selected.xml" "1 selected" \
+    "Long press did not start bulk file selection."
+
+  tap_row_from_xml "$evidence_dir/35-bulk-first-selected.xml" "$bulk_second_name"
+  sleep 1
+  capture_screen "36-bulk-two-selected"
+  require_xml_text "$evidence_dir/36-bulk-two-selected.xml" "2 selected" \
+    "Second bulk target did not join the selection."
+
+  local file_count
+  local folder_count
+  file_count="$(bulk_file_count)"
+  folder_count="$(bulk_folder_count)"
+  if [[ "$file_count" -gt 0 ]]; then
+    require_xml_text "$evidence_dir/36-bulk-two-selected.xml" \
+      "$file_count file" \
+      "Bulk selection detail did not show the expected file count."
+  fi
+
+  if [[ "$folder_count" -gt 0 ]]; then
+    require_xml_text "$evidence_dir/36-bulk-two-selected.xml" \
+      "$folder_count folder" \
+      "Bulk selection detail did not show the expected folder count."
+  fi
+
+  bulk_selected_xml="$evidence_dir/36-bulk-two-selected.xml"
+}
+
+open_bulk_selection_actions() {
+  tap_clickable_from_xml "$bulk_selected_xml" "Actions" exact
+  sleep 1
+  capture_screen "40-file-actions"
+  require_xml_text "$evidence_dir/40-file-actions.xml" "2 selected" \
+    "Bulk selection action sheet did not open."
+  require_xml_text "$evidence_dir/40-file-actions.xml" "Move to trash" \
+    "Bulk selection action sheet did not expose Move to trash."
+}
+
+confirm_bulk_move_to_trash() {
+  local selection_text
+
+  selection_text="$(format_bulk_selection_text)"
+  tap_clickable_from_xml "$evidence_dir/40-file-actions.xml" "Move to trash" exact
+  sleep 1
+  capture_screen "50-trash-confirm"
+  require_xml_text "$evidence_dir/50-trash-confirm.xml" "Move selection to trash?" \
+    "Bulk move-to-trash confirmation did not open."
+  require_xml_text "$evidence_dir/50-trash-confirm.xml" \
+    "$selection_text will be removed from this folder and can be restored from trash." \
+    "Bulk move-to-trash confirmation did not describe the selected item kinds."
+  tap_clickable_from_xml "$evidence_dir/50-trash-confirm.xml" "Move to trash" exact
+}
+
+wait_for_bulk_trash_completion() {
+  local attempt_limit=$((wait_seconds / 3))
+  local attempt=0
+  local xml_file
+
+  if [[ "$attempt_limit" -lt 1 ]]; then
+    attempt_limit=1
+  fi
+
+  while [[ "$attempt" -le "$attempt_limit" ]]; do
+    sleep 3
+    capture_screen "60-after-trash-$attempt"
+    xml_file="$evidence_dir/60-after-trash-$attempt.xml"
+
+    if xml_has_text "$xml_file" "2 items moved to trash."; then
+      cp "$xml_file" "$evidence_dir/60-after-trash.xml"
+      if [[ -f "$evidence_dir/60-after-trash-$attempt.png" ]]; then
+        cp "$evidence_dir/60-after-trash-$attempt.png" "$evidence_dir/60-after-trash.png"
+      fi
+      trash_xml="$xml_file"
+      return
+    fi
+
+    if xml_has_text "$xml_file" "Could not move selection to trash." \
+      || xml_has_text "$xml_file" "Refresh this folder before moving selected files to trash." \
+      || xml_has_text "$xml_file" "Offline. Move to trash needs internet." \
+      || xml_has_text "$xml_file" "Move to trash is taking longer than expected. Refresh and try again." \
+      || xml_has_text "$xml_file" "Move to trash failed after" \
+      || xml_has_text "$xml_file" "Move to trash cancelled"; then
+      printf 'Bulk move to trash did not complete successfully.\n' >&2
+      printf 'Evidence: %s\n' "$xml_file" >&2
+      exit 68
+    fi
+
+    attempt=$((attempt + 1))
+  done
+
+  cancel_after_timeout "$xml_file" "60-after-trash-timeout"
+  printf 'Timed out waiting for bulk move-to-trash completion.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 68
+}
+
+open_bulk_trash_page() {
+  tap_clickable_from_xml "$trash_xml" "Account" exact
+  sleep 1
+  capture_screen "65-account-actions"
+  require_xml_text "$evidence_dir/65-account-actions.xml" "Trash" \
+    "Account action sheet did not expose Trash."
+  tap_clickable_from_xml "$evidence_dir/65-account-actions.xml" "Trash" exact
+  sleep 2
+  wait_for_bulk_trash_page_items
+}
+
+wait_for_bulk_trash_page_items() {
+  local attempt_limit=$((wait_seconds / 3))
+  local attempt=0
+  local xml_file
+
+  if [[ "$attempt_limit" -lt 1 ]]; then
+    attempt_limit=1
+  fi
+
+  while [[ "$attempt" -le "$attempt_limit" ]]; do
+    capture_screen "66-trash-page-$attempt"
+    xml_file="$evidence_dir/66-trash-page-$attempt.xml"
+
+    if xml_has_text "$xml_file" "Trash" \
+      && xml_has_text "$xml_file" "Search trash" \
+      && xml_has_text "$xml_file" "Sort trash" \
+      && xml_has_text "$xml_file" "Change trash view" \
+      && xml_has_text "$xml_file" "$target_name" \
+      && xml_has_text "$xml_file" "$bulk_second_name" \
+      && xml_has_text "$xml_file" "Restore" \
+      && xml_has_text "$xml_file" "Delete forever"; then
+      cp "$xml_file" "$evidence_dir/66-trash-page.xml"
+      if [[ -f "$evidence_dir/66-trash-page-$attempt.png" ]]; then
+        cp "$evidence_dir/66-trash-page-$attempt.png" "$evidence_dir/66-trash-page.png"
+      fi
+      return
+    fi
+
+    if xml_has_text "$xml_file" "Could not load trash." \
+      || xml_has_text "$xml_file" "Offline. Trash needs internet." \
+      || xml_has_text "$xml_file" "Trash refresh cancelled."; then
+      printf 'Trash page did not load successfully after bulk move to trash.\n' >&2
+      printf 'Evidence: %s\n' "$xml_file" >&2
+      exit 68
+    fi
+
+    adb_device shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
+    sleep 3
+    attempt=$((attempt + 1))
+  done
+
+  printf 'Timed out waiting for both bulk target rows on Trash page.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 68
 }
 
 open_target_actions() {
@@ -1018,6 +1427,18 @@ fi
 
 if [[ "$create_disposable_folder" -eq 1 ]]; then
   create_disposable_target_folder
+fi
+
+if [[ "$bulk_selection" -eq 1 ]]; then
+  ensure_bulk_targets_visible
+  select_bulk_targets
+  open_bulk_selection_actions
+  confirm_bulk_move_to_trash
+  wait_for_bulk_trash_completion
+  open_bulk_trash_page
+  capture_text "99-logcat.txt" adb_device logcat -d -v time
+  printf 'Files bulk selection trash evidence captured in %s\n' "$evidence_dir"
+  exit 0
 fi
 
 ensure_target_visible

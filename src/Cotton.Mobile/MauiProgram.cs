@@ -37,6 +37,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton(_ => new HttpClient());
 			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
 			builder.Services.AddSingleton(FileDownloadCacheOptions.Default);
+			builder.Services.AddSingleton(CottonRecentFileStoreOptions.Default);
 			builder.Services.AddSingleton(
 				new CottonMobileOptions(
 					"Cotton Cloud",
@@ -72,6 +73,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
 			builder.Services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
+			builder.Services.AddSingleton<ICottonRecentFileMetadataPathProvider, CottonRecentFileMetadataPathProvider>();
+			builder.Services.AddSingleton<ICottonRecentFileStore, FileSystemCottonRecentFileStore>();
 			builder.Services.AddSingleton<ICottonSyncRootMetadataPathProvider, CottonSyncRootMetadataPathProvider>();
 			builder.Services.AddSingleton<ICottonSyncRootStore, FileSystemCottonSyncRootStore>();
 			builder.Services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();

@@ -54,6 +54,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonFileUploadService _fileUploadService;
         private readonly ICottonFolderContentCache _folderContentCache;
         private readonly ICottonOfflineFilePinStore _offlineFilePinStore;
+        private readonly ICottonRecentFileStore _recentFileStore;
         private readonly IFileBrowserPreferenceStore _preferenceStore;
         private readonly IFileUploadPickerService _fileUploadPickerService;
         private readonly IDocumentScanService _documentScanService;
@@ -109,6 +110,7 @@ namespace Cotton.Mobile.ViewModels
             ICottonFileUploadService fileUploadService,
             ICottonFolderContentCache folderContentCache,
             ICottonOfflineFilePinStore offlineFilePinStore,
+            ICottonRecentFileStore recentFileStore,
             IFileBrowserPreferenceStore preferenceStore,
             IFileUploadPickerService fileUploadPickerService,
             IDocumentScanService documentScanService,
@@ -147,6 +149,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileUploadService);
             ArgumentNullException.ThrowIfNull(folderContentCache);
             ArgumentNullException.ThrowIfNull(offlineFilePinStore);
+            ArgumentNullException.ThrowIfNull(recentFileStore);
             ArgumentNullException.ThrowIfNull(preferenceStore);
             ArgumentNullException.ThrowIfNull(fileUploadPickerService);
             ArgumentNullException.ThrowIfNull(documentScanService);
@@ -185,6 +188,7 @@ namespace Cotton.Mobile.ViewModels
             _fileUploadService = fileUploadService;
             _folderContentCache = folderContentCache;
             _offlineFilePinStore = offlineFilePinStore;
+            _recentFileStore = recentFileStore;
             _preferenceStore = preferenceStore;
             _fileUploadPickerService = fileUploadPickerService;
             _documentScanService = documentScanService;
@@ -1545,6 +1549,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Downloaded);
                 await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
                 _display.ShowFileActionAwaitingFollowUp();
                 shouldRunRecoveryRefresh = await ShowDownloadedFileActionsBestEffortAsync(
@@ -4110,6 +4115,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Opened);
                 _display.ShowFilesSummary();
                 shouldRunRecoveryRefresh = true;
             }
@@ -4195,6 +4201,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Shared);
                 _display.ShowFilesSummary();
                 shouldRunRecoveryRefresh = true;
             }
@@ -5210,6 +5217,17 @@ namespace Cotton.Mobile.ViewModels
             return downloadedFile;
         }
 
+        private Task RecordRecentFileAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CottonRecentFileActionKind action)
+        {
+            return _recentFileStore.RecordAsync(
+                instanceUri,
+                CottonRecentFileSnapshot.Create(file, action, DateTime.UtcNow),
+                CancellationToken.None);
+        }
+
         private static bool IsReusableLocalFile(
             CottonFileBrowserEntry file,
             CottonLocalFileSnapshot localFile)
@@ -5405,6 +5423,11 @@ namespace Cotton.Mobile.ViewModels
                     return false;
                 }
 
+                if (_instanceUri is Uri instanceUri)
+                {
+                    await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Opened);
+                }
+
                 _display.ShowFilesSummary();
                 return true;
             }
@@ -5454,6 +5477,11 @@ namespace Cotton.Mobile.ViewModels
                 if (!canUseAction())
                 {
                     return false;
+                }
+
+                if (_instanceUri is Uri instanceUri)
+                {
+                    await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Shared);
                 }
 
                 _display.ShowFilesSummary();

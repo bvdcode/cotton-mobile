@@ -249,6 +249,13 @@ namespace Cotton.Mobile.Services
                 "downloaded files",
                 failures,
                 cancellationToken).ConfigureAwait(false);
+            await TryClearCacheAreaAsync(
+                token => ClearDirectoryAsync(
+                    CottonMobileStoragePaths.CreateRecentFileMetadataRootDirectory(),
+                    token),
+                "recent files",
+                failures,
+                cancellationToken).ConfigureAwait(false);
 
             if (failures.Count == 1)
             {

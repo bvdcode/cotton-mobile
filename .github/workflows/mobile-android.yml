@@ -56,10 +56,10 @@ on:
         type: boolean
         default: false
       github_release_tag:
-        description: GitHub Release tag used for the stable Android APK download link.
-        required: true
+        description: Optional SemVer GitHub Release tag override. Defaults to the computed Android display version tag.
+        required: false
         type: string
-        default: android-latest
+        default: ""
       upload_store_listing:
         description: Upload default store listing text and graphics to Google Play.
         required: true
@@ -98,6 +98,8 @@ jobs:
       contents: read
     steps:
       - name: Validate release input combinations
+        env:
+          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
         run: |
           if [ "${{ inputs.publish_github_release }}" = "true" ] \
             && [ "${{ inputs.build_signed_release }}" != "true" ]; then
@@ -112,8 +114,9 @@ jobs:
           fi
 
           if [ "${{ inputs.publish_github_release }}" = "true" ] \
-            && [ -z "${{ inputs.github_release_tag }}" ]; then
-            echo "github_release_tag is required when publish_github_release=true." >&2
+            && [ -n "$GITHUB_RELEASE_TAG_INPUT" ] \
+            && [[ ! "$GITHUB_RELEASE_TAG_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "github_release_tag must be blank or a SemVer tag such as v1.0.0." >&2
             exit 1
           fi
 
@@ -388,25 +391,41 @@ jobs:
 
           echo "COTTON_GITHUB_RELEASE_DIR=$release_dir" >> "$GITHUB_ENV"
 
-      - name: Publish latest GitHub Release
+      - name: Publish versioned GitHub Release
         if: inputs.publish_github_release
         env:
+          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="${{ inputs.github_release_tag }}"
+          tag="${GITHUB_RELEASE_TAG_INPUT:-$ANDROID_DISPLAY_VERSION_TAG}"
           release_dir="$COTTON_GITHUB_RELEASE_DIR"
 
-          git tag -f "$tag" "$GITHUB_SHA"
-          git push --force origin "refs/tags/$tag"
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "GitHub Release tag must be a SemVer tag such as v1.0.0." >&2
+            exit 1
+          fi
+
+          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
+            tag_target="$(git rev-list -n 1 "$tag")"
+            if [ "$tag_target" != "$GITHUB_SHA" ]; then
+              echo "Release tag $tag already points to $tag_target, not $GITHUB_SHA." >&2
+              exit 1
+            fi
+
+            echo "Release tag $tag already points to this commit."
+          else
+            git tag "$tag" "$GITHUB_SHA"
+            git push origin "refs/tags/$tag"
+          fi
 
           if gh release view "$tag" >/dev/null 2>&1; then
             gh release edit "$tag" \
-              --title "Cotton Cloud Android" \
+              --title "Cotton Cloud Android $APPLICATION_DISPLAY_VERSION" \
               --notes-file "$release_dir/release-notes.md" \
               --latest
           else
             gh release create "$tag" \
-              --title "Cotton Cloud Android" \
+              --title "Cotton Cloud Android $APPLICATION_DISPLAY_VERSION" \
               --notes-file "$release_dir/release-notes.md" \
               --latest \
               --verify-tag

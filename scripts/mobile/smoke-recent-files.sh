@@ -505,9 +505,11 @@ verify_clear_action() {
 capture_final_state() {
   capture_screen "90-final"
   capture_text "91-logcat.txt" adb_device logcat -d -t 400
-  if grep -Eiq 'FATAL EXCEPTION|AndroidRuntime|SIGSEGV|libc.*Fatal signal' "$evidence_dir/91-logcat.txt"; then
+  if grep -Ei 'FATAL EXCEPTION|AndroidRuntime.*FATAL|SIGSEGV|libc.*Fatal signal|mono-rt.*SIG' \
+      "$evidence_dir/91-logcat.txt" \
+      > "$evidence_dir/92-fatal-logcat.txt"; then
     printf 'Fatal runtime marker found in logcat.\n' >&2
-    printf 'Evidence: %s\n' "$evidence_dir/91-logcat.txt" >&2
+    printf 'Evidence: %s\n' "$evidence_dir/92-fatal-logcat.txt" >&2
     exit 66
   fi
 }

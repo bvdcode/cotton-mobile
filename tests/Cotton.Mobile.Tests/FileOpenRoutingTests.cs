@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Tests
         [InlineData("diagram.svg", "", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
         [InlineData("inline-svg", "image/svg+xml", 1024, CottonFilePreviewKind.Text, "image/svg+xml")]
         [InlineData("photo.webp", "image/webp", 8_192, CottonFilePreviewKind.Image, "image/webp")]
+        [InlineData("report.pdf", "", 16_384, CottonFilePreviewKind.Pdf, "application/pdf")]
+        [InlineData("inline-pdf", "application/pdf", 16_384, CottonFilePreviewKind.Pdf, "application/pdf")]
         [InlineData("song.mp3", "audio/mpeg", 4_096, CottonFilePreviewKind.Audio, "audio/mpeg")]
         [InlineData("voice.m4a", "", 4_096, CottonFilePreviewKind.Audio, "audio/mp4")]
         [InlineData("movie.mp4", "", 16_384, CottonFilePreviewKind.Video, "video/mp4")]
@@ -60,7 +62,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData("report.pdf", "", CottonSystemFileOpenKind.Pdf, "application/pdf", "No PDF app can open this file.")]
         [InlineData("brief.docx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "No document app can open this file.")]
         [InlineData("slides.pptx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "No document app can open this file.")]
         [InlineData("archive.zip", "", CottonSystemFileOpenKind.Archive, "application/zip", "No archive app can open this file.")]

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:services="clr-namespace:Cotton.Mobile.Services"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.PdfViewerPage"
+             x:DataType="viewModels:PdfViewerViewModel"
+             Shell.NavBarIsVisible="True"
+             Title="{Binding Title}"
+             BackgroundColor="{StaticResource OffBlack}">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Share"
+                     Command="{Binding ShareCommand}" />
+        <ToolbarItem Text="Open"
+                     Command="{Binding OpenExternallyCommand}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="Auto,*"
+          BackgroundColor="{StaticResource OffBlack}">
+        <VerticalStackLayout Padding="16,12"
+                             Spacing="2">
+            <Label Text="{Binding Details}"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource Gray200}" />
+
+            <Label Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource Gray200}" />
+        </VerticalStackLayout>
+
+        <CollectionView Grid.Row="1"
+                        ItemsSource="{Binding Pages}"
+                        IsVisible="{Binding IsPreviewVisible}"
+                        BackgroundColor="{StaticResource OffBlack}"
+                        ItemSizingStrategy="MeasureAllItems">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout Orientation="Vertical"
+                                   ItemSpacing="10" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
+                    <Grid Padding="12,0">
+                        <Border Stroke="{StaticResource Gray500}"
+                                StrokeThickness="1"
+                                BackgroundColor="{StaticResource White}"
+                                HorizontalOptions="Fill">
+                            <Image Source="{Binding ImageSource}"
+                                   Aspect="AspectFit"
+                                   HeightRequest="{Binding DisplayHeight}"
+                                   BackgroundColor="{StaticResource White}"
+                                   HorizontalOptions="Fill" />
+                        </Border>
+                    </Grid>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
+
+        <Grid Grid.Row="1"
+              IsVisible="{Binding IsEmptyVisible}"
+              Padding="24">
+            <Label Text="{Binding EmptyText}"
+                   FontSize="14"
+                   TextColor="{StaticResource Gray200}"
+                   HorizontalTextAlignment="Center"
+                   HorizontalOptions="Center"
+                   VerticalOptions="Center" />
+        </Grid>
+    </Grid>
+</ContentPage>

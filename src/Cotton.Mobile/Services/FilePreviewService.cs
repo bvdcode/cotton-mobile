@@ -67,6 +67,12 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
+            if (route.PreviewKind == CottonFilePreviewKind.Pdf)
+            {
+                await OpenPdfPreviewAsync(file, downloadedFile, cancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             if (route.PreviewKind != CottonFilePreviewKind.Text)
             {
                 throw new InvalidOperationException("The selected file cannot be previewed inside Cotton.");
@@ -100,6 +106,20 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreateMediaViewerPage(file, downloadedFile, previewKind);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+
+        private async Task OpenPdfPreviewAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile,
+            CancellationToken cancellationToken)
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                ContentPage page = CreatePdfViewerPage(file, downloadedFile);
                 await Shell.Current.Navigation.PushAsync(page);
             });
             cancellationToken.ThrowIfCancellationRequested();
@@ -146,6 +166,19 @@ namespace Cotton.Mobile.Services
                 previewKind,
                 downloadedFile);
             return ActivatorUtilities.CreateInstance<MediaViewerPage>(_serviceProvider, viewModel);
+        }
+
+        private PdfViewerPage CreatePdfViewerPage(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult downloadedFile)
+        {
+            string details = CreateDetails(file);
+            var viewModel = ActivatorUtilities.CreateInstance<PdfViewerViewModel>(
+                _serviceProvider,
+                file.Name,
+                details,
+                downloadedFile);
+            return ActivatorUtilities.CreateInstance<PdfViewerPage>(_serviceProvider, viewModel);
         }
 
         private async Task<string> ReadTextPreviewAsync(

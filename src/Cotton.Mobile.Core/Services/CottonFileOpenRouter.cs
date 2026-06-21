@@ -136,6 +136,17 @@ namespace Cotton.Mobile.Services
                     contentType);
             }
 
+            if (IsPdfPreview(file, contentType))
+            {
+                return new CottonFileOpenRoute(
+                    CottonFileOpenTarget.InAppPreview,
+                    CottonFilePreviewKind.Pdf,
+                    CottonSystemFileOpenKind.None,
+                    OpenActionLabel,
+                    PdfOpenUnavailableStatus,
+                    contentType);
+            }
+
             if (IsAudioPreview(file, contentType))
             {
                 return new CottonFileOpenRoute(
@@ -198,6 +209,12 @@ namespace Cotton.Mobile.Services
         private static bool CanPreviewAsText(CottonFileBrowserEntry file, long? availableSizeBytes)
         {
             return (file.IsText || file.IsSvg) && CanPreviewText(file, availableSizeBytes);
+        }
+
+        private static bool IsPdfPreview(CottonFileBrowserEntry file, string? contentType)
+        {
+            return string.Equals(file.Kind, "PDF", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(contentType, "application/pdf", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsAudioPreview(CottonFileBrowserEntry file, string? contentType)

@@ -92,6 +92,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost, AndroidBackgroundTransferHost>();
+			builder.Services.AddSingleton<IPdfPreviewRenderer, AndroidPdfPreviewRenderer>();
 			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
@@ -105,6 +106,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonLocalNotificationService>(_ => NullCottonLocalNotificationService.Instance);
 			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost>(_ => DisabledCottonAndroidBackgroundTransferHost.Instance);
+			builder.Services.AddSingleton<IPdfPreviewRenderer, UnavailablePdfPreviewRenderer>();
 			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();
 			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
 				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
@@ -300,6 +302,7 @@ namespace Cotton.Mobile
 			builder.Services.AddTransient<CaptureInboxPage>();
 			builder.Services.AddTransient<CaptureDestinationPickerViewModel>();
 			builder.Services.AddTransient<CaptureDestinationPickerPage>();
+			builder.Services.AddTransient<PdfViewerPage>();
 			builder.Services.AddTransient<MediaViewerPage>();
 
 #if DEBUG

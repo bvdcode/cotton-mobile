@@ -24,7 +24,8 @@ Runs an Android Sync settings smoke:
   1. Backs up current app-private sync root metadata for the selected instance.
   2. Seeds one ready cloud-to-device root and one paused bidirectional root.
   3. Opens Files -> Sync and verifies the Sync settings page chrome/cards.
-  4. Restores the previous sync root metadata unless --leave-seed is used.
+  4. Taps Refresh and verifies the seeded roots reload from app-private metadata.
+  5. Restores the previous sync root metadata unless --leave-seed is used.
 
 Options:
   --package ID              Android package id to test. Defaults to COTTON_ANDROID_PACKAGE_ID.
@@ -531,12 +532,13 @@ wait_for_files_root() {
 }
 
 wait_for_sync_settings() {
+  local prefix_root="${1:-30-sync-settings}"
   local attempt
   local prefix
   local xml_file
 
   for attempt in 0 1 2 3 4 5 6 7; do
-    prefix="30-sync-settings-$attempt"
+    prefix="$prefix_root-$attempt"
     capture_screen "$prefix"
     xml_file="$evidence_dir/$prefix.xml"
 
@@ -555,13 +557,17 @@ wait_for_sync_settings() {
 }
 
 capture_scrolled_sync_settings() {
+  local prefix="${1:-40-sync-settings-scrolled}"
+
   adb_device shell input swipe 500 1600 500 700 300 >/dev/null 2>&1 || true
   sleep 1
-  capture_screen "40-sync-settings-scrolled"
-  sync_settings_scrolled_xml="$evidence_dir/40-sync-settings-scrolled.xml"
+  capture_screen "$prefix"
+  sync_settings_scrolled_xml="$evidence_dir/$prefix.xml"
 }
 
 verify_sync_settings() {
+  local scrolled_prefix="${1:-40-sync-settings-scrolled}"
+
   require_xml_text "$sync_settings_xml" "Folders" \
     "Sync settings page header is not visible."
   require_xml_text "$sync_settings_xml" "2 folders set to sync" \
@@ -588,7 +594,7 @@ verify_sync_settings() {
     "Sync settings did not expose Stop syncing."
 
   if ! xml_has_text "$sync_settings_xml" "Smoke Paused"; then
-    capture_scrolled_sync_settings
+    capture_scrolled_sync_settings "$scrolled_prefix"
   else
     sync_settings_scrolled_xml="$sync_settings_xml"
   fi
@@ -605,6 +611,13 @@ verify_sync_settings() {
     "Paused seeded sync root status is not visible."
   require_xml_text "$sync_settings_scrolled_xml" "Resume" \
     "Sync settings did not expose Resume for the paused root."
+}
+
+verify_refresh_action() {
+  tap_node_from_xml "$sync_settings_xml" "Refresh" exact
+  sleep 2
+  wait_for_sync_settings "50-sync-settings-after-refresh"
+  verify_sync_settings "60-sync-settings-after-refresh-scrolled"
 }
 
 capture_final_state() {
@@ -665,6 +678,7 @@ tap_node_from_xml "$files_root_xml" "Sync" exact
 sleep 2
 wait_for_sync_settings
 verify_sync_settings
+verify_refresh_action
 capture_final_state
 
 printf 'Sync settings smoke passed. Evidence: %s\n' "$evidence_dir"

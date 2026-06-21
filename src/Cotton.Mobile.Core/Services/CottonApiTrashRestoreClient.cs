@@ -1,17 +1,17 @@
 using Cotton.Files;
-using Cotton.Sdk;
+using Cotton;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSdkTrashRestoreClient : ICottonTrashRestoreClient
+    public class CottonApiTrashRestoreClient : ICottonTrashRestoreClient
     {
-        private readonly ICottonClientFactory _clientFactory;
+        private readonly CottonAuthenticatedApiClient _apiClient;
 
-        public CottonSdkTrashRestoreClient(ICottonClientFactory clientFactory)
+        public CottonApiTrashRestoreClient(CottonAuthenticatedApiClient apiClient)
         {
-            ArgumentNullException.ThrowIfNull(clientFactory);
+            ArgumentNullException.ThrowIfNull(apiClient);
 
-            _clientFactory = clientFactory;
+            _apiClient = apiClient;
         }
 
         public async Task<RestoreOutcomeDto> RestoreFileAsync(
@@ -24,9 +24,9 @@ namespace Cotton.Mobile.Services
             ValidateItemId(fileId, nameof(fileId));
             ArgumentNullException.ThrowIfNull(request);
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            return await client.Files
-                .RestoreAsync(fileId, request, cancellationToken)
+            string path = $"{Routes.V1.Files}/{fileId}/restore";
+            return await _apiClient
+                .SendJsonAsync<RestoreOutcomeDto>(instanceUri, HttpMethod.Post, path, request, cancellationToken)
                 .ConfigureAwait(false);
         }
 
@@ -40,9 +40,9 @@ namespace Cotton.Mobile.Services
             ValidateItemId(folderId, nameof(folderId));
             ArgumentNullException.ThrowIfNull(request);
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            return await client.Nodes
-                .RestoreAsync(folderId, request, cancellationToken)
+            string path = $"{Routes.V1.Layouts}/nodes/{folderId}/restore";
+            return await _apiClient
+                .SendJsonAsync<RestoreOutcomeDto>(instanceUri, HttpMethod.Post, path, request, cancellationToken)
                 .ConfigureAwait(false);
         }
 

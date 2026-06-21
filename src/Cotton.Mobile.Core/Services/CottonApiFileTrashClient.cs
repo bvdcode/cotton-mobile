@@ -1,16 +1,16 @@
-using Cotton.Sdk;
+using Cotton;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSdkFileTrashClient : ICottonFileTrashClient
+    public class CottonApiFileTrashClient : ICottonFileTrashClient
     {
-        private readonly ICottonClientFactory _clientFactory;
+        private readonly CottonAuthenticatedApiClient _apiClient;
 
-        public CottonSdkFileTrashClient(ICottonClientFactory clientFactory)
+        public CottonApiFileTrashClient(CottonAuthenticatedApiClient apiClient)
         {
-            ArgumentNullException.ThrowIfNull(clientFactory);
+            ArgumentNullException.ThrowIfNull(apiClient);
 
-            _clientFactory = clientFactory;
+            _apiClient = apiClient;
         }
 
         public async Task MoveFileToTrashAsync(
@@ -30,9 +30,13 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Expected file ETag is required.", nameof(expectedETag));
             }
 
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            await client.Files
-                .DeleteAsync(fileId, skipTrash: false, expectedETag.Trim(), cancellationToken)
+            string path = Routes.V1.Files
+                + "/"
+                + fileId
+                + "?skipTrash=false&expectedETag="
+                + Uri.EscapeDataString(expectedETag.Trim());
+            await _apiClient
+                .SendRequiredAsync(instanceUri, HttpMethod.Delete, path, cancellationToken)
                 .ConfigureAwait(false);
         }
     }

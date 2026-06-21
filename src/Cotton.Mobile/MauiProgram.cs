@@ -241,11 +241,11 @@ namespace Cotton.Mobile
 					new CottonAuthenticatedApiHttpOptions(metadata.UserAgent, metadata.DeviceName));
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
-			builder.Services.AddSingleton<ICottonFileTrashClient, CottonSdkFileTrashClient>();
+			builder.Services.AddSingleton<ICottonFileTrashClient, CottonApiFileTrashClient>();
 			builder.Services.AddSingleton<ICottonFileTrashService, CottonFileTrashService>();
-			builder.Services.AddSingleton<ICottonFolderTrashClient, CottonSdkFolderTrashClient>();
+			builder.Services.AddSingleton<ICottonFolderTrashClient, CottonApiFolderTrashClient>();
 			builder.Services.AddSingleton<ICottonFolderTrashService, CottonFolderTrashService>();
-			builder.Services.AddSingleton<ICottonTrashRestoreClient, CottonSdkTrashRestoreClient>();
+			builder.Services.AddSingleton<ICottonTrashRestoreClient, CottonApiTrashRestoreClient>();
 			builder.Services.AddSingleton<ICottonTrashRestoreService, CottonTrashRestoreService>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryClient, CottonSdkFileVersionHistoryClient>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryService, CottonFileVersionHistoryService>();

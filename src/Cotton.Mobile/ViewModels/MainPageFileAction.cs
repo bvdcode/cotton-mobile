@@ -6,6 +6,7 @@ namespace Cotton.Mobile.ViewModels
         Download,
         KeepFolderOffline,
         KeepOffline,
+        MoveToTrash,
         Open,
         RefreshOffline,
         RemoveOffline,

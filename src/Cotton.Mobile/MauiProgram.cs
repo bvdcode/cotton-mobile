@@ -234,6 +234,8 @@ namespace Cotton.Mobile
 					new CottonAuthenticatedApiHttpOptions(metadata.UserAgent, metadata.DeviceName));
 			});
 			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
+			builder.Services.AddSingleton<ICottonFileTrashClient, CottonSdkFileTrashClient>();
+			builder.Services.AddSingleton<ICottonFileTrashService, CottonFileTrashService>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryClient, CottonSdkFileVersionHistoryClient>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryService, CottonFileVersionHistoryService>();
 			builder.Services.AddSingleton<ICottonActivityFeedService, CottonActivityFeedService>();

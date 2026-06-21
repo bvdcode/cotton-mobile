@@ -211,6 +211,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Item restored.", CottonTrashRestoreStatusText.CreateRestoredStatus(" "));
             Assert.Equal("Restore cancelled.", CottonTrashRestoreStatusText.CancelledStatus);
             Assert.Equal("Could not restore item.", CottonTrashRestoreStatusText.FailedStatus);
+            Assert.Equal(
+                "Restore is taking longer than expected. Refresh and try again.",
+                CottonTrashRestoreStatusText.TimedOutStatus);
             Assert.Equal("Offline. Restore needs internet.", CottonTrashRestoreStatusText.OfflineUnavailableStatus);
         }
 

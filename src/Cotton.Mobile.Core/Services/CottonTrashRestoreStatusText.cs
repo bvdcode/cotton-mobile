@@ -20,6 +20,8 @@ namespace Cotton.Mobile.Services
 
         public const string RestoredStatus = "Item restored.";
 
+        public const string TimedOutStatus = "Restore is taking longer than expected. Refresh and try again.";
+
         public const string CreateMissingParentsAction = "Create folders";
 
         public const string ParentMissingTitle = "Original folder missing";

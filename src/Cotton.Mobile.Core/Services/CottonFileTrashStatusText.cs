@@ -14,6 +14,8 @@ namespace Cotton.Mobile.Services
 
         public const string OfflineUnavailableStatus = "Offline. Move to trash needs internet.";
 
+        public const string TimedOutStatus = "Move to trash is taking longer than expected. Refresh and try again.";
+
         public static string CreateConfirmMessage(string fileName)
         {
             string name = NormalizeFileName(fileName);

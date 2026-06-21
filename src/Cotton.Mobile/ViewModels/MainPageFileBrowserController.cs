@@ -46,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
         private const string OpenUnavailableStatus = CottonFileOpenRouter.OpenUnavailableStatus;
         private const int PayloadTooLargeStatusCode = 413;
         private const int InsufficientStorageStatusCode = 507;
+        private static readonly TimeSpan FileServerMutationTimeout = TimeSpan.FromSeconds(45);
         private static readonly TimeSpan SelectionClearActivationSettleDuration = TimeSpan.FromMilliseconds(350);
 
         private readonly MainPageDisplayState _display;
@@ -4673,10 +4674,13 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonFileTrashMoveResult result = await _fileTrashService.MoveFileToTrashAsync(
-                    instanceUri,
-                    currentFile,
-                    fileActionCancellation.Token);
+                CottonFileTrashMoveResult result = await AwaitFileServerMutationAsync(
+                    _fileTrashService.MoveFileToTrashAsync(
+                        instanceUri,
+                        currentFile,
+                        fileActionCancellation.Token),
+                    fileActionCancellation,
+                    CottonFileTrashStatusText.TimedOutStatus);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
@@ -4712,12 +4716,28 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
+                    didEndFileAction = true;
                     _logger.LogDebug("Ignored stale Cotton mobile trash cancellation {FileId}.", file.Id);
                     return;
                 }
 
                 ClearFileActionRetry();
                 _display.ShowFilesStatus(CottonFileTrashStatusText.CancelledStatus);
+            }
+            catch (TimeoutException exception)
+            {
+                didEndFileAction = true;
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile trash timeout {FileId}.", file.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Timed out moving Cotton mobile file to trash {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.MoveToTrash,
+                    file,
+                    exception.Message);
             }
             catch (Exception exception)
             {
@@ -4800,12 +4820,15 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonTrashRestoreResult result = await _trashRestoreService.RestoreAsync(
-                    instanceUri,
-                    item.Id,
-                    item.Type,
-                    retryMode,
-                    fileActionCancellation.Token);
+                CottonTrashRestoreResult result = await AwaitFileServerMutationAsync(
+                    _trashRestoreService.RestoreAsync(
+                        instanceUri,
+                        item.Id,
+                        item.Type,
+                        retryMode,
+                        fileActionCancellation.Token),
+                    fileActionCancellation,
+                    CottonTrashRestoreStatusText.TimedOutStatus);
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
@@ -4832,12 +4855,29 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (!IsActiveFileAction(fileActionCancellation, instanceUri))
                 {
+                    didEndFileAction = true;
                     _logger.LogDebug("Ignored stale Cotton mobile trash restore cancellation {ItemId}.", item.Id);
                     return;
                 }
 
                 ClearFileActionRetry();
                 _display.ShowFilesStatus(CottonTrashRestoreStatusText.CancelledStatus);
+            }
+            catch (TimeoutException exception)
+            {
+                didEndFileAction = true;
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile trash restore timeout {ItemId}.", item.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Timed out restoring Cotton mobile trashed item {ItemId}.", item.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    exception.Message,
+                    CottonTrashRestoreStatusText.RestoreAction);
             }
             catch (Exception exception)
             {
@@ -5476,6 +5516,66 @@ namespace Cotton.Mobile.ViewModels
                 lastStatus = status;
                 _display.ShowFileActionLoading(status);
             });
+        }
+
+        private async Task<T> AwaitFileServerMutationAsync<T>(
+            Task<T> mutation,
+            CancellationTokenSource fileActionCancellation,
+            string timeoutStatus)
+        {
+            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(fileActionCancellation.Token);
+            timeout.CancelAfter(FileServerMutationTimeout);
+            try
+            {
+                return await mutation.WaitAsync(timeout.Token);
+            }
+            catch (OperationCanceledException)
+                when (fileActionCancellation.IsCancellationRequested)
+            {
+                DetachIncompleteFileAction(fileActionCancellation, mutation);
+                throw;
+            }
+            catch (OperationCanceledException exception)
+                when (!fileActionCancellation.IsCancellationRequested && timeout.IsCancellationRequested)
+            {
+                DetachIncompleteFileAction(fileActionCancellation, mutation);
+                throw new TimeoutException(timeoutStatus, exception);
+            }
+        }
+
+        private void DetachIncompleteFileAction<T>(
+            CancellationTokenSource fileActionCancellation,
+            Task<T> mutation)
+        {
+            if (ReferenceEquals(_fileActionCancellation, fileActionCancellation))
+            {
+                _fileActionCancellation = null;
+            }
+
+            fileActionCancellation.Cancel();
+            _ = DisposeIncompleteFileActionAsync(fileActionCancellation, mutation);
+        }
+
+        private async Task DisposeIncompleteFileActionAsync<T>(
+            CancellationTokenSource fileActionCancellation,
+            Task<T> mutation)
+        {
+            try
+            {
+                await mutation.ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception)
+            {
+                _logger.LogDebug(exception, "Ignored late detached Cotton mobile file action cancellation.");
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Ignored late detached Cotton mobile file action failure.");
+            }
+            finally
+            {
+                fileActionCancellation.Dispose();
+            }
         }
 
         private CancellationTokenSource BeginFileAction(string status)

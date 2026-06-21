@@ -62,6 +62,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Move to trash cancelled.", CottonFileTrashStatusText.CancelledStatus);
             Assert.Equal("Could not move file to trash.", CottonFileTrashStatusText.FailedStatus);
             Assert.Equal(
+                "Move to trash is taking longer than expected. Refresh and try again.",
+                CottonFileTrashStatusText.TimedOutStatus);
+            Assert.Equal(
                 "Offline. Move to trash needs internet.",
                 CottonFileTrashStatusText.OfflineUnavailableStatus);
         }

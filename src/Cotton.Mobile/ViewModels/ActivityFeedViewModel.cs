@@ -13,9 +13,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonActivityFeedService _activityFeedService;
         private readonly ILogger<ActivityFeedViewModel> _logger;
         private bool _isBusy;
-        private int _currentPage;
-        private int? _totalItemCount;
-        private bool _mayHaveMore;
+        private CottonActivityFeedPagingState _pagingState = CottonActivityFeedPagingState.Empty;
         private string _summaryText = "0 items";
         private string _emptyMessage = "No activity yet";
         private string _emptyDetails = "Nothing needs attention right now.";
@@ -93,7 +91,7 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsListVisible => Items.Count > 0;
 
-        public bool IsLoadMoreVisible => Items.Count > 0 && _mayHaveMore;
+        public bool IsLoadMoreVisible => Items.Count > 0 && _pagingState.MayHaveMore;
 
         private async Task LoadAsync()
         {
@@ -109,7 +107,7 @@ namespace Cotton.Mobile.ViewModels
                     _instanceUri,
                     new CottonActivityFeedQuery(page: 1, pageSize: PageSize));
                 ShowSnapshot(CottonActivityFeedListSnapshot.Create(page, TimeZoneInfo.Local), append: false);
-                ShowPagingState(page, preserveExistingTotal: false);
+                ShowPagingState(_pagingState.ApplyRefresh(page));
                 Status = null;
             }
             catch (Exception exception)
@@ -138,9 +136,9 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonActivityFeedPageSnapshot page = await _activityFeedService.GetPageAsync(
                     _instanceUri,
-                    new CottonActivityFeedQuery(page: _currentPage + 1, pageSize: PageSize));
+                    new CottonActivityFeedQuery(page: _pagingState.NextPage, pageSize: PageSize));
                 ShowSnapshot(CottonActivityFeedListSnapshot.Create(page, TimeZoneInfo.Local), append: true);
-                ShowPagingState(page, preserveExistingTotal: true);
+                ShowPagingState(_pagingState.ApplyAppend(page));
                 Status = null;
             }
             catch (Exception exception)
@@ -175,12 +173,12 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
         }
 
-        private void ShowPagingState(CottonActivityFeedPageSnapshot page, bool preserveExistingTotal)
+        private void ShowPagingState(CottonActivityFeedPagingState pagingState)
         {
-            _currentPage = page.Query.Page;
-            _totalItemCount = page.TotalItemCount ?? (preserveExistingTotal ? _totalItemCount : null);
-            _mayHaveMore = page.MayHaveMore;
-            SummaryText = CottonActivityFeedListSnapshot.CreateSummaryText(Items.ToArray(), _totalItemCount);
+            _pagingState = pagingState;
+            SummaryText = CottonActivityFeedListSnapshot.CreateSummaryText(
+                Items.ToArray(),
+                _pagingState.TotalItemCount);
             OnPropertyChanged(nameof(IsLoadMoreVisible));
             LoadMoreCommand.RaiseCanExecuteChanged();
         }

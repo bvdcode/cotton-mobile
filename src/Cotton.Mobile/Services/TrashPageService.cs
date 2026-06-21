@@ -1,0 +1,42 @@
+using Cotton.Mobile.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Maui.ApplicationModel;
+
+namespace Cotton.Mobile.Services
+{
+    public class TrashPageService : ITrashPageService
+    {
+        private readonly IServiceProvider _serviceProvider;
+
+        public TrashPageService(IServiceProvider serviceProvider)
+        {
+            ArgumentNullException.ThrowIfNull(serviceProvider);
+
+            _serviceProvider = serviceProvider;
+        }
+
+        public async Task OpenAsync(Uri instanceUri, CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (Shell.Current.Navigation.NavigationStack.LastOrDefault() is TrashPage currentPage
+                    && currentPage.BindingContext is TrashViewModel currentViewModel)
+                {
+                    currentViewModel.LoadCommand.Execute(null);
+                    return;
+                }
+
+                var viewModel = ActivatorUtilities.CreateInstance<TrashViewModel>(
+                    _serviceProvider,
+                    instanceUri);
+                var page = ActivatorUtilities.CreateInstance<TrashPage>(_serviceProvider, viewModel);
+                await Shell.Current.Navigation.PushAsync(page);
+            });
+            cancellationToken.ThrowIfCancellationRequested();
+        }
+    }
+}

@@ -27,6 +27,7 @@ namespace Cotton.Mobile.ViewModels
         private const string AccountSecurityAction = "Security";
         private const string AccountResetFileLinksConfirmationAction = "Reset file links";
         private const string AccountStorageAction = "Storage";
+        private const string AccountTrashAction = "Trash";
         private const string LogoutConfirmationTitle = "Log out?";
         private const string LogoutConfirmationClearCacheMessage =
             "You will need to sign in again. Cached files on this device will be removed.";
@@ -55,6 +56,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly INotificationSettingsPageService _notificationSettingsPageService;
         private readonly IActivityFeedPageService _activityFeedPageService;
         private readonly IRecentFilesPageService _recentFilesPageService;
+        private readonly ITrashPageService _trashPageService;
         private readonly ICottonShareLaunchState _shareLaunchState;
         private readonly ICottonNotificationLaunchState _notificationLaunchState;
         private readonly ICottonTransferQueueRestoreCoordinator _transferQueueRestoreCoordinator;
@@ -105,6 +107,7 @@ namespace Cotton.Mobile.ViewModels
             INotificationSettingsPageService notificationSettingsPageService,
             IActivityFeedPageService activityFeedPageService,
             IRecentFilesPageService recentFilesPageService,
+            ITrashPageService trashPageService,
             IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonShareLaunchState shareLaunchState,
             ICottonNotificationLaunchState notificationLaunchState,
@@ -169,6 +172,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(notificationSettingsPageService);
             ArgumentNullException.ThrowIfNull(activityFeedPageService);
             ArgumentNullException.ThrowIfNull(recentFilesPageService);
+            ArgumentNullException.ThrowIfNull(trashPageService);
             ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(shareLaunchState);
             ArgumentNullException.ThrowIfNull(notificationLaunchState);
@@ -233,6 +237,7 @@ namespace Cotton.Mobile.ViewModels
             _notificationSettingsPageService = notificationSettingsPageService;
             _activityFeedPageService = activityFeedPageService;
             _recentFilesPageService = recentFilesPageService;
+            _trashPageService = trashPageService;
             _shareLaunchState = shareLaunchState;
             _notificationLaunchState = notificationLaunchState;
             _transferQueueRestoreCoordinator = transferQueueRestoreCoordinator;
@@ -777,6 +782,7 @@ namespace Cotton.Mobile.ViewModels
                 AccountNotificationsAction,
                 AccountActivityAction,
                 AccountRecentFilesAction,
+                AccountTrashAction,
                 AccountResetFileLinksAction,
                 AccountDiagnosticsAction,
                 AccountFeedbackAction,
@@ -809,6 +815,9 @@ namespace Cotton.Mobile.ViewModels
                     break;
                 case AccountRecentFilesAction:
                     await OpenRecentFilesAsync();
+                    break;
+                case AccountTrashAction:
+                    await OpenTrashAsync();
                     break;
                 case AccountResetFileLinksAction:
                     await ResetFileLinksAsync(profileName, profileEmail, profileInstance, instanceUrl);
@@ -1224,6 +1233,32 @@ namespace Cotton.Mobile.ViewModels
                 await _dialogService.ShowAlertAsync(
                     "Recent files",
                     "Could not inspect recent files.",
+                    "OK");
+            }
+        }
+
+        private async Task OpenTrashAsync()
+        {
+            Uri? instanceUri = ResolveInstanceUri();
+            if (instanceUri is null)
+            {
+                await _dialogService.ShowAlertAsync(
+                    "Trash",
+                    "Could not open trash for this instance.",
+                    "OK");
+                return;
+            }
+
+            try
+            {
+                await _trashPageService.OpenAsync(instanceUri);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to open Cotton mobile trash page.");
+                await _dialogService.ShowAlertAsync(
+                    "Trash",
+                    "Could not inspect trash.",
                     "OK");
             }
         }

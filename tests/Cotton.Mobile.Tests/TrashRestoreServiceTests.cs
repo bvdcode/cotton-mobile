@@ -208,6 +208,9 @@ namespace Cotton.Mobile.Tests
                 "An item with this name already exists. Overwrite it and restore notes.txt?",
                 CottonTrashRestoreStatusText.CreateConflictMessage("notes.txt"));
             Assert.Equal("notes.txt restored.", CottonTrashRestoreStatusText.CreateRestoredStatus("notes.txt"));
+            Assert.Equal(
+                "notes.txt restored. Refresh to update trash.",
+                CottonTrashRestoreStatusText.CreateRestoredNeedsRefreshStatus("notes.txt"));
             Assert.Equal("Item restored.", CottonTrashRestoreStatusText.CreateRestoredStatus(" "));
             Assert.Equal("Restore cancelled.", CottonTrashRestoreStatusText.CancelledStatus);
             Assert.Equal("Could not restore item.", CottonTrashRestoreStatusText.FailedStatus);

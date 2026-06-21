@@ -74,6 +74,12 @@ namespace Cotton.Mobile.Services
             return $"{name} restored.";
         }
 
+        public static string CreateRestoredNeedsRefreshStatus(string itemName)
+        {
+            string name = NormalizeItemName(itemName);
+            return $"{name} restored. Refresh to update trash.";
+        }
+
         private static string NormalizeItemName(string itemName)
         {
             return string.IsNullOrWhiteSpace(itemName) ? "Item" : itemName.Trim();

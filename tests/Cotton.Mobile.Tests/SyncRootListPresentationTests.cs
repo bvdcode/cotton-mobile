@@ -36,6 +36,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
             Assert.Equal(FirstRootId, item.Id);
+            Assert.Equal(CottonSyncDirection.CloudToDevice, item.Direction);
             Assert.Equal("Projects", item.Title);
             Assert.Equal("Files / Projects", item.PathText);
             Assert.Equal("Cloud to device · On this device", item.DetailText);
@@ -97,6 +98,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal("2 folders set to sync", state.SummaryText);
             Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
+            Assert.Equal(CottonSyncDirection.DeviceToCloud, state.Items[0].Direction);
             Assert.Equal("Device to cloud · On this device", state.Items[0].DetailText);
             Assert.False(state.Items[0].CanRunNow);
         }
@@ -189,6 +191,7 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
+            Assert.Equal(CottonSyncDirection.Bidirectional, item.Direction);
             Assert.Equal("Bidirectional · Device folder", item.DetailText);
             Assert.Equal("Sync root ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);

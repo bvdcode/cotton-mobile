@@ -187,10 +187,11 @@ namespace Cotton.Mobile.ViewModels
 
             if (!_networkAccess.HasInternetAccess)
             {
-                Status = CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+                Status = CottonSyncRootRunRouting.CreateOfflineUnavailableStatus(item.Direction);
                 return;
             }
 
+            CottonSyncDirection statusDirection = item.Direction;
             IsBusy = true;
             try
             {
@@ -204,6 +205,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                statusDirection = root.Direction;
                 IReadOnlySet<Guid> pausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 if (pausedIds.Contains(root.Id))
                 {
@@ -212,7 +214,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                Status = CreateStartingStatus(root);
+                Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
                 string completedStatus = await RunRootAndCreateCompletedStatusAsync(instanceUri, root);
                 IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
@@ -222,7 +224,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to run Cotton mobile sync root.");
-                Status = CottonCloudToDeviceSyncStatusText.FailedStatus;
+                Status = CottonSyncRootRunRouting.CreateFailedStatus(statusDirection);
             }
             finally
             {
@@ -241,7 +243,7 @@ namespace Cotton.Mobile.ViewModels
 
             if (!_networkAccess.HasInternetAccess)
             {
-                Status = CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+                Status = CottonSyncSettingsRunStatusText.OfflineUnavailableStatus;
                 return;
             }
 
@@ -265,7 +267,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to run Cotton mobile sync roots.");
-                Status = CottonCloudToDeviceSyncStatusText.FailedStatus;
+                Status = CottonSyncSettingsRunStatusText.FailedStatus;
             }
             finally
             {
@@ -398,19 +400,19 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonSyncRootSnapshot root)
         {
-            switch (root.Direction)
+            switch (CottonSyncRootRunRouting.CreateRoute(root))
             {
-                case CottonSyncDirection.CloudToDevice:
+                case CottonSyncRootRunRoute.CloudToDevice:
                     CottonCloudToDeviceSyncRunSummary cloudSummary =
                         await _syncCoordinator.RunRootAsync(instanceUri, root);
                     return CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(cloudSummary);
 
-                case CottonSyncDirection.DeviceToCloud:
+                case CottonSyncRootRunRoute.DeviceToCloud:
                     CottonDeviceToCloudSyncRunSummary deviceSummary =
                         await RunDeviceToCloudRootAsync(instanceUri, root);
                     return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(deviceSummary);
 
-                case CottonSyncDirection.Bidirectional:
+                case CottonSyncRootRunRoute.Bidirectional:
                     CottonBidirectionalSyncRunSummary bidirectionalSummary =
                         await RunBidirectionalRootAsync(instanceUri, root);
                     return CottonBidirectionalSyncStatusText.CreateCompletedStatus(bidirectionalSummary);
@@ -432,45 +434,37 @@ namespace Cotton.Mobile.ViewModels
             var bidirectionalResults = new List<CottonBidirectionalSyncRootRunResult>();
             foreach (CottonSyncRootSnapshot root in roots)
             {
-                if (root.Direction == CottonSyncDirection.CloudToDevice)
+                switch (CottonSyncRootRunRouting.CreateRoute(root))
                 {
-                    CottonCloudToDeviceSyncRunSummary summary =
-                        await _syncCoordinator.RunRootAsync(instanceUri, root);
-                    cloudResults.AddRange(summary.RootResults);
-                    continue;
-                }
+                    case CottonSyncRootRunRoute.CloudToDevice:
+                        CottonCloudToDeviceSyncRunSummary summary =
+                            await _syncCoordinator.RunRootAsync(instanceUri, root);
+                        cloudResults.AddRange(summary.RootResults);
+                        break;
 
-                if (root.Direction == CottonSyncDirection.Bidirectional)
-                {
-                    CottonBidirectionalSyncRunSummary bidirectionalSummary =
-                        await RunBidirectionalRootAsync(instanceUri, root);
-                    bidirectionalResults.AddRange(bidirectionalSummary.RootResults);
-                    continue;
-                }
+                    case CottonSyncRootRunRoute.DeviceToCloud:
+                        CottonDeviceToCloudSyncRunSummary deviceSummary =
+                            await RunDeviceToCloudRootAsync(instanceUri, root);
+                        deviceResults.AddRange(deviceSummary.RootResults);
+                        break;
 
-                CottonDeviceToCloudSyncRunSummary deviceSummary =
-                    await RunDeviceToCloudRootAsync(instanceUri, root);
-                deviceResults.AddRange(deviceSummary.RootResults);
+                    case CottonSyncRootRunRoute.Bidirectional:
+                        CottonBidirectionalSyncRunSummary bidirectionalSummary =
+                            await RunBidirectionalRootAsync(instanceUri, root);
+                        bidirectionalResults.AddRange(bidirectionalSummary.RootResults);
+                        break;
+
+                    default:
+                        throw new ArgumentOutOfRangeException(
+                            nameof(root),
+                            "Sync run route is not supported.");
+                }
             }
 
             return (
                 new CottonCloudToDeviceSyncRunSummary(cloudResults),
                 new CottonDeviceToCloudSyncRunSummary(deviceResults),
                 new CottonBidirectionalSyncRunSummary(bidirectionalResults));
-        }
-
-        private static string CreateStartingStatus(CottonSyncRootSnapshot root)
-        {
-            return root.Direction switch
-            {
-                CottonSyncDirection.CloudToDevice =>
-                    CottonCloudToDeviceSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
-                CottonSyncDirection.DeviceToCloud =>
-                    CottonDeviceToCloudSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
-                CottonSyncDirection.Bidirectional =>
-                    CottonBidirectionalSyncStatusText.CreateStartingStatus(root.CloudFolder.FolderName),
-                _ => throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported."),
-            };
         }
 
         private async Task<CottonDeviceToCloudSyncRunSummary> RunDeviceToCloudRootAsync(

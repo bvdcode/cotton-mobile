@@ -4,6 +4,12 @@ namespace Cotton.Mobile.Services
     {
         public const string StartingAllStatus = "Syncing folders...";
 
+        public static string OfflineUnavailableStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+
+        public static string FailedStatus { get; } =
+            CottonCloudToDeviceSyncStatusText.FailedStatus;
+
         public static string CreateCompletedStatus(
             CottonCloudToDeviceSyncRunSummary cloudToDeviceSummary,
             CottonDeviceToCloudSyncRunSummary deviceToCloudSummary,

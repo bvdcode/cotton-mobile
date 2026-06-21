@@ -15,6 +15,9 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Combined_status_reports_no_roots()
         {
+            Assert.Equal("Syncing folders...", CottonSyncSettingsRunStatusText.StartingAllStatus);
+            Assert.Equal("Offline. Sync needs internet.", CottonSyncSettingsRunStatusText.OfflineUnavailableStatus);
+            Assert.Equal("Sync failed.", CottonSyncSettingsRunStatusText.FailedStatus);
             Assert.Equal(
                 "No folders are set to sync.",
                 CottonSyncSettingsRunStatusText.CreateCompletedStatus(

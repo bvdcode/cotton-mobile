@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(root);
 
             Id = root.Id;
+            Direction = root.Direction;
             Title = root.CloudFolder.FolderName;
             PathText = root.CloudFolder.Path;
             DetailText = $"{CreateDirectionText(root.Direction)} · {root.LocalRoot.DisplayName}";
@@ -23,6 +24,8 @@ namespace Cotton.Mobile.Services
         }
 
         public Guid Id { get; }
+
+        public CottonSyncDirection Direction { get; }
 
         public string Title { get; }
 

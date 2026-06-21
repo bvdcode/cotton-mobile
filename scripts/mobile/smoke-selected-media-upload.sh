@@ -408,6 +408,40 @@ query_seeded_media_store() {
       exit 66
     fi
   done
+
+  local expected_transfer_items_file="$evidence_dir/14-expected-transfer-items.json"
+  python3 - "$output_file" "$expected_transfer_items_file" "${media_names[@]}" <<'PY'
+import json
+import re
+import sys
+from pathlib import Path
+
+source_path, output_path = sys.argv[1:3]
+expected_names = sys.argv[3:]
+source_text = Path(source_path).read_text(encoding="utf-8")
+items = []
+
+for name in expected_names:
+    row_match = re.search(
+        rf"_id=(?P<id>\d+), _display_name={re.escape(name)}, mime_type=(?P<mime>[^,]+),",
+        source_text,
+    )
+    if row_match is None:
+        raise SystemExit(f"Seeded MediaStore row was not found: {name}")
+
+    extension = Path(name).suffix.lower()
+    media_id = row_match.group("id")
+    picker_name = f"{media_id}{extension}" if extension else media_id
+    items.append(
+        {
+            "seededName": name,
+            "pickerName": picker_name,
+            "contentType": row_match.group("mime"),
+        }
+    )
+
+Path(output_path).write_text(json.dumps(items, indent=2) + "\n", encoding="utf-8")
+PY
 }
 
 seed_shared_media() {
@@ -504,6 +538,7 @@ validate_selected_media_queue() {
   local queue_path="$evidence_dir/60-after-picker-queue.json"
   local staged_path="$evidence_dir/60-after-picker-staged-files.txt"
   local item_path="$evidence_dir/61-selected-media-items.json"
+  local expected_path="$evidence_dir/14-expected-transfer-items.json"
 
   if [[ ! -f "$queue_path" ]]; then
     printf 'Transfer queue metadata was not captured.\n' >&2
@@ -511,21 +546,30 @@ validate_selected_media_queue() {
     exit 66
   fi
 
-  python3 - "$queue_path" "$staged_path" "$item_path" "$kind" "${media_names[@]}" <<'PY'
+  if [[ ! -f "$expected_path" ]]; then
+    printf 'Expected transfer item metadata was not captured.\n' >&2
+    printf 'Evidence: %s\n' "$expected_path" >&2
+    exit 66
+  fi
+
+  python3 - "$queue_path" "$staged_path" "$item_path" "$expected_path" "$kind" <<'PY'
 import json
 import sys
 
-queue_path, staged_path, item_path, kind = sys.argv[1:5]
-expected_names = sys.argv[5:]
+queue_path, staged_path, item_path, expected_path, kind = sys.argv[1:6]
+expected_items = json.load(open(expected_path, encoding="utf-8"))
 data = json.load(open(queue_path, encoding="utf-8"))
 staged_text = open(staged_path, encoding="utf-8").read()
 items = data.get("items", [])
 matches = []
 
-for name in expected_names:
-    item = next((candidate for candidate in reversed(items) if candidate.get("displayName") == name), None)
+for expected in expected_items:
+    seeded_name = expected["seededName"]
+    picker_name = expected["pickerName"]
+    aliases = {seeded_name, picker_name}
+    item = next((candidate for candidate in reversed(items) if candidate.get("displayName") in aliases), None)
     if item is None:
-        raise SystemExit(f"Missing selected-media transfer for {name}")
+        raise SystemExit(f"Missing selected-media transfer for {seeded_name} with aliases {sorted(aliases)!r}")
 
     source = item.get("source") or {}
     destination = item.get("destination") or {}
@@ -533,21 +577,21 @@ for name in expected_names:
     status = item.get("status")
 
     if source.get("kind") != 3:
-        raise SystemExit(f"Transfer source kind is not SelectedMedia for {name}: {source!r}")
+        raise SystemExit(f"Transfer source kind is not SelectedMedia for {seeded_name}: {source!r}")
     if not source.get("sourceId"):
-        raise SystemExit(f"Transfer source id is missing for {name}")
-    if source.get("sourceId") == name:
-        raise SystemExit(f"Transfer source id should not store the display name for {name}")
+        raise SystemExit(f"Transfer source id is missing for {seeded_name}")
+    if source.get("sourceId") in aliases:
+        raise SystemExit(f"Transfer source id should not store the display name for {seeded_name}")
     if not destination:
-        raise SystemExit(f"Transfer destination is missing for {name}")
+        raise SystemExit(f"Transfer destination is missing for {seeded_name}")
     if kind == "photo" and not content_type.startswith("image/"):
-        raise SystemExit(f"Unexpected photo content type for {name}: {content_type!r}")
+        raise SystemExit(f"Unexpected photo content type for {seeded_name}: {content_type!r}")
     if kind == "video" and not content_type.startswith("video/"):
-        raise SystemExit(f"Unexpected video content type for {name}: {content_type!r}")
+        raise SystemExit(f"Unexpected video content type for {seeded_name}: {content_type!r}")
     if status not in (0, 1, 2, 3, 4):
-        raise SystemExit(f"Unexpected transfer status for {name}: {status!r}")
-    if status != 3 and name not in staged_text:
-        raise SystemExit(f"Waiting transfer staged file is missing for {name}")
+        raise SystemExit(f"Unexpected transfer status for {seeded_name}: {status!r}")
+    if status != 3 and not any(alias in staged_text for alias in aliases):
+        raise SystemExit(f"Waiting transfer staged file is missing for {seeded_name}")
 
     matches.append(item)
 
@@ -559,7 +603,7 @@ print(json.dumps(
     {
         "validated": len(matches),
         "kind": kind,
-        "names": expected_names,
+        "items": expected_items,
         "statuses": [item.get("status") for item in matches],
     },
     indent=2,
@@ -569,7 +613,7 @@ PY
 
 open_transfers_page() {
   if xml_has_text "$files_root_xml" "Open transfers"; then
-    tap_node_from_xml "$files_root_xml" "Open transfers" exact
+    tap_node_from_xml "$files_root_xml" "Open transfers" contains
   else
     tap_node_from_xml "$files_root_xml" "Transfers" exact
   fi
@@ -599,6 +643,7 @@ write_checklist() {
     printf -- '- [ ] Seeded %s item(s) are visible in Android MediaStore.\n' "$kind"
     printf '%s\n' '- [ ] Files root is visible with Add files and Transfers navigation.'
     printf '%s\n' '- [ ] Add files opens the upload action sheet.'
+    printf '%s\n' '- [ ] Upload opens the media/source action sheet.'
     printf -- '- [ ] %s picker opens through the native selected-media flow.\n' "$kind"
     printf '%s\n' '- [ ] Operator selects all seeded items and confirms the picker.'
     printf '%s\n' '- [ ] Files returns without a fatal app crash.'
@@ -658,12 +703,16 @@ require_xml_text "$files_root_xml" "Add files" "Files Add action is not visible.
 tap_text "$files_root_xml" "Add files"
 sleep 2
 capture_screen "30-add-actions"
+require_xml_text "$evidence_dir/30-add-actions.xml" "Upload..." "Upload action is not visible."
+tap_text "$evidence_dir/30-add-actions.xml" "Upload..."
+sleep 2
+capture_screen "31-upload-actions"
 if [[ "$kind" == "photo" ]]; then
-  require_xml_text "$evidence_dir/30-add-actions.xml" "Upload photo" "Upload photo action is not visible."
-  tap_text "$evidence_dir/30-add-actions.xml" "Upload photo"
+  require_xml_text "$evidence_dir/31-upload-actions.xml" "Upload photo" "Upload photo action is not visible."
+  tap_text "$evidence_dir/31-upload-actions.xml" "Upload photo"
 else
-  require_xml_text "$evidence_dir/30-add-actions.xml" "Upload video" "Upload video action is not visible."
-  tap_text "$evidence_dir/30-add-actions.xml" "Upload video"
+  require_xml_text "$evidence_dir/31-upload-actions.xml" "Upload video" "Upload video action is not visible."
+  tap_text "$evidence_dir/31-upload-actions.xml" "Upload video"
 fi
 
 sleep 3

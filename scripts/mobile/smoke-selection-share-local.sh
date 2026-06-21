@@ -122,6 +122,11 @@ if [[ -n "$mixed_folder" && -z "${mixed_folder//[[:space:]]/}" ]]; then
   exit 64
 fi
 
+if [[ -n "$mixed_folder" && ("$mixed_folder" == "$first_file" || "$mixed_folder" == "$second_file") ]]; then
+  printf 'Mixed-selection folder name must be different from selected file names.\n' >&2
+  exit 64
+fi
+
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
   exit 127

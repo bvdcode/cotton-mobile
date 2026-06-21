@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Tests
             Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
         private static readonly Guid SecondNotificationId =
             Guid.Parse("11111111-2222-3333-4444-555555555555");
+        private static readonly Guid ThirdNotificationId =
+            Guid.Parse("66666666-7777-8888-9999-aaaaaaaaaaaa");
         private static readonly DateTime CreatedAt =
             new(2026, 6, 20, 4, 45, 0, DateTimeKind.Utc);
         private static readonly DateTime ReadAt =
@@ -64,6 +66,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(3, page.Query.PageSize);
             Assert.False(page.IsEmpty);
             Assert.False(page.MayHaveMore);
+            Assert.Null(page.TotalItemCount);
 
             CottonActivityFeedItemSnapshot first = page.Items[0];
             Assert.Equal(FirstNotificationId, first.Id);
@@ -92,6 +95,32 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Cotton-Mobile/1.0", request.UserAgent);
             Assert.Equal("Test device", request.DeviceName);
             Assert.Null(request.Content);
+        }
+
+        [Fact]
+        public async Task GetPageAsync_reads_total_count_header()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueJson(
+                HttpStatusCode.OK,
+                new object[]
+                {
+                    CreateNotificationResponse(FirstNotificationId),
+                    CreateNotificationResponse(SecondNotificationId),
+                    CreateNotificationResponse(ThirdNotificationId),
+                },
+                new Dictionary<string, string>
+                {
+                    ["X-Total-Count"] = "6",
+                });
+            var service = CreateService(handler, new FakeTokenStore("access", "refresh"));
+
+            CottonActivityFeedPageSnapshot page = await service.GetPageAsync(
+                InstanceUri,
+                new CottonActivityFeedQuery(page: 2, pageSize: 3));
+
+            Assert.Equal(6, page.TotalItemCount);
+            Assert.False(page.MayHaveMore);
         }
 
         [Fact]
@@ -160,6 +189,31 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(full.MayHaveMore);
             Assert.False(partial.MayHaveMore);
+            Assert.Null(full.TotalItemCount);
+        }
+
+        [Fact]
+        public void Page_snapshot_uses_total_count_when_available()
+        {
+            CottonActivityFeedItemSnapshot item = CreateItem();
+
+            var lastPage = new CottonActivityFeedPageSnapshot(
+                new CottonActivityFeedQuery(page: 2, pageSize: 3),
+                [item, item, item],
+                totalItemCount: 6);
+            var pageWithMore = new CottonActivityFeedPageSnapshot(
+                new CottonActivityFeedQuery(page: 2, pageSize: 3),
+                [item, item, item],
+                totalItemCount: 7);
+
+            Assert.False(lastPage.MayHaveMore);
+            Assert.True(pageWithMore.MayHaveMore);
+            Assert.Equal(6, lastPage.TotalItemCount);
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => new CottonActivityFeedPageSnapshot(
+                    new CottonActivityFeedQuery(),
+                    [item],
+                    totalItemCount: -1));
         }
 
         [Fact]
@@ -225,6 +279,20 @@ namespace Cotton.Mobile.Tests
                 null);
         }
 
+        private static object CreateNotificationResponse(Guid id)
+        {
+            return new
+            {
+                id,
+                title = "Activity",
+                content = (string?)null,
+                createdAt = CreatedAt,
+                readAt = (DateTime?)null,
+                priority = CottonActivityFeedPriority.Low,
+                metadata = (Dictionary<string, string>?)null,
+            };
+        }
+
         private static CottonActivityFeedService CreateService(
             RecordingHttpMessageHandler handler,
             ICottonTokenStore tokenStore)
@@ -284,13 +352,25 @@ namespace Cotton.Mobile.Tests
 
             public List<RecordedRequest> Requests { get; } = [];
 
-            public void EnqueueJson(HttpStatusCode statusCode, object value)
+            public void EnqueueJson(
+                HttpStatusCode statusCode,
+                object value,
+                IReadOnlyDictionary<string, string>? headers = null)
             {
                 string json = JsonSerializer.Serialize(value, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-                _responses.Enqueue(new HttpResponseMessage(statusCode)
+                var response = new HttpResponseMessage(statusCode)
                 {
                     Content = new StringContent(json, Encoding.UTF8, "application/json"),
-                });
+                };
+                if (headers is not null)
+                {
+                    foreach ((string name, string headerValue) in headers)
+                    {
+                        response.Headers.TryAddWithoutValidation(name, headerValue);
+                    }
+                }
+
+                _responses.Enqueue(response);
             }
 
             protected override async Task<HttpResponseMessage> SendAsync(

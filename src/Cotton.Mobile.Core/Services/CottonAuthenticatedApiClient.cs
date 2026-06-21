@@ -53,6 +53,37 @@ namespace Cotton.Mobile.Services
             object? body,
             CancellationToken cancellationToken)
         {
+            CottonAuthenticatedApiResponse<T> response = await SendJsonResponseAsync<T>(
+                    instanceUri,
+                    method,
+                    path,
+                    body,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return response.Value;
+        }
+
+        public Task<CottonAuthenticatedApiResponse<T>> SendJsonResponseAsync<T>(
+            Uri instanceUri,
+            HttpMethod method,
+            string path,
+            CancellationToken cancellationToken)
+        {
+            return SendJsonResponseAsync<T>(
+                instanceUri,
+                method,
+                path,
+                body: null,
+                cancellationToken);
+        }
+
+        public async Task<CottonAuthenticatedApiResponse<T>> SendJsonResponseAsync<T>(
+            Uri instanceUri,
+            HttpMethod method,
+            string path,
+            object? body,
+            CancellationToken cancellationToken)
+        {
             (HttpResponseMessage response, string? requestAccessToken) =
                 await SendOnceAsync(
                         instanceUri,
@@ -67,7 +98,7 @@ namespace Cotton.Mobile.Services
             {
                 if (response.StatusCode != HttpStatusCode.Unauthorized || !_options.RefreshOnUnauthorized)
                 {
-                    return await ReadRequiredJsonAsync<T>(response, method, path, cancellationToken)
+                    return await ReadRequiredJsonResponseAsync<T>(response, method, path, cancellationToken)
                         .ConfigureAwait(false);
                 }
             }
@@ -85,7 +116,7 @@ namespace Cotton.Mobile.Services
                 .ConfigureAwait(false);
             using (retry)
             {
-                return await ReadRequiredJsonAsync<T>(retry, method, path, cancellationToken)
+                return await ReadRequiredJsonResponseAsync<T>(retry, method, path, cancellationToken)
                     .ConfigureAwait(false);
             }
         }
@@ -310,6 +341,21 @@ namespace Cotton.Mobile.Services
             string path,
             CancellationToken cancellationToken)
         {
+            CottonAuthenticatedApiResponse<T> result = await ReadRequiredJsonResponseAsync<T>(
+                    response,
+                    method,
+                    path,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return result.Value;
+        }
+
+        private static async Task<CottonAuthenticatedApiResponse<T>> ReadRequiredJsonResponseAsync<T>(
+            HttpResponseMessage response,
+            HttpMethod method,
+            string path,
+            CancellationToken cancellationToken)
+        {
             await EnsureSuccessAsync(response, method, path, cancellationToken).ConfigureAwait(false);
 
             string body = await response.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
@@ -326,14 +372,21 @@ namespace Cotton.Mobile.Services
                 if (typeof(T) == typeof(string)
                     && !body.TrimStart().StartsWith("\"", StringComparison.Ordinal))
                 {
-                    return (T)(object)body.Trim();
+                    return new CottonAuthenticatedApiResponse<T>(
+                        (T)(object)body.Trim(),
+                        CopyHeaders(response));
                 }
 
                 T? result = JsonSerializer.Deserialize<T>(body, JsonOptions);
-                return result ?? throw new CottonApiException(
-                    response.StatusCode,
-                    null,
-                    $"Cotton API request {FormatRequestLabel(method, path)} returned an empty JSON response.");
+                if (result is null)
+                {
+                    throw new CottonApiException(
+                        response.StatusCode,
+                        null,
+                        $"Cotton API request {FormatRequestLabel(method, path)} returned an empty JSON response.");
+                }
+
+                return new CottonAuthenticatedApiResponse<T>(result, CopyHeaders(response));
             }
             catch (JsonException exception)
             {
@@ -345,6 +398,25 @@ namespace Cotton.Mobile.Services
                     + CreateResponsePreview(body),
                     exception);
             }
+        }
+
+        private static IReadOnlyDictionary<string, IReadOnlyList<string>> CopyHeaders(HttpResponseMessage response)
+        {
+            var headers = new Dictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, IEnumerable<string>> header in response.Headers)
+            {
+                headers[header.Key] = header.Value.ToArray();
+            }
+
+            if (response.Content is not null)
+            {
+                foreach (KeyValuePair<string, IEnumerable<string>> header in response.Content.Headers)
+                {
+                    headers[header.Key] = header.Value.ToArray();
+                }
+            }
+
+            return headers;
         }
 
         private static async Task EnsureSuccessAsync(

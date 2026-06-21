@@ -7,10 +7,15 @@ namespace Cotton.Mobile.ViewModels
 {
     public class ActivityFeedViewModel : ViewModelBase
     {
+        private const int PageSize = 20;
+
         private readonly Uri _instanceUri;
         private readonly ICottonActivityFeedService _activityFeedService;
         private readonly ILogger<ActivityFeedViewModel> _logger;
         private bool _isBusy;
+        private int _currentPage;
+        private int? _totalItemCount;
+        private bool _mayHaveMore;
         private string _summaryText = "0 items";
         private string _emptyMessage = "No activity yet";
         private string _emptyDetails = "Nothing needs attention right now.";
@@ -29,11 +34,14 @@ namespace Cotton.Mobile.ViewModels
             _activityFeedService = activityFeedService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            LoadMoreCommand = new AsyncCommand(LoadMoreAsync, LogUnhandledCommandException, CanLoadMore);
         }
 
         public ObservableCollection<CottonActivityFeedListItem> Items { get; } = [];
 
         public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand LoadMoreCommand { get; }
 
         public bool IsBusy
         {
@@ -43,6 +51,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     LoadCommand.RaiseCanExecuteChanged();
+                    LoadMoreCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                 }
             }
@@ -84,6 +93,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsListVisible => Items.Count > 0;
 
+        public bool IsLoadMoreVisible => Items.Count > 0 && _mayHaveMore;
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -96,8 +107,9 @@ namespace Cotton.Mobile.ViewModels
             {
                 CottonActivityFeedPageSnapshot page = await _activityFeedService.GetPageAsync(
                     _instanceUri,
-                    new CottonActivityFeedQuery());
-                ShowSnapshot(CottonActivityFeedListSnapshot.Create(page, TimeZoneInfo.Local));
+                    new CottonActivityFeedQuery(page: 1, pageSize: PageSize));
+                ShowSnapshot(CottonActivityFeedListSnapshot.Create(page, TimeZoneInfo.Local), append: false);
+                ShowPagingState(page, preserveExistingTotal: false);
                 Status = null;
             }
             catch (Exception exception)
@@ -110,22 +122,72 @@ namespace Cotton.Mobile.ViewModels
                 IsBusy = false;
                 OnPropertyChanged(nameof(IsEmpty));
                 OnPropertyChanged(nameof(IsListVisible));
+                OnPropertyChanged(nameof(IsLoadMoreVisible));
             }
         }
 
-        private void ShowSnapshot(CottonActivityFeedListSnapshot snapshot)
+        private async Task LoadMoreAsync()
         {
-            Items.Clear();
+            if (!CanLoadMore())
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                CottonActivityFeedPageSnapshot page = await _activityFeedService.GetPageAsync(
+                    _instanceUri,
+                    new CottonActivityFeedQuery(page: _currentPage + 1, pageSize: PageSize));
+                ShowSnapshot(CottonActivityFeedListSnapshot.Create(page, TimeZoneInfo.Local), append: true);
+                ShowPagingState(page, preserveExistingTotal: true);
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile activity feed load more failed.");
+                Status = "Could not load more activity.";
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+                OnPropertyChanged(nameof(IsLoadMoreVisible));
+            }
+        }
+
+        private void ShowSnapshot(CottonActivityFeedListSnapshot snapshot, bool append)
+        {
+            if (!append)
+            {
+                Items.Clear();
+            }
+
             foreach (CottonActivityFeedListItem item in snapshot.Items)
             {
                 Items.Add(item);
             }
 
-            SummaryText = snapshot.SummaryText;
             EmptyMessage = snapshot.EmptyMessage;
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsListVisible));
+        }
+
+        private void ShowPagingState(CottonActivityFeedPageSnapshot page, bool preserveExistingTotal)
+        {
+            _currentPage = page.Query.Page;
+            _totalItemCount = page.TotalItemCount ?? (preserveExistingTotal ? _totalItemCount : null);
+            _mayHaveMore = page.MayHaveMore;
+            SummaryText = CottonActivityFeedListSnapshot.CreateSummaryText(Items.ToArray(), _totalItemCount);
+            OnPropertyChanged(nameof(IsLoadMoreVisible));
+            LoadMoreCommand.RaiseCanExecuteChanged();
+        }
+
+        private bool CanLoadMore()
+        {
+            return !IsBusy && IsLoadMoreVisible;
         }
 
         private void LogUnhandledCommandException(Exception exception)

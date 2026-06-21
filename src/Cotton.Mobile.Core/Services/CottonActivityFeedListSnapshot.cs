@@ -33,16 +33,28 @@ namespace Cotton.Mobile.Services
                 .Select(item => CottonActivityFeedListItem.Create(item, displayTimeZone))
                 .ToArray();
             return new CottonActivityFeedListSnapshot(
-                CreateSummaryText(items),
+                CreateSummaryText(items, page.TotalItemCount),
                 "No activity yet",
                 "Nothing needs attention right now.",
                 items);
         }
 
-        private static string CreateSummaryText(IReadOnlyList<CottonActivityFeedListItem> items)
+        public static string CreateSummaryText(
+            IReadOnlyList<CottonActivityFeedListItem> items,
+            int? totalItemCount)
         {
+            ArgumentNullException.ThrowIfNull(items);
+            if (totalItemCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(totalItemCount));
+            }
+
             int unreadCount = items.Count(item => item.IsUnread);
-            string itemText = items.Count == 1 ? "1 item" : $"{items.Count:N0} items";
+            string itemText = totalItemCount > items.Count
+                ? $"{items.Count:N0} of {totalItemCount.Value:N0} items"
+                : items.Count == 1
+                    ? "1 item"
+                    : $"{items.Count:N0} items";
             return unreadCount == 0
                 ? itemText
                 : $"{itemText} · {unreadCount:N0} unread";

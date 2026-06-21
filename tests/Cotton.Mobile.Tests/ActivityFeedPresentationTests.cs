@@ -68,6 +68,35 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void List_snapshot_formats_loaded_total_count()
+        {
+            CottonActivityFeedPageSnapshot page = new(
+                new CottonActivityFeedQuery(pageSize: 2),
+                [
+                    CreateItem(
+                        "Shared file downloaded",
+                        null,
+                        CreatedAt,
+                        readAt: null,
+                        CottonActivityFeedPriority.Medium),
+                    CreateItem(
+                        "Security",
+                        null,
+                        CreatedAt.AddMinutes(-5),
+                        readAt: CreatedAt,
+                        CottonActivityFeedPriority.High),
+                ],
+                totalItemCount: 5);
+
+            CottonActivityFeedListSnapshot snapshot =
+                CottonActivityFeedListSnapshot.Create(page, DisplayTimeZone);
+
+            Assert.Equal("2 of 5 items · 1 unread", snapshot.SummaryText);
+            Assert.Throws<ArgumentOutOfRangeException>(
+                () => CottonActivityFeedListSnapshot.CreateSummaryText(snapshot.Items, totalItemCount: -1));
+        }
+
+        [Fact]
         public void List_item_formats_read_priority_badges()
         {
             Assert.Equal(

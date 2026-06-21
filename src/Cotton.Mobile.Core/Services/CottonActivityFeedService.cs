@@ -1,3 +1,4 @@
+using System.Globalization;
 using Cotton;
 
 namespace Cotton.Mobile.Services
@@ -5,6 +6,7 @@ namespace Cotton.Mobile.Services
     public class CottonActivityFeedService : ICottonActivityFeedService
     {
         private const string NotificationsRoute = Routes.V1.Notifications;
+        private const string TotalCountHeaderName = "X-Total-Count";
 
         private readonly CottonAuthenticatedApiClient _apiClient;
 
@@ -23,8 +25,8 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(query);
 
             string route = NotificationsRoute + "?" + query.ToQueryString();
-            List<NotificationResponse> response = await _apiClient
-                .SendJsonAsync<List<NotificationResponse>>(
+            CottonAuthenticatedApiResponse<List<NotificationResponse>> response = await _apiClient
+                .SendJsonResponseAsync<List<NotificationResponse>>(
                     instanceUri,
                     HttpMethod.Get,
                     route,
@@ -33,7 +35,27 @@ namespace Cotton.Mobile.Services
 
             return new CottonActivityFeedPageSnapshot(
                 query,
-                response.Select(item => item.ToSnapshot()).ToArray());
+                response.Value.Select(item => item.ToSnapshot()).ToArray(),
+                ReadTotalItemCount(response));
+        }
+
+        private static int? ReadTotalItemCount(
+            CottonAuthenticatedApiResponse<List<NotificationResponse>> response)
+        {
+            string? header = response.GetHeaderValue(TotalCountHeaderName);
+            if (string.IsNullOrWhiteSpace(header))
+            {
+                return null;
+            }
+
+            return int.TryParse(
+                header.Trim(),
+                NumberStyles.None,
+                CultureInfo.InvariantCulture,
+                out int totalItemCount)
+                && totalItemCount >= 0
+                    ? totalItemCount
+                    : null;
         }
 
         private class NotificationResponse

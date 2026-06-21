@@ -125,6 +125,11 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
+
+            <Button Text="Load more"
+                    Command="{Binding LoadMoreCommand}"
+                    IsVisible="{Binding IsLoadMoreVisible}"
+                    HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

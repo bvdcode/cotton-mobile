@@ -185,6 +185,75 @@ capture_window() {
   fi
 }
 
+xml_has_text() {
+  local xml_file="$1"
+  local needle="$2"
+
+  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
+}
+
+require_xml_text() {
+  local xml_file="$1"
+  local needle="$2"
+  local message="$3"
+
+  if ! xml_has_text "$xml_file" "$needle"; then
+    printf '%s\n' "$message" >&2
+    printf 'Missing text: %s\n' "$needle" >&2
+    printf 'Evidence: %s\n' "$xml_file" >&2
+    exit 67
+  fi
+}
+
+require_notifications_destination() {
+  local xml_file="$1"
+  local state_xml="$xml_file"
+  local attempt
+
+  require_xml_text "$xml_file" "Notifications" \
+    "Notifications page title was not found after notification launch."
+
+  for attempt in 0 1 2; do
+    if xml_has_text "$state_xml" "Server push"; then
+      if xml_has_text "$state_xml" "Shared-file activity" \
+        || xml_has_text "$state_xml" "Security and sessions"; then
+        require_xml_text "$state_xml" "Shared-file activity" \
+          "Server push preferences did not show shared-file activity after notification launch."
+        require_xml_text "$state_xml" "Security and sessions" \
+          "Server push preferences did not show security/session alerts after notification launch."
+        return
+      fi
+
+      if xml_has_text "$state_xml" "Server alerts unavailable."; then
+        require_xml_text "$state_xml" "Retry" \
+          "Server push unavailable state did not expose Retry after notification launch."
+        return
+      fi
+    fi
+
+    adb_device shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
+    sleep 1
+    capture_window "05-after-launch-server-push-$attempt"
+    state_xml="$evidence_dir/05-after-launch-server-push-$attempt-window.xml"
+  done
+
+  printf 'Notification launch did not land on a usable Notifications server-push state. Evidence: %s\n' \
+    "$evidence_dir" >&2
+  exit 67
+}
+
+fail_on_fatal_log_markers() {
+  grep -E 'Cotton|AndroidRuntime|FATAL EXCEPTION|mono-rt' \
+    "$evidence_dir/06-logcat.txt" \
+    > "$evidence_dir/07-logcat-cotton.txt" || true
+  if grep -E 'FATAL EXCEPTION|mono-rt' "$evidence_dir/07-logcat-cotton.txt" \
+    > "$evidence_dir/08-fatal-markers.txt"; then
+    printf 'Fatal log markers were found during remote notification launch smoke.\n' >&2
+    printf 'Evidence: %s/08-fatal-markers.txt\n' "$evidence_dir" >&2
+    exit 67
+  fi
+}
+
 if [[ "$install_debug" -eq 1 ]]; then
   "$SCRIPT_DIR/install-android-debug.sh" --no-launch > "$evidence_dir/01-install-debug.txt" 2>&1
 fi
@@ -233,14 +302,7 @@ if [[ ! -s "$xml_path" ]]; then
   exit 66
 fi
 
-if ! grep -q 'Notifications' "$xml_path"; then
-  printf 'Notifications page title was not found after notification launch. Evidence: %s\n' "$evidence_dir" >&2
-  exit 67
-fi
-
-if ! grep -Eq 'Server push|Push preferences|Android permission|Allowed|Denied|Not requested' "$xml_path"; then
-  printf 'Notification settings content was not found after notification launch. Evidence: %s\n' "$evidence_dir" >&2
-  exit 67
-fi
+require_notifications_destination "$xml_path"
+fail_on_fatal_log_markers
 
 printf '\nRemote notification launch smoke evidence: %s\n' "$evidence_dir"

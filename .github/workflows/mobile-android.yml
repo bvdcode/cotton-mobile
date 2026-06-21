@@ -123,6 +123,14 @@ jobs:
             exit 1
           fi
 
+          if [ "${{ inputs.upload_to_google_play }}" = "true" ]; then
+            if [ "${GITHUB_REF_TYPE:-}" != "tag" ] \
+              || [[ ! "${GITHUB_REF_NAME:-}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "upload_to_google_play requires running workflow_dispatch from a SemVer tag such as v1.0.0." >&2
+              exit 1
+            fi
+          fi
+
   yaml-configs:
     name: Validate YAML Configs
     runs-on: ubuntu-latest

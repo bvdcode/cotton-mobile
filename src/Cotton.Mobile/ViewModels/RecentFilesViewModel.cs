@@ -9,6 +9,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly Uri _instanceUri;
         private readonly ICottonRecentFileStore _recentFileStore;
+        private readonly IUserDialogService _dialogService;
         private readonly ILogger<RecentFilesViewModel> _logger;
         private bool _isBusy;
         private string _summaryText = "No recent files";
@@ -19,21 +20,30 @@ namespace Cotton.Mobile.ViewModels
         public RecentFilesViewModel(
             Uri instanceUri,
             ICottonRecentFileStore recentFileStore,
+            IUserDialogService dialogService,
             ILogger<RecentFilesViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(recentFileStore);
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
             _instanceUri = instanceUri;
             _recentFileStore = recentFileStore;
+            _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            ClearRecentFilesCommand = new AsyncCommand(
+                ClearRecentFilesAsync,
+                LogUnhandledCommandException,
+                () => CanClearRecentFiles);
         }
 
         public ObservableCollection<CottonRecentFileListItem> Items { get; } = [];
 
         public AsyncCommand LoadCommand { get; }
+
+        public AsyncCommand ClearRecentFilesCommand { get; }
 
         public bool IsBusy
         {
@@ -43,7 +53,9 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     LoadCommand.RaiseCanExecuteChanged();
+                    ClearRecentFilesCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(CanClearRecentFiles));
                 }
             }
         }
@@ -84,6 +96,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsListVisible => Items.Count > 0;
 
+        public bool CanClearRecentFiles => Items.Count > 0 && !IsBusy;
+
         private async Task LoadAsync()
         {
             if (IsBusy)
@@ -112,6 +126,44 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task ClearRecentFilesAsync()
+        {
+            if (!CanClearRecentFiles)
+            {
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                "Clear recent files?",
+                "This removes the recent-file list on this device. Cached and offline files stay available.",
+                "Clear",
+                "Cancel");
+            if (!confirmed)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                await _recentFileStore.ClearAsync(_instanceUri);
+                ShowSnapshot(CottonRecentFileListSnapshot.Create([]));
+                Status = "Recent files cleared.";
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile recent files clear failed.");
+                Status = "Could not clear recent files.";
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+                OnPropertyChanged(nameof(CanClearRecentFiles));
+            }
+        }
+
         private void ShowSnapshot(CottonRecentFileListSnapshot snapshot)
         {
             Items.Clear();
@@ -125,6 +177,8 @@ namespace Cotton.Mobile.ViewModels
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsListVisible));
+            OnPropertyChanged(nameof(CanClearRecentFiles));
+            ClearRecentFilesCommand.RaiseCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

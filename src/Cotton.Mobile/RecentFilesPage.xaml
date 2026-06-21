@@ -10,6 +10,8 @@
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
 
     <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Clear"
+                     Command="{Binding ClearRecentFilesCommand}" />
         <ToolbarItem Text="Refresh"
                      Command="{Binding LoadCommand}" />
     </ContentPage.ToolbarItems>

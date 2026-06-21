@@ -60,6 +60,15 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Cloud_quota_keeps_not_checked_state_explicit()
+        {
+            Assert.Equal(CottonCloudStorageQuotaStatus.Unknown, CottonCloudStorageQuotaSnapshot.Unknown.Status);
+            Assert.Equal("Account storage not checked.", CottonCloudStorageQuotaSnapshot.Unknown.SummaryText);
+            Assert.Equal("Refresh storage to check account usage.", CottonCloudStorageQuotaSnapshot.Unknown.DetailText);
+            Assert.False(CottonCloudStorageQuotaSnapshot.Unknown.IsProgressVisible);
+        }
+
+        [Fact]
         public void Cloud_quota_rejects_negative_values()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>

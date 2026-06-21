@@ -17,6 +17,7 @@ namespace Cotton.Mobile.Services
         private readonly FileThumbnailCacheOptions _thumbnailOptions;
         private readonly FileDownloadCacheOptions _downloadOptions;
         private readonly ICottonInstanceStore _instanceStore;
+        private readonly ICottonCloudStorageQuotaService _cloudStorageQuotaService;
         private readonly ICottonTransferMetadataStore _transferMetadataStore;
         private readonly ICottonTransferStagingStore _transferStagingStore;
         private readonly ILogger<StorageManagementService> _logger;
@@ -25,6 +26,7 @@ namespace Cotton.Mobile.Services
             FileThumbnailCacheOptions thumbnailOptions,
             FileDownloadCacheOptions downloadOptions,
             ICottonInstanceStore instanceStore,
+            ICottonCloudStorageQuotaService cloudStorageQuotaService,
             ICottonTransferMetadataStore transferMetadataStore,
             ICottonTransferStagingStore transferStagingStore,
             ILogger<StorageManagementService> logger)
@@ -32,6 +34,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(thumbnailOptions);
             ArgumentNullException.ThrowIfNull(downloadOptions);
             ArgumentNullException.ThrowIfNull(instanceStore);
+            ArgumentNullException.ThrowIfNull(cloudStorageQuotaService);
             ArgumentNullException.ThrowIfNull(transferMetadataStore);
             ArgumentNullException.ThrowIfNull(transferStagingStore);
             ArgumentNullException.ThrowIfNull(logger);
@@ -39,6 +42,7 @@ namespace Cotton.Mobile.Services
             _thumbnailOptions = thumbnailOptions;
             _downloadOptions = downloadOptions;
             _instanceStore = instanceStore;
+            _cloudStorageQuotaService = cloudStorageQuotaService;
             _transferMetadataStore = transferMetadataStore;
             _transferStagingStore = transferStagingStore;
             _logger = logger;
@@ -46,9 +50,12 @@ namespace Cotton.Mobile.Services
 
         public event EventHandler? DownloadedFilesCleared;
 
-        public Task<CottonStorageSummary> GetSummaryAsync(CancellationToken cancellationToken = default)
+        public async Task<CottonStorageSummary> GetSummaryAsync(CancellationToken cancellationToken = default)
         {
-            return Task.Run(
+            CottonCloudStorageQuotaSnapshot cloudQuota =
+                await GetCloudQuotaAsync(cancellationToken).ConfigureAwait(false);
+
+            return await Task.Run(
                 () =>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -111,9 +118,21 @@ namespace Cotton.Mobile.Services
                             FolderListingBudgetBytes,
                             protectedOfflineFileCount,
                             protectedOfflineBytes),
-                        CottonCloudStorageQuotaSnapshot.Unavailable);
+                        cloudQuota);
                 },
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<CottonCloudStorageQuotaSnapshot> GetCloudQuotaAsync(CancellationToken cancellationToken)
+        {
+            Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (instanceUri is null)
+            {
+                return CottonCloudStorageQuotaSnapshot.Unknown;
+            }
+
+            return await _cloudStorageQuotaService.GetCurrentAsync(instanceUri, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         public Task ClearThumbnailCacheAsync(CancellationToken cancellationToken = default)

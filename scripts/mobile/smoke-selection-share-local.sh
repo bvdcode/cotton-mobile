@@ -470,6 +470,7 @@ open_selection_actions() {
   require_xml_text "$evidence_dir/$prefix.xml" "2 selected" "Selection action sheet did not open."
   require_xml_text "$evidence_dir/$prefix.xml" "$download_label" "Selection action sheet did not expose Download."
   require_xml_text "$evidence_dir/$prefix.xml" "Keep offline" "Selection action sheet did not expose Keep offline."
+  require_xml_text "$evidence_dir/$prefix.xml" "Move to trash" "Selection action sheet did not expose Move to trash."
   actions_xml="$evidence_dir/$prefix.xml"
 }
 
@@ -550,6 +551,7 @@ validate_mixed_selection_actions() {
   require_xml_text "$actions_xml" "Keep offline" "Mixed selection action sheet did not expose Keep offline."
   require_xml_text "$actions_xml" "Remove offline" "Mixed selection action sheet did not expose file-scoped Remove offline."
   require_xml_text "$actions_xml" "Share file" "Mixed selection action sheet did not expose file-scoped Share file."
+  require_xml_text "$actions_xml" "Move to trash" "Mixed selection action sheet did not expose Move to trash."
 
   tap_node_from_xml "$actions_xml" "Cancel" exact
   sleep 1

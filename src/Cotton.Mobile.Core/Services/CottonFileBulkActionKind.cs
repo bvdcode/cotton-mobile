@@ -8,5 +8,6 @@ namespace Cotton.Mobile.Services
         KeepOffline,
         RemoveOffline,
         ShareLocalFiles,
+        MoveToTrash,
     }
 }

@@ -120,6 +120,11 @@ namespace Cotton.Mobile.Services
                     shareFilesLabel,
                     hasFiles && LocalFileCount == FileCount,
                     ResolveShareLocalFilesDisabledReason(hasFiles, LocalFileCount == FileCount)),
+                new CottonFileBulkActionSnapshot(
+                    CottonFileBulkActionKind.MoveToTrash,
+                    CottonFileBulkTrashStatusText.ConfirmAction,
+                    isEnabled: true,
+                    disabledReason: string.Empty),
             ];
         }
 

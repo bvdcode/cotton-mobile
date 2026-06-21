@@ -555,6 +555,9 @@ namespace Cotton.Mobile.ViewModels
                 case CottonFileBulkActionKind.ShareLocalFiles:
                     await ShareSelectionLocalFilesAsync(entries);
                     break;
+                case CottonFileBulkActionKind.MoveToTrash:
+                    await MoveSelectionToTrashAsync(entries);
+                    break;
             }
         }
 
@@ -2347,6 +2350,263 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+            }
+        }
+
+        private async Task MoveSelectionToTrashAsync(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            ArgumentNullException.ThrowIfNull(entries);
+
+            if (entries.Count == 0)
+            {
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.UnavailableStatus);
+                return;
+            }
+
+            if (entries.Count == 1)
+            {
+                CottonFileBrowserEntry entry = entries[0];
+                if (entry.Type == CottonFileBrowserEntryType.Folder)
+                {
+                    await MoveFolderToTrashAsync(entry);
+                    return;
+                }
+
+                await MoveFileToTrashAsync(entry);
+                return;
+            }
+
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to move selected items to trash.");
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.OfflineUnavailableStatus);
+                return;
+            }
+
+            CottonFileBrowserEntry[] selectedEntries = ResolveSelectedEntries(entries, instanceUri);
+            if (selectedEntries.Length != entries.Count)
+            {
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.UnavailableStatus);
+                return;
+            }
+
+            if (HasFileWithoutFreshETag(selectedEntries))
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.NeedsRefreshStatus);
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonFileBulkTrashStatusText.ConfirmTitle,
+                CottonFileBulkTrashStatusText.CreateConfirmMessage(
+                    selectedEntries.Count(entry => entry.Type == CottonFileBrowserEntryType.File),
+                    selectedEntries.Count(entry => entry.Type == CottonFileBrowserEntryType.Folder)),
+                CottonFileBulkTrashStatusText.ConfirmAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.CancelledStatus);
+                return;
+            }
+
+            selectedEntries = ResolveSelectedEntries(entries, instanceUri);
+            if (selectedEntries.Length != entries.Count)
+            {
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.UnavailableStatus);
+                return;
+            }
+
+            if (HasFileWithoutFreshETag(selectedEntries))
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonFileBulkTrashStatusText.NeedsRefreshStatus);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonFileBulkTrashStatusText.CreateMovingStatus(selectedEntries.Length));
+            int movedCount = 0;
+            bool didEndFileAction = false;
+
+            try
+            {
+                for (int index = 0; index < selectedEntries.Length; index++)
+                {
+                    fileActionCancellation.Token.ThrowIfCancellationRequested();
+                    if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                    {
+                        return;
+                    }
+
+                    CottonFileBrowserEntry entry = selectedEntries[index];
+                    _display.ShowFileActionLoading(
+                        CottonFileBulkTrashStatusText.CreateMovingItemStatus(
+                            index + 1,
+                            selectedEntries.Length,
+                            entry.Name));
+
+                    if (entry.Type == CottonFileBrowserEntryType.File)
+                    {
+                        await AwaitFileServerMutationAsync(
+                            _fileTrashService.MoveFileToTrashAsync(
+                                instanceUri,
+                                entry,
+                                fileActionCancellation.Token),
+                            fileActionCancellation,
+                            CottonFileBulkTrashStatusText.TimedOutStatus);
+                        fileActionCancellation.Token.ThrowIfCancellationRequested();
+                        if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                        {
+                            return;
+                        }
+
+                        await ClearTrashedFileLocalStateBestEffortAsync(instanceUri, entry);
+                    }
+                    else
+                    {
+                        await AwaitFileServerMutationAsync(
+                            _folderTrashService.MoveFolderToTrashAsync(
+                                instanceUri,
+                                entry,
+                                fileActionCancellation.Token),
+                            fileActionCancellation,
+                            CottonFileBulkTrashStatusText.TimedOutStatus);
+                    }
+
+                    movedCount++;
+                }
+
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                EndFileActionBeforeFollowUp(fileActionCancellation);
+                didEndFileAction = true;
+                await RefreshAsync();
+                if (CanUseFileBrowserContext(instanceUri))
+                {
+                    _display.ShowFilesStatus(CottonFileBulkTrashStatusText.CreateMovedStatus(movedCount));
+                }
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection trash authorization failure.");
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    didEndFileAction = true;
+                    _logger.LogDebug("Ignored stale Cotton mobile selection trash cancellation.");
+                    return;
+                }
+
+                await RefreshAfterPartialSelectionTrashAsync(
+                    fileActionCancellation,
+                    instanceUri,
+                    movedCount,
+                    () => CottonFileBulkTrashStatusText.CreateCancelledStatus(movedCount, selectedEntries.Length));
+                didEndFileAction = movedCount > 0;
+            }
+            catch (TimeoutException exception)
+            {
+                didEndFileAction = true;
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection trash timeout.");
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Timed out moving Cotton mobile selection to trash.");
+                if (movedCount > 0)
+                {
+                    await RefreshAsync();
+                }
+
+                if (Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _display.ShowFilesStatus(exception.Message);
+                }
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile selection trash failure.");
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to move Cotton mobile selection to trash.");
+                await RefreshAfterPartialSelectionTrashAsync(
+                    fileActionCancellation,
+                    instanceUri,
+                    movedCount,
+                    () => movedCount > 0
+                        ? CottonFileBulkTrashStatusText.CreateFailedStatus(movedCount, selectedEntries.Length)
+                        : CottonFileBulkTrashStatusText.FailedStatus);
+                didEndFileAction = movedCount > 0;
+            }
+            finally
+            {
+                if (!didEndFileAction)
+                {
+                    EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                }
+            }
+        }
+
+        private CottonFileBrowserEntry[] ResolveSelectedEntries(
+            IReadOnlyList<CottonFileBrowserEntry> entries,
+            Uri instanceUri)
+        {
+            return entries
+                .Select(entry => GetCurrentVisibleEntry(entry, instanceUri))
+                .Where(entry => entry is not null)
+                .Select(entry => entry!)
+                .ToArray();
+        }
+
+        private static bool HasFileWithoutFreshETag(IReadOnlyList<CottonFileBrowserEntry> entries)
+        {
+            return entries.Any(
+                entry => entry.Type == CottonFileBrowserEntryType.File
+                    && string.IsNullOrWhiteSpace(entry.ETag));
+        }
+
+        private async Task RefreshAfterPartialSelectionTrashAsync(
+            CancellationTokenSource fileActionCancellation,
+            Uri instanceUri,
+            int movedCount,
+            Func<string> createStatus)
+        {
+            ClearFileActionRetry();
+            if (movedCount > 0)
+            {
+                EndFileActionBeforeFollowUp(fileActionCancellation);
+                await RefreshAsync();
+            }
+
+            if (Uri.Equals(_instanceUri, instanceUri))
+            {
+                _display.ShowFilesStatus(createStatus());
             }
         }
 

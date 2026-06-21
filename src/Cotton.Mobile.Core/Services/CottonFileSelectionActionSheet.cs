@@ -42,6 +42,11 @@ namespace Cotton.Mobile.Services
                 return selection.FileCount > 0;
             }
 
+            if (action.Kind == CottonFileBulkActionKind.MoveToTrash)
+            {
+                return selection.FileCount > 0 || selection.FolderCount > 0;
+            }
+
             return false;
         }
     }

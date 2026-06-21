@@ -103,6 +103,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Share link", selection.GetAction(CottonFileBulkActionKind.ShareLinks).Label);
             Assert.Equal("Download file", selection.GetAction(CottonFileBulkActionKind.DownloadFiles).Label);
             Assert.Equal("Share file", selection.GetAction(CottonFileBulkActionKind.ShareLocalFiles).Label);
+            Assert.Equal("Move to trash", selection.GetAction(CottonFileBulkActionKind.MoveToTrash).Label);
         }
 
         [Fact]
@@ -153,6 +154,7 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.ShareLinks,
                     CottonFileBulkActionKind.DownloadFiles,
                     CottonFileBulkActionKind.KeepOffline,
+                    CottonFileBulkActionKind.MoveToTrash,
                 },
                 actions.Select(action => action.Kind));
             Assert.Equal("Download files", actions.Single(action => action.Kind == CottonFileBulkActionKind.DownloadFiles).Label);
@@ -178,6 +180,7 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.ShareLinks,
                     CottonFileBulkActionKind.DownloadFiles,
                     CottonFileBulkActionKind.KeepOffline,
+                    CottonFileBulkActionKind.MoveToTrash,
                 },
                 actions.Select(action => action.Kind));
             Assert.Equal("Download file", actions.Single(action => action.Kind == CottonFileBulkActionKind.DownloadFiles).Label);
@@ -206,6 +209,7 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.KeepOffline,
                     CottonFileBulkActionKind.RemoveOffline,
                     CottonFileBulkActionKind.ShareLocalFiles,
+                    CottonFileBulkActionKind.MoveToTrash,
                 },
                 actions.Select(action => action.Kind));
             Assert.Equal("Share file", actions.Single(action => action.Kind == CottonFileBulkActionKind.ShareLocalFiles).Label);
@@ -228,6 +232,7 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
                     CottonFileBulkActionKind.KeepOffline,
+                    CottonFileBulkActionKind.MoveToTrash,
                 },
                 actions.Select(action => action.Kind));
         }
@@ -250,6 +255,7 @@ namespace Cotton.Mobile.Tests
                     CottonFileBulkActionKind.CopyLinks,
                     CottonFileBulkActionKind.ShareLinks,
                     CottonFileBulkActionKind.KeepOffline,
+                    CottonFileBulkActionKind.MoveToTrash,
                 },
                 actions.Select(action => action.Kind));
         }
@@ -268,6 +274,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.KeepOffline);
             Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.RemoveOffline);
             Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.ShareLocalFiles);
+            Assert.Contains(actions, action => action.Kind == CottonFileBulkActionKind.MoveToTrash);
         }
 
         [Fact]

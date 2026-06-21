@@ -19,6 +19,8 @@ expected_version_name=""
 target_file=""
 target_folder=""
 create_disposable_folder=0
+restore_from_trash_page=0
+delete_forever_from_trash_page=0
 target_kind=""
 target_name=""
 
@@ -39,6 +41,9 @@ Options:
   --target-folder NAME      Existing Cotton Files folder row to move to trash and restore.
   --create-disposable-folder NAME
                             Create a root-visible disposable folder first, then trash/restore it.
+  --restore-from-trash-page Open Account -> Trash after moving the item, then restore it there.
+  --delete-forever-from-trash-page
+                            Open Account -> Trash after moving a disposable folder, then delete forever.
   --wait-seconds N          Seconds to wait for each server mutation. Defaults to $wait_seconds.
   --no-cancel-on-timeout    Leave the app in its current state when a mutation times out.
   --preflight-only          Capture device/package/root state and exit.
@@ -130,6 +135,14 @@ while [[ $# -gt 0 ]]; do
       target_folder="$2"
       shift 2
       ;;
+    --restore-from-trash-page)
+      restore_from_trash_page=1
+      shift
+      ;;
+    --delete-forever-from-trash-page)
+      delete_forever_from_trash_page=1
+      shift
+      ;;
     --wait-seconds)
       if [[ $# -lt 2 ]]; then
         printf 'Missing value for --wait-seconds.\n' >&2
@@ -181,6 +194,22 @@ if [[ "$create_disposable_folder" -eq 1 && "$preflight_only" -eq 1 ]]; then
   exit 64
 fi
 
+if [[ "$restore_from_trash_page" -eq 1 && "$delete_forever_from_trash_page" -eq 1 ]]; then
+  printf '%s\n' '--restore-from-trash-page and --delete-forever-from-trash-page cannot be combined.' >&2
+  exit 64
+fi
+
+if [[ "$preflight_only" -eq 1 \
+  && ( "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ) ]]; then
+  printf '%s\n' 'Trash page action options cannot be combined with --preflight-only.' >&2
+  exit 64
+fi
+
+if [[ "$delete_forever_from_trash_page" -eq 1 && "$create_disposable_folder" -ne 1 ]]; then
+  printf '%s\n' '--delete-forever-from-trash-page requires --create-disposable-folder.' >&2
+  exit 64
+fi
+
 if [[ -n "${target_file//[[:space:]]/}" ]]; then
   target_kind="file"
   target_name="$target_file"
@@ -214,7 +243,13 @@ fi
 if [[ -z "$evidence_dir" ]]; then
   timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
   if [[ -n "$target_kind" ]]; then
-    evidence_dir="$evidence_root/$timestamp-$target_kind-trash-restore"
+    if [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
+      evidence_dir="$evidence_root/$timestamp-$target_kind-trash-delete-forever"
+    elif [[ "$restore_from_trash_page" -eq 1 ]]; then
+      evidence_dir="$evidence_root/$timestamp-$target_kind-trash-page-restore"
+    else
+      evidence_dir="$evidence_root/$timestamp-$target_kind-trash-restore"
+    fi
   else
     evidence_dir="$evidence_root/$timestamp-trash-restore-preflight"
   fi
@@ -385,6 +420,94 @@ tap_clickable_from_xml() {
   adb_device shell input tap "$tap_x" "$tap_y"
 }
 
+point_for_target_row_action() {
+  local xml_file="$1"
+  local item_name="$2"
+  local action_text="$3"
+  local point_file="$evidence_dir/row-action-point.txt"
+
+  python3 - "$xml_file" "$item_name" "$action_text" > "$point_file" <<'PY'
+import re
+import sys
+from xml.etree import ElementTree
+
+xml_file, item_name, action_text = sys.argv[1:4]
+root = ElementTree.parse(xml_file).getroot()
+
+def parse_bounds(bounds: str) -> tuple[int, int, int, int]:
+    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
+    if match is None:
+        raise ValueError(bounds)
+    return tuple(int(value) for value in match.groups())
+
+def center(bounds: tuple[int, int, int, int]) -> tuple[int, int]:
+    left, top, right, bottom = bounds
+    return ((left + right) // 2, (top + bottom) // 2)
+
+def values_for(node: ElementTree.Element) -> tuple[str, str, str]:
+    return (
+        node.attrib.get("text", ""),
+        node.attrib.get("content-desc", ""),
+        node.attrib.get("hint", ""),
+    )
+
+nodes: list[tuple[ElementTree.Element, tuple[int, int, int, int]]] = []
+for node in root.iter("node"):
+    bounds_value = node.attrib.get("bounds")
+    if bounds_value:
+        nodes.append((node, parse_bounds(bounds_value)))
+
+target_nodes = [
+    (node, bounds)
+    for node, bounds in nodes
+    if any(value == item_name for value in values_for(node))
+]
+if not target_nodes:
+    target_nodes = [
+        (node, bounds)
+        for node, bounds in nodes
+        if any(item_name in value for value in values_for(node))
+    ]
+
+action_nodes = [
+    (node, bounds)
+    for node, bounds in nodes
+    if node.attrib.get("enabled", "true") == "true"
+    and any(value == action_text for value in values_for(node))
+]
+
+matches: list[tuple[int, int, tuple[int, int]]] = []
+for _target_node, target_bounds in target_nodes:
+    target_x, target_y = center(target_bounds)
+    for _action_node, action_bounds in action_nodes:
+        action_x, action_y = center(action_bounds)
+        vertical_distance = abs(action_y - target_y)
+        if action_y < target_bounds[1] - 24:
+            continue
+        if vertical_distance > 520:
+            continue
+        horizontal_distance = abs(action_x - target_x)
+        matches.append((vertical_distance, horizontal_distance, (action_x, action_y)))
+
+if not matches:
+    raise SystemExit(f"Could not find {action_text} for row: {item_name}")
+
+matches.sort()
+print(*matches[0][2])
+PY
+
+  read -r tap_x tap_y < "$point_file"
+}
+
+tap_target_row_action_from_xml() {
+  local xml_file="$1"
+  local item_name="$2"
+  local action_text="$3"
+
+  point_for_target_row_action "$xml_file" "$item_name" "$action_text"
+  adb_device shell input tap "$tap_x" "$tap_y"
+}
+
 tap_editable_from_xml() {
   local xml_file="$1"
 
@@ -426,6 +549,8 @@ write_metadata() {
     printf 'expected_version_code=%s\n' "$expected_version_code"
     printf 'expected_version_name=%s\n' "$expected_version_name"
     printf 'create_disposable_folder=%s\n' "$create_disposable_folder"
+    printf 'restore_from_trash_page=%s\n' "$restore_from_trash_page"
+    printf 'delete_forever_from_trash_page=%s\n' "$delete_forever_from_trash_page"
     printf 'target_kind=%s\n' "$target_kind"
     printf 'target_name=%s\n' "$target_name"
     printf 'target_file=%s\n' "$target_file"
@@ -437,19 +562,23 @@ write_metadata() {
 }
 
 write_checklist() {
-  cat > "$evidence_dir/checklist.md" <<EOF
-# Files Trash Restore Smoke
+  {
+    cat <<EOF
+# Files Trash Smoke
 
 Package: \`$package_id\`
 Device: \`$serial\`
 Target kind: \`$target_kind\`
 Target name: \`$target_name\`
+Restore from Trash page: \`$restore_from_trash_page\`
+Delete forever from Trash page: \`$delete_forever_from_trash_page\`
 
 ## Preconditions
 
 - [ ] Package/version in \`05-package-version.txt\` matches the build under test.
 - [ ] Signed-in session is restored without clearing app data.
 - [ ] Target item is disposable or safe to restore after a trash cycle.
+- [ ] Permanent delete is only run with \`create_disposable_folder=1\`.
 - [ ] If \`create_disposable_folder=1\`, \`28-created-folder.xml\` shows the new folder before trash.
 
 ## Trash
@@ -460,12 +589,36 @@ Target name: \`$target_name\`
 - [ ] \`50-trash-confirm.xml\` shows the move-to-trash confirmation.
 - [ ] \`60-after-trash.xml\` shows the moved-to-trash status and \`Restore\`.
 
+EOF
+
+    if [[ "$restore_from_trash_page" -eq 1 || "$delete_forever_from_trash_page" -eq 1 ]]; then
+      cat <<EOF
+## Trash Page
+
+- [ ] \`65-account-actions.xml\` shows the \`Trash\` account action.
+- [ ] \`66-trash-page.xml\` shows the Trash page, target item, \`Restore\`, and \`Delete forever\`.
+
+EOF
+    fi
+
+    if [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
+      cat <<EOF
+## Delete Forever
+
+- [ ] \`70-delete-forever-confirm.xml\` shows \`Delete forever?\`.
+- [ ] \`80-after-delete-forever.xml\` shows the permanent delete result.
+- [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
+EOF
+    else
+      cat <<EOF
 ## Restore
 
 - [ ] \`70-restore-confirm.xml\` shows \`Restore item?\`.
 - [ ] \`80-after-restore.xml\` shows the restored status or the target row restored in Files.
 - [ ] \`99-logcat.txt\` has no ANR/FATAL markers.
 EOF
+    fi
+  } > "$evidence_dir/checklist.md"
 }
 
 trap capture_failure_evidence EXIT
@@ -659,8 +812,71 @@ wait_for_trash_follow_up() {
   exit 68
 }
 
+open_trash_page() {
+  tap_clickable_from_xml "$trash_xml" "Account" exact
+  sleep 1
+  capture_screen "65-account-actions"
+  require_xml_text "$evidence_dir/65-account-actions.xml" "Trash" \
+    "Account action sheet did not expose Trash."
+  tap_clickable_from_xml "$evidence_dir/65-account-actions.xml" "Trash" exact
+  sleep 2
+  wait_for_trash_page_item
+}
+
+wait_for_trash_page_item() {
+  local attempt_limit=$((wait_seconds / 3))
+  local attempt=0
+  local xml_file
+
+  if [[ "$attempt_limit" -lt 1 ]]; then
+    attempt_limit=1
+  fi
+
+  while [[ "$attempt" -le "$attempt_limit" ]]; do
+    capture_screen "66-trash-page-$attempt"
+    xml_file="$evidence_dir/66-trash-page-$attempt.xml"
+
+    if xml_has_text "$xml_file" "Trash" \
+      && xml_has_text "$xml_file" "$target_name" \
+      && xml_has_text "$xml_file" "Restore" \
+      && xml_has_text "$xml_file" "Delete forever"; then
+      cp "$xml_file" "$evidence_dir/66-trash-page.xml"
+      if [[ -f "$evidence_dir/66-trash-page-$attempt.png" ]]; then
+        cp "$evidence_dir/66-trash-page-$attempt.png" "$evidence_dir/66-trash-page.png"
+      fi
+      trash_page_xml="$xml_file"
+      return
+    fi
+
+    if xml_has_text "$xml_file" "Could not load trash." \
+      || xml_has_text "$xml_file" "Offline. Trash needs internet." \
+      || xml_has_text "$xml_file" "Trash refresh cancelled."; then
+      printf 'Trash page did not load successfully.\n' >&2
+      printf 'Evidence: %s\n' "$xml_file" >&2
+      exit 68
+    fi
+
+    adb_device shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
+    sleep 3
+    attempt=$((attempt + 1))
+  done
+
+  printf 'Timed out waiting for the target row on Trash page.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 68
+}
+
 confirm_restore() {
   tap_clickable_from_xml "$trash_xml" "Restore" exact
+  sleep 1
+  capture_screen "70-restore-confirm"
+  require_xml_text "$evidence_dir/70-restore-confirm.xml" "Restore item?" "Restore confirmation did not open."
+  require_xml_text "$evidence_dir/70-restore-confirm.xml" "Restore $target_name" "Restore confirmation did not name the target $target_kind."
+  tap_clickable_from_xml "$evidence_dir/70-restore-confirm.xml" "Restore" exact
+}
+
+confirm_trash_page_restore() {
+  tap_target_row_action_from_xml "$trash_page_xml" "$target_name" "Restore"
   sleep 1
   capture_screen "70-restore-confirm"
   require_xml_text "$evidence_dir/70-restore-confirm.xml" "Restore item?" "Restore confirmation did not open."
@@ -709,6 +925,59 @@ wait_for_restore_completion() {
   exit 68
 }
 
+confirm_trash_page_delete_forever() {
+  tap_target_row_action_from_xml "$trash_page_xml" "$target_name" "Delete forever"
+  sleep 1
+  capture_screen "70-delete-forever-confirm"
+  require_xml_text "$evidence_dir/70-delete-forever-confirm.xml" "Delete forever?" \
+    "Delete-forever confirmation did not open."
+  require_xml_text "$evidence_dir/70-delete-forever-confirm.xml" "Permanently delete $target_name" \
+    "Delete-forever confirmation did not name the target $target_kind."
+  require_xml_text "$evidence_dir/70-delete-forever-confirm.xml" "This cannot be undone." \
+    "Delete-forever confirmation did not explain the permanent action."
+  tap_clickable_from_xml "$evidence_dir/70-delete-forever-confirm.xml" "Delete forever" exact
+}
+
+wait_for_delete_forever_completion() {
+  local attempt_limit=$((wait_seconds / 3))
+  local attempt=0
+  local xml_file
+
+  if [[ "$attempt_limit" -lt 1 ]]; then
+    attempt_limit=1
+  fi
+
+  while [[ "$attempt" -le "$attempt_limit" ]]; do
+    sleep 3
+    capture_screen "80-after-delete-forever-$attempt"
+    xml_file="$evidence_dir/80-after-delete-forever-$attempt.xml"
+
+    if xml_has_text "$xml_file" "$target_name permanently deleted."; then
+      cp "$xml_file" "$evidence_dir/80-after-delete-forever.xml"
+      if [[ -f "$evidence_dir/80-after-delete-forever-$attempt.png" ]]; then
+        cp "$evidence_dir/80-after-delete-forever-$attempt.png" "$evidence_dir/80-after-delete-forever.png"
+      fi
+      return
+    fi
+
+    if xml_has_text "$xml_file" "Could not permanently delete item." \
+      || xml_has_text "$xml_file" "Offline. Delete forever needs internet." \
+      || xml_has_text "$xml_file" "Refresh trash before permanently deleting this file." \
+      || xml_has_text "$xml_file" "Delete forever cancelled."; then
+      printf 'Delete forever did not complete successfully.\n' >&2
+      printf 'Evidence: %s\n' "$xml_file" >&2
+      exit 68
+    fi
+
+    attempt=$((attempt + 1))
+  done
+
+  cancel_after_timeout "$xml_file" "80-after-delete-forever-timeout"
+  printf 'Timed out waiting for delete-forever completion.\n' >&2
+  printf 'Evidence: %s\n' "$xml_file" >&2
+  exit 68
+}
+
 write_metadata
 write_checklist
 
@@ -752,8 +1021,22 @@ ensure_target_visible
 open_target_actions
 confirm_move_to_trash
 wait_for_trash_follow_up
-confirm_restore
-wait_for_restore_completion
+if [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
+  open_trash_page
+  confirm_trash_page_delete_forever
+  wait_for_delete_forever_completion
+elif [[ "$restore_from_trash_page" -eq 1 ]]; then
+  open_trash_page
+  confirm_trash_page_restore
+  wait_for_restore_completion
+else
+  confirm_restore
+  wait_for_restore_completion
+fi
 capture_text "99-logcat.txt" adb_device logcat -d -v time
 
-printf 'Files %s trash/restore evidence captured in %s\n' "$target_kind" "$evidence_dir"
+if [[ "$delete_forever_from_trash_page" -eq 1 ]]; then
+  printf 'Files %s trash/delete-forever evidence captured in %s\n' "$target_kind" "$evidence_dir"
+else
+  printf 'Files %s trash/restore evidence captured in %s\n' "$target_kind" "$evidence_dir"
+fi

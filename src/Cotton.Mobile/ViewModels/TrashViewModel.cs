@@ -12,6 +12,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly Uri _instanceUri;
         private readonly ICottonTrashBrowserService _trashBrowserService;
         private readonly ICottonTrashRestoreService _trashRestoreService;
+        private readonly ICottonTrashPermanentDeleteService _trashPermanentDeleteService;
         private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<TrashViewModel> _logger;
@@ -25,6 +26,7 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             ICottonTrashBrowserService trashBrowserService,
             ICottonTrashRestoreService trashRestoreService,
+            ICottonTrashPermanentDeleteService trashPermanentDeleteService,
             INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             ILogger<TrashViewModel> logger)
@@ -32,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(trashBrowserService);
             ArgumentNullException.ThrowIfNull(trashRestoreService);
+            ArgumentNullException.ThrowIfNull(trashPermanentDeleteService);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -39,12 +42,17 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = instanceUri;
             _trashBrowserService = trashBrowserService;
             _trashRestoreService = trashRestoreService;
+            _trashPermanentDeleteService = trashPermanentDeleteService;
             _networkAccess = networkAccess;
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             RestoreCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 RestoreAsync,
+                LogUnhandledCommandException,
+                _ => !IsBusy);
+            DeleteForeverCommand = new AsyncCommand<CottonFileBrowserEntry>(
+                DeleteForeverAsync,
                 LogUnhandledCommandException,
                 _ => !IsBusy);
         }
@@ -55,6 +63,8 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand<CottonFileBrowserEntry> RestoreCommand { get; }
 
+        public AsyncCommand<CottonFileBrowserEntry> DeleteForeverCommand { get; }
+
         public bool IsBusy
         {
             get => _isBusy;
@@ -64,6 +74,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     LoadCommand.RaiseCanExecuteChanged();
                     RestoreCommand.RaiseCanExecuteChanged();
+                    DeleteForeverCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                     OnPropertyChanged(nameof(IsListVisible));
                 }
@@ -194,6 +205,62 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task DeleteForeverAsync(CottonFileBrowserEntry item)
+        {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                Status = CottonTrashPermanentDeleteStatusText.OfflineUnavailableStatus;
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonTrashPermanentDeleteStatusText.ConfirmTitle,
+                CottonTrashPermanentDeleteStatusText.CreateConfirmMessage(item.Name, item.Type),
+                CottonTrashPermanentDeleteStatusText.ConfirmAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                Status = CottonTrashPermanentDeleteStatusText.CancelledStatus;
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                Status = CottonTrashPermanentDeleteStatusText.CreateDeletingStatus(item.Name);
+                CottonTrashPermanentDeleteResult result = await _trashPermanentDeleteService.DeleteForeverAsync(
+                    _instanceUri,
+                    item);
+                await RefreshAfterDeletedItemAsync(item, result);
+            }
+            catch (InvalidOperationException exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash permanent delete rejected {ItemId}.", item.Id);
+                Status = exception.Message;
+            }
+            catch (OperationCanceledException exception)
+            {
+                _logger.LogInformation(exception, "Cotton mobile trash permanent delete cancelled {ItemId}.", item.Id);
+                Status = CottonTrashPermanentDeleteStatusText.CancelledStatus;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile trash permanent delete failed {ItemId}.", item.Id);
+                Status = CottonTrashPermanentDeleteStatusText.FailedStatus;
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+            }
+        }
+
         private async Task RestoreItemAsync(
             CottonFileBrowserEntry item,
             CottonTrashRestoreRetryMode retryMode)
@@ -282,6 +349,33 @@ namespace Cotton.Mobile.ViewModels
                     item.Id);
                 Items.Remove(item);
                 Status = CottonTrashRestoreStatusText.CreateRestoredNeedsRefreshStatus(item.Name);
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+            }
+        }
+
+        private async Task RefreshAfterDeletedItemAsync(
+            CottonFileBrowserEntry item,
+            CottonTrashPermanentDeleteResult result)
+        {
+            try
+            {
+                CottonTrashListSnapshot snapshot = await LoadSnapshotAsync();
+                ShowSnapshot(snapshot);
+                Status = result.StatusText;
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Cotton mobile trash refresh after permanent delete failed {ItemId}.",
+                    item.Id);
+                Items.Remove(item);
+                Status = CottonTrashPermanentDeleteStatusText.CreateDeletedNeedsRefreshStatus(item.Name);
                 OnPropertyChanged(nameof(IsEmpty));
                 OnPropertyChanged(nameof(IsListVisible));
             }

@@ -121,15 +121,24 @@
                                            TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
                                 </Border>
 
-                                <Button Grid.Row="1"
-                                        Grid.ColumnSpan="2"
-                                        Text="Restore"
-                                        Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                        CommandParameter="{Binding .}"
-                                        FontSize="13"
-                                        Padding="14,6"
-                                        HeightRequest="36"
-                                        HorizontalOptions="End" />
+                                <HorizontalStackLayout Grid.Row="1"
+                                                       Grid.ColumnSpan="2"
+                                                       Spacing="8"
+                                                       HorizontalOptions="End">
+                                    <Button Text="Delete forever"
+                                            Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            FontSize="13"
+                                            Padding="14,6"
+                                            HeightRequest="36" />
+
+                                    <Button Text="Restore"
+                                            Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            FontSize="13"
+                                            Padding="14,6"
+                                            HeightRequest="36" />
+                                </HorizontalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

@@ -101,6 +101,40 @@ namespace Cotton.Mobile.Tests
             Assert.True(body.RootElement.GetProperty("overwrite").GetBoolean());
         }
 
+        [Fact]
+        public async Task DeleteFileForeverAsync_sends_authorized_permanent_delete_with_if_match()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueStatus(HttpStatusCode.NoContent);
+            var client = new CottonApiTrashPermanentDeleteClient(CreateApiClient(handler));
+
+            await client.DeleteFileForeverAsync(InstanceUri, FileId, " \"etag-current\" ");
+
+            RecordedRequest request = Assert.Single(handler.Requests);
+            Assert.Equal(HttpMethod.Delete, request.Method);
+            Assert.Equal($"/api/v1/files/{FileId}?skipTrash=true", request.Uri.PathAndQuery);
+            Assert.Equal("Bearer", request.AuthorizationScheme);
+            Assert.Equal("access-token", request.AuthorizationParameter);
+            Assert.Equal("\"etag-current\"", request.Headers["If-Match"]);
+        }
+
+        [Fact]
+        public async Task DeleteFolderForeverAsync_sends_authorized_permanent_node_delete()
+        {
+            var handler = new RecordingHttpMessageHandler();
+            handler.EnqueueStatus(HttpStatusCode.NoContent);
+            var client = new CottonApiTrashPermanentDeleteClient(CreateApiClient(handler));
+
+            await client.DeleteFolderForeverAsync(InstanceUri, FolderId);
+
+            RecordedRequest request = Assert.Single(handler.Requests);
+            Assert.Equal(HttpMethod.Delete, request.Method);
+            Assert.Equal($"/api/v1/layouts/nodes/{FolderId}?skipTrash=true", request.Uri.PathAndQuery);
+            Assert.Equal("Bearer", request.AuthorizationScheme);
+            Assert.Equal("access-token", request.AuthorizationParameter);
+            Assert.False(request.Headers.ContainsKey("If-Match"));
+        }
+
         private static CottonAuthenticatedApiClient CreateApiClient(RecordingHttpMessageHandler handler)
         {
             var httpClient = new HttpClient(handler);
@@ -170,6 +204,10 @@ namespace Cotton.Mobile.Tests
                     request.RequestUri ?? throw new InvalidOperationException("Request URI is missing."),
                     request.Headers.Authorization?.Scheme,
                     request.Headers.Authorization?.Parameter,
+                    request.Headers.ToDictionary(
+                        header => header.Key,
+                        header => string.Join(",", header.Value),
+                        StringComparer.OrdinalIgnoreCase),
                     body));
                 return _responses.Dequeue();
             }
@@ -182,12 +220,14 @@ namespace Cotton.Mobile.Tests
                 Uri uri,
                 string? authorizationScheme,
                 string? authorizationParameter,
+                IReadOnlyDictionary<string, string> headers,
                 string body)
             {
                 Method = method;
                 Uri = uri;
                 AuthorizationScheme = authorizationScheme;
                 AuthorizationParameter = authorizationParameter;
+                Headers = headers;
                 Body = body;
             }
 
@@ -198,6 +238,8 @@ namespace Cotton.Mobile.Tests
             public string? AuthorizationScheme { get; }
 
             public string? AuthorizationParameter { get; }
+
+            public IReadOnlyDictionary<string, string> Headers { get; }
 
             public string Body { get; }
         }

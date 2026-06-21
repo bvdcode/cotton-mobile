@@ -59,6 +59,7 @@ namespace Cotton.Mobile.Services
                         method,
                         path,
                         body,
+                        headers: null,
                         authorize: true,
                         cancellationToken)
                     .ConfigureAwait(false);
@@ -78,6 +79,7 @@ namespace Cotton.Mobile.Services
                     method,
                     path,
                     body,
+                    headers: null,
                     authorize: true,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -99,6 +101,25 @@ namespace Cotton.Mobile.Services
                 method,
                 path,
                 body: null,
+                headers: null,
+                cancellationToken);
+        }
+
+        public Task SendRequiredAsync(
+            Uri instanceUri,
+            HttpMethod method,
+            string path,
+            IReadOnlyDictionary<string, string> headers,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(headers);
+
+            return SendRequiredAsync(
+                instanceUri,
+                method,
+                path,
+                body: null,
+                headers,
                 cancellationToken);
         }
 
@@ -109,12 +130,31 @@ namespace Cotton.Mobile.Services
             object? body,
             CancellationToken cancellationToken)
         {
+            await SendRequiredAsync(
+                    instanceUri,
+                    method,
+                    path,
+                    body,
+                    headers: null,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private async Task SendRequiredAsync(
+            Uri instanceUri,
+            HttpMethod method,
+            string path,
+            object? body,
+            IReadOnlyDictionary<string, string>? headers,
+            CancellationToken cancellationToken)
+        {
             (HttpResponseMessage response, string? requestAccessToken) =
                 await SendOnceAsync(
                         instanceUri,
                         method,
                         path,
                         body,
+                        headers,
                         authorize: true,
                         cancellationToken)
                     .ConfigureAwait(false);
@@ -134,6 +174,7 @@ namespace Cotton.Mobile.Services
                     method,
                     path,
                     body,
+                    headers,
                     authorize: true,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -148,6 +189,7 @@ namespace Cotton.Mobile.Services
             HttpMethod method,
             string path,
             object? body,
+            IReadOnlyDictionary<string, string>? headers,
             bool authorize,
             CancellationToken cancellationToken)
         {
@@ -156,6 +198,7 @@ namespace Cotton.Mobile.Services
                     method,
                     path,
                     body,
+                    headers,
                     authorize,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -180,12 +223,14 @@ namespace Cotton.Mobile.Services
             HttpMethod method,
             string path,
             object? body,
+            IReadOnlyDictionary<string, string>? headers,
             bool authorize,
             CancellationToken cancellationToken)
         {
             EnsureSupportedInstanceUri(instanceUri);
             var request = new HttpRequestMessage(method, CreateUri(instanceUri, path));
             ApplyDefaultHeaders(request);
+            ApplyRequestHeaders(request, headers);
             if (body is not null)
             {
                 request.Content = new StringContent(
@@ -231,6 +276,7 @@ namespace Cotton.Mobile.Services
                         HttpMethod.Post,
                         path,
                         body: null,
+                        headers: null,
                         authorize: false,
                         cancellationToken)
                     .ConfigureAwait(false);
@@ -336,6 +382,26 @@ namespace Cotton.Mobile.Services
             if (deviceName is not null)
             {
                 request.Headers.TryAddWithoutValidation(CottonClientHeaders.DeviceName, deviceName);
+            }
+        }
+
+        private static void ApplyRequestHeaders(
+            HttpRequestMessage request,
+            IReadOnlyDictionary<string, string>? headers)
+        {
+            if (headers is null)
+            {
+                return;
+            }
+
+            foreach ((string name, string value) in headers)
+            {
+                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(value))
+                {
+                    continue;
+                }
+
+                request.Headers.TryAddWithoutValidation(name.Trim(), value.Trim());
             }
         }
 

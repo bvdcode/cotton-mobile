@@ -252,6 +252,8 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonTrashRestoreService, CottonTrashRestoreService>();
 			builder.Services.AddSingleton<ICottonTrashBrowserClient, CottonApiTrashBrowserClient>();
 			builder.Services.AddSingleton<ICottonTrashBrowserService, CottonTrashBrowserService>();
+			builder.Services.AddSingleton<ICottonTrashPermanentDeleteClient, CottonApiTrashPermanentDeleteClient>();
+			builder.Services.AddSingleton<ICottonTrashPermanentDeleteService, CottonTrashPermanentDeleteService>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryClient, CottonSdkFileVersionHistoryClient>();
 			builder.Services.AddSingleton<ICottonFileVersionHistoryService, CottonFileVersionHistoryService>();
 			builder.Services.AddSingleton<ICottonCloudStorageQuotaService, CottonCloudStorageQuotaService>();

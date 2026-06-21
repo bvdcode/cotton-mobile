@@ -9,6 +9,11 @@
              Shell.NavBarIsVisible="True"
              Title="Sync"
              BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem Text="Run all"
+                     Command="{Binding RunAllCommand}" />
+    </ContentPage.ToolbarItems>
+
     <ScrollView>
         <VerticalStackLayout Padding="16"
                              Spacing="14">

@@ -1672,6 +1672,7 @@ namespace Cotton.Mobile.ViewModels
                             fileActionCancellation.Token),
                         fileActionCancellation.Token);
                     downloadedCount++;
+                    await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Downloaded);
                 }
 
                 fileActionCancellation.Token.ThrowIfCancellationRequested();
@@ -4312,6 +4313,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                await RecordRecentFilesAsync(instanceUri, selectedFiles, CottonRecentFileActionKind.Shared);
                 _display.ShowFilesSummary();
             }
             catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
@@ -5226,6 +5228,19 @@ namespace Cotton.Mobile.ViewModels
                 instanceUri,
                 CottonRecentFileSnapshot.Create(file, action, DateTime.UtcNow),
                 CancellationToken.None);
+        }
+
+        private async Task RecordRecentFilesAsync(
+            Uri instanceUri,
+            IEnumerable<CottonFileBrowserEntry> files,
+            CottonRecentFileActionKind action)
+        {
+            ArgumentNullException.ThrowIfNull(files);
+
+            foreach (CottonFileBrowserEntry file in files)
+            {
+                await RecordRecentFileAsync(instanceUri, file, action);
+            }
         }
 
         private static bool IsReusableLocalFile(

@@ -10,6 +10,7 @@ namespace Cotton.Mobile.ViewModels
         Open,
         RefreshOffline,
         RemoveOffline,
+        RestoreFromTrash,
         Share,
         ShareLink,
         SyncFolderToDevice,

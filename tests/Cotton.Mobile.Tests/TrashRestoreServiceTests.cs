@@ -198,6 +198,15 @@ namespace Cotton.Mobile.Tests
         public void Trash_restore_status_text_is_explicit()
         {
             Assert.Equal("Restoring notes.txt...", CottonTrashRestoreStatusText.CreateRestoringStatus(" notes.txt "));
+            Assert.Equal(
+                "Restore notes.txt to its original folder?",
+                CottonTrashRestoreStatusText.CreateConfirmMessage("notes.txt"));
+            Assert.Equal(
+                "Create the missing original folders and restore notes.txt?",
+                CottonTrashRestoreStatusText.CreateParentMissingMessage("notes.txt"));
+            Assert.Equal(
+                "An item with this name already exists. Overwrite it and restore notes.txt?",
+                CottonTrashRestoreStatusText.CreateConflictMessage("notes.txt"));
             Assert.Equal("notes.txt restored.", CottonTrashRestoreStatusText.CreateRestoredStatus("notes.txt"));
             Assert.Equal("Item restored.", CottonTrashRestoreStatusText.CreateRestoredStatus(" "));
             Assert.Equal("Restore cancelled.", CottonTrashRestoreStatusText.CancelledStatus);

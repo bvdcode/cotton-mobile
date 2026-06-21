@@ -125,6 +125,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             ICottonFileTrashService fileTrashService,
+            ICottonTrashRestoreService trashRestoreService,
             ICottonCloudShareLinkService cloudShareLinkService,
             ICottonAccountSessionService accountSessionService,
             ICottonRemotePushSessionRegistrationService remotePushRegistrationService,
@@ -185,6 +186,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(fileTrashService);
+            ArgumentNullException.ThrowIfNull(trashRestoreService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
             ArgumentNullException.ThrowIfNull(accountSessionService);
             ArgumentNullException.ThrowIfNull(remotePushRegistrationService);
@@ -259,6 +261,7 @@ namespace Cotton.Mobile.ViewModels
                 fileInteractionService,
                 filePreviewService,
                 fileTrashService,
+                trashRestoreService,
                 fileVersionHistoryPageService,
                 cloudShareLinkService,
                 cloudShareLinkInteractionService,

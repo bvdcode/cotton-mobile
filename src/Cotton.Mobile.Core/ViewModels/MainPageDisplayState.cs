@@ -42,6 +42,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _canNavigateFilesUp;
         private bool _canCancelFileAction;
         private bool _canRetryFileAction;
+        private string _fileRetryActionText = "Retry";
 
         public MainPageDisplayState(string defaultInstanceUrl)
         {
@@ -481,6 +482,12 @@ namespace Cotton.Mobile.ViewModels
             private set => SetProperty(ref _canRetryFileAction, value);
         }
 
+        public string FileRetryActionText
+        {
+            get => _fileRetryActionText;
+            private set => SetProperty(ref _fileRetryActionText, value);
+        }
+
         public bool IsFilesEmptyVisible =>
             !IsFilesLoading
             && FileEntries.Count == 0
@@ -721,13 +728,16 @@ namespace Cotton.Mobile.ViewModels
             FilesStatus = status;
         }
 
-        public void ShowFileActionRetry(string status)
+        public void ShowFileActionRetry(string status, string actionText = "Retry")
         {
+            ArgumentException.ThrowIfNullOrWhiteSpace(actionText);
+
             IsFilesLoading = false;
             IsFilesRefreshing = false;
             IsFileActionInProgress = false;
             CanCancelFileAction = false;
             CanRetryFileAction = true;
+            FileRetryActionText = actionText.Trim();
             FilesStatus = status;
             NotifyFilesEmptyStateChanged();
         }
@@ -736,6 +746,7 @@ namespace Cotton.Mobile.ViewModels
         {
             bool wasRetryVisible = CanRetryFileAction;
             CanRetryFileAction = false;
+            FileRetryActionText = "Retry";
             if (wasRetryVisible && !IsFileBrowserBusy)
             {
                 FilesStatus = CreateFilesStatus();

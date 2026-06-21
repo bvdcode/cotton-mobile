@@ -472,7 +472,7 @@
                                         MinimumWidthRequest="72" />
                             </HorizontalStackLayout>
 
-                            <Button Text="Retry"
+                            <Button Text="{Binding Display.FileRetryActionText}"
                                     Command="{Binding RetryFileActionCommand}"
                                     IsEnabled="{Binding Display.CanRetryFileAction}"
                                     IsVisible="{Binding Display.CanRetryFileAction}"

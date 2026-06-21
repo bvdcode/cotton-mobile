@@ -66,6 +66,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IFilePreviewService _filePreviewService;
         private readonly ICottonFileTrashService _fileTrashService;
+        private readonly ICottonTrashRestoreService _trashRestoreService;
         private readonly IFileVersionHistoryPageService _fileVersionHistoryPageService;
         private readonly ICottonCloudShareLinkService _cloudShareLinkService;
         private readonly ICloudShareLinkInteractionService _cloudShareLinkInteractionService;
@@ -119,6 +120,7 @@ namespace Cotton.Mobile.ViewModels
             IFileInteractionService fileInteractionService,
             IFilePreviewService filePreviewService,
             ICottonFileTrashService fileTrashService,
+            ICottonTrashRestoreService trashRestoreService,
             IFileVersionHistoryPageService fileVersionHistoryPageService,
             ICottonCloudShareLinkService cloudShareLinkService,
             ICloudShareLinkInteractionService cloudShareLinkInteractionService,
@@ -155,6 +157,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(fileInteractionService);
             ArgumentNullException.ThrowIfNull(filePreviewService);
             ArgumentNullException.ThrowIfNull(fileTrashService);
+            ArgumentNullException.ThrowIfNull(trashRestoreService);
             ArgumentNullException.ThrowIfNull(fileVersionHistoryPageService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkService);
             ArgumentNullException.ThrowIfNull(cloudShareLinkInteractionService);
@@ -191,6 +194,7 @@ namespace Cotton.Mobile.ViewModels
             _fileInteractionService = fileInteractionService;
             _filePreviewService = filePreviewService;
             _fileTrashService = fileTrashService;
+            _trashRestoreService = trashRestoreService;
             _fileVersionHistoryPageService = fileVersionHistoryPageService;
             _cloudShareLinkService = cloudShareLinkService;
             _cloudShareLinkInteractionService = cloudShareLinkInteractionService;
@@ -871,6 +875,12 @@ namespace Cotton.Mobile.ViewModels
             MainPageFileAction action = _retryFileAction.Value;
             CottonFileBrowserEntry entry = _retryFileActionEntry;
             ClearFileActionRetry();
+            if (action == MainPageFileAction.RestoreFromTrash)
+            {
+                await RestoreTrashedItemAsync(entry);
+                return;
+            }
+
             CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
             if (currentEntry is null)
             {
@@ -4677,9 +4687,13 @@ namespace Cotton.Mobile.ViewModels
                 EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
                 didEndFileAction = true;
                 await RefreshAsync();
-                if (!_lastFileLoadFailed)
+                if (CanUseFileBrowserContext(instanceUri))
                 {
-                    _display.ShowFilesStatus(result.StatusText);
+                    ShowFileActionRetry(
+                        MainPageFileAction.RestoreFromTrash,
+                        currentFile,
+                        result.StatusText,
+                        CottonTrashRestoreStatusText.RestoreAction);
                 }
             }
             catch (Exception exception)
@@ -4729,6 +4743,192 @@ namespace Cotton.Mobile.ViewModels
                     EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
                 }
             }
+        }
+
+        private async Task RestoreTrashedItemAsync(CottonFileBrowserEntry item)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                _display.ShowFilesStatus("Sign in to restore items.");
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    CottonTrashRestoreStatusText.OfflineUnavailableStatus,
+                    CottonTrashRestoreStatusText.RestoreAction);
+                return;
+            }
+
+            bool confirmed = await _dialogService.ShowConfirmationAsync(
+                CottonTrashRestoreStatusText.RestoreTitle,
+                CottonTrashRestoreStatusText.CreateConfirmMessage(item.Name),
+                CottonTrashRestoreStatusText.RestoreAction,
+                CancelAction);
+            if (!confirmed)
+            {
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonTrashRestoreStatusText.CancelledStatus);
+                return;
+            }
+
+            await RestoreTrashedItemAsync(item, instanceUri, CottonTrashRestoreRetryMode.None);
+        }
+
+        private async Task RestoreTrashedItemAsync(
+            CottonFileBrowserEntry item,
+            Uri instanceUri,
+            CottonTrashRestoreRetryMode retryMode)
+        {
+            if (!_networkAccess.HasInternetAccess)
+            {
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    CottonTrashRestoreStatusText.OfflineUnavailableStatus,
+                    CottonTrashRestoreStatusText.RestoreAction);
+                return;
+            }
+
+            CancellationTokenSource fileActionCancellation = BeginFileAction(
+                CottonTrashRestoreStatusText.CreateRestoringStatus(item.Name));
+            bool didEndFileAction = false;
+
+            try
+            {
+                CottonTrashRestoreResult result = await _trashRestoreService.RestoreAsync(
+                    instanceUri,
+                    item.Id,
+                    item.Type,
+                    retryMode,
+                    fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                didEndFileAction = true;
+                await HandleTrashRestoreOutcomeAsync(item, instanceUri, result);
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile trash restore authorization failure {ItemId}.", item.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile trash restore cancellation {ItemId}.", item.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                _display.ShowFilesStatus(CottonTrashRestoreStatusText.CancelledStatus);
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile trash restore failure {ItemId}.", item.Id);
+                    return;
+                }
+
+                _logger.LogWarning(exception, "Failed to restore Cotton mobile trashed item {ItemId}.", item.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    CreateFileActionFailureStatus(
+                        exception,
+                        CottonTrashRestoreStatusText.FailedStatus,
+                        CottonTrashRestoreStatusText.OfflineUnavailableStatus),
+                    CottonTrashRestoreStatusText.RestoreAction);
+            }
+            finally
+            {
+                if (!didEndFileAction)
+                {
+                    EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh: false);
+                }
+            }
+        }
+
+        private async Task HandleTrashRestoreOutcomeAsync(
+            CottonFileBrowserEntry item,
+            Uri instanceUri,
+            CottonTrashRestoreResult result)
+        {
+            if (result.IsRestored)
+            {
+                ClearFileActionRetry();
+                await RefreshAsync();
+                if (CanUseFileBrowserContext(instanceUri))
+                {
+                    _display.ShowFilesStatus(CottonTrashRestoreStatusText.CreateRestoredStatus(item.Name));
+                }
+
+                return;
+            }
+
+            if (result.CanRetryWithCreateMissingParents
+                && result.RetryMode != CottonTrashRestoreRetryMode.CreateMissingParents)
+            {
+                bool confirmed = await _dialogService.ShowConfirmationAsync(
+                    CottonTrashRestoreStatusText.ParentMissingTitle,
+                    CottonTrashRestoreStatusText.CreateParentMissingMessage(item.Name),
+                    CottonTrashRestoreStatusText.CreateMissingParentsAction,
+                    CancelAction);
+                if (confirmed)
+                {
+                    await RestoreTrashedItemAsync(item, instanceUri, CottonTrashRestoreRetryMode.CreateMissingParents);
+                    return;
+                }
+
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    CottonTrashRestoreStatusText.ParentMissingStatus,
+                    CottonTrashRestoreStatusText.RestoreAction);
+                return;
+            }
+
+            if (result.CanRetryWithOverwrite
+                && result.RetryMode != CottonTrashRestoreRetryMode.Overwrite)
+            {
+                bool confirmed = await _dialogService.ShowConfirmationAsync(
+                    CottonTrashRestoreStatusText.ConflictTitle,
+                    CottonTrashRestoreStatusText.CreateConflictMessage(item.Name),
+                    CottonTrashRestoreStatusText.OverwriteAction,
+                    CancelAction);
+                if (confirmed)
+                {
+                    await RestoreTrashedItemAsync(item, instanceUri, CottonTrashRestoreRetryMode.Overwrite);
+                    return;
+                }
+
+                ShowFileActionRetry(
+                    MainPageFileAction.RestoreFromTrash,
+                    item,
+                    CottonTrashRestoreStatusText.ConflictStatus,
+                    CottonTrashRestoreStatusText.RestoreAction);
+                return;
+            }
+
+            ClearFileActionRetry();
+            _display.ShowFilesStatus(result.StatusText);
         }
 
         private async Task ClearTrashedFileLocalStateBestEffortAsync(Uri instanceUri, CottonFileBrowserEntry file)
@@ -5368,11 +5568,12 @@ namespace Cotton.Mobile.ViewModels
         private void ShowFileActionRetry(
             MainPageFileAction action,
             CottonFileBrowserEntry entry,
-            string status)
+            string status,
+            string actionText = "Retry")
         {
             _retryFileAction = action;
             _retryFileActionEntry = entry;
-            _display.ShowFileActionRetry(status);
+            _display.ShowFileActionRetry(status, actionText);
         }
 
         private void ShowFileLoadFailure(string fallbackStatus)

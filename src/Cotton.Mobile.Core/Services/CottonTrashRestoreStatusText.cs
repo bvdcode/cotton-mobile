@@ -14,7 +14,19 @@ namespace Cotton.Mobile.Services
 
         public const string ParentMissingStatus = "Original folder is missing.";
 
+        public const string RestoreAction = "Restore";
+
+        public const string RestoreTitle = "Restore item?";
+
         public const string RestoredStatus = "Item restored.";
+
+        public const string CreateMissingParentsAction = "Create folders";
+
+        public const string ParentMissingTitle = "Original folder missing";
+
+        public const string OverwriteAction = "Overwrite";
+
+        public const string ConflictTitle = "Name conflict";
 
         public static string CreateOutcomeStatus(CottonSyncRestoreOutcomeSnapshot outcome)
         {
@@ -34,6 +46,24 @@ namespace Cotton.Mobile.Services
         {
             string name = NormalizeItemName(itemName);
             return $"Restoring {name}...";
+        }
+
+        public static string CreateConfirmMessage(string itemName)
+        {
+            string name = NormalizeItemName(itemName);
+            return $"Restore {name} to its original folder?";
+        }
+
+        public static string CreateParentMissingMessage(string itemName)
+        {
+            string name = NormalizeItemName(itemName);
+            return $"Create the missing original folders and restore {name}?";
+        }
+
+        public static string CreateConflictMessage(string itemName)
+        {
+            string name = NormalizeItemName(itemName);
+            return $"An item with this name already exists. Overwrite it and restore {name}?";
         }
 
         public static string CreateRestoredStatus(string itemName)

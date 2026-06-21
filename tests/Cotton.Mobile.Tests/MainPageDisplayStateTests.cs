@@ -180,6 +180,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_action_follow_up_can_use_specific_button_text()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ShowFileActionRetry("zeta.txt moved to trash.", "Restore");
+
+            Assert.True(display.CanRetryFileAction);
+            Assert.Equal("Restore", display.FileRetryActionText);
+            Assert.Equal("zeta.txt moved to trash.", display.FilesStatus);
+
+            display.ClearFileActionRetry();
+
+            Assert.False(display.CanRetryFileAction);
+            Assert.Equal("Retry", display.FileRetryActionText);
+            Assert.Equal("4 items · A-Z", display.FilesStatus);
+        }
+
+        [Fact]
         public void Refresh_request_keeps_refresh_available_without_enabling_file_actions()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

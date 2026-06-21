@@ -9,6 +9,8 @@ package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
 configuration="$COTTON_ANDROID_CONFIGURATION"
 config_file="$COTTON_REPO_ROOT/src/Cotton.Mobile/Platforms/Android/google-services.json"
+config_source_file=""
+config_source_env_name=""
 evidence_root="${COTTON_MOBILE_EVIDENCE_ROOT:-${TMPDIR:-/tmp}/cotton-mobile-evidence}"
 evidence_dir=""
 install_debug=0
@@ -33,6 +35,8 @@ Options:
   --serial SERIAL           ADB serial to use. Defaults to COTTON_ADB_SERIAL.
   --configuration NAME      Android build configuration. Defaults to COTTON_ANDROID_CONFIGURATION.
   --config-file PATH        Firebase google-services.json path.
+  --config-source-file PATH Restore google-services.json from this local source before preflight.
+  --config-source-env NAME  Restore google-services.json from this environment variable before preflight.
   --evidence-dir DIR        Evidence directory. Defaults to a timestamped directory under $evidence_root.
   --install-debug           Install the current debug APK with -r before launch, preserving app data.
   --expected-version-code N Require the installed package to have this Android versionCode.
@@ -84,6 +88,22 @@ while [[ $# -gt 0 ]]; do
         exit 64
       fi
       config_file="$2"
+      shift 2
+      ;;
+    --config-source-file)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --config-source-file.\n' >&2
+        exit 64
+      fi
+      config_source_file="$2"
+      shift 2
+      ;;
+    --config-source-env)
+      if [[ $# -lt 2 ]]; then
+        printf 'Missing value for --config-source-env.\n' >&2
+        exit 64
+      fi
+      config_source_env_name="$2"
       shift 2
       ;;
     --evidence-dir)
@@ -180,6 +200,13 @@ capture_text() {
 }
 
 write_metadata() {
+  local config_source="none"
+  if [[ -n "$config_source_file" ]]; then
+    config_source="file"
+  elif [[ -n "$config_source_env_name" ]]; then
+    config_source="env"
+  fi
+
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
     printf 'repo=%s\n' "$COTTON_REPO_ROOT"
@@ -188,6 +215,8 @@ write_metadata() {
     printf 'serial=%s\n' "$serial"
     printf 'configuration=%s\n' "$configuration"
     printf 'config_file=%s\n' "$config_file"
+    printf 'config_source=%s\n' "$config_source"
+    printf 'config_source_env_name=%s\n' "$config_source_env_name"
     printf 'install_debug=%s\n' "$install_debug"
     printf 'launch_app=%s\n' "$launch_app"
     printf 'preflight_only=%s\n' "$preflight_only"
@@ -203,6 +232,29 @@ write_metadata() {
     printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
     printf 'android_logcat_docs=https://developer.android.com/tools/logcat\n'
   } > "$evidence_dir/00-metadata.txt"
+}
+
+restore_firebase_config_if_requested() {
+  if [[ -z "$config_source_file" && -z "$config_source_env_name" ]]; then
+    return
+  fi
+
+  local restore_args=(
+    --configuration "$configuration"
+    --package-id "$package_id"
+    --config-file "$config_file"
+  )
+
+  if [[ -n "$config_source_file" ]]; then
+    restore_args+=(--source-file "$config_source_file")
+  fi
+
+  if [[ -n "$config_source_env_name" ]]; then
+    restore_args+=(--source-env "$config_source_env_name")
+  fi
+
+  "$SCRIPT_DIR/restore-android-firebase-config.sh" "${restore_args[@]}" \
+    > "$evidence_dir/01-restore-firebase-config.txt" 2>&1
 }
 
 run_firebase_config_preflight() {
@@ -454,6 +506,7 @@ write_result() {
 }
 
 write_metadata
+restore_firebase_config_if_requested
 run_firebase_config_preflight
 
 capture_text "01-adb-devices.txt" adb devices

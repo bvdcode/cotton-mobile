@@ -19,6 +19,15 @@ on:
     branches:
       - main
       - develop
+    paths:
+      - "GitVersion.yml"
+      - "src/Cotton.Mobile.Core/**"
+      - "src/Cotton.Mobile/**"
+      - "tests/**"
+      - "scripts/ci/**"
+      - "scripts/mobile/**"
+      - "store/google-play/**"
+      - ".github/workflows/mobile-android.yml"
   pull_request:
     paths:
       - "GitVersion.yml"

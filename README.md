@@ -7,17 +7,11 @@ Native Cotton Cloud mobile client for Android, built with .NET MAUI.
   <a href="https://github.com/bvdcode/cotton-mobile/releases/latest/download/CottonCloud-Android.apk"><img alt="Download Cotton Cloud APK from GitHub" src="https://img.shields.io/badge/GitHub-APK%20download-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-Cotton Mobile is the focused phone client for Cotton Cloud: sign in to an instance, browse files, upload and share content, keep selected files available offline, and keep the interface calm enough to trust every day.
-
-The app is being built around three product rules:
-
-- show files quickly and clearly;
-- keep authentication, uploads, downloads, and sharing predictable;
-- add sync and notifications only behind explicit, testable flows.
+Cotton Mobile is the Android client for Cotton Cloud. It signs in to a Cotton Cloud instance, browses remote files, uploads and shares content, keeps selected items available offline, and exposes transfer, notification, storage, security, and diagnostics state for testing.
 
 ## Current Testing Scope
 
-The Android testing build is meant for real dogfooding, not a blank store shell.
+Current Android testing builds cover:
 
 - Instance sign-in through the Cotton app-code OAuth flow.
 - Secure token storage through the platform key store.
@@ -78,30 +72,19 @@ COTTON_ADB_SERIAL=emulator-5554 scripts/mobile/install-android-debug.sh
 Use the emulator for fast visual checks, then batch real-device smoke tests over ADB when the slice is worth testing on hardware.
 Debug builds install side by side with the Play/GitHub release package.
 
-## Repository Checks
-
-```bash
-scripts/ci/validate-yaml.rb
-```
-
-The YAML validator uses Ruby's standard parser and checks workflow/config files before pushing CI changes.
-
 ## Release Flow
 
-Signed Android builds are produced by the `Mobile Android` workflow.
+The `Mobile Android` workflow runs on every push to `main` and `develop`.
 
-- Use `build_signed_release=true` to produce signed APK/AAB artifacts.
-- Use `publish_github_release=true` to update the stable GitHub APK download.
-- Use `upload_to_google_play=true` only for intentional Play testing uploads.
-- `publish_github_release` and `upload_to_google_play` require `build_signed_release=true`; the workflow fails early if that combination is wrong.
-- Signed release display versions come from `GitVersion.yml` `next-version` and existing `vX.Y.Z` release tags.
-- The first Play upload for a `next-version` value uses that exact version; later uploads increment the patch version until `next-version` is moved forward.
-- Successful Play uploads tag the commit as `vX.Y.Z` so the next upload can compute the next patch version.
-- Android `versionCode` is computed from the GitHub Actions run number and attempt, is guarded against reuse, and is not user-facing.
-- Signed release builds fail if the computed display version and Android version code were not applied.
-
-The release flow keeps direct APK testing, Play dogfooding, and store submission separate on purpose.
+- Every push runs Google Play listing validation, Android release-version checks, release-notes checks, mobile unit tests, a debug APK build, and a signed release build.
+- Every push to `main` or `develop` creates the next SemVer tag from `GitVersion.yml` and existing `vX.Y.Z` tags, creates a GitHub Release, and uploads `CottonCloud-Android.apk`.
+- `main` releases are marked latest and are used by the stable GitHub APK download link.
+- `develop` releases are marked as prereleases and keep a downloadable APK for branch testing.
+- Every push to `main` also uploads the signed AAB to Google Play internal testing after the GitHub Release is created.
+- Manual workflow dispatch remains available for controlled signed rebuilds, Play uploads from an existing SemVer tag, and store listing updates.
+- Android `ApplicationDisplayVersion` is SemVer. Android `versionCode` is computed from the GitHub Actions run number and attempt, is guarded against reuse, and is not user-facing.
+- Google Play upload requires valid signing secrets, Firebase config, service-account access, and any required Play Console app-content declarations for requested Android permissions.
 
 ## Product Direction
 
-The next milestones are intentionally boring in the best way: keep upload, backup, offline, sync, notifications, storage, and security flows explicit enough that testers can trust what the app will do before it does it.
+The next milestones are upload reliability, camera backup, offline content, sync, notifications, storage controls, security controls, sharing, and activity history.

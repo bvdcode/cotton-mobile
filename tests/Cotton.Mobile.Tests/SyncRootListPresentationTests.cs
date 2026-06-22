@@ -233,6 +233,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Bidirectional_app_private_root_shows_source_unsupported()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Available,
+                CottonSyncDirection.Bidirectional);
+
+            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([root]);
+            CottonSyncRootListItem item = Assert.Single(state.Items);
+
+            Assert.False(state.CanRunAny);
+            Assert.Equal("Bidirectional · On this device", item.DetailText);
+            Assert.Equal("Local sync source unsupported", item.StatusText);
+            Assert.True(item.IsUnsupportedLocalRoot);
+            Assert.False(item.IsReady);
+            Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
+        }
+
+        [Fact]
         public void Stop_sync_management_copy_is_explicit_about_local_files()
         {
             Assert.Equal("Stop syncing Projects?", CottonSyncRootManagementText.CreateStopTitle(" Projects "));

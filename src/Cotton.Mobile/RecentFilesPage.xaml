@@ -128,6 +128,18 @@
                                        LineBreakMode="NoWrap"
                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
                             </Border>
+
+                            <Button Grid.Column="1"
+                                    Grid.Row="1"
+                                    Text="Remove"
+                                    FontSize="12"
+                                    Padding="10,4"
+                                    MinimumWidthRequest="74"
+                                    HeightRequest="32"
+                                    VerticalOptions="Start"
+                                    Command="{Binding BindingContext.RemoveRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
+                                    CommandParameter="{Binding .}"
+                                    SemanticProperties.Description="Remove recent file" />
                         </Grid>
                     </Border>
                 </DataTemplate>

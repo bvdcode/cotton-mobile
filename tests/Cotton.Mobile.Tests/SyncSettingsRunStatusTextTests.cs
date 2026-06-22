@@ -147,6 +147,14 @@ namespace Cotton.Mobile.Tests
                     removedCount: 0,
                     skippedCount: 0,
                     blockedCount: 0));
+            CottonCloudToDeviceSyncRunSummary blockedCloudSummary = CreateCloudSummary(
+                new CottonCloudToDeviceSyncExecutionResult(
+                    downloadedCount: 0,
+                    refreshedCount: 0,
+                    renamedCount: 0,
+                    removedCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 1));
             CottonDeviceToCloudSyncRunSummary deviceSummary = CreateDeviceSummary(
                 new CottonDeviceToCloudSyncExecutionResult(
                     uploadedCount: 1,
@@ -176,6 +184,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Sync complete. 1 downloaded.",
                 CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(cloudSummary));
+            Assert.Equal(
+                "Sync complete. 1 blocked.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(blockedCloudSummary));
             Assert.Equal(
                 "Sync complete. 1 uploaded.",
                 CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary));

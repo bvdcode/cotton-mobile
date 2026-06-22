@@ -215,6 +215,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_reports_blocked_missing_remote_revision_without_download()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", eTag: null);
+            _folderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, file));
+
+            CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonCloudToDeviceSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonCloudToDeviceSyncRootRunStatus.Completed, result.Status);
+            Assert.Equal(1, result.Plan?.BlockedCount);
+            Assert.Equal(1, summary.BlockedItemCount);
+            Assert.True(summary.HasBlockedItems);
+            Assert.False(summary.HasAppliedChanges);
+            Assert.Empty(_fileOperator.DownloadedIds);
+            Assert.Empty(_fileOperator.RenamedIds);
+            Assert.Empty(_fileOperator.RemovedIds);
+            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
+        }
+
+        [Fact]
         public async Task Run_skips_not_ready_and_unsupported_direction_roots_without_remote_reads()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(

@@ -242,6 +242,15 @@ namespace Cotton.Mobile.Tests
                     removedManifestCount: 0,
                     skippedCount: 2,
                     blockedCount: 0));
+            CottonDeviceToCloudSyncRunSummary blockedSummary = CreateDeviceSummary(
+                new CottonDeviceToCloudSyncExecutionResult(
+                    uploadedCount: 0,
+                    refreshedCount: 0,
+                    createdFolderCount: 0,
+                    deletedRemoteFileCount: 0,
+                    removedManifestCount: 0,
+                    skippedCount: 0,
+                    blockedCount: 1));
 
             Assert.Equal("Sync from folder", CottonDeviceToCloudSyncStatusText.ActionLabel);
             Assert.Equal("Syncing Camera...", CottonDeviceToCloudSyncStatusText.CreateStartingStatus(" Camera "));
@@ -271,6 +280,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "Sync complete. Everything is up to date.",
                 CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary));
+            Assert.Equal(
+                "Sync complete. 1 blocked.",
+                CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(blockedSummary));
         }
 
         private static CottonCloudToDeviceSyncRunSummary CreateCloudSummary(

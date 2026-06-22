@@ -282,6 +282,43 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_reports_blocked_remote_revision_without_mutation()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            CottonSyncedFileSnapshot manifestItem = new(
+                FirstFileId,
+                "alpha.txt",
+                "\"etag-1\"",
+                UpdatedAt.AddMinutes(-10),
+                42,
+                "text/plain",
+                UpdatedAt.AddMinutes(-10),
+                "alpha.txt");
+            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
+            _localTreeReader.SetContent(
+                root.Id,
+                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt")));
+            _remoteFolderContentSource.SetContent(
+                root.CloudFolder.FolderId,
+                CreateContent(root, CreateFile(FirstFileId, "alpha.txt", "\"etag-2\"")));
+
+            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
+            Assert.Equal(1, result.Plan?.BlockedCount);
+            Assert.Equal(1, summary.BlockedItemCount);
+            Assert.True(summary.HasBlockedItems);
+            Assert.False(summary.HasAppliedChanges);
+            Assert.Empty(_fileOperator.UploadedNewRelativePaths);
+            Assert.Empty(_fileOperator.DeletedFileIds);
+
+            CottonSyncedFileSnapshot savedManifestItem =
+                Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
+            Assert.Equal("\"etag-1\"", savedManifestItem.ETag);
+        }
+
+        [Fact]
         public async Task Run_root_executes_destructive_remote_delete_when_explicitly_allowed()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");

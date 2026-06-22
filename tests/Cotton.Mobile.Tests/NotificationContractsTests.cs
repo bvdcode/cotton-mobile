@@ -34,6 +34,33 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Notification_channel_shape_is_validated()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CottonNotificationChannelCatalog.Get((CottonNotificationChannelKind)999));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonNotificationChannelSnapshot(
+                    (CottonNotificationChannelKind)999,
+                    "cotton.invalid",
+                    "Invalid",
+                    "Invalid channel.",
+                    CottonNotificationImportance.Default,
+                    defaultEnabled: false));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonNotificationChannelSnapshot(
+                    CottonNotificationChannelKind.Transfers,
+                    "cotton.invalid",
+                    "Invalid",
+                    "Invalid channel.",
+                    (CottonNotificationImportance)999,
+                    defaultEnabled: false));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CottonNotificationSettings.Default.WithChannelEnabled(
+                    (CottonNotificationChannelKind)999,
+                    isEnabled: true));
+        }
+
+        [Fact]
         public void Default_notification_settings_enable_only_useful_early_channels()
         {
             CottonNotificationSettings settings = CottonNotificationSettings.Default;

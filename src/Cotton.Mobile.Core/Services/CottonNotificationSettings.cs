@@ -44,6 +44,13 @@ namespace Cotton.Mobile.Services
             CottonNotificationChannelKind kind,
             bool isEnabled)
         {
+            if (!Enum.IsDefined(kind))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(kind),
+                    "Notification channel kind is not supported.");
+            }
+
             Dictionary<CottonNotificationChannelKind, bool> values = _channelEnabled.ToDictionary(
                 pair => pair.Key,
                 pair => pair.Value);

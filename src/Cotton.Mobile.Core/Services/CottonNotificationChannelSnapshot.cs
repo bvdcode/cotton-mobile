@@ -12,6 +12,13 @@ namespace Cotton.Mobile.Services
             CottonNotificationImportance importance,
             bool defaultEnabled)
         {
+            if (!Enum.IsDefined(kind))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(kind),
+                    "Notification channel kind is not supported.");
+            }
+
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new ArgumentException("Notification channel id is required.", nameof(id));
@@ -20,6 +27,13 @@ namespace Cotton.Mobile.Services
             if (string.IsNullOrWhiteSpace(name))
             {
                 throw new ArgumentException("Notification channel name is required.", nameof(name));
+            }
+
+            if (!Enum.IsDefined(importance))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(importance),
+                    "Notification importance is not supported.");
             }
 
             Kind = kind;

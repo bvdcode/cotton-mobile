@@ -7,13 +7,13 @@ Native Cotton Cloud mobile client for Android, built with .NET MAUI.
   <a href="https://github.com/bvdcode/cotton-mobile/releases/latest/download/CottonCloud-Android.apk"><img alt="Download Cotton Cloud APK from GitHub" src="https://img.shields.io/badge/GitHub-APK%20download-181717?style=for-the-badge&logo=github&logoColor=white"></a>
 </p>
 
-Cotton Mobile is the focused phone client for Cotton Cloud: sign in to an instance, browse files, open documents with native Android flows, and keep the interface calm enough to trust every day.
+Cotton Mobile is the focused phone client for Cotton Cloud: sign in to an instance, browse files, upload and share content, keep selected files available offline, and keep the interface calm enough to trust every day.
 
 The app is being built around three product rules:
 
 - show files quickly and clearly;
-- keep authentication, downloads, and sharing predictable;
-- avoid adding sync-heavy features until the core browser feels excellent.
+- keep authentication, uploads, downloads, and sharing predictable;
+- add sync and notifications only behind explicit, testable flows.
 
 ## Current Testing Scope
 
@@ -23,7 +23,13 @@ The Android testing build is meant for real dogfooding, not a blank store shell.
 - Secure token storage through the platform key store.
 - File browser with list and tile views.
 - Folder navigation, refresh, search, and sorting.
-- Native Android open, share, and download actions.
+- Native Android open, share, download, upload, and document-scan actions.
+- Share-to-Cotton capture inbox for Android share targets.
+- Durable transfer queue with restart recovery evidence.
+- Camera backup setup and media-scan queueing.
+- Offline files and folders with explicit `On device` state.
+- Notification permission, local transfer notifications, and server-push controls.
+- Storage cleanup, diagnostics, security settings, activity, recent files, Trash, and Sync settings surfaces.
 - GitHub APK download for direct installs.
 - Google Play internal or closed testing when tester accounts are opted in.
 
@@ -38,7 +44,7 @@ The GitHub APK is a stable release asset, so the link does not expire like a wor
 
 ## Tester Smoke Script
 
-Use this short flow for closed-test invites, Play dogfooding, and release-candidate checks.
+Use this flow for closed-test invites, Play dogfooding, and release-candidate checks.
 
 1. Install Cotton Cloud from Google Play testing or the GitHub APK.
 2. Sign in to the assigned Cotton Cloud instance and approve the browser request.
@@ -49,10 +55,18 @@ Use this short flow for closed-test invites, Play dogfooding, and release-candid
 7. Open a folder, confirm its contents or empty state, then go back up.
 8. Open a small text or image file.
 9. Download or share one file, then confirm it is marked `On device` when available.
-10. Send feedback from the account menu and describe anything confusing or broken; the draft includes app version, device, Android, screen, cache, and browser context automatically. If no email app is available, Cotton copies the same details so they can be pasted into email or chat.
-11. If support asks for a snapshot, open `Diagnostics` from the account menu, tap `Copy`, and paste the copied text into the same feedback thread.
+10. Upload a small file through `Add files` -> `Upload...` -> `Upload file`.
+11. Share a small text or file item from Android into Cotton, then choose a destination from Capture Inbox.
+12. Queue one selected photo or video upload and confirm it appears in Transfers.
+13. Enable Camera Backup for the assigned destination and run `Queue now` with a recent test photo.
+14. Keep one file and one folder offline, turn on airplane mode, and confirm only `On device` content opens.
+15. Open Notifications and confirm Android permission state plus server-push preferences or the unavailable/retry state.
+16. Open Storage and confirm account storage, pending uploads, offline files, and cleanup actions are understandable.
+17. Open Activity, Recent files, Trash, Security, Sync, and Diagnostics from the account menu and confirm each page loads without clipped controls.
+18. Send feedback from the account menu and describe anything confusing or broken; the draft includes app version, device, Android, screen, cache, and browser context automatically. If no email app is available, Cotton copies the same details so they can be pasted into email or chat.
+19. If support asks for a snapshot, open `Diagnostics` from the account menu, tap `Copy`, and paste the copied text into the same feedback thread.
 
-Optional offline check: after opening a file once, turn on airplane mode and confirm only files marked `On device` still open.
+Optional document-scan check: use `Add files` -> `Scan document`, complete the Android document scanner flow with a real document or gallery import, and confirm the scanned PDF appears in Files.
 
 ## Local Android Development
 
@@ -61,7 +75,7 @@ scripts/mobile/build-android-debug.sh
 COTTON_ADB_SERIAL=emulator-5554 scripts/mobile/install-android-debug.sh
 ```
 
-Use the emulator for fast visual checks, then batch real-device smoke tests on the Samsung A53 over ADB when the slice is worth testing on hardware.
+Use the emulator for fast visual checks, then batch real-device smoke tests over ADB when the slice is worth testing on hardware.
 Debug builds install side by side with the Play/GitHub release package.
 
 ## Repository Checks
@@ -90,4 +104,4 @@ The release flow keeps direct APK testing, Play dogfooding, and store submission
 
 ## Product Direction
 
-The next milestones are intentionally boring in the best way: make the file browser feel fast, make previews useful, make downloads and offline state obvious, then add sync and notifications only when the architecture can carry them cleanly.
+The next milestones are intentionally boring in the best way: keep upload, backup, offline, sync, notifications, storage, and security flows explicit enough that testers can trust what the app will do before it does it.

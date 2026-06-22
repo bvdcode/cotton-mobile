@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Services
         SkippedUnsupportedLocalRoot,
         SkippedUnsupportedDirection,
         SkippedConflictReviewRequired,
+        SkippedBlockedReviewRequired,
         SkippedDestructiveReviewRequired,
     }
 }

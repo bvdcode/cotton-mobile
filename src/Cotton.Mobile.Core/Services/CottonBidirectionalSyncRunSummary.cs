@@ -66,12 +66,18 @@ namespace Cotton.Mobile.Services
 
         private static int CreatePreflightBlockedCount(CottonBidirectionalSyncRootRunResult result)
         {
-            if (result.Status != CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired)
+            if (result.Status != CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired
+                && result.Status != CottonBidirectionalSyncRootRunStatus.SkippedBlockedReviewRequired)
             {
                 return 0;
             }
 
             int blockedCount = result.PreflightPlan?.BlockedCount ?? 0;
+            if (result.Status == CottonBidirectionalSyncRootRunStatus.SkippedBlockedReviewRequired)
+            {
+                return blockedCount;
+            }
+
             int conflictCount = result.PreflightPlan?.ConflictCount ?? 0;
             return Math.Max(0, blockedCount - conflictCount);
         }

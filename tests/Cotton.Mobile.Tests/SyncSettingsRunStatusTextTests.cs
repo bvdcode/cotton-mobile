@@ -494,7 +494,7 @@ namespace Cotton.Mobile.Tests
 
             return new CottonBidirectionalSyncRunSummary(
                 [
-                    CottonBidirectionalSyncRootRunResult.SkippedConflictReviewRequired(
+                    CottonBidirectionalSyncRootRunResult.SkippedBlockedReviewRequired(
                         root,
                         executionPlan),
                 ]);

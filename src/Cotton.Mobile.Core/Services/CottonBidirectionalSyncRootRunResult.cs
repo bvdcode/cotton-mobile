@@ -75,6 +75,7 @@ namespace Cotton.Mobile.Services
 
         public bool HasBlockedItems =>
             Status is CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired
+                or CottonBidirectionalSyncRootRunStatus.SkippedBlockedReviewRequired
                 or CottonBidirectionalSyncRootRunStatus.SkippedDestructiveReviewRequired
             || PreflightPlan?.HasBlockingItems == true
             || CloudToDeviceExecutionResult?.HasBlockedItems == true
@@ -138,6 +139,17 @@ namespace Cotton.Mobile.Services
                 root,
                 CottonBidirectionalSyncRootRunStatus.SkippedConflictReviewRequired,
                 CottonBidirectionalSyncStatusText.ConflictReviewRequiredStatus,
+                executionPlan);
+        }
+
+        public static CottonBidirectionalSyncRootRunResult SkippedBlockedReviewRequired(
+            CottonSyncRootSnapshot root,
+            CottonBidirectionalSyncExecutionPlan executionPlan)
+        {
+            return Create(
+                root,
+                CottonBidirectionalSyncRootRunStatus.SkippedBlockedReviewRequired,
+                CottonBidirectionalSyncStatusText.BlockedReviewRequiredStatus,
                 executionPlan);
         }
 

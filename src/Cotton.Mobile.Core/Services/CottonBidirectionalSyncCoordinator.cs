@@ -127,7 +127,9 @@ namespace Cotton.Mobile.Services
                 await CreateExecutionPlanAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             if (!executionPlan.CanExecute)
             {
-                return CottonBidirectionalSyncRootRunResult.SkippedConflictReviewRequired(root, executionPlan);
+                return executionPlan.PreflightPlan.ConflictCount > 0
+                    ? CottonBidirectionalSyncRootRunResult.SkippedConflictReviewRequired(root, executionPlan)
+                    : CottonBidirectionalSyncRootRunResult.SkippedBlockedReviewRequired(root, executionPlan);
             }
 
             if (executionPlan.HasDestructiveChanges && !options.AllowDestructiveChanges)

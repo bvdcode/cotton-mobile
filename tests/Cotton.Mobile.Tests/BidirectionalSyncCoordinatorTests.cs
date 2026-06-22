@@ -111,6 +111,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Run_root_requires_blocked_review_without_mutations()
+        {
+            CottonSyncRootSnapshot root = CreateRoot();
+            _localTreeReader.SetContent(root.Id, CreateLocalContent());
+            _remoteFolderContentSource.SetContent(
+                root.CloudFolder.FolderId,
+                CreateContent(root, CreateFile(RemoteFileId, "remote.txt", eTag: null)));
+
+            CottonBidirectionalSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            CottonBidirectionalSyncRootRunResult result = Assert.Single(summary.RootResults);
+            Assert.Equal(CottonBidirectionalSyncRootRunStatus.SkippedBlockedReviewRequired, result.Status);
+            Assert.Equal(CottonBidirectionalSyncStatusText.BlockedReviewRequiredStatus, result.StatusText);
+            Assert.False(summary.NeedsConflictReview);
+            Assert.Equal(1, summary.BlockedItemCount);
+            Assert.Empty(_cloudToDeviceFileOperator.DownloadedRelativePaths);
+            Assert.Empty(_deviceToCloudFileOperator.UploadedNewRelativePaths);
+            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
+        }
+
+        [Fact]
         public async Task Run_root_requires_destructive_review_before_remote_delete()
         {
             CottonSyncRootSnapshot root = CreateRoot();

@@ -13,8 +13,6 @@ namespace Cotton.Mobile.Services
     public sealed class AndroidCameraBackupMediaAccessPolicy : ICottonCameraBackupMediaAccessPolicy
     {
         private const string RequestedPreferenceKey = "cotton.cameraBackup.mediaAccess.requested";
-        private const string ReadMediaVisualUserSelectedPermission =
-            "android.permission.READ_MEDIA_VISUAL_USER_SELECTED";
 
         private readonly IPreferences _preferences;
 
@@ -37,6 +35,11 @@ namespace Cotton.Mobile.Services
         {
             cancellationToken.ThrowIfCancellationRequested();
             _preferences.Set(RequestedPreferenceKey, true);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(33))
+            {
+                return CottonCameraBackupMediaAccessState.Unavailable;
+            }
 
             try
             {
@@ -75,24 +78,7 @@ namespace Cotton.Mobile.Services
 
             if (OperatingSystem.IsAndroidVersionAtLeast(33))
             {
-                bool imagesAllowed = HasPermission(Manifest.Permission.ReadMediaImages);
-                bool videosAllowed = HasPermission(Manifest.Permission.ReadMediaVideo);
-                bool selectedAllowed = OperatingSystem.IsAndroidVersionAtLeast(34)
-                    && HasPermission(ReadMediaVisualUserSelectedPermission);
-
-                if (imagesAllowed && videosAllowed)
-                {
-                    return CottonCameraBackupMediaAccessState.Allowed;
-                }
-
-                if (imagesAllowed || videosAllowed || selectedAllowed)
-                {
-                    return CottonCameraBackupMediaAccessState.Limited;
-                }
-
-                return WasRequested()
-                    ? CottonCameraBackupMediaAccessState.Denied
-                    : CottonCameraBackupMediaAccessState.NotRequested;
+                return CottonCameraBackupMediaAccessState.Unavailable;
             }
 
             if (HasPermission(Manifest.Permission.ReadExternalStorage))
@@ -126,25 +112,6 @@ namespace Cotton.Mobile.Services
             {
                 get
                 {
-                    if (OperatingSystem.IsAndroidVersionAtLeast(34))
-                    {
-                        return
-                        [
-                            (Manifest.Permission.ReadMediaImages, true),
-                            (Manifest.Permission.ReadMediaVideo, true),
-                            (ReadMediaVisualUserSelectedPermission, true),
-                        ];
-                    }
-
-                    if (OperatingSystem.IsAndroidVersionAtLeast(33))
-                    {
-                        return
-                        [
-                            (Manifest.Permission.ReadMediaImages, true),
-                            (Manifest.Permission.ReadMediaVideo, true),
-                        ];
-                    }
-
                     return
                     [
                         (Manifest.Permission.ReadExternalStorage, true),

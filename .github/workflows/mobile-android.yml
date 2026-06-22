@@ -172,6 +172,9 @@ jobs:
       - name: Test Android release change filter
         run: scripts/ci/test-android-release-change-filter.sh
 
+      - name: Test Android Play media permissions
+        run: scripts/ci/test-android-play-media-permissions.sh
+
       - name: Test Android Firebase config validation
         run: scripts/ci/test-android-firebase-config.sh
 

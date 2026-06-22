@@ -95,6 +95,43 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Remote_push_capability_shape_is_validated()
+        {
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonRemotePushEventCategorySnapshot(
+                    (CottonRemotePushEventCategory)999,
+                    CottonNotificationChannelKind.Shares,
+                    defaultEnabled: false,
+                    requiresServerNotificationRow: true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonRemotePushEventCategorySnapshot(
+                    CottonRemotePushEventCategory.SharedFile,
+                    (CottonNotificationChannelKind)999,
+                    defaultEnabled: false,
+                    requiresServerNotificationRow: true));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CreateCapability(
+                    (CottonRemotePushProviderKind)999,
+                    CottonRemotePushMobilePlatform.Android,
+                    [CreateSharedFileCategory()]));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CreateCapability(
+                    CottonRemotePushProviderKind.FirebaseCloudMessaging,
+                    (CottonRemotePushMobilePlatform)999,
+                    [CreateSharedFileCategory()]));
+            Assert.Throws<ArgumentException>(() =>
+                CreateCapability(
+                    CottonRemotePushProviderKind.FirebaseCloudMessaging,
+                    CottonRemotePushMobilePlatform.Android,
+                    [CreateSharedFileCategory(), CreateSharedFileCategory()]));
+            Assert.Throws<ArgumentException>(() =>
+                CreateCapability(
+                    CottonRemotePushProviderKind.FirebaseCloudMessaging,
+                    CottonRemotePushMobilePlatform.Android,
+                    [CreateSharedFileCategory(), null!]));
+        }
+
+        [Fact]
         public void Remote_push_defaults_allow_security_but_not_collaboration_noise()
         {
             CottonNotificationSettings settings = CottonNotificationSettings.Default;
@@ -290,6 +327,30 @@ namespace Cotton.Mobile.Tests
                 [CottonRemotePushMessageDataKeys.EventCategory] = category.ToString(),
                 [CottonRemotePushMessageDataKeys.Priority] = "Normal",
             };
+        }
+
+        private static CottonRemotePushEventCategorySnapshot CreateSharedFileCategory()
+        {
+            return new CottonRemotePushEventCategorySnapshot(
+                CottonRemotePushEventCategory.SharedFile,
+                CottonNotificationChannelKind.Shares,
+                defaultEnabled: false,
+                requiresServerNotificationRow: true);
+        }
+
+        private static CottonRemotePushCapabilitySnapshot CreateCapability(
+            CottonRemotePushProviderKind provider,
+            CottonRemotePushMobilePlatform platform,
+            IReadOnlyList<CottonRemotePushEventCategorySnapshot> eventCategories)
+        {
+            return new CottonRemotePushCapabilitySnapshot(
+                provider,
+                platform,
+                requiredServerCapabilities: [],
+                availableServerCapabilities: [],
+                eventCategories,
+                CottonRemotePushPayloadPrivacyPolicy.GenericVisiblePayloads,
+                requiresAndroidPostNotificationsPermissionForVisibleAlerts: true);
         }
     }
 }

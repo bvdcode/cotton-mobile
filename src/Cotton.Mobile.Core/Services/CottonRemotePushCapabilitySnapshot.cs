@@ -20,6 +20,37 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(eventCategories);
             ArgumentNullException.ThrowIfNull(payloadPrivacyPolicy);
 
+            if (!Enum.IsDefined(provider))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(provider),
+                    "Remote push provider is not supported.");
+            }
+
+            if (!Enum.IsDefined(platform))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(platform),
+                    "Remote push mobile platform is not supported.");
+            }
+
+            CottonRemotePushEventCategorySnapshot[] categorySnapshots = eventCategories.ToArray();
+            if (categorySnapshots.Any(category => category is null))
+            {
+                throw new ArgumentException(
+                    "Remote push visible event categories cannot contain null entries.",
+                    nameof(eventCategories));
+            }
+
+            if (categorySnapshots
+                .GroupBy(category => category.Category)
+                .Any(group => group.Count() > 1))
+            {
+                throw new ArgumentException(
+                    "Remote push visible event categories must be unique.",
+                    nameof(eventCategories));
+            }
+
             Provider = provider;
             Platform = platform;
             RequiredServerCapabilities = requiredServerCapabilities
@@ -30,7 +61,7 @@ namespace Cotton.Mobile.Services
                 .Distinct()
                 .OrderBy(capability => capability)
                 .ToArray();
-            EventCategories = eventCategories.ToArray();
+            EventCategories = categorySnapshots;
             PayloadPrivacyPolicy = payloadPrivacyPolicy;
             RequiresAndroidPostNotificationsPermissionForVisibleAlerts =
                 requiresAndroidPostNotificationsPermissionForVisibleAlerts;

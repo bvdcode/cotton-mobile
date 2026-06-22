@@ -10,6 +10,20 @@ namespace Cotton.Mobile.Services
             bool defaultEnabled,
             bool requiresServerNotificationRow)
         {
+            if (!Enum.IsDefined(category))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(category),
+                    "Remote push event category is not supported.");
+            }
+
+            if (!Enum.IsDefined(channelKind))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(channelKind),
+                    "Notification channel kind is not supported.");
+            }
+
             Category = category;
             ChannelKind = channelKind;
             DefaultEnabled = defaultEnabled;

@@ -11,6 +11,23 @@ base_ref="$1"
 head_ref="$2"
 release_required="false"
 
+requires_android_release() {
+  case "$1" in
+    .github/workflows/mobile-android.yml|GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
+      return 0
+      ;;
+    scripts/mobile/compute-android-release-version.sh|scripts/mobile/create-android-release-notes.sh)
+      return 0
+      ;;
+    scripts/mobile/detect-android-release-changes.sh|scripts/mobile/upload-google-play.py)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 if [[ "$base_ref" =~ ^0+$ ]]; then
   changed_paths="$(git ls-tree -r --name-only "$head_ref")"
 else
@@ -18,12 +35,10 @@ else
 fi
 
 while IFS= read -r path; do
-  case "$path" in
-    GitVersion.yml|src/Cotton.Mobile/*|src/Cotton.Mobile.Core/*)
-      release_required="true"
-      break
-      ;;
-  esac
+  if requires_android_release "$path"; then
+    release_required="true"
+    break
+  fi
 done <<< "$changed_paths"
 
 if [[ -n "${GITHUB_OUTPUT:-}" ]]; then

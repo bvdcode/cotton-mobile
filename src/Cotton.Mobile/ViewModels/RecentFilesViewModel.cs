@@ -53,6 +53,10 @@ namespace Cotton.Mobile.ViewModels
                 OpenRecentFileAsync,
                 LogUnhandledCommandException,
                 _ => !IsBusy);
+            RemoveRecentFileCommand = new AsyncCommand<CottonRecentFileListItem>(
+                RemoveRecentFileAsync,
+                LogUnhandledCommandException,
+                _ => !IsBusy);
         }
 
         public ObservableCollection<CottonRecentFileListItem> Items { get; } = [];
@@ -62,6 +66,8 @@ namespace Cotton.Mobile.ViewModels
         public AsyncCommand ClearRecentFilesCommand { get; }
 
         public AsyncCommand<CottonRecentFileListItem> OpenRecentFileCommand { get; }
+
+        public AsyncCommand<CottonRecentFileListItem> RemoveRecentFileCommand { get; }
 
         public bool IsBusy
         {
@@ -73,6 +79,7 @@ namespace Cotton.Mobile.ViewModels
                     LoadCommand.RaiseCanExecuteChanged();
                     ClearRecentFilesCommand.RaiseCanExecuteChanged();
                     OpenRecentFileCommand.RaiseCanExecuteChanged();
+                    RemoveRecentFileCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
                     OnPropertyChanged(nameof(CanClearRecentFiles));
                 }
@@ -236,6 +243,38 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task RemoveRecentFileAsync(CottonRecentFileListItem item)
+        {
+            if (IsBusy || item is null)
+            {
+                return;
+            }
+
+            IsBusy = true;
+            Status = CottonRecentFileRemoveStatusText.CreateRemovingStatus(item.FileName);
+            try
+            {
+                bool removed = await _recentFileStore.RemoveAsync(_instanceUri, item.FileId);
+                IReadOnlyList<CottonRecentFileSnapshot> recentFiles = await _recentFileStore.LoadAsync(_instanceUri);
+                ShowSnapshot(CottonRecentFileListSnapshot.Create(recentFiles));
+                Status = removed
+                    ? CottonRecentFileRemoveStatusText.CreateRemovedStatus(item.FileName)
+                    : CottonRecentFileRemoveStatusText.AlreadyRemovedStatus;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile recent file remove failed {FileId}.", item.FileId);
+                Status = CottonRecentFileRemoveStatusText.FailedStatus;
+            }
+            finally
+            {
+                IsBusy = false;
+                OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsListVisible));
+                OnPropertyChanged(nameof(CanClearRecentFiles));
+            }
+        }
+
         private async Task<CottonFileDownloadResult> PrepareFileForOpenAsync(CottonFileBrowserEntry file)
         {
             CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(_instanceUri, file);
@@ -263,6 +302,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanClearRecentFiles));
             ClearRecentFilesCommand.RaiseCanExecuteChanged();
+            RemoveRecentFileCommand.RaiseCanExecuteChanged();
         }
 
         private static CottonFileBrowserEntry CreateFileEntry(CottonRecentFileListItem item)

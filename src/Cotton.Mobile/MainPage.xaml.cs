@@ -1,4 +1,7 @@
-﻿using System.ComponentModel;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using System.ComponentModel;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile

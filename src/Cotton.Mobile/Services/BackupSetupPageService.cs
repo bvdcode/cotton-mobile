@@ -1,3 +1,6 @@
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
 using Cotton.Mobile;
 using Cotton.Mobile.ViewModels;
 using Microsoft.Extensions.DependencyInjection;

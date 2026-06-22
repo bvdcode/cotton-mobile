@@ -1,3 +1,6 @@
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
 using Cotton.Sdk;
 using Cotton.Sdk.Auth;
 using Cotton.Sdk.Chunks;

@@ -1,3 +1,6 @@
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
 using CommunityToolkit.Maui.Views;
 using Cotton.Mobile.ViewModels;
 

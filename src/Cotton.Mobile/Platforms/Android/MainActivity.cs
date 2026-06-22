@@ -1,4 +1,7 @@
-﻿using Android.App;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using Android.App;
 using Android.Content;
 using Android.Content.PM;
 using Android.Content.Res;

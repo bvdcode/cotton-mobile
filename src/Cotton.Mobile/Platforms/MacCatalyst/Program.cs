@@ -1,4 +1,7 @@
-﻿using ObjCRuntime;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using ObjCRuntime;
 using UIKit;
 
 namespace Cotton.Mobile

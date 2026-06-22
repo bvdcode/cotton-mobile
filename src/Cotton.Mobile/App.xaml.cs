@@ -1,4 +1,7 @@
-﻿using Cotton.Mobile.Services;
+﻿// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cotton.Mobile

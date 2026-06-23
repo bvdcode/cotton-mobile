@@ -9,7 +9,7 @@ env:
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
   ANDROID_VERSION_CODE_BASE: "1001000"
   ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
-  GOOGLE_PLAY_DEFAULT_TRACK: beta
+  GOOGLE_PLAY_DEFAULT_TRACK: alpha
 
 defaults:
   run:
@@ -75,7 +75,7 @@ on:
         description: Google Play release track.
         required: true
         type: string
-        default: beta
+        default: alpha
       google_play_release_status:
         description: Google Play release status.
         required: true

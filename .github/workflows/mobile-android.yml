@@ -9,6 +9,7 @@ env:
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
   ANDROID_VERSION_CODE_BASE: "1001000"
   ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
+  GOOGLE_PLAY_DEFAULT_TRACK: beta
 
 defaults:
   run:
@@ -74,7 +75,7 @@ on:
         description: Google Play release track.
         required: true
         type: string
-        default: internal
+        default: beta
       google_play_release_status:
         description: Google Play release status.
         required: true
@@ -564,9 +565,9 @@ jobs:
             changes_not_sent_flag+=(--changes-not-sent-for-review)
           fi
 
-          google_play_track="${GOOGLE_PLAY_TRACK_INPUT:-internal}"
+          google_play_track="${GOOGLE_PLAY_TRACK_INPUT:-$GOOGLE_PLAY_DEFAULT_TRACK}"
           if [ -z "$google_play_track" ]; then
-            google_play_track="internal"
+            google_play_track="$GOOGLE_PLAY_DEFAULT_TRACK"
           fi
 
           google_play_release_status="${GOOGLE_PLAY_RELEASE_STATUS_INPUT:-completed}"

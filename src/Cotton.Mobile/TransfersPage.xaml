@@ -43,10 +43,9 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   FontSize="13"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="2"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   LineBreakMode="TailTruncation" />
 
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3SurfaceCard}"

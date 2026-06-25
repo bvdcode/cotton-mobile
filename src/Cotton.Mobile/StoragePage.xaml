@@ -29,16 +29,14 @@
                            LineBreakMode="TailTruncation" />
 
                     <Label Text="{Binding TotalFileCountText}"
-                           FontSize="13"
+                           Style="{StaticResource M3BodyMedium}"
                            MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           LineBreakMode="TailTruncation" />
 
                     <Label Text="Files saved on this device"
-                           FontSize="12"
+                           Style="{StaticResource M3CardSupporting}"
                            MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -49,34 +47,28 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   FontSize="13"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="2"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   LineBreakMode="TailTruncation" />
 
             <Border Style="{StaticResource M3SurfaceCard}"
                     Padding="16">
                 <VerticalStackLayout Spacing="8">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
-                               FontSize="15"
-                               FontAttributes="Bold"
+                               Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                               LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding CloudQuotaSummaryText, FallbackValue=Account storage unavailable., TargetNullValue=Account storage unavailable.}"
-                               FontSize="13"
-                               FontAttributes="Bold"
+                               Style="{StaticResource M3CardSupportingStrong}"
                                MaxLines="1"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                               LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding CloudQuotaDetailText, FallbackValue=Storage limits are not shared by this server., TargetNullValue=Storage limits are not shared by this server.}"
-                               FontSize="12"
+                               Style="{StaticResource M3CardSupporting}"
                                MaxLines="2"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
                     <ProgressBar Progress="{Binding CloudQuotaUsageFraction}"
@@ -87,11 +79,9 @@
             </Border>
 
             <Label Text="Free up storage"
-                   FontSize="15"
-                   FontAttributes="Bold"
+                   Style="{StaticResource M3CardTitle}"
                    MaxLines="1"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                   LineBreakMode="TailTruncation" />
 
             <VerticalStackLayout Spacing="10">
                 <Button Text="Free space"
@@ -112,17 +102,14 @@
                           ColumnSpacing="12">
                         <VerticalStackLayout Spacing="2">
                             <Label Text="Files on this device"
-                                   FontSize="15"
-                                   FontAttributes="Bold"
+                                   Style="{StaticResource M3CardTitle}"
                                    MaxLines="1"
-                                   LineBreakMode="TailTruncation"
-                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                   LineBreakMode="TailTruncation" />
 
                             <Label Text="{Binding OnDeviceSummaryText}"
-                                   FontSize="12"
+                                   Style="{StaticResource M3CardSupporting}"
                                    MaxLines="2"
-                                   LineBreakMode="TailTruncation"
-                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                   LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
                     </Grid>
 
@@ -136,34 +123,28 @@
                                       ColumnSpacing="10"
                                       IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
-                                           FontSize="13"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding SizeText}"
-                                           FontSize="13"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
                                            Text="{Binding DetailText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding CountText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -176,23 +157,19 @@
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Temporary files"
-                               FontSize="15"
-                               FontAttributes="Bold"
+                               Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                               LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding StorageBudgetSummaryText}"
-                               FontSize="12"
+                               Style="{StaticResource M3CardSupporting}"
                                MaxLines="2"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding ProtectedOfflineText}"
-                               FontSize="12"
+                               Style="{StaticResource M3CardSupporting}"
                                MaxLines="2"
-                               LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="8"
@@ -205,34 +182,28 @@
                                       ColumnSpacing="10"
                                       IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
-                                           FontSize="13"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding UsageText}"
-                                           FontSize="13"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
                                            Text="{Binding DetailText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding StatusText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <ProgressBar Grid.Row="2"
                                                  Grid.ColumnSpan="2"

@@ -61,17 +61,14 @@
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
                 <Label Text="{Binding EmptyMessage}"
-                       FontSize="16"
-                       FontAttributes="Bold"
-                       HorizontalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                       Style="{StaticResource M3EmptyTitle}"
+                       HorizontalTextAlignment="Center" />
 
                 <Label Text="{Binding EmptyDetails}"
-                       FontSize="12"
+                       Style="{StaticResource M3CardSupporting}"
                        MaxLines="2"
                        LineBreakMode="WordWrap"
-                       HorizontalTextAlignment="Center"
-                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                       HorizontalTextAlignment="Center" />
             </VerticalStackLayout>
         </Border>
 
@@ -100,17 +97,14 @@
                               ColumnSpacing="10">
                             <VerticalStackLayout Spacing="2">
                                 <Label Text="{Binding FileName}"
-                                       FontSize="15"
-                                       FontAttributes="Bold"
+                                       Style="{StaticResource M3CardTitle}"
                                        MaxLines="2"
-                                       LineBreakMode="TailTruncation"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                       LineBreakMode="TailTruncation" />
 
                                 <Label Text="{Binding DetailText}"
-                                       FontSize="12"
+                                       Style="{StaticResource M3CardSupporting}"
                                        MaxLines="2"
-                                       LineBreakMode="TailTruncation"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                       LineBreakMode="TailTruncation" />
                             </VerticalStackLayout>
 
                             <Border Grid.Column="1"
@@ -120,11 +114,9 @@
                                     BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
                                     VerticalOptions="Start">
                                 <Label Text="{Binding BadgeText}"
-                                       FontSize="11"
-                                       FontAttributes="Bold"
+                                       Style="{StaticResource M3ChipLabel}"
                                        MaxLines="1"
-                                       LineBreakMode="NoWrap"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                       LineBreakMode="NoWrap" />
                             </Border>
 
                             <Button Grid.Column="1"

@@ -36,7 +36,7 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
-    <Style TargetType="Button">
+    <Style TargetType="Button" x:Key="M3PrimaryButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="FontSize" Value="14" />
@@ -109,6 +109,8 @@
             </VisualStateGroupList>
         </Setter>
     </Style>
+
+    <Style TargetType="Button" BasedOn="{StaticResource FileChromeButton}" />
 
     <Style TargetType="Button" x:Key="DestructiveChromeButton" BasedOn="{StaticResource FileChromeButton}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />

@@ -58,6 +58,7 @@
                 <Button Grid.Column="1"
                         Text="Choose this folder"
                         Command="{Binding ChooseCommand}"
+                        Style="{StaticResource M3PrimaryButton}"
                         HeightRequest="44"
                         VerticalOptions="Center" />
             </Grid>

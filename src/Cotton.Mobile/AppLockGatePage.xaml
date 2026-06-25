@@ -30,6 +30,7 @@
             <Button Text="{Binding UnlockActionText}"
                     Command="{Binding UnlockCommand}"
                     IsEnabled="{Binding CanUnlock}"
+                    Style="{StaticResource M3PrimaryButton}"
                     HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </Grid>

@@ -66,6 +66,7 @@
 
                     <Button Text="Choose folder"
                             Command="{Binding OpenFilesCommand}"
+                            Style="{StaticResource M3PrimaryButton}"
                             Margin="0,6,0,0"
                             HeightRequest="44" />
                 </VerticalStackLayout>

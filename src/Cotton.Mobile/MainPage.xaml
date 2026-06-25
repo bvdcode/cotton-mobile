@@ -73,6 +73,7 @@
                     <Button Text="Connect"
                             Command="{Binding ConnectCommand}"
                             IsEnabled="{Binding Display.IsInputEnabled}"
+                            Style="{StaticResource M3PrimaryButton}"
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
@@ -431,6 +432,7 @@
                                     <Button Text="Add files"
                                             Command="{Binding ShowFileAddActionsCommand}"
                                             IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
+                                            Style="{StaticResource M3PrimaryButton}"
                                             Padding="14,0"
                                             HeightRequest="40"
                                             MinimumHeightRequest="40"

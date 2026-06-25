@@ -108,6 +108,7 @@
                             Command="{Binding VerifyDeviceUnlockCommand}"
                             IsEnabled="{Binding CanVerifyDeviceUnlock}"
                             IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                            Style="{StaticResource M3PrimaryButton}"
                             HorizontalOptions="End" />
                 </Grid>
             </Border>

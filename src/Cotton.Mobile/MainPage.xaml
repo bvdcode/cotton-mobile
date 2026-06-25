@@ -722,40 +722,47 @@
                 Margin="0,0,0,10">
             <Grid ColumnDefinitions="*,*,*,*"
                   ColumnSpacing="6">
-                <Border Grid.Column="0"
-                        Stroke="{StaticResource M3Accent}"
-                        StrokeShape="RoundRectangle 18"
-                        Padding="6,0"
-                        HeightRequest="40"
-                        BackgroundColor="{StaticResource M3Accent}">
-                    <Label Text="Files"
-                           Style="{StaticResource M3NavigationSelectedLabel}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center" />
-                </Border>
+                <controls:NavigationBarItem Grid.Column="0"
+                                            IconData="{x:Static controls:IconPathData.Folder}"
+                                            IconColor="{StaticResource M3OnAccent}"
+                                            Text="{Binding Display.FilesNavigation.Label}"
+                                            TextColor="{StaticResource M3OnAccent}"
+                                            FillColor="{StaticResource M3Accent}"
+                                            BorderColor="{StaticResource M3Accent}"
+                                            SemanticProperties.Description="{Binding Display.FilesNavigation.AccessibilityText}" />
 
-                <Button Grid.Column="1"
-                        Style="{StaticResource QuickNavigationButton}"
-                        Text="Sync"
-                        Command="{Binding OpenSyncSettingsCommand}"
-                        IsEnabled="{Binding Display.IsProfileVisible}"
-                        SemanticProperties.Description="Open sync folders" />
+                <controls:NavigationBarItem Grid.Column="1"
+                                            IconData="{x:Static controls:IconPathData.Transfer}"
+                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            Text="Sync"
+                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            FillColor="Transparent"
+                                            BorderColor="Transparent"
+                                            Command="{Binding OpenSyncSettingsCommand}"
+                                            IsEnabled="{Binding Display.IsProfileVisible}"
+                                            SemanticProperties.Description="Open sync folders" />
 
-                <Button Grid.Column="2"
-                        Style="{StaticResource QuickNavigationButton}"
-                        Text="{Binding Display.BackupNavigation.Label}"
-                        Command="{Binding OpenBackupSetupCommand}"
-                        IsEnabled="{Binding Display.IsProfileVisible}"
-                        SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
+                <controls:NavigationBarItem Grid.Column="2"
+                                            IconData="{x:Static controls:IconPathData.Backup}"
+                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            Text="{Binding Display.BackupNavigation.Label}"
+                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            FillColor="Transparent"
+                                            BorderColor="Transparent"
+                                            Command="{Binding OpenBackupSetupCommand}"
+                                            IsEnabled="{Binding Display.IsProfileVisible}"
+                                            SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
 
-                <Button Grid.Column="3"
-                        Style="{StaticResource QuickNavigationButton}"
-                        Text="More"
-                        Command="{Binding AccountCommand}"
-                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                        SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
+                <controls:NavigationBarItem Grid.Column="3"
+                                            IconData="{x:Static controls:IconPathData.MoreVertical}"
+                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            Text="More"
+                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                            FillColor="Transparent"
+                                            BorderColor="Transparent"
+                                            Command="{Binding AccountCommand}"
+                                            IsEnabled="{Binding Display.IsAccountActionEnabled}"
+                                            SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
             </Grid>
         </Border>
 

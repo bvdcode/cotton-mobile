@@ -138,8 +138,7 @@
                         Text="Restore"
                         Command="{Binding RestoreSelectionCommand}"
                         IsEnabled="{Binding IsBulkActionEnabled}"
-                        FontSize="12"
-                        Padding="12,0"
+                        Style="{StaticResource CompactChromeButton}"
                         HeightRequest="36"
                         MinimumHeightRequest="36"
                         VerticalOptions="Center" />
@@ -148,8 +147,7 @@
                         Text="Delete forever"
                         Command="{Binding DeleteForeverSelectionCommand}"
                         IsEnabled="{Binding IsBulkActionEnabled}"
-                        FontSize="12"
-                        Padding="12,0"
+                        Style="{StaticResource CompactDestructiveChromeButton}"
                         HeightRequest="36"
                         MinimumHeightRequest="36"
                         VerticalOptions="Center" />
@@ -157,8 +155,7 @@
                 <Button Grid.Column="3"
                         Text="Cancel"
                         Command="{Binding CancelSelectionCommand}"
-                        FontSize="12"
-                        Padding="12,0"
+                        Style="{StaticResource CompactChromeButton}"
                         HeightRequest="36"
                         MinimumHeightRequest="36"
                         VerticalOptions="Center" />
@@ -276,15 +273,13 @@
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            FontSize="13"
-                                            Padding="14,6"
+                                            Style="{StaticResource CompactDestructiveChromeButton}"
                                             HeightRequest="36" />
 
                                     <Button Text="Restore"
                                             Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            FontSize="13"
-                                            Padding="14,6"
+                                            Style="{StaticResource CompactChromeButton}"
                                             HeightRequest="36" />
                                 </HorizontalStackLayout>
                             </Grid>
@@ -383,15 +378,13 @@
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            FontSize="12"
-                                            Padding="10,0"
+                                            Style="{StaticResource CompactDestructiveChromeButton}"
                                             HeightRequest="34" />
 
                                     <Button Text="Restore"
                                             Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            FontSize="12"
-                                            Padding="10,0"
+                                            Style="{StaticResource CompactChromeButton}"
                                             HeightRequest="34" />
                                 </VerticalStackLayout>
                             </Grid>

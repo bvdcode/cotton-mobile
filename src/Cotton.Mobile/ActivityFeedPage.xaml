@@ -126,6 +126,7 @@
             <Button Text="Load more"
                     Command="{Binding LoadMoreCommand}"
                     IsVisible="{Binding IsLoadMoreVisible}"
+                    Style="{StaticResource FileChromeButton}"
                     HorizontalOptions="Fill" />
         </VerticalStackLayout>
         </ScrollView>

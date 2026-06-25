@@ -105,6 +105,7 @@
                     <Button Text="Cancel"
                             Command="{Binding CancelAuthorizationCommand}"
                             IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                            Style="{StaticResource FileChromeButton}"
                             HorizontalOptions="Fill" />
                 </VerticalStackLayout>
 
@@ -457,8 +458,8 @@
                                     Command="{Binding RetryFileActionCommand}"
                                     IsEnabled="{Binding Display.CanRetryFileAction}"
                                     IsVisible="{Binding Display.CanRetryFileAction}"
+                                    Style="{StaticResource CompactChromeButton}"
                                     HorizontalOptions="Start"
-                                    Padding="10,0"
                                     MinimumHeightRequest="32"
                                     MinimumWidthRequest="64" />
 

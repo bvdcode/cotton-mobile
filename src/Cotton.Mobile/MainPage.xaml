@@ -614,11 +614,8 @@
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
                                               Padding="4,4,4,6">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                    StrokeThickness="1"
-                                                    StrokeShape="RoundRectangle 22"
-                                                    Padding="6"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                                                    Style="{StaticResource M3SurfaceCard}"
+                                                    Padding="6">
                                                 <Grid RowSpacing="6">
                                                     <Border Grid.RowSpan="2"
                                                             IsVisible="{Binding IsSelected}"

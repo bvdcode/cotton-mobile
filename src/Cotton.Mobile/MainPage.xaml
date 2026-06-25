@@ -51,9 +51,6 @@
                                      Spacing="16"
                                      MaximumWidthRequest="520">
                     <VerticalStackLayout Spacing="8">
-                        <Label Text="Server URL"
-                               Style="{StaticResource M3CardSupporting}" />
-
                         <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
                                 StrokeThickness="1"
                                 StrokeShape="RoundRectangle 18"

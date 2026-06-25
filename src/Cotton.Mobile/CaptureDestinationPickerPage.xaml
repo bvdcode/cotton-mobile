@@ -54,21 +54,16 @@
                   ColumnSpacing="10">
                 <Button Text="Up"
                         Command="{Binding UpCommand}"
-                        FontAttributes="Bold"
-                        HeightRequest="42"
+                        Style="{StaticResource FileChromeButton}"
+                        HeightRequest="44"
                         MinimumWidthRequest="78"
-                        CornerRadius="8"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                        VerticalOptions="Center" />
 
                 <Button Grid.Column="1"
                         Text="Choose this folder"
                         Command="{Binding ChooseCommand}"
-                        FontAttributes="Bold"
-                        HeightRequest="42"
-                        CornerRadius="8"
-                        BackgroundColor="{StaticResource M3Accent}"
-                        TextColor="{StaticResource M3OnAccent}" />
+                        HeightRequest="44"
+                        VerticalOptions="Center" />
             </Grid>
 
             <Label Text="{Binding SummaryText}"
@@ -126,11 +121,10 @@
                                 <Button Grid.Column="1"
                                         Text="Open"
                                         Command="{Binding OpenCommand}"
-                                        HeightRequest="36"
+                                        Style="{StaticResource FileChromeButton}"
+                                        HeightRequest="40"
                                         MinimumWidthRequest="76"
-                                        CornerRadius="8"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                        VerticalOptions="Center" />
                             </Grid>
                         </Border>
                     </DataTemplate>

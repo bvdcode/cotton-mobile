@@ -51,29 +51,22 @@
                   IsVisible="{Binding IsActionBarVisible}">
                 <Button Text="Destination"
                         Command="{Binding DestinationCommand}"
-                        FontAttributes="Bold"
-                        HeightRequest="42"
-                        CornerRadius="8"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                        Style="{StaticResource FileChromeButton}"
+                        HeightRequest="44"
+                        VerticalOptions="Center" />
 
                 <Button Grid.Column="1"
                         Text="Rename"
                         Command="{Binding RenameCommand}"
-                        FontAttributes="Bold"
-                        HeightRequest="42"
-                        CornerRadius="8"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                        Style="{StaticResource FileChromeButton}"
+                        HeightRequest="44"
+                        VerticalOptions="Center" />
 
                 <Button Grid.Column="2"
                         Text="Queue"
                         Command="{Binding EnqueueCommand}"
-                        FontAttributes="Bold"
-                        HeightRequest="42"
-                        CornerRadius="8"
-                        BackgroundColor="{StaticResource M3Accent}"
-                        TextColor="{StaticResource M3OnAccent}" />
+                        HeightRequest="44"
+                        VerticalOptions="Center" />
             </Grid>
 
             <Border IsVisible="{Binding IsEmpty}"

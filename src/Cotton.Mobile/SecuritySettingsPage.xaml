@@ -44,8 +44,7 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
                       RowSpacing="6"
@@ -76,8 +75,7 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
                       RowSpacing="6"
@@ -111,8 +109,7 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16"
+            <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsPermissionLedgerVisible}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
@@ -170,8 +167,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
                           RowDefinitions="Auto,Auto"
@@ -266,8 +262,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
                       RowSpacing="6"

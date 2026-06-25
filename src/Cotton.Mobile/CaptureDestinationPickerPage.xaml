@@ -88,8 +88,7 @@
                                  BindableLayout.ItemsSource="{Binding Folders}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="16">
+                        <Border Style="{StaticResource M3ContentCard}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenCommand}" />
                             </Border.GestureRecognizers>

@@ -73,8 +73,7 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="6"
@@ -108,8 +107,7 @@
                 </Grid>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="12">

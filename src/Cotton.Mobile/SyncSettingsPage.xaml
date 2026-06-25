@@ -48,8 +48,7 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16"
+            <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsEmptyVisible}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="No folders yet"
@@ -74,8 +73,7 @@
                                  BindableLayout.ItemsSource="{Binding Roots}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="16">
+                        <Border Style="{StaticResource M3ContentCard}">
                             <Grid ColumnDefinitions="*,Auto"
                                   RowDefinitions="Auto,Auto,Auto,Auto"
                                   RowSpacing="4"

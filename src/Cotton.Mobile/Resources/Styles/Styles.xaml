@@ -25,6 +25,10 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3ContentCard" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="16" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3EmptyStateCard" BasedOn="{StaticResource M3SurfaceCard}">
         <Setter Property="Padding" Value="28,36" />
     </Style>

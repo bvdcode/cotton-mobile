@@ -79,8 +79,7 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
-                    <Border Style="{StaticResource M3SurfaceCard}"
-                            Padding="16">
+                    <Border Style="{StaticResource M3ContentCard}">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
                                                   CommandParameter="{Binding .}" />

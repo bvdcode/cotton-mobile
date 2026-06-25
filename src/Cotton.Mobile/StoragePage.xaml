@@ -49,8 +49,7 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="8">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
@@ -93,8 +92,7 @@
                         HeightRequest="44" />
             </VerticalStackLayout>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="12">
@@ -150,8 +148,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Style="{StaticResource M3SurfaceCard}"
-                    Padding="16">
+            <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Temporary files"

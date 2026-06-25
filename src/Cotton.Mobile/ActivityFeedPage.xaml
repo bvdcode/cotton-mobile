@@ -66,8 +66,7 @@
                                  BindableLayout.ItemsSource="{Binding Items}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonActivityFeedListItem">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="16">
+                        <Border Style="{StaticResource M3ContentCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto"
                                   ColumnDefinitions="*,Auto"
                                   RowSpacing="6"

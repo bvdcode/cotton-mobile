@@ -49,8 +49,7 @@
                                  BindableLayout.ItemsSource="{Binding Sections}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:DiagnosticsSectionViewModel">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="16">
+                        <Border Style="{StaticResource M3ContentCard}">
                             <VerticalStackLayout Spacing="10">
                                 <Label Text="{Binding Title}"
                                        Style="{StaticResource M3CardTitle}" />

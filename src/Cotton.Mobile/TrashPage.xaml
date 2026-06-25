@@ -159,8 +159,7 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="16">
+                        <Border Style="{StaticResource M3ContentCard}">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"

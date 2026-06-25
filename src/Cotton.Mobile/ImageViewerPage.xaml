@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.ImageViewerPage"
              x:DataType="viewModels:ImageViewerViewModel"
@@ -42,17 +43,16 @@
                HorizontalOptions="Start"
                VerticalOptions="End" />
 
-        <Button x:Name="ResetButton"
-                Text="Reset"
-                Clicked="OnResetClicked"
-                Style="{StaticResource ViewerChromeButton}"
-                IsVisible="False"
-                Margin="16"
-                Padding="12,0"
-                HeightRequest="44"
-                MinimumHeightRequest="44"
-                MinimumWidthRequest="72"
-                HorizontalOptions="End"
-                VerticalOptions="End" />
+        <controls:IconButton x:Name="ResetButton"
+                             IconData="{x:Static controls:IconPathData.Reset}"
+                             IconColor="{StaticResource M3DarkOnSurface}"
+                             ButtonBackgroundColor="{StaticResource M3DarkSurfaceContainerHigh}"
+                             BorderColor="{StaticResource M3DarkOutlineVariant}"
+                             Clicked="OnResetClicked"
+                             IsVisible="False"
+                             Margin="16"
+                             HorizontalOptions="End"
+                             VerticalOptions="End"
+                             SemanticProperties.Description="Reset image" />
     </Grid>
 </ContentPage>

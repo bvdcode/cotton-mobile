@@ -2,6 +2,7 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
              Shell.NavBarIsVisible="False"
@@ -115,22 +116,17 @@
                                              HorizontalOptions="Fill">
                             <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto"
                                   ColumnSpacing="8">
-                                <Button Grid.Column="0"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="↑"
-                                        Command="{Binding NavigateFilesUpCommand}"
-                                        IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
-                                        IsVisible="{Binding Display.IsFileUpButtonVisible}"
-                                        Opacity="{Binding Display.FileUpButtonOpacity}"
-                                        Padding="0"
-                                        FontSize="17"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
-                                        SemanticProperties.Description="Up" />
+                                <controls:IconButton Grid.Column="0"
+                                                     IconData="{x:Static controls:IconPathData.ArrowUp}"
+                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                     Command="{Binding NavigateFilesUpCommand}"
+                                                     IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
+                                                     IsVisible="{Binding Display.IsFileUpButtonVisible}"
+                                                     ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
+                                                     VerticalOptions="Center"
+                                                     SemanticProperties.Description="Up" />
 
                                 <VerticalStackLayout Grid.Column="1"
                                                      Spacing="1"
@@ -156,20 +152,24 @@
                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                                 </VerticalStackLayout>
 
-                                <Button Grid.Column="2"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.FileSearchButtonText}"
-                                        Command="{Binding ToggleFileSearchCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        Padding="0"
-                                        FontSize="15"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
-                                        SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}" />
+                                <controls:IconButton Grid.Column="2"
+                                                     IconData="{x:Static controls:IconPathData.Search}"
+                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                     Command="{Binding ToggleFileSearchCommand}"
+                                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                     VerticalOptions="Center"
+                                                     SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
+                                    <controls:IconButton.Triggers>
+                                        <DataTrigger TargetType="controls:IconButton"
+                                                     Binding="{Binding Display.IsFileSearchVisible}"
+                                                     Value="True">
+                                            <Setter Property="IconData"
+                                                    Value="{x:Static controls:IconPathData.Close}" />
+                                        </DataTrigger>
+                                    </controls:IconButton.Triggers>
+                                </controls:IconButton>
 
                                 <Button Grid.Column="3"
                                         Style="{StaticResource FileChromeButton}"
@@ -187,21 +187,16 @@
                                         WidthRequest="44"
                                         SemanticProperties.Description="Sort files" />
 
-                                <Button Grid.Column="4"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Text="{Binding Display.FileViewButtonText}"
-                                        Command="{Binding ShowFileViewActionsCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        IsVisible="{Binding Display.IsFileViewButtonVisible}"
-                                        Padding="0"
-                                        FontSize="15"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
-                                        SemanticProperties.Description="Change file view" />
+                                <controls:IconButton Grid.Column="4"
+                                                     IconData="{x:Static controls:IconPathData.ViewTiles}"
+                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                     Command="{Binding ShowFileViewActionsCommand}"
+                                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                     IsVisible="{Binding Display.IsFileViewButtonVisible}"
+                                                     VerticalOptions="Center"
+                                                     SemanticProperties.Description="Change file view" />
 
                                 <Button Grid.Column="5"
                                         Style="{StaticResource FileChromeButton}"
@@ -246,22 +241,21 @@
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       ColumnSpacing="8"
                                       HeightRequest="32">
-                                    <Label Text="↕"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label"
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
+                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                                       IconSize="18"
+                                                       VerticalOptions="Center">
+                                        <controls:IconView.Triggers>
+                                            <DataTrigger TargetType="controls:IconView"
                                                          Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
                                                          Value="True">
-                                                <Setter Property="Text"
-                                                        Value="!" />
-                                                <Setter Property="TextColor"
+                                                <Setter Property="IconData"
+                                                        Value="{x:Static controls:IconPathData.Error}" />
+                                                <Setter Property="IconColor"
                                                         Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
                                             </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
+                                        </controls:IconView.Triggers>
+                                    </controls:IconView>
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.TransferActivityIndicator.Text}"
@@ -304,11 +298,10 @@
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       ColumnSpacing="8"
                                       HeightRequest="32">
-                                    <Label Text="↥"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
+                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                                       IconSize="18"
+                                                       VerticalOptions="Center" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.BackupActivityIndicator.Text}"
@@ -338,11 +331,10 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto"
                                       ColumnSpacing="8"
                                       HeightRequest="32">
-                                    <Label Text="↓"
-                                           FontSize="14"
-                                           FontAttributes="Bold"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
+                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                                       IconSize="18"
+                                                       VerticalOptions="Center" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.OfflinePackProgress.Text}"
@@ -377,12 +369,11 @@
                                             StrokeThickness="1"
                                             BackgroundColor="Transparent"
                                             VerticalOptions="Start">
-                                        <Label Text="!"
-                                               FontSize="15"
-                                               FontAttributes="Bold"
-                                               HorizontalTextAlignment="Center"
-                                               VerticalTextAlignment="Center"
-                                               TextColor="{StaticResource M3Accent}" />
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
+                                                           IconColor="{StaticResource M3Accent}"
+                                                           IconSize="15"
+                                                           HorizontalOptions="Center"
+                                                           VerticalOptions="Center" />
                                     </Border>
 
                                     <VerticalStackLayout Grid.Column="1"
@@ -574,12 +565,11 @@
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                                     HorizontalOptions="End"
                                                     VerticalOptions="Start">
-                                                <Label Text="✓"
-                                                       FontSize="11"
-                                                       FontAttributes="Bold"
-                                                       HorizontalTextAlignment="Center"
-                                                       VerticalTextAlignment="Center"
-                                                       TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+                                                <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                                   IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
+                                                                   IconSize="11"
+                                                                   HorizontalOptions="Center"
+                                                                   VerticalOptions="Center" />
                                             </Border>
 
                                             <VerticalStackLayout Grid.Column="1"
@@ -610,19 +600,16 @@
                                                 </Grid.Behaviors>
                                             </Grid>
 
-                                            <Button Grid.Column="2"
-                                                    Style="{StaticResource FileChromeButton}"
-                                                    Text="⋯"
-                                                    FontSize="18"
-                                                    FontAttributes="Bold"
-                                                    Padding="0"
-                                                    HeightRequest="44"
-                                                    WidthRequest="44"
-                                                    Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                    CommandParameter="{Binding .}"
-                                                    IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                    IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                    SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
+                                            <controls:IconButton Grid.Column="2"
+                                                                 IconData="{x:Static controls:IconPathData.MoreVertical}"
+                                                                 IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                                 ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                                 BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                                 Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                 CommandParameter="{Binding .}"
+                                                                 IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                 IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                 SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -702,12 +689,11 @@
                                                             HorizontalOptions="Start"
                                                             VerticalOptions="Start"
                                                             Margin="4">
-                                                        <Label Text="✓"
-                                                               FontSize="11"
-                                                               FontAttributes="Bold"
-                                                               HorizontalTextAlignment="Center"
-                                                               VerticalTextAlignment="Center"
-                                                               TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+                                                        <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                                           IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
+                                                                           IconSize="11"
+                                                                           HorizontalOptions="Center"
+                                                                           VerticalOptions="Center" />
                                                     </Border>
 
                                                     <VerticalStackLayout Grid.Row="1"
@@ -768,22 +754,19 @@
                                                         </Grid.Behaviors>
                                                     </Grid>
 
-                                                    <Button Grid.Row="0"
-                                                            Style="{StaticResource FileChromeButton}"
-                                                            Text="⋯"
-                                                            FontSize="18"
-                                                            FontAttributes="Bold"
-                                                            Padding="0"
-                                                            HeightRequest="44"
-                                                            WidthRequest="44"
-                                                            HorizontalOptions="End"
-                                                            VerticalOptions="Start"
-                                                            Margin="0,4,4,0"
-                                                            Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                            CommandParameter="{Binding .}"
-                                                            IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                            IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                            SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
+                                                    <controls:IconButton Grid.Row="0"
+                                                                         IconData="{x:Static controls:IconPathData.MoreVertical}"
+                                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                                         HorizontalOptions="End"
+                                                                         VerticalOptions="Start"
+                                                                         Margin="0,4,4,0"
+                                                                         Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                         CommandParameter="{Binding .}"
+                                                                         IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                         IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                         SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
 
                                                 </Grid>
                                             </Border>
@@ -797,17 +780,21 @@
         </ScrollView>
         </RefreshView>
 
-        <Button Grid.Row="1"
-                Text="+"
-                Style="{StaticResource FloatingActionButton}"
-                Command="{Binding ShowFileAddActionsCommand}"
-                IsVisible="{Binding Display.IsFileAddButtonVisible}"
-                IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                HorizontalOptions="End"
-                VerticalOptions="End"
-                Margin="0,0,2,16"
-                Padding="0"
-                SemanticProperties.Description="Add files" />
+        <controls:IconButton Grid.Row="1"
+                             IconData="{x:Static controls:IconPathData.Plus}"
+                             IconColor="{StaticResource M3OnAccent}"
+                             ButtonBackgroundColor="{StaticResource M3Accent}"
+                             BorderColor="{StaticResource M3Accent}"
+                             ButtonSize="56"
+                             IconSize="24"
+                             ButtonCornerRadius="28"
+                             Command="{Binding ShowFileAddActionsCommand}"
+                             IsVisible="{Binding Display.IsFileAddButtonVisible}"
+                             IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                             HorizontalOptions="End"
+                             VerticalOptions="End"
+                             Margin="0,0,2,16"
+                             SemanticProperties.Description="Add files" />
 
         <Border Grid.Row="2"
                 IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"

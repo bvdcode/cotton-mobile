@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MediaViewerPage"
@@ -29,18 +30,16 @@
             <VerticalStackLayout x:Name="StartOverlay"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
-                <Button Text="▶"
-                        Clicked="OnPlayClicked"
-                        WidthRequest="60"
-                        HeightRequest="60"
-                        MinimumWidthRequest="60"
-                        MinimumHeightRequest="60"
-                        CornerRadius="30"
-                        Padding="0"
-                        FontSize="22"
-                        FontAttributes="Bold"
-                        HorizontalOptions="Center"
-                        SemanticProperties.Description="Play media" />
+                <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                     IconColor="{StaticResource M3OnAccent}"
+                                     ButtonBackgroundColor="{StaticResource M3Accent}"
+                                     BorderColor="{StaticResource M3Accent}"
+                                     ButtonSize="60"
+                                     IconSize="24"
+                                     ButtonCornerRadius="30"
+                                     Clicked="OnPlayClicked"
+                                     HorizontalOptions="Center"
+                                     SemanticProperties.Description="Play media" />
             </VerticalStackLayout>
 
         </Grid>

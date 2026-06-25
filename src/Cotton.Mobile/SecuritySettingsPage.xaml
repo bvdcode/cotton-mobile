@@ -7,11 +7,9 @@
              x:Class="Cotton.Mobile.SecuritySettingsPage"
              x:DataType="viewModels:SecuritySettingsViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Security"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Security">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar IsPrimaryActionVisible="False"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"

@@ -7,11 +7,9 @@
              x:Class="Cotton.Mobile.FileVersionHistoryPage"
              x:DataType="viewModels:FileVersionHistoryViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Version history"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Version history">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar IsPrimaryActionVisible="False"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"

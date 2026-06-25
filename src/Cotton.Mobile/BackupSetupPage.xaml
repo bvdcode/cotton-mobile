@@ -6,11 +6,9 @@
              x:Class="Cotton.Mobile.BackupSetupPage"
              x:DataType="viewModels:BackupSetupViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Camera Backup"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Camera Backup">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar IsPrimaryActionVisible="False"
                             SecondaryIconData="{x:Static controls:IconPathData.Save}"
                             SecondaryCommand="{Binding SaveCommand}"

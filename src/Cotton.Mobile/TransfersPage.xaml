@@ -7,11 +7,9 @@
              x:Class="Cotton.Mobile.TransfersPage"
              x:DataType="viewModels:TransfersViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Transfers"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Transfers">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Play}"
                             PrimaryCommand="{Binding RunWaitingCommand}"
                             PrimaryDescription="Run waiting transfers"

@@ -6,11 +6,9 @@
              x:Class="Cotton.Mobile.TextViewerPage"
              x:DataType="viewModels:TextViewerViewModel"
              Shell.NavBarIsVisible="False"
-             Title="{Binding Title}"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="{Binding Title}">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar TitleText="{Binding Title}"
                                   PrimaryIconData="{x:Static controls:IconPathData.Share}"
                                   PrimaryCommand="{Binding ShareCommand}"

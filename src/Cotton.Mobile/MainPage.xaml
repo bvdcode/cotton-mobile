@@ -5,8 +5,7 @@
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
-             Shell.NavBarIsVisible="False"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Shell.NavBarIsVisible="False">
 
     <Grid x:Name="RootLayout"
           Padding="18,0,18,16"

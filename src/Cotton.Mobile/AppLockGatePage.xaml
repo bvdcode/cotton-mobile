@@ -5,8 +5,7 @@
              x:Class="Cotton.Mobile.AppLockGatePage"
              x:DataType="viewModels:AppLockGateViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Cotton locked"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Cotton locked">
 
     <Grid Padding="24"
           RowDefinitions="*,Auto,*">

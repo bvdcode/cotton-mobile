@@ -6,11 +6,9 @@
              x:Class="Cotton.Mobile.NotificationSettingsPage"
              x:DataType="viewModels:NotificationSettingsViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Notifications"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Notifications">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar IsPrimaryActionVisible="False"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"

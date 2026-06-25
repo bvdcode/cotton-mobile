@@ -7,11 +7,9 @@
              x:Class="Cotton.Mobile.CaptureInboxPage"
              x:DataType="viewModels:CaptureInboxViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Capture Inbox"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Capture Inbox">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearCommand}"
                             PrimaryDescription="Clear capture inbox"

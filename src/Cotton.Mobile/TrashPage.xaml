@@ -8,11 +8,9 @@
              x:Name="TrashRoot"
              x:DataType="viewModels:TrashViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Trash"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Trash">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding EmptyTrashCommand}"
                             PrimaryDescription="Empty trash"

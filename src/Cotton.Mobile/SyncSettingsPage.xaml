@@ -8,11 +8,9 @@
              x:Name="SyncPageRoot"
              x:DataType="viewModels:SyncSettingsViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Sync"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Sync">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Play}"
                             PrimaryCommand="{Binding RunAllCommand}"
                             PrimaryDescription="Run all sync roots"

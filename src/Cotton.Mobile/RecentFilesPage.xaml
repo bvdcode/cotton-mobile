@@ -8,11 +8,9 @@
              x:Name="RecentFilesRoot"
              x:DataType="viewModels:RecentFilesViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Recent files"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Title="Recent files">
 
-    <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+    <Grid RowDefinitions="Auto,*">
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearRecentFilesCommand}"
                             PrimaryDescription="Clear recent files"

@@ -7,26 +7,26 @@
 
     <Color x:Key="Primary">#C6FF00</Color>
     <Color x:Key="PrimaryDark">#C6FF00</Color>
-    <Color x:Key="PrimaryDarkText">#242424</Color>
-    <Color x:Key="Secondary">#E8F5B4</Color>
-    <Color x:Key="SecondaryDarkText">#415500</Color>
-    <Color x:Key="Tertiary">#1F7A5C</Color>
+    <Color x:Key="PrimaryDarkText">#151900</Color>
+    <Color x:Key="Secondary">#D3E8BA</Color>
+    <Color x:Key="SecondaryDarkText">#233517</Color>
+    <Color x:Key="Tertiary">#9FCFC3</Color>
     <Color x:Key="Danger">#FF6B6B</Color>
 
     <Color x:Key="White">White</Color>
     <Color x:Key="Black">Black</Color>
     <Color x:Key="Magenta">#D600AA</Color>
-    <Color x:Key="MidnightBlue">#0B0F14</Color>
-    <Color x:Key="OffBlack">#0B0F14</Color>
+    <Color x:Key="MidnightBlue">#0D1117</Color>
+    <Color x:Key="OffBlack">#0D1117</Color>
 
-    <Color x:Key="Gray100">#E1E1E1</Color>
-    <Color x:Key="Gray200">#C8C8C8</Color>
-    <Color x:Key="Gray300">#ACACAC</Color>
-    <Color x:Key="Gray400">#919191</Color>
-    <Color x:Key="Gray500">#6E6E6E</Color>
-    <Color x:Key="Gray600">#404040</Color>
-    <Color x:Key="Gray900">#212121</Color>
-    <Color x:Key="Gray950">#141414</Color>
+    <Color x:Key="Gray100">#EDF0E6</Color>
+    <Color x:Key="Gray200">#C4C8BC</Color>
+    <Color x:Key="Gray300">#A8ADA2</Color>
+    <Color x:Key="Gray400">#8E9287</Color>
+    <Color x:Key="Gray500">#74796D</Color>
+    <Color x:Key="Gray600">#44483F</Color>
+    <Color x:Key="Gray900">#242B33</Color>
+    <Color x:Key="Gray950">#151A20</Color>
 
     <SolidColorBrush x:Key="PrimaryBrush" Color="{StaticResource Primary}"/>
     <SolidColorBrush x:Key="SecondaryBrush" Color="{StaticResource Secondary}"/>

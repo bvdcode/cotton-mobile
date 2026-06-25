@@ -31,14 +31,11 @@
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                      Spacing="8">
                     <Label Text="Cotton Cloud"
-                           FontSize="30"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                           Style="{StaticResource M3ScreenMetric}"
                            SemanticProperties.HeadingLevel="Level1" />
 
                     <Label Text="Sign in to your Cotton Cloud"
-                           FontSize="16"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           Style="{StaticResource M3BodyMedium}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"
@@ -47,8 +44,7 @@
                                        HorizontalOptions="Start" />
 
                     <Label Text="{Binding Display.LoadingMessage}"
-                           FontSize="14"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           Style="{StaticResource M3BodyMedium}" />
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
@@ -56,8 +52,7 @@
                                      MaximumWidthRequest="520">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Server URL"
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               Style="{StaticResource M3CardSupporting}" />
 
                         <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
                                 StrokeThickness="1"
@@ -75,8 +70,7 @@
 
                         <Label Text="{Binding Display.Status}"
                                IsVisible="{Binding Display.IsStatusVisible}"
-                               FontSize="13"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               Style="{StaticResource M3BodyMedium}" />
                     </VerticalStackLayout>
 
                     <Button Text="Connect"
@@ -93,13 +87,10 @@
 
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Waiting for browser approval"
-                               FontSize="18"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                               Style="{StaticResource M3PanelTitle}" />
 
                         <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                               FontSize="14"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                               Style="{StaticResource M3BodyMedium}" />
                     </VerticalStackLayout>
 
                     <Button Text="Cancel"
@@ -133,24 +124,20 @@
                                                      Spacing="1"
                                                      VerticalOptions="Center">
                                     <Label Text="{Binding Display.FilesTitle}"
-                                           FontSize="20"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3BrowserTitle}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Text="{Binding Display.FilesPath}"
                                            IsVisible="{Binding Display.IsFilesPathVisible}"
-                                           FontSize="10"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           Style="{StaticResource M3CardMeta}"
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Text="{Binding Display.FilesStatus}"
                                            IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                           FontSize="11"
+                                           Style="{StaticResource M3CardMeta}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
 
                                 <controls:IconButton Grid.Column="2"
@@ -173,19 +160,12 @@
                                 </controls:IconButton>
 
                                 <Button Grid.Column="3"
-                                        Style="{StaticResource FileChromeButton}"
+                                        Style="{StaticResource IconChromeButton}"
                                         Text="{Binding Display.FileSortButtonText}"
                                         Command="{Binding ShowFileSortActionsCommand}"
                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                         IsVisible="{Binding Display.IsFileSortButtonVisible}"
-                                        Padding="0"
-                                        FontSize="12"
-                                        FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
                                         SemanticProperties.Description="Sort files" />
 
                                 <controls:IconButton Grid.Column="4"
@@ -200,25 +180,17 @@
                                                      SemanticProperties.Description="Change file view" />
 
                                 <Button Grid.Column="5"
-                                        Style="{StaticResource FileChromeButton}"
+                                        Style="{StaticResource IconChromeButton}"
                                         Text="{Binding Display.ProfileInitials}"
                                         Command="{Binding AccountCommand}"
                                         IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                        Padding="0"
-                                        FontSize="12"
-                                        FontAttributes="Bold"
                                         VerticalOptions="Center"
-                                        HeightRequest="44"
-                                        MinimumHeightRequest="44"
-                                        MinimumWidthRequest="44"
-                                        WidthRequest="44"
                                         SemanticProperties.Description="Account" />
                             </Grid>
 
                             <Label Text="{Binding Display.ProfileStatus}"
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
-                                   FontSize="13"
-                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                   Style="{StaticResource M3BodyMedium}" />
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
                                     Style="{StaticResource M3TonalPanel}"
@@ -258,12 +230,10 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.TransferActivityIndicator.Text}"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}">
+                                           VerticalTextAlignment="Center">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label"
                                                          Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
@@ -276,11 +246,10 @@
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.TransferActivityIndicator.Details}"
-                                           FontSize="11"
+                                           Style="{StaticResource M3CardMeta}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           VerticalTextAlignment="Center" />
                                 </Grid>
                             </Border>
 
@@ -302,20 +271,17 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.BackupActivityIndicator.Text}"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           VerticalTextAlignment="Center" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.BackupActivityIndicator.Details}"
-                                           FontSize="11"
+                                           Style="{StaticResource M3CardMeta}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           VerticalTextAlignment="Center" />
                                 </Grid>
                             </Border>
 
@@ -333,20 +299,17 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.OfflinePackProgress.Text}"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           VerticalTextAlignment="Center" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.OfflinePackProgress.Details}"
-                                           FontSize="11"
+                                           Style="{StaticResource M3CardMeta}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           VerticalTextAlignment="Center" />
                                 </Grid>
                             </Border>
 
@@ -372,15 +335,12 @@
                                     <VerticalStackLayout Grid.Column="1"
                                                          Spacing="2">
                                         <Label Text="{Binding Display.FilesNoticeTitle}"
-                                               FontSize="13"
-                                               FontAttributes="Bold"
-                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                               Style="{StaticResource M3CardSupportingStrong}" />
 
                                         <Label Text="{Binding Display.FilesNoticeMessage}"
-                                               FontSize="12"
+                                               Style="{StaticResource M3CardSupporting}"
                                                MaxLines="2"
-                                               LineBreakMode="WordWrap"
-                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                               LineBreakMode="WordWrap" />
                                     </VerticalStackLayout>
                                 </Grid>
                             </Border>
@@ -389,11 +349,7 @@
                                        Text="{Binding Display.FileSearchText, Mode=TwoWay}"
                                        IsVisible="{Binding Display.IsFileSearchVisible}"
                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                       Placeholder="Search"
-                                       HeightRequest="46"
-                                       FontSize="13"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                       PlaceholderColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                       Placeholder="Search" />
 
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
                                     Style="{StaticResource M3TonalPanel}"
@@ -404,17 +360,14 @@
                                     <VerticalStackLayout Spacing="1"
                                                          VerticalOptions="Center">
                                         <Label Text="{Binding Display.FileSelection.TitleText}"
-                                               FontSize="13"
-                                               FontAttributes="Bold"
+                                               Style="{StaticResource M3CardSupportingStrong}"
                                                MaxLines="1"
-                                               LineBreakMode="TailTruncation"
-                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                               LineBreakMode="TailTruncation" />
 
                                         <Label Text="{Binding Display.FileSelection.DetailText}"
-                                               FontSize="11"
+                                               Style="{StaticResource M3CardMeta}"
                                                MaxLines="1"
-                                               LineBreakMode="TailTruncation"
-                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                               LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
 
                                     <Button Grid.Column="1"
@@ -422,7 +375,6 @@
                                             Command="{Binding ShowFileSelectionActionsCommand}"
                                             Style="{StaticResource FileChromeButton}"
                                             Padding="10,0"
-                                            FontSize="12"
                                             HeightRequest="36"
                                             MinimumHeightRequest="36"
                                             MinimumWidthRequest="72" />
@@ -432,7 +384,6 @@
                                             Command="{Binding ClearFileSelectionCommand}"
                                             Style="{StaticResource FileChromeButton}"
                                             Padding="10,0"
-                                            FontSize="12"
                                             HeightRequest="36"
                                             MinimumHeightRequest="36"
                                             MinimumWidthRequest="68" />
@@ -470,18 +421,15 @@
                                                      HorizontalOptions="Center"
                                                      VerticalOptions="Center">
                                     <Label Text="{Binding Display.FilesEmptyMessage}"
-                                           FontSize="16"
-                                           FontAttributes="Bold"
-                                           HorizontalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           Style="{StaticResource M3EmptyTitle}"
+                                           HorizontalTextAlignment="Center" />
 
                                     <Label Text="{Binding Display.FilesEmptyDetails}"
                                            IsVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="2"
                                            LineBreakMode="WordWrap"
-                                           HorizontalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           HorizontalTextAlignment="Center" />
 
                                     <Button Text="Add files"
                                             Command="{Binding ShowFileAddActionsCommand}"
@@ -536,11 +484,10 @@
 
                                                     <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                            IsVisible="{Binding IsPlaceholderTextVisible}"
+                                                           Style="{StaticResource M3ThumbnailPlaceholder}"
                                                            FontSize="{Binding Thumbnail.PlaceholderFontSize}"
-                                                           FontAttributes="Bold"
                                                            HorizontalTextAlignment="Center"
-                                                           VerticalTextAlignment="Center"
-                                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3Accent}}" />
+                                                           VerticalTextAlignment="Center" />
                                                 </Grid>
                                             </Border>
 
@@ -565,17 +512,14 @@
                                                                  VerticalOptions="Center"
                                                                  Spacing="2">
                                                 <Label Text="{Binding Name}"
-                                                       FontSize="15"
-                                                       FontAttributes="Bold"
+                                                       Style="{StaticResource M3CardTitle}"
                                                        MaxLines="1"
-                                                       LineBreakMode="TailTruncation"
-                                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                                       LineBreakMode="TailTruncation" />
 
                                                 <Label Text="{Binding DisplayDetails}"
-                                                       FontSize="12"
+                                                       Style="{StaticResource M3CardSupporting}"
                                                        MaxLines="1"
-                                                       LineBreakMode="TailTruncation"
-                                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                                       LineBreakMode="TailTruncation" />
                                             </VerticalStackLayout>
 
                                             <Grid x:Name="ListEntryTouchSurface"
@@ -656,11 +600,10 @@
 
                                                             <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                                    IsVisible="{Binding IsPlaceholderTextVisible}"
+                                                                   Style="{StaticResource M3ThumbnailPlaceholder}"
                                                                    FontSize="{Binding Thumbnail.PlaceholderFontSize}"
-                                                                   FontAttributes="Bold"
                                                                    HorizontalTextAlignment="Center"
-                                                                   VerticalTextAlignment="Center"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3Accent}}" />
+                                                                   VerticalTextAlignment="Center" />
                                                         </Grid>
                                                     </Border>
 
@@ -685,19 +628,16 @@
                                                     <VerticalStackLayout Grid.Row="1"
                                                                          Spacing="1">
                                                         <Label Text="{Binding Name}"
-                                                               FontSize="12"
-                                                               FontAttributes="Bold"
+                                                               Style="{StaticResource M3CardSupportingStrong}"
                                                                MaxLines="1"
-                                                               LineBreakMode="TailTruncation"
-                                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                                               LineBreakMode="TailTruncation" />
 
                                                         <Grid ColumnDefinitions="*,Auto,Auto"
                                                               ColumnSpacing="6">
                                                             <Label Text="{Binding Details}"
-                                                                   FontSize="11"
+                                                                   Style="{StaticResource M3CardMeta}"
                                                                    MaxLines="1"
-                                                                   LineBreakMode="TailTruncation"
-                                                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                                                   LineBreakMode="TailTruncation" />
 
                                                             <Border Grid.Column="1"
                                                                     IsVisible="{Binding HasLocalCopy}"
@@ -706,11 +646,9 @@
                                                                     Padding="5,1"
                                                                     BackgroundColor="{StaticResource M3Accent}">
                                                                 <Label Text="{Binding LocalCopyStatus}"
-                                                                       FontSize="9"
-                                                                       FontAttributes="Bold"
+                                                                       Style="{StaticResource M3AccentChipLabel}"
                                                                        MaxLines="1"
-                                                                       LineBreakMode="NoWrap"
-                                                                       TextColor="{StaticResource M3OnAccent}" />
+                                                                       LineBreakMode="NoWrap" />
                                                             </Border>
 
                                                             <Border Grid.Column="2"
@@ -720,11 +658,9 @@
                                                                     Padding="5,1"
                                                                     BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}">
                                                                 <Label Text="{Binding OfflineAttentionStatus}"
-                                                                       FontSize="9"
-                                                                       FontAttributes="Bold"
+                                                                       Style="{StaticResource M3ErrorChipLabel}"
                                                                        MaxLines="1"
-                                                                       LineBreakMode="NoWrap"
-                                                                       TextColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                                                       LineBreakMode="NoWrap" />
                                                             </Border>
                                                         </Grid>
                                                     </VerticalStackLayout>
@@ -796,49 +732,32 @@
                         HeightRequest="40"
                         BackgroundColor="{StaticResource M3Accent}">
                     <Label Text="Files"
-                           FontSize="12"
-                           FontAttributes="Bold"
+                           Style="{StaticResource M3NavigationSelectedLabel}"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
                            HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center"
-                           TextColor="{StaticResource M3OnAccent}" />
+                           VerticalTextAlignment="Center" />
                 </Border>
 
                 <Button Grid.Column="1"
-                        Style="{StaticResource FileChromeButton}"
+                        Style="{StaticResource QuickNavigationButton}"
                         Text="Sync"
                         Command="{Binding OpenSyncSettingsCommand}"
                         IsEnabled="{Binding Display.IsProfileVisible}"
-                        Padding="4,0"
-                        FontSize="12"
-                        FontAttributes="Bold"
-                        HeightRequest="40"
-                        MinimumHeightRequest="40"
                         SemanticProperties.Description="Open sync folders" />
 
                 <Button Grid.Column="2"
-                        Style="{StaticResource FileChromeButton}"
+                        Style="{StaticResource QuickNavigationButton}"
                         Text="{Binding Display.BackupNavigation.Label}"
                         Command="{Binding OpenBackupSetupCommand}"
                         IsEnabled="{Binding Display.IsProfileVisible}"
-                        Padding="4,0"
-                        FontSize="12"
-                        FontAttributes="Bold"
-                        HeightRequest="40"
-                        MinimumHeightRequest="40"
                         SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
 
                 <Button Grid.Column="3"
-                        Style="{StaticResource FileChromeButton}"
+                        Style="{StaticResource QuickNavigationButton}"
                         Text="More"
                         Command="{Binding AccountCommand}"
                         IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                        Padding="4,0"
-                        FontSize="12"
-                        FontAttributes="Bold"
-                        HeightRequest="40"
-                        MinimumHeightRequest="40"
                         SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
             </Grid>
         </Border>
@@ -849,17 +768,12 @@
                                VerticalOptions="Center"
                                IsVisible="{Binding Display.IsLegalFooterVisible}">
             <Label Text="Vadim Belov / bvdcode"
-                   FontSize="12"
-                   VerticalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   Style="{StaticResource M3CardSupporting}"
+                   VerticalTextAlignment="Center" />
 
             <Button Text="Privacy"
                     Command="{Binding PrivacyPolicyCommand}"
-                    BackgroundColor="Transparent"
-                    Padding="8,0"
-                    MinimumHeightRequest="32"
-                    MinimumWidthRequest="44"
-                    TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                    Style="{StaticResource FooterLinkButton}" />
         </HorizontalStackLayout>
     </Grid>
 

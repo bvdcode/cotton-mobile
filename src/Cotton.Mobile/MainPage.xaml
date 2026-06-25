@@ -75,26 +75,30 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <VerticalStackLayout IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                                     Spacing="16"
-                                     MaximumWidthRequest="520">
-                    <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                       HorizontalOptions="Start" />
+                <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                        Style="{StaticResource M3AuthPanel}"
+                        Padding="14"
+                        MaximumWidthRequest="520"
+                        HorizontalOptions="Fill">
+                    <VerticalStackLayout Spacing="16">
+                        <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                           HorizontalOptions="Start" />
 
-                    <VerticalStackLayout Spacing="4">
-                        <Label Text="Waiting for browser approval"
-                               Style="{StaticResource M3PanelTitle}" />
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Waiting for browser approval"
+                                   Style="{StaticResource M3PanelTitle}" />
 
-                        <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                               Style="{StaticResource M3BodyMedium}" />
+                            <Label Text="{Binding Display.AuthorizationProgressMessage}"
+                                   Style="{StaticResource M3BodyMedium}" />
+                        </VerticalStackLayout>
+
+                        <Button Text="Cancel"
+                                Command="{Binding CancelAuthorizationCommand}"
+                                IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                Style="{StaticResource FileChromeButton}"
+                                HorizontalOptions="Fill" />
                     </VerticalStackLayout>
-
-                    <Button Text="Cancel"
-                            Command="{Binding CancelAuthorizationCommand}"
-                            IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                            Style="{StaticResource FileChromeButton}"
-                            HorizontalOptions="Fill" />
-                </VerticalStackLayout>
+                </Border>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
                                      Spacing="0"

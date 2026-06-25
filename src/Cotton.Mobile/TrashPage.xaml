@@ -265,12 +265,11 @@
                                         BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                         HorizontalOptions="End"
                                         VerticalOptions="End">
-                                    <Label Text="✓"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
-                                           HorizontalTextAlignment="Center"
-                                           VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
+                                                       IconSize="12"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center" />
                                 </Border>
 
                                 <HorizontalStackLayout Grid.Row="1"
@@ -367,12 +366,11 @@
                                             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                             HorizontalOptions="End"
                                             VerticalOptions="End">
-                                        <Label Text="✓"
-                                               FontSize="12"
-                                               FontAttributes="Bold"
-                                               HorizontalTextAlignment="Center"
-                                               VerticalTextAlignment="Center"
-                                               TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                           IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
+                                                           IconSize="12"
+                                                           HorizontalOptions="Center"
+                                                           VerticalOptions="Center" />
                                     </Border>
                                 </Grid>
 

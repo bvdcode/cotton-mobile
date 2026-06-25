@@ -49,14 +49,10 @@
                     BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       ColumnSpacing="10">
-                    <Label Text="!"
-                           WidthRequest="28"
-                           HeightRequest="28"
-                           HorizontalTextAlignment="Center"
-                           VerticalTextAlignment="Center"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
+                                       IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
+                                       IconSize="24"
+                                       VerticalOptions="Center" />
 
                     <Label Grid.Column="1"
                            Text="{Binding Status}"
@@ -154,14 +150,10 @@
                           RowDefinitions="Auto,Auto,Auto"
                           ColumnSpacing="10"
                           RowSpacing="8">
-                        <Label Text="!"
-                               WidthRequest="28"
-                               HeightRequest="28"
-                               HorizontalTextAlignment="Center"
-                               VerticalTextAlignment="Center"
-                               FontSize="16"
-                               FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
+                                           IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
+                                           IconSize="24"
+                                           VerticalOptions="Start" />
 
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushUnavailableTitle}"

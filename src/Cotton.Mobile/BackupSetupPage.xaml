@@ -6,7 +6,7 @@
              x:DataType="viewModels:BackupSetupViewModel"
              Shell.NavBarIsVisible="True"
              Title="Camera Backup"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Save"
@@ -14,8 +14,8 @@
     </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <VerticalStackLayout Padding="16"
-                             Spacing="14">
+        <VerticalStackLayout Padding="18"
+                             Spacing="16">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="3">
@@ -24,13 +24,13 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="{Binding ExecutionStatusText}"
                            FontSize="13"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -44,12 +44,12 @@
                    FontSize="13"
                    MaxLines="2"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="8"
@@ -60,13 +60,13 @@
                                FontAttributes="Bold"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                         <Label Text="{Binding DestinationText}"
                                FontSize="13"
                                MaxLines="2"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                     </VerticalStackLayout>
 
                     <Button Grid.Column="1"
@@ -83,28 +83,28 @@
                                FontSize="12"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                         <Label Text="{Binding DestinationStorageEstimateTitle}"
                                FontSize="12"
                                FontAttributes="Bold"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                         <Label Text="{Binding DestinationStorageEstimateText}"
                                FontSize="12"
                                MaxLines="2"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                     </VerticalStackLayout>
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="6"
@@ -114,7 +114,7 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding MediaAccessStatusText}"
@@ -122,7 +122,7 @@
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
                            HorizontalTextAlignment="End"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
@@ -130,7 +130,7 @@
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                     <Button Grid.Row="2"
                             Grid.ColumnSpan="2"
@@ -143,10 +143,10 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                       RowSpacing="8">
                     <Label Text="{Binding HealthTitle}"
@@ -154,21 +154,21 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Grid.Row="1"
                            Text="{Binding HealthCountsText}"
                            FontSize="13"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Grid.Row="2"
                            Text="{Binding HealthStatusText}"
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                     <Button Grid.Row="3"
                             Text="Queue now"
@@ -179,10 +179,10 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12"
@@ -192,7 +192,7 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Switch Grid.Column="1"
                             IsEnabled="{Binding CanEnableBackup}"
@@ -204,14 +204,14 @@
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                     <Label Grid.Row="2"
                            Text="Photos only"
                            FontSize="14"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Switch Grid.Row="2"
                             Grid.Column="1"
@@ -222,7 +222,7 @@
                            FontSize="14"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Switch Grid.Row="3"
                             Grid.Column="1"
@@ -230,10 +230,10 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12"
@@ -242,7 +242,7 @@
                            FontSize="14"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Switch Grid.Column="1"
                             IsToggled="{Binding WifiOnly, Mode=TwoWay}" />
@@ -252,7 +252,7 @@
                            FontSize="14"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Switch Grid.Row="1"
                             Grid.Column="1"

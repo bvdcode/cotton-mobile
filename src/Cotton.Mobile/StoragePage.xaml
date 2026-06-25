@@ -7,7 +7,7 @@
              x:DataType="viewModels:StorageSettingsViewModel"
              Shell.NavBarIsVisible="True"
              Title="Storage"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Refresh"
@@ -15,8 +15,8 @@
     </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <VerticalStackLayout Padding="16"
-                             Spacing="14">
+        <VerticalStackLayout Padding="18"
+                             Spacing="16">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
@@ -25,19 +25,19 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="{Binding TotalFileCountText}"
                            FontSize="13"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                     <Label Text="Files saved on this device"
                            FontSize="12"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -51,12 +51,12 @@
                    FontSize="13"
                    MaxLines="2"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <VerticalStackLayout Spacing="8">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
@@ -64,26 +64,26 @@
                                FontAttributes="Bold"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                         <Label Text="{Binding CloudQuotaSummaryText, FallbackValue=Account storage unavailable., TargetNullValue=Account storage unavailable.}"
                                FontSize="13"
                                FontAttributes="Bold"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                         <Label Text="{Binding CloudQuotaDetailText, FallbackValue=Storage limits are not shared by this server., TargetNullValue=Storage limits are not shared by this server.}"
                                FontSize="12"
                                MaxLines="2"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                     </VerticalStackLayout>
 
                     <ProgressBar Progress="{Binding CloudQuotaUsageFraction}"
                                  IsVisible="{Binding IsCloudQuotaProgressVisible}"
                                  HeightRequest="4"
-                                 ProgressColor="{StaticResource Primary}" />
+                                 ProgressColor="{StaticResource M3Accent}" />
                 </VerticalStackLayout>
             </Border>
 
@@ -92,7 +92,7 @@
                    FontAttributes="Bold"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
             <VerticalStackLayout Spacing="10">
                 <Button Text="Free space"
@@ -106,10 +106,10 @@
                         HeightRequest="44" />
             </VerticalStackLayout>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="12">
@@ -119,13 +119,13 @@
                                    FontAttributes="Bold"
                                    MaxLines="1"
                                    LineBreakMode="TailTruncation"
-                                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                             <Label Text="{Binding OnDeviceSummaryText}"
                                    FontSize="12"
                                    MaxLines="2"
                                    LineBreakMode="TailTruncation"
-                                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                         </VerticalStackLayout>
                     </Grid>
 
@@ -143,7 +143,7 @@
                                            FontAttributes="Bold"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding SizeText}"
@@ -151,14 +151,14 @@
                                            FontAttributes="Bold"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Label Grid.Row="1"
                                            Text="{Binding DetailText}"
                                            FontSize="12"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
@@ -166,7 +166,7 @@
                                            FontSize="12"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -174,10 +174,10 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="14"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Temporary files"
@@ -185,19 +185,19 @@
                                FontAttributes="Bold"
                                MaxLines="1"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                         <Label Text="{Binding StorageBudgetSummaryText}"
                                FontSize="12"
                                MaxLines="2"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                         <Label Text="{Binding ProtectedOfflineText}"
                                FontSize="12"
                                MaxLines="2"
                                LineBreakMode="TailTruncation"
-                               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                     </VerticalStackLayout>
 
                     <VerticalStackLayout Spacing="8"
@@ -214,7 +214,7 @@
                                            FontAttributes="Bold"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding UsageText}"
@@ -222,14 +222,14 @@
                                            FontAttributes="Bold"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Label Grid.Row="1"
                                            Text="{Binding DetailText}"
                                            FontSize="12"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
@@ -237,13 +237,13 @@
                                            FontSize="12"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                                     <ProgressBar Grid.Row="2"
                                                  Grid.ColumnSpan="2"
                                                  Progress="{Binding UsageFraction}"
                                                  HeightRequest="4"
-                                                 ProgressColor="{StaticResource Primary}" />
+                                                 ProgressColor="{StaticResource M3Accent}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>

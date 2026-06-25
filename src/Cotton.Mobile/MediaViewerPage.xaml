@@ -7,7 +7,7 @@
              x:DataType="viewModels:MediaViewerViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}"
-             BackgroundColor="{StaticResource OffBlack}">
+             BackgroundColor="{StaticResource M3DarkSurface}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Share"
@@ -16,8 +16,8 @@
                      Command="{Binding OpenExternallyCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid BackgroundColor="{StaticResource OffBlack}">
-        <Grid BackgroundColor="{StaticResource OffBlack}">
+    <Grid BackgroundColor="{StaticResource M3DarkSurface}">
+        <Grid BackgroundColor="{StaticResource M3DarkSurface}">
             <toolkit:MediaElement x:Name="MediaPlayer"
                                   Aspect="AspectFit"
                                   ShouldAutoPlay="False"
@@ -51,7 +51,7 @@
                FontSize="12"
                MaxLines="1"
                LineBreakMode="TailTruncation"
-               TextColor="{StaticResource Gray200}"
+               TextColor="{StaticResource M3DarkOnSurfaceVariant}"
                HorizontalOptions="Start"
                VerticalOptions="End" />
     </Grid>

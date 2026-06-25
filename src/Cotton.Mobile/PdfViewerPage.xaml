@@ -7,7 +7,7 @@
              x:DataType="viewModels:PdfViewerViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}"
-             BackgroundColor="{StaticResource OffBlack}">
+             BackgroundColor="{StaticResource M3DarkSurface}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Share"
@@ -17,27 +17,27 @@
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{StaticResource OffBlack}">
+          BackgroundColor="{StaticResource M3DarkSurface}">
         <VerticalStackLayout Padding="16,12"
                              Spacing="2">
             <Label Text="{Binding Details}"
                    FontSize="12"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource Gray200}" />
+                   TextColor="{StaticResource M3DarkOnSurfaceVariant}" />
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
                    FontSize="12"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource Gray200}" />
+                   TextColor="{StaticResource M3DarkOnSurfaceVariant}" />
         </VerticalStackLayout>
 
         <CollectionView Grid.Row="1"
                         ItemsSource="{Binding Pages}"
                         IsVisible="{Binding IsPreviewVisible}"
-                        BackgroundColor="{StaticResource OffBlack}"
+                        BackgroundColor="{StaticResource M3DarkSurface}"
                         ItemSizingStrategy="MeasureAllItems">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical"
@@ -46,7 +46,7 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
                     <Grid Padding="12,0">
-                        <Border Stroke="{StaticResource Gray500}"
+                        <Border Stroke="{StaticResource M3DarkOutline}"
                                 StrokeThickness="1"
                                 BackgroundColor="{StaticResource White}"
                                 HorizontalOptions="Fill">
@@ -66,7 +66,7 @@
               Padding="24">
             <Label Text="{Binding EmptyText}"
                    FontSize="14"
-                   TextColor="{StaticResource Gray200}"
+                   TextColor="{StaticResource M3DarkOnSurfaceVariant}"
                    HorizontalTextAlignment="Center"
                    HorizontalOptions="Center"
                    VerticalOptions="Center" />

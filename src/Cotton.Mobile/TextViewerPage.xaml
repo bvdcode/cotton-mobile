@@ -6,7 +6,7 @@
              x:DataType="viewModels:TextViewerViewModel"
              Shell.NavBarIsVisible="True"
              Title="{Binding Title}"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Share"
@@ -15,7 +15,7 @@
                      Command="{Binding MoreCommand}" />
     </ContentPage.ToolbarItems>
 
-    <Grid Padding="16"
+    <Grid Padding="18"
           RowDefinitions="Auto,*"
           RowSpacing="12">
         <VerticalStackLayout Spacing="2">
@@ -23,14 +23,14 @@
                    FontSize="12"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
                    FontSize="12"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         </VerticalStackLayout>
 
         <Editor Grid.Row="1"
@@ -40,7 +40,7 @@
                 FontSize="15"
                 HorizontalOptions="Fill"
                 VerticalOptions="Fill"
-                TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                 BackgroundColor="Transparent" />
     </Grid>
 </ContentPage>

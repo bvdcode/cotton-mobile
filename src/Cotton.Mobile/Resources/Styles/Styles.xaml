@@ -115,6 +115,12 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
+    <Style TargetType="Button" x:Key="ViewerChromeButton" BasedOn="{StaticResource FileChromeButton}">
+        <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurface}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurfaceContainerHigh}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="FloatingActionButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />

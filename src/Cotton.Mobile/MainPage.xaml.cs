@@ -16,7 +16,7 @@ namespace Cotton.Mobile
 		private const double FileTileFolderIconMinimumSize = 62;
 		private const double FileTileFolderIconMaximumSize = 92;
 		private const double FileTileFolderIconWidthRatio = 0.42;
-		private const double FileTileVerticalChrome = 54;
+		private const double FileTileVerticalChrome = 68;
 
 		private readonly MainPageViewModel _viewModel;
 		private double _fileTileHeight = 146;

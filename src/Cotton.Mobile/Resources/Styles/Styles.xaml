@@ -222,9 +222,6 @@
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 
-    <Style TargetType="Label" x:Key="Headline" BasedOn="{StaticResource M3HeadlineLarge}" />
-    <Style TargetType="Label" x:Key="SubHeadline" BasedOn="{StaticResource M3TitleLarge}" />
-
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />

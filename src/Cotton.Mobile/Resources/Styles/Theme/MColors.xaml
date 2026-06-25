@@ -5,6 +5,7 @@
 
     <Color x:Key="M3Accent">#C6FF00</Color>
     <Color x:Key="M3OnAccent">#151900</Color>
+    <Color x:Key="M3DocumentSurface">#FFFFFF</Color>
 
     <Color x:Key="M3LightSurface">#FAFBF5</Color>
     <Color x:Key="M3LightOnSurface">#191D16</Color>

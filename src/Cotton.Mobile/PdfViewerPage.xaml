@@ -52,12 +52,12 @@
                         <Grid Padding="12,0">
                             <Border Stroke="{StaticResource M3DarkOutline}"
                                     StrokeThickness="1"
-                                    BackgroundColor="{StaticResource White}"
+                                    BackgroundColor="{StaticResource M3DocumentSurface}"
                                     HorizontalOptions="Fill">
                                 <Image Source="{Binding ImageSource}"
                                        Aspect="AspectFit"
                                        HeightRequest="{Binding DisplayHeight}"
-                                       BackgroundColor="{StaticResource White}"
+                                       BackgroundColor="{StaticResource M3DocumentSurface}"
                                        HorizontalOptions="Fill" />
                             </Border>
                         </Grid>

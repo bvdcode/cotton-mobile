@@ -6,7 +6,7 @@
              x:DataType="viewModels:AppLockGateViewModel"
              Shell.NavBarIsVisible="False"
              Title="Cotton locked"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <Grid Padding="24"
           RowDefinitions="*,Auto,*">
@@ -17,14 +17,14 @@
                    FontSize="28"
                    FontAttributes="Bold"
                    HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
             <Label Text="{Binding StatusText}"
                    FontSize="15"
                    MaxLines="3"
                    LineBreakMode="WordWrap"
                    HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                                IsVisible="{Binding IsBusy}"

@@ -18,10 +18,11 @@ namespace Cotton.Mobile
 	{
 		public static MauiApp CreateMauiApp()
 		{
-			var builder = MauiApp.CreateBuilder();
+			MauiAppBuilder builder = MauiApp.CreateBuilder();
 			builder
 				.UseMauiApp<App>()
-				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false);
+				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
+				.UseCottonDesignSystem();
 
 			builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);

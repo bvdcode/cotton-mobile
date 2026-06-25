@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.TrashPage"
              x:Name="TrashRoot"
              x:DataType="viewModels:TrashViewModel"
-             Shell.NavBarIsVisible="True"
+             Shell.NavBarIsVisible="False"
              Title="Trash"
              BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Refresh"
-                     Command="{Binding LoadCommand}" />
-        <ToolbarItem Text="{Binding SelectionToolbarText}"
-                     Command="{Binding ToggleSelectionModeCommand}" />
-        <ToolbarItem Text="Empty"
-                     Order="Secondary"
-                     Priority="10"
-                     Command="{Binding EmptyTrashCommand}" />
-    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="Auto,*"
+          BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+        <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
+                            PrimaryCommand="{Binding EmptyTrashCommand}"
+                            PrimaryDescription="Empty trash"
+                            SecondaryIconData="{x:Static controls:IconPathData.Check}"
+                            SecondaryCommand="{Binding ToggleSelectionModeCommand}"
+                            SecondaryDescription="{Binding SelectionToolbarText}"
+                            IsTertiaryActionVisible="True"
+                            TertiaryIconData="{x:Static controls:IconPathData.Refresh}"
+                            TertiaryCommand="{Binding LoadCommand}"
+                            TertiaryDescription="Refresh trash" />
 
-    <Grid Padding="16"
-          RowDefinitions="Auto,Auto,Auto,Auto,*"
-          RowSpacing="14">
+        <Grid Grid.Row="1"
+              Padding="16"
+              RowDefinitions="Auto,Auto,Auto,Auto,*"
+              RowSpacing="14">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
               ColumnSpacing="8">
             <VerticalStackLayout Spacing="2">
@@ -401,6 +405,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
+        </Grid>
         </Grid>
     </Grid>
 </ContentPage>

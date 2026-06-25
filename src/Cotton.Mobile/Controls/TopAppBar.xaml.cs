@@ -66,6 +66,29 @@ namespace Cotton.Mobile.Controls
             typeof(TopAppBar),
             true);
 
+        public static readonly BindableProperty TertiaryIconDataProperty = BindableProperty.Create(
+            nameof(TertiaryIconData),
+            typeof(Geometry),
+            typeof(TopAppBar),
+            default(Geometry));
+
+        public static readonly BindableProperty TertiaryCommandProperty = BindableProperty.Create(
+            nameof(TertiaryCommand),
+            typeof(ICommand),
+            typeof(TopAppBar));
+
+        public static readonly BindableProperty TertiaryDescriptionProperty = BindableProperty.Create(
+            nameof(TertiaryDescription),
+            typeof(string),
+            typeof(TopAppBar),
+            "Tertiary action");
+
+        public static readonly BindableProperty IsTertiaryActionVisibleProperty = BindableProperty.Create(
+            nameof(IsTertiaryActionVisible),
+            typeof(bool),
+            typeof(TopAppBar),
+            false);
+
         public TopAppBar()
         {
             InitializeComponent();
@@ -129,6 +152,30 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsSecondaryActionVisibleProperty);
             set => SetValue(IsSecondaryActionVisibleProperty, value);
+        }
+
+        public Geometry? TertiaryIconData
+        {
+            get => (Geometry?)GetValue(TertiaryIconDataProperty);
+            set => SetValue(TertiaryIconDataProperty, value);
+        }
+
+        public ICommand? TertiaryCommand
+        {
+            get => (ICommand?)GetValue(TertiaryCommandProperty);
+            set => SetValue(TertiaryCommandProperty, value);
+        }
+
+        public string TertiaryDescription
+        {
+            get => (string)GetValue(TertiaryDescriptionProperty);
+            set => SetValue(TertiaryDescriptionProperty, value);
+        }
+
+        public bool IsTertiaryActionVisible
+        {
+            get => (bool)GetValue(IsTertiaryActionVisibleProperty);
+            set => SetValue(IsTertiaryActionVisibleProperty, value);
         }
 
         private async void OnBackClicked(object? sender, EventArgs e)

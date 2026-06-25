@@ -6,52 +6,58 @@
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MediaViewerPage"
              x:DataType="viewModels:MediaViewerViewModel"
-             Shell.NavBarIsVisible="True"
+             Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
              BackgroundColor="{StaticResource M3DarkSurface}">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Share"
-                     Command="{Binding ShareCommand}" />
-        <ToolbarItem Text="Open"
-                     Command="{Binding OpenExternallyCommand}" />
-    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="Auto,*"
+          BackgroundColor="{StaticResource M3DarkSurface}">
+        <controls:TopAppBar TitleText="{Binding Title}"
+                                  UseDarkTheme="True"
+                                  PrimaryIconData="{x:Static controls:IconPathData.Share}"
+                                  PrimaryCommand="{Binding ShareCommand}"
+                                  PrimaryDescription="Share media"
+                                  SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                  SecondaryCommand="{Binding OpenExternallyCommand}"
+                                  SecondaryDescription="Open media" />
 
-    <Grid BackgroundColor="{StaticResource M3DarkSurface}">
-        <Grid BackgroundColor="{StaticResource M3DarkSurface}">
-            <toolkit:MediaElement x:Name="MediaPlayer"
-                                  Aspect="AspectFit"
-                                  ShouldAutoPlay="False"
-                                  ShouldLoopPlayback="False"
-                                  ShouldShowPlaybackControls="True"
-                                  HorizontalOptions="Fill"
-                                  VerticalOptions="Fill" />
+        <Grid Grid.Row="1"
+              BackgroundColor="{StaticResource M3DarkSurface}">
+            <Grid BackgroundColor="{StaticResource M3DarkSurface}">
+                <toolkit:MediaElement x:Name="MediaPlayer"
+                                      Aspect="AspectFit"
+                                      ShouldAutoPlay="False"
+                                      ShouldLoopPlayback="False"
+                                      ShouldShowPlaybackControls="True"
+                                      HorizontalOptions="Fill"
+                                      VerticalOptions="Fill" />
 
-            <VerticalStackLayout x:Name="StartOverlay"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center">
-                <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                     IconColor="{StaticResource M3OnAccent}"
-                                     ButtonBackgroundColor="{StaticResource M3Accent}"
-                                     BorderColor="{StaticResource M3Accent}"
-                                     ButtonSize="60"
-                                     IconSize="24"
-                                     ButtonCornerRadius="30"
-                                     Clicked="OnPlayClicked"
+                <VerticalStackLayout x:Name="StartOverlay"
                                      HorizontalOptions="Center"
-                                     SemanticProperties.Description="Play media" />
-            </VerticalStackLayout>
+                                     VerticalOptions="Center">
+                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                         IconColor="{StaticResource M3OnAccent}"
+                                         ButtonBackgroundColor="{StaticResource M3Accent}"
+                                         BorderColor="{StaticResource M3Accent}"
+                                         ButtonSize="60"
+                                         IconSize="24"
+                                         ButtonCornerRadius="30"
+                                         Clicked="OnPlayClicked"
+                                         HorizontalOptions="Center"
+                                         SemanticProperties.Description="Play media" />
+                </VerticalStackLayout>
 
+            </Grid>
+
+            <Label Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   Margin="16"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource M3DarkOnSurfaceVariant}"
+                   HorizontalOptions="Start"
+                   VerticalOptions="End" />
         </Grid>
-
-        <Label Text="{Binding Status}"
-               IsVisible="{Binding IsStatusVisible}"
-               Margin="16"
-               FontSize="12"
-               MaxLines="1"
-               LineBreakMode="TailTruncation"
-               TextColor="{StaticResource M3DarkOnSurfaceVariant}"
-               HorizontalOptions="Start"
-               VerticalOptions="End" />
     </Grid>
 </ContentPage>

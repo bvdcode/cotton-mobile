@@ -5,54 +5,60 @@
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.ImageViewerPage"
              x:DataType="viewModels:ImageViewerViewModel"
-             Shell.NavBarIsVisible="True"
+             Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
              BackgroundColor="{StaticResource M3DarkSurface}">
 
-    <ContentPage.ToolbarItems>
-        <ToolbarItem Text="Share"
-                     Command="{Binding ShareCommand}" />
-        <ToolbarItem Text="Open"
-                     Command="{Binding OpenExternallyCommand}" />
-    </ContentPage.ToolbarItems>
+    <Grid RowDefinitions="Auto,*"
+          BackgroundColor="{StaticResource M3DarkSurface}">
+        <controls:TopAppBar TitleText="{Binding Title}"
+                                  UseDarkTheme="True"
+                                  PrimaryIconData="{x:Static controls:IconPathData.Share}"
+                                  PrimaryCommand="{Binding ShareCommand}"
+                                  PrimaryDescription="Share image"
+                                  SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                  SecondaryCommand="{Binding OpenExternallyCommand}"
+                                  SecondaryDescription="Open image" />
 
-    <Grid BackgroundColor="{StaticResource M3DarkSurface}">
-        <Grid x:Name="ImageSurface"
+        <Grid Grid.Row="1"
               BackgroundColor="{StaticResource M3DarkSurface}">
-            <Image x:Name="PreviewImage"
-                   Source="{Binding ImageSource}"
-                   Aspect="AspectFit"
-                   HorizontalOptions="Fill"
-                   VerticalOptions="Fill">
-                <Image.GestureRecognizers>
-                    <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
-                    <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
-                    <TapGestureRecognizer NumberOfTapsRequired="2"
-                                          Tapped="OnImageDoubleTapped" />
-                </Image.GestureRecognizers>
-            </Image>
+            <Grid x:Name="ImageSurface"
+                  BackgroundColor="{StaticResource M3DarkSurface}">
+                <Image x:Name="PreviewImage"
+                       Source="{Binding ImageSource}"
+                       Aspect="AspectFit"
+                       HorizontalOptions="Fill"
+                       VerticalOptions="Fill">
+                    <Image.GestureRecognizers>
+                        <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
+                        <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
+                        <TapGestureRecognizer NumberOfTapsRequired="2"
+                                              Tapped="OnImageDoubleTapped" />
+                    </Image.GestureRecognizers>
+                </Image>
+            </Grid>
+
+            <Label Text="{Binding Status}"
+                   IsVisible="{Binding IsStatusVisible}"
+                   Margin="16,0,104,16"
+                   FontSize="12"
+                   MaxLines="1"
+                   LineBreakMode="TailTruncation"
+                   TextColor="{StaticResource M3DarkOnSurfaceVariant}"
+                   HorizontalOptions="Start"
+                   VerticalOptions="End" />
+
+            <controls:IconButton x:Name="ResetButton"
+                                 IconData="{x:Static controls:IconPathData.Reset}"
+                                 IconColor="{StaticResource M3DarkOnSurface}"
+                                 ButtonBackgroundColor="{StaticResource M3DarkSurfaceContainerHigh}"
+                                 BorderColor="{StaticResource M3DarkOutlineVariant}"
+                                 Clicked="OnResetClicked"
+                                 IsVisible="False"
+                                 Margin="16"
+                                 HorizontalOptions="End"
+                                 VerticalOptions="End"
+                                 SemanticProperties.Description="Reset image" />
         </Grid>
-
-        <Label Text="{Binding Status}"
-               IsVisible="{Binding IsStatusVisible}"
-               Margin="16,0,104,16"
-               FontSize="12"
-               MaxLines="1"
-               LineBreakMode="TailTruncation"
-               TextColor="{StaticResource M3DarkOnSurfaceVariant}"
-               HorizontalOptions="Start"
-               VerticalOptions="End" />
-
-        <controls:IconButton x:Name="ResetButton"
-                             IconData="{x:Static controls:IconPathData.Reset}"
-                             IconColor="{StaticResource M3DarkOnSurface}"
-                             ButtonBackgroundColor="{StaticResource M3DarkSurfaceContainerHigh}"
-                             BorderColor="{StaticResource M3DarkOutlineVariant}"
-                             Clicked="OnResetClicked"
-                             IsVisible="False"
-                             Margin="16"
-                             HorizontalOptions="End"
-                             VerticalOptions="End"
-                             SemanticProperties.Description="Reset image" />
     </Grid>
 </ContentPage>

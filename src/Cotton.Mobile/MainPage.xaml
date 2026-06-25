@@ -220,10 +220,8 @@
                                    TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
+                                    Style="{StaticResource M3TonalPanel}"
                                     Padding="12,8"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}"
                                     SemanticProperties.Description="{Binding Display.TransferActivityIndicator.AccessibilityText}">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border"
@@ -286,10 +284,8 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
+                                    Style="{StaticResource M3TonalPanel}"
                                     Padding="12,8"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}"
                                     SemanticProperties.Description="{Binding Display.BackupActivityIndicator.AccessibilityText}">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenBackupSetupCommand}" />
@@ -323,10 +319,8 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
+                                    Style="{StaticResource M3TonalPanel}"
                                     Padding="12,8"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}"
                                     SemanticProperties.Description="{Binding Display.OfflinePackProgress.AccessibilityText}">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
                                       ColumnSpacing="8"
@@ -356,10 +350,8 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
-                                    Padding="14"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}">
+                                    Style="{StaticResource M3TonalPanel}"
+                                    Padding="14">
                                 <Grid ColumnDefinitions="Auto,*"
                                       ColumnSpacing="10">
                                     <Border WidthRequest="28"
@@ -403,10 +395,8 @@
                                        PlaceholderColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
-                                    Padding="12,8"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}">
+                                    Style="{StaticResource M3TonalPanel}"
+                                    Padding="12,8">
                                 <Grid ColumnDefinitions="*,Auto,Auto"
                                       ColumnSpacing="8"
                                       HeightRequest="40">
@@ -473,10 +463,8 @@
                                     MinimumWidthRequest="64" />
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
-                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                    StrokeShape="RoundRectangle 18"
-                                    Padding="28,36"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                                    Style="{StaticResource M3SurfaceCard}"
+                                    Padding="28,36">
                                 <VerticalStackLayout Spacing="8"
                                                      HorizontalOptions="Center"
                                                      VerticalOptions="Center">
@@ -798,11 +786,9 @@
 
         <Border Grid.Row="2"
                 IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
-                Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                StrokeShape="RoundRectangle 18"
+                Style="{StaticResource M3SurfaceCard}"
                 Padding="6"
-                Margin="0,0,0,10"
-                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                Margin="0,0,0,10">
             <Grid ColumnDefinitions="*,*,*,*"
                   ColumnSpacing="6">
                 <Border Grid.Column="0"

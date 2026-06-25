@@ -104,86 +104,90 @@
                         <VerticalStackLayout x:Name="FileBrowserContent"
                                              Spacing="12"
                                              HorizontalOptions="Fill">
-                            <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto"
-                                  ColumnSpacing="8">
-                                <controls:IconButton Grid.Column="0"
-                                                     IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                     Command="{Binding NavigateFilesUpCommand}"
-                                                     IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
-                                                     IsVisible="{Binding Display.IsFileUpButtonVisible}"
-                                                     ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
-                                                     VerticalOptions="Center"
-                                                     SemanticProperties.Description="Up" />
+                            <Grid RowDefinitions="Auto,Auto"
+                                  RowSpacing="8">
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="10">
+                                    <controls:IconButton Grid.Column="0"
+                                                         IconData="{x:Static controls:IconPathData.ArrowUp}"
+                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Command="{Binding NavigateFilesUpCommand}"
+                                                         IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
+                                                         IsVisible="{Binding Display.IsFileUpButtonVisible}"
+                                                         ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="Up" />
 
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Spacing="1"
-                                                     VerticalOptions="Center">
-                                    <Label Text="{Binding Display.FilesTitle}"
-                                           Style="{StaticResource M3BrowserTitle}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="1"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Display.FilesTitle}"
+                                               Style="{StaticResource M3BrowserTitle}"
+                                               MaxLines="1"
+                                               LineBreakMode="TailTruncation" />
 
-                                    <Label Text="{Binding Display.FilesPath}"
-                                           IsVisible="{Binding Display.IsFilesPathVisible}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Display.FilesPath}"
+                                               IsVisible="{Binding Display.IsFilesPathVisible}"
+                                               Style="{StaticResource M3CardMeta}"
+                                               LineBreakMode="TailTruncation" />
 
-                                    <Label Text="{Binding Display.FilesStatus}"
-                                           IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
-                                </VerticalStackLayout>
+                                        <Label Text="{Binding Display.FilesStatus}"
+                                               IsVisible="{Binding Display.IsFilesStatusVisible}"
+                                               Style="{StaticResource M3CardMeta}"
+                                               MaxLines="1"
+                                               LineBreakMode="TailTruncation" />
+                                    </VerticalStackLayout>
 
-                                <controls:IconButton Grid.Column="2"
-                                                     IconData="{x:Static controls:IconPathData.Search}"
-                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                     Command="{Binding ToggleFileSearchCommand}"
-                                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                     VerticalOptions="Center"
-                                                     SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
-                                    <controls:IconButton.Triggers>
-                                        <DataTrigger TargetType="controls:IconButton"
-                                                     Binding="{Binding Display.IsFileSearchVisible}"
-                                                     Value="True">
-                                            <Setter Property="IconData"
-                                                    Value="{x:Static controls:IconPathData.Close}" />
-                                        </DataTrigger>
-                                    </controls:IconButton.Triggers>
-                                </controls:IconButton>
+                                    <Button Grid.Column="2"
+                                            Style="{StaticResource IconChromeButton}"
+                                            Text="{Binding Display.ProfileInitials}"
+                                            Command="{Binding AccountCommand}"
+                                            IsEnabled="{Binding Display.IsAccountActionEnabled}"
+                                            VerticalOptions="Center"
+                                            SemanticProperties.Description="Account" />
+                                </Grid>
 
-                                <Button Grid.Column="3"
-                                        Style="{StaticResource IconChromeButton}"
-                                        Text="{Binding Display.FileSortButtonText}"
-                                        Command="{Binding ShowFileSortActionsCommand}"
-                                        IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                        IsVisible="{Binding Display.IsFileSortButtonVisible}"
-                                        VerticalOptions="Center"
-                                        SemanticProperties.Description="Sort files" />
+                                <HorizontalStackLayout Grid.Row="1"
+                                                       Spacing="8"
+                                                       HorizontalOptions="End">
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
+                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Command="{Binding ToggleFileSearchCommand}"
+                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
+                                        <controls:IconButton.Triggers>
+                                            <DataTrigger TargetType="controls:IconButton"
+                                                         Binding="{Binding Display.IsFileSearchVisible}"
+                                                         Value="True">
+                                                <Setter Property="IconData"
+                                                        Value="{x:Static controls:IconPathData.Close}" />
+                                            </DataTrigger>
+                                        </controls:IconButton.Triggers>
+                                    </controls:IconButton>
 
-                                <controls:IconButton Grid.Column="4"
-                                                     IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                                     IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                     ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                     BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                     Command="{Binding ShowFileViewActionsCommand}"
-                                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                     IsVisible="{Binding Display.IsFileViewButtonVisible}"
-                                                     VerticalOptions="Center"
-                                                     SemanticProperties.Description="Change file view" />
+                                    <Button Style="{StaticResource IconChromeButton}"
+                                            Text="{Binding Display.FileSortButtonText}"
+                                            Command="{Binding ShowFileSortActionsCommand}"
+                                            IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                            IsVisible="{Binding Display.IsFileSortButtonVisible}"
+                                            VerticalOptions="Center"
+                                            SemanticProperties.Description="Sort files" />
 
-                                <Button Grid.Column="5"
-                                        Style="{StaticResource IconChromeButton}"
-                                        Text="{Binding Display.ProfileInitials}"
-                                        Command="{Binding AccountCommand}"
-                                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                        VerticalOptions="Center"
-                                        SemanticProperties.Description="Account" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
+                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
+                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
+                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Command="{Binding ShowFileViewActionsCommand}"
+                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                         IsVisible="{Binding Display.IsFileViewButtonVisible}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="Change file view" />
+                                </HorizontalStackLayout>
                             </Grid>
 
                             <Label Text="{Binding Display.ProfileStatus}"

@@ -167,10 +167,8 @@
 
         <Grid Grid.Row="4">
             <Border IsVisible="{Binding IsEmpty}"
-                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="28,36"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                    Style="{StaticResource M3SurfaceCard}"
+                    Padding="28,36">
                 <VerticalStackLayout Spacing="8"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">
@@ -200,16 +198,16 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                StrokeShape="RoundRectangle 18"
-                                Padding="16"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                        <Border Style="{StaticResource M3SurfaceCard}"
+                                Padding="16">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
                                             Value="{StaticResource M3Accent}" />
+                                    <Setter Property="StrokeThickness"
+                                            Value="1" />
                                     <Setter Property="BackgroundColor"
                                             Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>
@@ -308,17 +306,17 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                StrokeShape="RoundRectangle 18"
+                        <Border Style="{StaticResource M3SurfaceCard}"
                                 Padding="12"
-                                HeightRequest="190"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                                HeightRequest="190">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
                                             Value="{StaticResource M3Accent}" />
+                                    <Setter Property="StrokeThickness"
+                                            Value="1" />
                                     <Setter Property="BackgroundColor"
                                             Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>

@@ -54,10 +54,8 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <VerticalStackLayout Spacing="8">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
@@ -107,10 +105,8 @@
                         HeightRequest="44" />
             </VerticalStackLayout>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <VerticalStackLayout Spacing="12">
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="12">
@@ -175,10 +171,8 @@
                 </VerticalStackLayout>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <VerticalStackLayout Spacing="12">
                     <VerticalStackLayout Spacing="2">
                         <Label Text="Temporary files"

@@ -47,10 +47,8 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="8"
@@ -102,10 +100,8 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="6"
@@ -144,10 +140,8 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                       RowSpacing="8">
                     <Label Text="{Binding HealthTitle}"
@@ -180,10 +174,8 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12"
@@ -231,10 +223,8 @@
                 </Grid>
             </Border>
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="16"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+            <Border Style="{StaticResource M3SurfaceCard}"
+                    Padding="16">
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="*,Auto"
                       RowSpacing="12"

@@ -19,6 +19,10 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Close => Create("M6.4 5 L12 10.6 L17.6 5 L19 6.4 L13.4 12 L19 17.6 L17.6 19 L12 13.4 L6.4 19 L5 17.6 L10.6 12 L5 6.4 Z");
 
+        public static Geometry Copy => Create("M8 7 L8 20 L19 20 L19 7 Z M10 9 L17 9 L17 18 L10 18 Z M5 4 L16 4 L16 6 L7 6 L7 17 L5 17 Z");
+
+        public static Geometry Delete => Create("M9 3 L15 3 L16 5 L21 5 L21 7 L19 7 L18 21 L6 21 L5 7 L3 7 L3 5 L8 5 Z M7 7 L8 19 L16 19 L17 7 Z M10 9 L12 9 L12 17 L10 17 Z M14 9 L16 9 L16 17 L14 17 Z");
+
         public static Geometry Download => Create("M11 4 L13 4 L13 13 L16.5 9.5 L18 11 L12 17 L6 11 L7.5 9.5 L11 13 Z M5 19 L19 19 L19 21 L5 21 Z");
 
         public static Geometry Error => Create("M12 3 L22 20 L2 20 Z M11 9 L13 9 L13 14 L11 14 Z M11 16 L13 16 L13 18 L11 18 Z");
@@ -34,6 +38,8 @@ namespace Cotton.Mobile.Controls
         public static Geometry Reset => Create("M12 5 C8.7 5 6 7.7 6 11 L3 11 L7 15 L11 11 L8 11 C8 8.8 9.8 7 12 7 C14.2 7 16 8.8 16 11 C16 13.2 14.2 15 12 15 C10.8 15 9.7 14.5 9 13.7 L7.6 15.1 C8.7 16.3 10.3 17 12 17 C15.3 17 18 14.3 18 11 C18 7.7 15.3 5 12 5 Z");
 
         public static Geometry Refresh => Create("M17.7 6.3 C16.2 4.9 14.2 4 12 4 C7.6 4 4 7.6 4 12 L2 12 L5 15 L8 12 L6 12 C6 8.7 8.7 6 12 6 C13.7 6 15.2 6.7 16.3 7.7 L13 11 L21 11 L21 3 Z M6.3 17.7 C7.8 19.1 9.8 20 12 20 C16.4 20 20 16.4 20 12 L22 12 L19 9 L16 12 L18 12 C18 15.3 15.3 18 12 18 C10.3 18 8.8 17.3 7.7 16.3 L11 13 L3 13 L3 21 Z");
+
+        public static Geometry Save => Create("M5 4 L17 4 L21 8 L21 20 L3 20 L3 4 Z M7 6 L7 11 L16 11 L16 6 Z M8 14 L8 18 L16 18 L16 14 Z M17 6 L17 11 L19 11 L19 8 Z");
 
         public static Geometry Search => Create("M9.5 3 C5.9 3 3 5.9 3 9.5 C3 13.1 5.9 16 9.5 16 C11 16 12.4 15.5 13.5 14.7 L18.7 20 L20 18.7 L14.8 13.5 C15.6 12.4 16 11 16 9.5 C16 5.9 13.1 3 9.5 3 Z M9.5 5 C12 5 14 7 14 9.5 C14 12 12 14 9.5 14 C7 14 5 12 5 9.5 C5 7 7 5 9.5 5 Z");
 

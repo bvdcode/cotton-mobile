@@ -21,12 +21,7 @@ namespace Cotton.Mobile
 			var builder = MauiApp.CreateBuilder();
 			builder
 				.UseMauiApp<App>()
-				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
-				.ConfigureFonts(fonts =>
-				{
-					fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-					fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
-				});
+				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false);
 
 			builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
 			builder.Services.AddSingleton<IPreferences>(Preferences.Default);

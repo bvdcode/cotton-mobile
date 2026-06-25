@@ -27,17 +27,15 @@
             <VerticalStackLayout Padding="16,12"
                                  Spacing="2">
                 <Label Text="{Binding Details}"
-                       FontSize="12"
+                       Style="{StaticResource M3DarkSupporting}"
                        MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{StaticResource M3DarkOnSurfaceVariant}" />
+                       LineBreakMode="TailTruncation" />
 
                 <Label Text="{Binding Status}"
                        IsVisible="{Binding IsStatusVisible}"
-                       FontSize="12"
+                       Style="{StaticResource M3DarkSupporting}"
                        MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{StaticResource M3DarkOnSurfaceVariant}" />
+                       LineBreakMode="TailTruncation" />
             </VerticalStackLayout>
 
             <CollectionView Grid.Row="1"
@@ -71,8 +69,7 @@
                   IsVisible="{Binding IsEmptyVisible}"
                   Padding="24">
                 <Label Text="{Binding EmptyText}"
-                       FontSize="14"
-                       TextColor="{StaticResource M3DarkOnSurfaceVariant}"
+                       Style="{StaticResource M3DarkBodyMedium}"
                        HorizontalTextAlignment="Center"
                        HorizontalOptions="Center"
                        VerticalOptions="Center" />

@@ -181,6 +181,12 @@
         <Setter Property="MinimumWidthRequest" Value="44" />
     </Style>
 
+    <Style TargetType="Editor" x:Key="TextViewerContentEditor">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="FontSize" Value="15" />
+    </Style>
+
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />

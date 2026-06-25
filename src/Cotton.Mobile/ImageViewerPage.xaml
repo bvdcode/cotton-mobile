@@ -41,10 +41,9 @@
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
                    Margin="16,0,104,16"
-                   FontSize="12"
+                   Style="{StaticResource M3DarkSupporting}"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{StaticResource M3DarkOnSurfaceVariant}"
                    HorizontalOptions="Start"
                    VerticalOptions="End" />
 

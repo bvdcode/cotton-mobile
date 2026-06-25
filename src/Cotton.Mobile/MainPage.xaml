@@ -47,15 +47,17 @@
                            Style="{StaticResource M3BodyMedium}" />
                 </VerticalStackLayout>
 
-                <VerticalStackLayout IsVisible="{Binding Display.IsSignInVisible}"
-                                     Spacing="16"
-                                     MaximumWidthRequest="520">
-                    <VerticalStackLayout Spacing="8">
+                <Border IsVisible="{Binding Display.IsSignInVisible}"
+                        Style="{StaticResource M3AuthPanel}"
+                        Padding="14"
+                        MaximumWidthRequest="520"
+                        HorizontalOptions="Fill">
+                    <VerticalStackLayout Spacing="14">
                         <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
                                 StrokeThickness="1"
-                                StrokeShape="RoundRectangle 18"
-                                Padding="14,3"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                                StrokeShape="RoundRectangle 20"
+                                Padding="14,4"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}">
                             <Entry Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                    Keyboard="Url"
                                    ReturnType="Go"
@@ -68,14 +70,14 @@
                         <Label Text="{Binding Display.Status}"
                                IsVisible="{Binding Display.IsStatusVisible}"
                                Style="{StaticResource M3BodyMedium}" />
-                    </VerticalStackLayout>
 
-                    <Button Text="Connect"
-                            Command="{Binding ConnectCommand}"
-                            IsEnabled="{Binding Display.IsInputEnabled}"
-                            Style="{StaticResource M3PrimaryButton}"
-                            HorizontalOptions="Fill" />
-                </VerticalStackLayout>
+                        <Button Text="Connect"
+                                Command="{Binding ConnectCommand}"
+                                IsEnabled="{Binding Display.IsInputEnabled}"
+                                Style="{StaticResource M3PrimaryButton}"
+                                HorizontalOptions="Fill" />
+                    </VerticalStackLayout>
+                </Border>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                      Spacing="16"

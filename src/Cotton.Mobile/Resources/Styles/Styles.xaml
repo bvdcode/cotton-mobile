@@ -32,6 +32,14 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3AuthPanel">
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 28" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3AccentOutlineChip">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />

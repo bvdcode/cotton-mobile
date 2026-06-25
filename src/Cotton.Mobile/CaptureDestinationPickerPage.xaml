@@ -29,10 +29,9 @@
 
                     <Label Text="{Binding PathText}"
                            IsVisible="{Binding IsPathTextVisible}"
-                           FontSize="13"
+                           Style="{StaticResource M3BodyMedium}"
                            MaxLines="2"
-                           LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -43,10 +42,9 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   FontSize="13"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="2"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   LineBreakMode="TailTruncation" />
 
             <Grid ColumnDefinitions="Auto,*"
                   ColumnSpacing="10">
@@ -65,10 +63,9 @@
             </Grid>
 
             <Label Text="{Binding SummaryText}"
-                   FontSize="13"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="1"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   LineBreakMode="TailTruncation" />
 
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3SurfaceCard}"
@@ -77,17 +74,14 @@
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">
                     <Label Text="No folders here"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                           Style="{StaticResource M3EmptyTitle}"
+                           HorizontalTextAlignment="Center" />
 
                     <Label Text="Choose this folder or go back."
-                           FontSize="12"
+                           Style="{StaticResource M3CardSupporting}"
                            MaxLines="2"
                            LineBreakMode="WordWrap"
-                           HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </Border>
 
@@ -105,12 +99,10 @@
                             <Grid ColumnDefinitions="*,Auto"
                                   ColumnSpacing="10">
                                 <Label Text="{Binding DisplayName}"
-                                       FontSize="15"
-                                       FontAttributes="Bold"
+                                       Style="{StaticResource M3CardTitle}"
                                        MaxLines="1"
                                        LineBreakMode="TailTruncation"
-                                       VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                       VerticalOptions="Center" />
 
                                 <Button Grid.Column="1"
                                         Text="Open"

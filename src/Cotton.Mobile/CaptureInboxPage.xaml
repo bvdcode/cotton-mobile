@@ -39,10 +39,9 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   FontSize="13"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="2"
-                   LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   LineBreakMode="TailTruncation" />
 
             <Grid ColumnDefinitions="*,*,*"
                   ColumnSpacing="10"
@@ -74,17 +73,14 @@
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">
                     <Label Text="{Binding EmptyMessage}"
-                           FontSize="16"
-                           FontAttributes="Bold"
-                           HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                           Style="{StaticResource M3EmptyTitle}"
+                           HorizontalTextAlignment="Center" />
 
                     <Label Text="{Binding EmptyDetails}"
-                           FontSize="12"
+                           Style="{StaticResource M3CardSupporting}"
                            MaxLines="2"
                            LineBreakMode="WordWrap"
-                           HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                           HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </Border>
 
@@ -101,17 +97,14 @@
                                   ColumnSpacing="10">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{Binding DisplayName}"
-                                           FontSize="15"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardTitle}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="TailTruncation" />
 
                                     <Label Text="{Binding DetailText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
 
                                 <Border Grid.Column="1"
@@ -121,11 +114,9 @@
                                         BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
                                         VerticalOptions="Start">
                                     <Label Text="{Binding StatusText}"
-                                           FontSize="11"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3ChipLabel}"
                                            MaxLines="1"
-                                           LineBreakMode="NoWrap"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="NoWrap" />
                                 </Border>
 
                                 <Grid Grid.Row="1"
@@ -133,35 +124,30 @@
                                       ColumnDefinitions="Auto,*"
                                       ColumnSpacing="8">
                                     <Label Text="{Binding KindText}"
-                                           FontSize="12"
-                                           FontAttributes="Bold"
+                                           Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
-                                           LineBreakMode="NoWrap"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                           LineBreakMode="NoWrap" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding MetadataText}"
-                                           FontSize="12"
+                                           Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                                           LineBreakMode="TailTruncation" />
                                 </Grid>
 
                                 <Label Grid.Row="2"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding DestinationText}"
                                        IsVisible="{Binding IsDestinationVisible}"
-                                       FontSize="12"
-                                       FontAttributes="Bold"
+                                       Style="{StaticResource M3CardSupportingStrong}"
                                        MaxLines="2"
-                                       LineBreakMode="WordWrap"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                                       LineBreakMode="WordWrap" />
 
                                 <Label Grid.Row="3"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"
-                                       FontSize="12"
+                                       Style="{StaticResource M3CardSupporting}"
                                        MaxLines="2"
                                        LineBreakMode="WordWrap"
                                        TextColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />

@@ -72,6 +72,20 @@
 
     <Style TargetType="Label" x:Key="M3CardSupporting" BasedOn="{StaticResource M3LabelMedium}" />
 
+    <Style TargetType="Label" x:Key="M3CardSupportingStrong" BasedOn="{StaticResource M3LabelMedium}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3LabelSmall">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="LineHeight" Value="1.27" />
+        <Setter Property="CharacterSpacing" Value="0" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3CardMeta" BasedOn="{StaticResource M3LabelSmall}" />
+
     <Style TargetType="Label" x:Key="M3ChipLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="11" />

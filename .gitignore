@@ -54,4 +54,5 @@ src/Cotton.Mobile/Platforms/Android/google-services.json
 data/
 notes/
 .qa/
+.temp/
 AGENTS.md

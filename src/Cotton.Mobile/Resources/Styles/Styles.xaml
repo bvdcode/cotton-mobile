@@ -40,6 +40,14 @@
         <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3OutlinedInputField">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 20" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="14,4" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3AccentOutlineChip">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />

@@ -53,11 +53,7 @@
                         MaximumWidthRequest="520"
                         HorizontalOptions="Fill">
                     <VerticalStackLayout Spacing="14">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                StrokeThickness="1"
-                                StrokeShape="RoundRectangle 20"
-                                Padding="14,4"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}">
+                        <Border Style="{StaticResource M3OutlinedInputField}">
                             <Entry Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                    Keyboard="Url"
                                    ReturnType="Go"

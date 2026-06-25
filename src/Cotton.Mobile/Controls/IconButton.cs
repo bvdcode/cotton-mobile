@@ -6,7 +6,7 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class IconButton : ContentView
+    public class IconButton : PressableContentView
     {
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -92,10 +92,6 @@ namespace Cotton.Mobile.Controls
                 VerticalOptions = LayoutOptions.Center,
                 Content = _icon,
             };
-
-            TapGestureRecognizer tap = new();
-            tap.Tapped += HandleTapped;
-            GestureRecognizers.Add(tap);
 
             Content = _container;
             UpdateVisualState();
@@ -189,13 +185,18 @@ namespace Cotton.Mobile.Controls
             iconButton.UpdateVisualState();
         }
 
-        private void HandleTapped(object? sender, TappedEventArgs e)
+        protected override bool CanHandlePress()
         {
-            if (!IsEnabled || !CanExecuteCommand())
-            {
-                return;
-            }
+            return IsEnabled && CanExecuteCommand();
+        }
 
+        protected override void OnPressedStateChanged()
+        {
+            UpdateVisualState();
+        }
+
+        protected override void ExecutePress()
+        {
             ICommand? command = Command;
             object? parameter = CommandParameter;
             if (command?.CanExecute(parameter) == true)
@@ -243,7 +244,7 @@ namespace Cotton.Mobile.Controls
             HeightRequest = ButtonSize;
             MinimumWidthRequest = ButtonSize;
             MinimumHeightRequest = ButtonSize;
-            Opacity = IsEnabled && CanExecuteCommand() ? ButtonOpacity : DisabledOpacity;
+            Opacity = ResolvePressableOpacity(ButtonOpacity, DisabledOpacity);
 
             _container.WidthRequest = ButtonSize;
             _container.HeightRequest = ButtonSize;

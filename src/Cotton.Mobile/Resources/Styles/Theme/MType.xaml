@@ -17,6 +17,14 @@
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3ScreenMetric" BasedOn="{StaticResource M3HeadlineLarge}">
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ScreenTitle" BasedOn="{StaticResource M3HeadlineMedium}">
+        <Setter Property="FontAttributes" Value="Bold" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3TitleLarge">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="22" />

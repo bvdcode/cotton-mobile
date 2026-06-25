@@ -14,10 +14,8 @@
                              Spacing="16"
                              HorizontalOptions="Fill">
             <Label Text="{Binding Title}"
-                   FontSize="28"
-                   FontAttributes="Bold"
-                   HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                   Style="{StaticResource M3ScreenTitle}"
+                   HorizontalTextAlignment="Center" />
 
             <Label Text="{Binding StatusText}"
                    FontSize="15"

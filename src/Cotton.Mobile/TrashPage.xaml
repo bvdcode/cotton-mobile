@@ -32,11 +32,9 @@
               ColumnSpacing="8">
             <VerticalStackLayout Spacing="2">
                 <Label Text="Trash"
-                       FontSize="28"
-                       FontAttributes="Bold"
+                       Style="{StaticResource M3ScreenTitle}"
                        MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+                       LineBreakMode="TailTruncation" />
 
                 <Label Text="{Binding SummaryText}"
                        FontSize="13"

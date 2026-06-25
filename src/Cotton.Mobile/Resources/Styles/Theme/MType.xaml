@@ -53,6 +53,14 @@
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3AppBarTitle">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="LineHeight" Value="1.33" />
+        <Setter Property="CharacterSpacing" Value="0" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3BodyMedium">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FontSize" Value="14" />
@@ -142,6 +150,10 @@
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="LineHeight" Value="1.27" />
         <Setter Property="CharacterSpacing" Value="0" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ErrorSupporting" BasedOn="{StaticResource M3CardSupporting}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3NavigationSelectedLabel">

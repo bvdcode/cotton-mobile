@@ -38,11 +38,9 @@
 
         <Label Grid.Column="1"
                Text="{Binding Source={x:Reference Root}, Path=TitleText}"
-               FontSize="18"
-               FontAttributes="Bold"
+               Style="{StaticResource M3AppBarTitle}"
                MaxLines="1"
                LineBreakMode="TailTruncation"
-               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                VerticalOptions="Center">
             <Label.Triggers>
                 <DataTrigger TargetType="Label"

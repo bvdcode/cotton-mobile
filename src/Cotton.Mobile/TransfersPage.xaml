@@ -118,10 +118,9 @@
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"
-                                       Style="{StaticResource M3CardSupporting}"
+                                       Style="{StaticResource M3ErrorSupporting}"
                                        MaxLines="2"
-                                       LineBreakMode="WordWrap"
-                                       TextColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                       LineBreakMode="WordWrap" />
                             </Grid>
                         </Border>
                     </DataTemplate>

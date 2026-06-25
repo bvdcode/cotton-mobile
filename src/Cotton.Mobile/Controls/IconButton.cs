@@ -67,17 +67,20 @@ namespace Cotton.Mobile.Controls
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
-            typeof(IconButton));
+            typeof(IconButton),
+            propertyChanged: OnCommandPropertyChanged);
 
         public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
             nameof(CommandParameter),
             typeof(object),
-            typeof(IconButton));
+            typeof(IconButton),
+            propertyChanged: OnVisualPropertyChanged);
 
         private const double DisabledOpacity = 0.5;
 
         private readonly Border _container;
         private readonly IconView _icon;
+        private ICommand? _observedCommand;
 
         public IconButton()
         {
@@ -176,9 +179,19 @@ namespace Cotton.Mobile.Controls
             iconButton.UpdateVisualState();
         }
 
+        private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            IconButton iconButton = (IconButton)bindable;
+            ICommand? oldCommand = oldValue as ICommand;
+            ICommand? newCommand = newValue as ICommand;
+
+            iconButton.ObserveCommand(oldCommand, newCommand);
+            iconButton.UpdateVisualState();
+        }
+
         private void HandleTapped(object? sender, TappedEventArgs e)
         {
-            if (!IsEnabled)
+            if (!IsEnabled || !CanExecuteCommand())
             {
                 return;
             }
@@ -193,13 +206,44 @@ namespace Cotton.Mobile.Controls
             Clicked?.Invoke(this, EventArgs.Empty);
         }
 
+        private bool CanExecuteCommand()
+        {
+            ICommand? command = Command;
+            if (command is null)
+            {
+                return true;
+            }
+
+            return command.CanExecute(CommandParameter);
+        }
+
+        private void ObserveCommand(ICommand? oldCommand, ICommand? newCommand)
+        {
+            if (oldCommand is not null && ReferenceEquals(_observedCommand, oldCommand))
+            {
+                oldCommand.CanExecuteChanged -= OnCommandCanExecuteChanged;
+                _observedCommand = null;
+            }
+
+            if (newCommand is not null)
+            {
+                newCommand.CanExecuteChanged += OnCommandCanExecuteChanged;
+                _observedCommand = newCommand;
+            }
+        }
+
+        private void OnCommandCanExecuteChanged(object? sender, EventArgs e)
+        {
+            UpdateVisualState();
+        }
+
         private void UpdateVisualState()
         {
             WidthRequest = ButtonSize;
             HeightRequest = ButtonSize;
             MinimumWidthRequest = ButtonSize;
             MinimumHeightRequest = ButtonSize;
-            Opacity = IsEnabled ? ButtonOpacity : DisabledOpacity;
+            Opacity = IsEnabled && CanExecuteCommand() ? ButtonOpacity : DisabledOpacity;
 
             _container.WidthRequest = ButtonSize;
             _container.HeightRequest = ButtonSize;

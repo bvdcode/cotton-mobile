@@ -8,21 +8,21 @@
              Shell.NavBarIsVisible="False">
 
     <Grid x:Name="RootLayout"
-          Padding="18,0,18,16"
+          Padding="16,0,16,16"
           RowDefinitions="*,Auto,Auto,Auto">
         <RefreshView Grid.Row="0"
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
             <VerticalStackLayout Spacing="22"
-                                 Padding="0,0,0,18"
+                                 Padding="0,0,0,16"
                                  VerticalOptions="Start"
                                  HorizontalOptions="Fill">
                 <Image Source="appiconfg.svg"
                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
                        HeightRequest="68"
                        WidthRequest="68"
-                       Margin="0,34,0,0"
+                       Margin="0,32,0,0"
                        Aspect="AspectFit"
                        HorizontalOptions="Start"
                        SemanticProperties.Description="Cotton Cloud" />

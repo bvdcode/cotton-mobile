@@ -8,7 +8,7 @@
              x:DataType="viewModels:TrashViewModel"
              Shell.NavBarIsVisible="True"
              Title="Trash"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Refresh"
@@ -32,13 +32,13 @@
                        FontAttributes="Bold"
                        MaxLines="1"
                        LineBreakMode="TailTruncation"
-                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                 <Label Text="{Binding SummaryText}"
                        FontSize="13"
                        MaxLines="1"
                        LineBreakMode="TailTruncation"
-                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
             </VerticalStackLayout>
 
             <Button Grid.Column="1"
@@ -97,8 +97,8 @@
                    Placeholder="Search trash"
                    HeightRequest="40"
                    FontSize="13"
-                   TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
-                   PlaceholderColor="{AppThemeBinding Light={StaticResource Gray500}, Dark={StaticResource Gray400}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                   PlaceholderColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
         <Label Grid.Row="2"
                Text="{Binding Status}"
@@ -106,14 +106,14 @@
                FontSize="13"
                MaxLines="2"
                LineBreakMode="TailTruncation"
-               TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
         <Border Grid.Row="3"
                 IsVisible="{Binding IsSelectionBarVisible}"
-                Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                StrokeShape="RoundRectangle 8"
+                Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                StrokeShape="RoundRectangle 18"
                 Padding="10,8"
-                BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray950}}">
+                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
                   ColumnSpacing="8">
                 <VerticalStackLayout Spacing="1"
@@ -123,13 +123,13 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="{Binding SelectionDetailText}"
                            FontSize="11"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
 
                 <Button Grid.Column="1"
@@ -165,10 +165,10 @@
 
         <Grid Grid.Row="4">
             <Border IsVisible="{Binding IsEmpty}"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="24,34"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="28,36"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <VerticalStackLayout Spacing="8"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">
@@ -176,14 +176,14 @@
                            FontSize="16"
                            FontAttributes="Bold"
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="{Binding EmptyDetails}"
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="WordWrap"
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
             </Border>
 
@@ -198,18 +198,18 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                StrokeShape="RoundRectangle 8"
-                                Padding="14"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                StrokeShape="RoundRectangle 18"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
-                                            Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray100}}" />
+                                            Value="{StaticResource M3Accent}" />
                                     <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>
                             </Border.Triggers>
 
@@ -228,37 +228,37 @@
                                            FontAttributes="Bold"
                                            MaxLines="2"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Label Text="{Binding DisplayDetails}"
                                            FontSize="12"
                                            MaxLines="2"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                                 </VerticalStackLayout>
 
                                 <Border Grid.Column="1"
-                                        Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                        StrokeShape="RoundRectangle 8"
+                                        Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                        StrokeShape="RoundRectangle 18"
                                         Padding="8,3"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
                                         VerticalOptions="Start">
                                     <Label Text="{Binding BadgeText}"
                                            FontSize="11"
                                            FontAttributes="Bold"
                                            MaxLines="1"
                                            LineBreakMode="NoWrap"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
                                 </Border>
 
                                 <Border Grid.Column="1"
                                         IsVisible="{Binding IsSelected}"
                                         WidthRequest="20"
                                         HeightRequest="20"
-                                        Stroke="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                        Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                         StrokeThickness="1"
                                         StrokeShape="RoundRectangle 10"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                         HorizontalOptions="End"
                                         VerticalOptions="End">
                                     <Label Text="✓"
@@ -266,7 +266,7 @@
                                            FontAttributes="Bold"
                                            HorizontalTextAlignment="Center"
                                            VerticalTextAlignment="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
                                 </Border>
 
                                 <HorizontalStackLayout Grid.Row="1"
@@ -307,19 +307,19 @@
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                StrokeShape="RoundRectangle 8"
+                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                StrokeShape="RoundRectangle 18"
                                 Padding="12"
                                 HeightRequest="190"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
-                                            Value="{AppThemeBinding Light={StaticResource Gray950}, Dark={StaticResource Gray100}}" />
+                                            Value="{StaticResource M3Accent}" />
                                     <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>
                             </Border.Triggers>
 
@@ -337,30 +337,30 @@
                                            FontAttributes="Bold"
                                            MaxLines="2"
                                            LineBreakMode="TailTruncation"
-                                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                     <Border Grid.Column="1"
-                                            Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                            StrokeShape="RoundRectangle 8"
+                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                            StrokeShape="RoundRectangle 18"
                                             Padding="6,2"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
                                             VerticalOptions="Start">
                                         <Label Text="{Binding BadgeText}"
                                                FontSize="10"
                                                FontAttributes="Bold"
                                                MaxLines="1"
                                                LineBreakMode="NoWrap"
-                                               TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                               TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
                                     </Border>
 
                                     <Border Grid.Column="1"
                                             IsVisible="{Binding IsSelected}"
                                             WidthRequest="20"
                                             HeightRequest="20"
-                                            Stroke="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                             StrokeThickness="1"
                                             StrokeShape="RoundRectangle 10"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                             HorizontalOptions="End"
                                             VerticalOptions="End">
                                         <Label Text="✓"
@@ -368,7 +368,7 @@
                                                FontAttributes="Bold"
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center"
-                                               TextColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}" />
+                                               TextColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
                                     </Border>
                                 </Grid>
 
@@ -377,7 +377,7 @@
                                        FontSize="11"
                                        MaxLines="2"
                                        LineBreakMode="TailTruncation"
-                                       TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
                                 <VerticalStackLayout Grid.Row="3"
                                                      Spacing="6"

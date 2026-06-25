@@ -6,7 +6,7 @@
              x:DataType="viewModels:CaptureDestinationPickerViewModel"
              Shell.NavBarIsVisible="True"
              Title="Choose Destination"
-             BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource OffBlack}}">
+             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
 
     <ContentPage.ToolbarItems>
         <ToolbarItem Text="Refresh"
@@ -14,8 +14,8 @@
     </ContentPage.ToolbarItems>
 
     <ScrollView>
-        <VerticalStackLayout Padding="16"
-                             Spacing="14">
+        <VerticalStackLayout Padding="18"
+                             Spacing="16">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
@@ -24,14 +24,14 @@
                            FontAttributes="Bold"
                            MaxLines="1"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="{Binding PathText}"
                            IsVisible="{Binding IsPathTextVisible}"
                            FontSize="13"
                            MaxLines="2"
                            LineBreakMode="TailTruncation"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -45,7 +45,7 @@
                    FontSize="13"
                    MaxLines="2"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
             <Grid ColumnDefinitions="Auto,*"
                   ColumnSpacing="10">
@@ -55,8 +55,8 @@
                         HeightRequest="42"
                         MinimumWidthRequest="78"
                         CornerRadius="8"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
+                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                 <Button Grid.Column="1"
                         Text="Choose this folder"
@@ -64,21 +64,21 @@
                         FontAttributes="Bold"
                         HeightRequest="42"
                         CornerRadius="8"
-                        BackgroundColor="{StaticResource Primary}"
-                        TextColor="{StaticResource PrimaryDarkText}" />
+                        BackgroundColor="{StaticResource M3Accent}"
+                        TextColor="{StaticResource M3OnAccent}" />
             </Grid>
 
             <Label Text="{Binding SummaryText}"
                    FontSize="13"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
-                   TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
             <Border IsVisible="{Binding IsEmpty}"
-                    Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                    StrokeShape="RoundRectangle 8"
-                    Padding="24,34"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                    StrokeShape="RoundRectangle 18"
+                    Padding="28,36"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                 <VerticalStackLayout Spacing="8"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">
@@ -86,14 +86,14 @@
                            FontSize="16"
                            FontAttributes="Bold"
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                     <Label Text="Choose this folder or go back."
                            FontSize="12"
                            MaxLines="2"
                            LineBreakMode="WordWrap"
                            HorizontalTextAlignment="Center"
-                           TextColor="{AppThemeBinding Light={StaticResource Gray600}, Dark={StaticResource Gray200}}" />
+                           TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                 </VerticalStackLayout>
             </Border>
 
@@ -102,10 +102,10 @@
                                  BindableLayout.ItemsSource="{Binding Folders}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource Gray200}, Dark={StaticResource Gray600}}"
-                                StrokeShape="RoundRectangle 8"
-                                Padding="14"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource White}, Dark={StaticResource Gray950}}">
+                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                StrokeShape="RoundRectangle 18"
+                                Padding="16"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
                             <Border.GestureRecognizers>
                                 <TapGestureRecognizer Command="{Binding OpenCommand}" />
                             </Border.GestureRecognizers>
@@ -118,7 +118,7 @@
                                        MaxLines="1"
                                        LineBreakMode="TailTruncation"
                                        VerticalOptions="Center"
-                                       TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                       TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
 
                                 <Button Grid.Column="1"
                                         Text="Open"
@@ -126,8 +126,8 @@
                                         HeightRequest="36"
                                         MinimumWidthRequest="76"
                                         CornerRadius="8"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource Gray100}, Dark={StaticResource Gray900}}"
-                                        TextColor="{AppThemeBinding Light={StaticResource OffBlack}, Dark={StaticResource White}}" />
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
+                                        TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

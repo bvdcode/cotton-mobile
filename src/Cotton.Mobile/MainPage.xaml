@@ -418,8 +418,7 @@
                                     MinimumWidthRequest="64" />
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
-                                    Style="{StaticResource M3SurfaceCard}"
-                                    Padding="28,36">
+                                    Style="{StaticResource M3EmptyStateCard}">
                                 <VerticalStackLayout Spacing="8"
                                                      HorizontalOptions="Center"
                                                      VerticalOptions="Center">

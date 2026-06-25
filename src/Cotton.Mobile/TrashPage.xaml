@@ -132,8 +132,7 @@
 
         <Grid Grid.Row="4">
             <Border IsVisible="{Binding IsEmpty}"
-                    Style="{StaticResource M3SurfaceCard}"
-                    Padding="28,36">
+                    Style="{StaticResource M3EmptyStateCard}">
                 <VerticalStackLayout Spacing="8"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">

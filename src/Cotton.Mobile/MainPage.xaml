@@ -760,14 +760,9 @@
         </Border>
 
         <HorizontalStackLayout Grid.Row="3"
-                               Spacing="12"
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                IsVisible="{Binding Display.IsLegalFooterVisible}">
-            <Label Text="Vadim Belov / bvdcode"
-                   Style="{StaticResource M3CardSupporting}"
-                   VerticalTextAlignment="Center" />
-
             <Button Text="Privacy"
                     Command="{Binding PrivacyPolicyCommand}"
                     Style="{StaticResource FooterLinkButton}" />

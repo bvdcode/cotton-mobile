@@ -52,11 +52,9 @@
                    LineBreakMode="TailTruncation"
                    TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
 
-            <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                    StrokeShape="RoundRectangle 18"
+            <Border Style="{StaticResource M3SurfaceCard}"
                     Padding="16"
-                    IsVisible="{Binding IsEmptyVisible}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                    IsVisible="{Binding IsEmptyVisible}">
                 <VerticalStackLayout Spacing="8">
                     <Label Text="No folders yet"
                            FontSize="15"
@@ -82,10 +80,8 @@
                                  BindableLayout.ItemsSource="{Binding Roots}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                StrokeShape="RoundRectangle 18"
-                                Padding="16"
-                                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                        <Border Style="{StaticResource M3SurfaceCard}"
+                                Padding="16">
                             <Grid ColumnDefinitions="*,Auto"
                                   RowDefinitions="Auto,Auto,Auto,Auto"
                                   RowSpacing="4"

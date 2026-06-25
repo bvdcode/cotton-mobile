@@ -89,11 +89,7 @@
                                 </VerticalStackLayout>
 
                                 <Border Grid.Column="1"
-                                        Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                        StrokeShape="RoundRectangle 18"
-                                        Padding="8,3"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                                        VerticalOptions="Start">
+                                        Style="{StaticResource M3NeutralChip}">
                                     <Label Text="{Binding StatusText}"
                                            Style="{StaticResource M3ChipLabel}"
                                            MaxLines="1"

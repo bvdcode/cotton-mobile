@@ -233,12 +233,8 @@
                                            LineBreakMode="TailTruncation" />
 
                                     <Border Grid.Column="1"
-                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                            StrokeShape="RoundRectangle 18"
-                                            Padding="8,3"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                                            HorizontalOptions="End"
-                                            VerticalOptions="Start">
+                                            Style="{StaticResource M3NeutralChip}"
+                                            HorizontalOptions="End">
                                         <Label Text="{Binding BadgeText}"
                                                Style="{StaticResource M3ChipLabel}"
                                                MaxLines="1"

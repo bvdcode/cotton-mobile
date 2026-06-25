@@ -56,6 +56,15 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3NeutralChip">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="8,3" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>

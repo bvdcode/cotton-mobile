@@ -18,11 +18,10 @@
                    HorizontalTextAlignment="Center" />
 
             <Label Text="{Binding StatusText}"
-                   FontSize="15"
+                   Style="{StaticResource M3BodyMedium}"
                    MaxLines="3"
                    LineBreakMode="WordWrap"
-                   HorizontalTextAlignment="Center"
-                   TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+                   HorizontalTextAlignment="Center" />
 
             <ActivityIndicator IsRunning="{Binding IsBusy}"
                                IsVisible="{Binding IsBusy}"

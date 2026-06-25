@@ -72,6 +72,10 @@
 
     <Style TargetType="Label" x:Key="M3CardSupporting" BasedOn="{StaticResource M3LabelMedium}" />
 
+    <Style TargetType="Label" x:Key="M3CardSupportingPrimary" BasedOn="{StaticResource M3LabelMedium}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3CardSupportingStrong" BasedOn="{StaticResource M3LabelMedium}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontAttributes" Value="Bold" />

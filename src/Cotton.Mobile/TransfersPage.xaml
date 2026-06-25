@@ -46,8 +46,7 @@
                    LineBreakMode="TailTruncation" />
 
             <Border IsVisible="{Binding IsEmpty}"
-                    Style="{StaticResource M3SurfaceCard}"
-                    Padding="24,34">
+                    Style="{StaticResource M3EmptyStateCard}">
                 <VerticalStackLayout Spacing="8"
                                      HorizontalOptions="Center"
                                      VerticalOptions="Center">

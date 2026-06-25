@@ -55,10 +55,8 @@
 
         <Border Grid.Row="2"
                 IsVisible="{Binding IsEmpty}"
-                Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                StrokeShape="RoundRectangle 18"
-                Padding="28,36"
-                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                Style="{StaticResource M3SurfaceCard}"
+                Padding="28,36">
             <VerticalStackLayout Spacing="8"
                                  HorizontalOptions="Center"
                                  VerticalOptions="Center">
@@ -89,10 +87,8 @@
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
-                    <Border Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                            StrokeShape="RoundRectangle 18"
-                            Padding="16"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                    <Border Style="{StaticResource M3SurfaceCard}"
+                            Padding="16">
                         <Border.GestureRecognizers>
                             <TapGestureRecognizer Command="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
                                                   CommandParameter="{Binding .}" />

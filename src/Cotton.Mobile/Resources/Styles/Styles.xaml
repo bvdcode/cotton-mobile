@@ -22,7 +22,7 @@
         <Setter Property="Stroke" Value="Transparent" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="StrokeThickness" Value="0" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3TonalPanel">

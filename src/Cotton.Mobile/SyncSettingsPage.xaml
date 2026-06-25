@@ -112,8 +112,7 @@
                                             CommandParameter="{Binding .}"
                                             IsEnabled="{Binding CanRunNow}"
                                             IsVisible="{Binding CanRunNow}"
-                                            Style="{StaticResource FileChromeButton}"
-                                            HeightRequest="40" />
+                                            Style="{StaticResource PanelChromeButton}" />
 
                                     <Grid ColumnDefinitions="*,*"
                                           ColumnSpacing="8">
@@ -122,16 +121,14 @@
                                                 CommandParameter="{Binding .}"
                                                 IsEnabled="{Binding CanPauseSync}"
                                                 IsVisible="{Binding CanPauseSync}"
-                                                Style="{StaticResource FileChromeButton}"
-                                                HeightRequest="40" />
+                                                Style="{StaticResource PanelChromeButton}" />
 
                                         <Button Text="{Binding ResumeSyncActionText}"
                                                 Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
                                                 CommandParameter="{Binding .}"
                                                 IsEnabled="{Binding CanResumeSync}"
                                                 IsVisible="{Binding CanResumeSync}"
-                                                Style="{StaticResource FileChromeButton}"
-                                                HeightRequest="40" />
+                                                Style="{StaticResource PanelChromeButton}" />
 
                                         <Button Grid.Column="1"
                                                 Text="{Binding StopSyncActionText}"
@@ -139,8 +136,7 @@
                                                 CommandParameter="{Binding .}"
                                                 IsEnabled="{Binding CanStopSync}"
                                                 IsVisible="{Binding CanStopSync}"
-                                                Style="{StaticResource DestructiveChromeButton}"
-                                                HeightRequest="40" />
+                                                Style="{StaticResource PanelDestructiveChromeButton}" />
                                     </Grid>
                                 </VerticalStackLayout>
                             </Grid>

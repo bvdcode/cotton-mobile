@@ -106,26 +106,20 @@
                         Text="Restore"
                         Command="{Binding RestoreSelectionCommand}"
                         IsEnabled="{Binding IsBulkActionEnabled}"
-                        Style="{StaticResource CompactChromeButton}"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
+                        Style="{StaticResource DenseChromeButton}"
                         VerticalOptions="Center" />
 
                 <Button Grid.Column="2"
                         Text="Delete forever"
                         Command="{Binding DeleteForeverSelectionCommand}"
                         IsEnabled="{Binding IsBulkActionEnabled}"
-                        Style="{StaticResource CompactDestructiveChromeButton}"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
+                        Style="{StaticResource DenseDestructiveChromeButton}"
                         VerticalOptions="Center" />
 
                 <Button Grid.Column="3"
                         Text="Cancel"
                         Command="{Binding CancelSelectionCommand}"
-                        Style="{StaticResource CompactChromeButton}"
-                        HeightRequest="36"
-                        MinimumHeightRequest="36"
+                        Style="{StaticResource DenseChromeButton}"
                         VerticalOptions="Center" />
             </Grid>
         </Border>
@@ -227,14 +221,12 @@
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            Style="{StaticResource CompactDestructiveChromeButton}"
-                                            HeightRequest="36" />
+                                            Style="{StaticResource DenseDestructiveChromeButton}" />
 
                                     <Button Text="Restore"
                                             Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            Style="{StaticResource CompactChromeButton}"
-                                            HeightRequest="36" />
+                                            Style="{StaticResource DenseChromeButton}" />
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>

@@ -59,10 +59,8 @@
                     <Button Grid.Column="2"
                             Text="Retry"
                             Command="{Binding LoadCommand}"
-                            Style="{StaticResource FileChromeButton}"
-                            HeightRequest="36"
+                            Style="{StaticResource DenseChromeButton}"
                             MinimumWidthRequest="76"
-                            Padding="12,0"
                             VerticalOptions="Center" />
                 </Grid>
             </Border>
@@ -151,8 +149,7 @@
                                 Grid.ColumnSpan="2"
                                 Text="Retry"
                                 Command="{Binding LoadCommand}"
-                                Style="{StaticResource FileChromeButton}"
-                                HeightRequest="40"
+                                Style="{StaticResource PanelChromeButton}"
                                 HorizontalOptions="Fill" />
                     </Grid>
 

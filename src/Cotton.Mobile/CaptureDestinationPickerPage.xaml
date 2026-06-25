@@ -104,8 +104,7 @@
                                 <Button Grid.Column="1"
                                         Text="Open"
                                         Command="{Binding OpenCommand}"
-                                        Style="{StaticResource FileChromeButton}"
-                                        HeightRequest="40"
+                                        Style="{StaticResource PanelChromeButton}"
                                         MinimumWidthRequest="76"
                                         VerticalOptions="Center" />
                             </Grid>

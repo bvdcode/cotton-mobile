@@ -63,8 +63,7 @@
                     <Button Grid.Column="1"
                             Text="Choose"
                             Command="{Binding ChooseDestinationCommand}"
-                            Style="{StaticResource FileChromeButton}"
-                            HeightRequest="40"
+                            Style="{StaticResource PanelChromeButton}"
                             VerticalOptions="Center" />
 
                     <VerticalStackLayout Grid.Row="1"
@@ -117,8 +116,7 @@
                             Text="{Binding MediaAccessActionText}"
                             IsVisible="{Binding IsMediaAccessActionVisible}"
                             Command="{Binding MediaAccessActionCommand}"
-                            Style="{StaticResource FileChromeButton}"
-                            HeightRequest="40"
+                            Style="{StaticResource PanelChromeButton}"
                             HorizontalOptions="Start" />
                 </Grid>
             </Border>
@@ -146,8 +144,7 @@
                     <Button Grid.Row="3"
                             Text="Queue now"
                             Command="{Binding QueueNowCommand}"
-                            Style="{StaticResource FileChromeButton}"
-                            HeightRequest="40"
+                            Style="{StaticResource PanelChromeButton}"
                             HorizontalOptions="Start" />
                 </Grid>
             </Border>

@@ -376,19 +376,13 @@
                                     <Button Grid.Column="1"
                                             Text="Actions"
                                             Command="{Binding ShowFileSelectionActionsCommand}"
-                                            Style="{StaticResource FileChromeButton}"
-                                            Padding="10,0"
-                                            HeightRequest="36"
-                                            MinimumHeightRequest="36"
+                                            Style="{StaticResource DenseChromeButton}"
                                             MinimumWidthRequest="72" />
 
                                     <Button Grid.Column="2"
                                             Text="Cancel"
                                             Command="{Binding ClearFileSelectionCommand}"
-                                            Style="{StaticResource FileChromeButton}"
-                                            Padding="10,0"
-                                            HeightRequest="36"
-                                            MinimumHeightRequest="36"
+                                            Style="{StaticResource DenseChromeButton}"
                                             MinimumWidthRequest="68" />
                                 </Grid>
                             </Border>
@@ -402,9 +396,7 @@
                                         Command="{Binding CancelFileActionCommand}"
                                         IsEnabled="{Binding Display.CanCancelFileAction}"
                                         IsVisible="{Binding Display.CanCancelFileAction}"
-                                        Style="{StaticResource FileChromeButton}"
-                                        Padding="12,0"
-                                        MinimumHeightRequest="36"
+                                        Style="{StaticResource DenseChromeButton}"
                                         MinimumWidthRequest="72" />
                             </HorizontalStackLayout>
 

@@ -144,6 +144,14 @@
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3AccentOutlineChipLabel">
+        <Setter Property="TextColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="LineHeight" Value="1.27" />
+        <Setter Property="CharacterSpacing" Value="0" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3ErrorChipLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="FontSize" Value="9" />

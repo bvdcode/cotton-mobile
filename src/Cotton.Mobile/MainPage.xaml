@@ -640,12 +640,9 @@
 
                                                             <Border Grid.Column="1"
                                                                     IsVisible="{Binding HasLocalCopy}"
-                                                                    Stroke="{StaticResource M3Accent}"
-                                                                    StrokeShape="RoundRectangle 18"
-                                                                    Padding="5,1"
-                                                                    BackgroundColor="{StaticResource M3Accent}">
+                                                                    Style="{StaticResource M3AccentOutlineChip}">
                                                                 <Label Text="{Binding LocalCopyStatus}"
-                                                                       Style="{StaticResource M3AccentChipLabel}"
+                                                                       Style="{StaticResource M3AccentOutlineChipLabel}"
                                                                        MaxLines="1"
                                                                        LineBreakMode="NoWrap" />
                                                             </Border>

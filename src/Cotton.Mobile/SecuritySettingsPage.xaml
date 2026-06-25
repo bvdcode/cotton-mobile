@@ -16,7 +16,7 @@
                             SecondaryDescription="Refresh security" />
 
         <ScrollView Grid.Row="1">
-        <VerticalStackLayout Padding="18"
+        <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
                              Spacing="16">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">

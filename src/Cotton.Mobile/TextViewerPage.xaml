@@ -18,7 +18,7 @@
                                   SecondaryDescription="More text actions" />
 
         <Grid Grid.Row="1"
-              Padding="18"
+              Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,*"
               RowSpacing="12">
             <VerticalStackLayout Spacing="2">

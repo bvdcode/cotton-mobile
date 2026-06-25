@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#FAFBF5</color>
-    <color name="colorPrimaryDark">#FAFBF5</color>
-    <color name="colorAccent">#C6FF00</color>
+    <color name="cotton_surface">#FAFBF5</color>
+    <color name="cotton_accent">#C6FF00</color>
 </resources>

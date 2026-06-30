@@ -12,6 +12,8 @@
     <x:Double x:Key="Space24">24</x:Double>
     <x:Double x:Key="Space32">32</x:Double>
     <x:Double x:Key="TouchTarget">48</x:Double>
+    <x:Double x:Key="M3AuthPanelMaxWidth">520</x:Double>
+    <x:Double x:Key="M3BrandMarkSize">64</x:Double>
     <x:Double x:Key="M3FileActionSize">48</x:Double>
     <x:Double x:Key="M3FileActionIconSize">20</x:Double>
     <x:Double x:Key="M3FileInlineIconSize">18</x:Double>
@@ -30,8 +32,12 @@
     <x:Double x:Key="M3TopAppBarIconSize">24</x:Double>
 
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
+    <Thickness x:Key="M3AuthPanelPadding">16</Thickness>
+    <Thickness x:Key="M3BrandHeaderMargin">0,32,0,0</Thickness>
     <Thickness x:Key="M3FileAttentionChipPadding">5,1</Thickness>
     <Thickness x:Key="M3FileTileOuterPadding">4,4,4,6</Thickness>
+    <Thickness x:Key="M3MainContentBottomPadding">0,0,0,16</Thickness>
+    <Thickness x:Key="M3MainPagePadding">16,0,16,16</Thickness>
     <Thickness x:Key="M3NavigationBarMargin">0,0,0,10</Thickness>
     <Thickness x:Key="M3NavigationBarPadding">6</Thickness>
     <Thickness x:Key="M3NavigationBarItemPadding">4,5</Thickness>

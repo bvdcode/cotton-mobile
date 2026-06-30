@@ -126,6 +126,15 @@
         <Setter Property="Margin" Value="{StaticResource M3NavigationBarMargin}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3SelectionBar" BasedOn="{StaticResource M3TonalPanel}">
+        <Setter Property="Padding" Value="{StaticResource M3SelectionBarPadding}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3TrashTileCard" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3TrashTilePadding}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3TrashTileHeight}" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>

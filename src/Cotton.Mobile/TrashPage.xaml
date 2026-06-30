@@ -23,9 +23,9 @@
                             TertiaryDescription="Refresh trash" />
 
         <Grid Grid.Row="1"
-              Padding="16"
+              Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,Auto,Auto,Auto,*"
-              RowSpacing="14">
+              RowSpacing="{StaticResource Space16}">
         <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
               ColumnSpacing="8">
             <VerticalStackLayout Spacing="2">
@@ -83,10 +83,7 @@
 
         <Border Grid.Row="3"
                 IsVisible="{Binding IsSelectionBarVisible}"
-                Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                StrokeShape="RoundRectangle 18"
-                Padding="10,8"
-                BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}">
+                Style="{StaticResource M3SelectionBar}">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
                   ColumnSpacing="8">
                 <VerticalStackLayout Spacing="1"
@@ -148,7 +145,7 @@
                             ItemSizingStrategy="MeasureFirstItem">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
-                                       ItemSpacing="10" />
+                                       ItemSpacing="{StaticResource Space12}" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
@@ -175,7 +172,7 @@
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="*,Auto"
                                   RowSpacing="8"
-                                  ColumnSpacing="10">
+                                  ColumnSpacing="{StaticResource Space12}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{Binding Name}"
                                            Style="{StaticResource M3CardTitle}"
@@ -198,17 +195,12 @@
 
                                 <Border Grid.Column="1"
                                         IsVisible="{Binding IsSelected}"
-                                        WidthRequest="20"
-                                        HeightRequest="20"
-                                        Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                        StrokeThickness="1"
-                                        StrokeShape="RoundRectangle 10"
-                                        BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                        Style="{StaticResource M3FileSelectionMark}"
                                         HorizontalOptions="End"
                                         VerticalOptions="End">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                       IconSize="12"
+                                                       IconSize="{StaticResource M3FileSelectionIconSize}"
                                                        HorizontalOptions="Center"
                                                        VerticalOptions="Center" />
                                 </Border>
@@ -241,15 +233,13 @@
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
                                      Span="2"
-                                     HorizontalItemSpacing="10"
-                                     VerticalItemSpacing="10" />
+                                     HorizontalItemSpacing="{StaticResource Space12}"
+                                     VerticalItemSpacing="{StaticResource Space12}" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Style="{StaticResource M3SurfaceCard}"
-                                Padding="12"
-                                HeightRequest="190">
+                        <Border Style="{StaticResource M3TrashTileCard}">
                             <Border.Triggers>
                                 <DataTrigger TargetType="Border"
                                              Binding="{Binding IsSelected}"
@@ -269,7 +259,7 @@
                             </Border.GestureRecognizers>
 
                             <Grid RowDefinitions="Auto,Auto,*,Auto"
-                                  RowSpacing="6">
+                                  RowSpacing="{StaticResource Space8}">
                                 <Grid ColumnDefinitions="*,Auto"
                                       ColumnSpacing="8">
                                     <Label Text="{Binding Name}"
@@ -278,11 +268,7 @@
                                            LineBreakMode="TailTruncation" />
 
                                     <Border Grid.Column="1"
-                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                            StrokeShape="RoundRectangle 18"
-                                            Padding="6,2"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}"
-                                            VerticalOptions="Start">
+                                            Style="{StaticResource M3NeutralChip}">
                                         <Label Text="{Binding BadgeText}"
                                                Style="{StaticResource M3ChipLabel}"
                                                MaxLines="1"
@@ -291,17 +277,12 @@
 
                                     <Border Grid.Column="1"
                                             IsVisible="{Binding IsSelected}"
-                                            WidthRequest="20"
-                                            HeightRequest="20"
-                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                            StrokeThickness="1"
-                                            StrokeShape="RoundRectangle 10"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                            Style="{StaticResource M3FileSelectionMark}"
                                             HorizontalOptions="End"
                                             VerticalOptions="End">
                                         <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                            IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                           IconSize="12"
+                                                           IconSize="{StaticResource M3FileSelectionIconSize}"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
                                     </Border>
@@ -314,19 +295,17 @@
                                        LineBreakMode="TailTruncation" />
 
                                 <VerticalStackLayout Grid.Row="3"
-                                                     Spacing="6"
+                                                     Spacing="{StaticResource Space8}"
                                                      IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
                                     <Button Text="Delete forever"
                                             Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            Style="{StaticResource CompactDestructiveChromeButton}"
-                                            HeightRequest="34" />
+                                            Style="{StaticResource DenseDestructiveChromeButton}" />
 
                                     <Button Text="Restore"
                                             Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
                                             CommandParameter="{Binding .}"
-                                            Style="{StaticResource CompactChromeButton}"
-                                            HeightRequest="34" />
+                                            Style="{StaticResource DenseChromeButton}" />
                                 </VerticalStackLayout>
                             </Grid>
                         </Border>

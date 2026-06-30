@@ -312,6 +312,24 @@
         <Setter Property="BorderColor" Value="Transparent" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerOverlayIconButton">
+        <Setter Property="ButtonSize" Value="{StaticResource M3ViewerOverlayButtonSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3ViewerOverlayIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
+        <Setter Property="IconColor" Value="{StaticResource M3DarkOnSurface}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3DarkSurfaceContainerHigh}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerPlayIconButton">
+        <Setter Property="ButtonSize" Value="{StaticResource M3ViewerPlayButtonSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3ViewerPlayIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource M3ViewerPlayButtonCornerRadius}" />
+        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="FloatingActionButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />

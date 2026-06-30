@@ -40,7 +40,7 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   Margin="16,0,104,16"
+                   Margin="{StaticResource M3ViewerStatusWithTrailingActionMargin}"
                    Style="{StaticResource M3DarkSupporting}"
                    MaxLines="1"
                    LineBreakMode="TailTruncation"
@@ -49,12 +49,10 @@
 
             <controls:IconButton x:Name="ResetButton"
                                  IconData="{x:Static controls:IconPathData.Reset}"
-                                 IconColor="{StaticResource M3DarkOnSurface}"
-                                 ButtonBackgroundColor="{StaticResource M3DarkSurfaceContainerHigh}"
-                                 BorderColor="{StaticResource M3DarkOutlineVariant}"
+                                 Style="{StaticResource M3ViewerOverlayIconButton}"
                                  Clicked="OnResetClicked"
                                  IsVisible="False"
-                                 Margin="16"
+                                 Margin="{StaticResource M3ViewerOverlayMargin}"
                                  HorizontalOptions="End"
                                  VerticalOptions="End"
                                  SemanticProperties.Description="Reset image" />

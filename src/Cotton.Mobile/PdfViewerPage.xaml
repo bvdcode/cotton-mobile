@@ -24,7 +24,7 @@
         <Grid Grid.Row="1"
               RowDefinitions="Auto,*"
               BackgroundColor="{StaticResource M3DarkSurface}">
-            <VerticalStackLayout Padding="16,12"
+            <VerticalStackLayout Padding="{StaticResource M3PdfHeaderPadding}"
                                  Spacing="2">
                 <Label Text="{Binding Details}"
                        Style="{StaticResource M3DarkSupporting}"
@@ -45,11 +45,11 @@
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
-                                       ItemSpacing="10" />
+                                       ItemSpacing="{StaticResource M3PdfPageSpacing}" />
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
-                        <Grid Padding="12,0">
+                        <Grid Padding="{StaticResource M3PdfPagePadding}">
                             <Border Stroke="{StaticResource M3DarkOutline}"
                                     StrokeThickness="1"
                                     BackgroundColor="{StaticResource M3DocumentSurface}"
@@ -67,7 +67,7 @@
 
             <Grid Grid.Row="1"
                   IsVisible="{Binding IsEmptyVisible}"
-                  Padding="24">
+                  Padding="{StaticResource M3PdfEmptyPadding}">
                 <Label Text="{Binding EmptyText}"
                        Style="{StaticResource M3DarkBodyMedium}"
                        HorizontalTextAlignment="Center"

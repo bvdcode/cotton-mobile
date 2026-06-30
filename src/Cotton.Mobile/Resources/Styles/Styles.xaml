@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Cotton.Mobile.Controls">
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{StaticResource M3Accent}" />
@@ -207,6 +208,15 @@
         <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurface}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurfaceContainerHigh}" />
         <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3TopAppBarIconButton">
+        <Setter Property="ButtonSize" Value="{StaticResource TouchTarget}" />
+        <Setter Property="IconSize" Value="{StaticResource M3TopAppBarIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="ButtonBackgroundColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="Transparent" />
     </Style>
 
     <Style TargetType="Button" x:Key="FloatingActionButton">

@@ -74,6 +74,53 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3FileThumbnailSurface">
+        <Setter Property="WidthRequest" Value="{StaticResource M3FileThumbnailSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FilePreviewSurface">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
+        <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileSelectionRowOverlay" BasedOn="{StaticResource M3FileSelectionOverlay}">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileSelectionMark">
+        <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 10" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileAttentionChip">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="{StaticResource M3FileAttentionChipPadding}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
@@ -217,6 +264,15 @@
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="ButtonBackgroundColor" Value="Transparent" />
         <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3FileChromeIconButton">
+        <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FileActionIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
     <Style TargetType="Button" x:Key="FloatingActionButton">

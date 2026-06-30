@@ -111,9 +111,7 @@
                                       ColumnSpacing="10">
                                     <controls:IconButton Grid.Column="0"
                                                          IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
                                                          Command="{Binding NavigateFilesUpCommand}"
                                                          IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
                                                          IsVisible="{Binding Display.IsFileUpButtonVisible}"
@@ -154,9 +152,7 @@
                                                        Spacing="8"
                                                        HorizontalOptions="End">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
-                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
                                                          Command="{Binding ToggleFileSearchCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          VerticalOptions="Center"
@@ -180,9 +176,7 @@
                                             SemanticProperties.Description="Sort files" />
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
                                                          Command="{Binding ShowFileViewActionsCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          IsVisible="{Binding Display.IsFileViewButtonVisible}"
@@ -217,7 +211,7 @@
                                       HeightRequest="32">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="18"
+                                                       IconSize="{StaticResource M3FileInlineIconSize}"
                                                        VerticalOptions="Center">
                                         <controls:IconView.Triggers>
                                             <DataTrigger TargetType="controls:IconView"
@@ -269,7 +263,7 @@
                                       HeightRequest="32">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="18"
+                                                       IconSize="{StaticResource M3FileInlineIconSize}"
                                                        VerticalOptions="Center" />
 
                                     <Label Grid.Column="1"
@@ -297,7 +291,7 @@
                                       HeightRequest="32">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="18"
+                                                       IconSize="{StaticResource M3FileInlineIconSize}"
                                                        VerticalOptions="Center" />
 
                                     <Label Grid.Column="1"
@@ -442,23 +436,15 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid Padding="0,10"
-                                              HeightRequest="72"
-                                              ColumnDefinitions="52,*,44"
+                                              HeightRequest="{StaticResource M3FileRowHeight}"
+                                              ColumnDefinitions="52,*,48"
                                               ColumnSpacing="12">
                                             <Border Grid.ColumnSpan="3"
                                                     IsVisible="{Binding IsSelected}"
-                                                    Stroke="{StaticResource M3Accent}"
-                                                    StrokeThickness="1"
-                                                    StrokeShape="RoundRectangle 18"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+                                                    Style="{StaticResource M3FileSelectionRowOverlay}" />
 
-                                            <Border WidthRequest="44"
-                                                    HeightRequest="44"
-                                                    VerticalOptions="Center"
-                                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                    StrokeShape="RoundRectangle 18"
-                                                    Padding="0"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}">
+                                            <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                                    VerticalOptions="Center">
                                                 <Grid>
                                                     <Image Source="{Binding Thumbnail.Source}"
                                                            Aspect="AspectFill"
@@ -488,17 +474,12 @@
 
                                             <Border Grid.Column="0"
                                                     IsVisible="{Binding IsSelected}"
-                                                    WidthRequest="18"
-                                                    HeightRequest="18"
-                                                    Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                    StrokeThickness="1"
-                                                    StrokeShape="RoundRectangle 10"
-                                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                                    Style="{StaticResource M3FileSelectionMark}"
                                                     HorizontalOptions="End"
                                                     VerticalOptions="Start">
                                                 <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                                    IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                                   IconSize="11"
+                                                                   IconSize="{StaticResource M3FileSelectionIconSize}"
                                                                    HorizontalOptions="Center"
                                                                    VerticalOptions="Center" />
                                             </Border>
@@ -530,9 +511,7 @@
 
                                             <controls:IconButton Grid.Column="2"
                                                                  IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                                 IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                                 ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                                 BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                                 Style="{StaticResource M3FileChromeIconButton}"
                                                                  Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                                  CommandParameter="{Binding .}"
                                                                  IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
@@ -552,17 +531,14 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Padding="4,4,4,6">
+                                              Padding="{StaticResource M3FileTileOuterPadding}">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Style="{StaticResource M3SurfaceCard}"
                                                     Padding="6">
                                                 <Grid RowSpacing="6">
                                                     <Border Grid.RowSpan="2"
                                                             IsVisible="{Binding IsSelected}"
-                                                            Stroke="{StaticResource M3Accent}"
-                                                            StrokeThickness="1"
-                                                            StrokeShape="RoundRectangle 18"
-                                                            BackgroundColor="Transparent" />
+                                                            Style="{StaticResource M3FileSelectionOverlay}" />
 
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
@@ -570,11 +546,7 @@
                                                     </Grid.RowDefinitions>
 
                                                     <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
-                                                            HorizontalOptions="Fill"
-                                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
-                                                            StrokeShape="RoundRectangle 18"
-                                                            Padding="0"
-                                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}">
+                                                            Style="{StaticResource M3FilePreviewSurface}">
                                                         <Grid>
                                                             <Image Source="{Binding Thumbnail.Source}"
                                                                    Aspect="AspectFill"
@@ -604,18 +576,13 @@
 
                                                     <Border Grid.Row="0"
                                                             IsVisible="{Binding IsSelected}"
-                                                            WidthRequest="18"
-                                                            HeightRequest="18"
-                                                            Stroke="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                            StrokeThickness="1"
-                                                            StrokeShape="RoundRectangle 10"
-                                                            BackgroundColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
+                                                            Style="{StaticResource M3FileSelectionMark}"
                                                             HorizontalOptions="Start"
                                                             VerticalOptions="Start"
                                                             Margin="4">
                                                         <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                                            IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                                           IconSize="11"
+                                                                           IconSize="{StaticResource M3FileSelectionIconSize}"
                                                                            HorizontalOptions="Center"
                                                                            VerticalOptions="Center" />
                                                     </Border>
@@ -645,10 +612,7 @@
 
                                                             <Border Grid.Column="2"
                                                                     IsVisible="{Binding IsOfflineAttentionVisible}"
-                                                                    Stroke="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                                                                    StrokeShape="RoundRectangle 18"
-                                                                    Padding="5,1"
-                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}">
+                                                                    Style="{StaticResource M3FileAttentionChip}">
                                                                 <Label Text="{Binding OfflineAttentionStatus}"
                                                                        Style="{StaticResource M3ErrorChipLabel}"
                                                                        MaxLines="1"
@@ -670,9 +634,7 @@
 
                                                     <controls:IconButton Grid.Row="0"
                                                                          IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                                         IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                                                         ButtonBackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}"
-                                                                         BorderColor="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}"
+                                                                         Style="{StaticResource M3FileChromeIconButton}"
                                                                          HorizontalOptions="End"
                                                                          VerticalOptions="Start"
                                                                          Margin="0,4,4,0"

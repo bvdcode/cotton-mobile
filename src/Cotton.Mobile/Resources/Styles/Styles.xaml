@@ -121,6 +121,11 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3NavigationBarSurface" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3NavigationBarPadding}" />
+        <Setter Property="Margin" Value="{StaticResource M3NavigationBarMargin}" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
@@ -275,18 +280,50 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton">
+        <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FloatingActionButtonIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource M3FloatingActionButtonCornerRadius}" />
+        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
+    <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">
+        <Setter Property="ContentPadding" Value="{StaticResource M3NavigationBarItemPadding}" />
+        <Setter Property="ContentSpacing" Value="{StaticResource M3NavigationBarContentSpacing}" />
+        <Setter Property="IconSize" Value="{StaticResource M3NavigationBarIconSize}" />
+        <Setter Property="ItemCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
+        <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
+        <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
+    </Style>
+
+    <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemSelected" BasedOn="{StaticResource M3NavigationBarItem}">
+        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="FillColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
+    <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemUnselected" BasedOn="{StaticResource M3NavigationBarItem}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="FillColor" Value="Transparent" />
+        <Setter Property="BorderColor" Value="Transparent" />
+    </Style>
+
     <Style TargetType="Button" x:Key="FloatingActionButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="FontSize" Value="24" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="28" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3FloatingActionButtonCornerRadius}" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="HeightRequest" Value="56" />
-        <Setter Property="WidthRequest" Value="56" />
-        <Setter Property="MinimumHeightRequest" Value="56" />
-        <Setter Property="MinimumWidthRequest" Value="56" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
+        <Setter Property="WidthRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
     </Style>
 
     <Style TargetType="Button" x:Key="FooterLinkButton">

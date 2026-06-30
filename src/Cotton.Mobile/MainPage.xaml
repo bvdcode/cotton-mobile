@@ -658,12 +658,7 @@
 
         <controls:IconButton Grid.Row="1"
                              IconData="{x:Static controls:IconPathData.Plus}"
-                             IconColor="{StaticResource M3OnAccent}"
-                             ButtonBackgroundColor="{StaticResource M3Accent}"
-                             BorderColor="{StaticResource M3Accent}"
-                             ButtonSize="56"
-                             IconSize="24"
-                             ButtonCornerRadius="28"
+                             Style="{StaticResource M3FloatingActionIconButton}"
                              Command="{Binding ShowFileAddActionsCommand}"
                              IsVisible="{Binding Display.IsFileAddButtonVisible}"
                              IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
@@ -674,49 +669,35 @@
 
         <Border Grid.Row="2"
                 IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
-                Style="{StaticResource M3SurfaceCard}"
-                Padding="6"
-                Margin="0,0,0,10">
+                Style="{StaticResource M3NavigationBarSurface}">
             <Grid ColumnDefinitions="*,*,*,*"
                   ColumnSpacing="6">
                 <controls:NavigationBarItem Grid.Column="0"
+                                            Style="{StaticResource M3NavigationBarItemSelected}"
                                             IconData="{x:Static controls:IconPathData.Folder}"
-                                            IconColor="{StaticResource M3OnAccent}"
                                             Text="{Binding Display.FilesNavigation.Label}"
-                                            TextColor="{StaticResource M3OnAccent}"
-                                            FillColor="{StaticResource M3Accent}"
-                                            BorderColor="{StaticResource M3Accent}"
                                             SemanticProperties.Description="{Binding Display.FilesNavigation.AccessibilityText}" />
 
                 <controls:NavigationBarItem Grid.Column="1"
+                                            Style="{StaticResource M3NavigationBarItemUnselected}"
                                             IconData="{x:Static controls:IconPathData.Transfer}"
-                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
                                             Text="Sync"
-                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                            FillColor="Transparent"
-                                            BorderColor="Transparent"
                                             Command="{Binding OpenSyncSettingsCommand}"
                                             IsEnabled="{Binding Display.IsProfileVisible}"
                                             SemanticProperties.Description="Open sync folders" />
 
                 <controls:NavigationBarItem Grid.Column="2"
+                                            Style="{StaticResource M3NavigationBarItemUnselected}"
                                             IconData="{x:Static controls:IconPathData.Backup}"
-                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
                                             Text="{Binding Display.BackupNavigation.Label}"
-                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                            FillColor="Transparent"
-                                            BorderColor="Transparent"
                                             Command="{Binding OpenBackupSetupCommand}"
                                             IsEnabled="{Binding Display.IsProfileVisible}"
                                             SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
 
                 <controls:NavigationBarItem Grid.Column="3"
+                                            Style="{StaticResource M3NavigationBarItemUnselected}"
                                             IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                            IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
                                             Text="More"
-                                            TextColor="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}"
-                                            FillColor="Transparent"
-                                            BorderColor="Transparent"
                                             Command="{Binding AccountCommand}"
                                             IsEnabled="{Binding Display.IsAccountActionEnabled}"
                                             SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />

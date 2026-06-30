@@ -8,6 +8,15 @@ namespace Cotton.Mobile.Controls
 {
     public class NavigationBarItem : PressableContentView
     {
+        private const double DefaultContentSpacing = 3.0;
+        private const double DefaultIconSize = 18.0;
+        private const double DefaultItemCornerRadius = 20.0;
+        private const double DefaultItemHeight = 56.0;
+        private const double DefaultTextFontSize = 11.0;
+        private const double DisabledOpacity = 0.5;
+
+        private static readonly Thickness DefaultContentPadding = new(4, 5);
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -50,6 +59,48 @@ namespace Cotton.Mobile.Controls
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty ContentSpacingProperty = BindableProperty.Create(
+            nameof(ContentSpacing),
+            typeof(double),
+            typeof(NavigationBarItem),
+            DefaultContentSpacing,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
+            nameof(ContentPadding),
+            typeof(Thickness),
+            typeof(NavigationBarItem),
+            DefaultContentPadding,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
+            nameof(IconSize),
+            typeof(double),
+            typeof(NavigationBarItem),
+            DefaultIconSize,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ItemCornerRadiusProperty = BindableProperty.Create(
+            nameof(ItemCornerRadius),
+            typeof(double),
+            typeof(NavigationBarItem),
+            DefaultItemCornerRadius,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ItemHeightProperty = BindableProperty.Create(
+            nameof(ItemHeight),
+            typeof(double),
+            typeof(NavigationBarItem),
+            DefaultItemHeight,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
+            nameof(TextFontSize),
+            typeof(double),
+            typeof(NavigationBarItem),
+            DefaultTextFontSize,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -62,9 +113,8 @@ namespace Cotton.Mobile.Controls
             typeof(NavigationBarItem),
             propertyChanged: OnVisualPropertyChanged);
 
-        private const double DisabledOpacity = 0.5;
-
         private readonly Border _container;
+        private readonly VerticalStackLayout _content;
         private readonly IconView _icon;
         private readonly Label _label;
         private ICommand? _observedCommand;
@@ -73,13 +123,11 @@ namespace Cotton.Mobile.Controls
         {
             _icon = new IconView
             {
-                IconSize = 18,
                 HorizontalOptions = LayoutOptions.Center,
             };
 
             _label = new Label
             {
-                FontSize = 11,
                 FontAttributes = FontAttributes.Bold,
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center,
@@ -88,9 +136,8 @@ namespace Cotton.Mobile.Controls
                 InputTransparent = true,
             };
 
-            VerticalStackLayout content = new()
+            _content = new VerticalStackLayout
             {
-                Spacing = 3,
                 InputTransparent = true,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
@@ -106,13 +153,11 @@ namespace Cotton.Mobile.Controls
                 StrokeThickness = 1,
                 StrokeShape = new RoundRectangle
                 {
-                    CornerRadius = new CornerRadius(20),
+                    CornerRadius = new CornerRadius(ItemCornerRadius),
                 },
-                Padding = new Thickness(4, 5),
-                HeightRequest = 56,
                 HorizontalOptions = LayoutOptions.Fill,
                 VerticalOptions = LayoutOptions.Center,
-                Content = content,
+                Content = _content,
             };
 
             Content = _container;
@@ -153,6 +198,42 @@ namespace Cotton.Mobile.Controls
         {
             get => (Color)GetValue(BorderColorProperty);
             set => SetValue(BorderColorProperty, value);
+        }
+
+        public double ContentSpacing
+        {
+            get => (double)GetValue(ContentSpacingProperty);
+            set => SetValue(ContentSpacingProperty, value);
+        }
+
+        public Thickness ContentPadding
+        {
+            get => (Thickness)GetValue(ContentPaddingProperty);
+            set => SetValue(ContentPaddingProperty, value);
+        }
+
+        public double IconSize
+        {
+            get => (double)GetValue(IconSizeProperty);
+            set => SetValue(IconSizeProperty, value);
+        }
+
+        public double ItemCornerRadius
+        {
+            get => (double)GetValue(ItemCornerRadiusProperty);
+            set => SetValue(ItemCornerRadiusProperty, value);
+        }
+
+        public double ItemHeight
+        {
+            get => (double)GetValue(ItemHeightProperty);
+            set => SetValue(ItemHeightProperty, value);
+        }
+
+        public double TextFontSize
+        {
+            get => (double)GetValue(TextFontSizeProperty);
+            set => SetValue(TextFontSizeProperty, value);
         }
 
         public ICommand? Command
@@ -248,11 +329,20 @@ namespace Cotton.Mobile.Controls
         {
             Opacity = ResolvePressableOpacity(1, DisabledOpacity);
             _container.BackgroundColor = FillColor;
+            _container.HeightRequest = ItemHeight;
+            _container.Padding = ContentPadding;
             _container.Stroke = new SolidColorBrush(BorderColor);
+            _container.StrokeShape = new RoundRectangle
+            {
+                CornerRadius = new CornerRadius(ItemCornerRadius),
+            };
+            _content.Spacing = ContentSpacing;
             _icon.IconData = IconData;
             _icon.IconColor = IconColor;
+            _icon.IconSize = IconSize;
             _label.Text = Text;
             _label.TextColor = TextColor;
+            _label.FontSize = TextFontSize;
         }
     }
 }

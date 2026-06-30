@@ -16,9 +16,9 @@
                             SecondaryDescription="Refresh versions" />
 
         <Grid Grid.Row="1"
-              Padding="16"
+              Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,Auto,*"
-              RowSpacing="14">
+              RowSpacing="{StaticResource Space16}">
         <Grid ColumnDefinitions="*,Auto"
               ColumnSpacing="12">
             <VerticalStackLayout Spacing="2">
@@ -72,14 +72,18 @@
                 <CollectionView ItemsSource="{Binding Items}"
                                 IsVisible="{Binding IsListVisible}"
                                 SelectionMode="None">
+                    <CollectionView.ItemsLayout>
+                        <LinearItemsLayout Orientation="Vertical"
+                                           ItemSpacing="{StaticResource Space12}" />
+                    </CollectionView.ItemsLayout>
+
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">
-                            <Border Style="{StaticResource M3ContentCard}"
-                                    Margin="0,0,0,10">
+                            <Border Style="{StaticResource M3ContentCard}">
                                 <Grid RowDefinitions="Auto,Auto,Auto"
                                       ColumnDefinitions="*,Auto"
-                                      RowSpacing="6"
-                                      ColumnSpacing="10">
+                                      RowSpacing="{StaticResource Space8}"
+                                      ColumnSpacing="{StaticResource Space12}">
                                     <VerticalStackLayout Spacing="2">
                                         <Label Text="{Binding VersionText}"
                                                Style="{StaticResource M3CardTitle}"

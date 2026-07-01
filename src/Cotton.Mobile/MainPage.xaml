@@ -8,7 +8,7 @@
              Shell.NavBarIsVisible="False">
 
     <Grid x:Name="RootLayout"
-          RowDefinitions="*,Auto,Auto,Auto"
+          RowDefinitions="*,Auto,Auto"
           Style="{StaticResource M3MainPageRootGrid}">
         <ScrollView Grid.Row="0"
                     IsVisible="{Binding Display.IsBrandHeaderVisible}">
@@ -115,6 +115,12 @@
                                              SemanticProperties.Description="Cancel browser approval" />
                     </Grid>
                 </Border>
+
+                <HorizontalStackLayout IsVisible="{Binding Display.IsLegalFooterVisible}"
+                                       Style="{StaticResource M3LegalFooterBar}">
+                    <controls:TextAction Text="Privacy"
+                                         Command="{Binding PrivacyPolicyCommand}" />
+                </HorizontalStackLayout>
             </VerticalStackLayout>
         </ScrollView>
 
@@ -662,12 +668,6 @@
             </Grid>
         </Border>
 
-        <HorizontalStackLayout Grid.Row="3"
-                               IsVisible="{Binding Display.IsLegalFooterVisible}"
-                               Style="{StaticResource M3LegalFooterBar}">
-            <controls:TextAction Text="Privacy"
-                                 Command="{Binding PrivacyPolicyCommand}" />
-        </HorizontalStackLayout>
     </Grid>
 
 </ContentPage>

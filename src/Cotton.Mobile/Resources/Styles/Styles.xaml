@@ -869,7 +869,7 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
         <Setter Property="DisabledTextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkPrimaryPressed}}" />
         <Setter Property="DisabledButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="DisabledBorderColor" Value="{StaticResource M3Transparent}" />
@@ -880,7 +880,7 @@
         <Setter Property="ContentPadding" Value="{StaticResource M3FilledButtonPadding}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionPrimaryDisabledOpacity}" />
     </Style>
 

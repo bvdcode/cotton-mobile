@@ -32,16 +32,11 @@
                                    VerticalOptions="Center" />
                         </Border>
 
-                        <VerticalStackLayout Grid.Column="1"
-                                             Spacing="{StaticResource Space2}"
-                                             VerticalOptions="Center">
-                            <Label Text="Cotton Cloud"
-                                   Style="{StaticResource M3ScreenTitle}"
-                                   SemanticProperties.HeadingLevel="Level1" />
-
-                            <Label Text="Sign in to continue"
-                                   Style="{StaticResource M3AuthSubtitle}" />
-                        </VerticalStackLayout>
+                        <Label Grid.Column="1"
+                               Text="Cotton Cloud"
+                               Style="{StaticResource M3ScreenTitle}"
+                               VerticalOptions="Center"
+                               SemanticProperties.HeadingLevel="Level1" />
                     </Grid>
                 </VerticalStackLayout>
 

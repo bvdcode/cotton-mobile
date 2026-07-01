@@ -328,8 +328,6 @@
         <Setter Property="LineBreakMode" Value="WordWrap" />
     </Style>
 
-    <Style TargetType="Label" x:Key="M3AuthSubtitle" BasedOn="{StaticResource M3ScreenHeaderSupporting}" />
-
     <Style TargetType="Label" x:Key="M3AuthStatus" BasedOn="{StaticResource M3CardSupportingPrimary}" />
 
     <Style TargetType="Label" x:Key="M3NavigationSelectedLabel">

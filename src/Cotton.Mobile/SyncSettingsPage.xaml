@@ -57,7 +57,7 @@
                            Style="{StaticResource M3EmptyBody}" />
 
                     <Grid ColumnDefinitions="Auto,Auto"
-                          ColumnSpacing="{StaticResource Space12}"
+                          Style="{StaticResource M3ActionListItemGrid}"
                           Margin="{StaticResource M3PanelActionTopMargin}">
                         <Label Text="Choose folder"
                                Style="{StaticResource M3CardSupportingStrongLine}"
@@ -86,8 +86,7 @@
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid ColumnDefinitions="Auto,*,Auto"
                                   RowDefinitions="Auto,Auto,Auto,Auto"
-                                  RowSpacing="{StaticResource Space4}"
-                                  ColumnSpacing="{StaticResource Space12}">
+                                  Style="{StaticResource M3SettingsListItemGrid}">
                                 <controls:IconFrame Grid.RowSpan="4"
                                                     IconData="{x:Static controls:IconPathData.Folder}"
                                                     Style="{StaticResource M3SyncThumbnailFrame}"

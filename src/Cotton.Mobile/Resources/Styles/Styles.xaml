@@ -621,6 +621,11 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3ActionListItemGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3MetadataCardGrid">
         <Setter Property="RowSpacing" Value="{StaticResource Space8}" />
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />

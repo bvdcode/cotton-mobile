@@ -99,8 +99,7 @@
             <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsLoadMoreVisible}">
                 <Grid ColumnDefinitions="Auto,*,Auto"
-                      ColumnSpacing="{StaticResource Space12}"
-                      VerticalOptions="Center">
+                      Style="{StaticResource M3ActionListItemGrid}">
                     <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
                                         Style="{StaticResource M3ActivityThumbnailFrame}" />
 

@@ -36,7 +36,7 @@
             <Border IsVisible="{Binding IsAttentionStatusVisible}"
                     Style="{StaticResource M3AttentionStatusPanel}">
                 <Grid ColumnDefinitions="Auto,*,Auto"
-                      ColumnSpacing="{StaticResource Space12}">
+                      Style="{StaticResource M3ActionListItemGrid}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                        Style="{StaticResource M3AttentionStatusIcon}"
                                        VerticalOptions="Center" />
@@ -171,7 +171,7 @@
                             <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
                                 <Grid ColumnDefinitions="*,Auto"
                                       Style="{StaticResource M3SettingsSummaryGrid}">
-                                    <VerticalStackLayout Spacing="{StaticResource Space2}">
+                                    <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
                                         <Label Text="{Binding Title}"
                                                Style="{StaticResource M3LabelLargeLine}" />
 

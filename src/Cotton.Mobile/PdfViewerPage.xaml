@@ -27,15 +27,11 @@
             <VerticalStackLayout Padding="{StaticResource M3PdfHeaderPadding}"
                                  Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
-                       Style="{StaticResource M3DarkSupporting}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3DarkSupportingLine}" />
 
                 <Label Text="{Binding Status}"
                        IsVisible="{Binding IsStatusVisible}"
-                       Style="{StaticResource M3DarkSupporting}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3DarkSupportingLine}" />
             </VerticalStackLayout>
 
             <CollectionView Grid.Row="1"

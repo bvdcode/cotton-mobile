@@ -59,9 +59,7 @@
 
                                                 <Label Grid.Column="1"
                                                        Text="{Binding Value}"
-                                                       Style="{StaticResource M3CardSupportingPrimary}"
-                                                       MaxLines="2"
-                                                       LineBreakMode="TailTruncation" />
+                                                       Style="{StaticResource M3CardSupportingPrimaryBlock}" />
                                             </Grid>
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>

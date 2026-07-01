@@ -159,20 +159,15 @@
                                                      Style="{StaticResource M3CardTextStack}"
                                                      VerticalOptions="Center">
                                     <Label Text="{Binding Display.FilesTitle}"
-                                           Style="{StaticResource M3BrowserTitle}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3BrowserTitleLine}" />
 
                                     <Label Text="{Binding Display.FilesPath}"
                                            IsVisible="{Binding Display.IsFilesPathVisible}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardMetaLine}" />
 
                                     <Label Text="{Binding Display.FilesStatus}"
                                            IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardMetaLine}" />
                                 </VerticalStackLayout>
 
                                 <HorizontalStackLayout Grid.Column="2"
@@ -425,9 +420,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.FilesStatus}"
-                                           Style="{StaticResource M3ErrorSupporting}"
-                                           MaxLines="2"
-                                           LineBreakMode="TailTruncation"
+                                           Style="{StaticResource M3ErrorSupportingBlock}"
                                            VerticalTextAlignment="Center" />
 
                                     <controls:IconButton Grid.Column="2"
@@ -597,9 +590,7 @@
                                                         <Grid ColumnDefinitions="*,Auto,Auto"
                                                               ColumnSpacing="{StaticResource Space8}">
                                                             <Label Text="{Binding Details}"
-                                                                   Style="{StaticResource M3CardMeta}"
-                                                                   MaxLines="1"
-                                                                   LineBreakMode="TailTruncation" />
+                                                                   Style="{StaticResource M3CardMetaLine}" />
 
                                                             <Border Grid.Column="1"
                                                                     IsVisible="{Binding HasLocalCopy}"

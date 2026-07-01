@@ -47,9 +47,7 @@
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
                    Margin="{StaticResource M3ViewerOverlayMargin}"
-                   Style="{StaticResource M3DarkSupporting}"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation"
+                   Style="{StaticResource M3DarkSupportingLine}"
                    HorizontalOptions="Start"
                    VerticalOptions="End" />
         </Grid>

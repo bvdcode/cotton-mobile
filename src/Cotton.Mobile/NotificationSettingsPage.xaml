@@ -43,9 +43,7 @@
 
                     <Label Grid.Column="1"
                            Text="{Binding Status}"
-                           Style="{StaticResource M3LabelLarge}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation"
+                           Style="{StaticResource M3LabelLargeBlock}"
                            VerticalOptions="Center" />
 
                     <controls:IconButton Grid.Column="2"
@@ -149,9 +147,7 @@
                                       ColumnSpacing="{StaticResource Space12}">
                                     <VerticalStackLayout Spacing="{StaticResource Space2}">
                                         <Label Text="{Binding Title}"
-                                               Style="{StaticResource M3LabelLarge}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
+                                               Style="{StaticResource M3LabelLargeLine}" />
 
                                         <Label Text="{Binding DetailText}"
                                                Style="{StaticResource M3CardSupportingBlock}" />

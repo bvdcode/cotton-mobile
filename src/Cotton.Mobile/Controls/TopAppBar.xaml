@@ -41,9 +41,7 @@
 
         <Label Grid.Column="1"
                Text="{Binding Source={x:Reference Root}, Path=TitleText}"
-               Style="{StaticResource M3AppBarTitle}"
-               MaxLines="1"
-               LineBreakMode="TailTruncation"
+               Style="{StaticResource M3AppBarTitleLine}"
                VerticalOptions="Center">
             <Label.Triggers>
                 <DataTrigger TargetType="Label"

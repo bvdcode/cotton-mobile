@@ -133,9 +133,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding HealthCountsText}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingStrongBlock}" />
 
                         <Label Text="{Binding HealthStatusText}"
                                Style="{StaticResource M3CardSupportingBlock}" />
@@ -175,9 +173,7 @@
                     <Label Grid.Row="1"
                            Grid.Column="1"
                            Text="Photos only"
-                           Style="{StaticResource M3LabelLarge}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3LabelLargeLine}" />
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"
@@ -187,9 +183,7 @@
                     <Label Grid.Row="2"
                            Grid.Column="1"
                            Text="While charging"
-                           Style="{StaticResource M3LabelLarge}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3LabelLargeLine}" />
 
                     <controls:ToggleSwitch Grid.Row="2"
                                            Grid.Column="2"
@@ -209,9 +203,7 @@
 
                     <Label Grid.Column="1"
                            Text="Wi-Fi only"
-                           Style="{StaticResource M3LabelLarge}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3LabelLargeLine}" />
 
                     <controls:ToggleSwitch Grid.Column="2"
                                            VerticalOptions="Center"
@@ -220,9 +212,7 @@
                     <Label Grid.Row="1"
                            Grid.Column="1"
                            Text="Allow cellular"
-                           Style="{StaticResource M3LabelLarge}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3LabelLargeLine}" />
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"

@@ -110,9 +110,7 @@
                                       ColumnDefinitions="Auto,*"
                                       ColumnSpacing="{StaticResource Space8}">
                                     <Label Text="{Binding KindText}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding MetadataText}"

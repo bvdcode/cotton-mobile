@@ -107,9 +107,7 @@
                                            Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding ContentTypeText}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardMetaLine}" />
                                 </Grid>
                             </Border>
                         </DataTemplate>

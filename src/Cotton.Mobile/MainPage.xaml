@@ -398,65 +398,8 @@
                                 </Grid>
                             </Border>
 
-                            <VerticalStackLayout IsVisible="{Binding Display.IsInlineFilesLoadingVisible}"
-                                                 Style="{StaticResource M3FileSkeletonListStack}">
-                                <Grid Style="{StaticResource M3FileSkeletonRowGrid}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{StaticResource M3FileListThumbnailColumnWidth}" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonThumbnailBlock}" />
-
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Style="{StaticResource M3FileSkeletonTextStack}">
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonPrimaryLineBlock}" />
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonSecondaryLineBlock}" />
-                                    </VerticalStackLayout>
-
-                                    <controls:SkeletonBlock Grid.Column="2"
-                                                            Style="{StaticResource M3FileSkeletonActionBlock}" />
-                                </Grid>
-
-                                <Grid Style="{StaticResource M3FileSkeletonRowGrid}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{StaticResource M3FileListThumbnailColumnWidth}" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonThumbnailBlock}" />
-
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Style="{StaticResource M3FileSkeletonTextStack}">
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonPrimaryLineBlock}" />
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonSecondaryLineBlock}" />
-                                    </VerticalStackLayout>
-
-                                    <controls:SkeletonBlock Grid.Column="2"
-                                                            Style="{StaticResource M3FileSkeletonActionBlock}" />
-                                </Grid>
-
-                                <Grid Style="{StaticResource M3FileSkeletonRowGrid}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{StaticResource M3FileListThumbnailColumnWidth}" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonThumbnailBlock}" />
-
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Style="{StaticResource M3FileSkeletonTextStack}">
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonPrimaryLineBlock}" />
-                                        <controls:SkeletonBlock Style="{StaticResource M3FileSkeletonSecondaryLineBlock}" />
-                                    </VerticalStackLayout>
-
-                                    <controls:SkeletonBlock Grid.Column="2"
-                                                            Style="{StaticResource M3FileSkeletonActionBlock}" />
-                                </Grid>
-                            </VerticalStackLayout>
+                            <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}"
+                                                           Style="{StaticResource M3FileListSkeletonView}" />
 
                             <Border IsVisible="{Binding Display.CanRetryFileAction}"
                                     Style="{StaticResource M3AttentionStatusPanel}">

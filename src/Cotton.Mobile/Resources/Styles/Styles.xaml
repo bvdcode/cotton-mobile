@@ -648,6 +648,11 @@
         <Setter Property="InputTransparent" Value="True" />
     </Style>
 
+    <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
+        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
+        <Setter Property="InputTransparent" Value="True" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3FileSkeletonRowGrid">
         <Setter Property="Padding" Value="{StaticResource M3FileRowPadding}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileRowHeight}" />

@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Tests
         private const string SpacingResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MSpacing.xaml";
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
+        private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -51,15 +52,29 @@ namespace Cotton.Mobile.Tests
             Assert.True(GetIntResource(interaction, "M3MotionSkeletonPulseDuration") >= 1000);
 
             IReadOnlyDictionary<string, string> skeletonSetters = GetStyleSetters(styles, "M3SkeletonBlock");
+            IReadOnlyDictionary<string, string> listSetters = GetStyleSetters(styles, "M3FileListSkeletonView");
             IReadOnlyDictionary<string, string> rowSetters = GetStyleSetters(styles, "M3FileSkeletonRowGrid");
 
             Assert.Equal("{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}", skeletonSetters["BackgroundColor"]);
             Assert.Equal("{StaticResource M3SkeletonIdleOpacity}", skeletonSetters["IdleOpacity"]);
             Assert.Equal("{StaticResource M3SkeletonPulseOpacity}", skeletonSetters["PulseOpacity"]);
             Assert.Equal("{StaticResource M3MotionSkeletonPulseDuration}", skeletonSetters["PulseDuration"]);
+            Assert.Equal("{StaticResource SpaceNone}", listSetters["Spacing"]);
+            Assert.Equal("True", listSetters["InputTransparent"]);
             Assert.Equal("{StaticResource M3FileRowPadding}", rowSetters["Padding"]);
             Assert.Equal("{StaticResource M3FileRowHeight}", rowSetters["HeightRequest"]);
             Assert.Equal("{StaticResource Space12}", rowSetters["ColumnSpacing"]);
+        }
+
+        [Fact]
+        public void Main_file_browser_uses_reusable_loading_skeleton_view()
+        {
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Contains("<controls:FileListSkeletonView", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileSkeletonRowGrid", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileSkeletonPrimaryLineBlock", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileSkeletonSecondaryLineBlock", mainPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)
@@ -67,6 +82,13 @@ namespace Cotton.Mobile.Tests
             string repositoryRoot = FindRepositoryRoot(relativePath);
             string resourcePath = Path.Combine(repositoryRoot, relativePath);
             return XDocument.Load(resourcePath);
+        }
+
+        private static string LoadText(string relativePath)
+        {
+            string repositoryRoot = FindRepositoryRoot(relativePath);
+            string resourcePath = Path.Combine(repositoryRoot, relativePath);
+            return File.ReadAllText(resourcePath);
         }
 
         private static string FindRepositoryRoot(string relativePath)

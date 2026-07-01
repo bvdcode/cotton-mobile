@@ -163,20 +163,7 @@
                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Style="{StaticResource M3ContentCard}">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border"
-                                             Binding="{Binding IsSelected}"
-                                             Value="True">
-                                    <Setter Property="Stroke"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
-                                    <Setter Property="StrokeThickness"
-                                            Value="{StaticResource M3StrokeThin}" />
-                                    <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
-                                </DataTrigger>
-                            </Border.Triggers>
-
+                        <Border Style="{StaticResource M3SelectableContentCard}">
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3MetadataCardGrid}">
@@ -261,20 +248,7 @@
                             ItemsLayout="{StaticResource M3TrashTileItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <Border Style="{StaticResource M3TrashTileCard}">
-                            <Border.Triggers>
-                                <DataTrigger TargetType="Border"
-                                             Binding="{Binding IsSelected}"
-                                             Value="True">
-                                    <Setter Property="Stroke"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
-                                    <Setter Property="StrokeThickness"
-                                            Value="{StaticResource M3StrokeThin}" />
-                                    <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
-                                </DataTrigger>
-                            </Border.Triggers>
-
+                        <Border Style="{StaticResource M3SelectableTrashTileCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto"
                                   Style="{StaticResource M3FileTileContentGrid}">
                                 <Border Style="{StaticResource M3TrashTilePreviewSurface}">

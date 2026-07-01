@@ -55,6 +55,25 @@
         <Setter Property="Padding" Value="{StaticResource M3ContentCardPadding}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3SelectableSurfaceCard" BasedOn="{StaticResource M3SurfaceCard}">
+        <Style.Triggers>
+            <DataTrigger TargetType="Border"
+                         Binding="{Binding IsSelected}"
+                         Value="True">
+                <Setter Property="Stroke"
+                        Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+                <Setter Property="StrokeThickness"
+                        Value="{StaticResource M3StrokeThin}" />
+                <Setter Property="BackgroundColor"
+                        Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+            </DataTrigger>
+        </Style.Triggers>
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3SelectableContentCard" BasedOn="{StaticResource M3SelectableSurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3ContentCardPadding}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3EmptyStateCard" BasedOn="{StaticResource M3SurfaceCard}">
         <Setter Property="Padding" Value="{StaticResource M3EmptyStateCardPadding}" />
     </Style>
@@ -665,6 +684,11 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3TrashTileCard" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3TrashTilePadding}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3TrashTileHeight}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3SelectableTrashTileCard" BasedOn="{StaticResource M3SelectableSurfaceCard}">
         <Setter Property="Padding" Value="{StaticResource M3TrashTilePadding}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3TrashTileHeight}" />
     </Style>

@@ -29,16 +29,13 @@
                                       ShouldAutoPlay="False"
                                       ShouldLoopPlayback="False"
                                       ShouldShowPlaybackControls="True"
-                                      HorizontalOptions="Fill"
-                                      VerticalOptions="Fill" />
+                                      Style="{StaticResource M3ViewerMediaElement}" />
 
                 <VerticalStackLayout x:Name="StartOverlay"
-                                     HorizontalOptions="Center"
-                                     VerticalOptions="Center">
+                                     Style="{StaticResource M3ViewerCenteredOverlay}">
                     <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                         Style="{StaticResource M3ViewerPlayIconButton}"
+                                         Style="{StaticResource M3ViewerCenteredPlayIconButton}"
                                          Clicked="OnPlayClicked"
-                                         HorizontalOptions="Center"
                                          SemanticProperties.Description="Play media" />
                 </VerticalStackLayout>
 
@@ -46,10 +43,7 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   Margin="{StaticResource M3ViewerOverlayMargin}"
-                   Style="{StaticResource M3DarkSupportingLine}"
-                   HorizontalOptions="Start"
-                   VerticalOptions="End" />
+                   Style="{StaticResource M3ViewerOverlayStatus}" />
         </Grid>
     </Grid>
 </ContentPage>

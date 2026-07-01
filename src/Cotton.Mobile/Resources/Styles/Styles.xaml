@@ -2,7 +2,8 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:Cotton.Mobile.Controls">
+    xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{StaticResource M3Accent}" />
@@ -612,6 +613,31 @@
         <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
     </Style>
 
+    <Style TargetType="Image" x:Key="M3ViewerImage">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="toolkit:MediaElement" x:Key="M3ViewerMediaElement">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3ViewerCenteredOverlay">
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ViewerOverlayStatus" BasedOn="{StaticResource M3DarkSupportingLine}">
+        <Setter Property="Margin" Value="{StaticResource M3ViewerOverlayMargin}" />
+        <Setter Property="HorizontalOptions" Value="Start" />
+        <Setter Property="VerticalOptions" Value="End" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ViewerOverlayStatusWithTrailingAction" BasedOn="{StaticResource M3ViewerOverlayStatus}">
+        <Setter Property="Margin" Value="{StaticResource M3ViewerStatusWithTrailingActionMargin}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3ViewerEmptyStateCard">
         <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape">
@@ -1008,6 +1034,12 @@
         <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerOverlayActionIconButton" BasedOn="{StaticResource M3ViewerOverlayIconButton}">
+        <Setter Property="Margin" Value="{StaticResource M3ViewerOverlayMargin}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3ViewerPlayIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3ViewerPlayButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3ViewerPlayIconSize}" />
@@ -1016,6 +1048,10 @@
         <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerCenteredPlayIconButton" BasedOn="{StaticResource M3ViewerPlayIconButton}">
+        <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3ActionSheetSurface">

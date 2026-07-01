@@ -27,8 +27,7 @@
                 <Image x:Name="PreviewImage"
                        Source="{Binding ImageSource}"
                        Aspect="AspectFit"
-                       HorizontalOptions="Fill"
-                       VerticalOptions="Fill">
+                       Style="{StaticResource M3ViewerImage}">
                     <Image.GestureRecognizers>
                         <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
                         <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
@@ -40,19 +39,13 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   Margin="{StaticResource M3ViewerStatusWithTrailingActionMargin}"
-                   Style="{StaticResource M3DarkSupportingLine}"
-                   HorizontalOptions="Start"
-                   VerticalOptions="End" />
+                   Style="{StaticResource M3ViewerOverlayStatusWithTrailingAction}" />
 
             <controls:IconButton x:Name="ResetButton"
                                  IconData="{x:Static controls:IconPathData.Reset}"
-                                 Style="{StaticResource M3ViewerOverlayIconButton}"
+                                 Style="{StaticResource M3ViewerOverlayActionIconButton}"
                                  Clicked="OnResetClicked"
                                  IsVisible="False"
-                                 Margin="{StaticResource M3ViewerOverlayMargin}"
-                                 HorizontalOptions="End"
-                                 VerticalOptions="End"
                                  SemanticProperties.Description="Reset image" />
         </Grid>
     </Grid>

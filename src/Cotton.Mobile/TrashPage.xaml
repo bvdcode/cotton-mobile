@@ -27,8 +27,8 @@
               Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,Auto,Auto,Auto,*"
               RowSpacing="{StaticResource Space16}">
-        <Grid ColumnDefinitions="*,Auto,Auto,Auto,Auto"
-              ColumnSpacing="{StaticResource Space8}">
+        <Grid ColumnDefinitions="*,Auto"
+              Style="{StaticResource M3ScreenHeaderGrid}">
             <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="Trash"
                        Style="{StaticResource M3ScreenTitle}" />
@@ -37,39 +37,38 @@
                        Style="{StaticResource M3ScreenHeaderSupporting}" />
             </VerticalStackLayout>
 
-            <controls:IconButton Grid.Column="1"
-                                 IconData="{x:Static controls:IconPathData.Search}"
-                                 Style="{StaticResource M3FileChromeIconButton}"
-                                 Command="{Binding ToggleSearchCommand}"
-                                 SemanticProperties.Description="{Binding SearchButtonDescription}">
-                <controls:IconButton.Triggers>
-                    <DataTrigger TargetType="controls:IconButton"
-                                 Binding="{Binding IsSearchVisible}"
-                                 Value="True">
-                        <Setter Property="IconData"
-                                Value="{x:Static controls:IconPathData.Close}" />
-                    </DataTrigger>
-                </controls:IconButton.Triggers>
-            </controls:IconButton>
+            <HorizontalStackLayout Grid.Column="1"
+                                   Style="{StaticResource M3ScreenHeaderActionCluster}">
+                <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     Command="{Binding ToggleSearchCommand}"
+                                     SemanticProperties.Description="{Binding SearchButtonDescription}">
+                    <controls:IconButton.Triggers>
+                        <DataTrigger TargetType="controls:IconButton"
+                                     Binding="{Binding IsSearchVisible}"
+                                     Value="True">
+                            <Setter Property="IconData"
+                                    Value="{x:Static controls:IconPathData.Close}" />
+                        </DataTrigger>
+                    </controls:IconButton.Triggers>
+                </controls:IconButton>
 
-            <controls:IconButton Grid.Column="2"
-                                 IconData="{x:Static controls:IconPathData.Sort}"
-                                 Style="{StaticResource M3FileChromeIconButton}"
-                                 Command="{Binding ShowSortActionsCommand}"
-                                 IsVisible="{Binding IsSortButtonVisible}"
-                                 SemanticProperties.Description="Sort trash" />
+                <controls:IconButton IconData="{x:Static controls:IconPathData.Sort}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     Command="{Binding ShowSortActionsCommand}"
+                                     IsVisible="{Binding IsSortButtonVisible}"
+                                     SemanticProperties.Description="Sort trash" />
 
-            <controls:IconButton Grid.Column="3"
-                                 IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                 Style="{StaticResource M3FileChromeIconButton}"
-                                 Command="{Binding ShowViewActionsCommand}"
-                                 IsVisible="{Binding IsViewButtonVisible}"
-                                 SemanticProperties.Description="Change trash view" />
+                <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     Command="{Binding ShowViewActionsCommand}"
+                                     IsVisible="{Binding IsViewButtonVisible}"
+                                     SemanticProperties.Description="Change trash view" />
 
-            <ActivityIndicator Grid.Column="4"
-                               IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               VerticalOptions="Center" />
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
+            </HorizontalStackLayout>
         </Grid>
 
         <Border Grid.Row="1"

@@ -579,6 +579,30 @@
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DialogButtonMinWidth}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3DialogSurface">
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3DialogMaxWidth}" />
+        <Setter Property="Margin" Value="{StaticResource M3DialogMargin}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3DialogCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3DialogStack">
+        <Setter Property="Padding" Value="{StaticResource M3DialogPadding}" />
+        <Setter Property="Spacing" Value="{StaticResource Space16}" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3DialogButtonRow">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Spacing" Value="{StaticResource Space8}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />

@@ -3,7 +3,6 @@
 
 using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.Controls.Shapes;
 using System.Windows.Input;
 
 namespace Cotton.Mobile.Controls
@@ -103,8 +102,7 @@ namespace Cotton.Mobile.Controls
             Border dialog = CreateDialogSurface();
             VerticalStackLayout stack = new()
             {
-                Padding = MaterialResources.Get<Thickness>("M3DialogPadding"),
-                Spacing = MaterialResources.Get<double>("Space16"),
+                Style = MaterialResources.Get<Style>("M3DialogStack"),
             };
             stack.Add(CreateTitle(title));
 
@@ -126,24 +124,10 @@ namespace Cotton.Mobile.Controls
 
         private Border CreateDialogSurface()
         {
-            Border dialog = new()
+            return new Border
             {
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                MaximumWidthRequest = MaterialResources.Get<double>("M3DialogMaxWidth"),
-                Margin = MaterialResources.Get<Thickness>("M3DialogMargin"),
-                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
-                StrokeShape = new RoundRectangle
-                {
-                    CornerRadius = MaterialResources.Get<CornerRadius>("M3DialogCornerRadius"),
-                },
+                Style = MaterialResources.Get<Style>("M3DialogSurface"),
             };
-            MaterialResources.SetThemeColor(
-                dialog,
-                BackgroundColorProperty,
-                "M3LightSurfaceContainerLowest",
-                "M3DarkSurfaceContainerLow");
-            return dialog;
         }
 
         private static Label CreateTitle(string title)
@@ -205,8 +189,7 @@ namespace Cotton.Mobile.Controls
         {
             HorizontalStackLayout row = new()
             {
-                HorizontalOptions = LayoutOptions.End,
-                Spacing = MaterialResources.Get<double>("Space8"),
+                Style = MaterialResources.Get<Style>("M3DialogButtonRow"),
             };
 
             if (!string.IsNullOrWhiteSpace(secondaryAction))

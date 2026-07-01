@@ -76,8 +76,6 @@ namespace Cotton.Mobile.Controls
             typeof(IconButton),
             propertyChanged: OnVisualPropertyChanged);
 
-        private const double DisabledOpacity = 0.5;
-
         private readonly Border _container;
         private readonly IconView _icon;
         private ICommand? _observedCommand;
@@ -249,7 +247,7 @@ namespace Cotton.Mobile.Controls
             HeightRequest = ButtonSize;
             MinimumWidthRequest = ButtonSize;
             MinimumHeightRequest = ButtonSize;
-            Opacity = ResolvePressableOpacity(ButtonOpacity, DisabledOpacity);
+            Opacity = ResolvePressableOpacity(ButtonOpacity);
 
             _container.WidthRequest = ButtonSize;
             _container.HeightRequest = ButtonSize;

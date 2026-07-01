@@ -341,19 +341,19 @@
                     <VisualState x:Name="Normal" />
                     <VisualState x:Name="Pressed">
                         <VisualState.Setters>
-                            <Setter Property="Opacity" Value="0.86" />
+                            <Setter Property="Opacity" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
-                            <Setter Property="Opacity" Value="0.55" />
+                            <Setter Property="Opacity" Value="{StaticResource M3InteractionPrimaryDisabledOpacity}" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
                         <VisualState.Setters>
-                            <Setter Property="Opacity" Value="0.92" />
+                            <Setter Property="Opacity" Value="{StaticResource M3InteractionHoverOpacity}" />
                         </VisualState.Setters>
                     </VisualState>
                 </VisualStateGroup>
@@ -391,7 +391,7 @@
                             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutlineVariant}}" />
                             <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
-                            <Setter Property="Opacity" Value="0.54" />
+                            <Setter Property="Opacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
                         </VisualState.Setters>
                     </VisualState>
                     <VisualState x:Name="PointerOver">
@@ -474,7 +474,12 @@
         <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3TopAppBarIconButton">
+    <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3TopAppBarIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource TouchTarget}" />
         <Setter Property="IconSize" Value="{StaticResource M3TopAppBarIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
@@ -483,7 +488,7 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3FileChromeIconButton">
+    <Style TargetType="controls:IconButton" x:Key="M3FileChromeIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileActionIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
@@ -499,7 +504,7 @@
         <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton">
+    <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FloatingActionButtonIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3FloatingActionButtonCornerRadius}" />
@@ -509,6 +514,8 @@
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3NavigationBarItemPadding}" />
         <Setter Property="ContentSpacing" Value="{StaticResource M3NavigationBarContentSpacing}" />
         <Setter Property="IconSize" Value="{StaticResource M3NavigationBarIconSize}" />
@@ -533,7 +540,7 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3ViewerOverlayIconButton">
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerOverlayIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3ViewerOverlayButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3ViewerOverlayIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
@@ -542,7 +549,7 @@
         <Setter Property="BorderColor" Value="{StaticResource M3DarkOutlineVariant}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3ViewerPlayIconButton">
+    <Style TargetType="controls:IconButton" x:Key="M3ViewerPlayIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3ViewerPlayButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3ViewerPlayIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3ViewerPlayButtonCornerRadius}" />
@@ -600,7 +607,7 @@
     </Style>
 
     <Style TargetType="ImageButton">
-        <Setter Property="Opacity" Value="1" />
+        <Setter Property="Opacity" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />

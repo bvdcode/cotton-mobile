@@ -5,7 +5,22 @@ namespace Cotton.Mobile.Controls
 {
     public abstract class PressableContentView : ContentView
     {
-        private const double PressedOpacityMultiplier = 0.86;
+        public static readonly BindableProperty PressedOpacityMultiplierProperty = BindableProperty.Create(
+            nameof(PressedOpacityMultiplier),
+            typeof(double),
+            typeof(PressableContentView),
+            DefaultPressedOpacityMultiplier,
+            propertyChanged: OnInteractionMetricChanged);
+
+        public static readonly BindableProperty DisabledOpacityProperty = BindableProperty.Create(
+            nameof(DisabledOpacity),
+            typeof(double),
+            typeof(PressableContentView),
+            DefaultDisabledOpacity,
+            propertyChanged: OnInteractionMetricChanged);
+
+        private const double DefaultPressedOpacityMultiplier = 0.86;
+        private const double DefaultDisabledOpacity = 0.54;
 
 #if ANDROID
         private Android.Views.View? _platformView;
@@ -24,11 +39,23 @@ namespace Cotton.Mobile.Controls
 
         protected bool IsPressed { get; private set; }
 
-        protected double ResolvePressableOpacity(double enabledOpacity, double disabledOpacity)
+        public double PressedOpacityMultiplier
+        {
+            get => (double)GetValue(PressedOpacityMultiplierProperty);
+            set => SetValue(PressedOpacityMultiplierProperty, value);
+        }
+
+        public double DisabledOpacity
+        {
+            get => (double)GetValue(DisabledOpacityProperty);
+            set => SetValue(DisabledOpacityProperty, value);
+        }
+
+        protected double ResolvePressableOpacity(double enabledOpacity)
         {
             if (!CanHandlePress())
             {
-                return disabledOpacity;
+                return DisabledOpacity;
             }
 
             return IsPressed ? enabledOpacity * PressedOpacityMultiplier : enabledOpacity;
@@ -44,6 +71,14 @@ namespace Cotton.Mobile.Controls
         }
 
         protected abstract void ExecutePress();
+
+        private static void OnInteractionMetricChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            if (bindable is PressableContentView pressableContentView)
+            {
+                pressableContentView.OnPressedStateChanged();
+            }
+        }
 
         protected override void OnPropertyChanged(string? propertyName = null)
         {

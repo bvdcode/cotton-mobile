@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="Resources/Styles/Theme/MColors.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Theme/MSpacing.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Theme/MShape.xaml" />
+                <ResourceDictionary Source="Resources/Styles/Theme/MInteraction.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Theme/MType.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
             </ResourceDictionary.MergedDictionaries>

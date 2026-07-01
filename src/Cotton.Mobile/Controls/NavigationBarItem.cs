@@ -13,7 +13,6 @@ namespace Cotton.Mobile.Controls
         private const double DefaultItemCornerRadius = 20.0;
         private const double DefaultItemHeight = 56.0;
         private const double DefaultTextFontSize = 11.0;
-        private const double DisabledOpacity = 0.5;
 
         private static readonly Thickness DefaultContentPadding = new(4, 5);
 
@@ -332,7 +331,7 @@ namespace Cotton.Mobile.Controls
                 return;
             }
 
-            Opacity = ResolvePressableOpacity(1, DisabledOpacity);
+            Opacity = ResolvePressableOpacity(1);
             _container.BackgroundColor = FillColor;
             _container.HeightRequest = ItemHeight;
             _container.Padding = ContentPadding;

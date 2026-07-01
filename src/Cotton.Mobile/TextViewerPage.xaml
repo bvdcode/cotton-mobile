@@ -18,9 +18,8 @@
                                   SecondaryDescription="More text actions" />
 
         <Grid Grid.Row="1"
-              Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,*"
-              RowSpacing="{StaticResource Space12}">
+              Style="{StaticResource M3TextViewerContentGrid}">
             <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
                        Style="{StaticResource M3CardSupportingLine}" />

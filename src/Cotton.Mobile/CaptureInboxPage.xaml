@@ -37,7 +37,7 @@
                    Style="{StaticResource M3ScreenStatus}" />
 
             <Grid ColumnDefinitions="Auto,Auto,Auto,*"
-                  ColumnSpacing="{StaticResource Space12}"
+                  Style="{StaticResource M3InlineActionBarGrid}"
                   IsVisible="{Binding IsActionBarVisible}">
                 <controls:IconButton IconData="{x:Static controls:IconPathData.Folder}"
                                      Command="{Binding DestinationCommand}"
@@ -106,7 +106,7 @@
                                       Grid.Column="1"
                                       Grid.ColumnSpan="2"
                                       ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="{StaticResource Space8}">
+                                      Style="{StaticResource M3InlineMetadataGrid}">
                                     <Label Text="{Binding KindText}"
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 

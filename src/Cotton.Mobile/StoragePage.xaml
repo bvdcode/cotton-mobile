@@ -151,7 +151,7 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <VerticalStackLayout Spacing="{StaticResource Space8}"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
                                          BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
@@ -209,7 +209,7 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <VerticalStackLayout Spacing="{StaticResource Space8}"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
                                          BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">

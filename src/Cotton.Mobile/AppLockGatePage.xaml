@@ -14,8 +14,7 @@
                 Style="{StaticResource M3EmptyStateCard}"
                 MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                 HorizontalOptions="Fill">
-            <VerticalStackLayout Spacing="{StaticResource Space16}"
-                                 HorizontalOptions="Fill">
+            <VerticalStackLayout Style="{StaticResource M3AppLockContentStack}">
                 <Border Style="{StaticResource M3EmptyStateIconFrame}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
                                        Style="{StaticResource M3EmptyStateIcon}" />

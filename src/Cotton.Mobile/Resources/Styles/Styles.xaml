@@ -513,6 +513,10 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3DestructiveFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 
     <Style TargetType="controls:IconView">

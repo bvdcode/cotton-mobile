@@ -293,55 +293,85 @@
                                                       CommandParameter="{Binding .}" />
                             </Border.GestureRecognizers>
 
-                            <Grid RowDefinitions="Auto,Auto,*,Auto"
+                            <Grid RowDefinitions="Auto,Auto,Auto"
                                   RowSpacing="{StaticResource Space8}">
-                                <Grid ColumnDefinitions="*,Auto"
-                                      ColumnSpacing="{StaticResource Space8}">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardTitle}"
-                                           MaxLines="2"
-                                           LineBreakMode="TailTruncation" />
+                                <Border HeightRequest="{StaticResource M3TrashTilePreviewHeight}"
+                                        Style="{StaticResource M3FilePreviewSurface}">
+                                    <Grid>
+                                        <Image Source="{Binding Thumbnail.Source}"
+                                               Aspect="AspectFill"
+                                               IsVisible="{Binding IsPreviewImageVisible}" />
 
-                                    <Border Grid.Column="1"
-                                            Style="{StaticResource M3NeutralChip}">
-                                        <Label Text="{Binding BadgeText}"
-                                               Style="{StaticResource M3ChipLabel}"
-                                               MaxLines="1"
-                                               LineBreakMode="NoWrap" />
-                                    </Border>
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                           Style="{StaticResource M3FolderThumbnailIcon}" />
 
-                                    <Border Grid.Column="1"
-                                            IsVisible="{Binding IsSelected}"
-                                            Style="{StaticResource M3FileSelectionMark}"
-                                            HorizontalOptions="End"
-                                            VerticalOptions="End">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
-                                                           IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                           IconSize="{StaticResource M3FileSelectionIconSize}"
+                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
+                                                           IsVisible="{Binding Thumbnail.IsLoading}"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
-                                    </Border>
-                                </Grid>
 
-                                <Label Grid.Row="1"
-                                       Text="{Binding DisplayDetails}"
-                                       Style="{StaticResource M3CardMeta}"
-                                       MaxLines="2"
-                                       LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
+                                               IsVisible="{Binding IsPlaceholderTextVisible}"
+                                               Style="{StaticResource M3ThumbnailPlaceholder}"
+                                               FontSize="{Binding Thumbnail.PlaceholderFontSize}"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center" />
 
-                                <VerticalStackLayout Grid.Row="3"
-                                                     Spacing="{StaticResource Space8}"
-                                                     IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
-                                    <Button Text="Delete forever"
-                                            Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            Style="{StaticResource DenseDestructiveChromeButton}" />
+                                        <Border Style="{StaticResource M3NeutralChip}"
+                                                HorizontalOptions="End"
+                                                VerticalOptions="Start"
+                                                Margin="{StaticResource M3FileTileActionMargin}">
+                                            <Label Text="{Binding BadgeText}"
+                                                   Style="{StaticResource M3ChipLabel}"
+                                                   MaxLines="1"
+                                                   LineBreakMode="NoWrap" />
+                                        </Border>
+                                    </Grid>
+                                </Border>
 
-                                    <Button Text="Restore"
-                                            Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            Style="{StaticResource DenseChromeButton}" />
+                                <Border Grid.Row="0"
+                                        IsVisible="{Binding IsSelected}"
+                                        Style="{StaticResource M3FileSelectionMark}"
+                                        HorizontalOptions="Start"
+                                        VerticalOptions="Start"
+                                        Margin="{StaticResource M3FileTileSelectionMarkMargin}">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
+                                                       IconSize="{StaticResource M3FileSelectionIconSize}"
+                                                       HorizontalOptions="Center"
+                                                       VerticalOptions="Center" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Row="1"
+                                                     Spacing="{StaticResource Space2}">
+                                    <Label Text="{Binding Name}"
+                                           Style="{StaticResource M3CardSupportingStrong}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <Label Text="{Binding DisplayDetails}"
+                                           Style="{StaticResource M3CardMeta}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
+
+                                <HorizontalStackLayout Grid.Row="2"
+                                                       Spacing="{StaticResource Space8}"
+                                                       HorizontalOptions="End"
+                                                       IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
+                                                         Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} forever'}" />
+
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Reset}"
+                                                         Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding Name, StringFormat='Restore {0}'}" />
+                                </HorizontalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

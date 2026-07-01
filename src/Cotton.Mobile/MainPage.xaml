@@ -441,13 +441,9 @@
                                                            Aspect="AspectFill"
                                                            IsVisible="{Binding IsPreviewImageVisible}" />
 
-                                                    <Image Source="folder.svg"
-                                                           Aspect="AspectFit"
-                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                           HeightRequest="{StaticResource M3FolderThumbnailIconSize}"
-                                                           WidthRequest="{StaticResource M3FolderThumbnailIconSize}"
-                                                           HorizontalOptions="Center"
-                                                           VerticalOptions="Center" />
+                                                    <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                                                       IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                                       Style="{StaticResource M3FolderThumbnailIcon}" />
 
                                                     <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                        IsVisible="{Binding Thumbnail.IsLoading}"
@@ -542,13 +538,10 @@
                                                                    Aspect="AspectFill"
                                                                    IsVisible="{Binding IsPreviewImageVisible}" />
 
-                                                            <Image Source="folder.svg"
-                                                                   Aspect="AspectFit"
-                                                                   IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                                   HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
-                                                                   WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
-                                                                   HorizontalOptions="Center"
-                                                                   VerticalOptions="Center" />
+                                                            <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                                                               IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                                               IconSize="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
+                                                                               Style="{StaticResource M3FolderThumbnailIcon}" />
 
                                                             <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                                IsVisible="{Binding Thumbnail.IsLoading}"

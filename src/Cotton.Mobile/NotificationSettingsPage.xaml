@@ -125,8 +125,7 @@
                           RowDefinitions="Auto,Auto,Auto"
                           Style="{StaticResource M3SettingsSummaryGrid}">
                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                           Style="{StaticResource M3AttentionStatusIcon}"
-                                           VerticalOptions="Start" />
+                                           Style="{StaticResource M3AttentionStatusIconTop}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushUnavailableTitle}"

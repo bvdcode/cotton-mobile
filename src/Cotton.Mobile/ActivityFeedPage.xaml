@@ -77,8 +77,7 @@
                                 </VerticalStackLayout>
 
                                 <Border Grid.Column="2"
-                                        Style="{StaticResource M3NeutralChip}"
-                                        VerticalOptions="Start">
+                                        Style="{StaticResource M3NeutralChip}">
                                     <Label Text="{Binding BadgeText}"
                                            Style="{StaticResource M3ChipLabel}" />
                                 </Border>

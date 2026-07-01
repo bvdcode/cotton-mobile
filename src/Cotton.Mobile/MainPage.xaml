@@ -424,8 +424,7 @@
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Plus}"
                                                          Command="{Binding ShowFileAddActionsCommand}"
                                                          IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
-                                                         Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                                         HorizontalOptions="Center"
+                                                         Style="{StaticResource M3EmptyStateActionIconButton}"
                                                          SemanticProperties.Description="Add files" />
                                 </VerticalStackLayout>
                             </Border>
@@ -618,9 +617,6 @@
                              Command="{Binding ShowFileAddActionsCommand}"
                              IsVisible="{Binding Display.IsFileAddButtonVisible}"
                              IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                             HorizontalOptions="End"
-                             VerticalOptions="End"
-                             Margin="{StaticResource M3FloatingActionButtonMargin}"
                              SemanticProperties.Description="Add files" />
 
         <Border Grid.Row="2"

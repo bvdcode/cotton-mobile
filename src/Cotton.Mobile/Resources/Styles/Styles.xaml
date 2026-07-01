@@ -152,6 +152,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="controls:IconView" x:Key="M3AttentionStatusIconTop" BasedOn="{StaticResource M3AttentionStatusIcon}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3AttentionStatusMessage" BasedOn="{StaticResource M3ErrorSupportingBlock}">
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
@@ -299,6 +303,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3TrailingChip" BasedOn="{StaticResource M3NeutralChip}">
+        <Setter Property="HorizontalOptions" Value="End" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileThumbnailSurface">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
@@ -362,6 +370,10 @@
 
     <Style TargetType="controls:IconFrame" x:Key="M3FileThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
         <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardUtilityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
     <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
@@ -993,6 +1005,10 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryFileChromeIconButton}">
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3DestructiveFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
@@ -1058,6 +1074,9 @@
         <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="Margin" Value="{StaticResource M3FloatingActionButtonMargin}" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">

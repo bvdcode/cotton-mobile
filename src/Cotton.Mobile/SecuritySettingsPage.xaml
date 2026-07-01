@@ -153,8 +153,7 @@
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Border Grid.Column="2"
-                                            Style="{StaticResource M3NeutralChip}"
-                                            HorizontalOptions="End">
+                                            Style="{StaticResource M3TrailingChip}">
                                         <Label Text="{Binding StatusText}"
                                                Style="{StaticResource M3ChipLabel}">
                                             <Label.Triggers>
@@ -250,8 +249,7 @@
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Border Grid.Column="2"
-                                            Style="{StaticResource M3NeutralChip}"
-                                            HorizontalOptions="End">
+                                            Style="{StaticResource M3TrailingChip}">
                                         <Label Text="{Binding BadgeText}"
                                                Style="{StaticResource M3ChipLabel}" />
                                     </Border>

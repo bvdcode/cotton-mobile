@@ -268,6 +268,8 @@
 
     <Style TargetType="controls:IconFrame" x:Key="M3NeutralThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}" />
 
+    <Style TargetType="controls:IconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
     <Style TargetType="controls:IconFrame" x:Key="M3FileThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
     <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />

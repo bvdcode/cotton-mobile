@@ -47,7 +47,6 @@
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame Grid.RowSpan="2"
                                         IconData="{x:Static controls:IconPathData.Cloud}"
-                                        Style="{StaticResource M3NeutralThumbnailFrame}"
                                         VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
@@ -84,7 +83,6 @@
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Download}"
-                                            Style="{StaticResource M3NeutralThumbnailFrame}"
                                             VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
@@ -110,7 +108,6 @@
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Delete}"
-                                            Style="{StaticResource M3NeutralThumbnailFrame}"
                                             VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
@@ -140,7 +137,6 @@
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3NeutralThumbnailFrame}"
                                             VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"

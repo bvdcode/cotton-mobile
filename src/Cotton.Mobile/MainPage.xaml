@@ -409,8 +409,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.FilesStatus}"
-                                           Style="{StaticResource M3ErrorSupportingBlock}"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3AttentionStatusMessage}" />
 
                                     <controls:IconButton Grid.Column="2"
                                                          IconData="{x:Static controls:IconPathData.Refresh}"

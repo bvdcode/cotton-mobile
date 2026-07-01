@@ -145,6 +145,10 @@
         <Setter Property="IconSize" Value="{StaticResource M3InlineStatusIconSize}" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3AttentionStatusMessage" BasedOn="{StaticResource M3ErrorSupportingBlock}">
+        <Setter Property="VerticalTextAlignment" Value="Center" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3AuthPanel">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape">

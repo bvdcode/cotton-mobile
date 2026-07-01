@@ -144,6 +144,8 @@
         <Setter Property="FontSize" Value="{StaticResource M3CardTitleFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="LineHeight" Value="{StaticResource M3CardTitleLineHeight}" />
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3LabelMedium">

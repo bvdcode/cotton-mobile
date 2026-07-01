@@ -101,9 +101,7 @@
 
                                 <Label Grid.Column="1"
                                        Text="{Binding Title}"
-                                       Style="{StaticResource M3CardTitle}"
-                                       MaxLines="1"
-                                       LineBreakMode="TailTruncation" />
+                                       Style="{StaticResource M3CardTitle}" />
 
                                 <Label Grid.Column="2"
                                        Text="{Binding StatusText}"

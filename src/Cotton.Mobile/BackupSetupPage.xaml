@@ -49,9 +49,7 @@
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="Destination"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding DestinationText}"
                                Style="{StaticResource M3CardSupporting}"
@@ -99,9 +97,7 @@
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding MediaAccessTitle}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding MediaAccessDetailText}"
                                Style="{StaticResource M3CardSupporting}"
@@ -148,9 +144,7 @@
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding HealthTitle}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding HealthCountsText}"
                                Style="{StaticResource M3CardSupportingStrong}"
@@ -183,9 +177,7 @@
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="Backup running"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding LocalMediaRetentionText}"
                                Style="{StaticResource M3CardSupporting}"

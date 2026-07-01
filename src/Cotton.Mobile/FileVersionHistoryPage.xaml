@@ -26,9 +26,7 @@
                        Style="{StaticResource M3ScreenTitle}" />
 
                 <Label Text="{Binding FileName}"
-                       Style="{StaticResource M3CardTitle}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3CardTitle}" />
 
                 <Label Text="{Binding SummaryText}"
                        Style="{StaticResource M3ScreenHeaderSupportingMultiline}" />
@@ -85,9 +83,7 @@
                                     <VerticalStackLayout Grid.Column="1"
                                                          Style="{StaticResource M3CardTextStack}">
                                         <Label Text="{Binding VersionText}"
-                                               Style="{StaticResource M3CardTitle}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
+                                               Style="{StaticResource M3CardTitle}" />
 
                                         <Label Text="{Binding Name}"
                                                Style="{StaticResource M3CardSupporting}"

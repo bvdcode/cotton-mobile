@@ -66,15 +66,11 @@
                       RowSpacing="{StaticResource Space8}"
                       ColumnSpacing="{StaticResource Space12}">
                     <Label Text="{Binding PermissionTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding PermissionStatusText}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
@@ -113,9 +109,7 @@
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="{StaticResource Space12}">
                         <Label Text="Server push"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushStatusText}"
@@ -136,9 +130,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushUnavailableTitle}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Grid.Row="1"
                                Grid.ColumnSpan="2"

@@ -56,9 +56,7 @@
                                          Grid.ColumnSpan="2"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding CloudQuotaSummaryText, FallbackValue=Account storage unavailable., TargetNullValue=Account storage unavailable.}"
                                Style="{StaticResource M3CardSupportingStrong}"
@@ -83,9 +81,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="{StaticResource Space12}">
                     <Label Text="Free up storage"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3SettingsListItemGrid}">
@@ -152,9 +148,7 @@
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
                             <Label Text="Files on this device"
-                                   Style="{StaticResource M3CardTitle}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardTitle}" />
 
                             <Label Text="{Binding OnDeviceSummaryText}"
                                    Style="{StaticResource M3CardSupporting}"
@@ -219,9 +213,7 @@
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
                             <Label Text="Temporary files"
-                                   Style="{StaticResource M3CardTitle}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardTitle}" />
 
                             <Label Text="{Binding StorageBudgetSummaryText}"
                                    Style="{StaticResource M3CardSupporting}"

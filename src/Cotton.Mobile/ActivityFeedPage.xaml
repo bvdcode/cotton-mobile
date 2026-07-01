@@ -72,9 +72,7 @@
                                 <VerticalStackLayout Grid.Column="1"
                                                      Style="{StaticResource M3CardTextStack}">
                                     <Label Text="{Binding Title}"
-                                           Style="{StaticResource M3CardTitle}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardTitle}" />
 
                                     <Label Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupporting}"
@@ -116,8 +114,6 @@
                     <Label Grid.Column="1"
                            Text="Load more"
                            Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation"
                            VerticalOptions="Center" />
 
                     <controls:IconButton Grid.Column="2"

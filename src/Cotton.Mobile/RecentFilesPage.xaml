@@ -88,9 +88,7 @@
                                                  Style="{StaticResource M3CardTextStack}"
                                                  VerticalOptions="Center">
                                 <Label Text="{Binding FileName}"
-                                       Style="{StaticResource M3CardTitle}"
-                                       MaxLines="1"
-                                       LineBreakMode="TailTruncation" />
+                                       Style="{StaticResource M3CardTitle}" />
 
                                 <Label Text="{Binding DetailText}"
                                        Style="{StaticResource M3CardSupporting}"

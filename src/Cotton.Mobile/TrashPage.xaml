@@ -219,9 +219,7 @@
                                 <VerticalStackLayout Grid.Column="1"
                                                      Style="{StaticResource M3CardTextStack}">
                                     <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardTitle}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardTitle}" />
 
                                     <Label Text="{Binding DisplayDetails}"
                                            Style="{StaticResource M3CardSupporting}"

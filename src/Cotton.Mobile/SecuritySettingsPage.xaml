@@ -43,9 +43,7 @@
                       RowDefinitions="Auto,Auto,Auto"
                       Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding AppLockTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding AppLockStatusText}"
@@ -75,9 +73,7 @@
                       RowDefinitions="Auto,Auto,Auto"
                       Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding DeviceUnlockTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding DeviceUnlockStatusText}"
@@ -125,9 +121,7 @@
                           RowDefinitions="Auto,Auto"
                           Style="{StaticResource M3SettingsSummaryGrid}">
                         <Label Text="{Binding PermissionLedgerTitle}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding PermissionLedgerStatusText}"
@@ -210,9 +204,7 @@
                           RowDefinitions="Auto,Auto"
                           Style="{StaticResource M3SettingsSummaryGrid}">
                         <Label Text="{Binding AccountSessionsTitle}"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardTitle}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding AccountSessionsStatusText}"
@@ -326,9 +318,7 @@
                       RowDefinitions="Auto,Auto,Auto"
                       Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding LogoutCacheCleanupTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardTitle}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding LogoutCacheCleanupStatusText}"

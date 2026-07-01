@@ -17,10 +17,10 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+                  ColumnSpacing="{StaticResource Space12}">
+                <VerticalStackLayout Spacing="{StaticResource Space2}">
                     <Label Text="Security"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -47,8 +47,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
-                      RowSpacing="6"
-                      ColumnSpacing="12">
+                      Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding AppLockTitle}"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"
@@ -78,8 +77,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
-                      RowSpacing="6"
-                      ColumnSpacing="12">
+                      Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding DeviceUnlockTitle}"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"
@@ -111,11 +109,10 @@
 
             <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsPermissionLedgerVisible}">
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="*,Auto"
                           RowDefinitions="Auto,Auto"
-                          RowSpacing="6"
-                          ColumnSpacing="12">
+                          Style="{StaticResource M3SettingsSummaryGrid}">
                         <Label Text="{Binding PermissionLedgerTitle}"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -135,14 +132,13 @@
                                LineBreakMode="TailTruncation" />
                     </Grid>
 
-                    <VerticalStackLayout Spacing="10"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                          BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
                                 <Grid ColumnDefinitions="*,Auto"
                                       RowDefinitions="Auto,Auto"
-                                      RowSpacing="3"
-                                      ColumnSpacing="10">
+                                      Style="{StaticResource M3SettingsListItemGrid}">
                                     <Label Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
@@ -168,11 +164,10 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="*,Auto"
                           RowDefinitions="Auto,Auto"
-                          RowSpacing="6"
-                          ColumnSpacing="12">
+                          Style="{StaticResource M3SettingsSummaryGrid}">
                         <Label Text="{Binding AccountSessionsTitle}"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -199,7 +194,7 @@
                             HorizontalOptions="Start"
                             Style="{StaticResource DestructiveChromeButton}" />
 
-                    <VerticalStackLayout Spacing="2"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
                                          IsVisible="{Binding IsAccountSessionsEmptyVisible}">
                         <Label Text="{Binding AccountSessionsEmptyTitle}"
                                Style="{StaticResource M3CardSupportingStrong}"
@@ -212,15 +207,14 @@
                                LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="12"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                          IsVisible="{Binding IsAccountSessionsListVisible}"
                                          BindableLayout.ItemsSource="{Binding AccountSessions}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonAccountSessionListItem">
                                 <Grid ColumnDefinitions="*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto"
-                                      RowSpacing="3"
-                                      ColumnSpacing="10">
+                                      Style="{StaticResource M3SettingsListItemGrid}">
                                     <Label Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
@@ -265,8 +259,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"
                       RowDefinitions="Auto,Auto,Auto"
-                      RowSpacing="6"
-                      ColumnSpacing="12">
+                      Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding LogoutCacheCleanupTitle}"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"

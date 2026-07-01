@@ -36,6 +36,13 @@ namespace Cotton.Mobile.Controls
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
+            nameof(BorderWidth),
+            typeof(double),
+            typeof(IconButton),
+            1.0,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ButtonSizeProperty = BindableProperty.Create(
             nameof(ButtonSize),
             typeof(double),
@@ -85,7 +92,7 @@ namespace Cotton.Mobile.Controls
             _icon = new IconView();
             _container = new Border
             {
-                StrokeThickness = 1,
+                StrokeThickness = BorderWidth,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
                 Content = _icon,
@@ -119,6 +126,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (Color)GetValue(BorderColorProperty);
             set => SetValue(BorderColorProperty, value);
+        }
+
+        public double BorderWidth
+        {
+            get => (double)GetValue(BorderWidthProperty);
+            set => SetValue(BorderWidthProperty, value);
         }
 
         public double ButtonSize
@@ -257,6 +270,7 @@ namespace Cotton.Mobile.Controls
             };
             _container.BackgroundColor = ButtonBackgroundColor;
             _container.Stroke = new SolidColorBrush(BorderColor);
+            _container.StrokeThickness = BorderWidth;
 
             _icon.IconData = IconData;
             _icon.IconColor = IconColor;

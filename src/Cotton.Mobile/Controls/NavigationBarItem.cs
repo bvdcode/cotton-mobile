@@ -58,6 +58,13 @@ namespace Cotton.Mobile.Controls
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
+            nameof(BorderWidth),
+            typeof(double),
+            typeof(NavigationBarItem),
+            1.0,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ContentSpacingProperty = BindableProperty.Create(
             nameof(ContentSpacing),
             typeof(double),
@@ -149,7 +156,7 @@ namespace Cotton.Mobile.Controls
 
             _container = new Border
             {
-                StrokeThickness = 1,
+                StrokeThickness = BorderWidth,
                 StrokeShape = new RoundRectangle
                 {
                     CornerRadius = new CornerRadius(ItemCornerRadius),
@@ -197,6 +204,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (Color)GetValue(BorderColorProperty);
             set => SetValue(BorderColorProperty, value);
+        }
+
+        public double BorderWidth
+        {
+            get => (double)GetValue(BorderWidthProperty);
+            set => SetValue(BorderWidthProperty, value);
         }
 
         public double ContentSpacing
@@ -336,6 +349,7 @@ namespace Cotton.Mobile.Controls
             _container.HeightRequest = ItemHeight;
             _container.Padding = ContentPadding;
             _container.Stroke = new SolidColorBrush(BorderColor);
+            _container.StrokeThickness = BorderWidth;
             _container.StrokeShape = new RoundRectangle
             {
                 CornerRadius = new CornerRadius(ItemCornerRadius),

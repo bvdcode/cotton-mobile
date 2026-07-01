@@ -294,6 +294,13 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="controls:IconView" x:Key="M3FileNoticeIcon">
+        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FileStatusIconSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3FileNoticeTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>

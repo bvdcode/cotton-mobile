@@ -326,10 +326,7 @@
                                       ColumnSpacing="{StaticResource Space12}">
                                     <Border Style="{StaticResource M3FileNoticeIconFrame}">
                                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                                           IconColor="{StaticResource M3Accent}"
-                                                           IconSize="{StaticResource M3FileStatusIconSize}"
-                                                           HorizontalOptions="Center"
-                                                           VerticalOptions="Center" />
+                                                           Style="{StaticResource M3FileNoticeIcon}" />
                                     </Border>
 
                                     <VerticalStackLayout Grid.Column="1"

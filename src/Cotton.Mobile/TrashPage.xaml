@@ -108,25 +108,28 @@
                            LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
 
-                <Button Grid.Column="1"
-                        Text="Restore"
-                        Command="{Binding RestoreSelectionCommand}"
-                        IsEnabled="{Binding IsBulkActionEnabled}"
-                        Style="{StaticResource DenseChromeButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton Grid.Column="1"
+                                     IconData="{x:Static controls:IconPathData.Reset}"
+                                     Command="{Binding RestoreSelectionCommand}"
+                                     IsEnabled="{Binding IsBulkActionEnabled}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Restore selected items" />
 
-                <Button Grid.Column="2"
-                        Text="Delete forever"
-                        Command="{Binding DeleteForeverSelectionCommand}"
-                        IsEnabled="{Binding IsBulkActionEnabled}"
-                        Style="{StaticResource DenseDestructiveChromeButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton Grid.Column="2"
+                                     IconData="{x:Static controls:IconPathData.Delete}"
+                                     Command="{Binding DeleteForeverSelectionCommand}"
+                                     IsEnabled="{Binding IsBulkActionEnabled}"
+                                     Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Delete selected items forever" />
 
-                <Button Grid.Column="3"
-                        Text="Cancel"
-                        Command="{Binding CancelSelectionCommand}"
-                        Style="{StaticResource DenseChromeButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton Grid.Column="3"
+                                     IconData="{x:Static controls:IconPathData.Close}"
+                                     Command="{Binding CancelSelectionCommand}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Cancel selection" />
             </Grid>
         </Border>
 

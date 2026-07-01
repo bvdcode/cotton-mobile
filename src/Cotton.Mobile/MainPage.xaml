@@ -230,9 +230,7 @@
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="{StaticResource M3FileInlineIconSize}"
-                                                       VerticalOptions="Center">
+                                                       Style="{StaticResource M3FileStatusIcon}">
                                         <controls:IconView.Triggers>
                                             <DataTrigger TargetType="controls:IconView"
                                                          Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
@@ -280,9 +278,7 @@
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
-                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="{StaticResource M3FileInlineIconSize}"
-                                                       VerticalOptions="Center" />
+                                                       Style="{StaticResource M3FileStatusIcon}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.BackupActivityIndicator.Text}"
@@ -306,9 +302,7 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto"
                                       Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
-                                                       IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
-                                                       IconSize="{StaticResource M3FileInlineIconSize}"
-                                                       VerticalOptions="Center" />
+                                                       Style="{StaticResource M3FileStatusIcon}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.OfflinePackProgress.Text}"

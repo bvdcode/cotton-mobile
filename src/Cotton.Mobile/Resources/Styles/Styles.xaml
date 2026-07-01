@@ -270,6 +270,12 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusRowHeight}" />
     </Style>
 
+    <Style TargetType="controls:IconView" x:Key="M3FileStatusIcon">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileNoticePanel" BasedOn="{StaticResource M3TonalPanel}">
         <Setter Property="Padding" Value="{StaticResource M3FileNoticePadding}" />
     </Style>

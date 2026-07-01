@@ -68,8 +68,7 @@ namespace Cotton.Mobile.Controls
             Border sheet = CreateSheetSurface();
             VerticalStackLayout stack = new()
             {
-                Padding = MaterialResources.Get<Thickness>("M3ActionSheetPadding"),
-                Spacing = MaterialResources.Get<double>("Space8"),
+                Style = MaterialResources.Get<Style>("M3ActionSheetStack"),
             };
 
             stack.Add(CreateHandle());
@@ -96,44 +95,18 @@ namespace Cotton.Mobile.Controls
 
         private Border CreateSheetSurface()
         {
-            Border sheet = new()
+            return new Border
             {
-                HorizontalOptions = LayoutOptions.Fill,
-                VerticalOptions = LayoutOptions.End,
-                MaximumWidthRequest = MaterialResources.Get<double>("M3ActionSheetMaxWidth"),
-                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
-                StrokeShape = new RoundRectangle
-                {
-                    CornerRadius = MaterialResources.Get<CornerRadius>("M3ActionSheetCornerRadius"),
-                },
+                Style = MaterialResources.Get<Style>("M3ActionSheetSurface"),
             };
-            MaterialResources.SetThemeColor(
-                sheet,
-                BackgroundColorProperty,
-                "M3LightSurfaceContainerLowest",
-                "M3DarkSurfaceContainerLow");
-            return sheet;
         }
 
         private Border CreateHandle()
         {
-            Border handle = new()
+            return new Border
             {
-                WidthRequest = MaterialResources.Get<double>("M3ActionSheetHandleWidth"),
-                HeightRequest = MaterialResources.Get<double>("M3ActionSheetHandleHeight"),
-                HorizontalOptions = LayoutOptions.Center,
-                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
-                StrokeShape = new RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(MaterialResources.Get<double>("ShapeFull")),
-                },
+                Style = MaterialResources.Get<Style>("M3ActionSheetHandle"),
             };
-            MaterialResources.SetThemeColor(
-                handle,
-                BackgroundColorProperty,
-                "M3LightOutlineVariant",
-                "M3DarkOutlineVariant");
-            return handle;
         }
 
         private Label CreateTitle(string title)
@@ -141,10 +114,7 @@ namespace Cotton.Mobile.Controls
             Label label = new()
             {
                 Text = title,
-                Style = MaterialResources.Get<Style>("M3PanelTitle"),
-                Margin = MaterialResources.Get<Thickness>("M3ActionSheetTitleMargin"),
-                MaxLines = 3,
-                LineBreakMode = LineBreakMode.TailTruncation,
+                Style = MaterialResources.Get<Style>("M3ActionSheetTitle"),
             };
             return label;
         }
@@ -174,19 +144,10 @@ namespace Cotton.Mobile.Controls
 
         private BoxView CreateDivider()
         {
-            BoxView divider = new()
+            return new BoxView
             {
-                HeightRequest = MaterialResources.Get<double>("M3StrokeThin"),
-                Margin = new Thickness(
-                    MaterialResources.Get<double>("Space8"),
-                    MaterialResources.Get<double>("Space4")),
+                Style = MaterialResources.Get<Style>("M3ActionSheetDivider"),
             };
-            MaterialResources.SetThemeColor(
-                divider,
-                BoxView.ColorProperty,
-                "M3LightOutlineVariant",
-                "M3DarkOutlineVariant");
-            return divider;
         }
 
         private ICommand CreateDismissCommand(string? result)

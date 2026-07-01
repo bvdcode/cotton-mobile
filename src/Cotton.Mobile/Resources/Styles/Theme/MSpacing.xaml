@@ -105,6 +105,7 @@
     <Thickness x:Key="M3ViewerStatusWithTrailingActionMargin">16,0,80,16</Thickness>
     <Thickness x:Key="M3ActionSheetPadding">16,10,16,16</Thickness>
     <Thickness x:Key="M3ActionSheetTitleMargin">8,8,8,6</Thickness>
+    <Thickness x:Key="M3ActionSheetDividerMargin">8,4</Thickness>
     <Thickness x:Key="M3ActionSheetRowPadding">10,8</Thickness>
     <Thickness x:Key="M3DialogMargin">24</Thickness>
     <Thickness x:Key="M3DialogPadding">24</Thickness>

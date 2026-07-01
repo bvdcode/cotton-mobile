@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Tests
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
+        private const string AppLockGatePagePath = "src/Cotton.Mobile/AppLockGatePage.xaml";
         private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
         private const string TransfersPagePath = "src/Cotton.Mobile/TransfersPage.xaml";
@@ -173,6 +174,20 @@ namespace Cotton.Mobile.Tests
                 Assert.Contains("<controls:EmptyStateView", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("M3EmptyStateStack", page, StringComparison.Ordinal);
             }
+        }
+
+        [Fact]
+        public void Loading_indicator_frames_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string appLockGatePage = LoadText(AppLockGatePagePath);
+
+            Assert.Contains("<controls:LoadingIndicatorView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:LoadingIndicatorView", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LoadingIndicatorFrame", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LoadingIndicatorFrame", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LoadingActivityIndicator", appLockGatePage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

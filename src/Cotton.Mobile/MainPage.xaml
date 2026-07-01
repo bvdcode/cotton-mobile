@@ -34,10 +34,7 @@
                         Style="{StaticResource M3AuthLoadingStatusPanel}">
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3LoadingStatusGrid}">
-                        <Border Style="{StaticResource M3LoadingIndicatorFrame}">
-                            <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                               Style="{StaticResource M3LoadingActivityIndicator}" />
-                        </Border>
+                        <controls:LoadingIndicatorView IsRunning="{Binding Display.IsLoadingIndicatorRunning}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding Display.LoadingMessage}"
@@ -73,10 +70,7 @@
                         Style="{StaticResource M3AuthLoadingStatusPanel}">
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3LoadingStatusGrid}">
-                        <Border Style="{StaticResource M3LoadingIndicatorFrame}">
-                            <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                               Style="{StaticResource M3LoadingActivityIndicator}" />
-                        </Border>
+                        <controls:LoadingIndicatorView IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -338,10 +332,7 @@
                                     Style="{StaticResource M3LoadingStatusPanel}">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
                                       Style="{StaticResource M3LoadingStatusGrid}">
-                                    <Border Style="{StaticResource M3LoadingIndicatorFrame}">
-                                        <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
-                                                           Style="{StaticResource M3LoadingActivityIndicator}" />
-                                    </Border>
+                                    <controls:LoadingIndicatorView IsRunning="{Binding Display.IsFilesLoading}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.LoadingMessage}"

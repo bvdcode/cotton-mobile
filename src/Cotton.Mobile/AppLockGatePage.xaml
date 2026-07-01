@@ -24,11 +24,8 @@
                 <Label Text="{Binding StatusText}"
                        Style="{StaticResource M3CardSupportingCenteredLongWrap}" />
 
-                <Border IsVisible="{Binding IsBusy}"
-                        Style="{StaticResource M3LoadingIndicatorFrame}">
-                    <ActivityIndicator IsRunning="{Binding IsBusy}"
-                                       Style="{StaticResource M3LoadingActivityIndicator}" />
-                </Border>
+                <controls:LoadingIndicatorView IsVisible="{Binding IsBusy}"
+                                               IsRunning="{Binding IsBusy}" />
 
                 <controls:FilledButton Text="{Binding UnlockActionText}"
                                        Command="{Binding UnlockCommand}"

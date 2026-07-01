@@ -184,6 +184,11 @@
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3CardSupportingStrongLine" BasedOn="{StaticResource M3CardSupportingStrong}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3LabelSmall">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FontSize" Value="{StaticResource M3LabelSmallFontSize}" />

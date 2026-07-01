@@ -329,9 +329,7 @@
                                 <VerticalStackLayout Grid.Row="1"
                                                      Spacing="{StaticResource Space2}">
                                     <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Text="{Binding DisplayDetails}"
                                            Style="{StaticResource M3CardMeta}"

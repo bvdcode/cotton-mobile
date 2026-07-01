@@ -71,9 +71,7 @@
                                Style="{StaticResource M3CardSupportingLine}" />
 
                         <Label Text="{Binding DestinationStorageEstimateTitle}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingStrongLine}" />
 
                         <Label Text="{Binding DestinationStorageEstimateText}"
                                Style="{StaticResource M3CardSupporting}"
@@ -116,9 +114,7 @@
                           IsVisible="{Binding IsMediaAccessActionVisible}"
                           ColumnSpacing="{StaticResource Space12}">
                         <Label Text="{Binding MediaAccessActionText}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
+                               Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
                         <controls:IconButton Grid.Column="1"

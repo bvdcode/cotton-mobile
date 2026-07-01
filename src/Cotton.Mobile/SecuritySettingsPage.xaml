@@ -94,9 +94,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding DeviceUnlockActionText}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
+                               Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
                         <controls:IconButton Grid.Column="2"
@@ -155,9 +153,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Border Grid.Column="2"
                                             Style="{StaticResource M3NeutralChip}"
@@ -218,9 +214,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding RevokeCurrentSessionActionText}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
+                               Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
                         <controls:IconButton Grid.Column="2"
@@ -234,9 +228,7 @@
                     <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
                                          IsVisible="{Binding IsAccountSessionsEmptyVisible}">
                         <Label Text="{Binding AccountSessionsEmptyTitle}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingStrongLine}" />
 
                         <Label Text="{Binding AccountSessionsEmptyDetails}"
                                Style="{StaticResource M3CardSupporting}"
@@ -259,9 +251,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Border Grid.Column="2"
                                             Style="{StaticResource M3NeutralChip}"

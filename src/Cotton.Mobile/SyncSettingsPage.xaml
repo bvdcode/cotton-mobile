@@ -60,9 +60,7 @@
                           ColumnSpacing="{StaticResource Space12}"
                           Margin="{StaticResource M3PanelActionTopMargin}">
                         <Label Text="Choose folder"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
+                               Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
                         <controls:IconButton Grid.Column="1"

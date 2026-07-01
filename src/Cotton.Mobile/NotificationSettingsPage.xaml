@@ -90,9 +90,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding PermissionActionText}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
+                               Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
                         <controls:IconButton Grid.Column="2"

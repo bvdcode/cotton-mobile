@@ -56,9 +56,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding CloudQuotaSummaryText, FallbackValue=Account storage unavailable., TargetNullValue=Account storage unavailable.}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingStrongLine}" />
 
                         <Label Text="{Binding CloudQuotaDetailText, FallbackValue=Storage limits are not shared by this server., TargetNullValue=Storage limits are not shared by this server.}"
                                Style="{StaticResource M3CardSupporting}"
@@ -88,9 +86,7 @@
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
                             <Label Text="Free space"
-                                   Style="{StaticResource M3CardSupportingStrong}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingStrongLine}" />
 
                             <Label Text="Remove evictable local copies while keeping offline files."
                                    Style="{StaticResource M3CardSupporting}"
@@ -113,9 +109,7 @@
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
                             <Label Text="Clear all cached files"
-                                   Style="{StaticResource M3CardSupportingStrong}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingStrongLine}" />
 
                             <Label Text="Clear thumbnails, folder listings, downloads, and recents."
                                    Style="{StaticResource M3CardSupporting}"
@@ -166,15 +160,11 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding SizeText}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
@@ -232,15 +222,11 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding UsageText}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"

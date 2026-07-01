@@ -20,10 +20,10 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+                  ColumnSpacing="{StaticResource Space12}">
+                <VerticalStackLayout Spacing="{StaticResource Space2}">
                     <Label Text="Folders"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -50,7 +50,7 @@
 
             <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsEmptyVisible}">
-                <VerticalStackLayout Spacing="8">
+                <VerticalStackLayout Spacing="{StaticResource Space8}">
                     <Label Text="No folders yet"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"
@@ -64,20 +64,19 @@
                     <Button Text="Choose folder"
                             Command="{Binding OpenFilesCommand}"
                             Style="{StaticResource M3PrimaryButton}"
-                            Margin="0,6,0,0"
-                            HeightRequest="44" />
+                            Margin="{StaticResource M3PanelActionTopMargin}" />
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10"
+            <VerticalStackLayout Spacing="{StaticResource Space12}"
                                  BindableLayout.ItemsSource="{Binding Roots}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid ColumnDefinitions="*,Auto"
                                   RowDefinitions="Auto,Auto,Auto,Auto"
-                                  RowSpacing="4"
-                                  ColumnSpacing="12">
+                                  RowSpacing="{StaticResource Space4}"
+                                  ColumnSpacing="{StaticResource Space12}">
                                 <Label Text="{Binding Title}"
                                        Style="{StaticResource M3CardTitle}"
                                        MaxLines="1"
@@ -105,8 +104,8 @@
 
                                 <VerticalStackLayout Grid.Row="3"
                                                      Grid.ColumnSpan="2"
-                                                     Spacing="8"
-                                                     Margin="0,6,0,0">
+                                                     Spacing="{StaticResource Space8}"
+                                                     Margin="{StaticResource M3PanelActionTopMargin}">
                                     <Button Text="{Binding RunNowActionText}"
                                             Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
                                             CommandParameter="{Binding .}"
@@ -115,7 +114,7 @@
                                             Style="{StaticResource PanelChromeButton}" />
 
                                     <Grid ColumnDefinitions="*,*"
-                                          ColumnSpacing="8">
+                                          ColumnSpacing="{StaticResource Space8}">
                                         <Button Text="{Binding PauseSyncActionText}"
                                                 Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
                                                 CommandParameter="{Binding .}"

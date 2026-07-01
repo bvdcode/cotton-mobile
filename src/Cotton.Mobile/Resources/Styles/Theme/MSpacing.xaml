@@ -48,6 +48,7 @@
     <Thickness x:Key="M3NavigationBarMargin">0,0,0,10</Thickness>
     <Thickness x:Key="M3NavigationBarPadding">6</Thickness>
     <Thickness x:Key="M3NavigationBarItemPadding">4,5</Thickness>
+    <Thickness x:Key="M3PanelActionTopMargin">0,8,0,0</Thickness>
     <Thickness x:Key="M3PdfEmptyPadding">24</Thickness>
     <Thickness x:Key="M3PdfHeaderPadding">16,12</Thickness>
     <Thickness x:Key="M3PdfPagePadding">12,0</Thickness>

@@ -13,8 +13,8 @@
     <x:Double x:Key="Space24">24</x:Double>
     <x:Double x:Key="Space32">32</x:Double>
     <x:Double x:Key="TouchTarget">48</x:Double>
-    <x:Double x:Key="M3ButtonMinSize">44</x:Double>
-    <x:Double x:Key="M3ControlMinSize">44</x:Double>
+    <x:Double x:Key="M3ButtonMinSize">48</x:Double>
+    <x:Double x:Key="M3ControlMinSize">48</x:Double>
     <x:Double x:Key="M3FooterLinkMinHeight">48</x:Double>
     <x:Double x:Key="M3InputIconFrameSize">32</x:Double>
     <x:Double x:Key="M3InputIconSize">18</x:Double>

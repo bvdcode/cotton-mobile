@@ -85,10 +85,6 @@
         <Setter Property="HorizontalTextAlignment" Value="Center" />
     </Style>
 
-    <Style TargetType="Label" x:Key="M3DarkEmptyTitle" BasedOn="{StaticResource M3EmptyTitle}">
-        <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurface}" />
-    </Style>
-
     <Style TargetType="Label" x:Key="M3BrowserTitle">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3BrowserTitleFontSize}" />

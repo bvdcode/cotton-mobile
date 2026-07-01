@@ -8,12 +8,11 @@
              x:DataType="viewModels:PdfViewerViewModel"
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
-             Style="{StaticResource M3DarkViewerPage}">
+             Style="{StaticResource M3DocumentViewerPage}">
 
     <Grid RowDefinitions="Auto,*"
-          Style="{StaticResource M3DarkViewerSurface}">
+          Style="{StaticResource M3DocumentViewerSurface}">
         <controls:TopAppBar TitleText="{Binding Title}"
-                            UseDarkTheme="True"
                             PrimaryIconData="{x:Static controls:IconPathData.Share}"
                             PrimaryCommand="{Binding ShareCommand}"
                             PrimaryDescription="Share PDF"
@@ -23,21 +22,21 @@
 
         <Grid Grid.Row="1"
               RowDefinitions="Auto,*"
-              Style="{StaticResource M3DarkViewerSurface}">
+              Style="{StaticResource M3DocumentViewerSurface}">
             <VerticalStackLayout Padding="{StaticResource M3PdfHeaderPadding}"
                                  Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
-                       Style="{StaticResource M3DarkSupportingLine}" />
+                       Style="{StaticResource M3CardSupportingLine}" />
 
                 <Label Text="{Binding Status}"
                        IsVisible="{Binding IsStatusVisible}"
-                       Style="{StaticResource M3DarkSupportingLine}" />
+                       Style="{StaticResource M3CardSupportingLine}" />
             </VerticalStackLayout>
 
             <CollectionView Grid.Row="1"
                             ItemsSource="{Binding Pages}"
                             IsVisible="{Binding IsPreviewVisible}"
-                            Style="{StaticResource M3DarkViewerCollection}"
+                            Style="{StaticResource M3DocumentViewerCollection}"
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
@@ -59,15 +58,15 @@
             <Grid Grid.Row="1"
                   IsVisible="{Binding IsEmptyVisible}"
                   Style="{StaticResource M3PdfEmptyStateLayer}">
-                <Border Style="{StaticResource M3CenteredViewerEmptyStateCard}">
+                <Border Style="{StaticResource M3CenteredPdfEmptyStateCard}">
                     <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                        <Border Style="{StaticResource M3ViewerEmptyStateIconFrame}">
+                        <Border Style="{StaticResource M3PdfEmptyStateIconFrame}">
                             <controls:IconView IconData="{x:Static controls:IconPathData.File}"
                                                Style="{StaticResource M3EmptyStateIcon}" />
                         </Border>
 
                         <Label Text="{Binding EmptyText}"
-                               Style="{StaticResource M3DarkEmptyTitle}" />
+                               Style="{StaticResource M3EmptyTitle}" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>

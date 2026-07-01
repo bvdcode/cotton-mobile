@@ -39,9 +39,7 @@
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3BodyMedium}"
-                   MaxLines="2"
-                   LineBreakMode="TailTruncation" />
+                   Style="{StaticResource M3ScreenStatus}" />
 
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto"

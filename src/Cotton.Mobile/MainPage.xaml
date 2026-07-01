@@ -359,8 +359,7 @@
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
                                     Style="{StaticResource M3SelectionBar}">
                                 <Grid ColumnDefinitions="*,Auto,Auto"
-                                      ColumnSpacing="{StaticResource Space8}"
-                                      HeightRequest="{StaticResource M3PanelButtonHeight}">
+                                      ColumnSpacing="{StaticResource Space8}">
                                     <VerticalStackLayout Spacing="{StaticResource Space2}"
                                                          VerticalOptions="Center">
                                         <Label Text="{Binding Display.FileSelection.TitleText}"
@@ -374,15 +373,19 @@
                                                LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
 
-                                    <Button Grid.Column="1"
-                                            Text="Actions"
-                                            Command="{Binding ShowFileSelectionActionsCommand}"
-                                            Style="{StaticResource DenseActionChromeButton}" />
+                                    <controls:IconButton Grid.Column="1"
+                                                         IconData="{x:Static controls:IconPathData.MoreVertical}"
+                                                         Command="{Binding ShowFileSelectionActionsCommand}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="Selected file actions" />
 
-                                    <Button Grid.Column="2"
-                                            Text="Cancel"
-                                            Command="{Binding ClearFileSelectionCommand}"
-                                            Style="{StaticResource DenseActionChromeButton}" />
+                                    <controls:IconButton Grid.Column="2"
+                                                         IconData="{x:Static controls:IconPathData.Close}"
+                                                         Command="{Binding ClearFileSelectionCommand}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="Cancel file selection" />
                                 </Grid>
                             </Border>
 

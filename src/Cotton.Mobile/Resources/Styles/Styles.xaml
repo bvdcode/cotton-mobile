@@ -728,6 +728,18 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3TopAppBarContentGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space4}" />
+        <Setter Property="HeightRequest" Value="{StaticResource TouchTarget}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3TopAppBarActionCluster">
+        <Setter Property="Spacing" Value="{StaticResource Space4}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />

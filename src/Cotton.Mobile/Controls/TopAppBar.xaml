@@ -14,9 +14,7 @@
         </DataTrigger>
     </ContentView.Triggers>
 
-    <Grid ColumnSpacing="{StaticResource Space4}"
-          HeightRequest="{StaticResource TouchTarget}"
-          VerticalOptions="Center">
+    <Grid Style="{StaticResource M3TopAppBarContentGrid}">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{StaticResource TouchTarget}" />
             <ColumnDefinition Width="*" />
@@ -52,9 +50,7 @@
         </Label>
 
         <HorizontalStackLayout Grid.Column="2"
-                               Spacing="{StaticResource Space4}"
-                               HorizontalOptions="End"
-                               VerticalOptions="Center">
+                               Style="{StaticResource M3TopAppBarActionCluster}">
             <controls:IconButton IconData="{Binding Source={x:Reference Root}, Path=PrimaryIconData}"
                                  Style="{StaticResource M3TopAppBarIconButton}"
                                  Command="{Binding Source={x:Reference Root}, Path=PrimaryCommand}"

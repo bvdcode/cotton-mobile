@@ -18,8 +18,8 @@
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
                              Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+                  Style="{StaticResource M3ScreenHeaderGrid}">
+                <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="{Binding CurrentFolderName}"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -66,9 +66,7 @@
 
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3EmptyStateCard}">
-                <VerticalStackLayout Spacing="8"
-                                     HorizontalOptions="Center"
-                                     VerticalOptions="Center">
+                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
                     <Label Text="No folders here"
                            Style="{StaticResource M3EmptyTitle}"
                            HorizontalTextAlignment="Center" />

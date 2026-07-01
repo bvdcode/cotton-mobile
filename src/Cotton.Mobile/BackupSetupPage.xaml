@@ -168,14 +168,14 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
+                      Style="{StaticResource M3SettingsToggleGroupGrid}">
                     <controls:IconFrame Grid.RowSpan="3"
                                         IconData="{x:Static controls:IconPathData.Backup}"
                                         Style="{StaticResource M3CardCaptureThumbnailFrame}" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
-                        <Label Text="Backup running"
+                        <Label Text="Camera backup"
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding LocalMediaRetentionText}"
@@ -186,19 +186,29 @@
                                            IsEnabled="{Binding CanEnableBackup}"
                                            IsToggled="{Binding IsBackupEnabled, Mode=OneWay}" />
 
-                    <Label Grid.Row="1"
-                           Grid.Column="1"
-                           Text="Photos only"
-                           Style="{StaticResource M3LabelLargeLine}" />
+                    <VerticalStackLayout Grid.Row="1"
+                                         Grid.Column="1"
+                                         Style="{StaticResource M3SettingsDenseStack}">
+                        <Label Text="Photos only"
+                               Style="{StaticResource M3LabelLargeLine}" />
+
+                        <Label Text="Skip videos during camera backup."
+                               Style="{StaticResource M3CardSupportingLine}" />
+                    </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"
                                            IsToggled="{Binding PhotosOnly, Mode=TwoWay}" />
 
-                    <Label Grid.Row="2"
-                           Grid.Column="1"
-                           Text="While charging"
-                           Style="{StaticResource M3LabelLargeLine}" />
+                    <VerticalStackLayout Grid.Row="2"
+                                         Grid.Column="1"
+                                         Style="{StaticResource M3SettingsDenseStack}">
+                        <Label Text="Require charging"
+                               Style="{StaticResource M3LabelLargeLine}" />
+
+                        <Label Text="Run backup only while the phone is plugged in."
+                               Style="{StaticResource M3CardSupportingLine}" />
+                    </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Row="2"
                                            Grid.Column="2"
@@ -209,22 +219,32 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
+                      Style="{StaticResource M3SettingsToggleGroupGrid}">
                     <controls:IconFrame Grid.RowSpan="2"
                                         IconData="{x:Static controls:IconPathData.Transfer}"
                                         Style="{StaticResource M3CardTransferThumbnailFrame}" />
 
-                    <Label Grid.Column="1"
-                           Text="Wi-Fi only"
-                           Style="{StaticResource M3LabelLargeLine}" />
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3SettingsDenseStack}">
+                        <Label Text="Wi-Fi only"
+                               Style="{StaticResource M3LabelLargeLine}" />
+
+                        <Label Text="Pause uploads on mobile networks."
+                               Style="{StaticResource M3CardSupportingLine}" />
+                    </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Column="2"
                                            IsToggled="{Binding WifiOnly, Mode=TwoWay}" />
 
-                    <Label Grid.Row="1"
-                           Grid.Column="1"
-                           Text="Allow cellular"
-                           Style="{StaticResource M3LabelLargeLine}" />
+                    <VerticalStackLayout Grid.Row="1"
+                                         Grid.Column="1"
+                                         Style="{StaticResource M3SettingsDenseStack}">
+                        <Label Text="Cellular uploads"
+                               Style="{StaticResource M3LabelLargeLine}" />
+
+                        <Label Text="Allow uploads when Wi-Fi is unavailable."
+                               Style="{StaticResource M3CardSupportingLine}" />
+                    </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"

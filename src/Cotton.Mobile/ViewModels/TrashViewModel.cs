@@ -17,8 +17,6 @@ namespace Cotton.Mobile.ViewModels
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
         private const string ViewTilesAction = "Tiles";
-        private const string CurrentActionSuffix = " (current)";
-
         private readonly Uri _instanceUri;
         private readonly ICottonTrashBrowserService _trashBrowserService;
         private readonly ICottonTrashRestoreService _trashRestoreService;
@@ -1188,19 +1186,12 @@ namespace Cotton.Mobile.ViewModels
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)
         {
-            return isCurrent ? label + CurrentActionSuffix : label;
+            return CottonActionSheetCurrentLabel.Create(label, isCurrent);
         }
 
         private static string? NormalizeAction(string? action)
         {
-            if (action is null)
-            {
-                return null;
-            }
-
-            return action.EndsWith(CurrentActionSuffix, StringComparison.Ordinal)
-                ? action[..^CurrentActionSuffix.Length]
-                : action;
+            return CottonActionSheetCurrentLabel.Normalize(action);
         }
 
         private void LogUnhandledCommandException(Exception exception)

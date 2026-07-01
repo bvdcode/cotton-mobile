@@ -20,6 +20,7 @@
     <Color x:Key="M3LightOutlineVariant">#C0C8BF</Color>
     <Color x:Key="M3LightError">#BA1A1A</Color>
     <Color x:Key="M3LightPressedStateLayer">#1F171D18</Color>
+    <Color x:Key="M3LightScrim">#66000000</Color>
 
     <Color x:Key="M3DarkSurface">#0A0F0C</Color>
     <Color x:Key="M3DarkOnSurface">#E4ECE3</Color>
@@ -33,6 +34,7 @@
     <Color x:Key="M3DarkOutlineVariant">#3E493E</Color>
     <Color x:Key="M3DarkError">#FFB4AB</Color>
     <Color x:Key="M3DarkPressedStateLayer">#1FE4ECE3</Color>
+    <Color x:Key="M3DarkScrim">#99000000</Color>
 
     <SolidColorBrush x:Key="M3AccentBrush" Color="{StaticResource M3Accent}" />
 </ResourceDictionary>

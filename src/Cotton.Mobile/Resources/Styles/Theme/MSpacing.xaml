@@ -58,6 +58,12 @@
     <x:Double x:Key="M3PdfPageSpacing">12</x:Double>
     <x:Double x:Key="M3TrashTileHeight">236</x:Double>
     <x:Double x:Key="M3TrashTilePreviewHeight">92</x:Double>
+    <x:Double x:Key="M3ActionSheetMaxWidth">560</x:Double>
+    <x:Double x:Key="M3ActionSheetHandleWidth">36</x:Double>
+    <x:Double x:Key="M3ActionSheetHandleHeight">4</x:Double>
+    <x:Double x:Key="M3ActionSheetRowIconFrameSize">36</x:Double>
+    <x:Double x:Key="M3ActionSheetRowIconSize">20</x:Double>
+    <x:Double x:Key="M3ActionSheetRowMinHeight">56</x:Double>
 
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
     <Thickness x:Key="M3NoPadding">0</Thickness>
@@ -95,4 +101,7 @@
     <Thickness x:Key="M3TextViewerPadding">16</Thickness>
     <Thickness x:Key="M3ViewerOverlayMargin">16</Thickness>
     <Thickness x:Key="M3ViewerStatusWithTrailingActionMargin">16,0,80,16</Thickness>
+    <Thickness x:Key="M3ActionSheetPadding">16,10,16,16</Thickness>
+    <Thickness x:Key="M3ActionSheetTitleMargin">8,8,8,6</Thickness>
+    <Thickness x:Key="M3ActionSheetRowPadding">10,8</Thickness>
 </ResourceDictionary>

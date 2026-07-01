@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 
@@ -110,7 +111,9 @@ namespace Cotton.Mobile.Services
                         return null;
                     }
 
-                    return await page.DisplayActionSheetAsync(title, cancel, destruction, buttons);
+                    MaterialActionSheetPage actionSheet = new(title, cancel, destruction, buttons);
+                    await page.Navigation.PushModalAsync(actionSheet, animated: false);
+                    return await actionSheet.WaitForResultAsync();
                 });
             }
             catch (Exception exception)

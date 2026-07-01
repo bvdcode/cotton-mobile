@@ -453,6 +453,10 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3SecondaryFileListItemGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserProfileStack">
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
@@ -684,6 +688,10 @@
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileListTextStack" BasedOn="{StaticResource M3CardTextStack}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3SecondaryFileListTextStack" BasedOn="{StaticResource M3CardTextStack}">
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 

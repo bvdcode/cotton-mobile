@@ -64,7 +64,7 @@
                                 SelectionMode="None">
                     <CollectionView.ItemsLayout>
                         <LinearItemsLayout Orientation="Vertical"
-                                           ItemSpacing="{StaticResource Space12}" />
+                                           ItemSpacing="{StaticResource M3CardListItemSpacing}" />
                     </CollectionView.ItemsLayout>
 
                     <CollectionView.ItemTemplate>

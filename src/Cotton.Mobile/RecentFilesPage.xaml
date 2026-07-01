@@ -67,21 +67,20 @@
                         ItemSizingStrategy="MeasureFirstItem">
             <CollectionView.ItemsLayout>
                 <LinearItemsLayout Orientation="Vertical"
-                                   ItemSpacing="{StaticResource Space12}" />
+                                   ItemSpacing="{StaticResource M3CardListItemSpacing}" />
             </CollectionView.ItemsLayout>
 
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
                     <Border Style="{StaticResource M3ContentCard}">
                         <Grid ColumnDefinitions="Auto,*,Auto"
-                              ColumnSpacing="{StaticResource Space12}">
+                              Style="{StaticResource M3SecondaryFileListItemGrid}">
                             <controls:IconFrame IconData="{x:Static controls:IconPathData.File}"
                                                 Style="{StaticResource M3FileThumbnailFrame}"
                                                 VerticalOptions="Center" />
 
                             <VerticalStackLayout Grid.Column="1"
-                                                 Style="{StaticResource M3CardTextStack}"
-                                                 VerticalOptions="Center">
+                                                 Style="{StaticResource M3SecondaryFileListTextStack}">
                                 <Label Text="{Binding FileName}"
                                        Style="{StaticResource M3CardTitle}" />
 

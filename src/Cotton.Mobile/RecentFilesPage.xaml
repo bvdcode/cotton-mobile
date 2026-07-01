@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -50,42 +49,23 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
                     <Border Style="{StaticResource M3ContentCard}">
-                        <Grid ColumnDefinitions="Auto,*,Auto"
-                              Style="{StaticResource M3SecondaryFileListItemGrid}">
-                            <controls:IconFrame IconData="{x:Static controls:IconPathData.File}"
-                                                Style="{StaticResource M3FileThumbnailFrame}" />
-
-                            <VerticalStackLayout Grid.Column="1"
-                                                 Style="{StaticResource M3SecondaryFileListTextStack}">
-                                <Label Text="{Binding FileName}"
-                                       Style="{StaticResource M3CardTitle}" />
-
-                                <Label Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-                            </VerticalStackLayout>
-
-                            <HorizontalStackLayout Grid.Column="2"
-                                                   Style="{StaticResource M3RowActionCluster}">
-                                <Border Style="{StaticResource M3RowActionChip}">
-                                    <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}" />
-                                </Border>
-
-                                <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
-                                                     Style="{StaticResource M3FileChromeIconButton}"
+                        <controls:ActionListItemView Text="{Binding FileName}"
+                                                     SupportingText="{Binding DetailText}"
+                                                     TrailingText="{Binding BadgeText}"
+                                                     LeadingIconData="{x:Static controls:IconPathData.File}"
+                                                     IsLeadingIconVisible="True"
+                                                     LeadingIconFrameStyleResourceKey="M3FileThumbnailFrame"
+                                                     ActionIconData="{x:Static controls:IconPathData.Delete}"
                                                      Command="{Binding BindingContext.RemoveRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
                                                      CommandParameter="{Binding .}"
-                                                     SemanticProperties.Description="Remove recent file" />
-                            </HorizontalStackLayout>
-
-                            <Grid Grid.ColumnSpan="2"
-                                  Style="{StaticResource M3ListItemTouchSurface}">
-                                <Grid.Behaviors>
-                                    <behaviors:LongPressBehavior TapCommand="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
-                                                                 TapCommandParameter="{Binding .}" />
-                                </Grid.Behaviors>
-                            </Grid>
-                        </Grid>
+                                                     RowTapCommand="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
+                                                     RowTapCommandParameter="{Binding .}"
+                                                     GridStyleResourceKey="M3SecondaryFileListItemGrid"
+                                                     TextStackStyleResourceKey="M3SecondaryFileListTextStack"
+                                                     TextStyleResourceKey="M3CardTitle"
+                                                     SupportingTextStyleResourceKey="M3CardSupportingLine"
+                                                     ActionSemanticDescription="Remove recent file"
+                                                     SemanticDescription="{Binding FileName, StringFormat='Open {0}'}" />
                     </Border>
                 </DataTemplate>
             </CollectionView.ItemTemplate>

@@ -236,6 +236,7 @@ namespace Cotton.Mobile.Tests
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+            string recentFilesPage = LoadText(RecentFilesPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string storagePage = LoadText(StoragePagePath);
 
@@ -251,6 +252,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionIconData=\"{x:Static controls:IconPathData.ChevronRight}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"{Binding DisplayName, StringFormat='Open {0}'}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", captureDestinationPickerPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:ActionListItemView Text=\"{Binding FileName}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("RowTapCommand=\"{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("CommandParameter=\"{Binding .}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("ActionSemanticDescription=\"Remove recent file\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<behaviors:LongPressBehavior", recentFilesPage, StringComparison.Ordinal);
 
             Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);

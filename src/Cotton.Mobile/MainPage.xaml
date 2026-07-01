@@ -161,13 +161,13 @@
                                                LineBreakMode="TailTruncation" />
                                     </VerticalStackLayout>
 
-                                    <Button Grid.Column="2"
-                                            Style="{StaticResource IconChromeButton}"
-                                            Text="{Binding Display.ProfileInitials}"
-                                            Command="{Binding AccountCommand}"
-                                            IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                            VerticalOptions="Center"
-                                            SemanticProperties.Description="Account" />
+                                    <controls:InitialsButton Grid.Column="2"
+                                                             Style="{StaticResource M3AccountInitialsButton}"
+                                                             Text="{Binding Display.ProfileInitials}"
+                                                             Command="{Binding AccountCommand}"
+                                                             IsEnabled="{Binding Display.IsAccountActionEnabled}"
+                                                             VerticalOptions="Center"
+                                                             SemanticProperties.Description="Account" />
                                 </Grid>
 
                                 <HorizontalStackLayout Grid.Row="1"

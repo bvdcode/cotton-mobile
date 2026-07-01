@@ -5,106 +5,116 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class IconButton : CommandPressableContentView
+    public class InitialsButton : CommandPressableContentView
     {
-        public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
-            nameof(IconData),
-            typeof(Geometry),
-            typeof(IconButton),
-            default(Geometry),
+        public static readonly BindableProperty TextProperty = BindableProperty.Create(
+            nameof(Text),
+            typeof(string),
+            typeof(InitialsButton),
+            string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
-            nameof(IconColor),
+        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
+            nameof(TextColor),
             typeof(Color),
-            typeof(IconButton),
+            typeof(InitialsButton),
             Colors.White,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(ButtonBackgroundColor),
             typeof(Color),
-            typeof(IconButton),
+            typeof(InitialsButton),
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
-            typeof(IconButton),
+            typeof(InitialsButton),
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
-            typeof(IconButton),
+            typeof(InitialsButton),
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),
             typeof(double),
-            typeof(IconButton),
+            typeof(InitialsButton),
             1.0,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ButtonSizeProperty = BindableProperty.Create(
             nameof(ButtonSize),
             typeof(double),
-            typeof(IconButton),
+            typeof(InitialsButton),
             44.0,
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
-            nameof(IconSize),
+        public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
+            nameof(TextFontSize),
             typeof(double),
-            typeof(IconButton),
-            20.0,
+            typeof(InitialsButton),
+            14.0,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
-            typeof(IconButton),
+            typeof(InitialsButton),
             22.0,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ButtonOpacityProperty = BindableProperty.Create(
             nameof(ButtonOpacity),
             typeof(double),
-            typeof(IconButton),
+            typeof(InitialsButton),
             1.0,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Border _container;
-        private readonly IconView _icon;
+        private readonly Label _label;
 
-        public IconButton()
+        public InitialsButton()
         {
-            _icon = new IconView();
+            _label = new Label
+            {
+                FontAttributes = FontAttributes.Bold,
+                HorizontalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+                LineBreakMode = LineBreakMode.TailTruncation,
+                MaxLines = 1,
+                VerticalOptions = LayoutOptions.Center,
+                VerticalTextAlignment = TextAlignment.Center,
+            };
+
             _container = new Border
             {
                 StrokeThickness = BorderWidth,
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
-                Content = _icon,
+                Content = _label,
             };
 
             Content = _container;
             UpdateVisualState();
         }
 
-        public Geometry? IconData
+        public string Text
         {
-            get => (Geometry?)GetValue(IconDataProperty);
-            set => SetValue(IconDataProperty, value);
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
         }
 
-        public Color IconColor
+        public Color TextColor
         {
-            get => (Color)GetValue(IconColorProperty);
-            set => SetValue(IconColorProperty, value);
+            get => (Color)GetValue(TextColorProperty);
+            set => SetValue(TextColorProperty, value);
         }
 
         public Color ButtonBackgroundColor
@@ -137,10 +147,10 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ButtonSizeProperty, value);
         }
 
-        public double IconSize
+        public double TextFontSize
         {
-            get => (double)GetValue(IconSizeProperty);
-            set => SetValue(IconSizeProperty, value);
+            get => (double)GetValue(TextFontSizeProperty);
+            set => SetValue(TextFontSizeProperty, value);
         }
 
         public double ButtonCornerRadius
@@ -167,8 +177,8 @@ namespace Cotton.Mobile.Controls
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            IconButton iconButton = (IconButton)bindable;
-            iconButton.UpdateVisualState();
+            InitialsButton initialsButton = (InitialsButton)bindable;
+            initialsButton.UpdateVisualState();
         }
 
         protected override void OnPressedStateChanged()
@@ -183,7 +193,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            if (_container is null || _icon is null)
+            if (_container is null || _label is null)
             {
                 return;
             }
@@ -204,9 +214,11 @@ namespace Cotton.Mobile.Controls
             _container.Stroke = new SolidColorBrush(BorderColor);
             _container.StrokeThickness = BorderWidth;
 
-            _icon.IconData = IconData;
-            _icon.IconColor = IconColor;
-            _icon.IconSize = IconSize;
+            _label.WidthRequest = ButtonSize;
+            _label.HeightRequest = ButtonSize;
+            _label.Text = Text;
+            _label.TextColor = TextColor;
+            _label.FontSize = TextFontSize;
         }
     }
 }

@@ -14,12 +14,8 @@
     <x:Double x:Key="Space32">32</x:Double>
     <x:Double x:Key="TouchTarget">48</x:Double>
     <x:Double x:Key="M3ButtonMinSize">44</x:Double>
-    <x:Double x:Key="M3ChromeActionMinWidth">76</x:Double>
     <x:Double x:Key="M3CompactButtonHeight">32</x:Double>
     <x:Double x:Key="M3ControlMinSize">44</x:Double>
-    <x:Double x:Key="M3DenseActionMinWidth">72</x:Double>
-    <x:Double x:Key="M3DenseButtonHeight">36</x:Double>
-    <x:Double x:Key="M3PanelButtonHeight">40</x:Double>
     <x:Double x:Key="M3InputIconFrameSize">32</x:Double>
     <x:Double x:Key="M3InputIconSize">18</x:Double>
     <x:Double x:Key="M3AuthPanelMaxWidth">480</x:Double>
@@ -63,7 +59,6 @@
     <Thickness x:Key="M3AuthPanelPadding">0</Thickness>
     <Thickness x:Key="M3AuthShellMargin">0,32,0,0</Thickness>
     <Thickness x:Key="M3AppLockGatePadding">24</Thickness>
-    <Thickness x:Key="M3ChromeButtonPadding">10,0</Thickness>
     <Thickness x:Key="M3CompactChipPadding">5,1</Thickness>
     <Thickness x:Key="M3ContentCardPadding">16</Thickness>
     <Thickness x:Key="M3EmptyStateCardPadding">28,36</Thickness>
@@ -84,7 +79,6 @@
     <Thickness x:Key="M3NavigationBarItemPadding">4,5</Thickness>
     <Thickness x:Key="M3NeutralChipPadding">8,3</Thickness>
     <Thickness x:Key="M3OutlinedInputPadding">14,4</Thickness>
-    <Thickness x:Key="M3PanelButtonPadding">12,0</Thickness>
     <Thickness x:Key="M3PanelActionTopMargin">0,8,0,0</Thickness>
     <Thickness x:Key="M3PdfEmptyPadding">24</Thickness>
     <Thickness x:Key="M3PdfHeaderPadding">16,12</Thickness>

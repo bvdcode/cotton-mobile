@@ -638,6 +638,10 @@
         <Setter Property="Margin" Value="{StaticResource M3ViewerStatusWithTrailingActionMargin}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3PdfEmptyStateLayer">
+        <Setter Property="Padding" Value="{StaticResource M3PdfEmptyPadding}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3ViewerEmptyStateCard">
         <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape">
@@ -648,6 +652,11 @@
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="Padding" Value="{StaticResource M3EmptyStateCardPadding}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurfaceContainer}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3CenteredViewerEmptyStateCard" BasedOn="{StaticResource M3ViewerEmptyStateCard}">
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3ViewerEmptyStateIconFrame">

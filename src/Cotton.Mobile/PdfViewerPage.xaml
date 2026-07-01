@@ -58,10 +58,8 @@
 
             <Grid Grid.Row="1"
                   IsVisible="{Binding IsEmptyVisible}"
-                  Padding="{StaticResource M3PdfEmptyPadding}">
-                <Border Style="{StaticResource M3ViewerEmptyStateCard}"
-                        HorizontalOptions="Fill"
-                        VerticalOptions="Center">
+                  Style="{StaticResource M3PdfEmptyStateLayer}">
+                <Border Style="{StaticResource M3CenteredViewerEmptyStateCard}">
                     <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
                         <Border Style="{StaticResource M3ViewerEmptyStateIconFrame}">
                             <controls:IconView IconData="{x:Static controls:IconPathData.File}"

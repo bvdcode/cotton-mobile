@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.NotificationSettingsPage"
@@ -46,6 +47,13 @@
                            Style="{StaticResource M3LabelLargeBlock}"
                            VerticalOptions="Center" />
 
+                    <Grid Grid.ColumnSpan="3"
+                          Style="{StaticResource M3ListItemTouchSurface}">
+                        <Grid.Behaviors>
+                            <behaviors:LongPressBehavior TapCommand="{Binding LoadCommand}" />
+                        </Grid.Behaviors>
+                    </Grid>
+
                     <controls:IconButton Grid.Column="2"
                                          IconData="{x:Static controls:IconPathData.Refresh}"
                                          Command="{Binding LoadCommand}"
@@ -89,6 +97,13 @@
                                Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
+                        <Grid Grid.ColumnSpan="3"
+                              Style="{StaticResource M3ListItemTouchSurface}">
+                            <Grid.Behaviors>
+                                <behaviors:LongPressBehavior TapCommand="{Binding PermissionActionCommand}" />
+                            </Grid.Behaviors>
+                        </Grid>
+
                         <controls:IconButton Grid.Column="2"
                                              IconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding PermissionActionCommand}"
@@ -129,13 +144,27 @@
                                Text="{Binding RemotePushUnavailableDetail}"
                                Style="{StaticResource M3CardSupportingBlock}" />
 
-                        <controls:IconButton Grid.Row="2"
-                                             Grid.Column="1"
-                                             IconData="{x:Static controls:IconPathData.Refresh}"
-                                             Command="{Binding LoadCommand}"
-                                             Style="{StaticResource M3FileChromeIconButton}"
-                                             HorizontalOptions="End"
-                                             SemanticProperties.Description="Retry server push" />
+                        <Grid Grid.Row="2"
+                              Grid.ColumnSpan="2"
+                              ColumnDefinitions="*,Auto"
+                              Style="{StaticResource M3SettingsListItemGrid}">
+                            <Label Text="Retry server push"
+                                   Style="{StaticResource M3CardSupportingStrongLine}"
+                                   VerticalOptions="Center" />
+
+                            <Grid Grid.ColumnSpan="2"
+                                  Style="{StaticResource M3ListItemTouchSurface}">
+                                <Grid.Behaviors>
+                                    <behaviors:LongPressBehavior TapCommand="{Binding LoadCommand}" />
+                                </Grid.Behaviors>
+                            </Grid>
+
+                            <controls:IconButton Grid.Column="1"
+                                                 IconData="{x:Static controls:IconPathData.Refresh}"
+                                                 Command="{Binding LoadCommand}"
+                                                 Style="{StaticResource M3FileChromeIconButton}"
+                                                 SemanticProperties.Description="Retry server push" />
+                        </Grid>
                     </Grid>
 
                     <VerticalStackLayout Spacing="{StaticResource Space12}"

@@ -41,7 +41,7 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Grid ColumnDefinitions="Auto,Auto,*"
+            <Grid ColumnDefinitions="Auto,Auto,Auto,*"
                   ColumnSpacing="{StaticResource Space12}"
                   IsVisible="{Binding IsActionBarVisible}">
                 <controls:IconButton IconData="{x:Static controls:IconPathData.Folder}"
@@ -57,11 +57,12 @@
                                      VerticalOptions="Center"
                                      SemanticProperties.Description="Rename capture item" />
 
-                <Button Grid.Column="2"
-                        Text="Queue"
-                        Command="{Binding EnqueueCommand}"
-                        Style="{StaticResource M3PrimaryButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton Grid.Column="2"
+                                     IconData="{x:Static controls:IconPathData.Transfer}"
+                                     Command="{Binding EnqueueCommand}"
+                                     Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Queue captured items" />
             </Grid>
 
             <Border IsVisible="{Binding IsEmpty}"

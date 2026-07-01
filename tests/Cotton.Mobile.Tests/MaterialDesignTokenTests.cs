@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Tests
     public class MaterialDesignTokenTests
     {
         private const string SpacingResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MSpacing.xaml";
+        private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
@@ -32,6 +33,33 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> switchSetters = GetStyleSetters(styles, "M3Switch");
 
             Assert.Equal("{StaticResource TouchTarget}", switchSetters["TouchTargetSize"]);
+        }
+
+        [Fact]
+        public void File_browser_loading_skeleton_uses_material_geometry_and_motion()
+        {
+            XDocument spacing = LoadResourceDictionary(SpacingResourcePath);
+            XDocument interaction = LoadResourceDictionary(InteractionResourcePath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+
+            Assert.True(GetDoubleResource(spacing, "M3FileSkeletonLineHeight") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3FileSkeletonSecondaryLineHeight") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3FileSkeletonPrimaryLineWidth") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3FileSkeletonSecondaryLineWidth") > 0);
+            Assert.True(GetDoubleResource(interaction, "M3SkeletonIdleOpacity") < 1);
+            Assert.True(GetDoubleResource(interaction, "M3SkeletonPulseOpacity") > GetDoubleResource(interaction, "M3SkeletonIdleOpacity"));
+            Assert.True(GetIntResource(interaction, "M3MotionSkeletonPulseDuration") >= 1000);
+
+            IReadOnlyDictionary<string, string> skeletonSetters = GetStyleSetters(styles, "M3SkeletonBlock");
+            IReadOnlyDictionary<string, string> rowSetters = GetStyleSetters(styles, "M3FileSkeletonRowGrid");
+
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}", skeletonSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3SkeletonIdleOpacity}", skeletonSetters["IdleOpacity"]);
+            Assert.Equal("{StaticResource M3SkeletonPulseOpacity}", skeletonSetters["PulseOpacity"]);
+            Assert.Equal("{StaticResource M3MotionSkeletonPulseDuration}", skeletonSetters["PulseDuration"]);
+            Assert.Equal("{StaticResource M3FileRowPadding}", rowSetters["Padding"]);
+            Assert.Equal("{StaticResource M3FileRowHeight}", rowSetters["HeightRequest"]);
+            Assert.Equal("{StaticResource Space12}", rowSetters["ColumnSpacing"]);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)
@@ -66,6 +94,16 @@ namespace Cotton.Mobile.Tests
                     key,
                     StringComparison.Ordinal));
             return double.Parse(element.Value, CultureInfo.InvariantCulture);
+        }
+
+        private static int GetIntResource(XDocument document, string key)
+        {
+            XElement element = document.Descendants()
+                .Single(descendant => string.Equals(
+                    (string?)descendant.Attribute(XamlNamespace + "Key"),
+                    key,
+                    StringComparison.Ordinal));
+            return int.Parse(element.Value, CultureInfo.InvariantCulture);
         }
 
         private static IReadOnlyDictionary<string, string> GetStyleSetters(XDocument document, string styleKey)

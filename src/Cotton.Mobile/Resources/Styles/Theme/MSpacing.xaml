@@ -40,6 +40,10 @@
     <x:Double x:Key="M3FileThumbnailSize">44</x:Double>
     <x:Double x:Key="M3FileListThumbnailColumnWidth">52</x:Double>
     <x:Double x:Key="M3FileRowHeight">72</x:Double>
+    <x:Double x:Key="M3FileSkeletonLineHeight">12</x:Double>
+    <x:Double x:Key="M3FileSkeletonSecondaryLineHeight">10</x:Double>
+    <x:Double x:Key="M3FileSkeletonPrimaryLineWidth">184</x:Double>
+    <x:Double x:Key="M3FileSkeletonSecondaryLineWidth">128</x:Double>
     <x:Double x:Key="M3CardListItemSpacing">12</x:Double>
     <x:Double x:Key="M3InlineStatusIconSize">24</x:Double>
     <x:Double x:Key="M3ScreenHeaderActivityIndicatorSize">24</x:Double>

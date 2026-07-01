@@ -100,8 +100,7 @@
                                 <Button Grid.Column="1"
                                         Text="Open"
                                         Command="{Binding OpenCommand}"
-                                        Style="{StaticResource PanelChromeButton}"
-                                        MinimumWidthRequest="76"
+                                        Style="{StaticResource PanelActionChromeButton}"
                                         VerticalOptions="Center" />
                             </Grid>
                         </Border>

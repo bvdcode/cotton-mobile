@@ -356,6 +356,10 @@
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
     </Style>
 
+    <Style TargetType="Button" x:Key="CompactActionChromeButton" BasedOn="{StaticResource CompactChromeButton}">
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ChromeActionMinWidth}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="CompactDestructiveChromeButton" BasedOn="{StaticResource CompactChromeButton}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
@@ -368,6 +372,10 @@
         <Setter Property="Padding" Value="{StaticResource M3PanelButtonPadding}" />
     </Style>
 
+    <Style TargetType="Button" x:Key="PanelActionChromeButton" BasedOn="{StaticResource PanelChromeButton}">
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ChromeActionMinWidth}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="PanelDestructiveChromeButton" BasedOn="{StaticResource PanelChromeButton}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
@@ -376,6 +384,10 @@
     <Style TargetType="Button" x:Key="DenseChromeButton" BasedOn="{StaticResource CompactChromeButton}">
         <Setter Property="HeightRequest" Value="{StaticResource M3DenseButtonHeight}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3DenseButtonHeight}" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="DenseActionChromeButton" BasedOn="{StaticResource DenseChromeButton}">
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DenseActionMinWidth}" />
     </Style>
 
     <Style TargetType="Button" x:Key="DenseDestructiveChromeButton" BasedOn="{StaticResource DenseChromeButton}">

@@ -366,14 +366,12 @@
                                     <Button Grid.Column="1"
                                             Text="Actions"
                                             Command="{Binding ShowFileSelectionActionsCommand}"
-                                            Style="{StaticResource DenseChromeButton}"
-                                            MinimumWidthRequest="72" />
+                                            Style="{StaticResource DenseActionChromeButton}" />
 
                                     <Button Grid.Column="2"
                                             Text="Cancel"
                                             Command="{Binding ClearFileSelectionCommand}"
-                                            Style="{StaticResource DenseChromeButton}"
-                                            MinimumWidthRequest="68" />
+                                            Style="{StaticResource DenseActionChromeButton}" />
                                 </Grid>
                             </Border>
 
@@ -386,18 +384,15 @@
                                         Command="{Binding CancelFileActionCommand}"
                                         IsEnabled="{Binding Display.CanCancelFileAction}"
                                         IsVisible="{Binding Display.CanCancelFileAction}"
-                                        Style="{StaticResource DenseChromeButton}"
-                                        MinimumWidthRequest="72" />
+                                        Style="{StaticResource DenseActionChromeButton}" />
                             </HorizontalStackLayout>
 
                             <Button Text="{Binding Display.FileRetryActionText}"
                                     Command="{Binding RetryFileActionCommand}"
                                     IsEnabled="{Binding Display.CanRetryFileAction}"
                                     IsVisible="{Binding Display.CanRetryFileAction}"
-                                    Style="{StaticResource CompactChromeButton}"
-                                    HorizontalOptions="Start"
-                                    MinimumHeightRequest="{StaticResource M3CompactButtonHeight}"
-                                    MinimumWidthRequest="64" />
+                                    Style="{StaticResource CompactActionChromeButton}"
+                                    HorizontalOptions="Start" />
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                     Style="{StaticResource M3EmptyStateCard}">

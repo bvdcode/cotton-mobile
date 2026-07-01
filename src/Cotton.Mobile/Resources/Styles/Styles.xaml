@@ -289,7 +289,7 @@
     <Style TargetType="controls:IconFrame" x:Key="M3ThumbnailIconFrame">
         <Setter Property="FrameSize" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />
-        <Setter Property="FrameCornerRadius" Value="{StaticResource M3ProminentCornerRadius}" />
+        <Setter Property="FrameCornerRadius" Value="{StaticResource M3ThumbnailFrameCornerRadius}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="FrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />

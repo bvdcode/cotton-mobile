@@ -26,8 +26,8 @@ namespace Cotton.Mobile.Controls
             nameof(IconSize),
             typeof(double),
             typeof(IconView),
-            20.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FileInlineIconSize"));
 
         private readonly MauiPath _path;
 

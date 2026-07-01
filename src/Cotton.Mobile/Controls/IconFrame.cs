@@ -39,29 +39,29 @@ namespace Cotton.Mobile.Controls
             nameof(BorderWidth),
             typeof(double),
             typeof(IconFrame),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty FrameSizeProperty = BindableProperty.Create(
             nameof(FrameSize),
             typeof(double),
             typeof(IconFrame),
-            40.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FileThumbnailSize"));
 
         public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
             nameof(IconSize),
             typeof(double),
             typeof(IconFrame),
-            24.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FolderThumbnailIconSize"));
 
         public static readonly BindableProperty FrameCornerRadiusProperty = BindableProperty.Create(
             nameof(FrameCornerRadius),
             typeof(double),
             typeof(IconFrame),
-            12.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ThumbnailFrameCornerRadius"));
 
         private readonly Border _container;
         private readonly IconView _icon;

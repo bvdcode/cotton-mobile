@@ -90,8 +90,7 @@
                             </VerticalStackLayout>
 
                             <HorizontalStackLayout Grid.Column="2"
-                                                   Spacing="{StaticResource Space8}"
-                                                   VerticalOptions="Center">
+                                                   Style="{StaticResource M3RowActionCluster}">
                                 <Border Style="{StaticResource M3NeutralChip}"
                                         VerticalOptions="Center">
                                     <Label Text="{Binding BadgeText}"

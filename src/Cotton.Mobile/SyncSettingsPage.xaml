@@ -136,9 +136,8 @@
                                 <HorizontalStackLayout Grid.Row="3"
                                                        Grid.Column="1"
                                                        Grid.ColumnSpan="2"
-                                                       Spacing="{StaticResource Space8}"
                                                        Margin="{StaticResource M3PanelActionTopMargin}"
-                                                       HorizontalOptions="End">
+                                                       Style="{StaticResource M3RowActionCluster}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
                                                          Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
                                                          CommandParameter="{Binding .}"

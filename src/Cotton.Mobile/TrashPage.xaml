@@ -239,8 +239,7 @@
                                 <HorizontalStackLayout Grid.Row="1"
                                                        Grid.Column="1"
                                                        Grid.ColumnSpan="2"
-                                                       Spacing="{StaticResource Space8}"
-                                                       HorizontalOptions="End"
+                                                       Style="{StaticResource M3RowActionCluster}"
                                                        IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
                                                          Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
@@ -340,8 +339,7 @@
                                 </Grid>
 
                                 <HorizontalStackLayout Grid.Row="2"
-                                                       Spacing="{StaticResource Space8}"
-                                                       HorizontalOptions="End"
+                                                       Style="{StaticResource M3RowActionCluster}"
                                                        IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
                                                          Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"

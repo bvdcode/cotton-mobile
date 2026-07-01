@@ -66,11 +66,13 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation" />
 
-                    <Switch Grid.Row="2"
-                            Grid.ColumnSpan="2"
-                            HorizontalOptions="End"
-                            IsEnabled="{Binding CanToggleAppLock}"
-                            IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
+                    <controls:ToggleSwitch Grid.Row="2"
+                                           Grid.ColumnSpan="2"
+                                           HorizontalOptions="End"
+                                           VerticalOptions="Center"
+                                           IsEnabled="{Binding CanToggleAppLock}"
+                                           IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}"
+                                           Style="{StaticResource M3Switch}" />
                 </Grid>
             </Border>
 
@@ -357,11 +359,13 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation" />
 
-                    <Switch Grid.Row="2"
-                            Grid.ColumnSpan="2"
-                            HorizontalOptions="End"
-                            IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
-                            IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
+                    <controls:ToggleSwitch Grid.Row="2"
+                                           Grid.ColumnSpan="2"
+                                           HorizontalOptions="End"
+                                           VerticalOptions="Center"
+                                           IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
+                                           IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}"
+                                           Style="{StaticResource M3Switch}" />
                 </Grid>
             </Border>
         </VerticalStackLayout>

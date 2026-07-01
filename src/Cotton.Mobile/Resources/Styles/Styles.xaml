@@ -452,6 +452,27 @@
 
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 
+    <Style TargetType="controls:ToggleSwitch" x:Key="M3Switch">
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="TrackWidth" Value="{StaticResource M3SwitchTrackWidth}" />
+        <Setter Property="TrackHeight" Value="{StaticResource M3SwitchTrackHeight}" />
+        <Setter Property="TrackCornerRadius" Value="{StaticResource M3SwitchTrackCornerRadius}" />
+        <Setter Property="TrackBorderWidth" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="ThumbSize" Value="{StaticResource M3SwitchThumbSize}" />
+        <Setter Property="ThumbCornerRadius" Value="{StaticResource M3SwitchThumbCornerRadius}" />
+        <Setter Property="ThumbInset" Value="{StaticResource M3SwitchThumbInset}" />
+        <Setter Property="TrackOnColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="TrackOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
+        <Setter Property="TrackDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
+        <Setter Property="TrackOnBorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="TrackOffBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="TrackDisabledBorderColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="ThumbOnColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="ThumbOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="ThumbDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+    </Style>
+
     <Style TargetType="controls:InitialsButton" x:Key="M3AccountInitialsButton">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
@@ -625,11 +646,6 @@
 
     <Style TargetType="SwipeItem">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
-    </Style>
-
-    <Style TargetType="Switch">
-        <Setter Property="OnColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="ThumbColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkOnSurface}}" />
     </Style>
 
     <Style TargetType="TimePicker">

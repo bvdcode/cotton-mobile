@@ -50,8 +50,19 @@
                    LineBreakMode="TailTruncation" />
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="{StaticResource Space8}">
-                    <VerticalStackLayout Spacing="{StaticResource Space2}">
+                <Grid RowDefinitions="Auto,Auto"
+                      ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Grid.RowSpan="2"
+                            Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Cloud}"
+                                           Style="{StaticResource M3NeutralThumbnailIcon}" />
+                    </Border>
+
+                    <VerticalStackLayout Grid.Column="1"
+                                         Grid.ColumnSpan="2"
+                                         Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -68,33 +79,95 @@
                                LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
-                    <ProgressBar Progress="{Binding CloudQuotaUsageFraction}"
+                    <ProgressBar Grid.Row="1"
+                                 Grid.Column="1"
+                                 Grid.ColumnSpan="2"
+                                 Progress="{Binding CloudQuotaUsageFraction}"
                                  IsVisible="{Binding IsCloudQuotaProgressVisible}"
                                  HeightRequest="{StaticResource Space4}"
                                  ProgressColor="{StaticResource M3Accent}" />
-                </VerticalStackLayout>
+                </Grid>
             </Border>
-
-            <Label Text="Free up storage"
-                   Style="{StaticResource M3CardTitle}"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation" />
-
-            <VerticalStackLayout Spacing="{StaticResource Space12}">
-                <Button Text="Free space"
-                        Command="{Binding FreeDeviceSpaceCommand}"
-                        Style="{StaticResource FileChromeButton}" />
-
-                <Button Text="Clear all cached files"
-                        Command="{Binding ClearAllCommand}"
-                        Style="{StaticResource DestructiveChromeButton}" />
-            </VerticalStackLayout>
 
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="{StaticResource Space12}">
-                    <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="{StaticResource Space12}">
-                        <VerticalStackLayout Spacing="{StaticResource Space2}">
+                    <Label Text="Free up storage"
+                           Style="{StaticResource M3CardTitle}"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation" />
+
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
+                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1"
+                                             Style="{StaticResource M3CardTextStack}">
+                            <Label Text="Free space"
+                                   Style="{StaticResource M3CardSupportingStrong}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Label Text="Remove evictable local copies while keeping offline files."
+                                   Style="{StaticResource M3CardSupporting}"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.Download}"
+                                             Command="{Binding FreeDeviceSpaceCommand}"
+                                             Style="{StaticResource M3FileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="Free device storage" />
+                    </Grid>
+
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Delete}"
+                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1"
+                                             Style="{StaticResource M3CardTextStack}">
+                            <Label Text="Clear all cached files"
+                                   Style="{StaticResource M3CardSupportingStrong}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Label Text="Clear thumbnails, folder listings, downloads, and recents."
+                                   Style="{StaticResource M3CardSupporting}"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.Delete}"
+                                             Command="{Binding ClearAllCommand}"
+                                             Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="Clear all cached files" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <Border Style="{StaticResource M3ContentCard}">
+                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                    <Grid ColumnDefinitions="Auto,*"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
+                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
+                        </Border>
+
+                        <VerticalStackLayout Grid.Column="1"
+                                             Style="{StaticResource M3CardTextStack}">
                             <Label Text="Files on this device"
                                    Style="{StaticResource M3CardTitle}"
                                    MaxLines="1"
@@ -112,29 +185,37 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
                                 <Grid RowDefinitions="Auto,Auto"
-                                      ColumnDefinitions="*,Auto"
-                                      RowSpacing="{StaticResource Space2}"
-                                      ColumnSpacing="{StaticResource Space12}"
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      Style="{StaticResource M3SettingsListItemGrid}"
                                       IsVisible="{Binding IsVisible}">
-                                    <Label Text="{Binding Title}"
+                                    <Border Grid.RowSpan="2"
+                                            Style="{StaticResource M3FileThumbnailSurface}"
+                                            VerticalOptions="Start">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
+                                                           Style="{StaticResource M3FileThumbnailIcon}" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
-                                    <Label Grid.Column="1"
+                                    <Label Grid.Column="2"
                                            Text="{Binding SizeText}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
+                                           Grid.Column="1"
                                            Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
-                                           Grid.Column="1"
+                                           Grid.Column="2"
                                            Text="{Binding CountText}"
                                            Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
@@ -148,57 +229,76 @@
 
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Spacing="{StaticResource Space12}">
-                    <VerticalStackLayout Spacing="{StaticResource Space2}">
-                        <Label Text="Temporary files"
-                               Style="{StaticResource M3CardTitle}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                    <Grid ColumnDefinitions="Auto,*"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
+                                               Style="{StaticResource M3TransferThumbnailIcon}" />
+                        </Border>
 
-                        <Label Text="{Binding StorageBudgetSummaryText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Style="{StaticResource M3CardTextStack}">
+                            <Label Text="Temporary files"
+                                   Style="{StaticResource M3CardTitle}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation" />
 
-                        <Label Text="{Binding ProtectedOfflineText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
-                    </VerticalStackLayout>
+                            <Label Text="{Binding StorageBudgetSummaryText}"
+                                   Style="{StaticResource M3CardSupporting}"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation" />
+
+                            <Label Text="{Binding ProtectedOfflineText}"
+                                   Style="{StaticResource M3CardSupporting}"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Grid>
 
                     <VerticalStackLayout Spacing="{StaticResource Space8}"
                                          BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
                                 <Grid RowDefinitions="Auto,Auto,Auto"
-                                      ColumnDefinitions="*,Auto"
-                                      RowSpacing="{StaticResource Space2}"
-                                      ColumnSpacing="{StaticResource Space12}"
+                                      ColumnDefinitions="Auto,*,Auto"
+                                      Style="{StaticResource M3SettingsListItemGrid}"
                                       IsVisible="{Binding IsVisible}">
-                                    <Label Text="{Binding Title}"
+                                    <Border Grid.RowSpan="3"
+                                            Style="{StaticResource M3FileThumbnailSurface}"
+                                            VerticalOptions="Start">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
+                                                           Style="{StaticResource M3FileThumbnailIcon}" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
-                                    <Label Grid.Column="1"
+                                    <Label Grid.Column="2"
                                            Text="{Binding UsageText}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
+                                           Grid.Column="1"
                                            Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="1"
-                                           Grid.Column="1"
+                                           Grid.Column="2"
                                            Text="{Binding StatusText}"
                                            Style="{StaticResource M3CardSupporting}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <ProgressBar Grid.Row="2"
+                                                 Grid.Column="1"
                                                  Grid.ColumnSpan="2"
                                                  Progress="{Binding UsageFraction}"
                                                  HeightRequest="{StaticResource Space4}"

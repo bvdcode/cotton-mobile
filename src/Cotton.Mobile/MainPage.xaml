@@ -24,7 +24,7 @@
                           Style="{StaticResource M3AuthBrandGrid}">
                         <Border Style="{StaticResource M3AuthBrandMarkFrame}"
                                 SemanticProperties.Description="Cotton Cloud">
-                            <Image Source="appiconfg.svg"
+                            <Image Source="cotton_brand_mark.svg"
                                    HeightRequest="{StaticResource M3AuthBrandMarkImageSize}"
                                    WidthRequest="{StaticResource M3AuthBrandMarkImageSize}"
                                    Aspect="AspectFit"

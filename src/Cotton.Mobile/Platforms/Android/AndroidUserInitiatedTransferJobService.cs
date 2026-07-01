@@ -207,7 +207,7 @@ namespace Cotton.Mobile.Services
             builder
                 .SetContentTitle(CreateNotificationTitle(workKind))
                 .SetContentText(CreateNotificationText(displayName, progress))
-                .SetSmallIcon(ApplicationInfo?.Icon ?? Resource.Mipmap.appicon)
+                .SetSmallIcon(ApplicationInfo?.Icon ?? Resource.Mipmap.cotton_app_icon_background)
                 .SetOngoing(true)
                 .SetOnlyAlertOnce(true)
                 .SetShowWhen(true)

@@ -94,7 +94,7 @@ namespace Cotton.Mobile.Services
             builder
                 .SetContentTitle(notification.Title)
                 .SetContentText(notification.Message)
-                .SetSmallIcon(context.ApplicationInfo?.Icon ?? Resource.Mipmap.appicon)
+                .SetSmallIcon(context.ApplicationInfo?.Icon ?? Resource.Mipmap.cotton_app_icon_background)
                 .SetAutoCancel(true)
                 .SetShowWhen(true)
                 .SetCategory(Notification.CategoryStatus);

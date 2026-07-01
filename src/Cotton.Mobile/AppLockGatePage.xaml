@@ -33,7 +33,7 @@
                 <controls:FilledButton Text="{Binding UnlockActionText}"
                                        Command="{Binding UnlockCommand}"
                                        IsEnabled="{Binding CanUnlock}"
-                                       Style="{StaticResource M3AuthFilledButton}"
+                                       Style="{StaticResource M3FullWidthFilledButton}"
                                        Margin="{StaticResource M3PanelActionTopMargin}" />
             </VerticalStackLayout>
         </Border>

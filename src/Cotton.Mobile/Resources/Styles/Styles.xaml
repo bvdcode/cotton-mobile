@@ -884,11 +884,13 @@
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionPrimaryDisabledOpacity}" />
     </Style>
 
-    <Style TargetType="controls:FilledButton" x:Key="M3AuthFilledButton" BasedOn="{StaticResource M3FilledButton}">
+    <Style TargetType="controls:FilledButton" x:Key="M3FullWidthFilledButton" BasedOn="{StaticResource M3FilledButton}">
         <Setter Property="HeightRequest" Value="{StaticResource M3FilledButtonHeight}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FilledButtonHeight}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
+
+    <Style TargetType="controls:FilledButton" x:Key="M3AuthFilledButton" BasedOn="{StaticResource M3FullWidthFilledButton}" />
 
     <Style TargetType="controls:FilledButton" x:Key="M3DialogFilledButton" BasedOn="{StaticResource M3FilledButton}">
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DialogButtonMinWidth}" />

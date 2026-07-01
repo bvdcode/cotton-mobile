@@ -127,52 +127,39 @@
                         <VerticalStackLayout x:Name="FileBrowserContent"
                                              Spacing="{StaticResource Space12}"
                                              HorizontalOptions="Fill">
-                            <Grid RowDefinitions="Auto,Auto"
-                                  RowSpacing="{StaticResource Space8}">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="{StaticResource Space12}">
-                                    <controls:IconButton Grid.Column="0"
-                                                         IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         Command="{Binding NavigateFilesUpCommand}"
-                                                         IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
-                                                         IsVisible="{Binding Display.IsFileUpButtonVisible}"
-                                                         ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
-                                                         VerticalOptions="Center"
-                                                         SemanticProperties.Description="Up" />
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  Style="{StaticResource M3FileBrowserTopBar}">
+                                <controls:IconButton Grid.Column="0"
+                                                     IconData="{x:Static controls:IconPathData.ArrowUp}"
+                                                     Style="{StaticResource M3FileChromeIconButton}"
+                                                     Command="{Binding NavigateFilesUpCommand}"
+                                                     IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
+                                                     IsVisible="{Binding Display.IsFileUpButtonVisible}"
+                                                     ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
+                                                     SemanticProperties.Description="Up" />
 
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="{StaticResource Space2}"
-                                                         VerticalOptions="Center">
-                                        <Label Text="{Binding Display.FilesTitle}"
-                                               Style="{StaticResource M3BrowserTitle}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Style="{StaticResource M3CardTextStack}"
+                                                     VerticalOptions="Center">
+                                    <Label Text="{Binding Display.FilesTitle}"
+                                           Style="{StaticResource M3BrowserTitle}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
 
-                                        <Label Text="{Binding Display.FilesPath}"
-                                               IsVisible="{Binding Display.IsFilesPathVisible}"
-                                               Style="{StaticResource M3CardMeta}"
-                                               LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding Display.FilesPath}"
+                                           IsVisible="{Binding Display.IsFilesPathVisible}"
+                                           Style="{StaticResource M3CardMeta}"
+                                           LineBreakMode="TailTruncation" />
 
-                                        <Label Text="{Binding Display.FilesStatus}"
-                                               IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                               Style="{StaticResource M3CardMeta}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
-                                    </VerticalStackLayout>
+                                    <Label Text="{Binding Display.FilesStatus}"
+                                           IsVisible="{Binding Display.IsFilesStatusVisible}"
+                                           Style="{StaticResource M3CardMeta}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
 
-                                    <controls:InitialsButton Grid.Column="2"
-                                                             Style="{StaticResource M3AccountInitialsButton}"
-                                                             Text="{Binding Display.ProfileInitials}"
-                                                             Command="{Binding AccountCommand}"
-                                                             IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                                             VerticalOptions="Center"
-                                                             SemanticProperties.Description="Account" />
-                                </Grid>
-
-                                <HorizontalStackLayout Grid.Row="1"
-                                                       Spacing="{StaticResource Space8}"
-                                                       HorizontalOptions="End">
+                                <HorizontalStackLayout Grid.Column="2"
+                                                       Style="{StaticResource M3FileBrowserActionCluster}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
                                                          Style="{StaticResource M3FileChromeIconButton}"
                                                          Command="{Binding ToggleFileSearchCommand}"
@@ -193,7 +180,6 @@
                                                          Command="{Binding ShowFileSortActionsCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          IsVisible="{Binding Display.IsFileSortButtonVisible}"
-                                                         VerticalOptions="Center"
                                                          SemanticProperties.Description="Sort files" />
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
@@ -201,8 +187,13 @@
                                                          Command="{Binding ShowFileViewActionsCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          IsVisible="{Binding Display.IsFileViewButtonVisible}"
-                                                         VerticalOptions="Center"
                                                          SemanticProperties.Description="Change file view" />
+
+                                    <controls:InitialsButton Style="{StaticResource M3AccountInitialsButton}"
+                                                             Text="{Binding Display.ProfileInitials}"
+                                                             Command="{Binding AccountCommand}"
+                                                             IsEnabled="{Binding Display.IsAccountActionEnabled}"
+                                                             SemanticProperties.Description="Account" />
                                 </HorizontalStackLayout>
                             </Grid>
 

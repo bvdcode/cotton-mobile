@@ -392,6 +392,17 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3FileBrowserTopBar">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3FileBrowserActionCluster">
+        <Setter Property="Spacing" Value="{StaticResource Space4}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3FileListStack">
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>

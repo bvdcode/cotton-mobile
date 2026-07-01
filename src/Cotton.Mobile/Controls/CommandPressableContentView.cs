@@ -21,8 +21,6 @@ namespace Cotton.Mobile.Controls
 
         private ICommand? _observedCommand;
 
-        public event EventHandler? Clicked;
-
         public ICommand? Command
         {
             get => (ICommand?)GetValue(CommandProperty);
@@ -48,8 +46,6 @@ namespace Cotton.Mobile.Controls
             {
                 command.Execute(parameter);
             }
-
-            Clicked?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void OnCommandStateChanged()

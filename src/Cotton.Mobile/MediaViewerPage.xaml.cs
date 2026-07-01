@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Windows.Input;
 using CommunityToolkit.Maui.Views;
 using Cotton.Mobile.ViewModels;
 
@@ -18,9 +19,12 @@ namespace Cotton.Mobile
 
             _viewModel = viewModel;
             InitializeComponent();
+            PlayMediaCommand = new Command(PlayMedia);
             BindingContext = viewModel;
             Unloaded += OnPageUnloaded;
         }
+
+        public ICommand PlayMediaCommand { get; }
 
         protected override void OnAppearing()
         {
@@ -36,7 +40,7 @@ namespace Cotton.Mobile
             base.OnDisappearing();
         }
 
-        private void OnPlayClicked(object? sender, EventArgs e)
+        private void PlayMedia()
         {
             EnsureMediaSourceLoaded();
             StartOverlay.IsVisible = false;

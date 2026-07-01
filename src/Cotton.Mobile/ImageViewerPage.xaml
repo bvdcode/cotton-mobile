@@ -4,6 +4,7 @@
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.ImageViewerPage"
+             x:Name="RootPage"
              x:DataType="viewModels:ImageViewerViewModel"
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
@@ -44,7 +45,7 @@
             <controls:IconButton x:Name="ResetButton"
                                  IconData="{x:Static controls:IconPathData.Reset}"
                                  Style="{StaticResource M3ViewerOverlayActionIconButton}"
-                                 Clicked="OnResetClicked"
+                                 Command="{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}"
                                  IsVisible="False"
                                  SemanticProperties.Description="Reset image" />
         </Grid>

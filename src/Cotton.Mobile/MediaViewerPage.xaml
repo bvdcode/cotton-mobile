@@ -5,6 +5,7 @@
              xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MediaViewerPage"
+             x:Name="RootPage"
              x:DataType="viewModels:MediaViewerViewModel"
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
@@ -35,7 +36,7 @@
                                      Style="{StaticResource M3ViewerCenteredOverlay}">
                     <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
                                          Style="{StaticResource M3ViewerCenteredPlayIconButton}"
-                                         Clicked="OnPlayClicked"
+                                         Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
                                          SemanticProperties.Description="Play media" />
                 </VerticalStackLayout>
 

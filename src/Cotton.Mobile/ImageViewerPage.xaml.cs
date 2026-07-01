@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Windows.Input;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 
@@ -17,10 +18,13 @@ namespace Cotton.Mobile
             ArgumentNullException.ThrowIfNull(viewModel);
 
             InitializeComponent();
+            ResetImageCommand = new Command(ResetImageTransform);
             BindingContext = viewModel;
             ImageSurface.SizeChanged += ImageSurface_SizeChanged;
             PreviewImage.SizeChanged += PreviewImage_SizeChanged;
         }
+
+        public ICommand ResetImageCommand { get; }
 
         private void ImageSurface_SizeChanged(object? sender, EventArgs e)
         {
@@ -88,11 +92,6 @@ namespace Cotton.Mobile
         {
             ApplyImageTransform(
                 CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(PreviewImage.Scale));
-        }
-
-        private void OnResetClicked(object? sender, EventArgs e)
-        {
-            ResetImageTransform();
         }
 
         private void ResetImageTransform()

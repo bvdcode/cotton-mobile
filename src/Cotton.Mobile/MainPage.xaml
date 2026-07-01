@@ -46,20 +46,19 @@
                 </VerticalStackLayout>
 
                 <Border IsVisible="{Binding Display.IsLoadingVisible}"
-                        Style="{StaticResource M3StatusPanel}"
+                        Style="{StaticResource M3LoadingStatusPanel}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
                     <Grid ColumnDefinitions="Auto,*"
-                          Style="{StaticResource M3StatusGrid}">
-                        <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                           Style="{StaticResource M3StatusActivityIndicator}" />
+                          Style="{StaticResource M3LoadingStatusGrid}">
+                        <Border Style="{StaticResource M3LoadingIndicatorFrame}">
+                            <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                               Style="{StaticResource M3LoadingActivityIndicator}" />
+                        </Border>
 
                         <Label Grid.Column="1"
                                Text="{Binding Display.LoadingMessage}"
-                               Style="{StaticResource M3CardSupportingStrong}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation"
-                               VerticalTextAlignment="Center" />
+                               Style="{StaticResource M3LoadingMessage}" />
                     </Grid>
                 </Border>
 
@@ -112,13 +111,15 @@
                 </Border>
 
                 <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                        Style="{StaticResource M3StatusPanel}"
+                        Style="{StaticResource M3LoadingStatusPanel}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
                     <Grid ColumnDefinitions="Auto,*,Auto"
-                          Style="{StaticResource M3StatusGrid}">
-                        <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                           Style="{StaticResource M3StatusActivityIndicator}" />
+                          Style="{StaticResource M3LoadingStatusGrid}">
+                        <Border Style="{StaticResource M3LoadingIndicatorFrame}">
+                            <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                               Style="{StaticResource M3LoadingActivityIndicator}" />
+                        </Border>
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -422,18 +423,17 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsFilesLoading}"
-                                    Style="{StaticResource M3FileStatusPanel}">
+                                    Style="{StaticResource M3LoadingStatusPanel}">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3FileActionStatusGrid}">
-                                    <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
-                                                       Style="{StaticResource M3FileStatusActivityIndicator}" />
+                                      Style="{StaticResource M3LoadingStatusGrid}">
+                                    <Border Style="{StaticResource M3LoadingIndicatorFrame}">
+                                        <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
+                                                           Style="{StaticResource M3LoadingActivityIndicator}" />
+                                    </Border>
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.LoadingMessage}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3LoadingMessage}" />
 
                                     <controls:IconButton Grid.Column="2"
                                                          IconData="{x:Static controls:IconPathData.Close}"

@@ -30,9 +30,11 @@
                        LineBreakMode="WordWrap"
                        HorizontalTextAlignment="Center" />
 
-                <ActivityIndicator IsRunning="{Binding IsBusy}"
-                                   IsVisible="{Binding IsBusy}"
-                                   Style="{StaticResource M3StatusActivityIndicator}" />
+                <Border IsVisible="{Binding IsBusy}"
+                        Style="{StaticResource M3LoadingIndicatorFrame}">
+                    <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                       Style="{StaticResource M3LoadingActivityIndicator}" />
+                </Border>
 
                 <controls:FilledButton Text="{Binding UnlockActionText}"
                                        Command="{Binding UnlockCommand}"

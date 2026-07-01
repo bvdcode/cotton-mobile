@@ -25,7 +25,7 @@
               RowDefinitions="Auto,*"
               BackgroundColor="{StaticResource M3DarkSurface}">
             <VerticalStackLayout Padding="{StaticResource M3PdfHeaderPadding}"
-                                 Spacing="2">
+                                 Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
                        Style="{StaticResource M3DarkSupporting}"
                        MaxLines="1"

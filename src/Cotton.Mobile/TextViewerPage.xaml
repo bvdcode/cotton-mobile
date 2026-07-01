@@ -20,8 +20,8 @@
         <Grid Grid.Row="1"
               Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,*"
-              RowSpacing="12">
-            <VerticalStackLayout Spacing="2">
+              RowSpacing="{StaticResource Space12}">
+            <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
                        Style="{StaticResource M3CardSupporting}"
                        MaxLines="1"

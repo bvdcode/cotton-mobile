@@ -966,6 +966,9 @@
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionPrimaryDisabledOpacity}" />
     </Style>
 
@@ -1059,6 +1062,9 @@
 
     <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
     </Style>
@@ -1147,6 +1153,9 @@
 
     <Style TargetType="controls:InitialsButton" x:Key="M3AccountInitialsButton">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
@@ -1180,6 +1189,9 @@
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
@@ -1297,6 +1309,9 @@
         <Setter Property="TextLineHeight" Value="{StaticResource M3LabelLargeLineHeight}" />
         <Setter Property="ContentSpacing" Value="{StaticResource Space12}" />
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
@@ -1317,6 +1332,9 @@
 
     <Style TargetType="controls:TextAction" x:Key="M3FooterTextAction">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
+        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
+        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
+        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3FooterLinkFontSize}" />

@@ -1,10 +1,31 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Globalization;
+
 namespace Cotton.Mobile.Controls
 {
     public abstract class PressableContentView : ContentView
     {
+        public static readonly BindableProperty PressedScaleProperty = BindableProperty.Create(
+            nameof(PressedScale),
+            typeof(double),
+            typeof(PressableContentView),
+            propertyChanged: OnInteractionMetricChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3InteractionRestScale"));
+
+        public static readonly BindableProperty PressInDurationProperty = BindableProperty.Create(
+            nameof(PressInDuration),
+            typeof(int),
+            typeof(PressableContentView),
+            defaultValueCreator: _ => MaterialResources.Get<int>("M3MotionPressInDuration"));
+
+        public static readonly BindableProperty PressOutDurationProperty = BindableProperty.Create(
+            nameof(PressOutDuration),
+            typeof(int),
+            typeof(PressableContentView),
+            defaultValueCreator: _ => MaterialResources.Get<int>("M3MotionPressOutDuration"));
+
         public static readonly BindableProperty PressedOpacityMultiplierProperty = BindableProperty.Create(
             nameof(PressedOpacityMultiplier),
             typeof(double),
@@ -35,6 +56,24 @@ namespace Cotton.Mobile.Controls
         }
 
         protected bool IsPressed { get; private set; }
+
+        public double PressedScale
+        {
+            get => (double)GetValue(PressedScaleProperty);
+            set => SetValue(PressedScaleProperty, value);
+        }
+
+        public int PressInDuration
+        {
+            get => (int)GetValue(PressInDurationProperty);
+            set => SetValue(PressInDurationProperty, value);
+        }
+
+        public int PressOutDuration
+        {
+            get => (int)GetValue(PressOutDurationProperty);
+            set => SetValue(PressOutDurationProperty, value);
+        }
 
         public double PressedOpacityMultiplier
         {
@@ -103,7 +142,27 @@ namespace Cotton.Mobile.Controls
             }
 
             IsPressed = isPressed;
+            AnimatePressedScale();
             OnPressedStateChanged();
+        }
+
+        private void AnimatePressedScale()
+        {
+            double targetScale = IsPressed ? PressedScale : MaterialResources.Get<double>("M3InteractionRestScale");
+            if (Scale == targetScale)
+            {
+                return;
+            }
+
+            int duration = IsPressed ? PressInDuration : PressOutDuration;
+            if (duration <= 0)
+            {
+                Scale = targetScale;
+                return;
+            }
+
+            this.AbortAnimation(nameof(PressableContentView));
+            _ = this.ScaleToAsync(targetScale, Convert.ToUInt32(duration, CultureInfo.InvariantCulture), Easing.CubicOut);
         }
 
 #if ANDROID

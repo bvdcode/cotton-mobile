@@ -8,5 +8,9 @@
     <x:Double x:Key="M3InteractionHoverOpacity">0.92</x:Double>
     <x:Double x:Key="M3InteractionDisabledOpacity">0.54</x:Double>
     <x:Double x:Key="M3InteractionPrimaryDisabledOpacity">0.55</x:Double>
+    <x:Double x:Key="M3InteractionRestScale">1.0</x:Double>
+    <x:Double x:Key="M3InteractionPressedScale">0.98</x:Double>
+    <x:Int32 x:Key="M3MotionPressInDuration">72</x:Int32>
+    <x:Int32 x:Key="M3MotionPressOutDuration">120</x:Int32>
 
 </ResourceDictionary>

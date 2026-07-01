@@ -128,14 +128,25 @@
                                LineBreakMode="TailTruncation" />
                     </Border>
 
-                    <Button Grid.Row="2"
-                            Grid.Column="1"
-                            Grid.ColumnSpan="2"
-                            Text="{Binding MediaAccessActionText}"
-                            IsVisible="{Binding IsMediaAccessActionVisible}"
-                            Command="{Binding MediaAccessActionCommand}"
-                            Style="{StaticResource PanelChromeButton}"
-                            HorizontalOptions="Start" />
+                    <Grid Grid.Row="2"
+                          Grid.Column="1"
+                          Grid.ColumnSpan="2"
+                          ColumnDefinitions="*,Auto"
+                          IsVisible="{Binding IsMediaAccessActionVisible}"
+                          ColumnSpacing="{StaticResource Space12}">
+                        <Label Text="{Binding MediaAccessActionText}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+
+                        <controls:IconButton Grid.Column="1"
+                                             IconData="{x:Static controls:IconPathData.OpenInNew}"
+                                             Command="{Binding MediaAccessActionCommand}"
+                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="{Binding MediaAccessActionText}" />
+                    </Grid>
                 </Grid>
             </Border>
 

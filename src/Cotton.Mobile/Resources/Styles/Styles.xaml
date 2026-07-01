@@ -150,14 +150,14 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3AuthPanel">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3AuthPanelCornerRadius}" />
             </Setter.Value>
         </Setter>
-        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3AuthShellStack">

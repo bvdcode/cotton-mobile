@@ -16,10 +16,10 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+                  ColumnSpacing="{StaticResource Space12}">
+                <VerticalStackLayout Spacing="{StaticResource Space2}">
                     <Label Text="Notifications"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -38,15 +38,12 @@
             </Grid>
 
             <Border IsVisible="{Binding IsAttentionStatusVisible}"
-                    Stroke="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                    StrokeShape="RoundRectangle 18"
-                    Padding="12"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}">
+                    Style="{StaticResource M3AttentionStatusPanel}">
                 <Grid ColumnDefinitions="Auto,*,Auto"
-                      ColumnSpacing="10">
+                      ColumnSpacing="{StaticResource Space12}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                        IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                                       IconSize="24"
+                                       IconSize="{StaticResource M3InlineStatusIconSize}"
                                        VerticalOptions="Center" />
 
                     <Label Grid.Column="1"
@@ -60,7 +57,7 @@
                             Text="Retry"
                             Command="{Binding LoadCommand}"
                             Style="{StaticResource DenseChromeButton}"
-                            MinimumWidthRequest="76"
+                            MinimumWidthRequest="{StaticResource M3InlineStatusActionMinWidth}"
                             VerticalOptions="Center" />
                 </Grid>
             </Border>
@@ -74,8 +71,8 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
-                      RowSpacing="6"
-                      ColumnSpacing="12">
+                      RowSpacing="{StaticResource Space8}"
+                      ColumnSpacing="{StaticResource Space12}">
                     <Label Text="{Binding PermissionTitle}"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"
@@ -100,15 +97,14 @@
                             Command="{Binding PermissionActionCommand}"
                             IsVisible="{Binding IsPermissionActionVisible}"
                             Style="{StaticResource FileChromeButton}"
-                            HeightRequest="44"
                             HorizontalOptions="Fill" />
                 </Grid>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Spacing="{StaticResource Space12}">
                     <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12">
+                          ColumnSpacing="{StaticResource Space12}">
                         <Label Text="Server push"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -125,11 +121,11 @@
                     <Grid IsVisible="{Binding IsRemotePushUnavailable}"
                           ColumnDefinitions="Auto,*"
                           RowDefinitions="Auto,Auto,Auto"
-                          ColumnSpacing="10"
-                          RowSpacing="8">
+                          ColumnSpacing="{StaticResource Space12}"
+                          RowSpacing="{StaticResource Space8}">
                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                            IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                                           IconSize="24"
+                                           IconSize="{StaticResource M3InlineStatusIconSize}"
                                            VerticalOptions="Start" />
 
                         <Label Grid.Column="1"
@@ -153,14 +149,14 @@
                                 HorizontalOptions="Fill" />
                     </Grid>
 
-                    <VerticalStackLayout Spacing="12"
+                    <VerticalStackLayout Spacing="{StaticResource Space12}"
                                          IsVisible="{Binding HasRemotePushPreferences}"
                                          BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
                                 <Grid ColumnDefinitions="*,Auto"
-                                      ColumnSpacing="12">
-                                    <VerticalStackLayout Spacing="2">
+                                      ColumnSpacing="{StaticResource Space12}">
+                                    <VerticalStackLayout Spacing="{StaticResource Space2}">
                                         <Label Text="{Binding Title}"
                                                Style="{StaticResource M3LabelLarge}"
                                                MaxLines="1"

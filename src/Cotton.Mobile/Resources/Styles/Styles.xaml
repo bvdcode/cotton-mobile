@@ -41,6 +41,14 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3AttentionStatusPanel">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="Padding" Value="{StaticResource M3InlineStatusPanelPadding}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3AuthPanel">
         <Setter Property="Stroke" Value="Transparent" />
         <Setter Property="StrokeShape" Value="RoundRectangle 28" />

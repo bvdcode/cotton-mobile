@@ -95,23 +95,21 @@
                                   RowDefinitions="Auto,Auto,Auto,Auto"
                                   RowSpacing="{StaticResource Space4}"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <Border Grid.RowSpan="4"
-                                        Style="{StaticResource M3FileThumbnailSurface}"
-                                        VerticalOptions="Start">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                                       Style="{StaticResource M3SyncThumbnailIcon}">
-                                        <controls:IconView.Triggers>
-                                            <DataTrigger TargetType="controls:IconView"
-                                                         Binding="{Binding IsAttentionVisible}"
-                                                         Value="True">
-                                                <Setter Property="IconData"
-                                                        Value="{x:Static controls:IconPathData.Error}" />
-                                                <Setter Property="IconColor"
-                                                        Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
-                                            </DataTrigger>
-                                        </controls:IconView.Triggers>
-                                    </controls:IconView>
-                                </Border>
+                                <controls:IconFrame Grid.RowSpan="4"
+                                                    IconData="{x:Static controls:IconPathData.Folder}"
+                                                    Style="{StaticResource M3SyncThumbnailFrame}"
+                                                    VerticalOptions="Start">
+                                    <controls:IconFrame.Triggers>
+                                        <DataTrigger TargetType="controls:IconFrame"
+                                                     Binding="{Binding IsAttentionVisible}"
+                                                     Value="True">
+                                            <Setter Property="IconData"
+                                                    Value="{x:Static controls:IconPathData.Error}" />
+                                            <Setter Property="IconColor"
+                                                    Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                        </DataTrigger>
+                                    </controls:IconFrame.Triggers>
+                                </controls:IconFrame>
 
                                 <Label Grid.Column="1"
                                        Text="{Binding Title}"

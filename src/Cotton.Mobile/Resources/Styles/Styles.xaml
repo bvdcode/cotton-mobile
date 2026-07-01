@@ -232,25 +232,6 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="controls:IconView" x:Key="M3NeutralThumbnailIcon">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />
-        <Setter Property="HorizontalOptions" Value="Center" />
-        <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
-    <Style TargetType="controls:IconView" x:Key="M3FileThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
-
-    <Style TargetType="controls:IconView" x:Key="M3ActivityThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
-
-    <Style TargetType="controls:IconView" x:Key="M3TransferThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
-
-    <Style TargetType="controls:IconView" x:Key="M3CaptureThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
-
-    <Style TargetType="controls:IconView" x:Key="M3SecurityThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
-
-    <Style TargetType="controls:IconView" x:Key="M3SyncThumbnailIcon" BasedOn="{StaticResource M3FolderThumbnailIcon}" />
-
     <Style TargetType="controls:IconFrame" x:Key="M3ThumbnailIconFrame">
         <Setter Property="FrameSize" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />

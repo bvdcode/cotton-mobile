@@ -136,9 +136,7 @@ namespace Cotton.Mobile.Controls
             return new Label
             {
                 Text = title,
-                Style = MaterialResources.Get<Style>("M3PanelTitle"),
-                MaxLines = 3,
-                LineBreakMode = LineBreakMode.TailTruncation,
+                Style = MaterialResources.Get<Style>("M3DialogTitle"),
             };
         }
 
@@ -147,9 +145,7 @@ namespace Cotton.Mobile.Controls
             return new Label
             {
                 Text = message,
-                Style = MaterialResources.Get<Style>("M3BodyMedium"),
-                MaxLines = 6,
-                LineBreakMode = LineBreakMode.WordWrap,
+                Style = MaterialResources.Get<Style>("M3DialogMessage"),
             };
         }
 

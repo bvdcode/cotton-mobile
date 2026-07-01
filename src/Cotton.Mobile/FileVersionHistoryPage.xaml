@@ -18,24 +18,12 @@
         <Grid Grid.Row="1"
               RowDefinitions="Auto,Auto,*"
               Style="{StaticResource M3ScreenContentGrid}">
-        <Grid ColumnDefinitions="*,Auto"
-              Style="{StaticResource M3ScreenHeaderGrid}">
-            <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
-                <Label Text="Version history"
-                       Style="{StaticResource M3ScreenTitle}" />
-
-                <Label Text="{Binding FileName}"
-                       Style="{StaticResource M3CardTitle}" />
-
-                <Label Text="{Binding SummaryText}"
-                       Style="{StaticResource M3ScreenHeaderSupportingMultiline}" />
-            </VerticalStackLayout>
-
-            <ActivityIndicator Grid.Column="1"
-                               IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
-        </Grid>
+        <controls:ScreenHeaderView Title="Version history"
+                                   SupportingText="{Binding FileName}"
+                                   SupportingTextStyleResourceKey="M3CardTitle"
+                                   DetailText="{Binding SummaryText}"
+                                   DetailTextStyleResourceKey="M3ScreenHeaderSupportingMultiline"
+                                   IsBusy="{Binding IsBusy}" />
 
         <controls:ScreenStatusView Grid.Row="1"
                                    Text="{Binding Status}"

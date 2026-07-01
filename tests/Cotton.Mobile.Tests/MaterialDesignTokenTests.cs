@@ -230,13 +230,14 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Simple_secondary_screen_headers_use_reusable_material_control()
+        public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =
             [
                 RecentFilesPagePath,
                 ActivityFeedPagePath,
                 TransfersPagePath,
+                FileVersionHistoryPagePath,
                 CaptureInboxPagePath,
                 CaptureDestinationPickerPagePath,
                 DiagnosticsPagePath,
@@ -244,6 +245,7 @@ namespace Cotton.Mobile.Tests
                 NotificationSettingsPagePath,
                 SecuritySettingsPagePath,
                 BackupSetupPagePath,
+                StoragePagePath,
             ];
 
             foreach (string screenPath in screenPaths)
@@ -258,11 +260,17 @@ namespace Cotton.Mobile.Tests
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
+            string storagePage = LoadText(StoragePagePath);
 
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsPathTextVisible}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingTextStyleResourceKey=\"M3CardTitle\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("DetailTextStyleResourceKey=\"M3ScreenHeaderSupportingMultiline\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("TitleStyleResourceKey=\"M3ScreenMetric\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("DetailTextStyleResourceKey=\"M3CardSupportingLine\"", storagePage, StringComparison.Ordinal);
         }
 
         [Fact]

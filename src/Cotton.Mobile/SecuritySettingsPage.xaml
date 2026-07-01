@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -64,33 +63,19 @@
                            Text="{Binding DeviceUnlockDetailText}"
                            Style="{StaticResource M3CardSupportingBlock}" />
 
-                    <Grid Grid.Row="2"
-                          Grid.ColumnSpan="2"
-                          ColumnDefinitions="Auto,*,Auto"
-                          IsVisible="{Binding IsDeviceUnlockActionVisible}"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3CardSecurityThumbnailFrame}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding DeviceUnlockActionText}"
-                               Style="{StaticResource M3ActionListItemLabel}" />
-
-                        <Grid Grid.ColumnSpan="3"
-                              IsEnabled="{Binding CanVerifyDeviceUnlock}"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding VerifyDeviceUnlockCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.Check}"
-                                             Command="{Binding VerifyDeviceUnlockCommand}"
-                                             IsEnabled="{Binding CanVerifyDeviceUnlock}"
-                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             SemanticProperties.Description="{Binding DeviceUnlockActionText}" />
-                    </Grid>
+                    <controls:ActionListItemView Grid.Row="2"
+                                                 Grid.ColumnSpan="2"
+                                                 Text="{Binding DeviceUnlockActionText}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                                 IsLeadingIconVisible="True"
+                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                 ActionIconData="{x:Static controls:IconPathData.Check}"
+                                                 Command="{Binding VerifyDeviceUnlockCommand}"
+                                                 IsActionEnabled="{Binding CanVerifyDeviceUnlock}"
+                                                 IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                                                 ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                                 GridStyleResourceKey="M3SettingsListItemGrid"
+                                                 SemanticDescription="{Binding DeviceUnlockActionText}" />
                 </Grid>
             </Border>
 
@@ -184,31 +169,17 @@
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </Grid>
 
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          IsVisible="{Binding IsRevokeCurrentSessionVisible}"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3CardSecurityThumbnailFrame}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding RevokeCurrentSessionActionText}"
-                               Style="{StaticResource M3ActionListItemLabel}" />
-
-                        <Grid Grid.ColumnSpan="3"
-                              IsEnabled="{Binding CanRevokeCurrentSession}"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding RevokeCurrentSessionCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.Delete}"
-                                             Command="{Binding RevokeCurrentSessionCommand}"
-                                             IsEnabled="{Binding CanRevokeCurrentSession}"
-                                             Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                             SemanticProperties.Description="{Binding RevokeCurrentSessionActionText}" />
-                    </Grid>
+                    <controls:ActionListItemView Text="{Binding RevokeCurrentSessionActionText}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                                 IsLeadingIconVisible="True"
+                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                 ActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                 Command="{Binding RevokeCurrentSessionCommand}"
+                                                 IsActionEnabled="{Binding CanRevokeCurrentSession}"
+                                                 IsVisible="{Binding IsRevokeCurrentSessionVisible}"
+                                                 ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                 GridStyleResourceKey="M3SettingsListItemGrid"
+                                                 SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
 
                     <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
                                          IsVisible="{Binding IsAccountSessionsEmptyVisible}">

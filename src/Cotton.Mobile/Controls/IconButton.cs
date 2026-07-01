@@ -46,36 +46,36 @@ namespace Cotton.Mobile.Controls
             nameof(BorderWidth),
             typeof(double),
             typeof(IconButton),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty ButtonSizeProperty = BindableProperty.Create(
             nameof(ButtonSize),
             typeof(double),
             typeof(IconButton),
-            44.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FileActionSize"));
 
         public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
             nameof(IconSize),
             typeof(double),
             typeof(IconButton),
-            20.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FileActionIconSize"));
 
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
             typeof(IconButton),
-            22.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("ShapeExtraLarge"));
 
         public static readonly BindableProperty ButtonOpacityProperty = BindableProperty.Create(
             nameof(ButtonOpacity),
             typeof(double),
             typeof(IconButton),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3InteractionEnabledOpacity"));
 
         private readonly Border _container;
         private readonly IconView _icon;

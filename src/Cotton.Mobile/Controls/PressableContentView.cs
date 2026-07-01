@@ -9,18 +9,15 @@ namespace Cotton.Mobile.Controls
             nameof(PressedOpacityMultiplier),
             typeof(double),
             typeof(PressableContentView),
-            DefaultPressedOpacityMultiplier,
-            propertyChanged: OnInteractionMetricChanged);
+            propertyChanged: OnInteractionMetricChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3InteractionPressedOpacityFactor"));
 
         public static readonly BindableProperty DisabledOpacityProperty = BindableProperty.Create(
             nameof(DisabledOpacity),
             typeof(double),
             typeof(PressableContentView),
-            DefaultDisabledOpacity,
-            propertyChanged: OnInteractionMetricChanged);
-
-        private const double DefaultPressedOpacityMultiplier = 0.86;
-        private const double DefaultDisabledOpacity = 0.54;
+            propertyChanged: OnInteractionMetricChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3InteractionDisabledOpacity"));
 
 #if ANDROID
         private Android.Views.View? _platformView;

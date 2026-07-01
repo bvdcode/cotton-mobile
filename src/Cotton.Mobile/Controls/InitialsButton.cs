@@ -74,8 +74,8 @@ namespace Cotton.Mobile.Controls
             nameof(ButtonOpacity),
             typeof(double),
             typeof(InitialsButton),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3InteractionEnabledOpacity"));
 
         private readonly Border _container;
         private readonly Label _label;

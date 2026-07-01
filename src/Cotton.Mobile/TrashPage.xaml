@@ -108,7 +108,7 @@
                 IsVisible="{Binding IsSelectionBarVisible}"
                 Style="{StaticResource M3SelectionBar}">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto"
-                  ColumnSpacing="{StaticResource Space8}">
+                  Style="{StaticResource M3SelectionBarGrid}">
                 <VerticalStackLayout Style="{StaticResource M3SelectionTextStack}">
                     <Label Text="{Binding SelectionTitleText}"
                            Style="{StaticResource M3SelectionTitleText}" />
@@ -162,7 +162,7 @@
                             ItemSizingStrategy="MeasureFirstItem">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
-                                       ItemSpacing="{StaticResource Space12}" />
+                                       ItemSpacing="{StaticResource M3CardListItemSpacing}" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>
@@ -266,8 +266,8 @@
                 <CollectionView.ItemsLayout>
                     <GridItemsLayout Orientation="Vertical"
                                      Span="2"
-                                     HorizontalItemSpacing="{StaticResource Space12}"
-                                     VerticalItemSpacing="{StaticResource Space12}" />
+                                     HorizontalItemSpacing="{StaticResource M3CardListItemSpacing}"
+                                     VerticalItemSpacing="{StaticResource M3CardListItemSpacing}" />
                 </CollectionView.ItemsLayout>
 
                 <CollectionView.ItemTemplate>

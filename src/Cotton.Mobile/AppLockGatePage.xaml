@@ -37,12 +37,12 @@
                                    IsVisible="{Binding IsBusy}"
                                    HorizontalOptions="Center" />
 
-                <Button Text="{Binding UnlockActionText}"
-                        Command="{Binding UnlockCommand}"
-                        IsEnabled="{Binding CanUnlock}"
-                        Style="{StaticResource M3AuthPrimaryButton}"
-                        HorizontalOptions="Fill"
-                        Margin="{StaticResource M3PanelActionTopMargin}" />
+                <controls:FilledButton Text="{Binding UnlockActionText}"
+                                       Command="{Binding UnlockCommand}"
+                                       IsEnabled="{Binding CanUnlock}"
+                                       Style="{StaticResource M3AuthFilledButton}"
+                                       HorizontalOptions="Fill"
+                                       Margin="{StaticResource M3PanelActionTopMargin}" />
             </VerticalStackLayout>
         </Border>
     </Grid>

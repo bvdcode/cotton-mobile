@@ -88,11 +88,11 @@
                                IsVisible="{Binding Display.IsStatusVisible}"
                                Style="{StaticResource M3AuthStatus}" />
 
-                        <Button Text="Connect"
-                                Command="{Binding ConnectCommand}"
-                                IsEnabled="{Binding Display.IsInputEnabled}"
-                                Style="{StaticResource M3AuthPrimaryButton}"
-                                HorizontalOptions="Fill" />
+                        <controls:FilledButton Text="Connect"
+                                               Command="{Binding ConnectCommand}"
+                                               IsEnabled="{Binding Display.IsInputEnabled}"
+                                               Style="{StaticResource M3AuthFilledButton}"
+                                               HorizontalOptions="Fill" />
                     </VerticalStackLayout>
                 </Border>
 

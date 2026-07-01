@@ -1,0 +1,268 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using Microsoft.Maui.Controls.Shapes;
+
+namespace Cotton.Mobile.Controls
+{
+    public class FilledButton : CommandPressableContentView
+    {
+        public static readonly BindableProperty TextProperty = BindableProperty.Create(
+            nameof(Text),
+            typeof(string),
+            typeof(FilledButton),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
+            nameof(TextColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.White,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DisabledTextColorProperty = BindableProperty.Create(
+            nameof(DisabledTextColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.White,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(ButtonBackgroundColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(PressedButtonBackgroundColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DisabledButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(DisabledButtonBackgroundColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
+            nameof(BorderColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DisabledBorderColorProperty = BindableProperty.Create(
+            nameof(DisabledBorderColor),
+            typeof(Color),
+            typeof(FilledButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
+            nameof(BorderWidth),
+            typeof(double),
+            typeof(FilledButton),
+            0.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
+            nameof(ButtonCornerRadius),
+            typeof(double),
+            typeof(FilledButton),
+            22.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
+            nameof(TextFontSize),
+            typeof(double),
+            typeof(FilledButton),
+            14.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty FontAttributesProperty = BindableProperty.Create(
+            nameof(FontAttributes),
+            typeof(FontAttributes),
+            typeof(FilledButton),
+            FontAttributes.None,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
+            nameof(ContentPadding),
+            typeof(Thickness),
+            typeof(FilledButton),
+            default(Thickness),
+            propertyChanged: OnVisualPropertyChanged);
+
+        private readonly Border _container;
+        private readonly Label _label;
+
+        public FilledButton()
+        {
+            _label = new Label
+            {
+                HorizontalOptions = LayoutOptions.Center,
+                HorizontalTextAlignment = TextAlignment.Center,
+                LineBreakMode = LineBreakMode.TailTruncation,
+                MaxLines = 1,
+                VerticalOptions = LayoutOptions.Center,
+                VerticalTextAlignment = TextAlignment.Center,
+            };
+
+            _container = new Border
+            {
+                HorizontalOptions = LayoutOptions.Fill,
+                VerticalOptions = LayoutOptions.Fill,
+                Content = _label,
+            };
+
+            Content = _container;
+            UpdateVisualState();
+        }
+
+        public string Text
+        {
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
+        }
+
+        public Color TextColor
+        {
+            get => (Color)GetValue(TextColorProperty);
+            set => SetValue(TextColorProperty, value);
+        }
+
+        public Color DisabledTextColor
+        {
+            get => (Color)GetValue(DisabledTextColorProperty);
+            set => SetValue(DisabledTextColorProperty, value);
+        }
+
+        public Color ButtonBackgroundColor
+        {
+            get => (Color)GetValue(ButtonBackgroundColorProperty);
+            set => SetValue(ButtonBackgroundColorProperty, value);
+        }
+
+        public Color PressedButtonBackgroundColor
+        {
+            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            set => SetValue(PressedButtonBackgroundColorProperty, value);
+        }
+
+        public Color DisabledButtonBackgroundColor
+        {
+            get => (Color)GetValue(DisabledButtonBackgroundColorProperty);
+            set => SetValue(DisabledButtonBackgroundColorProperty, value);
+        }
+
+        public Color BorderColor
+        {
+            get => (Color)GetValue(BorderColorProperty);
+            set => SetValue(BorderColorProperty, value);
+        }
+
+        public Color DisabledBorderColor
+        {
+            get => (Color)GetValue(DisabledBorderColorProperty);
+            set => SetValue(DisabledBorderColorProperty, value);
+        }
+
+        public double BorderWidth
+        {
+            get => (double)GetValue(BorderWidthProperty);
+            set => SetValue(BorderWidthProperty, value);
+        }
+
+        public double ButtonCornerRadius
+        {
+            get => (double)GetValue(ButtonCornerRadiusProperty);
+            set => SetValue(ButtonCornerRadiusProperty, value);
+        }
+
+        public double TextFontSize
+        {
+            get => (double)GetValue(TextFontSizeProperty);
+            set => SetValue(TextFontSizeProperty, value);
+        }
+
+        public FontAttributes FontAttributes
+        {
+            get => (FontAttributes)GetValue(FontAttributesProperty);
+            set => SetValue(FontAttributesProperty, value);
+        }
+
+        public Thickness ContentPadding
+        {
+            get => (Thickness)GetValue(ContentPaddingProperty);
+            set => SetValue(ContentPaddingProperty, value);
+        }
+
+        protected override void OnPropertyChanged(string? propertyName = null)
+        {
+            base.OnPropertyChanged(propertyName);
+
+            if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
+            {
+                UpdateVisualState();
+            }
+        }
+
+        private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FilledButton filledButton = (FilledButton)bindable;
+            filledButton.UpdateVisualState();
+        }
+
+        protected override void OnPressedStateChanged()
+        {
+            UpdateVisualState();
+        }
+
+        protected override void OnCommandStateChanged()
+        {
+            UpdateVisualState();
+        }
+
+        private void UpdateVisualState()
+        {
+            if (_container is null || _label is null)
+            {
+                return;
+            }
+
+            bool canPress = CanHandlePress();
+            Opacity = ResolvePressableOpacity(1);
+
+            _container.Padding = ContentPadding;
+            _container.MinimumHeightRequest = MinimumHeightRequest;
+            _container.MinimumWidthRequest = MinimumWidthRequest;
+            _container.StrokeShape = new RoundRectangle
+            {
+                CornerRadius = new CornerRadius(ButtonCornerRadius),
+            };
+            _container.Stroke = new SolidColorBrush(canPress ? BorderColor : DisabledBorderColor);
+            _container.StrokeThickness = BorderWidth;
+            _container.BackgroundColor = ResolveBackgroundColor(canPress);
+
+            _label.Text = Text;
+            _label.TextColor = canPress ? TextColor : DisabledTextColor;
+            _label.FontSize = TextFontSize;
+            _label.FontAttributes = FontAttributes;
+        }
+
+        private Color ResolveBackgroundColor(bool canPress)
+        {
+            if (!canPress)
+            {
+                return DisabledButtonBackgroundColor;
+            }
+
+            return IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor;
+        }
+    }
+}

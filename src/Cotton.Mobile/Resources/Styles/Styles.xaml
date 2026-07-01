@@ -894,6 +894,8 @@
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DialogButtonMinWidth}" />
     </Style>
 
+    <Style TargetType="controls:FilledButton" BasedOn="{StaticResource M3FilledButton}" />
+
     <Style TargetType="Border" x:Key="M3DialogSurface">
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />

@@ -82,8 +82,7 @@
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                                   ColumnDefinitions="Auto,*,Auto"
-                                  RowSpacing="{StaticResource Space8}"
-                                  ColumnSpacing="{StaticResource Space12}">
+                                  Style="{StaticResource M3MetadataCardGrid}">
                                 <controls:IconFrame Grid.RowSpan="4"
                                                     IconData="{x:Static controls:IconPathData.Transfer}"
                                                     Style="{StaticResource M3CaptureThumbnailFrame}"

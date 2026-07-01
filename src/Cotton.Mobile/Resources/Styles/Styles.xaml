@@ -1217,11 +1217,14 @@
     </Style>
 
     <Style TargetType="controls:TextAction" x:Key="M3FooterTextAction">
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3FooterLinkFontSize}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3FooterLinkPadding}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FooterLinkMinHeight}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>

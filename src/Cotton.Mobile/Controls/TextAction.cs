@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Microsoft.Maui.Controls.Shapes;
+
 namespace Cotton.Mobile.Controls
 {
     public class TextAction : CommandPressableContentView
@@ -33,6 +35,27 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<Thickness>("M3FooterLinkPadding"));
 
+        public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(ButtonBackgroundColor),
+            typeof(Color),
+            typeof(TextAction),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
+
+        public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(PressedButtonBackgroundColor),
+            typeof(Color),
+            typeof(TextAction),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+
+        public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
+            nameof(ButtonCornerRadius),
+            typeof(double),
+            typeof(TextAction),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("ShapeExtraLarge"));
+
         private readonly Border _container;
         private readonly Label _label;
 
@@ -50,7 +73,6 @@ namespace Cotton.Mobile.Controls
 
             _container = new Border
             {
-                BackgroundColor = MaterialResources.Get<Color>("M3Transparent"),
                 StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
@@ -83,6 +105,24 @@ namespace Cotton.Mobile.Controls
         {
             get => (Thickness)GetValue(ContentPaddingProperty);
             set => SetValue(ContentPaddingProperty, value);
+        }
+
+        public Color ButtonBackgroundColor
+        {
+            get => (Color)GetValue(ButtonBackgroundColorProperty);
+            set => SetValue(ButtonBackgroundColorProperty, value);
+        }
+
+        public Color PressedButtonBackgroundColor
+        {
+            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            set => SetValue(PressedButtonBackgroundColorProperty, value);
+        }
+
+        public double ButtonCornerRadius
+        {
+            get => (double)GetValue(ButtonCornerRadiusProperty);
+            set => SetValue(ButtonCornerRadiusProperty, value);
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -123,6 +163,11 @@ namespace Cotton.Mobile.Controls
             _container.Padding = ContentPadding;
             _container.MinimumHeightRequest = MinimumHeightRequest;
             _container.MinimumWidthRequest = MinimumWidthRequest;
+            _container.StrokeShape = new RoundRectangle
+            {
+                CornerRadius = new CornerRadius(ButtonCornerRadius),
+            };
+            _container.BackgroundColor = IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor;
 
             _label.Text = Text;
             _label.TextColor = TextColor;

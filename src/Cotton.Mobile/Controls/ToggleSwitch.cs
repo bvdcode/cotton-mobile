@@ -141,6 +141,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchThumbInset"));
 
+        public static readonly BindableProperty TouchTargetSizeProperty = BindableProperty.Create(
+            nameof(TouchTargetSize),
+            typeof(double),
+            typeof(ToggleSwitch),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("TouchTarget"));
+
         private readonly Grid _trackContent;
         private readonly Border _track;
         private readonly Border _thumb;
@@ -281,6 +288,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ThumbInsetProperty, value);
         }
 
+        public double TouchTargetSize
+        {
+            get => (double)GetValue(TouchTargetSizeProperty);
+            set => SetValue(TouchTargetSizeProperty, value);
+        }
+
         protected override void OnPropertyChanged(string? propertyName = null)
         {
             base.OnPropertyChanged(propertyName);
@@ -328,10 +341,12 @@ namespace Cotton.Mobile.Controls
 
             Opacity = ResolvePressableOpacity(1);
 
-            WidthRequest = TrackWidth;
-            HeightRequest = TrackHeight;
-            MinimumWidthRequest = TrackWidth;
-            MinimumHeightRequest = TrackHeight;
+            double touchWidth = Math.Max(TrackWidth, TouchTargetSize);
+            double touchHeight = Math.Max(TrackHeight, TouchTargetSize);
+            WidthRequest = touchWidth;
+            HeightRequest = touchHeight;
+            MinimumWidthRequest = touchWidth;
+            MinimumHeightRequest = touchHeight;
 
             _track.WidthRequest = TrackWidth;
             _track.HeightRequest = TrackHeight;

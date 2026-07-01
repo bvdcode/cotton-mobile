@@ -1136,6 +1136,7 @@
         <Setter Property="ThumbSize" Value="{StaticResource M3SwitchThumbSize}" />
         <Setter Property="ThumbCornerRadius" Value="{StaticResource M3SwitchThumbCornerRadius}" />
         <Setter Property="ThumbInset" Value="{StaticResource M3SwitchThumbInset}" />
+        <Setter Property="TouchTargetSize" Value="{StaticResource TouchTarget}" />
         <Setter Property="TrackOnColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="TrackOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
         <Setter Property="TrackOnPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkPrimaryPressed}}" />

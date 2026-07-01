@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.NotificationSettingsPage"
@@ -49,31 +48,18 @@
                            Text="{Binding PermissionDetailText}"
                            Style="{StaticResource M3CardSupportingBlock}" />
 
-                    <Grid Grid.Row="2"
-                          Grid.ColumnSpan="2"
-                          ColumnDefinitions="Auto,*,Auto"
-                          IsVisible="{Binding IsPermissionActionVisible}"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
-                                            Style="{StaticResource M3CardActivityThumbnailFrame}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding PermissionActionText}"
-                               Style="{StaticResource M3ActionListItemLabel}" />
-
-                        <Grid Grid.ColumnSpan="3"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding PermissionActionCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.OpenInNew}"
-                                             Command="{Binding PermissionActionCommand}"
-                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             SemanticProperties.Description="{Binding PermissionActionText}" />
-                    </Grid>
+                    <controls:ActionListItemView Grid.Row="2"
+                                                 Grid.ColumnSpan="2"
+                                                 Text="{Binding PermissionActionText}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                                 IsLeadingIconVisible="True"
+                                                 LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
+                                                 ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                                 Command="{Binding PermissionActionCommand}"
+                                                 IsVisible="{Binding IsPermissionActionVisible}"
+                                                 GridStyleResourceKey="M3SettingsListItemGrid"
+                                                 ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                                 SemanticDescription="{Binding PermissionActionText}" />
                 </Grid>
             </Border>
 
@@ -106,26 +92,13 @@
                                Text="{Binding RemotePushUnavailableDetail}"
                                Style="{StaticResource M3CardSupportingBlock}" />
 
-                        <Grid Grid.Row="2"
-                              Grid.ColumnSpan="2"
-                              ColumnDefinitions="*,Auto"
-                              Style="{StaticResource M3SettingsListItemGrid}">
-                            <Label Text="Retry server push"
-                                   Style="{StaticResource M3ActionListItemLabel}" />
-
-                            <Grid Grid.ColumnSpan="2"
-                                  Style="{StaticResource M3ListItemTouchSurface}">
-                                <Grid.Behaviors>
-                                    <behaviors:LongPressBehavior TapCommand="{Binding LoadCommand}" />
-                                </Grid.Behaviors>
-                            </Grid>
-
-                            <controls:IconButton Grid.Column="1"
-                                                 IconData="{x:Static controls:IconPathData.Refresh}"
-                                                 Command="{Binding LoadCommand}"
-                                                 Style="{StaticResource M3FileChromeIconButton}"
-                                                 SemanticProperties.Description="Retry server push" />
-                        </Grid>
+                        <controls:ActionListItemView Grid.Row="2"
+                                                     Grid.ColumnSpan="2"
+                                                     Text="Retry server push"
+                                                     ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                                     Command="{Binding LoadCommand}"
+                                                     GridStyleResourceKey="M3SettingsListItemGrid"
+                                                     SemanticDescription="Retry server push" />
                     </Grid>
 
                     <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"

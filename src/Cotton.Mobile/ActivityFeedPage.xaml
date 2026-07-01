@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -75,28 +74,14 @@
 
             <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsLoadMoreVisible}">
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3ActionListItemGrid}">
-                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
-                                        Style="{StaticResource M3ActivityThumbnailFrame}" />
-
-                    <Label Grid.Column="1"
-                           Text="Load more"
-                           Style="{StaticResource M3ActionListItemTitle}" />
-
-                    <Grid Grid.ColumnSpan="3"
-                          Style="{StaticResource M3ListItemTouchSurface}">
-                        <Grid.Behaviors>
-                            <behaviors:LongPressBehavior TapCommand="{Binding LoadMoreCommand}" />
-                        </Grid.Behaviors>
-                    </Grid>
-
-                    <controls:IconButton Grid.Column="2"
-                                         IconData="{x:Static controls:IconPathData.ArrowDown}"
-                                         Command="{Binding LoadMoreCommand}"
-                                         Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                         SemanticProperties.Description="Load more activity" />
-                </Grid>
+                <controls:ActionListItemView Text="Load more"
+                                             LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                             IsLeadingIconVisible="True"
+                                             ActionIconData="{x:Static controls:IconPathData.ArrowDown}"
+                                             Command="{Binding LoadMoreCommand}"
+                                             TextStyleResourceKey="M3ActionListItemTitle"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             SemanticDescription="Load more activity" />
             </Border>
         </VerticalStackLayout>
         </ScrollView>

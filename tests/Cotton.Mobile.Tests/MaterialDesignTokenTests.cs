@@ -230,6 +230,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Single_line_action_rows_use_reusable_material_control()
+        {
+            string activityFeedPage = LoadText(ActivityFeedPagePath);
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+
+            Assert.Contains("<controls:ActionListItemView Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"Load more activity\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<behaviors:LongPressBehavior", activityFeedPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:ActionListItemView Grid.Row=\"2\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Command=\"{Binding MediaAccessActionCommand}\"", backupSetupPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =
@@ -318,6 +339,25 @@ namespace Cotton.Mobile.Tests
             string repositoryRoot = FindRepositoryRoot(relativePath);
             string resourcePath = Path.Combine(repositoryRoot, relativePath);
             return File.ReadAllText(resourcePath);
+        }
+
+        private static int CountOccurrences(string text, string value)
+        {
+            int count = 0;
+            int startIndex = 0;
+            while (startIndex < text.Length)
+            {
+                int matchIndex = text.IndexOf(value, startIndex, StringComparison.Ordinal);
+                if (matchIndex < 0)
+                {
+                    return count;
+                }
+
+                count++;
+                startIndex = matchIndex + value.Length;
+            }
+
+            return count;
         }
 
         private static string FindRepositoryRoot(string relativePath)

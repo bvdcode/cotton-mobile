@@ -194,6 +194,19 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserProfileStack">
+        <Setter Property="Spacing" Value="0" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileListStack">
+        <Setter Property="Spacing" Value="0" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileEntryTouchSurface">
+        <Setter Property="BackgroundColor" Value="Transparent" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileTileCard" BasedOn="{StaticResource M3SurfaceCard}">
         <Setter Property="Padding" Value="{StaticResource M3FileTileInnerPadding}" />
     </Style>

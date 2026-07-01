@@ -110,8 +110,7 @@
                 </Border>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Spacing="0"
-                                     HorizontalOptions="Fill">
+                                     Style="{StaticResource M3FileBrowserProfileStack}">
                         <VerticalStackLayout x:Name="FileBrowserContent"
                                              Spacing="{StaticResource Space12}"
                                              HorizontalOptions="Fill">
@@ -418,7 +417,7 @@
                                 </VerticalStackLayout>
                             </Border>
 
-                            <VerticalStackLayout Spacing="0"
+                            <VerticalStackLayout Style="{StaticResource M3FileListStack}"
                                                  IsVisible="{Binding Display.IsFileListViewVisible}"
                                                  BindableLayout.ItemsSource="{Binding Display.FileEntries}">
                                 <BindableLayout.ItemTemplate>
@@ -482,7 +481,7 @@
 
                                             <Grid x:Name="ListEntryTouchSurface"
                                                   Grid.ColumnSpan="2"
-                                                  BackgroundColor="Transparent">
+                                                  Style="{StaticResource M3FileEntryTouchSurface}">
                                                 <Grid.Behaviors>
                                                     <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                  CommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}"
@@ -601,7 +600,7 @@
 
                                                     <Grid x:Name="TileEntryTouchSurface"
                                                           Grid.RowSpan="2"
-                                                          BackgroundColor="Transparent">
+                                                          Style="{StaticResource M3FileEntryTouchSurface}">
                                                         <Grid.Behaviors>
                                                             <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                          CommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}"

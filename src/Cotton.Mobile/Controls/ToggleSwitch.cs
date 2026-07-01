@@ -29,6 +29,20 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHighest"));
 
+        public static readonly BindableProperty TrackOnPressedColorProperty = BindableProperty.Create(
+            nameof(TrackOnPressedColor),
+            typeof(Color),
+            typeof(ToggleSwitch),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkPrimaryPressed"));
+
+        public static readonly BindableProperty TrackOffPressedColorProperty = BindableProperty.Create(
+            nameof(TrackOffPressedColor),
+            typeof(Color),
+            typeof(ToggleSwitch),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+
         public static readonly BindableProperty TrackDisabledColorProperty = BindableProperty.Create(
             nameof(TrackDisabledColor),
             typeof(Color),
@@ -169,6 +183,18 @@ namespace Cotton.Mobile.Controls
         {
             get => (Color)GetValue(TrackOffColorProperty);
             set => SetValue(TrackOffColorProperty, value);
+        }
+
+        public Color TrackOnPressedColor
+        {
+            get => (Color)GetValue(TrackOnPressedColorProperty);
+            set => SetValue(TrackOnPressedColorProperty, value);
+        }
+
+        public Color TrackOffPressedColor
+        {
+            get => (Color)GetValue(TrackOffPressedColorProperty);
+            set => SetValue(TrackOffPressedColorProperty, value);
         }
 
         public Color TrackDisabledColor
@@ -323,6 +349,11 @@ namespace Cotton.Mobile.Controls
             if (!IsEnabled)
             {
                 return TrackDisabledColor;
+            }
+
+            if (IsPressed)
+            {
+                return IsToggled ? TrackOnPressedColor : TrackOffPressedColor;
             }
 
             return IsToggled ? TrackOnColor : TrackOffColor;

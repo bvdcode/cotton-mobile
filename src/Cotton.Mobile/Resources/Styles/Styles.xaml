@@ -1024,7 +1024,7 @@
     <Style TargetType="controls:ToggleSwitch" x:Key="M3Switch">
         <Setter Property="HorizontalOptions" Value="End" />
         <Setter Property="VerticalOptions" Value="Center" />
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="TrackWidth" Value="{StaticResource M3SwitchTrackWidth}" />
         <Setter Property="TrackHeight" Value="{StaticResource M3SwitchTrackHeight}" />
@@ -1035,6 +1035,8 @@
         <Setter Property="ThumbInset" Value="{StaticResource M3SwitchThumbInset}" />
         <Setter Property="TrackOnColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="TrackOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
+        <Setter Property="TrackOnPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkPrimaryPressed}}" />
+        <Setter Property="TrackOffPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="TrackDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
         <Setter Property="TrackOnBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="TrackOffBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
@@ -1197,7 +1199,7 @@
         <Setter Property="TextFontSize" Value="{StaticResource M3LabelLargeFontSize}" />
         <Setter Property="TextLineHeight" Value="{StaticResource M3LabelLargeLineHeight}" />
         <Setter Property="ContentSpacing" Value="{StaticResource Space12}" />
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />

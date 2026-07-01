@@ -68,10 +68,22 @@
                            LineBreakMode="WordWrap"
                            HorizontalTextAlignment="Center" />
 
-                    <Button Text="Choose folder"
-                            Command="{Binding OpenFilesCommand}"
-                            Style="{StaticResource M3PrimaryButton}"
-                            Margin="{StaticResource M3PanelActionTopMargin}" />
+                    <Grid ColumnDefinitions="Auto,Auto"
+                          ColumnSpacing="{StaticResource Space12}"
+                          Margin="{StaticResource M3PanelActionTopMargin}">
+                        <Label Text="Choose folder"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+
+                        <controls:IconButton Grid.Column="1"
+                                             IconData="{x:Static controls:IconPathData.Folder}"
+                                             Command="{Binding OpenFilesCommand}"
+                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="Choose sync folder" />
+                    </Grid>
                 </VerticalStackLayout>
             </Border>
 

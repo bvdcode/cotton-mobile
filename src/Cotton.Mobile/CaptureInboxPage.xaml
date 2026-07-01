@@ -32,7 +32,7 @@
                 <ActivityIndicator Grid.Column="1"
                                    IsRunning="{Binding IsBusy}"
                                    IsVisible="{Binding IsBusy}"
-                                   VerticalOptions="Center" />
+                                   Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
             </Grid>
 
             <Label Text="{Binding Status}"

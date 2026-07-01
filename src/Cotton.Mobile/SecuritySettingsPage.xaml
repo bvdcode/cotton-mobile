@@ -19,8 +19,8 @@
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
                              Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="{StaticResource Space12}">
-                <VerticalStackLayout Spacing="{StaticResource Space2}">
+                  Style="{StaticResource M3ScreenHeaderGrid}">
+                <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="Security"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -35,7 +35,7 @@
                 <ActivityIndicator Grid.Column="1"
                                    IsRunning="{Binding IsBusy}"
                                    IsVisible="{Binding IsBusy}"
-                                   VerticalOptions="Center" />
+                                   Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
             </Grid>
 
             <Label Text="{Binding Status}"

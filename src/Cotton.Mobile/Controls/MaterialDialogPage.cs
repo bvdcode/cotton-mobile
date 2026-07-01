@@ -91,8 +91,10 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            BoxView scrim = new();
-            MaterialResources.SetThemeColor(scrim, BoxView.ColorProperty, "M3LightScrim", "M3DarkScrim");
+            BoxView scrim = new()
+            {
+                Style = MaterialResources.Get<Style>("M3ModalScrim"),
+            };
             scrim.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = CreateDismissCommand((string?)null),

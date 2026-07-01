@@ -603,6 +603,10 @@
         <Setter Property="Spacing" Value="{StaticResource Space8}" />
     </Style>
 
+    <Style TargetType="BoxView" x:Key="M3ModalScrim">
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightScrim}, Dark={StaticResource M3DarkScrim}}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />

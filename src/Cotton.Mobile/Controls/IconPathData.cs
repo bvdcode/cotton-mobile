@@ -45,6 +45,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry OpenInNew => Create("M5 5 L13 5 L13 7 L7 7 L7 17 L17 17 L17 11 L19 11 L19 19 L5 19 Z M15 5 L20 5 L20 10 L18 10 L18.6 8.4 L11.4 15.6 L10 14.2 L17.2 7 L15 7 Z");
 
+        public static Geometry Pause => Create("M7 5 L10 5 L10 19 L7 19 Z M14 5 L17 5 L17 19 L14 19 Z");
+
         public static Geometry Play => Create("M8 5 L19 12 L8 19 Z");
 
         public static Geometry Plus => Create("M11 5 L13 5 L13 11 L19 11 L19 13 L13 13 L13 19 L11 19 L11 13 L5 13 L5 11 L11 11 Z");

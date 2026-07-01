@@ -132,43 +132,44 @@
                                        MaxLines="1"
                                        LineBreakMode="TailTruncation" />
 
-                                <VerticalStackLayout Grid.Row="3"
-                                                     Grid.Column="1"
-                                                     Grid.ColumnSpan="2"
-                                                     Spacing="{StaticResource Space8}"
-                                                     Margin="{StaticResource M3PanelActionTopMargin}">
-                                    <Button Text="{Binding RunNowActionText}"
-                                            Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            IsEnabled="{Binding CanRunNow}"
-                                            IsVisible="{Binding CanRunNow}"
-                                            Style="{StaticResource PanelChromeButton}" />
+                                <HorizontalStackLayout Grid.Row="3"
+                                                       Grid.Column="1"
+                                                       Grid.ColumnSpan="2"
+                                                       Spacing="{StaticResource Space8}"
+                                                       Margin="{StaticResource M3PanelActionTopMargin}"
+                                                       HorizontalOptions="End">
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                                         Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEnabled="{Binding CanRunNow}"
+                                                         IsVisible="{Binding CanRunNow}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding RunNowActionText}" />
 
-                                    <Grid ColumnDefinitions="*,*"
-                                          ColumnSpacing="{StaticResource Space8}">
-                                        <Button Text="{Binding PauseSyncActionText}"
-                                                Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                CommandParameter="{Binding .}"
-                                                IsEnabled="{Binding CanPauseSync}"
-                                                IsVisible="{Binding CanPauseSync}"
-                                                Style="{StaticResource PanelChromeButton}" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Pause}"
+                                                         Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEnabled="{Binding CanPauseSync}"
+                                                         IsVisible="{Binding CanPauseSync}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding PauseSyncActionText}" />
 
-                                        <Button Text="{Binding ResumeSyncActionText}"
-                                                Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                CommandParameter="{Binding .}"
-                                                IsEnabled="{Binding CanResumeSync}"
-                                                IsVisible="{Binding CanResumeSync}"
-                                                Style="{StaticResource PanelChromeButton}" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                                         Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEnabled="{Binding CanResumeSync}"
+                                                         IsVisible="{Binding CanResumeSync}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding ResumeSyncActionText}" />
 
-                                        <Button Grid.Column="1"
-                                                Text="{Binding StopSyncActionText}"
-                                                Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                CommandParameter="{Binding .}"
-                                                IsEnabled="{Binding CanStopSync}"
-                                                IsVisible="{Binding CanStopSync}"
-                                                Style="{StaticResource PanelDestructiveChromeButton}" />
-                                    </Grid>
-                                </VerticalStackLayout>
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
+                                                         Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEnabled="{Binding CanStopSync}"
+                                                         IsVisible="{Binding CanStopSync}"
+                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding StopSyncActionText}" />
+                                </HorizontalStackLayout>
                             </Grid>
                         </Border>
                     </DataTemplate>

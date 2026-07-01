@@ -263,7 +263,7 @@
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3InputIcon">
-        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="IconSize" Value="{StaticResource M3InputIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />

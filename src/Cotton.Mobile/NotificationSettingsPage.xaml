@@ -21,31 +21,14 @@
                                        SupportingText="{Binding EnabledCategoriesText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <Border IsVisible="{Binding IsAttentionStatusVisible}"
-                    Style="{StaticResource M3AttentionStatusPanel}">
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3ActionListItemGrid}">
-                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                       Style="{StaticResource M3AttentionStatusIcon}" />
-
-                    <Label Grid.Column="1"
-                           Text="{Binding Status}"
-                           Style="{StaticResource M3AttentionStatusMessage}" />
-
-                    <Grid Grid.ColumnSpan="3"
-                          Style="{StaticResource M3ListItemTouchSurface}">
-                        <Grid.Behaviors>
-                            <behaviors:LongPressBehavior TapCommand="{Binding LoadCommand}" />
-                        </Grid.Behaviors>
-                    </Grid>
-
-                    <controls:IconButton Grid.Column="2"
-                                         IconData="{x:Static controls:IconPathData.Refresh}"
-                                         Command="{Binding LoadCommand}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         SemanticProperties.Description="Retry notifications" />
-                </Grid>
-            </Border>
+            <controls:AttentionStatusView IsVisible="{Binding IsAttentionStatusVisible}"
+                                          Message="{Binding Status}"
+                                          IconData="{x:Static controls:IconPathData.Error}"
+                                          ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                          ActionCommand="{Binding LoadCommand}"
+                                          IsRowTapEnabled="True"
+                                          GridStyleResourceKey="M3ActionListItemGrid"
+                                          ActionSemanticDescription="Retry notifications" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsNeutralStatusVisible}" />

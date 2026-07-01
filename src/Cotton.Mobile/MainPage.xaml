@@ -351,25 +351,14 @@
                             <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}"
                                                            Style="{StaticResource M3FileListSkeletonView}" />
 
-                            <Border IsVisible="{Binding Display.CanRetryFileAction}"
-                                    Style="{StaticResource M3AttentionStatusPanel}">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3StatusGrid}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                                       Style="{StaticResource M3AttentionStatusIcon}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Display.FilesStatus}"
-                                           Style="{StaticResource M3AttentionStatusMessage}" />
-
-                                    <controls:IconButton Grid.Column="2"
-                                                         IconData="{x:Static controls:IconPathData.Refresh}"
-                                                         Command="{Binding RetryFileActionCommand}"
-                                                         IsEnabled="{Binding Display.CanRetryFileAction}"
-                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding Display.FileRetryActionText}" />
-                                </Grid>
-                            </Border>
+                            <controls:AttentionStatusView IsVisible="{Binding Display.CanRetryFileAction}"
+                                                          Message="{Binding Display.FilesStatus}"
+                                                          IconData="{x:Static controls:IconPathData.Error}"
+                                                          ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                                          ActionCommand="{Binding RetryFileActionCommand}"
+                                                          IsActionEnabled="{Binding Display.CanRetryFileAction}"
+                                                          ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                          ActionSemanticDescription="{Binding Display.FileRetryActionText}" />
 
                             <controls:EmptyStateView IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                                      IconData="{x:Static controls:IconPathData.File}"

@@ -212,6 +212,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Retry_attention_panels_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+
+            Assert.Contains("<controls:AttentionStatusView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AttentionStatusPanel", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AttentionStatusMessage", mainPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:AttentionStatusView", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsRowTapEnabled=\"True\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("GridStyleResourceKey=\"M3ActionListItemGrid\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AttentionStatusPanel", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Retry notifications\"", notificationSettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Simple_secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

@@ -17,10 +17,10 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+                  ColumnSpacing="{StaticResource Space12}">
+                <VerticalStackLayout Spacing="{StaticResource Space2}">
                     <Label Text="{Binding TotalSizeText}"
                            Style="{StaticResource M3ScreenMetric}"
                            MaxLines="1"
@@ -50,8 +50,8 @@
                    LineBreakMode="TailTruncation" />
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="8">
-                    <VerticalStackLayout Spacing="2">
+                <VerticalStackLayout Spacing="{StaticResource Space8}">
+                    <VerticalStackLayout Spacing="{StaticResource Space2}">
                         <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -70,7 +70,7 @@
 
                     <ProgressBar Progress="{Binding CloudQuotaUsageFraction}"
                                  IsVisible="{Binding IsCloudQuotaProgressVisible}"
-                                 HeightRequest="4"
+                                 HeightRequest="{StaticResource Space4}"
                                  ProgressColor="{StaticResource M3Accent}" />
                 </VerticalStackLayout>
             </Border>
@@ -80,23 +80,21 @@
                    MaxLines="1"
                    LineBreakMode="TailTruncation" />
 
-            <VerticalStackLayout Spacing="10">
+            <VerticalStackLayout Spacing="{StaticResource Space12}">
                 <Button Text="Free space"
                         Command="{Binding FreeDeviceSpaceCommand}"
-                        Style="{StaticResource FileChromeButton}"
-                        HeightRequest="44" />
+                        Style="{StaticResource FileChromeButton}" />
 
                 <Button Text="Clear all cached files"
                         Command="{Binding ClearAllCommand}"
-                        Style="{StaticResource DestructiveChromeButton}"
-                        HeightRequest="44" />
+                        Style="{StaticResource DestructiveChromeButton}" />
             </VerticalStackLayout>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="12">
+                <VerticalStackLayout Spacing="{StaticResource Space12}">
                     <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="12">
-                        <VerticalStackLayout Spacing="2">
+                          ColumnSpacing="{StaticResource Space12}">
+                        <VerticalStackLayout Spacing="{StaticResource Space2}">
                             <Label Text="Files on this device"
                                    Style="{StaticResource M3CardTitle}"
                                    MaxLines="1"
@@ -109,14 +107,14 @@
                         </VerticalStackLayout>
                     </Grid>
 
-                    <VerticalStackLayout Spacing="8"
+                    <VerticalStackLayout Spacing="{StaticResource Space8}"
                                          BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
                                 <Grid RowDefinitions="Auto,Auto"
                                       ColumnDefinitions="*,Auto"
-                                      RowSpacing="2"
-                                      ColumnSpacing="10"
+                                      RowSpacing="{StaticResource Space2}"
+                                      ColumnSpacing="{StaticResource Space12}"
                                       IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
@@ -149,8 +147,8 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="12">
-                    <VerticalStackLayout Spacing="2">
+                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                    <VerticalStackLayout Spacing="{StaticResource Space2}">
                         <Label Text="Temporary files"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -167,14 +165,14 @@
                                LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
-                    <VerticalStackLayout Spacing="8"
+                    <VerticalStackLayout Spacing="{StaticResource Space8}"
                                          BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
                                 <Grid RowDefinitions="Auto,Auto,Auto"
                                       ColumnDefinitions="*,Auto"
-                                      RowSpacing="2"
-                                      ColumnSpacing="10"
+                                      RowSpacing="{StaticResource Space2}"
+                                      ColumnSpacing="{StaticResource Space12}"
                                       IsVisible="{Binding IsVisible}">
                                     <Label Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
@@ -203,7 +201,7 @@
                                     <ProgressBar Grid.Row="2"
                                                  Grid.ColumnSpan="2"
                                                  Progress="{Binding UsageFraction}"
-                                                 HeightRequest="4"
+                                                 HeightRequest="{StaticResource Space4}"
                                                  ProgressColor="{StaticResource M3Accent}" />
                                 </Grid>
                             </DataTemplate>

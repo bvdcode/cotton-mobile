@@ -2,8 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 	<application
 		android:allowBackup="false"
-		android:icon="@mipmap/cotton_app_icon_background"
-		android:roundIcon="@mipmap/cotton_app_icon_background_round"
+		android:icon="@mipmap/cotton_app_icon"
+		android:roundIcon="@mipmap/cotton_app_icon_round"
 		android:supportsRtl="true"
 		android:usesCleartextTraffic="false"></application>
 	<queries>

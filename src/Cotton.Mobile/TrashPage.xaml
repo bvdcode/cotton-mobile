@@ -24,9 +24,8 @@
                             TertiaryDescription="Refresh trash" />
 
         <Grid Grid.Row="1"
-              Padding="{StaticResource M3ScreenPadding}"
               RowDefinitions="Auto,Auto,Auto,Auto,*"
-              RowSpacing="{StaticResource Space16}">
+              Style="{StaticResource M3ScreenContentGrid}">
         <Grid ColumnDefinitions="*,Auto"
               Style="{StaticResource M3ScreenHeaderGrid}">
             <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">

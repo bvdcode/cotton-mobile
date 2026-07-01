@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.AppLockGatePage"
              x:DataType="viewModels:AppLockGateViewModel"
@@ -9,28 +10,40 @@
 
     <Grid Padding="{StaticResource M3AppLockGatePadding}"
           RowDefinitions="*,Auto,*">
-        <VerticalStackLayout Grid.Row="1"
-                             Spacing="{StaticResource Space16}"
-                             HorizontalOptions="Fill">
-            <Label Text="{Binding Title}"
-                   Style="{StaticResource M3ScreenTitle}"
-                   HorizontalTextAlignment="Center" />
+        <Border Grid.Row="1"
+                Style="{StaticResource M3EmptyStateCard}"
+                MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
+                HorizontalOptions="Fill">
+            <VerticalStackLayout Spacing="{StaticResource Space16}"
+                                 HorizontalOptions="Fill">
+                <Border Style="{StaticResource M3EmptyStateIconFrame}">
+                    <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
+                                       Style="{StaticResource M3EmptyStateIcon}" />
+                </Border>
 
-            <Label Text="{Binding StatusText}"
-                   Style="{StaticResource M3BodyMedium}"
-                   MaxLines="3"
-                   LineBreakMode="WordWrap"
-                   HorizontalTextAlignment="Center" />
+                <Label Text="{Binding Title}"
+                       Style="{StaticResource M3EmptyTitle}"
+                       MaxLines="1"
+                       LineBreakMode="TailTruncation"
+                       HorizontalTextAlignment="Center" />
 
-            <ActivityIndicator IsRunning="{Binding IsBusy}"
-                               IsVisible="{Binding IsBusy}"
-                               HorizontalOptions="Center" />
+                <Label Text="{Binding StatusText}"
+                       Style="{StaticResource M3CardSupporting}"
+                       MaxLines="3"
+                       LineBreakMode="WordWrap"
+                       HorizontalTextAlignment="Center" />
 
-            <Button Text="{Binding UnlockActionText}"
-                    Command="{Binding UnlockCommand}"
-                    IsEnabled="{Binding CanUnlock}"
-                    Style="{StaticResource M3PrimaryButton}"
-                    HorizontalOptions="Fill" />
-        </VerticalStackLayout>
+                <ActivityIndicator IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   HorizontalOptions="Center" />
+
+                <Button Text="{Binding UnlockActionText}"
+                        Command="{Binding UnlockCommand}"
+                        IsEnabled="{Binding CanUnlock}"
+                        Style="{StaticResource M3AuthPrimaryButton}"
+                        HorizontalOptions="Fill"
+                        Margin="{StaticResource M3PanelActionTopMargin}" />
+            </VerticalStackLayout>
+        </Border>
     </Grid>
 </ContentPage>

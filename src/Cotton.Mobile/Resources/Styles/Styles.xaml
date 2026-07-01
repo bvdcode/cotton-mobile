@@ -202,6 +202,24 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3ScreenHeaderGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3ScreenHeaderTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3EmptyStateStack">
+        <Setter Property="Spacing" Value="{StaticResource Space8}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3CardTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="M3PrimaryButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />

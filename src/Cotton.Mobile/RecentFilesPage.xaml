@@ -23,8 +23,8 @@
               RowDefinitions="Auto,Auto,*"
               RowSpacing="{StaticResource Space16}">
         <Grid ColumnDefinitions="*,Auto"
-              ColumnSpacing="12">
-            <VerticalStackLayout Spacing="2">
+              Style="{StaticResource M3ScreenHeaderGrid}">
+            <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="Recent files"
                        Style="{StaticResource M3ScreenTitle}"
                        MaxLines="1"
@@ -52,9 +52,7 @@
         <Border Grid.Row="2"
                 IsVisible="{Binding IsEmpty}"
                 Style="{StaticResource M3EmptyStateCard}">
-            <VerticalStackLayout Spacing="8"
-                                 HorizontalOptions="Center"
-                                 VerticalOptions="Center">
+            <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
                 <Label Text="{Binding EmptyMessage}"
                        Style="{StaticResource M3EmptyTitle}"
                        HorizontalTextAlignment="Center" />
@@ -89,7 +87,7 @@
                               ColumnDefinitions="*,Auto"
                               RowSpacing="{StaticResource Space8}"
                               ColumnSpacing="{StaticResource Space12}">
-                            <VerticalStackLayout Spacing="2">
+                            <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
                                 <Label Text="{Binding FileName}"
                                        Style="{StaticResource M3CardTitle}"
                                        MaxLines="2"

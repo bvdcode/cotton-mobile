@@ -28,8 +28,12 @@ namespace Cotton.Mobile.Behaviors
             default(IconView),
             propertyChanged: OnVisualTargetChanged);
 
-        private const string AccentResourceKey = "M3Accent";
-        private const string OnAccentResourceKey = "M3OnAccent";
+        private const string LightPrimaryResourceKey = "M3LightPrimary";
+        private const string LightPrimaryContainerResourceKey = "M3LightPrimaryContainer";
+        private const string LightOnPrimaryContainerResourceKey = "M3LightOnPrimaryContainer";
+        private const string DarkPrimaryResourceKey = "M3DarkPrimary";
+        private const string DarkPrimaryContainerResourceKey = "M3DarkPrimaryContainer";
+        private const string DarkOnPrimaryContainerResourceKey = "M3DarkOnPrimaryContainer";
         private const string FocusStrokeResourceKey = "M3StrokeFocus";
         private const string FocusedLightFieldBackgroundResourceKey = "M3LightSurfaceContainerLowest";
         private const string FocusedDarkFieldBackgroundResourceKey = "M3DarkSurfaceContainerHigh";
@@ -104,27 +108,28 @@ namespace Cotton.Mobile.Behaviors
                 return;
             }
 
-            Color accentColor = GetRequiredColor(AccentResourceKey);
-            Color onAccentColor = GetRequiredColor(OnAccentResourceKey);
+            Color primaryColor = GetRequiredColor(GetPrimaryResourceKey());
+            Color primaryContainerColor = GetRequiredColor(GetPrimaryContainerResourceKey());
+            Color onPrimaryContainerColor = GetRequiredColor(GetOnPrimaryContainerResourceKey());
             Color fieldBackgroundColor = GetRequiredColor(GetFocusedFieldBackgroundResourceKey());
             double focusStroke = GetRequiredDouble(FocusStrokeResourceKey);
 
             if (Field is not null)
             {
-                Field.Stroke = new SolidColorBrush(accentColor);
+                Field.Stroke = new SolidColorBrush(primaryColor);
                 Field.StrokeThickness = focusStroke;
                 Field.BackgroundColor = fieldBackgroundColor;
             }
 
             if (LeadingIconFrame is not null)
             {
-                LeadingIconFrame.Stroke = new SolidColorBrush(accentColor);
-                LeadingIconFrame.BackgroundColor = accentColor;
+                LeadingIconFrame.Stroke = new SolidColorBrush(primaryColor);
+                LeadingIconFrame.BackgroundColor = primaryContainerColor;
             }
 
             if (LeadingIcon is not null)
             {
-                LeadingIcon.IconColor = onAccentColor;
+                LeadingIcon.IconColor = onPrimaryContainerColor;
             }
         }
 
@@ -149,6 +154,39 @@ namespace Cotton.Mobile.Behaviors
             }
 
             return FocusedDarkFieldBackgroundResourceKey;
+        }
+
+        private static string GetPrimaryResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightPrimaryResourceKey;
+            }
+
+            return DarkPrimaryResourceKey;
+        }
+
+        private static string GetPrimaryContainerResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightPrimaryContainerResourceKey;
+            }
+
+            return DarkPrimaryContainerResourceKey;
+        }
+
+        private static string GetOnPrimaryContainerResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightOnPrimaryContainerResourceKey;
+            }
+
+            return DarkOnPrimaryContainerResourceKey;
         }
 
         private static Color GetRequiredColor(string key)

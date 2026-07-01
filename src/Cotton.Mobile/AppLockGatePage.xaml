@@ -11,9 +11,7 @@
     <Grid Padding="{StaticResource M3AppLockGatePadding}"
           RowDefinitions="*,Auto,*">
         <Border Grid.Row="1"
-                Style="{StaticResource M3EmptyStateCard}"
-                MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
-                HorizontalOptions="Fill">
+                Style="{StaticResource M3AppLockCard}">
             <VerticalStackLayout Style="{StaticResource M3AppLockContentStack}">
                 <Border Style="{StaticResource M3EmptyStateIconFrame}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
@@ -36,7 +34,6 @@
                                        Command="{Binding UnlockCommand}"
                                        IsEnabled="{Binding CanUnlock}"
                                        Style="{StaticResource M3AuthFilledButton}"
-                                       HorizontalOptions="Fill"
                                        Margin="{StaticResource M3PanelActionTopMargin}" />
             </VerticalStackLayout>
         </Border>

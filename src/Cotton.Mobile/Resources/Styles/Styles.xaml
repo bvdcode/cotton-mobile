@@ -456,7 +456,7 @@
     <Style TargetType="Editor" x:Key="TextViewerContentEditor">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="15" />
+        <Setter Property="FontSize" Value="{StaticResource M3TextViewerFontSize}" />
     </Style>
 
     <Style TargetType="Entry">
@@ -480,7 +480,7 @@
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 

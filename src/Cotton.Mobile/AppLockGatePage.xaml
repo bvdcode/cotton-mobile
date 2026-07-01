@@ -25,10 +25,7 @@
                        Style="{StaticResource M3EmptyTitle}" />
 
                 <Label Text="{Binding StatusText}"
-                       Style="{StaticResource M3CardSupporting}"
-                       MaxLines="3"
-                       LineBreakMode="WordWrap"
-                       HorizontalTextAlignment="Center" />
+                       Style="{StaticResource M3CardSupportingCenteredLongWrap}" />
 
                 <Border IsVisible="{Binding IsBusy}"
                         Style="{StaticResource M3LoadingIndicatorFrame}">

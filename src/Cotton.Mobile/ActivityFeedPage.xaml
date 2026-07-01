@@ -90,9 +90,7 @@
                                        Grid.ColumnSpan="2"
                                        Text="{Binding ContentText}"
                                        IsVisible="{Binding IsContentVisible}"
-                                       Style="{StaticResource M3CardSupporting}"
-                                       MaxLines="3"
-                                       LineBreakMode="WordWrap" />
+                                       Style="{StaticResource M3CardSupportingLongWrap}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

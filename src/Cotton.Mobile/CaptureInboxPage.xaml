@@ -122,18 +122,14 @@
                                        Grid.ColumnSpan="2"
                                        Text="{Binding DestinationText}"
                                        IsVisible="{Binding IsDestinationVisible}"
-                                       Style="{StaticResource M3CardSupportingStrong}"
-                                       MaxLines="2"
-                                       LineBreakMode="WordWrap" />
+                                       Style="{StaticResource M3CardSupportingStrongWrap}" />
 
                                 <Label Grid.Row="3"
                                        Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"
-                                       Style="{StaticResource M3ErrorSupporting}"
-                                       MaxLines="2"
-                                       LineBreakMode="WordWrap" />
+                                       Style="{StaticResource M3ErrorSupportingWrap}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

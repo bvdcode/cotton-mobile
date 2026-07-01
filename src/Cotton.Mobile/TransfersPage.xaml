@@ -105,9 +105,7 @@
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"
-                                       Style="{StaticResource M3ErrorSupporting}"
-                                       MaxLines="2"
-                                       LineBreakMode="WordWrap" />
+                                       Style="{StaticResource M3ErrorSupportingWrap}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

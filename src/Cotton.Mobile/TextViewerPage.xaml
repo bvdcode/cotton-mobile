@@ -34,8 +34,7 @@
                     Style="{StaticResource M3TextViewerSurface}">
                 <ScrollView>
                     <Label Text="{Binding Content}"
-                           Style="{StaticResource M3TextViewerContent}"
-                           LineBreakMode="WordWrap" />
+                           Style="{StaticResource M3TextViewerContent}" />
                 </ScrollView>
             </Border>
         </Grid>

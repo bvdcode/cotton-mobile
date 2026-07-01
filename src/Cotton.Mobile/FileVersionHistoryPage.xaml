@@ -99,9 +99,7 @@
                                            Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="2"
-                                           LineBreakMode="WordWrap" />
+                                           Style="{StaticResource M3CardSupportingWrap}" />
 
                                     <Label Grid.Row="2"
                                            Grid.Column="1"

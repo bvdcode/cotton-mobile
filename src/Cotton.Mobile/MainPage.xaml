@@ -324,9 +324,7 @@
                                                Style="{StaticResource M3CardSupportingStrong}" />
 
                                         <Label Text="{Binding Display.FilesNoticeMessage}"
-                                               Style="{StaticResource M3CardSupporting}"
-                                               MaxLines="2"
-                                               LineBreakMode="WordWrap" />
+                                               Style="{StaticResource M3CardSupportingWrap}" />
                                     </VerticalStackLayout>
                                 </Grid>
                             </Border>

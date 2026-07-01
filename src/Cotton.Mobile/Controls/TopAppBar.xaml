@@ -33,8 +33,8 @@
                 <DataTrigger TargetType="controls:IconButton"
                              Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                              Value="True">
-                    <Setter Property="IconColor"
-                            Value="{StaticResource M3DarkOnSurface}" />
+                    <Setter Property="Style"
+                            Value="{StaticResource M3DarkTopAppBarIconButton}" />
                 </DataTrigger>
             </controls:IconButton.Triggers>
         </controls:IconButton>
@@ -68,8 +68,8 @@
                     <DataTrigger TargetType="controls:IconButton"
                                  Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                                  Value="True">
-                        <Setter Property="IconColor"
-                                Value="{StaticResource M3DarkOnSurface}" />
+                        <Setter Property="Style"
+                                Value="{StaticResource M3DarkTopAppBarIconButton}" />
                     </DataTrigger>
                 </controls:IconButton.Triggers>
             </controls:IconButton>
@@ -83,8 +83,8 @@
                     <DataTrigger TargetType="controls:IconButton"
                                  Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                                  Value="True">
-                        <Setter Property="IconColor"
-                                Value="{StaticResource M3DarkOnSurface}" />
+                        <Setter Property="Style"
+                                Value="{StaticResource M3DarkTopAppBarIconButton}" />
                     </DataTrigger>
                 </controls:IconButton.Triggers>
             </controls:IconButton>
@@ -98,8 +98,8 @@
                     <DataTrigger TargetType="controls:IconButton"
                                  Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                                  Value="True">
-                        <Setter Property="IconColor"
-                                Value="{StaticResource M3DarkOnSurface}" />
+                        <Setter Property="Style"
+                                Value="{StaticResource M3DarkTopAppBarIconButton}" />
                     </DataTrigger>
                 </controls:IconButton.Triggers>
             </controls:IconButton>

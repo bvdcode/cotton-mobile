@@ -45,14 +45,23 @@
                     </Grid>
                 </VerticalStackLayout>
 
-                <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"
-                                     Spacing="{StaticResource Space12}">
-                    <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                       HorizontalOptions="Start" />
+                <Border IsVisible="{Binding Display.IsLoadingVisible}"
+                        Style="{StaticResource M3StatusPanel}"
+                        MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
+                        HorizontalOptions="Fill">
+                    <Grid ColumnDefinitions="Auto,*"
+                          Style="{StaticResource M3StatusGrid}">
+                        <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                           Style="{StaticResource M3StatusActivityIndicator}" />
 
-                    <Label Text="{Binding Display.LoadingMessage}"
-                           Style="{StaticResource M3BodyMedium}" />
-                </VerticalStackLayout>
+                        <Label Grid.Column="1"
+                               Text="{Binding Display.LoadingMessage}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalTextAlignment="Center" />
+                    </Grid>
+                </Border>
 
                 <Border IsVisible="{Binding Display.IsSignInVisible}"
                         Style="{StaticResource M3AuthPanel}"
@@ -93,29 +102,32 @@
                 </Border>
 
                 <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                        Style="{StaticResource M3AuthPanel}"
-                        Padding="{StaticResource M3AuthPanelPadding}"
+                        Style="{StaticResource M3StatusPanel}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
-                    <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          Style="{StaticResource M3StatusGrid}">
                         <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                           HorizontalOptions="Start" />
+                                           Style="{StaticResource M3StatusActivityIndicator}" />
 
-                        <VerticalStackLayout Spacing="{StaticResource Space4}">
+                        <VerticalStackLayout Grid.Column="1"
+                                             Style="{StaticResource M3CardTextStack}">
                             <Label Text="Waiting for browser approval"
-                                   Style="{StaticResource M3PanelTitle}" />
+                                   Style="{StaticResource M3CardSupportingStrong}" />
 
                             <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                                   Style="{StaticResource M3BodyMedium}" />
+                                   Style="{StaticResource M3CardSupporting}"
+                                   MaxLines="2"
+                                   LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
 
-                        <controls:IconButton IconData="{x:Static controls:IconPathData.Close}"
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.Close}"
                                              Command="{Binding CancelAuthorizationCommand}"
                                              IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
                                              Style="{StaticResource M3FileChromeIconButton}"
-                                             HorizontalOptions="Start"
                                              SemanticProperties.Description="Cancel browser approval" />
-                    </VerticalStackLayout>
+                    </Grid>
                 </Border>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"

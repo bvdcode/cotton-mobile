@@ -14,13 +14,15 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="ActivityIndicator" x:Key="M3FileStatusActivityIndicator">
+    <Style TargetType="ActivityIndicator" x:Key="M3StatusActivityIndicator">
         <Setter Property="Color" Value="{StaticResource M3Accent}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="WidthRequest" Value="{StaticResource M3FileInlineIconSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileInlineIconSize}" />
     </Style>
+
+    <Style TargetType="ActivityIndicator" x:Key="M3FileStatusActivityIndicator" BasedOn="{StaticResource M3StatusActivityIndicator}" />
 
     <Style TargetType="IndicatorView">
         <Setter Property="IndicatorColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
@@ -86,6 +88,10 @@
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3StatusPanel" BasedOn="{StaticResource M3TonalPanel}">
+        <Setter Property="Padding" Value="{StaticResource M3FileStatusPanelPadding}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3AttentionStatusPanel">
@@ -289,18 +295,18 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
-    <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3TonalPanel}">
-        <Setter Property="Padding" Value="{StaticResource M3FileStatusPanelPadding}" />
-    </Style>
+    <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3StatusPanel}" />
 
     <Style TargetType="Grid" x:Key="M3FileStatusGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusRowHeight}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3FileActionStatusGrid">
+    <Style TargetType="Grid" x:Key="M3StatusGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
     </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileActionStatusGrid" BasedOn="{StaticResource M3StatusGrid}" />
 
     <Style TargetType="controls:IconView" x:Key="M3FileStatusIcon">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />

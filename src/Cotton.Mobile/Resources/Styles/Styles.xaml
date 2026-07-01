@@ -650,6 +650,11 @@
         <Setter Property="ProgressColor" Value="{StaticResource M3Accent}" />
     </Style>
 
+    <Style TargetType="ProgressBar" x:Key="M3LinearProgressBar">
+        <Setter Property="HeightRequest" Value="{StaticResource Space4}" />
+        <Setter Property="ProgressColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
     <Style TargetType="RefreshView">
         <Setter Property="RefreshColor" Value="{StaticResource M3Accent}" />
     </Style>

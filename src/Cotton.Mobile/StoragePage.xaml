@@ -84,8 +84,7 @@
                                  Grid.ColumnSpan="2"
                                  Progress="{Binding CloudQuotaUsageFraction}"
                                  IsVisible="{Binding IsCloudQuotaProgressVisible}"
-                                 HeightRequest="{StaticResource Space4}"
-                                 ProgressColor="{StaticResource M3Accent}" />
+                                 Style="{StaticResource M3LinearProgressBar}" />
                 </Grid>
             </Border>
 
@@ -301,8 +300,7 @@
                                                  Grid.Column="1"
                                                  Grid.ColumnSpan="2"
                                                  Progress="{Binding UsageFraction}"
-                                                 HeightRequest="{StaticResource Space4}"
-                                                 ProgressColor="{StaticResource M3Accent}" />
+                                                 Style="{StaticResource M3LinearProgressBar}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>

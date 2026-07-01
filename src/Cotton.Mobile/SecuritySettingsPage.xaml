@@ -212,15 +212,23 @@
                                          BindableLayout.ItemsSource="{Binding AccountSessions}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonAccountSessionListItem">
-                                <Grid ColumnDefinitions="*,Auto"
+                                <Grid ColumnDefinitions="Auto,*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto"
                                       Style="{StaticResource M3SettingsListItemGrid}">
-                                    <Label Text="{Binding Title}"
+                                    <Border Grid.RowSpan="4"
+                                            Style="{StaticResource M3FileThumbnailSurface}"
+                                            VerticalOptions="Start">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
+                                                           Style="{StaticResource M3SecurityThumbnailIcon}" />
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
-                                    <Border Grid.Column="1"
+                                    <Border Grid.Column="2"
                                             Style="{StaticResource M3NeutralChip}"
                                             HorizontalOptions="End">
                                         <Label Text="{Binding BadgeText}"
@@ -230,6 +238,7 @@
                                     </Border>
 
                                     <Label Grid.Row="1"
+                                           Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupporting}"
@@ -237,6 +246,7 @@
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="2"
+                                           Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding AccessText}"
                                            Style="{StaticResource M3CardSupporting}"
@@ -244,6 +254,7 @@
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Grid.Row="3"
+                                           Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DurationText}"
                                            Style="{StaticResource M3CardSupporting}"

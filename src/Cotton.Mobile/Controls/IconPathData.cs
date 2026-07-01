@@ -29,6 +29,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Delete => Create("M9 3 L15 3 L16 5 L21 5 L21 7 L19 7 L18 21 L6 21 L5 7 L3 7 L3 5 L8 5 Z M7 7 L8 19 L16 19 L17 7 Z M10 9 L12 9 L12 17 L10 17 Z M14 9 L16 9 L16 17 L14 17 Z");
 
+        public static Geometry Device => Create("M7 2 L17 2 C18.1 2 19 2.9 19 4 L19 20 C19 21.1 18.1 22 17 22 L7 22 C5.9 22 5 21.1 5 20 L5 4 C5 2.9 5.9 2 7 2 Z M7 4 L7 18 L17 18 L17 4 Z M10 20 L14 20 L14 19 L10 19 Z");
+
         public static Geometry Download => Create("M11 4 L13 4 L13 13 L16.5 9.5 L18 11 L12 17 L6 11 L7.5 9.5 L11 13 Z M5 19 L19 19 L19 21 L5 21 Z");
 
         public static Geometry Edit => Create("M5 17.2 L5 20 L7.8 20 L17.1 10.7 L14.3 7.9 Z M18.3 9.5 L19.7 8.1 C20.1 7.7 20.1 7.1 19.7 6.7 L18.3 5.3 C17.9 4.9 17.3 4.9 16.9 5.3 L15.5 6.7 Z");

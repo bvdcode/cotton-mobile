@@ -50,10 +50,7 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
                         <Grid Padding="{StaticResource M3PdfPagePadding}">
-                            <Border Stroke="{StaticResource M3DarkOutline}"
-                                    StrokeThickness="1"
-                                    BackgroundColor="{StaticResource M3DocumentSurface}"
-                                    HorizontalOptions="Fill">
+                            <Border Style="{StaticResource M3PdfPageSurface}">
                                 <Image Source="{Binding ImageSource}"
                                        Aspect="AspectFit"
                                        HeightRequest="{Binding DisplayHeight}"
@@ -68,11 +65,20 @@
             <Grid Grid.Row="1"
                   IsVisible="{Binding IsEmptyVisible}"
                   Padding="{StaticResource M3PdfEmptyPadding}">
-                <Label Text="{Binding EmptyText}"
-                       Style="{StaticResource M3DarkBodyMedium}"
-                       HorizontalTextAlignment="Center"
-                       HorizontalOptions="Center"
-                       VerticalOptions="Center" />
+                <Border Style="{StaticResource M3ViewerEmptyStateCard}"
+                        HorizontalOptions="Fill"
+                        VerticalOptions="Center">
+                    <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
+                        <Border Style="{StaticResource M3ViewerEmptyStateIconFrame}">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.File}"
+                                               Style="{StaticResource M3EmptyStateIcon}" />
+                        </Border>
+
+                        <Label Text="{Binding EmptyText}"
+                               Style="{StaticResource M3DarkEmptyTitle}"
+                               HorizontalTextAlignment="Center" />
+                    </VerticalStackLayout>
+                </Border>
             </Grid>
         </Grid>
     </Grid>

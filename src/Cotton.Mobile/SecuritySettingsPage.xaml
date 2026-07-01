@@ -61,8 +61,7 @@
                                            HorizontalOptions="End"
                                            VerticalOptions="Center"
                                            IsEnabled="{Binding CanToggleAppLock}"
-                                           IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}"
-                                           Style="{StaticResource M3Switch}" />
+                                           IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
                 </Grid>
             </Border>
 
@@ -322,8 +321,7 @@
                                            HorizontalOptions="End"
                                            VerticalOptions="Center"
                                            IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
-                                           IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}"
-                                           Style="{StaticResource M3Switch}" />
+                                           IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
                 </Grid>
             </Border>
         </VerticalStackLayout>

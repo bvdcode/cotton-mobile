@@ -578,6 +578,10 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3FileBrowserTopBarIconButton" BasedOn="{StaticResource M3TopAppBarIconButton}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3FileChromeIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileActionIconSize}" />

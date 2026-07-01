@@ -131,7 +131,7 @@
                                   Style="{StaticResource M3FileBrowserTopBar}">
                                 <controls:IconButton Grid.Column="0"
                                                      IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                     Style="{StaticResource M3FileChromeIconButton}"
+                                                     Style="{StaticResource M3FileBrowserTopBarIconButton}"
                                                      Command="{Binding NavigateFilesUpCommand}"
                                                      IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
                                                      IsVisible="{Binding Display.IsFileUpButtonVisible}"
@@ -161,7 +161,7 @@
                                 <HorizontalStackLayout Grid.Column="2"
                                                        Style="{StaticResource M3FileBrowserActionCluster}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
                                                          Command="{Binding ToggleFileSearchCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
@@ -176,14 +176,14 @@
                                     </controls:IconButton>
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Sort}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
                                                          Command="{Binding ShowFileSortActionsCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          IsVisible="{Binding Display.IsFileSortButtonVisible}"
                                                          SemanticProperties.Description="Sort files" />
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
                                                          Command="{Binding ShowFileViewActionsCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          IsVisible="{Binding Display.IsFileViewButtonVisible}"

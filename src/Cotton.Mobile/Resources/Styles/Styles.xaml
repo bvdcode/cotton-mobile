@@ -282,6 +282,14 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3FileListThumbnailSurface" BasedOn="{StaticResource M3FileThumbnailSurface}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3MetadataFileThumbnailSurface" BasedOn="{StaticResource M3FileThumbnailSurface}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FilePreviewSurface">
         <Setter Property="HorizontalOptions" Value="Fill" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />

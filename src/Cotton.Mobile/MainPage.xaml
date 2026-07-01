@@ -460,8 +460,7 @@
                                                     IsVisible="{Binding IsSelected}"
                                                     Style="{StaticResource M3FileSelectionRowOverlay}" />
 
-                                            <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                                    VerticalOptions="Center">
+                                            <Border Style="{StaticResource M3FileListThumbnailSurface}">
                                                 <Grid>
                                                     <Image Source="{Binding Thumbnail.Source}"
                                                            Aspect="AspectFill"

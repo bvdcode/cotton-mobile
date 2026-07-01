@@ -185,8 +185,7 @@
                                   ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3MetadataCardGrid}">
                                 <Border Grid.RowSpan="2"
-                                        Style="{StaticResource M3FileThumbnailSurface}"
-                                        VerticalOptions="Start">
+                                        Style="{StaticResource M3MetadataFileThumbnailSurface}">
                                     <Grid>
                                         <Image Source="{Binding Thumbnail.Source}"
                                                Aspect="AspectFill"

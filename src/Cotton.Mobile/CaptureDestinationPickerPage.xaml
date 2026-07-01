@@ -46,11 +46,11 @@
 
             <Grid ColumnDefinitions="Auto,*"
                   ColumnSpacing="{StaticResource Space12}">
-                <Button Text="Up"
-                        Command="{Binding UpCommand}"
-                        Style="{StaticResource FileChromeButton}"
-                        MinimumWidthRequest="78"
-                        VerticalOptions="Center" />
+                <controls:IconButton IconData="{x:Static controls:IconPathData.ArrowUp}"
+                                     Command="{Binding UpCommand}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Up" />
 
                 <Button Grid.Column="1"
                         Text="Choose this folder"

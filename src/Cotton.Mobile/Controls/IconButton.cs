@@ -18,29 +18,29 @@ namespace Cotton.Mobile.Controls
             nameof(IconColor),
             typeof(Color),
             typeof(IconButton),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
 
         public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(ButtonBackgroundColor),
             typeof(Color),
             typeof(IconButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
             typeof(IconButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
             typeof(IconButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),

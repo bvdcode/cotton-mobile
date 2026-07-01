@@ -19,8 +19,8 @@ namespace Cotton.Mobile.Controls
             nameof(IconColor),
             typeof(Color),
             typeof(IconView),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
 
         public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
             nameof(IconSize),

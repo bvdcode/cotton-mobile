@@ -18,22 +18,22 @@ namespace Cotton.Mobile.Controls
             nameof(IconColor),
             typeof(Color),
             typeof(IconFrame),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty FrameBackgroundColorProperty = BindableProperty.Create(
             nameof(FrameBackgroundColor),
             typeof(Color),
             typeof(IconFrame),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
             typeof(IconFrame),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),

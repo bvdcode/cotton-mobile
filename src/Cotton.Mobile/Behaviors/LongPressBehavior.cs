@@ -286,7 +286,13 @@ namespace Cotton.Mobile.Behaviors
                 return;
             }
 
-            _isLongPressHandled = TryExecute(Command, CommandParameter);
+            bool didExecute = TryExecute(Command, CommandParameter);
+            if (didExecute)
+            {
+                _platformView?.PerformHapticFeedback(Android.Views.FeedbackConstants.LongPress);
+            }
+
+            _isLongPressHandled = didExecute;
         }
 
         private void CancelLongPress()

@@ -10,6 +10,10 @@ namespace Cotton.Mobile.Tests
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
+        private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
+        private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
+        private const string TransfersPagePath = "src/Cotton.Mobile/TransfersPage.xaml";
+        private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -47,12 +51,18 @@ namespace Cotton.Mobile.Tests
             Assert.True(GetDoubleResource(spacing, "M3FileSkeletonSecondaryLineHeight") > 0);
             Assert.True(GetDoubleResource(spacing, "M3FileSkeletonPrimaryLineWidth") > 0);
             Assert.True(GetDoubleResource(spacing, "M3FileSkeletonSecondaryLineWidth") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3MetadataSkeletonChipWidth") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3MetadataSkeletonChipHeight") > 0);
+            Assert.True(GetDoubleResource(spacing, "M3MetadataSkeletonBodyLineWidth") > 0);
             Assert.True(GetDoubleResource(interaction, "M3SkeletonIdleOpacity") < 1);
             Assert.True(GetDoubleResource(interaction, "M3SkeletonPulseOpacity") > GetDoubleResource(interaction, "M3SkeletonIdleOpacity"));
             Assert.True(GetIntResource(interaction, "M3MotionSkeletonPulseDuration") >= 1000);
 
             IReadOnlyDictionary<string, string> skeletonSetters = GetStyleSetters(styles, "M3SkeletonBlock");
             IReadOnlyDictionary<string, string> listSetters = GetStyleSetters(styles, "M3FileListSkeletonView");
+            IReadOnlyDictionary<string, string> metadataListSetters = GetStyleSetters(styles, "M3MetadataListSkeletonView");
+            IReadOnlyDictionary<string, string> metadataGridSetters = GetStyleSetters(styles, "M3MetadataSkeletonGrid");
+            IReadOnlyDictionary<string, string> metadataChipSetters = GetStyleSetters(styles, "M3MetadataSkeletonChipBlock");
             IReadOnlyDictionary<string, string> rowSetters = GetStyleSetters(styles, "M3FileSkeletonRowGrid");
 
             Assert.Equal("{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}", skeletonSetters["BackgroundColor"]);
@@ -61,6 +71,12 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("{StaticResource M3MotionSkeletonPulseDuration}", skeletonSetters["PulseDuration"]);
             Assert.Equal("{StaticResource SpaceNone}", listSetters["Spacing"]);
             Assert.Equal("True", listSetters["InputTransparent"]);
+            Assert.Equal("{StaticResource M3CardListItemSpacing}", metadataListSetters["Spacing"]);
+            Assert.Equal("True", metadataListSetters["InputTransparent"]);
+            Assert.Equal("{StaticResource Space8}", metadataGridSetters["RowSpacing"]);
+            Assert.Equal("{StaticResource Space12}", metadataGridSetters["ColumnSpacing"]);
+            Assert.Equal("{StaticResource M3MetadataSkeletonChipWidth}", metadataChipSetters["WidthRequest"]);
+            Assert.Equal("{StaticResource M3MetadataSkeletonChipHeight}", metadataChipSetters["HeightRequest"]);
             Assert.Equal("{StaticResource M3FileRowPadding}", rowSetters["Padding"]);
             Assert.Equal("{StaticResource M3FileRowHeight}", rowSetters["HeightRequest"]);
             Assert.Equal("{StaticResource Space12}", rowSetters["ColumnSpacing"]);
@@ -75,6 +91,31 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3FileSkeletonRowGrid", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileSkeletonPrimaryLineBlock", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileSkeletonSecondaryLineBlock", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Secondary_list_screens_use_initial_loading_skeletons()
+        {
+            string[] screenPaths =
+            [
+                RecentFilesPagePath,
+                ActivityFeedPagePath,
+                TransfersPagePath,
+                FileVersionHistoryPagePath,
+            ];
+
+            foreach (string screenPath in screenPaths)
+            {
+                string page = LoadText(screenPath);
+
+                Assert.Contains("<controls:MetadataListSkeletonView", page, StringComparison.Ordinal);
+                Assert.Contains("IsLoadingPlaceholderVisible", page, StringComparison.Ordinal);
+                Assert.Contains("M3MetadataListSkeletonView", page, StringComparison.Ordinal);
+            }
+
+            string recentFilesPage = LoadText(RecentFilesPagePath);
+
+            Assert.Contains("IsBodyLineVisible=\"False\"", recentFilesPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

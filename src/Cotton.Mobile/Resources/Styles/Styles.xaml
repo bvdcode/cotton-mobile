@@ -643,13 +643,13 @@
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
 
-    <Style TargetType="VerticalStackLayout" x:Key="M3FileSkeletonListStack">
+    <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
         <Setter Property="InputTransparent" Value="True" />
     </Style>
 
-    <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
-        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
+    <Style TargetType="controls:MetadataListSkeletonView" x:Key="M3MetadataListSkeletonView">
+        <Setter Property="Spacing" Value="{StaticResource M3CardListItemSpacing}" />
         <Setter Property="InputTransparent" Value="True" />
     </Style>
 
@@ -696,6 +696,43 @@
                 <RoundRectangle CornerRadius="{StaticResource ShapeExtraLarge}" />
             </Setter.Value>
         </Setter>
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3MetadataSkeletonCard" BasedOn="{StaticResource M3ContentCard}" />
+
+    <Style TargetType="Grid" x:Key="M3MetadataSkeletonGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space8}" />
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3MetadataSkeletonTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonThumbnailBlock" BasedOn="{StaticResource M3FileSkeletonThumbnailBlock}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonPrimaryLineBlock" BasedOn="{StaticResource M3FileSkeletonPrimaryLineBlock}" />
+
+    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonSecondaryLineBlock" BasedOn="{StaticResource M3FileSkeletonSecondaryLineBlock}" />
+
+    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonChipBlock" BasedOn="{StaticResource M3SkeletonBlock}">
+        <Setter Property="WidthRequest" Value="{StaticResource M3MetadataSkeletonChipWidth}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3MetadataSkeletonChipHeight}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonBodyLineBlock" BasedOn="{StaticResource M3SkeletonBlock}">
+        <Setter Property="WidthRequest" Value="{StaticResource M3MetadataSkeletonBodyLineWidth}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileSkeletonSecondaryLineHeight}" />
+        <Setter Property="HorizontalOptions" Value="Start" />
     </Style>
 
     <LinearItemsLayout x:Key="M3VerticalCardListItemsLayout"

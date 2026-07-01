@@ -43,6 +43,9 @@
                Style="{StaticResource M3ScreenStatus}" />
 
             <Grid Grid.Row="2">
+                <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
+                                                   Style="{StaticResource M3MetadataListSkeletonView}" />
+
                 <Border IsVisible="{Binding IsEmpty}"
                         Style="{StaticResource M3EmptyStateCard}">
                     <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">

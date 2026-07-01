@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly ICottonFileVersionHistoryService _versionHistoryService;
         private readonly INetworkAccessService _networkAccess;
         private readonly ILogger<FileVersionHistoryViewModel> _logger;
+        private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
         private string _summaryText;
         private string _emptyMessage = "No versions found.";
@@ -60,6 +61,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     LoadCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 }
             }
         }
@@ -98,6 +100,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
+
         public bool IsListVisible => Items.Count > 0;
 
         private async Task LoadAsync()
@@ -107,6 +111,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isLoadingPlaceholderEnabled = Items.Count == 0;
             IsBusy = true;
             Status = CottonFileVersionStatusText.CreateLoadingStatus(_file.Name);
             try
@@ -139,7 +144,9 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
             }
         }
@@ -158,6 +165,7 @@ namespace Cotton.Mobile.ViewModels
                 ? string.Empty
                 : "Refresh after this file changes.";
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
         }
 
@@ -169,6 +177,7 @@ namespace Cotton.Mobile.ViewModels
             EmptyDetails = "Connect and refresh to view versions.";
             Status = CottonFileVersionStatusText.OfflineUnavailableStatus;
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
         }
 

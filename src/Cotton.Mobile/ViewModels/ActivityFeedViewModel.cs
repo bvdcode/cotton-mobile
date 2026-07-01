@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly Uri _instanceUri;
         private readonly ICottonActivityFeedService _activityFeedService;
         private readonly ILogger<ActivityFeedViewModel> _logger;
+        private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
         private CottonActivityFeedPagingState _pagingState = CottonActivityFeedPagingState.Empty;
         private string _summaryText = "0 items";
@@ -54,6 +55,7 @@ namespace Cotton.Mobile.ViewModels
                     LoadCommand.RaiseCanExecuteChanged();
                     LoadMoreCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 }
             }
         }
@@ -92,6 +94,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
+
         public bool IsListVisible => Items.Count > 0;
 
         public bool IsLoadMoreVisible => Items.Count > 0 && _pagingState.MayHaveMore;
@@ -103,6 +107,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isLoadingPlaceholderEnabled = Items.Count == 0;
             IsBusy = true;
             try
             {
@@ -121,7 +126,9 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
                 OnPropertyChanged(nameof(IsLoadMoreVisible));
             }
@@ -153,6 +160,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
                 OnPropertyChanged(nameof(IsLoadMoreVisible));
             }
@@ -173,6 +181,7 @@ namespace Cotton.Mobile.ViewModels
             EmptyMessage = snapshot.EmptyMessage;
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
         }
 

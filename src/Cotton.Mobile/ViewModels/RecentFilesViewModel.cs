@@ -17,6 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IFileInteractionService _fileInteractionService;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<RecentFilesViewModel> _logger;
+        private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
         private string _summaryText = "No recent files";
         private string _emptyMessage = "No recent files yet";
@@ -84,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
                     OpenRecentFileCommand.RaiseCanExecuteChanged();
                     RemoveRecentFileCommand.RaiseCanExecuteChanged();
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                     OnPropertyChanged(nameof(CanClearRecentFiles));
                 }
             }
@@ -123,6 +125,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
+
         public bool IsListVisible => Items.Count > 0;
 
         public bool CanClearRecentFiles => Items.Count > 0 && !IsBusy;
@@ -134,6 +138,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isLoadingPlaceholderEnabled = Items.Count == 0;
             IsBusy = true;
             try
             {
@@ -150,7 +155,9 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
             }
         }
@@ -188,6 +195,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
                 OnPropertyChanged(nameof(CanClearRecentFiles));
             }
@@ -241,6 +249,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
                 OnPropertyChanged(nameof(CanClearRecentFiles));
             }
@@ -273,6 +282,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 IsBusy = false;
                 OnPropertyChanged(nameof(IsEmpty));
+                OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                 OnPropertyChanged(nameof(IsListVisible));
                 OnPropertyChanged(nameof(CanClearRecentFiles));
             }
@@ -302,6 +312,7 @@ namespace Cotton.Mobile.ViewModels
             EmptyMessage = snapshot.EmptyMessage;
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanClearRecentFiles));
             ClearRecentFilesCommand.RaiseCanExecuteChanged();

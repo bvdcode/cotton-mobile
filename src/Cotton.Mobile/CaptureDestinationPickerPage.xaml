@@ -44,37 +44,49 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Grid ColumnDefinitions="Auto,*"
-                  ColumnSpacing="{StaticResource Space12}">
-                <controls:IconButton IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                     Command="{Binding UpCommand}"
-                                     Style="{StaticResource M3FileChromeIconButton}"
-                                     VerticalOptions="Center"
-                                     SemanticProperties.Description="Up" />
+            <Border Style="{StaticResource M3ContentCard}">
+                <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Center">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                           Style="{StaticResource M3FolderThumbnailIcon}" />
+                    </Border>
 
-                <Button Grid.Column="1"
-                        Text="Choose this folder"
-                        Command="{Binding ChooseCommand}"
-                        Style="{StaticResource M3PrimaryButton}"
-                        VerticalOptions="Center" />
-            </Grid>
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="Current folder"
+                               Style="{StaticResource M3CardTitle}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
 
-            <Label Text="{Binding SummaryText}"
-                   Style="{StaticResource M3BodyMedium}"
-                   MaxLines="1"
-                   LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding SummaryText}"
+                               Style="{StaticResource M3CardSupporting}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.ArrowUp}"
+                                         Command="{Binding UpCommand}"
+                                         Style="{StaticResource M3FileChromeIconButton}"
+                                         VerticalOptions="Center"
+                                         SemanticProperties.Description="Go to parent folder" />
+
+                    <controls:IconButton Grid.Column="3"
+                                         IconData="{x:Static controls:IconPathData.Check}"
+                                         Command="{Binding ChooseCommand}"
+                                         Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                         VerticalOptions="Center"
+                                         SemanticProperties.Description="Choose current folder" />
+                </Grid>
+            </Border>
 
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3EmptyStateCard}">
                 <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                    <Label Text="No folders here"
+                    <Label Text="No subfolders here"
                            Style="{StaticResource M3EmptyTitle}"
-                           HorizontalTextAlignment="Center" />
-
-                    <Label Text="Choose this folder or go back."
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="WordWrap"
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
             </Border>
@@ -90,7 +102,7 @@
                             </Border.GestureRecognizers>
 
                             <Grid ColumnDefinitions="Auto,*,Auto"
-                                  ColumnSpacing="{StaticResource Space12}">
+                                  Style="{StaticResource M3SettingsListItemGrid}">
                                 <Border Style="{StaticResource M3FileThumbnailSurface}"
                                         VerticalOptions="Center">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"

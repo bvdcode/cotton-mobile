@@ -519,6 +519,13 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3PrimaryFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
+        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3DestructiveFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>

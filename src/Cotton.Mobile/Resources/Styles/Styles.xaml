@@ -365,20 +365,6 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
     </Style>
 
-    <Style TargetType="Button" x:Key="FloatingActionButton">
-        <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="FontSize" Value="24" />
-        <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="{StaticResource M3FloatingActionButtonCornerRadius}" />
-        <Setter Property="Padding" Value="0" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
-        <Setter Property="WidthRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
-        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
-        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3FloatingActionButtonSize}" />
-    </Style>
-
     <Style TargetType="Button" x:Key="FooterLinkButton">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />

@@ -35,6 +35,43 @@ namespace Cotton.Mobile.Services
                 translationY: 0);
         }
 
+        public static CottonImageViewerTransform CreateDoubleTapTransform(
+            double currentScale,
+            double imageWidth,
+            double imageHeight,
+            double surfaceWidth,
+            double surfaceHeight,
+            double tapX,
+            double tapY)
+        {
+            if (currentScale > MinimumScale)
+            {
+                return Reset();
+            }
+
+            if (imageWidth <= 0 || imageHeight <= 0 || surfaceWidth <= 0 || surfaceHeight <= 0)
+            {
+                return CreateDoubleTapTransform(currentScale);
+            }
+
+            double targetScale = DoubleTapScale;
+            double centerX = imageWidth / 2d;
+            double centerY = imageHeight / 2d;
+            double boundedTapX = Math.Clamp(tapX, 0, imageWidth);
+            double boundedTapY = Math.Clamp(tapY, 0, imageHeight);
+            double translationX = -(boundedTapX - centerX) * (targetScale - MinimumScale);
+            double translationY = -(boundedTapY - centerY) * (targetScale - MinimumScale);
+
+            return ClampTranslation(
+                imageWidth,
+                imageHeight,
+                surfaceWidth,
+                surfaceHeight,
+                targetScale,
+                translationX,
+                translationY);
+        }
+
         public static CottonImageViewerTransform ClampTranslation(
             double imageWidth,
             double imageHeight,

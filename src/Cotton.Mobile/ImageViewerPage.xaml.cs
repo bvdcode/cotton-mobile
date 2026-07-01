@@ -90,8 +90,21 @@ namespace Cotton.Mobile
 
         private void OnImageDoubleTapped(object? sender, TappedEventArgs e)
         {
+            Point? tapPosition = e.GetPosition(PreviewImage);
+            if (tapPosition is not Point point)
+            {
+                return;
+            }
+
             ApplyImageTransform(
-                CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(PreviewImage.Scale));
+                CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(
+                    PreviewImage.Scale,
+                    PreviewImage.Width,
+                    PreviewImage.Height,
+                    ImageSurface.Width,
+                    ImageSurface.Height,
+                    point.X,
+                    point.Y));
         }
 
         private void ResetImageTransform()

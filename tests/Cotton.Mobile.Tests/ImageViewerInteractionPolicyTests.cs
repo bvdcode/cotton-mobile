@@ -26,10 +26,64 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Double_tap_zooms_toward_tapped_image_region()
+        {
+            CottonImageViewerTransform transform =
+                CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(
+                    currentScale: 1,
+                    imageWidth: 400,
+                    imageHeight: 300,
+                    surfaceWidth: 400,
+                    surfaceHeight: 300,
+                    tapX: 300,
+                    tapY: 225);
+
+            Assert.Equal(2, transform.Scale);
+            Assert.Equal(-100, transform.TranslationX);
+            Assert.Equal(-75, transform.TranslationY);
+        }
+
+        [Fact]
+        public void Double_tap_translation_stays_inside_zoomed_surface_bounds()
+        {
+            CottonImageViewerTransform transform =
+                CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(
+                    currentScale: 1,
+                    imageWidth: 400,
+                    imageHeight: 300,
+                    surfaceWidth: 240,
+                    surfaceHeight: 180,
+                    tapX: 400,
+                    tapY: 300);
+
+            Assert.Equal(2, transform.Scale);
+            Assert.Equal(-200, transform.TranslationX);
+            Assert.Equal(-150, transform.TranslationY);
+        }
+
+        [Fact]
         public void Double_tap_resets_from_zoomed_scale()
         {
             CottonImageViewerTransform transform =
                 CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(2);
+
+            Assert.Equal(1, transform.Scale);
+            Assert.Equal(0, transform.TranslationX);
+            Assert.Equal(0, transform.TranslationY);
+        }
+
+        [Fact]
+        public void Positioned_double_tap_resets_from_zoomed_scale()
+        {
+            CottonImageViewerTransform transform =
+                CottonImageViewerInteractionPolicy.CreateDoubleTapTransform(
+                    currentScale: 2,
+                    imageWidth: 400,
+                    imageHeight: 300,
+                    surfaceWidth: 400,
+                    surfaceHeight: 300,
+                    tapX: 300,
+                    tapY: 225);
 
             Assert.Equal(1, transform.Scale);
             Assert.Equal(0, transform.TranslationX);

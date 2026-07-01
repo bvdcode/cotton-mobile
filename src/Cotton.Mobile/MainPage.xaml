@@ -209,10 +209,6 @@
                                     </DataTrigger>
                                 </Border.Triggers>
 
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding OpenTransfersCommand}" />
-                                </Border.GestureRecognizers>
-
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
@@ -251,16 +247,21 @@
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
                                            VerticalTextAlignment="Center" />
+
+                                    <Grid Grid.ColumnSpan="3"
+                                          Style="{StaticResource M3ListItemTouchSurface}">
+                                        <Grid.Behaviors>
+                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenTransfersCommand}"
+                                                                         RestingBackgroundColor="{StaticResource M3Transparent}"
+                                                                         PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                        </Grid.Behaviors>
+                                    </Grid>
                                 </Grid>
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
                                     Style="{StaticResource M3FileStatusPanel}"
                                     SemanticProperties.Description="{Binding Display.BackupActivityIndicator.AccessibilityText}">
-                                <Border.GestureRecognizers>
-                                    <TapGestureRecognizer Command="{Binding OpenBackupSetupCommand}" />
-                                </Border.GestureRecognizers>
-
                                 <Grid ColumnDefinitions="Auto,*,*"
                                       Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
@@ -279,6 +280,15 @@
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation"
                                            VerticalTextAlignment="Center" />
+
+                                    <Grid Grid.ColumnSpan="3"
+                                          Style="{StaticResource M3ListItemTouchSurface}">
+                                        <Grid.Behaviors>
+                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenBackupSetupCommand}"
+                                                                         RestingBackgroundColor="{StaticResource M3Transparent}"
+                                                                         PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                        </Grid.Behaviors>
+                                    </Grid>
                                 </Grid>
                             </Border>
 

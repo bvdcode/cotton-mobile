@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.BackupSetupPage"
@@ -55,12 +56,6 @@
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
-                    <controls:IconButton Grid.Column="2"
-                                         IconData="{x:Static controls:IconPathData.Folder}"
-                                         Command="{Binding ChooseDestinationCommand}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         SemanticProperties.Description="Choose backup destination" />
-
                     <VerticalStackLayout Grid.Row="1"
                                          Grid.Column="1"
                                          Grid.ColumnSpan="2"
@@ -74,6 +69,20 @@
                         <Label Text="{Binding DestinationStorageEstimateText}"
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
+
+                    <Grid Grid.RowSpan="2"
+                          Grid.ColumnSpan="3"
+                          Style="{StaticResource M3ListItemTouchSurface}">
+                        <Grid.Behaviors>
+                            <behaviors:LongPressBehavior TapCommand="{Binding ChooseDestinationCommand}" />
+                        </Grid.Behaviors>
+                    </Grid>
+
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.Folder}"
+                                         Command="{Binding ChooseDestinationCommand}"
+                                         Style="{StaticResource M3FileChromeIconButton}"
+                                         SemanticProperties.Description="Choose backup destination" />
                 </Grid>
             </Border>
 
@@ -111,6 +120,13 @@
                                Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
 
+                        <Grid Grid.ColumnSpan="2"
+                              Style="{StaticResource M3ListItemTouchSurface}">
+                            <Grid.Behaviors>
+                                <behaviors:LongPressBehavior TapCommand="{Binding MediaAccessActionCommand}" />
+                            </Grid.Behaviors>
+                        </Grid>
+
                         <controls:IconButton Grid.Column="1"
                                              IconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding MediaAccessActionCommand}"
@@ -138,6 +154,13 @@
                         <Label Text="{Binding HealthStatusText}"
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
+
+                    <Grid Grid.ColumnSpan="3"
+                          Style="{StaticResource M3ListItemTouchSurface}">
+                        <Grid.Behaviors>
+                            <behaviors:LongPressBehavior TapCommand="{Binding QueueNowCommand}" />
+                        </Grid.Behaviors>
+                    </Grid>
 
                     <controls:IconButton Grid.Column="2"
                                          IconData="{x:Static controls:IconPathData.Play}"

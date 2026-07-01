@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly Func<CottonUploadDestinationSnapshot, string> _successStatusFactory;
         private readonly List<CottonFolderHandle> _path = [];
 
+        private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
         private string _currentFolderName = "Files";
         private string _pathText = "Files";
@@ -84,6 +85,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                     LoadCommand.RaiseCanExecuteChanged();
                     UpCommand.RaiseCanExecuteChanged();
                     ChooseCommand.RaiseCanExecuteChanged();
@@ -141,6 +143,8 @@ namespace Cotton.Mobile.ViewModels
         public bool CanNavigateUp => _path.Count > 1;
 
         public bool IsEmpty => Folders.Count == 0 && !IsBusy;
+
+        public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Folders.Count == 0;
 
         public bool IsListVisible => Folders.Count > 0;
 
@@ -202,6 +206,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isLoadingPlaceholderEnabled = Folders.Count == 0;
             IsBusy = true;
             try
             {
@@ -221,12 +226,14 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 RaiseFolderStateChanged();
             }
         }
 
         private async Task LoadFolderAsync(CottonFolderHandle folder, bool preserveExistingPath)
         {
+            _isLoadingPlaceholderEnabled = Folders.Count == 0;
             IsBusy = true;
             try
             {
@@ -253,6 +260,7 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 RaiseFolderStateChanged();
             }
         }
@@ -340,6 +348,7 @@ namespace Cotton.Mobile.ViewModels
         private void RaiseFolderStateChanged()
         {
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanNavigateUp));
             UpCommand.RaiseCanExecuteChanged();

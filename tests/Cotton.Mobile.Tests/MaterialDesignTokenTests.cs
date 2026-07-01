@@ -14,6 +14,8 @@ namespace Cotton.Mobile.Tests
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
         private const string TransfersPagePath = "src/Cotton.Mobile/TransfersPage.xaml";
         private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
+        private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
+        private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -102,6 +104,7 @@ namespace Cotton.Mobile.Tests
                 ActivityFeedPagePath,
                 TransfersPagePath,
                 FileVersionHistoryPagePath,
+                CaptureInboxPagePath,
             ];
 
             foreach (string screenPath in screenPaths)
@@ -116,6 +119,16 @@ namespace Cotton.Mobile.Tests
             string recentFilesPage = LoadText(RecentFilesPagePath);
 
             Assert.Contains("IsBodyLineVisible=\"False\"", recentFilesPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Folder_picker_screens_use_file_loading_skeletons()
+        {
+            string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+
+            Assert.Contains("<controls:FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("IsLoadingPlaceholderVisible", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("M3FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

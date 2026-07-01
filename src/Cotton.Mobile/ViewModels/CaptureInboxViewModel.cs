@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<CaptureInboxViewModel> _logger;
 
+        private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
         private string _summaryText = "0 captured items";
         private string _emptyMessage = "No captured items";
@@ -85,6 +86,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     OnPropertyChanged(nameof(IsEmpty));
+                    OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
                     LoadCommand.RaiseCanExecuteChanged();
                     DestinationCommand.RaiseCanExecuteChanged();
                     RenameCommand.RaiseCanExecuteChanged();
@@ -128,6 +130,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
+
         public bool IsListVisible => Items.Count > 0;
 
         public bool CanChooseDestination => Items.Any(item => item.CanSelectDestination);
@@ -145,6 +149,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            _isLoadingPlaceholderEnabled = Items.Count == 0;
             IsBusy = true;
             try
             {
@@ -160,6 +165,7 @@ namespace Cotton.Mobile.ViewModels
             finally
             {
                 IsBusy = false;
+                _isLoadingPlaceholderEnabled = false;
                 RaiseListStateChanged();
             }
         }
@@ -406,6 +412,7 @@ namespace Cotton.Mobile.ViewModels
         private void RaiseListStateChanged()
         {
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanChooseDestination));
             OnPropertyChanged(nameof(CanRenameCapturedFiles));

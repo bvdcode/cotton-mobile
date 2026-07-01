@@ -67,6 +67,9 @@
                 </Grid>
             </Border>
 
+            <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
+                                           Style="{StaticResource M3FileListSkeletonView}" />
+
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3EmptyStateCard}">
                 <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">

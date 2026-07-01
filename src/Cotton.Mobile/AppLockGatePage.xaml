@@ -8,8 +8,8 @@
              Shell.NavBarIsVisible="False"
              Title="Cotton locked">
 
-    <Grid Padding="{StaticResource M3AppLockGatePadding}"
-          RowDefinitions="*,Auto,*">
+    <Grid RowDefinitions="*,Auto,*"
+          Style="{StaticResource M3AppLockGateGrid}">
         <Border Grid.Row="1"
                 Style="{StaticResource M3AppLockCard}">
             <VerticalStackLayout Style="{StaticResource M3AppLockContentStack}">
@@ -33,8 +33,7 @@
                 <controls:FilledButton Text="{Binding UnlockActionText}"
                                        Command="{Binding UnlockCommand}"
                                        IsEnabled="{Binding CanUnlock}"
-                                       Style="{StaticResource M3FullWidthFilledButton}"
-                                       Margin="{StaticResource M3PanelActionTopMargin}" />
+                                       Style="{StaticResource M3PanelActionFilledButton}" />
             </VerticalStackLayout>
         </Border>
     </Grid>

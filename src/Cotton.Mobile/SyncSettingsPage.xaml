@@ -57,8 +57,7 @@
                            Style="{StaticResource M3EmptyBody}" />
 
                     <Grid ColumnDefinitions="Auto,Auto"
-                          Style="{StaticResource M3ActionListItemGrid}"
-                          Margin="{StaticResource M3PanelActionTopMargin}">
+                          Style="{StaticResource M3PanelActionListItemGrid}">
                         <Label Text="Choose folder"
                                Style="{StaticResource M3ActionListItemLabel}" />
 
@@ -133,8 +132,7 @@
                                 <HorizontalStackLayout Grid.Row="3"
                                                        Grid.Column="1"
                                                        Grid.ColumnSpan="2"
-                                                       Margin="{StaticResource M3PanelActionTopMargin}"
-                                                       Style="{StaticResource M3RowActionCluster}">
+                                                       Style="{StaticResource M3PanelActionCluster}">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
                                                          Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
                                                          CommandParameter="{Binding .}"

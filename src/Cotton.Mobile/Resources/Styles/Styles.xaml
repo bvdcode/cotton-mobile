@@ -220,6 +220,10 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3AppLockGateGrid">
+        <Setter Property="Padding" Value="{StaticResource M3AppLockGatePadding}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3AppLockCard" BasedOn="{StaticResource M3EmptyStateCard}">
         <Setter Property="MaximumWidthRequest" Value="{StaticResource M3AuthPanelMaxWidth}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
@@ -575,6 +579,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="HorizontalStackLayout" x:Key="M3PanelActionCluster" BasedOn="{StaticResource M3RowActionCluster}">
+        <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3FileListStack">
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
@@ -757,6 +765,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3PanelActionListItemGrid" BasedOn="{StaticResource M3ActionListItemGrid}">
+        <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3ActionListItemLabel" BasedOn="{StaticResource M3CardSupportingStrongLine}">
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
@@ -882,6 +894,10 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3FilledButtonHeight}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FilledButtonHeight}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="controls:FilledButton" x:Key="M3PanelActionFilledButton" BasedOn="{StaticResource M3FullWidthFilledButton}">
+        <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
     </Style>
 
     <Style TargetType="controls:FilledButton" x:Key="M3AuthFilledButton" BasedOn="{StaticResource M3FullWidthFilledButton}" />

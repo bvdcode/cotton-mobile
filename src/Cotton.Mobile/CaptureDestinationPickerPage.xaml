@@ -97,11 +97,12 @@
                                        LineBreakMode="TailTruncation"
                                        VerticalOptions="Center" />
 
-                                <Button Grid.Column="1"
-                                        Text="Open"
-                                        Command="{Binding OpenCommand}"
-                                        Style="{StaticResource PanelActionChromeButton}"
-                                        VerticalOptions="Center" />
+                                <controls:IconButton Grid.Column="1"
+                                                     IconData="{x:Static controls:IconPathData.ChevronRight}"
+                                                     Command="{Binding OpenCommand}"
+                                                     Style="{StaticResource M3FileChromeIconButton}"
+                                                     VerticalOptions="Center"
+                                                     SemanticProperties.Description="{Binding DisplayName, StringFormat='Open {0}'}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

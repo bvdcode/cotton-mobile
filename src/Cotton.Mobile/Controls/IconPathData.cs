@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Check => Create("M9 16.2 L4.8 12 L3.4 13.4 L9 19 L21 7 L19.6 5.6 Z");
 
+        public static Geometry ChevronRight => Create("M9.3 5.3 L10.7 3.9 L18.8 12 L10.7 20.1 L9.3 18.7 L16 12 Z");
+
         public static Geometry Close => Create("M6.4 5 L12 10.6 L17.6 5 L19 6.4 L13.4 12 L19 17.6 L17.6 19 L12 13.4 L6.4 19 L5 17.6 L10.6 12 L5 6.4 Z");
 
         public static Geometry Cloud => Create("M19.4 10 C18.7 6.6 15.6 4 12 4 C9.1 4 6.6 5.6 5.4 8 C2.3 8.4 0 10.9 0 14 C0 17.3 2.7 20 6 20 L19 20 C21.8 20 24 17.8 24 15 C24 12.4 22 10.2 19.4 10 Z M19 18 L6 18 C3.8 18 2 16.2 2 14 C2 12 3.6 10.2 5.6 10 L6.7 9.9 L7.2 8.9 C8.1 7.1 10 6 12 6 C14.7 6 17 7.9 17.4 10.6 L17.7 12.1 L19.2 12.2 C20.8 12.3 22 13.6 22 15 C22 16.7 20.7 18 19 18 Z");

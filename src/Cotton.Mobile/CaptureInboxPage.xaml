@@ -19,7 +19,7 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
@@ -42,26 +42,23 @@
                    LineBreakMode="TailTruncation" />
 
             <Grid ColumnDefinitions="*,*,*"
-                  ColumnSpacing="10"
+                  ColumnSpacing="{StaticResource Space12}"
                   IsVisible="{Binding IsActionBarVisible}">
                 <Button Text="Destination"
                         Command="{Binding DestinationCommand}"
                         Style="{StaticResource FileChromeButton}"
-                        HeightRequest="44"
                         VerticalOptions="Center" />
 
                 <Button Grid.Column="1"
                         Text="Rename"
                         Command="{Binding RenameCommand}"
                         Style="{StaticResource FileChromeButton}"
-                        HeightRequest="44"
                         VerticalOptions="Center" />
 
                 <Button Grid.Column="2"
                         Text="Queue"
                         Command="{Binding EnqueueCommand}"
                         Style="{StaticResource M3PrimaryButton}"
-                        HeightRequest="44"
                         VerticalOptions="Center" />
             </Grid>
 
@@ -82,7 +79,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10"
+            <VerticalStackLayout Spacing="{StaticResource Space12}"
                                  IsVisible="{Binding IsListVisible}"
                                  BindableLayout.ItemsSource="{Binding Items}">
                 <BindableLayout.ItemTemplate>
@@ -90,8 +87,8 @@
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto"
                                   ColumnDefinitions="*,Auto"
-                                  RowSpacing="6"
-                                  ColumnSpacing="10">
+                                  RowSpacing="{StaticResource Space8}"
+                                  ColumnSpacing="{StaticResource Space12}">
                                 <VerticalStackLayout Spacing="2">
                                     <Label Text="{Binding DisplayName}"
                                            Style="{StaticResource M3CardTitle}"

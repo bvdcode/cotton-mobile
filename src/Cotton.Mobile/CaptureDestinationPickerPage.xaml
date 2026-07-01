@@ -16,7 +16,7 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
-                             Spacing="16">
+                             Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
                   ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
@@ -45,11 +45,10 @@
                    LineBreakMode="TailTruncation" />
 
             <Grid ColumnDefinitions="Auto,*"
-                  ColumnSpacing="10">
+                  ColumnSpacing="{StaticResource Space12}">
                 <Button Text="Up"
                         Command="{Binding UpCommand}"
                         Style="{StaticResource FileChromeButton}"
-                        HeightRequest="44"
                         MinimumWidthRequest="78"
                         VerticalOptions="Center" />
 
@@ -57,7 +56,6 @@
                         Text="Choose this folder"
                         Command="{Binding ChooseCommand}"
                         Style="{StaticResource M3PrimaryButton}"
-                        HeightRequest="44"
                         VerticalOptions="Center" />
             </Grid>
 
@@ -83,7 +81,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="10"
+            <VerticalStackLayout Spacing="{StaticResource Space12}"
                                  IsVisible="{Binding IsListVisible}"
                                  BindableLayout.ItemsSource="{Binding Folders}">
                 <BindableLayout.ItemTemplate>
@@ -94,7 +92,7 @@
                             </Border.GestureRecognizers>
 
                             <Grid ColumnDefinitions="*,Auto"
-                                  ColumnSpacing="10">
+                                  ColumnSpacing="{StaticResource Space12}">
                                 <Label Text="{Binding DisplayName}"
                                        Style="{StaticResource M3CardTitle}"
                                        MaxLines="1"

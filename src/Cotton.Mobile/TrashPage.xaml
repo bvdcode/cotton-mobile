@@ -245,15 +245,17 @@
                                                        Spacing="{StaticResource Space8}"
                                                        HorizontalOptions="End"
                                                        IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
-                                    <Button Text="Delete forever"
-                                            Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            Style="{StaticResource DenseDestructiveChromeButton}" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
+                                                         Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} forever'}" />
 
-                                    <Button Text="Restore"
-                                            Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                            CommandParameter="{Binding .}"
-                                            Style="{StaticResource DenseChromeButton}" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Reset}"
+                                                         Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding Name, StringFormat='Restore {0}'}" />
                                 </HorizontalStackLayout>
                             </Grid>
                         </Border>

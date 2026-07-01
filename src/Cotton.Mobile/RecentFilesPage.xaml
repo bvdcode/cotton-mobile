@@ -64,12 +64,8 @@
                         ItemsSource="{Binding Items}"
                         IsVisible="{Binding IsListVisible}"
                         SelectionMode="None"
-                        ItemSizingStrategy="MeasureFirstItem">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout Orientation="Vertical"
-                                   ItemSpacing="{StaticResource M3CardListItemSpacing}" />
-            </CollectionView.ItemsLayout>
-
+                        ItemSizingStrategy="MeasureFirstItem"
+                        ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
                     <Border Style="{StaticResource M3ContentCard}">

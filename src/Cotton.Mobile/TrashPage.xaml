@@ -159,12 +159,8 @@
             <CollectionView ItemsSource="{Binding Items}"
                             IsVisible="{Binding IsListVisible}"
                             SelectionMode="None"
-                            ItemSizingStrategy="MeasureFirstItem">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical"
-                                       ItemSpacing="{StaticResource M3CardListItemSpacing}" />
-                </CollectionView.ItemsLayout>
-
+                            ItemSizingStrategy="MeasureFirstItem"
+                            ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                         <Border Style="{StaticResource M3ContentCard}">
@@ -261,14 +257,8 @@
             <CollectionView ItemsSource="{Binding Items}"
                             IsVisible="{Binding IsTileVisible}"
                             SelectionMode="None"
-                            ItemSizingStrategy="MeasureFirstItem">
-                <CollectionView.ItemsLayout>
-                    <GridItemsLayout Orientation="Vertical"
-                                     Span="2"
-                                     HorizontalItemSpacing="{StaticResource M3CardListItemSpacing}"
-                                     VerticalItemSpacing="{StaticResource M3CardListItemSpacing}" />
-                </CollectionView.ItemsLayout>
-
+                            ItemSizingStrategy="MeasureFirstItem"
+                            ItemsLayout="{StaticResource M3TrashTileItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                         <Border Style="{StaticResource M3TrashTileCard}">

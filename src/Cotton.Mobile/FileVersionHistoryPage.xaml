@@ -61,12 +61,8 @@
 
                 <CollectionView ItemsSource="{Binding Items}"
                                 IsVisible="{Binding IsListVisible}"
-                                SelectionMode="None">
-                    <CollectionView.ItemsLayout>
-                        <LinearItemsLayout Orientation="Vertical"
-                                           ItemSpacing="{StaticResource M3CardListItemSpacing}" />
-                    </CollectionView.ItemsLayout>
-
+                                SelectionMode="None"
+                                ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">
                             <Border Style="{StaticResource M3ContentCard}">

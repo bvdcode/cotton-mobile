@@ -36,11 +36,8 @@
                             ItemsSource="{Binding Pages}"
                             IsVisible="{Binding IsPreviewVisible}"
                             Style="{StaticResource M3DocumentViewerCollection}"
-                            ItemSizingStrategy="MeasureAllItems">
-                <CollectionView.ItemsLayout>
-                    <LinearItemsLayout Orientation="Vertical"
-                                       ItemSpacing="{StaticResource M3PdfPageSpacing}" />
-                </CollectionView.ItemsLayout>
+                            ItemSizingStrategy="MeasureAllItems"
+                            ItemsLayout="{StaticResource M3PdfPreviewItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
                         <Grid Style="{StaticResource M3PdfPageContainerGrid}">

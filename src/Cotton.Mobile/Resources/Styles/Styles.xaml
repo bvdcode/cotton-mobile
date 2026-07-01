@@ -591,6 +591,16 @@
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
 
+    <LinearItemsLayout x:Key="M3VerticalCardListItemsLayout"
+                       Orientation="Vertical"
+                       ItemSpacing="{StaticResource M3CardListItemSpacing}" />
+
+    <GridItemsLayout x:Key="M3TrashTileItemsLayout"
+                     Orientation="Vertical"
+                     Span="2"
+                     HorizontalItemSpacing="{StaticResource M3CardListItemSpacing}"
+                     VerticalItemSpacing="{StaticResource M3CardListItemSpacing}" />
+
     <Style TargetType="Grid" x:Key="M3ListItemTouchSurface">
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
@@ -697,6 +707,10 @@
     <Style TargetType="CollectionView" x:Key="M3DocumentViewerCollection">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
+
+    <LinearItemsLayout x:Key="M3PdfPreviewItemsLayout"
+                       Orientation="Vertical"
+                       ItemSpacing="{StaticResource M3PdfPageSpacing}" />
 
     <Style TargetType="Grid" x:Key="M3PdfPageContainerGrid">
         <Setter Property="Padding" Value="{StaticResource M3PdfPagePadding}" />

@@ -26,9 +26,7 @@
                            LineBreakMode="TailTruncation" />
 
                     <Label Text="{Binding ExecutionStatusText}"
-                           Style="{StaticResource M3BodyMedium}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenHeaderSupportingMultiline}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"

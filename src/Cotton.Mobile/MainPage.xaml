@@ -42,9 +42,7 @@
                                    SemanticProperties.HeadingLevel="Level1" />
 
                             <Label Text="Sign in to continue"
-                                   Style="{StaticResource M3BodyMedium}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3AuthSubtitle}" />
                         </VerticalStackLayout>
                     </Grid>
                 </VerticalStackLayout>

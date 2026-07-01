@@ -31,9 +31,7 @@
 
                     <Label Text="{Binding SummaryText}"
                            IsVisible="{Binding IsSummaryVisible}"
-                           Style="{StaticResource M3BodyMedium}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenHeaderSupporting}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"

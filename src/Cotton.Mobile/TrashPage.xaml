@@ -35,9 +35,7 @@
                        LineBreakMode="TailTruncation" />
 
                 <Label Text="{Binding SummaryText}"
-                       Style="{StaticResource M3BodyMedium}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3ScreenHeaderSupporting}" />
             </VerticalStackLayout>
 
             <controls:IconButton Grid.Column="1"

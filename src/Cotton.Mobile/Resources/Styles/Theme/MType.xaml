@@ -109,6 +109,15 @@
         <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3ScreenHeaderSupporting" BasedOn="{StaticResource M3BodyMedium}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ScreenHeaderSupportingMultiline" BasedOn="{StaticResource M3ScreenHeaderSupporting}">
+        <Setter Property="MaxLines" Value="2" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3DarkBodyMedium">
         <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurfaceVariant}" />
         <Setter Property="FontSize" Value="{StaticResource M3BodyMediumFontSize}" />
@@ -206,6 +215,8 @@
     <Style TargetType="Label" x:Key="M3ErrorSupporting" BasedOn="{StaticResource M3CardSupporting}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
+
+    <Style TargetType="Label" x:Key="M3AuthSubtitle" BasedOn="{StaticResource M3ScreenHeaderSupporting}" />
 
     <Style TargetType="Label" x:Key="M3AuthStatus" BasedOn="{StaticResource M3CardSupportingPrimary}" />
 

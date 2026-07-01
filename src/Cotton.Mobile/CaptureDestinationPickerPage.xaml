@@ -27,9 +27,7 @@
 
                     <Label Text="{Binding PathText}"
                            IsVisible="{Binding IsPathTextVisible}"
-                           Style="{StaticResource M3BodyMedium}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenHeaderSupportingMultiline}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"

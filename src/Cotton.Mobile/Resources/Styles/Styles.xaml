@@ -463,6 +463,10 @@
 
     <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3StatusPanel}" />
 
+    <Style TargetType="Border" x:Key="M3FileErrorStatusPanel" BasedOn="{StaticResource M3FileStatusPanel}">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3FileStatusGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusRowHeight}" />
@@ -480,11 +484,19 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="controls:IconView" x:Key="M3FileErrorStatusIcon" BasedOn="{StaticResource M3FileStatusIcon}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3FileStatusPrimaryText" BasedOn="{StaticResource M3CardSupportingStrong}">
         <Setter Property="MaxLines" Value="1" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="VerticalTextAlignment" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3FileErrorStatusPrimaryText" BasedOn="{StaticResource M3FileStatusPrimaryText}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3FileStatusMetaText" BasedOn="{StaticResource M3CardMeta}">

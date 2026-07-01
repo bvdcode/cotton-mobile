@@ -208,8 +208,8 @@
                                     <DataTrigger TargetType="Border"
                                                  Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
                                                  Value="True">
-                                        <Setter Property="Stroke"
-                                                Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                        <Setter Property="Style"
+                                                Value="{StaticResource M3FileErrorStatusPanel}" />
                                     </DataTrigger>
                                 </Border.Triggers>
 
@@ -223,8 +223,8 @@
                                                          Value="True">
                                                 <Setter Property="IconData"
                                                         Value="{x:Static controls:IconPathData.Error}" />
-                                                <Setter Property="IconColor"
-                                                        Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                                <Setter Property="Style"
+                                                        Value="{StaticResource M3FileErrorStatusIcon}" />
                                             </DataTrigger>
                                         </controls:IconView.Triggers>
                                     </controls:IconView>
@@ -236,8 +236,8 @@
                                             <DataTrigger TargetType="Label"
                                                          Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
                                                          Value="True">
-                                                <Setter Property="TextColor"
-                                                        Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                                <Setter Property="Style"
+                                                        Value="{StaticResource M3FileErrorStatusPrimaryText}" />
                                             </DataTrigger>
                                         </Label.Triggers>
                                     </Label>

@@ -5,10 +5,24 @@
 
     <Color x:Key="M3Accent">#C6FF00</Color>
     <Color x:Key="M3OnAccent">#151900</Color>
+    <Color x:Key="M3Primary">#C6FF00</Color>
+    <Color x:Key="M3OnPrimary">#151900</Color>
     <Color x:Key="M3DocumentSurface">#FFFFFF</Color>
     <Color x:Key="M3Transparent">Transparent</Color>
     <Color x:Key="M3Shadow">#000000</Color>
 
+    <Color x:Key="M3LightPrimary">#C6FF00</Color>
+    <Color x:Key="M3LightOnPrimary">#151900</Color>
+    <Color x:Key="M3LightPrimaryContainer">#DFFB73</Color>
+    <Color x:Key="M3LightOnPrimaryContainer">#1B2300</Color>
+    <Color x:Key="M3LightSecondary">#596248</Color>
+    <Color x:Key="M3LightOnSecondary">#FFFFFF</Color>
+    <Color x:Key="M3LightSecondaryContainer">#DDE8C7</Color>
+    <Color x:Key="M3LightOnSecondaryContainer">#171E0B</Color>
+    <Color x:Key="M3LightTertiary">#3D665F</Color>
+    <Color x:Key="M3LightOnTertiary">#FFFFFF</Color>
+    <Color x:Key="M3LightTertiaryContainer">#BFECE3</Color>
+    <Color x:Key="M3LightOnTertiaryContainer">#00201C</Color>
     <Color x:Key="M3LightSurface">#F7F8F7</Color>
     <Color x:Key="M3LightOnSurface">#181C1A</Color>
     <Color x:Key="M3LightOnSurfaceVariant">#424947</Color>
@@ -23,6 +37,18 @@
     <Color x:Key="M3LightPressedStateLayer">#1F181C1A</Color>
     <Color x:Key="M3LightScrim">#66000000</Color>
 
+    <Color x:Key="M3DarkPrimary">#C6FF00</Color>
+    <Color x:Key="M3DarkOnPrimary">#151900</Color>
+    <Color x:Key="M3DarkPrimaryContainer">#354700</Color>
+    <Color x:Key="M3DarkOnPrimaryContainer">#D8FF60</Color>
+    <Color x:Key="M3DarkSecondary">#C1CBB0</Color>
+    <Color x:Key="M3DarkOnSecondary">#2B331E</Color>
+    <Color x:Key="M3DarkSecondaryContainer">#414A33</Color>
+    <Color x:Key="M3DarkOnSecondaryContainer">#DDE8C7</Color>
+    <Color x:Key="M3DarkTertiary">#A3D0C7</Color>
+    <Color x:Key="M3DarkOnTertiary">#073731</Color>
+    <Color x:Key="M3DarkTertiaryContainer">#244E48</Color>
+    <Color x:Key="M3DarkOnTertiaryContainer">#BFECE3</Color>
     <Color x:Key="M3DarkSurface">#090B0A</Color>
     <Color x:Key="M3DarkOnSurface">#E4E8E6</Color>
     <Color x:Key="M3DarkOnSurfaceVariant">#BEC7C2</Color>
@@ -38,5 +64,6 @@
     <Color x:Key="M3DarkScrim">#99000000</Color>
 
     <SolidColorBrush x:Key="M3AccentBrush" Color="{StaticResource M3Accent}" />
+    <SolidColorBrush x:Key="M3PrimaryBrush" Color="{StaticResource M3Primary}" />
     <SolidColorBrush x:Key="M3ShadowBrush" Color="{StaticResource M3Shadow}" />
 </ResourceDictionary>

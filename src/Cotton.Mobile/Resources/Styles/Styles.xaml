@@ -866,12 +866,12 @@
     </Style>
 
     <Style TargetType="controls:FilledButton" x:Key="M3FilledButton">
-        <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
         <Setter Property="DisabledTextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="DisabledButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
-        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="DisabledBorderColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
@@ -999,10 +999,10 @@
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3PrimaryFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
-        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryFileChromeIconButton}">
@@ -1070,10 +1070,10 @@
         <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FloatingActionButtonIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3FloatingActionButtonCornerRadius}" />
-        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="HorizontalOptions" Value="End" />
         <Setter Property="VerticalOptions" Value="End" />
         <Setter Property="Margin" Value="{StaticResource M3FloatingActionButtonMargin}" />
@@ -1099,11 +1099,11 @@
     <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemSelected" BasedOn="{StaticResource M3NavigationBarItem}">
-        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="FillColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="PressedFillColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
+        <Setter Property="FillColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="PressedFillColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemUnselected" BasedOn="{StaticResource M3NavigationBarItem}">
@@ -1134,10 +1134,10 @@
         <Setter Property="ButtonSize" Value="{StaticResource M3ViewerPlayButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3ViewerPlayIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3ViewerPlayButtonCornerRadius}" />
-        <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />
-        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{StaticResource M3DarkOnPrimary}" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3DarkPrimary}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{StaticResource M3DarkPrimary}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3DarkPrimary}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3ViewerCenteredPlayIconButton" BasedOn="{StaticResource M3ViewerPlayIconButton}">

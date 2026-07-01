@@ -112,6 +112,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3DarkAppBarTitleLine" BasedOn="{StaticResource M3AppBarTitleLine}">
+        <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurface}" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3BodyMedium">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FontSize" Value="{StaticResource M3BodyMediumFontSize}" />

@@ -1036,6 +1036,10 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 
+    <Style TargetType="ContentView" x:Key="M3DarkTopAppBarSurface" BasedOn="{StaticResource M3TopAppBarSurface}">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3TopAppBarContentGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space4}" />
         <Setter Property="HeightRequest" Value="{StaticResource TouchTarget}" />

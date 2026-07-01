@@ -9,8 +9,8 @@
         <DataTrigger TargetType="ContentView"
                      Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                      Value="True">
-            <Setter Property="BackgroundColor"
-                    Value="{StaticResource M3DarkSurface}" />
+            <Setter Property="Style"
+                    Value="{StaticResource M3DarkTopAppBarSurface}" />
         </DataTrigger>
     </ContentView.Triggers>
 
@@ -42,8 +42,8 @@
                 <DataTrigger TargetType="Label"
                              Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
                              Value="True">
-                    <Setter Property="TextColor"
-                            Value="{StaticResource M3DarkOnSurface}" />
+                    <Setter Property="Style"
+                            Value="{StaticResource M3DarkAppBarTitleLine}" />
                 </DataTrigger>
             </Label.Triggers>
         </Label>

@@ -173,11 +173,11 @@
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
-                                            Value="{StaticResource M3Accent}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
                                     <Setter Property="StrokeThickness"
                                             Value="{StaticResource M3StrokeThin}" />
                                     <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
                                 </DataTrigger>
                             </Border.Triggers>
 
@@ -277,11 +277,11 @@
                                              Binding="{Binding IsSelected}"
                                              Value="True">
                                     <Setter Property="Stroke"
-                                            Value="{StaticResource M3Accent}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
                                     <Setter Property="StrokeThickness"
                                             Value="{StaticResource M3StrokeThin}" />
                                     <Setter Property="BackgroundColor"
-                                            Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+                                            Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
                                 </DataTrigger>
                             </Border.Triggers>
 

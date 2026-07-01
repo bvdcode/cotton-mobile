@@ -415,7 +415,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
-        <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -426,7 +426,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionRowOverlay" BasedOn="{StaticResource M3FileSelectionOverlay}">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3StatusPanel}" />
@@ -498,14 +498,14 @@
     <Style TargetType="Border" x:Key="M3FileSelectionMark">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3InsetCornerRadius}" />
             </Setter.Value>
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileListSelectionMark" BasedOn="{StaticResource M3FileSelectionMark}">
@@ -520,7 +520,7 @@
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FileSelectionCheckIcon">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileSelectionIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />

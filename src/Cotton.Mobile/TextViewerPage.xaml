@@ -34,13 +34,14 @@
                        LineBreakMode="TailTruncation" />
             </VerticalStackLayout>
 
-            <Editor Grid.Row="1"
-                    Text="{Binding Content}"
-                    IsReadOnly="True"
-                    AutoSize="Disabled"
-                    Style="{StaticResource TextViewerContentEditor}"
-                    HorizontalOptions="Fill"
-                    VerticalOptions="Fill" />
+            <Border Grid.Row="1"
+                    Style="{StaticResource M3TextViewerSurface}">
+                <ScrollView>
+                    <Label Text="{Binding Content}"
+                           Style="{StaticResource M3TextViewerContent}"
+                           LineBreakMode="WordWrap" />
+                </ScrollView>
+            </Border>
         </Grid>
     </Grid>
 </ContentPage>

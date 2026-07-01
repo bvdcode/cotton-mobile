@@ -91,6 +91,7 @@
     <Thickness x:Key="M3SelectionBarPadding">12,8</Thickness>
     <Thickness x:Key="M3TopAppBarPadding">4,8</Thickness>
     <Thickness x:Key="M3TrashTilePadding">12</Thickness>
+    <Thickness x:Key="M3TextViewerPadding">16</Thickness>
     <Thickness x:Key="M3ViewerOverlayMargin">16</Thickness>
     <Thickness x:Key="M3ViewerStatusWithTrailingActionMargin">16,0,80,16</Thickness>
 </ResourceDictionary>

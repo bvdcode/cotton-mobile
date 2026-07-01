@@ -7,6 +7,7 @@
     <x:Double x:Key="M3ControlFontSize">14</x:Double>
     <x:Double x:Key="M3FooterLinkFontSize">12</x:Double>
     <x:Double x:Key="M3TextViewerFontSize">15</x:Double>
+    <x:Double x:Key="M3TextViewerLineHeight">1.45</x:Double>
     <x:Double x:Key="M3HeadlineLargeFontSize">32</x:Double>
     <x:Double x:Key="M3HeadlineLargeLineHeight">1.12</x:Double>
     <x:Double x:Key="M3HeadlineMediumFontSize">28</x:Double>

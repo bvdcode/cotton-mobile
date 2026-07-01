@@ -349,6 +349,10 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3TrashTileHeight}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3TextViewerSurface" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3TextViewerPadding}" />
+    </Style>
+
     <Style TargetType="BoxView">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
@@ -575,19 +579,11 @@
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
-    <Style TargetType="Editor">
+    <Style TargetType="Label" x:Key="M3TextViewerContent">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
-        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
-        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
-        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
-    </Style>
-
-    <Style TargetType="Editor" x:Key="TextViewerContentEditor">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3TextViewerFontSize}" />
+        <Setter Property="LineHeight" Value="{StaticResource M3TextViewerLineHeight}" />
+        <Setter Property="CharacterSpacing" Value="0" />
     </Style>
 
     <Style TargetType="Entry">

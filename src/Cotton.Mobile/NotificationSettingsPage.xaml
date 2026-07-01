@@ -68,8 +68,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="*,Auto"
-                      RowSpacing="{StaticResource Space8}"
-                      ColumnSpacing="{StaticResource Space12}">
+                      Style="{StaticResource M3SettingsSummaryGrid}">
                     <Label Text="{Binding PermissionTitle}"
                            Style="{StaticResource M3CardTitle}" />
 
@@ -115,7 +114,7 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="*,Auto"
-                          ColumnSpacing="{StaticResource Space12}">
+                          Style="{StaticResource M3SettingsSummaryGrid}">
                         <Label Text="Server push"
                                Style="{StaticResource M3CardTitle}" />
 
@@ -128,8 +127,7 @@
                     <Grid IsVisible="{Binding IsRemotePushUnavailable}"
                           ColumnDefinitions="Auto,*"
                           RowDefinitions="Auto,Auto,Auto"
-                          ColumnSpacing="{StaticResource Space12}"
-                          RowSpacing="{StaticResource Space8}">
+                          Style="{StaticResource M3SettingsSummaryGrid}">
                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                            Style="{StaticResource M3AttentionStatusIcon}"
                                            VerticalOptions="Start" />
@@ -172,7 +170,7 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
                                 <Grid ColumnDefinitions="*,Auto"
-                                      ColumnSpacing="{StaticResource Space12}">
+                                      Style="{StaticResource M3SettingsSummaryGrid}">
                                     <VerticalStackLayout Spacing="{StaticResource Space2}">
                                         <Label Text="{Binding Title}"
                                                Style="{StaticResource M3LabelLargeLine}" />

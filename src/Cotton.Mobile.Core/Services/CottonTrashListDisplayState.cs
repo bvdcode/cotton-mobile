@@ -49,8 +49,6 @@ namespace Cotton.Mobile.Services
 
         public bool IsViewButtonVisible => !IsSearchVisible;
 
-        public string SearchButtonText => IsSearchVisible ? "×" : "⌕";
-
         public string SearchButtonDescription
         {
             get
@@ -63,8 +61,6 @@ namespace Cotton.Mobile.Services
                 return IsSearchOpen ? "Close trash search" : "Search trash";
             }
         }
-
-        public string ViewButtonText => ViewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
         public string SortButtonText => FormatSortButtonText(SortMode);
 

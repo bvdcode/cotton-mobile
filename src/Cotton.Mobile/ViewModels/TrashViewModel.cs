@@ -17,7 +17,7 @@ namespace Cotton.Mobile.ViewModels
         private const string SortTypeAction = "Type";
         private const string ViewListAction = "List";
         private const string ViewTilesAction = "Tiles";
-        private const string CurrentActionPrefix = "✓ ";
+        private const string CurrentActionSuffix = " (current)";
 
         private readonly Uri _instanceUri;
         private readonly ICottonTrashBrowserService _trashBrowserService;
@@ -206,8 +206,6 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsSearchVisible => _isSearchOpen || !string.IsNullOrWhiteSpace(SearchText);
 
-        public string SearchButtonText => IsSearchVisible ? "×" : "⌕";
-
         public string SearchButtonDescription
         {
             get
@@ -226,8 +224,6 @@ namespace Cotton.Mobile.ViewModels
         public bool IsViewButtonVisible => !IsSearchVisible;
 
         public string SortButtonText => CottonTrashListDisplayState.FormatSortButtonText(_sortMode);
-
-        public string ViewButtonText => _viewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
         public CottonTrashSelectionSnapshot Selection
         {
@@ -1021,12 +1017,10 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(IsTileVisible));
             OnPropertyChanged(nameof(IsSearchVisible));
-            OnPropertyChanged(nameof(SearchButtonText));
             OnPropertyChanged(nameof(SearchButtonDescription));
             OnPropertyChanged(nameof(IsSortButtonVisible));
             OnPropertyChanged(nameof(IsViewButtonVisible));
             OnPropertyChanged(nameof(SortButtonText));
-            OnPropertyChanged(nameof(ViewButtonText));
             OnPropertyChanged(nameof(IsSelectionBarVisible));
             OnPropertyChanged(nameof(IsTrashEntryActionsVisible));
             OnPropertyChanged(nameof(SelectionToolbarText));
@@ -1194,7 +1188,7 @@ namespace Cotton.Mobile.ViewModels
 
         private static string CreateCurrentActionLabel(string label, bool isCurrent)
         {
-            return isCurrent ? CurrentActionPrefix + label : label;
+            return isCurrent ? label + CurrentActionSuffix : label;
         }
 
         private static string? NormalizeAction(string? action)
@@ -1204,8 +1198,8 @@ namespace Cotton.Mobile.ViewModels
                 return null;
             }
 
-            return action.StartsWith(CurrentActionPrefix, StringComparison.Ordinal)
-                ? action[CurrentActionPrefix.Length..]
+            return action.EndsWith(CurrentActionSuffix, StringComparison.Ordinal)
+                ? action[..^CurrentActionSuffix.Length]
                 : action;
         }
 

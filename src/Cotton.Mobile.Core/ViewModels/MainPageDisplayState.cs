@@ -352,16 +352,6 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFileSearchActive => !string.IsNullOrWhiteSpace(FileSearchText);
 
-        public string FileSearchButtonText
-        {
-            get
-            {
-                return _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText)
-                    ? "×"
-                    : "⌕";
-            }
-        }
-
         public string FileSearchButtonDescription
         {
             get
@@ -384,7 +374,6 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsFileListViewVisible));
                     OnPropertyChanged(nameof(IsFileTileViewVisible));
-                    OnPropertyChanged(nameof(FileViewButtonText));
                 }
             }
         }
@@ -404,8 +393,6 @@ namespace Cotton.Mobile.ViewModels
         public bool IsFileListViewVisible => FileViewMode == CottonFileBrowserViewMode.List;
 
         public bool IsFileTileViewVisible => FileViewMode == CottonFileBrowserViewMode.Tiles;
-
-        public string FileViewButtonText => FileViewMode == CottonFileBrowserViewMode.List ? "☰" : "▦";
 
         public bool IsFileUpButtonVisible => CanNavigateFilesUp;
 
@@ -1215,7 +1202,6 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsFileSearchVisible));
             OnPropertyChanged(nameof(IsFileSearchOpen));
             OnPropertyChanged(nameof(IsFileSearchActive));
-            OnPropertyChanged(nameof(FileSearchButtonText));
             OnPropertyChanged(nameof(FileSearchButtonDescription));
             OnPropertyChanged(nameof(IsFileSortButtonVisible));
             OnPropertyChanged(nameof(IsFileViewButtonVisible));

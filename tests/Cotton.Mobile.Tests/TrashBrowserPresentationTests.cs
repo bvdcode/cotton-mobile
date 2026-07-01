@@ -80,7 +80,6 @@ namespace Cotton.Mobile.Tests
             Assert.False(state.IsSortButtonVisible);
             Assert.False(state.IsViewButtonVisible);
             Assert.Equal("1 match · A-Z", state.SummaryText);
-            Assert.Equal("×", state.SearchButtonText);
             Assert.Equal("Clear trash search", state.SearchButtonDescription);
         }
 
@@ -177,10 +176,10 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(list.IsListVisible);
             Assert.False(list.IsTileVisible);
-            Assert.Equal("☰", list.ViewButtonText);
+            Assert.Equal(CottonFileBrowserViewMode.List, list.ViewMode);
             Assert.False(tiles.IsListVisible);
             Assert.True(tiles.IsTileVisible);
-            Assert.Equal("▦", tiles.ViewButtonText);
+            Assert.Equal(CottonFileBrowserViewMode.Tiles, tiles.ViewMode);
         }
 
         private static CottonFileBrowserEntry CreateFile(string name, DateTime updatedAt)

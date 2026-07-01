@@ -65,14 +65,22 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonActivityFeedListItem">
                         <Border Style="{StaticResource M3ContentCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto"
-                                  ColumnDefinitions="*,Auto"
+                            <Grid RowDefinitions="Auto,Auto"
+                                  ColumnDefinitions="Auto,*,Auto"
                                   RowSpacing="{StaticResource Space8}"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
+                                <Border Grid.RowSpan="2"
+                                        Style="{StaticResource M3FileThumbnailSurface}"
+                                        VerticalOptions="Start">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Activity}"
+                                                       Style="{StaticResource M3ActivityThumbnailIcon}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Style="{StaticResource M3CardTextStack}">
                                     <Label Text="{Binding Title}"
                                            Style="{StaticResource M3CardTitle}"
-                                           MaxLines="2"
+                                           MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
                                     <Label Text="{Binding DetailText}"
@@ -81,8 +89,9 @@
                                            LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
 
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource M3NeutralChip}">
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource M3NeutralChip}"
+                                        VerticalOptions="Start">
                                     <Label Text="{Binding BadgeText}"
                                            Style="{StaticResource M3ChipLabel}"
                                            MaxLines="1"
@@ -90,6 +99,7 @@
                                 </Border>
 
                                 <Label Grid.Row="1"
+                                       Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding ContentText}"
                                        IsVisible="{Binding IsContentVisible}"

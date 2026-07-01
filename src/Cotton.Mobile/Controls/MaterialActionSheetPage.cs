@@ -11,6 +11,9 @@ namespace Cotton.Mobile.Controls
     public class MaterialActionSheetPage : ContentPage
     {
         private readonly TaskCompletionSource<string?> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly BoxView _scrim;
+        private readonly Border _sheet;
+        private bool _hasPresented;
         private bool _isCompleting;
 
         public MaterialActionSheetPage(
@@ -26,6 +29,9 @@ namespace Cotton.Mobile.Controls
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
             Style = MaterialResources.Get<Style>("M3ModalPage");
+            _scrim = CreateScrim();
+            _sheet = CreateSheetSurface();
+            PrepareInitialMotionState();
             Content = CreateContent(title, cancel, destruction, buttons);
         }
 
@@ -38,6 +44,13 @@ namespace Cotton.Mobile.Controls
         {
             MainThread.BeginInvokeOnMainThread(async () => await CompleteAsync(null));
             return true;
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+
+            await PresentAsync();
         }
 
         private Grid CreateContent(
@@ -55,18 +68,9 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            BoxView scrim = new()
-            {
-                Style = MaterialResources.Get<Style>("M3ModalScrim"),
-            };
-            scrim.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = CreateDismissCommand(null),
-            });
-            root.Add(scrim, 0, 0);
-            Grid.SetRowSpan(scrim, 2);
+            root.Add(_scrim, 0, 0);
+            Grid.SetRowSpan(_scrim, 2);
 
-            Border sheet = CreateSheetSurface();
             VerticalStackLayout stack = new()
             {
                 Style = MaterialResources.Get<Style>("M3ActionSheetStack"),
@@ -88,10 +92,23 @@ namespace Cotton.Mobile.Controls
 
             stack.Add(CreateDivider());
             stack.Add(CreateActionRow(cancel, null, isDestructive: false, isCancel: true));
-            sheet.Content = stack;
+            _sheet.Content = stack;
 
-            root.Add(sheet, 0, 1);
+            root.Add(_sheet, 0, 1);
             return root;
+        }
+
+        private BoxView CreateScrim()
+        {
+            BoxView scrim = new()
+            {
+                Style = MaterialResources.Get<Style>("M3ModalScrim"),
+            };
+            scrim.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = CreateDismissCommand(null),
+            });
+            return scrim;
         }
 
         private Border CreateSheetSurface()
@@ -166,6 +183,7 @@ namespace Cotton.Mobile.Controls
             _isCompleting = true;
             try
             {
+                await DismissAsync();
                 if (Navigation.ModalStack.Contains(this))
                 {
                     await Navigation.PopModalAsync(animated: false);
@@ -175,6 +193,42 @@ namespace Cotton.Mobile.Controls
             {
                 _completion.TrySetResult(result);
             }
+        }
+
+        private void PrepareInitialMotionState()
+        {
+            _scrim.Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+            _sheet.TranslationY = MaterialMotion.Value("M3MotionActionSheetInitialOffset");
+        }
+
+        private async Task PresentAsync()
+        {
+            if (_hasPresented || _isCompleting)
+            {
+                return;
+            }
+
+            _hasPresented = true;
+            uint duration = MaterialMotion.Duration("M3MotionModalEnterDuration");
+            await Task.WhenAll(
+                _scrim.FadeToAsync(MaterialMotion.Value("M3MotionVisibleOpacity"), duration, Easing.CubicOut),
+                _sheet.TranslateToAsync(
+                    MaterialMotion.Value("M3MotionRestOffset"),
+                    MaterialMotion.Value("M3MotionRestOffset"),
+                    duration,
+                    Easing.CubicOut));
+        }
+
+        private async Task DismissAsync()
+        {
+            uint duration = MaterialMotion.Duration("M3MotionModalExitDuration");
+            await Task.WhenAll(
+                _scrim.FadeToAsync(MaterialMotion.Value("M3MotionHiddenOpacity"), duration, Easing.CubicIn),
+                _sheet.TranslateToAsync(
+                    MaterialMotion.Value("M3MotionRestOffset"),
+                    MaterialMotion.Value("M3MotionActionSheetInitialOffset"),
+                    duration,
+                    Easing.CubicIn));
         }
 
         private static Geometry ResolveIconData(string label, bool isDestructive, bool isCancel)

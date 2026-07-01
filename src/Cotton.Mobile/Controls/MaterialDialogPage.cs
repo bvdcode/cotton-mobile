@@ -11,7 +11,10 @@ namespace Cotton.Mobile.Controls
     {
         private readonly TaskCompletionSource<string?> _completion =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private readonly BoxView _scrim;
+        private readonly Border _dialog;
         private readonly Entry? _promptEntry;
+        private bool _hasPresented;
         private bool _isCompleting;
 
         private MaterialDialogPage(
@@ -28,6 +31,9 @@ namespace Cotton.Mobile.Controls
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
             Style = MaterialResources.Get<Style>("M3ModalPage");
+            _scrim = CreateScrim();
+            _dialog = CreateDialogSurface();
+            PrepareInitialMotionState();
             _promptEntry = promptInitialValue is null
                 ? null
                 : CreatePromptEntry(message, promptInitialValue, promptMaxLength);
@@ -64,10 +70,14 @@ namespace Cotton.Mobile.Controls
         {
             base.OnAppearing();
 
-            if (_promptEntry is not null)
+            MainThread.BeginInvokeOnMainThread(async () =>
             {
-                MainThread.BeginInvokeOnMainThread(() => _promptEntry.Focus());
-            }
+                await PresentAsync();
+                if (_promptEntry is not null && !_isCompleting)
+                {
+                    _promptEntry.Focus();
+                }
+            });
         }
 
         protected override bool OnBackButtonPressed()
@@ -90,17 +100,8 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            BoxView scrim = new()
-            {
-                Style = MaterialResources.Get<Style>("M3ModalScrim"),
-            };
-            scrim.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = CreateDismissCommand((string?)null),
-            });
-            root.Add(scrim, 0, 0);
+            root.Add(_scrim, 0, 0);
 
-            Border dialog = CreateDialogSurface();
             VerticalStackLayout stack = new()
             {
                 Style = MaterialResources.Get<Style>("M3DialogStack"),
@@ -118,9 +119,22 @@ namespace Cotton.Mobile.Controls
             }
 
             stack.Add(CreateButtonRow(primaryAction, secondaryAction));
-            dialog.Content = stack;
-            root.Add(dialog, 0, 0);
+            _dialog.Content = stack;
+            root.Add(_dialog, 0, 0);
             return root;
+        }
+
+        private BoxView CreateScrim()
+        {
+            BoxView scrim = new()
+            {
+                Style = MaterialResources.Get<Style>("M3ModalScrim"),
+            };
+            scrim.GestureRecognizers.Add(new TapGestureRecognizer
+            {
+                Command = CreateDismissCommand((string?)null),
+            });
+            return scrim;
         }
 
         private Border CreateDialogSurface()
@@ -243,6 +257,7 @@ namespace Cotton.Mobile.Controls
             _isCompleting = true;
             try
             {
+                await DismissAsync();
                 if (Navigation.ModalStack.Contains(this))
                 {
                     await Navigation.PopModalAsync(animated: false);
@@ -252,6 +267,37 @@ namespace Cotton.Mobile.Controls
             {
                 _completion.TrySetResult(result);
             }
+        }
+
+        private void PrepareInitialMotionState()
+        {
+            _scrim.Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+            _dialog.Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+            _dialog.Scale = MaterialMotion.Value("M3MotionDialogInitialScale");
+        }
+
+        private async Task PresentAsync()
+        {
+            if (_hasPresented || _isCompleting)
+            {
+                return;
+            }
+
+            _hasPresented = true;
+            uint duration = MaterialMotion.Duration("M3MotionModalEnterDuration");
+            await Task.WhenAll(
+                _scrim.FadeToAsync(MaterialMotion.Value("M3MotionVisibleOpacity"), duration, Easing.CubicOut),
+                _dialog.FadeToAsync(MaterialMotion.Value("M3MotionVisibleOpacity"), duration, Easing.CubicOut),
+                _dialog.ScaleToAsync(MaterialMotion.Value("M3InteractionRestScale"), duration, Easing.CubicOut));
+        }
+
+        private async Task DismissAsync()
+        {
+            uint duration = MaterialMotion.Duration("M3MotionModalExitDuration");
+            await Task.WhenAll(
+                _scrim.FadeToAsync(MaterialMotion.Value("M3MotionHiddenOpacity"), duration, Easing.CubicIn),
+                _dialog.FadeToAsync(MaterialMotion.Value("M3MotionHiddenOpacity"), duration, Easing.CubicIn),
+                _dialog.ScaleToAsync(MaterialMotion.Value("M3MotionDialogExitScale"), duration, Easing.CubicIn));
         }
 
         private static bool ShouldShowMessage(string message, bool isPrompt)

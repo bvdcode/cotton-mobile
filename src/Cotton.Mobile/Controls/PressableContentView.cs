@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Globalization;
-
 namespace Cotton.Mobile.Controls
 {
     public abstract class PressableContentView : ContentView
@@ -148,7 +146,7 @@ namespace Cotton.Mobile.Controls
 
         private void AnimatePressedScale()
         {
-            double targetScale = IsPressed ? PressedScale : MaterialResources.Get<double>("M3InteractionRestScale");
+            double targetScale = IsPressed ? PressedScale : MaterialMotion.Value("M3InteractionRestScale");
             if (Scale == targetScale)
             {
                 return;
@@ -162,7 +160,7 @@ namespace Cotton.Mobile.Controls
             }
 
             this.AbortAnimation(nameof(PressableContentView));
-            _ = this.ScaleToAsync(targetScale, Convert.ToUInt32(duration, CultureInfo.InvariantCulture), Easing.CubicOut);
+            _ = this.ScaleToAsync(targetScale, MaterialMotion.Duration(duration), Easing.CubicOut);
         }
 
 #if ANDROID

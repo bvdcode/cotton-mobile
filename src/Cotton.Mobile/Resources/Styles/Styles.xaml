@@ -1200,7 +1200,8 @@
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="RowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
         <Setter Property="PressedRowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="IconFrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
@@ -1212,6 +1213,7 @@
     <Style TargetType="controls:ActionSheetItemView" x:Key="M3ActionSheetDestructiveItem" BasedOn="{StaticResource M3ActionSheetItem}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
     <Style TargetType="controls:TextAction" x:Key="M3FooterTextAction">

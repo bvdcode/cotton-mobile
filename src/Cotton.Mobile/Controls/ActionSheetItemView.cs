@@ -40,7 +40,14 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
+
+        public static readonly BindableProperty SelectedIconColorProperty = BindableProperty.Create(
+            nameof(SelectedIconColor),
+            typeof(Color),
+            typeof(ActionSheetItemView),
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkPrimary"));
 
         public static readonly BindableProperty RowBackgroundColorProperty = BindableProperty.Create(
             nameof(RowBackgroundColor),
@@ -216,6 +223,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IconColorProperty, value);
         }
 
+        public Color SelectedIconColor
+        {
+            get => (Color)GetValue(SelectedIconColorProperty);
+            set => SetValue(SelectedIconColorProperty, value);
+        }
+
         public Color RowBackgroundColor
         {
             get => (Color)GetValue(RowBackgroundColorProperty);
@@ -348,7 +361,7 @@ namespace Cotton.Mobile.Controls
             _label.FontSize = TextFontSize;
             _label.LineHeight = TextLineHeight;
 
-            _selectedIcon.IconColor = IconColor;
+            _selectedIcon.IconColor = SelectedIconColor;
             _selectedIcon.IconSize = IconSize;
             _selectedIcon.IsVisible = IsSelected;
         }

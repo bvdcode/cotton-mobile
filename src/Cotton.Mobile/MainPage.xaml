@@ -51,26 +51,35 @@
                         Padding="{StaticResource M3AuthPanelPadding}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
-                    <VerticalStackLayout Spacing="{StaticResource Space16}">
+                    <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
                         <Border Style="{StaticResource M3OutlinedInputField}">
-                            <Entry Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                   Placeholder="https://app.cottoncloud.dev/"
-                                   Keyboard="Url"
-                                   ReturnType="Go"
-                                   ClearButtonVisibility="WhileEditing"
-                                   IsEnabled="{Binding Display.IsInputEnabled}"
-                                   ReturnCommand="{Binding ConnectCommand}"
-                                   SemanticProperties.Hint="Cotton Cloud server URL" />
+                            <Grid ColumnDefinitions="Auto,*"
+                                  Style="{StaticResource M3AuthInputGrid}">
+                                <Border Style="{StaticResource M3AuthInputIconFrame}">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Cloud}"
+                                                       Style="{StaticResource M3AuthInputIcon}" />
+                                </Border>
+
+                                <Entry Grid.Column="1"
+                                       Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                       Placeholder="https://app.cottoncloud.dev/"
+                                       Keyboard="Url"
+                                       ReturnType="Go"
+                                       ClearButtonVisibility="WhileEditing"
+                                       IsEnabled="{Binding Display.IsInputEnabled}"
+                                       ReturnCommand="{Binding ConnectCommand}"
+                                       SemanticProperties.Hint="Cotton Cloud server URL" />
+                            </Grid>
                         </Border>
 
                         <Label Text="{Binding Display.Status}"
                                IsVisible="{Binding Display.IsStatusVisible}"
-                               Style="{StaticResource M3BodyMedium}" />
+                               Style="{StaticResource M3AuthStatus}" />
 
                         <Button Text="Connect"
                                 Command="{Binding ConnectCommand}"
                                 IsEnabled="{Binding Display.IsInputEnabled}"
-                                Style="{StaticResource M3PrimaryButton}"
+                                Style="{StaticResource M3AuthPrimaryButton}"
                                 HorizontalOptions="Fill" />
                     </VerticalStackLayout>
                 </Border>
@@ -80,7 +89,7 @@
                         Padding="{StaticResource M3AuthPanelPadding}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
-                    <VerticalStackLayout Spacing="{StaticResource Space16}">
+                    <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
                         <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
                                            HorizontalOptions="Start" />
 

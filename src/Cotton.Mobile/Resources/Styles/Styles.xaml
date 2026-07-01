@@ -57,12 +57,37 @@
         <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3AuthFormStack">
+        <Setter Property="Spacing" Value="{StaticResource Space16}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3OutlinedInputField">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Padding" Value="{StaticResource M3OutlinedInputPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3AuthInputGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3AuthInputIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
+        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 16" />
+        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:IconView" x:Key="M3AuthInputIcon">
+        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconSize" Value="{StaticResource M3AuthInputIconSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3AccentOutlineChip">
@@ -254,6 +279,11 @@
                 </VisualStateGroup>
             </VisualStateGroupList>
         </Setter>
+    </Style>
+
+    <Style TargetType="Button" x:Key="M3AuthPrimaryButton" BasedOn="{StaticResource M3PrimaryButton}">
+        <Setter Property="HeightRequest" Value="{StaticResource M3AuthPrimaryButtonHeight}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3AuthPrimaryButtonHeight}" />
     </Style>
 
     <Style TargetType="Button" x:Key="FileChromeButton">

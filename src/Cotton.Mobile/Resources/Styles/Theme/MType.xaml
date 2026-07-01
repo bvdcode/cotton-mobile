@@ -169,6 +169,8 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3AuthStatus" BasedOn="{StaticResource M3CardSupportingPrimary}" />
+
     <Style TargetType="Label" x:Key="M3NavigationSelectedLabel">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="FontSize" Value="12" />

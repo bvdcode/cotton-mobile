@@ -8,8 +8,6 @@ namespace Cotton.Mobile.Behaviors
 {
     public class LongPressBehavior : Behavior<VisualElement>
     {
-        private const int LongPressDelayMilliseconds = 550;
-
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -261,7 +259,7 @@ namespace Cotton.Mobile.Behaviors
             _touchStartX = motionEvent.GetX();
             _touchStartY = motionEvent.GetY();
             _longPressRunnable = new LongPressRunnable(HandleLongPress);
-            _platformView?.PostDelayed(_longPressRunnable, LongPressDelayMilliseconds);
+            _platformView?.PostDelayed(_longPressRunnable, Android.Views.ViewConfiguration.LongPressTimeout);
         }
 
         private void CompleteTouch()

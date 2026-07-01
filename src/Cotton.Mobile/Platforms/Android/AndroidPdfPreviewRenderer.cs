@@ -63,7 +63,7 @@ namespace Cotton.Mobile
                 height,
                 Bitmap.Config.Argb8888!);
             using var canvas = new Canvas(bitmap);
-            canvas.DrawColor(Android.Graphics.Color.White);
+            canvas.DrawColor(GetDocumentSurfaceColor());
             page.Render(bitmap, null, null, PdfRenderMode.ForDisplay);
 
             byte[] pageBytes = CreatePngBytes(bitmap);
@@ -73,6 +73,17 @@ namespace Cotton.Mobile
                 width,
                 height,
                 imageSource);
+        }
+
+        private static Android.Graphics.Color GetDocumentSurfaceColor()
+        {
+            Android.Content.Context context = Android.App.Application.Context
+                ?? throw new InvalidOperationException("Android application context was not found.");
+            Android.Content.Res.Resources resources = context.Resources
+                ?? throw new InvalidOperationException("Android application resources were not found.");
+#pragma warning disable CA1422
+            return resources.GetColor(Resource.Color.cotton_document_surface, context.Theme);
+#pragma warning restore CA1422
         }
 
         private static (int Width, int Height) CreateRenderSize(int pageWidth, int pageHeight)

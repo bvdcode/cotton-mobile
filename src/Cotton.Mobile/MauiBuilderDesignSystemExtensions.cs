@@ -23,7 +23,8 @@ namespace Cotton.Mobile
 					Resources resources = context.Resources
 						?? throw new InvalidOperationException("Entry resources were not found.");
 
-					handler.PlatformView.BackgroundTintList = ColorStateList.ValueOf(Android.Graphics.Color.Transparent);
+					handler.PlatformView.BackgroundTintList = ColorStateList.ValueOf(
+						resources.GetColor(Resource.Color.cotton_transparent, context.Theme));
 					handler.PlatformView.SetHighlightColor(
 						resources.GetColor(Resource.Color.cotton_text_highlight, context.Theme));
 

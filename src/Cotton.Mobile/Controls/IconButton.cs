@@ -29,6 +29,13 @@ namespace Cotton.Mobile.Controls
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
+            nameof(PressedButtonBackgroundColor),
+            typeof(Color),
+            typeof(IconButton),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
@@ -120,6 +127,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (Color)GetValue(ButtonBackgroundColorProperty);
             set => SetValue(ButtonBackgroundColorProperty, value);
+        }
+
+        public Color PressedButtonBackgroundColor
+        {
+            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            set => SetValue(PressedButtonBackgroundColorProperty, value);
         }
 
         public Color BorderColor
@@ -268,7 +281,7 @@ namespace Cotton.Mobile.Controls
             {
                 CornerRadius = new CornerRadius(ButtonCornerRadius),
             };
-            _container.BackgroundColor = ButtonBackgroundColor;
+            _container.BackgroundColor = IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor;
             _container.Stroke = new SolidColorBrush(BorderColor);
             _container.StrokeThickness = BorderWidth;
 

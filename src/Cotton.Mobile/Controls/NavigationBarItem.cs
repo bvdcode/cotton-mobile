@@ -51,6 +51,13 @@ namespace Cotton.Mobile.Controls
             Colors.Transparent,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty PressedFillColorProperty = BindableProperty.Create(
+            nameof(PressedFillColor),
+            typeof(Color),
+            typeof(NavigationBarItem),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
@@ -200,6 +207,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(FillColorProperty, value);
         }
 
+        public Color PressedFillColor
+        {
+            get => (Color)GetValue(PressedFillColorProperty);
+            set => SetValue(PressedFillColorProperty, value);
+        }
+
         public Color BorderColor
         {
             get => (Color)GetValue(BorderColorProperty);
@@ -345,7 +358,7 @@ namespace Cotton.Mobile.Controls
             }
 
             Opacity = ResolvePressableOpacity(1);
-            _container.BackgroundColor = FillColor;
+            _container.BackgroundColor = IsPressed ? PressedFillColor : FillColor;
             _container.HeightRequest = ItemHeight;
             _container.Padding = ContentPadding;
             _container.Stroke = new SolidColorBrush(BorderColor);

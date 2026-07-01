@@ -37,8 +37,7 @@
 
         <Label Grid.Column="1"
                Text="{Binding Source={x:Reference Root}, Path=TitleText}"
-               Style="{StaticResource M3AppBarTitleLine}"
-               VerticalOptions="Center">
+               Style="{StaticResource M3AppBarTitleLine}">
             <Label.Triggers>
                 <DataTrigger TargetType="Label"
                              Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"

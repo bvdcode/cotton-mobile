@@ -76,8 +76,7 @@
                         <Grid ColumnDefinitions="Auto,*,Auto"
                               Style="{StaticResource M3SecondaryFileListItemGrid}">
                             <controls:IconFrame IconData="{x:Static controls:IconPathData.File}"
-                                                Style="{StaticResource M3FileThumbnailFrame}"
-                                                VerticalOptions="Center" />
+                                                Style="{StaticResource M3FileThumbnailFrame}" />
 
                             <VerticalStackLayout Grid.Column="1"
                                                  Style="{StaticResource M3SecondaryFileListTextStack}">
@@ -90,8 +89,7 @@
 
                             <HorizontalStackLayout Grid.Column="2"
                                                    Style="{StaticResource M3RowActionCluster}">
-                                <Border Style="{StaticResource M3NeutralChip}"
-                                        VerticalOptions="Center">
+                                <Border Style="{StaticResource M3RowActionChip}">
                                     <Label Text="{Binding BadgeText}"
                                            Style="{StaticResource M3ChipLabel}" />
                                 </Border>

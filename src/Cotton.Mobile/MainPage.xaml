@@ -134,8 +134,7 @@
                                                      SemanticProperties.Description="Up" />
 
                                 <VerticalStackLayout Grid.Column="1"
-                                                     Style="{StaticResource M3CardTextStack}"
-                                                     VerticalOptions="Center">
+                                                     Style="{StaticResource M3FileBrowserTitleStack}">
                                     <Label Text="{Binding Display.FilesTitle}"
                                            Style="{StaticResource M3BrowserTitleLine}" />
 
@@ -509,10 +508,7 @@
 
                             <FlexLayout IsVisible="{Binding Display.IsFileTileViewVisible}"
                                         BindableLayout.ItemsSource="{Binding Display.FileEntries}"
-                                        Wrap="Wrap"
-                                        AlignItems="Start"
-                                        HorizontalOptions="Fill"
-                                        JustifyContent="Start">
+                                        Style="{StaticResource M3FileTileWrapLayout}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
@@ -665,9 +661,8 @@
         </Border>
 
         <HorizontalStackLayout Grid.Row="3"
-                               HorizontalOptions="Center"
-                               VerticalOptions="Center"
-                               IsVisible="{Binding Display.IsLegalFooterVisible}">
+                               IsVisible="{Binding Display.IsLegalFooterVisible}"
+                               Style="{StaticResource M3LegalFooterBar}">
             <controls:TextAction Text="Privacy"
                                  Command="{Binding PrivacyPolicyCommand}" />
         </HorizontalStackLayout>

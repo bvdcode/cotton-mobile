@@ -295,6 +295,10 @@
         <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3RowActionChip" BasedOn="{StaticResource M3NeutralChip}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileThumbnailSurface">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
@@ -349,13 +353,16 @@
 
     <Style TargetType="controls:IconFrame" x:Key="M3FolderThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}">
         <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="controls:IconFrame" x:Key="M3NeutralThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}" />
 
     <Style TargetType="controls:IconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
-    <Style TargetType="controls:IconFrame" x:Key="M3FileThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+    <Style TargetType="controls:IconFrame" x:Key="M3FileThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
 
     <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
@@ -576,6 +583,13 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
+    <Style TargetType="FlexLayout" x:Key="M3FileTileWrapLayout">
+        <Setter Property="Wrap" Value="Wrap" />
+        <Setter Property="AlignItems" Value="Start" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="JustifyContent" Value="Start" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3FileTileMetadataGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
     </Style>
@@ -745,6 +759,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3SingleLineListItemTitle" BasedOn="{StaticResource M3CardTitle}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3InlineActionBarGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
@@ -821,6 +839,10 @@
 
     <Style TargetType="VerticalStackLayout" x:Key="M3CardTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserTitleStack" BasedOn="{StaticResource M3CardTextStack}">
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileListTextStack" BasedOn="{StaticResource M3CardTextStack}">
@@ -918,6 +940,11 @@
     <Style TargetType="HorizontalStackLayout" x:Key="M3TopAppBarActionCluster">
         <Setter Property="Spacing" Value="{StaticResource Space4}" />
         <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3LegalFooterBar">
+        <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 

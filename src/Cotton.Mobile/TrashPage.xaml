@@ -183,8 +183,7 @@
 
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="Auto,*,Auto"
-                                  RowSpacing="{StaticResource Space8}"
-                                  ColumnSpacing="{StaticResource Space12}">
+                                  Style="{StaticResource M3MetadataCardGrid}">
                                 <Border Grid.RowSpan="2"
                                         Style="{StaticResource M3FileThumbnailSurface}"
                                         VerticalOptions="Start">

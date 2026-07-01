@@ -136,21 +136,53 @@
                                          BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
-                                <Grid ColumnDefinitions="*,Auto"
+                                <Grid ColumnDefinitions="Auto,*,Auto"
                                       RowDefinitions="Auto,Auto"
                                       Style="{StaticResource M3SettingsListItemGrid}">
-                                    <Label Text="{Binding Title}"
+                                    <Border Grid.RowSpan="2"
+                                            Style="{StaticResource M3FileThumbnailSurface}"
+                                            VerticalOptions="Start">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
+                                                           Style="{StaticResource M3SecurityThumbnailIcon}">
+                                            <controls:IconView.Triggers>
+                                                <DataTrigger TargetType="controls:IconView"
+                                                             Binding="{Binding NeedsAttention}"
+                                                             Value="True">
+                                                    <Setter Property="IconData"
+                                                            Value="{x:Static controls:IconPathData.Error}" />
+                                                    <Setter Property="IconColor"
+                                                            Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                                </DataTrigger>
+                                            </controls:IconView.Triggers>
+                                        </controls:IconView>
+                                    </Border>
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrong}"
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
 
-                                    <Label Grid.Column="1"
-                                           Text="{Binding StatusText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                    <Border Grid.Column="2"
+                                            Style="{StaticResource M3NeutralChip}"
+                                            HorizontalOptions="End">
+                                        <Label Text="{Binding StatusText}"
+                                               Style="{StaticResource M3ChipLabel}"
+                                               MaxLines="1"
+                                               LineBreakMode="NoWrap">
+                                            <Label.Triggers>
+                                                <DataTrigger TargetType="Label"
+                                                             Binding="{Binding NeedsAttention}"
+                                                             Value="True">
+                                                    <Setter Property="TextColor"
+                                                            Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                                </DataTrigger>
+                                            </Label.Triggers>
+                                        </Label>
+                                    </Border>
 
                                     <Label Grid.Row="1"
+                                           Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupporting}"

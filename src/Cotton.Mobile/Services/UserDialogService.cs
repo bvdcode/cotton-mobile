@@ -30,7 +30,9 @@ namespace Cotton.Mobile.Services
                         return;
                     }
 
-                    await page.DisplayAlertAsync(title, message, cancel);
+                    MaterialDialogPage dialog = MaterialDialogPage.Alert(title, message, cancel);
+                    await page.Navigation.PushModalAsync(dialog, animated: false);
+                    await dialog.WaitForResultAsync();
                 });
             }
             catch (Exception exception)
@@ -51,7 +53,10 @@ namespace Cotton.Mobile.Services
                         return false;
                     }
 
-                    return await page.DisplayAlertAsync(title, message, accept, cancel);
+                    MaterialDialogPage dialog = MaterialDialogPage.Confirmation(title, message, accept, cancel);
+                    await page.Navigation.PushModalAsync(dialog, animated: false);
+                    string? result = await dialog.WaitForResultAsync();
+                    return result is not null;
                 });
             }
             catch (Exception exception)
@@ -79,13 +84,15 @@ namespace Cotton.Mobile.Services
                         return null;
                     }
 
-                    return await page.DisplayPromptAsync(
+                    MaterialDialogPage dialog = MaterialDialogPage.Prompt(
                         title,
                         message,
                         accept,
                         cancel,
-                        initialValue: initialValue,
-                        maxLength: maxLength);
+                        initialValue,
+                        maxLength);
+                    await page.Navigation.PushModalAsync(dialog, animated: false);
+                    return await dialog.WaitForResultAsync();
                 });
             }
             catch (Exception exception)

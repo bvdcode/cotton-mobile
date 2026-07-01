@@ -64,6 +64,8 @@
     <x:Double x:Key="M3ActionSheetRowIconFrameSize">36</x:Double>
     <x:Double x:Key="M3ActionSheetRowIconSize">20</x:Double>
     <x:Double x:Key="M3ActionSheetRowMinHeight">56</x:Double>
+    <x:Double x:Key="M3DialogMaxWidth">520</x:Double>
+    <x:Double x:Key="M3DialogButtonMinWidth">76</x:Double>
 
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
     <Thickness x:Key="M3NoPadding">0</Thickness>
@@ -104,4 +106,7 @@
     <Thickness x:Key="M3ActionSheetPadding">16,10,16,16</Thickness>
     <Thickness x:Key="M3ActionSheetTitleMargin">8,8,8,6</Thickness>
     <Thickness x:Key="M3ActionSheetRowPadding">10,8</Thickness>
+    <Thickness x:Key="M3DialogMargin">24</Thickness>
+    <Thickness x:Key="M3DialogPadding">24</Thickness>
+    <Thickness x:Key="M3DialogTextButtonPadding">14,10</Thickness>
 </ResourceDictionary>

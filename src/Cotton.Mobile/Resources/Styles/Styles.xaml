@@ -573,6 +573,10 @@
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FilledButtonHeight}" />
     </Style>
 
+    <Style TargetType="controls:FilledButton" x:Key="M3DialogFilledButton" BasedOn="{StaticResource M3FilledButton}">
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DialogButtonMinWidth}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3IconButtonBase">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
@@ -737,6 +741,14 @@
         <Setter Property="ContentPadding" Value="{StaticResource M3FooterLinkPadding}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FooterLinkMinHeight}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
+    </Style>
+
+    <Style TargetType="controls:TextAction" x:Key="M3DialogTextAction" BasedOn="{StaticResource M3FooterTextAction}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
+        <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
+        <Setter Property="ContentPadding" Value="{StaticResource M3DialogTextButtonPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3DialogButtonMinWidth}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3TextViewerContent">

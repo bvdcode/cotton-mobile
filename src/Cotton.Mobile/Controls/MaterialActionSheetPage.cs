@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Controls
             };
 
             BoxView scrim = new();
-            SetThemeColor(scrim, BoxView.ColorProperty, "M3LightScrim", "M3DarkScrim");
+            MaterialResources.SetThemeColor(scrim, BoxView.ColorProperty, "M3LightScrim", "M3DarkScrim");
             scrim.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = CreateDismissCommand(null),
@@ -68,8 +68,8 @@ namespace Cotton.Mobile.Controls
             Border sheet = CreateSheetSurface();
             VerticalStackLayout stack = new()
             {
-                Padding = GetResource<Thickness>("M3ActionSheetPadding"),
-                Spacing = GetResource<double>("Space8"),
+                Padding = MaterialResources.Get<Thickness>("M3ActionSheetPadding"),
+                Spacing = MaterialResources.Get<double>("Space8"),
             };
 
             stack.Add(CreateHandle());
@@ -100,14 +100,18 @@ namespace Cotton.Mobile.Controls
             {
                 HorizontalOptions = LayoutOptions.Fill,
                 VerticalOptions = LayoutOptions.End,
-                MaximumWidthRequest = GetResource<double>("M3ActionSheetMaxWidth"),
-                StrokeThickness = GetResource<double>("M3StrokeNone"),
+                MaximumWidthRequest = MaterialResources.Get<double>("M3ActionSheetMaxWidth"),
+                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
                 StrokeShape = new RoundRectangle
                 {
-                    CornerRadius = GetResource<CornerRadius>("M3ActionSheetCornerRadius"),
+                    CornerRadius = MaterialResources.Get<CornerRadius>("M3ActionSheetCornerRadius"),
                 },
             };
-            SetThemeColor(sheet, BackgroundColorProperty, "M3LightSurfaceContainerLowest", "M3DarkSurfaceContainerLow");
+            MaterialResources.SetThemeColor(
+                sheet,
+                BackgroundColorProperty,
+                "M3LightSurfaceContainerLowest",
+                "M3DarkSurfaceContainerLow");
             return sheet;
         }
 
@@ -115,16 +119,20 @@ namespace Cotton.Mobile.Controls
         {
             Border handle = new()
             {
-                WidthRequest = GetResource<double>("M3ActionSheetHandleWidth"),
-                HeightRequest = GetResource<double>("M3ActionSheetHandleHeight"),
+                WidthRequest = MaterialResources.Get<double>("M3ActionSheetHandleWidth"),
+                HeightRequest = MaterialResources.Get<double>("M3ActionSheetHandleHeight"),
                 HorizontalOptions = LayoutOptions.Center,
-                StrokeThickness = GetResource<double>("M3StrokeNone"),
+                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
                 StrokeShape = new RoundRectangle
                 {
-                    CornerRadius = new CornerRadius(GetResource<double>("ShapeFull")),
+                    CornerRadius = new CornerRadius(MaterialResources.Get<double>("ShapeFull")),
                 },
             };
-            SetThemeColor(handle, BackgroundColorProperty, "M3LightOutlineVariant", "M3DarkOutlineVariant");
+            MaterialResources.SetThemeColor(
+                handle,
+                BackgroundColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             return handle;
         }
 
@@ -133,8 +141,8 @@ namespace Cotton.Mobile.Controls
             Label label = new()
             {
                 Text = title,
-                Style = GetResource<Style>("M3PanelTitle"),
-                Margin = GetResource<Thickness>("M3ActionSheetTitleMargin"),
+                Style = MaterialResources.Get<Style>("M3PanelTitle"),
+                Margin = MaterialResources.Get<Thickness>("M3ActionSheetTitleMargin"),
                 MaxLines = 3,
                 LineBreakMode = LineBreakMode.TailTruncation,
             };
@@ -154,36 +162,36 @@ namespace Cotton.Mobile.Controls
                 IconData = ResolveIconData(displayLabel, isDestructive, isCancel),
                 IsSelected = isSelected,
                 Command = CreateDismissCommand(result),
-                RowCornerRadius = GetResource<double>("ShapeExtraLarge"),
-                RowPadding = GetResource<Thickness>("M3ActionSheetRowPadding"),
-                RowMinHeight = GetResource<double>("M3ActionSheetRowMinHeight"),
-                IconFrameSize = GetResource<double>("M3ActionSheetRowIconFrameSize"),
-                IconSize = GetResource<double>("M3ActionSheetRowIconSize"),
-                IconFrameBorderWidth = GetResource<double>("M3StrokeThin"),
-                TextFontSize = GetResource<double>("M3LabelLargeFontSize"),
-                TextLineHeight = GetResource<double>("M3LabelLargeLineHeight"),
-                ContentSpacing = GetResource<double>("Space12"),
-                PressedOpacityMultiplier = GetResource<double>("M3InteractionPressedOpacityFactor"),
-                DisabledOpacity = GetResource<double>("M3InteractionDisabledOpacity"),
+                RowCornerRadius = MaterialResources.Get<double>("ShapeExtraLarge"),
+                RowPadding = MaterialResources.Get<Thickness>("M3ActionSheetRowPadding"),
+                RowMinHeight = MaterialResources.Get<double>("M3ActionSheetRowMinHeight"),
+                IconFrameSize = MaterialResources.Get<double>("M3ActionSheetRowIconFrameSize"),
+                IconSize = MaterialResources.Get<double>("M3ActionSheetRowIconSize"),
+                IconFrameBorderWidth = MaterialResources.Get<double>("M3StrokeThin"),
+                TextFontSize = MaterialResources.Get<double>("M3LabelLargeFontSize"),
+                TextLineHeight = MaterialResources.Get<double>("M3LabelLargeLineHeight"),
+                ContentSpacing = MaterialResources.Get<double>("Space12"),
+                PressedOpacityMultiplier = MaterialResources.Get<double>("M3InteractionPressedOpacityFactor"),
+                DisabledOpacity = MaterialResources.Get<double>("M3InteractionDisabledOpacity"),
             };
 
             SemanticProperties.SetDescription(row, displayLabel);
-            SetThemeColor(
+            MaterialResources.SetThemeColor(
                 row,
                 ActionSheetItemView.RowBackgroundColorProperty,
                 "M3LightSurfaceContainerLowest",
                 "M3DarkSurfaceContainerLow");
-            SetThemeColor(
+            MaterialResources.SetThemeColor(
                 row,
                 ActionSheetItemView.PressedRowBackgroundColorProperty,
                 "M3LightSurfaceContainerHigh",
                 "M3DarkSurfaceContainerHigh");
-            SetThemeColor(
+            MaterialResources.SetThemeColor(
                 row,
                 ActionSheetItemView.IconFrameBackgroundColorProperty,
                 "M3LightSurfaceContainer",
                 "M3DarkSurfaceContainer");
-            SetThemeColor(
+            MaterialResources.SetThemeColor(
                 row,
                 ActionSheetItemView.IconFrameBorderColorProperty,
                 "M3LightOutlineVariant",
@@ -191,13 +199,25 @@ namespace Cotton.Mobile.Controls
 
             if (isDestructive)
             {
-                SetThemeColor(row, ActionSheetItemView.TextColorProperty, "M3LightError", "M3DarkError");
-                SetThemeColor(row, ActionSheetItemView.IconColorProperty, "M3LightError", "M3DarkError");
+                MaterialResources.SetThemeColor(
+                    row,
+                    ActionSheetItemView.TextColorProperty,
+                    "M3LightError",
+                    "M3DarkError");
+                MaterialResources.SetThemeColor(
+                    row,
+                    ActionSheetItemView.IconColorProperty,
+                    "M3LightError",
+                    "M3DarkError");
             }
             else
             {
-                SetThemeColor(row, ActionSheetItemView.TextColorProperty, "M3LightOnSurface", "M3DarkOnSurface");
-                row.IconColor = GetResource<Color>("M3Accent");
+                MaterialResources.SetThemeColor(
+                    row,
+                    ActionSheetItemView.TextColorProperty,
+                    "M3LightOnSurface",
+                    "M3DarkOnSurface");
+                row.IconColor = MaterialResources.Get<Color>("M3Accent");
             }
 
             return row;
@@ -207,10 +227,16 @@ namespace Cotton.Mobile.Controls
         {
             BoxView divider = new()
             {
-                HeightRequest = GetResource<double>("M3StrokeThin"),
-                Margin = new Thickness(GetResource<double>("Space8"), GetResource<double>("Space4")),
+                HeightRequest = MaterialResources.Get<double>("M3StrokeThin"),
+                Margin = new Thickness(
+                    MaterialResources.Get<double>("Space8"),
+                    MaterialResources.Get<double>("Space4")),
             };
-            SetThemeColor(divider, BoxView.ColorProperty, "M3LightOutlineVariant", "M3DarkOutlineVariant");
+            MaterialResources.SetThemeColor(
+                divider,
+                BoxView.ColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             return divider;
         }
 
@@ -343,27 +369,5 @@ namespace Cotton.Mobile.Controls
             return false;
         }
 
-        private static void SetThemeColor(
-            BindableObject bindable,
-            BindableProperty property,
-            string lightResourceKey,
-            string darkResourceKey)
-        {
-            bindable.SetAppThemeColor(
-                property,
-                GetResource<Color>(lightResourceKey),
-                GetResource<Color>(darkResourceKey));
-        }
-
-        private static T GetResource<T>(string key)
-        {
-            ResourceDictionary? resources = Application.Current?.Resources;
-            if (resources?.TryGetValue(key, out object value) == true && value is T typedValue)
-            {
-                return typedValue;
-            }
-
-            throw new InvalidOperationException($"Material action sheet resource '{key}' was not found.");
-        }
     }
 }

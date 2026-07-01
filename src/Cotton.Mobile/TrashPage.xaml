@@ -156,7 +156,7 @@
                                     <Setter Property="Stroke"
                                             Value="{StaticResource M3Accent}" />
                                     <Setter Property="StrokeThickness"
-                                            Value="1" />
+                                            Value="{StaticResource M3StrokeThin}" />
                                     <Setter Property="BackgroundColor"
                                             Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>
@@ -168,34 +168,40 @@
                             </Border.GestureRecognizers>
 
                             <Grid RowDefinitions="Auto,Auto"
-                                  ColumnDefinitions="*,Auto"
+                                  ColumnDefinitions="Auto,*,Auto"
                                   RowSpacing="{StaticResource Space8}"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardTitle}"
-                                           MaxLines="2"
-                                           LineBreakMode="TailTruncation" />
+                                <Border Grid.RowSpan="2"
+                                        Style="{StaticResource M3FileThumbnailSurface}"
+                                        VerticalOptions="Start">
+                                    <Grid>
+                                        <Image Source="{Binding Thumbnail.Source}"
+                                               Aspect="AspectFill"
+                                               IsVisible="{Binding IsPreviewImageVisible}" />
 
-                                    <Label Text="{Binding DisplayDetails}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="2"
-                                           LineBreakMode="TailTruncation" />
-                                </VerticalStackLayout>
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
+                                                           Style="{StaticResource M3FolderThumbnailIcon}" />
 
-                                <Border Grid.Column="1"
-                                        Style="{StaticResource M3NeutralChip}">
-                                    <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
+                                                           IsVisible="{Binding Thumbnail.IsLoading}"
+                                                           HorizontalOptions="Center"
+                                                           VerticalOptions="Center" />
+
+                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
+                                               IsVisible="{Binding IsPlaceholderTextVisible}"
+                                               Style="{StaticResource M3ThumbnailPlaceholder}"
+                                               FontSize="{Binding Thumbnail.PlaceholderFontSize}"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center" />
+                                    </Grid>
                                 </Border>
 
-                                <Border Grid.Column="1"
+                                <Border Grid.Column="0"
                                         IsVisible="{Binding IsSelected}"
                                         Style="{StaticResource M3FileSelectionMark}"
                                         HorizontalOptions="End"
-                                        VerticalOptions="End">
+                                        VerticalOptions="Start">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
                                                        IconSize="{StaticResource M3FileSelectionIconSize}"
@@ -203,7 +209,29 @@
                                                        VerticalOptions="Center" />
                                 </Border>
 
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Style="{StaticResource M3CardTextStack}">
+                                    <Label Text="{Binding Name}"
+                                           Style="{StaticResource M3CardTitle}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+
+                                    <Label Text="{Binding DisplayDetails}"
+                                           Style="{StaticResource M3CardSupporting}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+
+                                <Border Grid.Column="2"
+                                        Style="{StaticResource M3NeutralChip}">
+                                    <Label Text="{Binding BadgeText}"
+                                           Style="{StaticResource M3ChipLabel}"
+                                           MaxLines="1"
+                                           LineBreakMode="NoWrap" />
+                                </Border>
+
                                 <HorizontalStackLayout Grid.Row="1"
+                                                       Grid.Column="1"
                                                        Grid.ColumnSpan="2"
                                                        Spacing="{StaticResource Space8}"
                                                        HorizontalOptions="End"
@@ -245,7 +273,7 @@
                                     <Setter Property="Stroke"
                                             Value="{StaticResource M3Accent}" />
                                     <Setter Property="StrokeThickness"
-                                            Value="1" />
+                                            Value="{StaticResource M3StrokeThin}" />
                                     <Setter Property="BackgroundColor"
                                             Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
                                 </DataTrigger>

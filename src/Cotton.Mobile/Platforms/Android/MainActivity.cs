@@ -25,7 +25,7 @@ namespace Cotton.Mobile
         {
             base.OnCreate(savedInstanceState);
 
-            ApplySystemBars();
+            RequestApplySystemBars();
             StageShareIntent(Intent);
             StageNotificationIntent(Intent);
         }
@@ -70,7 +70,7 @@ namespace Cotton.Mobile
         {
             base.OnResume();
 
-            ApplySystemBars();
+            RequestApplySystemBars();
 
             IPlatformApplication.Current?.Services
                 .GetService<IApplicationForegroundService>()
@@ -97,7 +97,17 @@ namespace Cotton.Mobile
         {
             base.OnConfigurationChanged(newConfig);
 
-            ApplySystemBars();
+            RequestApplySystemBars();
+        }
+
+        public override void OnWindowFocusChanged(bool hasFocus)
+        {
+            base.OnWindowFocusChanged(hasFocus);
+
+            if (hasFocus)
+            {
+                RequestApplySystemBars();
+            }
         }
 
         private void StageShareIntent(Intent? intent)
@@ -191,6 +201,12 @@ namespace Cotton.Mobile
             intent?.RemoveExtra(AndroidNotificationIntentExtras.IsNotificationLaunch);
             intent?.RemoveExtra(AndroidNotificationIntentExtras.NotificationId);
             intent?.RemoveExtra(AndroidNotificationIntentExtras.EventCategory);
+        }
+
+        private void RequestApplySystemBars()
+        {
+            ApplySystemBars();
+            Window?.DecorView.Post(ApplySystemBars);
         }
 
         private void ApplySystemBars()

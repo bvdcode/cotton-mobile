@@ -73,7 +73,7 @@
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
     <Thickness x:Key="M3NoPadding">0</Thickness>
     <Thickness x:Key="M3AuthPanelPadding">16</Thickness>
-    <Thickness x:Key="M3AuthShellMargin">0,32,0,0</Thickness>
+    <Thickness x:Key="M3AuthShellMargin">0,88,0,0</Thickness>
     <Thickness x:Key="M3AppLockGatePadding">24</Thickness>
     <Thickness x:Key="M3CompactChipPadding">5,1</Thickness>
     <Thickness x:Key="M3ContentCardPadding">16</Thickness>

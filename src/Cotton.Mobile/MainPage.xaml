@@ -350,11 +350,27 @@
                                 </Grid>
                             </Border>
 
-                            <SearchBar x:Name="FileSearchBar"
-                                       Text="{Binding Display.FileSearchText, Mode=TwoWay}"
-                                       IsVisible="{Binding Display.IsFileSearchVisible}"
-                                       IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                       Placeholder="Search" />
+                            <Border IsVisible="{Binding Display.IsFileSearchVisible}"
+                                    IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                    Style="{StaticResource M3OutlinedInputField}">
+                                <Grid ColumnDefinitions="Auto,*"
+                                      Style="{StaticResource M3AuthInputGrid}">
+                                    <Border Style="{StaticResource M3AuthInputIconFrame}">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.Search}"
+                                                           Style="{StaticResource M3AuthInputIcon}" />
+                                    </Border>
+
+                                    <Entry x:Name="FileSearchBar"
+                                           Grid.Column="1"
+                                           Text="{Binding Display.FileSearchText, Mode=TwoWay}"
+                                           IsVisible="{Binding Display.IsFileSearchVisible}"
+                                           IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                           Placeholder="Search"
+                                           ReturnType="Search"
+                                           ClearButtonVisibility="WhileEditing"
+                                           SemanticProperties.Hint="Search files and folders" />
+                                </Grid>
+                            </Border>
 
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
                                     Style="{StaticResource M3SelectionBar}">

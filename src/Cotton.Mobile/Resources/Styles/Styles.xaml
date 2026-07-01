@@ -479,6 +479,21 @@
         <Setter Property="Padding" Value="{StaticResource M3SelectionBarPadding}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3SelectionTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3SelectionTitleText" BasedOn="{StaticResource M3CardSupportingStrong}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3SelectionDetailText" BasedOn="{StaticResource M3CardMeta}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3TrashTileCard" BasedOn="{StaticResource M3SurfaceCard}">
         <Setter Property="Padding" Value="{StaticResource M3TrashTilePadding}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3TrashTileHeight}" />

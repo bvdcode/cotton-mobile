@@ -373,17 +373,12 @@
                                     Style="{StaticResource M3SelectionBar}">
                                 <Grid ColumnDefinitions="*,Auto,Auto"
                                       ColumnSpacing="{StaticResource Space8}">
-                                    <VerticalStackLayout Spacing="{StaticResource Space2}"
-                                                         VerticalOptions="Center">
+                                    <VerticalStackLayout Style="{StaticResource M3SelectionTextStack}">
                                         <Label Text="{Binding Display.FileSelection.TitleText}"
-                                               Style="{StaticResource M3CardSupportingStrong}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
+                                               Style="{StaticResource M3SelectionTitleText}" />
 
                                         <Label Text="{Binding Display.FileSelection.DetailText}"
-                                               Style="{StaticResource M3CardMeta}"
-                                               MaxLines="1"
-                                               LineBreakMode="TailTruncation" />
+                                               Style="{StaticResource M3SelectionDetailText}" />
                                     </VerticalStackLayout>
 
                                     <controls:IconButton Grid.Column="1"

@@ -190,6 +190,8 @@
 
     <Style TargetType="controls:IconView" x:Key="M3TransferThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
 
+    <Style TargetType="controls:IconView" x:Key="M3CaptureThumbnailIcon" BasedOn="{StaticResource M3NeutralThumbnailIcon}" />
+
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />

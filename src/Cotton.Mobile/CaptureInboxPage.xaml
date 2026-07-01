@@ -84,10 +84,18 @@
                     <DataTemplate x:DataType="services:CottonCaptureInboxListItem">
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                                  ColumnDefinitions="*,Auto"
+                                  ColumnDefinitions="Auto,*,Auto"
                                   RowSpacing="{StaticResource Space8}"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
+                                <Border Grid.RowSpan="4"
+                                        Style="{StaticResource M3FileThumbnailSurface}"
+                                        VerticalOptions="Start">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
+                                                       Style="{StaticResource M3CaptureThumbnailIcon}" />
+                                </Border>
+
+                                <VerticalStackLayout Grid.Column="1"
+                                                     Style="{StaticResource M3CardTextStack}">
                                     <Label Text="{Binding DisplayName}"
                                            Style="{StaticResource M3CardTitle}"
                                            MaxLines="1"
@@ -99,7 +107,7 @@
                                            LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
 
-                                <Border Grid.Column="1"
+                                <Border Grid.Column="2"
                                         Style="{StaticResource M3NeutralChip}">
                                     <Label Text="{Binding StatusText}"
                                            Style="{StaticResource M3ChipLabel}"
@@ -108,6 +116,7 @@
                                 </Border>
 
                                 <Grid Grid.Row="1"
+                                      Grid.Column="1"
                                       Grid.ColumnSpan="2"
                                       ColumnDefinitions="Auto,*"
                                       ColumnSpacing="{StaticResource Space8}">
@@ -124,6 +133,7 @@
                                 </Grid>
 
                                 <Label Grid.Row="2"
+                                       Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding DestinationText}"
                                        IsVisible="{Binding IsDestinationVisible}"
@@ -132,6 +142,7 @@
                                        LineBreakMode="WordWrap" />
 
                                 <Label Grid.Row="3"
+                                       Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"

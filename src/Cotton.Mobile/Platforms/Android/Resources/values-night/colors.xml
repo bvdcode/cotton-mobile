@@ -2,4 +2,5 @@
 <resources>
     <color name="cotton_surface">#0A0F0C</color>
     <color name="cotton_accent">#C6FF00</color>
+    <color name="cotton_text_highlight">#33C6FF00</color>
 </resources>

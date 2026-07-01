@@ -3,6 +3,11 @@
     <style name="Cotton.SplashTheme" parent="Maui.SplashTheme">
         <item name="android:colorAccent">@color/cotton_accent</item>
         <item name="colorAccent">@color/cotton_accent</item>
+        <item name="android:textColorHighlight">@color/cotton_text_highlight</item>
+        <item name="android:textCursorDrawable">@drawable/cotton_text_cursor</item>
+        <item name="android:textSelectHandle">@drawable/cotton_text_select_handle</item>
+        <item name="android:textSelectHandleLeft">@drawable/cotton_text_select_handle</item>
+        <item name="android:textSelectHandleRight">@drawable/cotton_text_select_handle</item>
         <item name="android:statusBarColor">@color/cotton_surface</item>
         <item name="android:navigationBarColor">@color/cotton_surface</item>
         <item name="android:navigationBarDividerColor">@color/cotton_surface</item>

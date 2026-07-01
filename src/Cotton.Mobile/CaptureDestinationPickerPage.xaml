@@ -51,9 +51,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding SummaryText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingLine}" />
                     </VerticalStackLayout>
 
                     <controls:IconButton Grid.Column="2"

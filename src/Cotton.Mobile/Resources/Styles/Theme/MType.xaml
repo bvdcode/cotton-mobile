@@ -164,6 +164,11 @@
 
     <Style TargetType="Label" x:Key="M3CardSupporting" BasedOn="{StaticResource M3LabelMedium}" />
 
+    <Style TargetType="Label" x:Key="M3CardSupportingLine" BasedOn="{StaticResource M3CardSupporting}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3EmptyBody" BasedOn="{StaticResource M3CardSupporting}">
         <Setter Property="MaxLines" Value="2" />
         <Setter Property="LineBreakMode" Value="WordWrap" />

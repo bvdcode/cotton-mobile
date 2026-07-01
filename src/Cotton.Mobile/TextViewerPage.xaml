@@ -23,15 +23,11 @@
               RowSpacing="{StaticResource Space12}">
             <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
-                       Style="{StaticResource M3CardSupporting}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3CardSupportingLine}" />
 
                 <Label Text="{Binding Status}"
                        IsVisible="{Binding IsStatusVisible}"
-                       Style="{StaticResource M3CardSupporting}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3CardSupportingLine}" />
             </VerticalStackLayout>
 
             <Border Grid.Row="1"

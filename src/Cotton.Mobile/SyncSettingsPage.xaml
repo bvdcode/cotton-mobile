@@ -105,9 +105,7 @@
 
                                 <Label Grid.Column="2"
                                        Text="{Binding StatusText}"
-                                       Style="{StaticResource M3CardSupporting}"
-                                       MaxLines="1"
-                                       LineBreakMode="TailTruncation">
+                                       Style="{StaticResource M3CardSupportingLine}">
                                     <Label.Triggers>
                                         <DataTrigger TargetType="Label"
                                                      Binding="{Binding IsAttentionVisible}"
@@ -122,17 +120,13 @@
                                        Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding PathText}"
-                                       Style="{StaticResource M3CardSupporting}"
-                                       MaxLines="1"
-                                       LineBreakMode="TailTruncation" />
+                                       Style="{StaticResource M3CardSupportingLine}" />
 
                                 <Label Grid.Row="2"
                                        Grid.Column="1"
                                        Grid.ColumnSpan="2"
                                        Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupporting}"
-                                       MaxLines="1"
-                                       LineBreakMode="TailTruncation" />
+                                       Style="{StaticResource M3CardSupportingLine}" />
 
                                 <HorizontalStackLayout Grid.Row="3"
                                                        Grid.Column="1"

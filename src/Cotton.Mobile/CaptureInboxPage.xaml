@@ -95,9 +95,7 @@
                                            Style="{StaticResource M3CardTitle}" />
 
                                     <Label Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
                                 </VerticalStackLayout>
 
                                 <Border Grid.Column="2"
@@ -120,9 +118,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding MetadataText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
                                 </Grid>
 
                                 <Label Grid.Row="2"

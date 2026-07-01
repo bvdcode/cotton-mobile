@@ -28,9 +28,7 @@
                            Style="{StaticResource M3ScreenHeaderSupporting}" />
 
                     <Label Text="Files saved on this device"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardSupportingLine}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"
@@ -185,16 +183,12 @@
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="2"
                                            Text="{Binding CountText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -255,16 +249,12 @@
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
                                            Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="2"
                                            Text="{Binding StatusText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
 
                                     <ProgressBar Grid.Row="2"
                                                  Grid.Column="1"

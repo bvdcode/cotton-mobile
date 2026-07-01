@@ -68,9 +68,7 @@
                                          Grid.ColumnSpan="2"
                                          Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding PolicySummaryText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingLine}" />
 
                         <Label Text="{Binding DestinationStorageEstimateTitle}"
                                Style="{StaticResource M3CardSupportingStrong}"

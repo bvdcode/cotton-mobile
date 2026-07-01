@@ -473,9 +473,7 @@
                                                        Style="{StaticResource M3CardTitle}" />
 
                                                 <Label Text="{Binding DisplayDetails}"
-                                                       Style="{StaticResource M3CardSupporting}"
-                                                       MaxLines="1"
-                                                       LineBreakMode="TailTruncation" />
+                                                       Style="{StaticResource M3CardSupportingLine}" />
                                             </VerticalStackLayout>
 
                                             <Grid x:Name="ListEntryTouchSurface"

@@ -114,9 +114,7 @@
                         <Label Grid.Column="1"
                                Text="{Binding RemotePushStatusText}"
                                IsVisible="{Binding IsRemotePushStatusVisible}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingLine}" />
                     </Grid>
 
                     <Grid IsVisible="{Binding IsRemotePushUnavailable}"

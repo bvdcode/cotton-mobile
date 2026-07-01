@@ -47,9 +47,7 @@
 
                     <Label Grid.Column="1"
                            Text="{Binding AppLockStatusText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardSupportingLine}" />
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
@@ -77,9 +75,7 @@
 
                     <Label Grid.Column="1"
                            Text="{Binding DeviceUnlockStatusText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardSupportingLine}" />
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
@@ -125,9 +121,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding PermissionLedgerStatusText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingLine}" />
 
                         <Label Grid.Row="1"
                                Grid.ColumnSpan="2"
@@ -208,9 +202,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding AccountSessionsStatusText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingLine}" />
 
                         <Label Grid.Row="1"
                                Grid.ColumnSpan="2"
@@ -287,25 +279,19 @@
                                            Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
 
                                     <Label Grid.Row="2"
                                            Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding AccessText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
 
                                     <Label Grid.Row="3"
                                            Grid.Column="1"
                                            Grid.ColumnSpan="2"
                                            Text="{Binding DurationText}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation" />
+                                           Style="{StaticResource M3CardSupportingLine}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>
@@ -322,9 +308,7 @@
 
                     <Label Grid.Column="1"
                            Text="{Binding LogoutCacheCleanupStatusText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardSupportingLine}" />
 
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"

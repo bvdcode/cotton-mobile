@@ -229,6 +229,10 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3MainPageRootGrid">
+        <Setter Property="Padding" Value="{StaticResource M3MainPagePadding}" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3MainContentStack">
         <Setter Property="Spacing" Value="{StaticResource Space24}" />
         <Setter Property="Padding" Value="{StaticResource M3MainContentBottomPadding}" />
@@ -608,6 +612,10 @@
         <Setter Property="AlignItems" Value="Start" />
         <Setter Property="HorizontalOptions" Value="Fill" />
         <Setter Property="JustifyContent" Value="Start" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileTileSlotGrid">
+        <Setter Property="Padding" Value="{StaticResource M3FileTileOuterPadding}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileTileMetadataGrid">

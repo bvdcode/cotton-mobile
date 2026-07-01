@@ -8,8 +8,8 @@
              Shell.NavBarIsVisible="False">
 
     <Grid x:Name="RootLayout"
-          Padding="{StaticResource M3MainPagePadding}"
-          RowDefinitions="*,Auto,Auto,Auto">
+          RowDefinitions="*,Auto,Auto,Auto"
+          Style="{StaticResource M3MainPageRootGrid}">
         <ScrollView Grid.Row="0"
                     IsVisible="{Binding Display.IsBrandHeaderVisible}">
             <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
@@ -517,7 +517,7 @@
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Padding="{StaticResource M3FileTileOuterPadding}">
+                                              Style="{StaticResource M3FileTileSlotGrid}">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Style="{StaticResource M3FileTileCard}">
                                                 <Grid Style="{StaticResource M3FileTileContentGrid}">

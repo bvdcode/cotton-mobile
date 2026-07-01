@@ -999,10 +999,10 @@
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3PrimaryFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
-        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryFileChromeIconButton}">
@@ -1099,11 +1099,11 @@
     <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemSelected" BasedOn="{StaticResource M3NavigationBarItem}">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnPrimary}}" />
-        <Setter Property="FillColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="FillColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
         <Setter Property="PressedFillColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemUnselected" BasedOn="{StaticResource M3NavigationBarItem}">

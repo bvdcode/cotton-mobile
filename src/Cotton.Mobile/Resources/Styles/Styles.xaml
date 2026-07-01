@@ -693,7 +693,10 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="Label" x:Key="M3ViewerOverlayStatus" BasedOn="{StaticResource M3DarkSupportingLine}">
+    <Style TargetType="Label" x:Key="M3ViewerOverlayStatus" BasedOn="{StaticResource M3LabelMedium}">
+        <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurfaceVariant}" />
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
         <Setter Property="Margin" Value="{StaticResource M3ViewerOverlayMargin}" />
         <Setter Property="HorizontalOptions" Value="Start" />
         <Setter Property="VerticalOptions" Value="End" />

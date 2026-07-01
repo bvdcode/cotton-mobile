@@ -52,13 +52,13 @@
                     <VerticalStackLayout Grid.Column="1"
                                          Grid.ColumnSpan="2"
                                          Style="{StaticResource M3CardTextStack}">
-                        <Label Text="{Binding CloudQuotaTitle, FallbackValue=Account storage, TargetNullValue=Account storage}"
+                        <Label Text="{Binding CloudQuotaTitle}"
                                Style="{StaticResource M3CardTitle}" />
 
-                        <Label Text="{Binding CloudQuotaSummaryText, FallbackValue=Account storage unavailable., TargetNullValue=Account storage unavailable.}"
+                        <Label Text="{Binding CloudQuotaSummaryText}"
                                Style="{StaticResource M3CardSupportingStrongLine}" />
 
-                        <Label Text="{Binding CloudQuotaDetailText, FallbackValue=Storage limits are not shared by this server., TargetNullValue=Storage limits are not shared by this server.}"
+                        <Label Text="{Binding CloudQuotaDetailText}"
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 

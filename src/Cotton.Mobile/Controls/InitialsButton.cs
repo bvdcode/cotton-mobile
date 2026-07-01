@@ -18,57 +18,57 @@ namespace Cotton.Mobile.Controls
             nameof(TextColor),
             typeof(Color),
             typeof(InitialsButton),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(ButtonBackgroundColor),
             typeof(Color),
             typeof(InitialsButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerLow"));
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
             typeof(InitialsButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
             typeof(InitialsButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),
             typeof(double),
             typeof(InitialsButton),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty ButtonSizeProperty = BindableProperty.Create(
             nameof(ButtonSize),
             typeof(double),
             typeof(InitialsButton),
-            44.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FileActionSize"));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
             typeof(double),
             typeof(InitialsButton),
-            14.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ButtonFontSize"));
 
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
             typeof(InitialsButton),
-            22.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("ShapeExtraLarge"));
 
         public static readonly BindableProperty ButtonOpacityProperty = BindableProperty.Create(
             nameof(ButtonOpacity),

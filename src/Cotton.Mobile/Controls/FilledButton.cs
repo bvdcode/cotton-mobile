@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Globalization;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -18,85 +19,85 @@ namespace Cotton.Mobile.Controls
             nameof(TextColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnAccent"));
 
         public static readonly BindableProperty DisabledTextColorProperty = BindableProperty.Create(
             nameof(DisabledTextColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(ButtonBackgroundColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty DisabledButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(DisabledButtonBackgroundColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHighest"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty DisabledBorderColorProperty = BindableProperty.Create(
             nameof(DisabledBorderColor),
             typeof(Color),
             typeof(FilledButton),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),
             typeof(double),
             typeof(FilledButton),
-            0.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeNone"));
 
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
             typeof(FilledButton),
-            22.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => Convert.ToDouble(MaterialResources.Get<int>("M3ButtonCornerRadius"), CultureInfo.InvariantCulture));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
             typeof(double),
             typeof(FilledButton),
-            14.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ButtonFontSize"));
 
         public static readonly BindableProperty FontAttributesProperty = BindableProperty.Create(
             nameof(FontAttributes),
             typeof(FontAttributes),
             typeof(FilledButton),
-            FontAttributes.None,
+            FontAttributes.Bold,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
             nameof(ContentPadding),
             typeof(Thickness),
             typeof(FilledButton),
-            default(Thickness),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Thickness>("M3FilledButtonPadding"));
 
         private readonly Border _container;
         private readonly Label _label;

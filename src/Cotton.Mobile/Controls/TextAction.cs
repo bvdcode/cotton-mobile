@@ -16,22 +16,22 @@ namespace Cotton.Mobile.Controls
             nameof(TextColor),
             typeof(Color),
             typeof(TextAction),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
             typeof(double),
             typeof(TextAction),
-            12.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3FooterLinkFontSize"));
 
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
             nameof(ContentPadding),
             typeof(Thickness),
             typeof(TextAction),
-            default(Thickness),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Thickness>("M3FooterLinkPadding"));
 
         private readonly Border _container;
         private readonly Label _label;
@@ -50,8 +50,8 @@ namespace Cotton.Mobile.Controls
 
             _container = new Border
             {
-                BackgroundColor = Colors.Transparent,
-                StrokeThickness = 0,
+                BackgroundColor = MaterialResources.Get<Color>("M3Transparent"),
+                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
                 HorizontalOptions = LayoutOptions.Center,
                 VerticalOptions = LayoutOptions.Center,
                 Content = _label,

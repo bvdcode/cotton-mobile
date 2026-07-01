@@ -224,9 +224,7 @@
 
                                 <Border Grid.Column="0"
                                         IsVisible="{Binding IsSelected}"
-                                        Style="{StaticResource M3FileSelectionMark}"
-                                        HorizontalOptions="End"
-                                        VerticalOptions="Start">
+                                        Style="{StaticResource M3FileListSelectionMark}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                        Style="{StaticResource M3FileSelectionCheckIcon}" />
                                 </Border>
@@ -344,10 +342,7 @@
 
                                 <Border Grid.Row="0"
                                         IsVisible="{Binding IsSelected}"
-                                        Style="{StaticResource M3FileSelectionMark}"
-                                        HorizontalOptions="Start"
-                                        VerticalOptions="Start"
-                                        Margin="{StaticResource M3FileTileSelectionMarkMargin}">
+                                        Style="{StaticResource M3FileTileSelectionMark}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                        Style="{StaticResource M3FileSelectionCheckIcon}" />
                                 </Border>

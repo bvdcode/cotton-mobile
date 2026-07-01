@@ -323,6 +323,17 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3FileListSelectionMark" BasedOn="{StaticResource M3FileSelectionMark}">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileTileSelectionMark" BasedOn="{StaticResource M3FileSelectionMark}">
+        <Setter Property="HorizontalOptions" Value="Start" />
+        <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="Margin" Value="{StaticResource M3FileTileSelectionMarkMargin}" />
+    </Style>
+
     <Style TargetType="controls:IconView" x:Key="M3FileSelectionCheckIcon">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileSelectionIconSize}" />

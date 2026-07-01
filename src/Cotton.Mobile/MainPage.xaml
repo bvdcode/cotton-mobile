@@ -631,10 +631,7 @@
 
                                                     <controls:IconButton Grid.Row="0"
                                                                          IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                                         HorizontalOptions="End"
-                                                                         VerticalOptions="Start"
-                                                                         Margin="{StaticResource M3FileTileActionMargin}"
+                                                                         Style="{StaticResource M3FileTileActionIconButton}"
                                                                          Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                                          CommandParameter="{Binding .}"
                                                                          IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"

@@ -333,10 +333,7 @@
                                                HorizontalTextAlignment="Center"
                                                VerticalTextAlignment="Center" />
 
-                                        <Border Style="{StaticResource M3NeutralChip}"
-                                                HorizontalOptions="End"
-                                                VerticalOptions="Start"
-                                                Margin="{StaticResource M3FileTileActionMargin}">
+                                        <Border Style="{StaticResource M3FileTileOverlayChip}">
                                             <Label Text="{Binding BadgeText}"
                                                    Style="{StaticResource M3ChipLabel}"
                                                    MaxLines="1"

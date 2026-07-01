@@ -193,6 +193,11 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3FileTileOverlayChip" BasedOn="{StaticResource M3NeutralChip}">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileThumbnailSurface">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
@@ -543,6 +548,12 @@
 
     <Style TargetType="controls:IconButton" x:Key="M3DestructiveFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3FileTileActionIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
     </Style>
 
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />

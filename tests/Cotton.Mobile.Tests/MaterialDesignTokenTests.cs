@@ -24,6 +24,7 @@ namespace Cotton.Mobile.Tests
         private const string NotificationSettingsPagePath = "src/Cotton.Mobile/NotificationSettingsPage.xaml";
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
+        private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -229,6 +230,39 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsPathTextVisible}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", destinationPickerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Secondary_screen_status_rows_use_reusable_material_control()
+        {
+            string[] screenPaths =
+            [
+                RecentFilesPagePath,
+                ActivityFeedPagePath,
+                TransfersPagePath,
+                FileVersionHistoryPagePath,
+                CaptureInboxPagePath,
+                CaptureDestinationPickerPagePath,
+                TrashPagePath,
+                DiagnosticsPagePath,
+                SyncSettingsPagePath,
+                NotificationSettingsPagePath,
+                SecuritySettingsPagePath,
+                BackupSetupPagePath,
+                StoragePagePath,
+            ];
+
+            foreach (string screenPath in screenPaths)
+            {
+                string page = LoadText(screenPath);
+
+                Assert.Contains("<controls:ScreenStatusView", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3ScreenStatus", page, StringComparison.Ordinal);
+            }
+
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+
+            Assert.Contains("IsVisible=\"{Binding IsNeutralStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

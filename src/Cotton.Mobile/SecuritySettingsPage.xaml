@@ -22,9 +22,8 @@
                                        SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3ScreenStatus}" />
+            <controls:ScreenStatusView Text="{Binding Status}"
+                                       IsVisible="{Binding IsStatusVisible}" />
 
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="*,Auto"

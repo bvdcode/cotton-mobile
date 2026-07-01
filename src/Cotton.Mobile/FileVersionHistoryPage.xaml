@@ -37,10 +37,9 @@
                                Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
         </Grid>
 
-        <Label Grid.Row="1"
-               Text="{Binding Status}"
-               IsVisible="{Binding IsStatusVisible}"
-               Style="{StaticResource M3ScreenStatus}" />
+        <controls:ScreenStatusView Grid.Row="1"
+                                   Text="{Binding Status}"
+                                   IsVisible="{Binding IsStatusVisible}" />
 
             <Grid Grid.Row="2">
                 <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"

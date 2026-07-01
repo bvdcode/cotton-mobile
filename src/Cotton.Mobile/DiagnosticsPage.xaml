@@ -22,9 +22,8 @@
                                        SupportingText="{Binding HeaderVersionText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3ScreenStatus}" />
+            <controls:ScreenStatusView Text="{Binding Status}"
+                                       IsVisible="{Binding IsStatusVisible}" />
 
             <VerticalStackLayout Style="{StaticResource M3DiagnosticsSectionListStack}"
                                  BindableLayout.ItemsSource="{Binding Sections}">

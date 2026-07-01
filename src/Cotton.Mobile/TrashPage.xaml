@@ -79,10 +79,9 @@
                                      ClearButtonVisibility="WhileEditing"
                                      SemanticHint="Search deleted files and folders" />
 
-        <Label Grid.Row="2"
-               Text="{Binding Status}"
-               IsVisible="{Binding IsStatusVisible}"
-               Style="{StaticResource M3ScreenStatus}" />
+        <controls:ScreenStatusView Grid.Row="2"
+                                   Text="{Binding Status}"
+                                   IsVisible="{Binding IsStatusVisible}" />
 
         <Border Grid.Row="3"
                 IsVisible="{Binding IsSelectionBarVisible}"

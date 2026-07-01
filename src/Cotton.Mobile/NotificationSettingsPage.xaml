@@ -47,9 +47,8 @@
                 </Grid>
             </Border>
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsNeutralStatusVisible}"
-                   Style="{StaticResource M3ScreenStatus}" />
+            <controls:ScreenStatusView Text="{Binding Status}"
+                                       IsVisible="{Binding IsNeutralStatusVisible}" />
 
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"

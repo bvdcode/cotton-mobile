@@ -26,9 +26,8 @@
             <controls:ScreenHeaderView Title="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3ScreenStatus}" />
+            <controls:ScreenStatusView Text="{Binding Status}"
+                                       IsVisible="{Binding IsStatusVisible}" />
 
             <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                                Style="{StaticResource M3MetadataListSkeletonView}" />

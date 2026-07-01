@@ -26,10 +26,9 @@
                                    SupportingText="{Binding SummaryText}"
                                    IsBusy="{Binding IsBusy}" />
 
-        <Label Grid.Row="1"
-               Text="{Binding Status}"
-               IsVisible="{Binding IsStatusVisible}"
-               Style="{StaticResource M3ScreenStatus}" />
+        <controls:ScreenStatusView Grid.Row="1"
+                                   Text="{Binding Status}"
+                                   IsVisible="{Binding IsStatusVisible}" />
 
         <controls:MetadataListSkeletonView Grid.Row="2"
                                            IsVisible="{Binding IsLoadingPlaceholderVisible}"

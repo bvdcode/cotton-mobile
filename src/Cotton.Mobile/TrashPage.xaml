@@ -78,10 +78,24 @@
                                VerticalOptions="Center" />
         </Grid>
 
-        <SearchBar Grid.Row="1"
-                   Text="{Binding SearchText, Mode=TwoWay}"
-                   IsVisible="{Binding IsSearchVisible}"
-                   Placeholder="Search trash" />
+        <Border Grid.Row="1"
+                IsVisible="{Binding IsSearchVisible}"
+                Style="{StaticResource M3OutlinedInputField}">
+            <Grid ColumnDefinitions="Auto,*"
+                  Style="{StaticResource M3InputGrid}">
+                <Border Style="{StaticResource M3InputIconFrame}">
+                    <controls:IconView IconData="{x:Static controls:IconPathData.Search}"
+                                       Style="{StaticResource M3InputIcon}" />
+                </Border>
+
+                <Entry Grid.Column="1"
+                       Text="{Binding SearchText, Mode=TwoWay}"
+                       Placeholder="Search trash"
+                       ReturnType="Search"
+                       ClearButtonVisibility="WhileEditing"
+                       SemanticProperties.Hint="Search deleted files and folders" />
+            </Grid>
+        </Border>
 
         <Label Grid.Row="2"
                Text="{Binding Status}"

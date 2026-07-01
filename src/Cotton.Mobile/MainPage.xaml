@@ -66,10 +66,10 @@
                     <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
                         <Border Style="{StaticResource M3OutlinedInputField}">
                             <Grid ColumnDefinitions="Auto,*"
-                                  Style="{StaticResource M3AuthInputGrid}">
-                                <Border Style="{StaticResource M3AuthInputIconFrame}">
+                                  Style="{StaticResource M3InputGrid}">
+                                <Border Style="{StaticResource M3InputIconFrame}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Cloud}"
-                                                       Style="{StaticResource M3AuthInputIcon}" />
+                                                       Style="{StaticResource M3InputIcon}" />
                                 </Border>
 
                                 <Entry Grid.Column="1"
@@ -354,10 +354,10 @@
                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                     Style="{StaticResource M3OutlinedInputField}">
                                 <Grid ColumnDefinitions="Auto,*"
-                                      Style="{StaticResource M3AuthInputGrid}">
-                                    <Border Style="{StaticResource M3AuthInputIconFrame}">
+                                      Style="{StaticResource M3InputGrid}">
+                                    <Border Style="{StaticResource M3InputIconFrame}">
                                         <controls:IconView IconData="{x:Static controls:IconPathData.Search}"
-                                                           Style="{StaticResource M3AuthInputIcon}" />
+                                                           Style="{StaticResource M3InputIcon}" />
                                     </Border>
 
                                     <Entry x:Name="FileSearchBar"

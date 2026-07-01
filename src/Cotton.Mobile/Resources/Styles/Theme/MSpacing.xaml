@@ -20,8 +20,8 @@
     <x:Double x:Key="M3DenseActionMinWidth">72</x:Double>
     <x:Double x:Key="M3DenseButtonHeight">36</x:Double>
     <x:Double x:Key="M3PanelButtonHeight">40</x:Double>
-    <x:Double x:Key="M3AuthInputIconFrameSize">32</x:Double>
-    <x:Double x:Key="M3AuthInputIconSize">18</x:Double>
+    <x:Double x:Key="M3InputIconFrameSize">32</x:Double>
+    <x:Double x:Key="M3InputIconSize">18</x:Double>
     <x:Double x:Key="M3AuthPanelMaxWidth">480</x:Double>
     <x:Double x:Key="M3AuthPrimaryButtonHeight">48</x:Double>
     <x:Double x:Key="M3AuthBrandMarkFrameSize">56</x:Double>

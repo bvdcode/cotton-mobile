@@ -138,13 +138,13 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3AuthInputGrid">
+    <Style TargetType="Grid" x:Key="M3InputGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
     </Style>
 
-    <Style TargetType="Border" x:Key="M3AuthInputIconFrame">
-        <Setter Property="WidthRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
+    <Style TargetType="Border" x:Key="M3InputIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3InputIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3InputIconFrameSize}" />
         <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -156,9 +156,9 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="controls:IconView" x:Key="M3AuthInputIcon">
+    <Style TargetType="controls:IconView" x:Key="M3InputIcon">
         <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="IconSize" Value="{StaticResource M3AuthInputIconSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3InputIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
@@ -729,16 +729,6 @@
 
     <Style TargetType="RefreshView">
         <Setter Property="RefreshColor" Value="{StaticResource M3Accent}" />
-    </Style>
-
-    <Style TargetType="SearchBar">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="CancelButtonColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
-        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
-        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
-        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="SearchHandler">

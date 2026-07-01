@@ -96,14 +96,32 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation" />
 
-                    <Button Grid.Row="2"
-                            Grid.ColumnSpan="2"
-                            Text="{Binding DeviceUnlockActionText}"
-                            Command="{Binding VerifyDeviceUnlockCommand}"
-                            IsEnabled="{Binding CanVerifyDeviceUnlock}"
-                            IsVisible="{Binding IsDeviceUnlockActionVisible}"
-                            Style="{StaticResource M3PrimaryButton}"
-                            HorizontalOptions="End" />
+                    <Grid Grid.Row="2"
+                          Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,Auto"
+                          IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
+                                               Style="{StaticResource M3SecurityThumbnailIcon}" />
+                        </Border>
+
+                        <Label Grid.Column="1"
+                               Text="{Binding DeviceUnlockActionText}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.Check}"
+                                             Command="{Binding VerifyDeviceUnlockCommand}"
+                                             IsEnabled="{Binding CanVerifyDeviceUnlock}"
+                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="{Binding DeviceUnlockActionText}" />
+                    </Grid>
                 </Grid>
             </Border>
 

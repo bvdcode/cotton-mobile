@@ -8,14 +8,6 @@ namespace Cotton.Mobile.Controls
 {
     public class NavigationBarItem : PressableContentView
     {
-        private const double DefaultContentSpacing = 3.0;
-        private const double DefaultIconSize = 18.0;
-        private const double DefaultItemCornerRadius = 20.0;
-        private const double DefaultItemHeight = 56.0;
-        private const double DefaultTextFontSize = 11.0;
-
-        private static readonly Thickness DefaultContentPadding = new(4, 5);
-
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -27,8 +19,8 @@ namespace Cotton.Mobile.Controls
             nameof(IconColor),
             typeof(Color),
             typeof(NavigationBarItem),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -41,78 +33,78 @@ namespace Cotton.Mobile.Controls
             nameof(TextColor),
             typeof(Color),
             typeof(NavigationBarItem),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty FillColorProperty = BindableProperty.Create(
             nameof(FillColor),
             typeof(Color),
             typeof(NavigationBarItem),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty PressedFillColorProperty = BindableProperty.Create(
             nameof(PressedFillColor),
             typeof(Color),
             typeof(NavigationBarItem),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),
             typeof(Color),
             typeof(NavigationBarItem),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
             nameof(BorderWidth),
             typeof(double),
             typeof(NavigationBarItem),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty ContentSpacingProperty = BindableProperty.Create(
             nameof(ContentSpacing),
             typeof(double),
             typeof(NavigationBarItem),
-            DefaultContentSpacing,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3NavigationBarContentSpacing"));
 
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
             nameof(ContentPadding),
             typeof(Thickness),
             typeof(NavigationBarItem),
-            DefaultContentPadding,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Thickness>("M3NavigationBarItemPadding"));
 
         public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
             nameof(IconSize),
             typeof(double),
             typeof(NavigationBarItem),
-            DefaultIconSize,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3NavigationBarIconSize"));
 
         public static readonly BindableProperty ItemCornerRadiusProperty = BindableProperty.Create(
             nameof(ItemCornerRadius),
             typeof(double),
             typeof(NavigationBarItem),
-            DefaultItemCornerRadius,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("ShapeExtraLarge"));
 
         public static readonly BindableProperty ItemHeightProperty = BindableProperty.Create(
             nameof(ItemHeight),
             typeof(double),
             typeof(NavigationBarItem),
-            DefaultItemHeight,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3NavigationBarHeight"));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
             typeof(double),
             typeof(NavigationBarItem),
-            DefaultTextFontSize,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3NavigationBarLabelFontSize"));
 
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),

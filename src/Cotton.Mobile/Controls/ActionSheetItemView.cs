@@ -32,106 +32,106 @@ namespace Cotton.Mobile.Controls
             nameof(TextColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
 
         public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
             nameof(IconColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty RowBackgroundColorProperty = BindableProperty.Create(
             nameof(RowBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerLow"));
 
         public static readonly BindableProperty PressedRowBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedRowBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty IconFrameBackgroundColorProperty = BindableProperty.Create(
             nameof(IconFrameBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainer"));
 
         public static readonly BindableProperty IconFrameBorderColorProperty = BindableProperty.Create(
             nameof(IconFrameBorderColor),
             typeof(Color),
             typeof(ActionSheetItemView),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
 
         public static readonly BindableProperty RowCornerRadiusProperty = BindableProperty.Create(
             nameof(RowCornerRadius),
             typeof(double),
             typeof(ActionSheetItemView),
-            16.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("ShapeExtraLarge"));
 
         public static readonly BindableProperty RowPaddingProperty = BindableProperty.Create(
             nameof(RowPadding),
             typeof(Thickness),
             typeof(ActionSheetItemView),
-            default(Thickness),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Thickness>("M3ActionSheetRowPadding"));
 
         public static readonly BindableProperty RowMinHeightProperty = BindableProperty.Create(
             nameof(RowMinHeight),
             typeof(double),
             typeof(ActionSheetItemView),
-            56.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ActionSheetRowMinHeight"));
 
         public static readonly BindableProperty IconFrameSizeProperty = BindableProperty.Create(
             nameof(IconFrameSize),
             typeof(double),
             typeof(ActionSheetItemView),
-            36.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ActionSheetRowIconFrameSize"));
 
         public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
             nameof(IconSize),
             typeof(double),
             typeof(ActionSheetItemView),
-            20.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3ActionSheetRowIconSize"));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
             typeof(double),
             typeof(ActionSheetItemView),
-            14.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3LabelLargeFontSize"));
 
         public static readonly BindableProperty TextLineHeightProperty = BindableProperty.Create(
             nameof(TextLineHeight),
             typeof(double),
             typeof(ActionSheetItemView),
-            1.43,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3LabelLargeLineHeight"));
 
         public static readonly BindableProperty IconFrameBorderWidthProperty = BindableProperty.Create(
             nameof(IconFrameBorderWidth),
             typeof(double),
             typeof(ActionSheetItemView),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty ContentSpacingProperty = BindableProperty.Create(
             nameof(ContentSpacing),
             typeof(double),
             typeof(ActionSheetItemView),
-            12.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("Space12"));
 
         private readonly Border _container;
         private readonly Grid _grid;
@@ -178,7 +178,7 @@ namespace Cotton.Mobile.Controls
 
             _container = new Border
             {
-                StrokeThickness = 0,
+                StrokeThickness = MaterialResources.Get<double>("M3StrokeNone"),
                 Content = _grid,
             };
 

@@ -804,6 +804,11 @@
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="FillColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="PressedFillColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3NavigationBarItemPadding}" />
         <Setter Property="ContentSpacing" Value="{StaticResource M3NavigationBarContentSpacing}" />

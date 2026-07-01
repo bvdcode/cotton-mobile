@@ -53,12 +53,12 @@
                            LineBreakMode="TailTruncation"
                            VerticalOptions="Center" />
 
-                    <Button Grid.Column="2"
-                            Text="Retry"
-                            Command="{Binding LoadCommand}"
-                            Style="{StaticResource DenseChromeButton}"
-                            MinimumWidthRequest="{StaticResource M3InlineStatusActionMinWidth}"
-                            VerticalOptions="Center" />
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.Refresh}"
+                                         Command="{Binding LoadCommand}"
+                                         Style="{StaticResource M3FileChromeIconButton}"
+                                         VerticalOptions="Center"
+                                         SemanticProperties.Description="Retry notifications" />
                 </Grid>
             </Border>
 
@@ -141,12 +141,13 @@
                                MaxLines="2"
                                LineBreakMode="TailTruncation" />
 
-                        <Button Grid.Row="2"
-                                Grid.ColumnSpan="2"
-                                Text="Retry"
-                                Command="{Binding LoadCommand}"
-                                Style="{StaticResource PanelChromeButton}"
-                                HorizontalOptions="Fill" />
+                        <controls:IconButton Grid.Row="2"
+                                             Grid.Column="1"
+                                             IconData="{x:Static controls:IconPathData.Refresh}"
+                                             Command="{Binding LoadCommand}"
+                                             Style="{StaticResource M3FileChromeIconButton}"
+                                             HorizontalOptions="End"
+                                             SemanticProperties.Description="Retry server push" />
                     </Grid>
 
                     <VerticalStackLayout Spacing="{StaticResource Space12}"

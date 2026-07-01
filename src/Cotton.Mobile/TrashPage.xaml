@@ -233,9 +233,7 @@
                                 <Border Grid.Column="2"
                                         Style="{StaticResource M3NeutralChip}">
                                     <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                           Style="{StaticResource M3ChipLabel}" />
                                 </Border>
 
                                 <Grid Grid.ColumnSpan="2"
@@ -321,9 +319,7 @@
 
                                         <Border Style="{StaticResource M3FileTileOverlayChip}">
                                             <Label Text="{Binding BadgeText}"
-                                                   Style="{StaticResource M3ChipLabel}"
-                                                   MaxLines="1"
-                                                   LineBreakMode="NoWrap" />
+                                                   Style="{StaticResource M3ChipLabel}" />
                                         </Border>
                                     </Grid>
                                 </Border>

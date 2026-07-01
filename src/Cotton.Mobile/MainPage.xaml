@@ -614,18 +614,14 @@
                                                                     IsVisible="{Binding HasLocalCopy}"
                                                                     Style="{StaticResource M3AccentOutlineChip}">
                                                                 <Label Text="{Binding LocalCopyStatus}"
-                                                                       Style="{StaticResource M3AccentOutlineChipLabel}"
-                                                                       MaxLines="1"
-                                                                       LineBreakMode="NoWrap" />
+                                                                       Style="{StaticResource M3AccentOutlineChipLabel}" />
                                                             </Border>
 
                                                             <Border Grid.Column="2"
                                                                     IsVisible="{Binding IsOfflineAttentionVisible}"
                                                                     Style="{StaticResource M3FileAttentionChip}">
                                                                 <Label Text="{Binding OfflineAttentionStatus}"
-                                                                       Style="{StaticResource M3ErrorChipLabel}"
-                                                                       MaxLines="1"
-                                                                       LineBreakMode="NoWrap" />
+                                                                       Style="{StaticResource M3ErrorChipLabel}" />
                                                             </Border>
                                                         </Grid>
                                                     </VerticalStackLayout>

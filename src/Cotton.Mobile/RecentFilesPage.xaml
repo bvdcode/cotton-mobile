@@ -96,9 +96,7 @@
                                 <Border Style="{StaticResource M3NeutralChip}"
                                         VerticalOptions="Center">
                                     <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                           Style="{StaticResource M3ChipLabel}" />
                                 </Border>
 
                                 <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"

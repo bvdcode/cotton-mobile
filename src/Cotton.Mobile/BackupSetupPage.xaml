@@ -106,9 +106,7 @@
                     <Border Grid.Column="2"
                             Style="{StaticResource M3NeutralChip}">
                         <Label Text="{Binding MediaAccessStatusText}"
-                               Style="{StaticResource M3ChipLabel}"
-                               MaxLines="1"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3ChipLabel}" />
                     </Border>
 
                     <Grid Grid.Row="2"

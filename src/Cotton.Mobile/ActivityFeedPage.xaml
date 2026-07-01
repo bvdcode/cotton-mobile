@@ -82,9 +82,7 @@
                                         Style="{StaticResource M3NeutralChip}"
                                         VerticalOptions="Start">
                                     <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                           Style="{StaticResource M3ChipLabel}" />
                                 </Border>
 
                                 <Label Grid.Row="1"

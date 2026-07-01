@@ -84,9 +84,7 @@
                                 <Border Grid.Column="2"
                                         Style="{StaticResource M3NeutralChip}">
                                     <Label Text="{Binding StatusText}"
-                                           Style="{StaticResource M3ChipLabel}"
-                                           MaxLines="1"
-                                           LineBreakMode="NoWrap" />
+                                           Style="{StaticResource M3ChipLabel}" />
                                 </Border>
 
                                 <ProgressBar Grid.Row="1"

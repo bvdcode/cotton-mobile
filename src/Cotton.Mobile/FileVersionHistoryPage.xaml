@@ -92,9 +92,7 @@
                                     <Border Grid.Column="2"
                                             Style="{StaticResource M3NeutralChip}">
                                         <Label Text="{Binding KindText}"
-                                               Style="{StaticResource M3ChipLabel}"
-                                               MaxLines="1"
-                                               LineBreakMode="NoWrap" />
+                                               Style="{StaticResource M3ChipLabel}" />
                                     </Border>
 
                                     <Label Grid.Row="1"

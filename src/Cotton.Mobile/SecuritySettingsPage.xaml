@@ -56,8 +56,6 @@
 
                     <controls:ToggleSwitch Grid.Row="2"
                                            Grid.ColumnSpan="2"
-                                           HorizontalOptions="End"
-                                           VerticalOptions="Center"
                                            IsEnabled="{Binding CanToggleAppLock}"
                                            IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
                 </Grid>
@@ -306,8 +304,6 @@
 
                     <controls:ToggleSwitch Grid.Row="2"
                                            Grid.ColumnSpan="2"
-                                           HorizontalOptions="End"
-                                           VerticalOptions="Center"
                                            IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
                                            IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
                 </Grid>

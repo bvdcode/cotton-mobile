@@ -182,7 +182,6 @@
                                     </VerticalStackLayout>
 
                                     <controls:ToggleSwitch Grid.Column="1"
-                                                           VerticalOptions="Center"
                                                            IsEnabled="{Binding CanToggle}"
                                                            IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
                                 </Grid>

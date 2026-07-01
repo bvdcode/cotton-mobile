@@ -770,6 +770,8 @@
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 
     <Style TargetType="controls:ToggleSwitch" x:Key="M3Switch">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionEnabledOpacity}" />
         <Setter Property="TrackWidth" Value="{StaticResource M3SwitchTrackWidth}" />

@@ -188,7 +188,6 @@
                     </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Column="2"
-                                           VerticalOptions="Center"
                                            IsEnabled="{Binding CanEnableBackup}"
                                            IsToggled="{Binding IsBackupEnabled, Mode=OneWay}" />
 
@@ -199,7 +198,6 @@
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"
-                                           VerticalOptions="Center"
                                            IsToggled="{Binding PhotosOnly, Mode=TwoWay}" />
 
                     <Label Grid.Row="2"
@@ -209,7 +207,6 @@
 
                     <controls:ToggleSwitch Grid.Row="2"
                                            Grid.Column="2"
-                                           VerticalOptions="Center"
                                            IsToggled="{Binding ChargingOnly, Mode=TwoWay}" />
                 </Grid>
             </Border>
@@ -228,7 +225,6 @@
                            Style="{StaticResource M3LabelLargeLine}" />
 
                     <controls:ToggleSwitch Grid.Column="2"
-                                           VerticalOptions="Center"
                                            IsToggled="{Binding WifiOnly, Mode=TwoWay}" />
 
                     <Label Grid.Row="1"
@@ -238,7 +234,6 @@
 
                     <controls:ToggleSwitch Grid.Row="1"
                                            Grid.Column="2"
-                                           VerticalOptions="Center"
                                            IsToggled="{Binding AllowCellular, Mode=TwoWay}" />
                 </Grid>
             </Border>

@@ -370,6 +370,13 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
 
+    <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
+
+    <Style TargetType="controls:IconView">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton">
         <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FloatingActionButtonIconSize}" />
@@ -387,6 +394,8 @@
         <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
     </Style>
+
+    <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemSelected" BasedOn="{StaticResource M3NavigationBarItem}">
         <Setter Property="IconColor" Value="{StaticResource M3OnAccent}" />

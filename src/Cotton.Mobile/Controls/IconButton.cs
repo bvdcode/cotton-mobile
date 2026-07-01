@@ -240,6 +240,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            if (_container is null || _icon is null)
+            {
+                return;
+            }
+
             WidthRequest = ButtonSize;
             HeightRequest = ButtonSize;
             MinimumWidthRequest = ButtonSize;

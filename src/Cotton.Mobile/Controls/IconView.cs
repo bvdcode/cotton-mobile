@@ -71,6 +71,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            if (_path is null)
+            {
+                return;
+            }
+
             WidthRequest = IconSize;
             HeightRequest = IconSize;
             _path.WidthRequest = IconSize;

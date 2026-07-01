@@ -327,6 +327,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            if (_container is null || _content is null || _icon is null || _label is null)
+            {
+                return;
+            }
+
             Opacity = ResolvePressableOpacity(1, DisabledOpacity);
             _container.BackgroundColor = FillColor;
             _container.HeightRequest = ItemHeight;

@@ -117,11 +117,30 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
 
-            <Button Text="Load more"
-                    Command="{Binding LoadMoreCommand}"
-                    IsVisible="{Binding IsLoadMoreVisible}"
-                    Style="{StaticResource FileChromeButton}"
-                    HorizontalOptions="Fill" />
+            <Border Style="{StaticResource M3ContentCard}"
+                    IsVisible="{Binding IsLoadMoreVisible}">
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      ColumnSpacing="{StaticResource Space12}"
+                      VerticalOptions="Center">
+                    <Border Style="{StaticResource M3FileThumbnailSurface}">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Activity}"
+                                           Style="{StaticResource M3ActivityThumbnailIcon}" />
+                    </Border>
+
+                    <Label Grid.Column="1"
+                           Text="Load more"
+                           Style="{StaticResource M3CardTitle}"
+                           MaxLines="1"
+                           LineBreakMode="TailTruncation"
+                           VerticalOptions="Center" />
+
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.Refresh}"
+                                         Command="{Binding LoadMoreCommand}"
+                                         Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                         SemanticProperties.Description="Load more activity" />
+                </Grid>
+            </Border>
         </VerticalStackLayout>
         </ScrollView>
     </Grid>

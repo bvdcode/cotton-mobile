@@ -19,6 +19,11 @@ namespace Cotton.Mobile.Tests
         private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
         private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
+        private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
+        private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
+        private const string NotificationSettingsPagePath = "src/Cotton.Mobile/NotificationSettingsPage.xaml";
+        private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
+        private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -188,6 +193,42 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingActivityIndicator", appLockGatePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Simple_secondary_screen_headers_use_reusable_material_control()
+        {
+            string[] screenPaths =
+            [
+                RecentFilesPagePath,
+                ActivityFeedPagePath,
+                TransfersPagePath,
+                CaptureInboxPagePath,
+                CaptureDestinationPickerPagePath,
+                DiagnosticsPagePath,
+                SyncSettingsPagePath,
+                NotificationSettingsPagePath,
+                SecuritySettingsPagePath,
+                BackupSetupPagePath,
+            ];
+
+            foreach (string screenPath in screenPaths)
+            {
+                string page = LoadText(screenPath);
+
+                Assert.Contains("<controls:ScreenHeaderView", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3ScreenHeaderGrid", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3ScreenHeaderActivityIndicator", page, StringComparison.Ordinal);
+            }
+
+            string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+            string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsPathTextVisible}\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextMultiline=\"True\"", destinationPickerPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

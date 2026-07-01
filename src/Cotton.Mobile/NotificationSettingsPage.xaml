@@ -17,21 +17,9 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
-            <Grid ColumnDefinitions="*,Auto"
-                  Style="{StaticResource M3ScreenHeaderGrid}">
-                <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
-                    <Label Text="Notifications"
-                           Style="{StaticResource M3ScreenTitle}" />
-
-                    <Label Text="{Binding EnabledCategoriesText}"
-                           Style="{StaticResource M3ScreenHeaderSupporting}" />
-                </VerticalStackLayout>
-
-                <ActivityIndicator Grid.Column="1"
-                                   IsRunning="{Binding IsBusy}"
-                                   IsVisible="{Binding IsBusy}"
-                                   Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
-            </Grid>
+            <controls:ScreenHeaderView Title="Notifications"
+                                       SupportingText="{Binding EnabledCategoriesText}"
+                                       IsBusy="{Binding IsBusy}" />
 
             <Border IsVisible="{Binding IsAttentionStatusVisible}"
                     Style="{StaticResource M3AttentionStatusPanel}">

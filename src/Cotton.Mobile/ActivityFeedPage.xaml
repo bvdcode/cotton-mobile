@@ -18,21 +18,9 @@
 
         <ScrollView Grid.Row="1">
         <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
-            <Grid ColumnDefinitions="*,Auto"
-                  Style="{StaticResource M3ScreenHeaderGrid}">
-                <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
-                    <Label Text="Activity"
-                           Style="{StaticResource M3ScreenTitle}" />
-
-                    <Label Text="{Binding SummaryText}"
-                           Style="{StaticResource M3ScreenHeaderSupporting}" />
-                </VerticalStackLayout>
-
-                <ActivityIndicator Grid.Column="1"
-                                   IsRunning="{Binding IsBusy}"
-                                   IsVisible="{Binding IsBusy}"
-                                   Style="{StaticResource M3ScreenHeaderActivityIndicator}" />
-            </Grid>
+            <controls:ScreenHeaderView Title="Activity"
+                                       SupportingText="{Binding SummaryText}"
+                                       IsBusy="{Binding IsBusy}" />
 
             <Label Text="{Binding Status}"
                    IsVisible="{Binding IsStatusVisible}"

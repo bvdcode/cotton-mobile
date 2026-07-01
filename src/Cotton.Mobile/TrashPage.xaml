@@ -70,34 +70,14 @@
             </HorizontalStackLayout>
         </Grid>
 
-        <Border Grid.Row="1"
-                IsVisible="{Binding IsSearchVisible}"
-                x:Name="TrashSearchField"
-                Style="{StaticResource M3OutlinedInputField}">
-            <Grid ColumnDefinitions="Auto,*"
-                  Style="{StaticResource M3InputGrid}">
-                <Border x:Name="TrashSearchIconFrame"
-                        Style="{StaticResource M3InputIconFrame}">
-                    <controls:IconView x:Name="TrashSearchIcon"
-                                       IconData="{x:Static controls:IconPathData.Search}"
-                                       Style="{StaticResource M3InputIcon}" />
-                </Border>
-
-                <Entry x:Name="TrashSearchEntry"
-                       Grid.Column="1"
-                       Text="{Binding SearchText, Mode=TwoWay}"
-                       Placeholder="Search trash"
-                       ReturnType="Search"
-                       ClearButtonVisibility="WhileEditing"
-                       SemanticProperties.Hint="Search deleted files and folders">
-                    <Entry.Behaviors>
-                        <behaviors:FocusedInputChromeBehavior Field="{x:Reference TrashSearchField}"
-                                                             LeadingIconFrame="{x:Reference TrashSearchIconFrame}"
-                                                             LeadingIcon="{x:Reference TrashSearchIcon}" />
-                    </Entry.Behaviors>
-                </Entry>
-            </Grid>
-        </Border>
+        <controls:OutlinedInputField Grid.Row="1"
+                                     Text="{Binding SearchText, Mode=TwoWay}"
+                                     IsVisible="{Binding IsSearchVisible}"
+                                     Placeholder="Search trash"
+                                     IconData="{x:Static controls:IconPathData.Search}"
+                                     ReturnType="Search"
+                                     ClearButtonVisibility="WhileEditing"
+                                     SemanticHint="Search deleted files and folders" />
 
         <Label Grid.Row="2"
                Text="{Binding Status}"

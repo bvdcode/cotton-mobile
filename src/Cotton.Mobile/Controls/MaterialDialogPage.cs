@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.ApplicationModel;
 using System.Windows.Input;
 
@@ -13,7 +12,7 @@ namespace Cotton.Mobile.Controls
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly BoxView _scrim;
         private readonly Border _dialog;
-        private readonly Entry? _promptEntry;
+        private readonly OutlinedInputField? _promptEntry;
         private bool _hasPresented;
         private bool _isCompleting;
 
@@ -75,7 +74,7 @@ namespace Cotton.Mobile.Controls
                 await PresentAsync();
                 if (_promptEntry is not null && !_isCompleting)
                 {
-                    _promptEntry.Focus();
+                    _promptEntry.FocusInput();
                 }
             });
         }
@@ -115,7 +114,7 @@ namespace Cotton.Mobile.Controls
 
             if (_promptEntry is not null)
             {
-                stack.Add(CreatePromptField(_promptEntry));
+                stack.Add(_promptEntry);
             }
 
             stack.Add(CreateButtonRow(primaryAction, secondaryAction));
@@ -163,37 +162,24 @@ namespace Cotton.Mobile.Controls
             };
         }
 
-        private Border CreatePromptField(Entry entry)
+        private OutlinedInputField CreatePromptEntry(string message, string initialValue, int maxLength)
         {
-            Border field = new()
-            {
-                Style = MaterialResources.Get<Style>("M3OutlinedInputField"),
-                Content = entry,
-            };
-            entry.Behaviors.Add(new FocusedInputChromeBehavior
-            {
-                Field = field,
-            });
-            return field;
-        }
-
-        private Entry CreatePromptEntry(string message, string initialValue, int maxLength)
-        {
-            Entry entry = new()
+            OutlinedInputField field = new()
             {
                 Text = initialValue,
                 Placeholder = ShouldShowMessage(message, isPrompt: true) ? string.Empty : message,
+                IconData = IconPathData.Edit,
                 ReturnType = ReturnType.Done,
                 ClearButtonVisibility = ClearButtonVisibility.WhileEditing,
+                ReturnCommand = CreateDismissCommand(() => _promptEntry?.Text ?? string.Empty),
+                SemanticHint = message,
             };
             if (maxLength >= 0)
             {
-                entry.MaxLength = maxLength;
+                field.MaxLength = maxLength;
             }
 
-            SemanticProperties.SetHint(entry, message);
-            entry.Completed += async (_, _) => await CompleteAsync(entry.Text);
-            return entry;
+            return field;
         }
 
         private HorizontalStackLayout CreateButtonRow(string primaryAction, string? secondaryAction)

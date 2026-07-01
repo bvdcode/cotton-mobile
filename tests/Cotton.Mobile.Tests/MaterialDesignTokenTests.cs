@@ -10,6 +10,8 @@ namespace Cotton.Mobile.Tests
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
+        private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
+        private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
         private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
         private const string TransfersPagePath = "src/Cotton.Mobile/TransfersPage.xaml";
@@ -132,6 +134,22 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("IsLoadingPlaceholderVisible", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("M3FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Outlined_inputs_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+            string materialDialogPage = LoadText(MaterialDialogPagePath);
+
+            Assert.Contains("<controls:OutlinedInputField", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:OutlinedInputField", trashPage, StringComparison.Ordinal);
+            Assert.Contains("OutlinedInputField", materialDialogPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Entry", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Entry", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("FocusedInputChromeBehavior", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("FocusedInputChromeBehavior", trashPage, StringComparison.Ordinal);
         }
 
         private static XDocument LoadResourceDictionary(string relativePath)

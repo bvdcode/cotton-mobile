@@ -25,7 +25,7 @@ namespace Cotton.Mobile
 			SizeChanged += MainPage_SizeChanged;
 			RootLayout.SizeChanged += RootLayout_SizeChanged;
 			FileBrowserContent.SizeChanged += FileBrowserContent_SizeChanged;
-			FileSearchBar.PropertyChanged += FileSearchBar_PropertyChanged;
+			FileSearchField.PropertyChanged += FileSearchField_PropertyChanged;
 			BindingContext = _viewModel;
 		}
 
@@ -84,28 +84,28 @@ namespace Cotton.Mobile
 			UpdateFileTileMetrics();
 		}
 
-		private void FileSearchBar_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+		private void FileSearchField_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
 			if (!string.Equals(e.PropertyName, nameof(VisualElement.IsVisible), StringComparison.Ordinal))
 			{
 				return;
 			}
 
-			if (FileSearchBar.IsVisible)
+			if (FileSearchField.IsVisible)
 			{
 				Dispatcher.DispatchDelayed(
 					TimeSpan.FromMilliseconds(50),
 					() =>
 					{
-						if (FileSearchBar.IsVisible)
+						if (FileSearchField.IsVisible)
 						{
-							FileSearchBar.Focus();
+							FileSearchField.FocusInput();
 						}
 					});
 				return;
 			}
 
-			FileSearchBar.Unfocus();
+			FileSearchField.UnfocusInput();
 		}
 
 		private void UpdateFileTileMetrics()

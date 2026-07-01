@@ -4,9 +4,7 @@
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.Controls.TopAppBar"
              x:Name="Root"
-             Padding="{StaticResource M3TopAppBarPadding}"
-             HeightRequest="{StaticResource M3TopAppBarHeight}"
-             BackgroundColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}">
+             Style="{StaticResource M3TopAppBarSurface}">
     <ContentView.Triggers>
         <DataTrigger TargetType="ContentView"
                      Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"

@@ -204,8 +204,7 @@
 
                                         <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                IsVisible="{Binding IsPlaceholderTextVisible}"
-                                               Style="{StaticResource M3ThumbnailPlaceholder}"
-                                               FontSize="{Binding Thumbnail.PlaceholderFontSize}" />
+                                               Style="{StaticResource M3DynamicThumbnailPlaceholder}" />
                                     </Grid>
                                 </Border>
 
@@ -309,8 +308,7 @@
 
                                         <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                IsVisible="{Binding IsPlaceholderTextVisible}"
-                                               Style="{StaticResource M3ThumbnailPlaceholder}"
-                                               FontSize="{Binding Thumbnail.PlaceholderFontSize}" />
+                                               Style="{StaticResource M3DynamicThumbnailPlaceholder}" />
 
                                         <Border Style="{StaticResource M3FileTileOverlayChip}">
                                             <Label Text="{Binding BadgeText}"

@@ -280,6 +280,10 @@
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3DynamicThumbnailPlaceholder" BasedOn="{StaticResource M3ThumbnailPlaceholder}">
+        <Setter Property="FontSize" Value="{Binding Thumbnail.PlaceholderFontSize}" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3AccentChipLabel">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="FontSize" Value="{StaticResource M3CompactChipLabelFontSize}" />

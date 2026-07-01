@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Tests
         private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
         private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
+        private const string PdfViewerPagePath = "src/Cotton.Mobile/PdfViewerPage.xaml";
         private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
         private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
         private const string NotificationSettingsPagePath = "src/Cotton.Mobile/NotificationSettingsPage.xaml";
@@ -164,6 +165,7 @@ namespace Cotton.Mobile.Tests
         {
             string[] screenPaths =
             [
+                MainPagePath,
                 RecentFilesPagePath,
                 ActivityFeedPagePath,
                 TransfersPagePath,
@@ -171,6 +173,8 @@ namespace Cotton.Mobile.Tests
                 CaptureInboxPagePath,
                 CaptureDestinationPickerPagePath,
                 TrashPagePath,
+                SyncSettingsPagePath,
+                PdfViewerPagePath,
             ];
 
             foreach (string screenPath in screenPaths)
@@ -180,6 +184,17 @@ namespace Cotton.Mobile.Tests
                 Assert.Contains("<controls:EmptyStateView", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("M3EmptyStateStack", page, StringComparison.Ordinal);
             }
+
+            string mainPage = LoadText(MainPagePath);
+            string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string pdfViewerPage = LoadText(PdfViewerPagePath);
+
+            Assert.Contains("ActionCommand=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ActionText=\"Choose folder\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey=\"M3CenteredPdfEmptyStateCard\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IconFrameStyleResourceKey=\"M3PdfEmptyStateIconFrame\"", pdfViewerPage, StringComparison.Ordinal);
         }
 
         [Fact]

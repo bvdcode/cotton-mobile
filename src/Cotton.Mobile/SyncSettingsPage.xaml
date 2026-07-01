@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -29,40 +28,16 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Border Style="{StaticResource M3EmptyStateCard}"
-                    IsVisible="{Binding IsEmptyVisible}">
-                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                           Style="{StaticResource M3EmptyStateIcon}" />
-                    </Border>
-
-                    <Label Text="No folders yet"
-                           Style="{StaticResource M3EmptyTitle}" />
-
-                    <Label Text="Pick a folder in Files to enable sync."
-                           Style="{StaticResource M3EmptyBody}" />
-
-                    <Grid ColumnDefinitions="Auto,Auto"
-                          Style="{StaticResource M3PanelActionListItemGrid}">
-                        <Label Text="Choose folder"
-                               Style="{StaticResource M3ActionListItemLabel}" />
-
-                        <Grid Grid.ColumnSpan="2"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding OpenFilesCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="1"
-                                             IconData="{x:Static controls:IconPathData.Folder}"
-                                             Command="{Binding OpenFilesCommand}"
-                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             SemanticProperties.Description="Choose sync folder" />
-                    </Grid>
-                </VerticalStackLayout>
-            </Border>
+            <controls:EmptyStateView IsVisible="{Binding IsEmptyVisible}"
+                                     IconData="{x:Static controls:IconPathData.Folder}"
+                                     Title="No folders yet"
+                                     Body="Pick a folder in Files to enable sync."
+                                     ActionText="Choose folder"
+                                     ActionIconData="{x:Static controls:IconPathData.Folder}"
+                                     ActionCommand="{Binding OpenFilesCommand}"
+                                     IsActionVisible="True"
+                                     ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                     ActionSemanticDescription="Choose sync folder" />
 
             <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                  BindableLayout.ItemsSource="{Binding Roots}">

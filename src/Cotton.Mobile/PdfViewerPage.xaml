@@ -54,17 +54,10 @@
             <Grid Grid.Row="1"
                   IsVisible="{Binding IsEmptyVisible}"
                   Style="{StaticResource M3PdfEmptyStateLayer}">
-                <Border Style="{StaticResource M3CenteredPdfEmptyStateCard}">
-                    <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                        <Border Style="{StaticResource M3PdfEmptyStateIconFrame}">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                               Style="{StaticResource M3EmptyStateIcon}" />
-                        </Border>
-
-                        <Label Text="{Binding EmptyText}"
-                               Style="{StaticResource M3EmptyTitle}" />
-                    </VerticalStackLayout>
-                </Border>
+                <controls:EmptyStateView IconData="{x:Static controls:IconPathData.File}"
+                                         Title="{Binding EmptyText}"
+                                         CardStyleResourceKey="M3CenteredPdfEmptyStateCard"
+                                         IconFrameStyleResourceKey="M3PdfEmptyStateIconFrame" />
             </Grid>
         </Grid>
     </Grid>

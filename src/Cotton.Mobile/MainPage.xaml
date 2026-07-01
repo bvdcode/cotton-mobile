@@ -371,28 +371,15 @@
                                 </Grid>
                             </Border>
 
-                            <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
-                                    Style="{StaticResource M3EmptyStateCard}">
-                                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                                           Style="{StaticResource M3EmptyStateIcon}" />
-                                    </Border>
-
-                                    <Label Text="{Binding Display.FilesEmptyMessage}"
-                                           Style="{StaticResource M3EmptyTitle}" />
-
-                                    <Label Text="{Binding Display.FilesEmptyDetails}"
-                                           IsVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
-                                           Style="{StaticResource M3EmptyBody}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Plus}"
-                                                         Command="{Binding ShowFileAddActionsCommand}"
-                                                         IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
-                                                         Style="{StaticResource M3EmptyStateActionIconButton}"
-                                                         SemanticProperties.Description="Add files" />
-                                </VerticalStackLayout>
-                            </Border>
+                            <controls:EmptyStateView IsVisible="{Binding Display.IsFilesEmptyVisible}"
+                                                     IconData="{x:Static controls:IconPathData.File}"
+                                                     Title="{Binding Display.FilesEmptyMessage}"
+                                                     Body="{Binding Display.FilesEmptyDetails}"
+                                                     IsBodyVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
+                                                     ActionIconData="{x:Static controls:IconPathData.Plus}"
+                                                     ActionCommand="{Binding ShowFileAddActionsCommand}"
+                                                     IsActionVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
+                                                     ActionSemanticDescription="Add files" />
 
                             <VerticalStackLayout Style="{StaticResource M3FileListStack}"
                                                  IsVisible="{Binding Display.IsFileListViewVisible}"

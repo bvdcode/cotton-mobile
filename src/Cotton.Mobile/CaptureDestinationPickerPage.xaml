@@ -47,11 +47,9 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Center">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                           Style="{StaticResource M3FolderThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Folder}"
+                                        Style="{StaticResource M3FolderThumbnailFrame}"
+                                        VerticalOptions="Center" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -106,11 +104,9 @@
 
                             <Grid ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3SettingsListItemGrid}">
-                                <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                        VerticalOptions="Center">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                                       Style="{StaticResource M3FolderThumbnailIcon}" />
-                                </Border>
+                                <controls:IconFrame IconData="{x:Static controls:IconPathData.Folder}"
+                                                    Style="{StaticResource M3FolderThumbnailFrame}"
+                                                    VerticalOptions="Center" />
 
                                 <Label Grid.Column="1"
                                        Text="{Binding DisplayName}"

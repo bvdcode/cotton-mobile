@@ -103,11 +103,9 @@
                           ColumnDefinitions="Auto,*,Auto"
                           IsVisible="{Binding IsDeviceUnlockActionVisible}"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
-                                               Style="{StaticResource M3SecurityThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
+                                            Style="{StaticResource M3SecurityThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <Label Grid.Column="1"
                                Text="{Binding DeviceUnlockActionText}"
@@ -241,11 +239,9 @@
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           IsVisible="{Binding IsRevokeCurrentSessionVisible}"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
-                                               Style="{StaticResource M3SecurityThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
+                                            Style="{StaticResource M3SecurityThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <Label Grid.Column="1"
                                Text="{Binding RevokeCurrentSessionActionText}"
@@ -283,12 +279,10 @@
                                 <Grid ColumnDefinitions="Auto,*,Auto"
                                       RowDefinitions="Auto,Auto,Auto,Auto"
                                       Style="{StaticResource M3SettingsListItemGrid}">
-                                    <Border Grid.RowSpan="4"
-                                            Style="{StaticResource M3FileThumbnailSurface}"
-                                            VerticalOptions="Start">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
-                                                           Style="{StaticResource M3SecurityThumbnailIcon}" />
-                                    </Border>
+                                    <controls:IconFrame Grid.RowSpan="4"
+                                                        IconData="{x:Static controls:IconPathData.Device}"
+                                                        Style="{StaticResource M3SecurityThumbnailFrame}"
+                                                        VerticalOptions="Start" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"

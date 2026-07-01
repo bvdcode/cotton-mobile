@@ -1,0 +1,165 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
+
+using Microsoft.Maui.Controls.Shapes;
+
+namespace Cotton.Mobile.Controls
+{
+    public class IconFrame : ContentView
+    {
+        public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
+            nameof(IconData),
+            typeof(Geometry),
+            typeof(IconFrame),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
+            nameof(IconColor),
+            typeof(Color),
+            typeof(IconFrame),
+            Colors.White,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty FrameBackgroundColorProperty = BindableProperty.Create(
+            nameof(FrameBackgroundColor),
+            typeof(Color),
+            typeof(IconFrame),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
+            nameof(BorderColor),
+            typeof(Color),
+            typeof(IconFrame),
+            Colors.Transparent,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty BorderWidthProperty = BindableProperty.Create(
+            nameof(BorderWidth),
+            typeof(double),
+            typeof(IconFrame),
+            1.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty FrameSizeProperty = BindableProperty.Create(
+            nameof(FrameSize),
+            typeof(double),
+            typeof(IconFrame),
+            40.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconSizeProperty = BindableProperty.Create(
+            nameof(IconSize),
+            typeof(double),
+            typeof(IconFrame),
+            24.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty FrameCornerRadiusProperty = BindableProperty.Create(
+            nameof(FrameCornerRadius),
+            typeof(double),
+            typeof(IconFrame),
+            12.0,
+            propertyChanged: OnVisualPropertyChanged);
+
+        private readonly Border _container;
+        private readonly IconView _icon;
+
+        public IconFrame()
+        {
+            _icon = new IconView();
+            _container = new Border
+            {
+                HorizontalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Center,
+                Content = _icon,
+            };
+
+            Content = _container;
+            InputTransparent = true;
+            UpdateVisualState();
+        }
+
+        public Geometry? IconData
+        {
+            get => (Geometry?)GetValue(IconDataProperty);
+            set => SetValue(IconDataProperty, value);
+        }
+
+        public Color IconColor
+        {
+            get => (Color)GetValue(IconColorProperty);
+            set => SetValue(IconColorProperty, value);
+        }
+
+        public Color FrameBackgroundColor
+        {
+            get => (Color)GetValue(FrameBackgroundColorProperty);
+            set => SetValue(FrameBackgroundColorProperty, value);
+        }
+
+        public Color BorderColor
+        {
+            get => (Color)GetValue(BorderColorProperty);
+            set => SetValue(BorderColorProperty, value);
+        }
+
+        public double BorderWidth
+        {
+            get => (double)GetValue(BorderWidthProperty);
+            set => SetValue(BorderWidthProperty, value);
+        }
+
+        public double FrameSize
+        {
+            get => (double)GetValue(FrameSizeProperty);
+            set => SetValue(FrameSizeProperty, value);
+        }
+
+        public double IconSize
+        {
+            get => (double)GetValue(IconSizeProperty);
+            set => SetValue(IconSizeProperty, value);
+        }
+
+        public double FrameCornerRadius
+        {
+            get => (double)GetValue(FrameCornerRadiusProperty);
+            set => SetValue(FrameCornerRadiusProperty, value);
+        }
+
+        private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            IconFrame iconFrame = (IconFrame)bindable;
+            iconFrame.UpdateVisualState();
+        }
+
+        private void UpdateVisualState()
+        {
+            if (_container is null || _icon is null)
+            {
+                return;
+            }
+
+            WidthRequest = FrameSize;
+            HeightRequest = FrameSize;
+            MinimumWidthRequest = FrameSize;
+            MinimumHeightRequest = FrameSize;
+
+            _container.WidthRequest = FrameSize;
+            _container.HeightRequest = FrameSize;
+            _container.StrokeShape = new RoundRectangle
+            {
+                CornerRadius = new CornerRadius(FrameCornerRadius),
+            };
+            _container.BackgroundColor = FrameBackgroundColor;
+            _container.Stroke = new SolidColorBrush(BorderColor);
+            _container.StrokeThickness = BorderWidth;
+
+            _icon.IconData = IconData;
+            _icon.IconColor = IconColor;
+            _icon.IconSize = IconSize;
+        }
+    }
+}

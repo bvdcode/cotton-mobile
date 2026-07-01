@@ -47,12 +47,10 @@
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Grid.RowSpan="2"
-                            Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                           Style="{StaticResource M3FolderThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame Grid.RowSpan="2"
+                                        IconData="{x:Static controls:IconPathData.Folder}"
+                                        Style="{StaticResource M3FolderThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -99,12 +97,10 @@
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Grid.RowSpan="2"
-                            Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Image}"
-                                           Style="{StaticResource M3CaptureThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame Grid.RowSpan="2"
+                                        IconData="{x:Static controls:IconPathData.Image}"
+                                        Style="{StaticResource M3CaptureThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -151,11 +147,9 @@
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Activity}"
-                                           Style="{StaticResource M3ActivityThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
+                                        Style="{StaticResource M3ActivityThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -187,12 +181,10 @@
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Grid.RowSpan="3"
-                            Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
-                                           Style="{StaticResource M3CaptureThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame Grid.RowSpan="3"
+                                        IconData="{x:Static controls:IconPathData.Backup}"
+                                        Style="{StaticResource M3CaptureThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -245,12 +237,10 @@
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Grid.RowSpan="2"
-                            Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                           Style="{StaticResource M3TransferThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame Grid.RowSpan="2"
+                                        IconData="{x:Static controls:IconPathData.Transfer}"
+                                        Style="{StaticResource M3TransferThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <Label Grid.Column="1"
                            Text="Wi-Fi only"

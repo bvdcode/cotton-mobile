@@ -53,12 +53,10 @@
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
-                    <Border Grid.RowSpan="2"
-                            Style="{StaticResource M3FileThumbnailSurface}"
-                            VerticalOptions="Start">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Cloud}"
-                                           Style="{StaticResource M3NeutralThumbnailIcon}" />
-                    </Border>
+                    <controls:IconFrame Grid.RowSpan="2"
+                                        IconData="{x:Static controls:IconPathData.Cloud}"
+                                        Style="{StaticResource M3NeutralThumbnailFrame}"
+                                        VerticalOptions="Start" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Grid.ColumnSpan="2"
@@ -97,11 +95,9 @@
 
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
-                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Download}"
+                                            Style="{StaticResource M3NeutralThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -125,11 +121,9 @@
 
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Delete}"
-                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Delete}"
+                                            Style="{StaticResource M3NeutralThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -157,11 +151,9 @@
                 <VerticalStackLayout Spacing="{StaticResource Space12}">
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
-                                               Style="{StaticResource M3NeutralThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
+                                            Style="{StaticResource M3NeutralThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -185,12 +177,10 @@
                                       ColumnDefinitions="Auto,*,Auto"
                                       Style="{StaticResource M3SettingsListItemGrid}"
                                       IsVisible="{Binding IsVisible}">
-                                    <Border Grid.RowSpan="2"
-                                            Style="{StaticResource M3FileThumbnailSurface}"
-                                            VerticalOptions="Start">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                                           Style="{StaticResource M3FileThumbnailIcon}" />
-                                    </Border>
+                                    <controls:IconFrame Grid.RowSpan="2"
+                                                        IconData="{x:Static controls:IconPathData.File}"
+                                                        Style="{StaticResource M3FileThumbnailFrame}"
+                                                        VerticalOptions="Start" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
@@ -228,11 +218,9 @@
                 <VerticalStackLayout Spacing="{StaticResource Space12}">
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
-                        <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                VerticalOptions="Start">
-                            <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                               Style="{StaticResource M3TransferThumbnailIcon}" />
-                        </Border>
+                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"
+                                            Style="{StaticResource M3TransferThumbnailFrame}"
+                                            VerticalOptions="Start" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -261,12 +249,10 @@
                                       ColumnDefinitions="Auto,*,Auto"
                                       Style="{StaticResource M3SettingsListItemGrid}"
                                       IsVisible="{Binding IsVisible}">
-                                    <Border Grid.RowSpan="3"
-                                            Style="{StaticResource M3FileThumbnailSurface}"
-                                            VerticalOptions="Start">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                                           Style="{StaticResource M3FileThumbnailIcon}" />
-                                    </Border>
+                                    <controls:IconFrame Grid.RowSpan="3"
+                                                        IconData="{x:Static controls:IconPathData.File}"
+                                                        Style="{StaticResource M3FileThumbnailFrame}"
+                                                        VerticalOptions="Start" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"

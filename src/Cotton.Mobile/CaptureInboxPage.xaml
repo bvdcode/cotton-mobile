@@ -92,12 +92,10 @@
                                   ColumnDefinitions="Auto,*,Auto"
                                   RowSpacing="{StaticResource Space8}"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <Border Grid.RowSpan="4"
-                                        Style="{StaticResource M3FileThumbnailSurface}"
-                                        VerticalOptions="Start">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                                       Style="{StaticResource M3CaptureThumbnailIcon}" />
-                                </Border>
+                                <controls:IconFrame Grid.RowSpan="4"
+                                                    IconData="{x:Static controls:IconPathData.Transfer}"
+                                                    Style="{StaticResource M3CaptureThumbnailFrame}"
+                                                    VerticalOptions="Start" />
 
                                 <VerticalStackLayout Grid.Column="1"
                                                      Style="{StaticResource M3CardTextStack}">

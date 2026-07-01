@@ -90,11 +90,9 @@
 
                         <Grid ColumnDefinitions="Auto,*,Auto"
                               ColumnSpacing="{StaticResource Space12}">
-                            <Border Style="{StaticResource M3FileThumbnailSurface}"
-                                    VerticalOptions="Center">
-                                <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                                   Style="{StaticResource M3FileThumbnailIcon}" />
-                            </Border>
+                            <controls:IconFrame IconData="{x:Static controls:IconPathData.File}"
+                                                Style="{StaticResource M3FileThumbnailFrame}"
+                                                VerticalOptions="Center" />
 
                             <VerticalStackLayout Grid.Column="1"
                                                  Style="{StaticResource M3CardTextStack}"

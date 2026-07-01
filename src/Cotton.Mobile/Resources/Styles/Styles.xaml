@@ -251,6 +251,34 @@
 
     <Style TargetType="controls:IconView" x:Key="M3SyncThumbnailIcon" BasedOn="{StaticResource M3FolderThumbnailIcon}" />
 
+    <Style TargetType="controls:IconFrame" x:Key="M3ThumbnailIconFrame">
+        <Setter Property="FrameSize" Value="{StaticResource M3FileThumbnailSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />
+        <Setter Property="FrameCornerRadius" Value="{StaticResource M3ProminentCornerRadius}" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="FrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3FolderThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}">
+        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3NeutralThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3FileThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3TransferThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CaptureThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3SecurityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3SyncThumbnailFrame" BasedOn="{StaticResource M3FolderThumbnailFrame}" />
+
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />

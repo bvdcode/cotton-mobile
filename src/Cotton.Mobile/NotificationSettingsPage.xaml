@@ -42,8 +42,7 @@
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       ColumnSpacing="{StaticResource Space12}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                       IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                                       IconSize="{StaticResource M3InlineStatusIconSize}"
+                                       Style="{StaticResource M3AttentionStatusIcon}"
                                        VerticalOptions="Center" />
 
                     <Label Grid.Column="1"
@@ -142,8 +141,7 @@
                           ColumnSpacing="{StaticResource Space12}"
                           RowSpacing="{StaticResource Space8}">
                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                           IconColor="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}"
-                                           IconSize="{StaticResource M3InlineStatusIconSize}"
+                                           Style="{StaticResource M3AttentionStatusIcon}"
                                            VerticalOptions="Start" />
 
                         <Label Grid.Column="1"

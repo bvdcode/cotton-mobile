@@ -41,6 +41,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Folder => Create("M3 6 L9 6 L11 8 L21 8 L21 19 L3 19 Z M5 10 L5 17 L19 17 L19 10 Z");
 
+        public static Geometry Image => Create("M4 5 L20 5 L20 19 L4 19 Z M6 7 L6 17 L18 17 L18 7 Z M8 9.5 C8 8.7 8.7 8 9.5 8 C10.3 8 11 8.7 11 9.5 C11 10.3 10.3 11 9.5 11 C8.7 11 8 10.3 8 9.5 Z M7 16 L11 12 L13.2 14.2 L14.5 13 L17 16 Z");
+
         public static Geometry MoreVertical => Create("M11 5 L13 5 L13 7 L11 7 Z M11 11 L13 11 L13 13 L11 13 Z M11 17 L13 17 L13 19 L11 19 Z");
 
         public static Geometry OpenInNew => Create("M5 5 L13 5 L13 7 L7 7 L7 17 L17 17 L17 11 L19 11 L19 19 L5 19 Z M15 5 L20 5 L20 10 L18 10 L18.6 8.4 L11.4 15.6 L10 14.2 L17.2 7 L15 7 Z");

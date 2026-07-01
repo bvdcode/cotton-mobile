@@ -18,8 +18,8 @@
         <VerticalStackLayout Padding="{StaticResource M3ScreenPadding}"
                              Spacing="{StaticResource Space16}">
             <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="{StaticResource Space12}">
-                <VerticalStackLayout Spacing="{StaticResource Space4}">
+                  Style="{StaticResource M3ScreenHeaderGrid}">
+                <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="Camera Backup"
                            Style="{StaticResource M3ScreenTitle}"
                            MaxLines="1"
@@ -44,11 +44,18 @@
                    LineBreakMode="TailTruncation" />
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid RowDefinitions="Auto,Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      RowSpacing="{StaticResource Space8}"
-                      ColumnSpacing="{StaticResource Space12}">
-                    <VerticalStackLayout Spacing="{StaticResource Space2}">
+                <Grid RowDefinitions="Auto,Auto"
+                      ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Grid.RowSpan="2"
+                            Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                           Style="{StaticResource M3FolderThumbnailIcon}" />
+                    </Border>
+
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
                         <Label Text="Destination"
                                Style="{StaticResource M3CardTitle}"
                                MaxLines="1"
@@ -60,15 +67,17 @@
                                LineBreakMode="TailTruncation" />
                     </VerticalStackLayout>
 
-                    <Button Grid.Column="1"
-                            Text="Choose"
-                            Command="{Binding ChooseDestinationCommand}"
-                            Style="{StaticResource PanelChromeButton}"
-                            VerticalOptions="Center" />
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.Folder}"
+                                         Command="{Binding ChooseDestinationCommand}"
+                                         Style="{StaticResource M3FileChromeIconButton}"
+                                         VerticalOptions="Center"
+                                         SemanticProperties.Description="Choose backup destination" />
 
                     <VerticalStackLayout Grid.Row="1"
+                                         Grid.Column="1"
                                          Grid.ColumnSpan="2"
-                                         Spacing="{StaticResource Space2}">
+                                         Style="{StaticResource M3CardTextStack}">
                         <Label Text="{Binding PolicySummaryText}"
                                Style="{StaticResource M3CardSupporting}"
                                MaxLines="1"
@@ -89,29 +98,38 @@
 
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      RowSpacing="{StaticResource Space8}"
-                      ColumnSpacing="{StaticResource Space12}">
-                    <Label Text="{Binding MediaAccessTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                      ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Grid.RowSpan="2"
+                            Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Image}"
+                                           Style="{StaticResource M3CaptureThumbnailIcon}" />
+                    </Border>
 
-                    <Label Grid.Column="1"
-                           Text="{Binding MediaAccessStatusText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           HorizontalTextAlignment="End" />
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="{Binding MediaAccessTitle}"
+                               Style="{StaticResource M3CardTitle}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
 
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding MediaAccessDetailText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding MediaAccessDetailText}"
+                               Style="{StaticResource M3CardSupporting}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <Border Grid.Column="2"
+                            Style="{StaticResource M3NeutralChip}">
+                        <Label Text="{Binding MediaAccessStatusText}"
+                               Style="{StaticResource M3ChipLabel}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
+                    </Border>
 
                     <Button Grid.Row="2"
+                            Grid.Column="1"
                             Grid.ColumnSpan="2"
                             Text="{Binding MediaAccessActionText}"
                             IsVisible="{Binding IsMediaAccessActionVisible}"
@@ -122,97 +140,122 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                      RowSpacing="{StaticResource Space8}">
-                    <Label Text="{Binding HealthTitle}"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                <Grid ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Activity}"
+                                           Style="{StaticResource M3ActivityThumbnailIcon}" />
+                    </Border>
 
-                    <Label Grid.Row="1"
-                           Text="{Binding HealthCountsText}"
-                           Style="{StaticResource M3CardSupportingStrong}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="{Binding HealthTitle}"
+                               Style="{StaticResource M3CardTitle}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
 
-                    <Label Grid.Row="2"
-                           Text="{Binding HealthStatusText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                        <Label Text="{Binding HealthCountsText}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation" />
 
-                    <Button Grid.Row="3"
-                            Text="Queue now"
-                            Command="{Binding QueueNowCommand}"
-                            Style="{StaticResource PanelChromeButton}"
-                            HorizontalOptions="Start" />
+                        <Label Text="{Binding HealthStatusText}"
+                               Style="{StaticResource M3CardSupporting}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <controls:IconButton Grid.Column="2"
+                                         IconData="{x:Static controls:IconPathData.Play}"
+                                         Command="{Binding QueueNowCommand}"
+                                         Style="{StaticResource M3FileChromeIconButton}"
+                                         VerticalOptions="Center"
+                                         SemanticProperties.Description="Queue camera backup now" />
                 </Grid>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      RowSpacing="{StaticResource Space12}"
-                      ColumnSpacing="{StaticResource Space12}">
-                    <Label Text="Backup running"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                <Grid RowDefinitions="Auto,Auto,Auto"
+                      ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Grid.RowSpan="3"
+                            Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
+                                           Style="{StaticResource M3CaptureThumbnailIcon}" />
+                    </Border>
 
-                    <Switch Grid.Column="1"
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="Backup running"
+                               Style="{StaticResource M3CardTitle}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation" />
+
+                        <Label Text="{Binding LocalMediaRetentionText}"
+                               Style="{StaticResource M3CardSupporting}"
+                               MaxLines="2"
+                               LineBreakMode="TailTruncation" />
+                    </VerticalStackLayout>
+
+                    <Switch Grid.Column="2"
                             IsEnabled="{Binding CanEnableBackup}"
                             IsToggled="{Binding IsBackupEnabled, Mode=OneWay}" />
 
                     <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding LocalMediaRetentionText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
-
-                    <Label Grid.Row="2"
+                           Grid.Column="1"
                            Text="Photos only"
                            Style="{StaticResource M3LabelLarge}"
                            MaxLines="1"
                            LineBreakMode="TailTruncation" />
 
-                    <Switch Grid.Row="2"
-                            Grid.Column="1"
+                    <Switch Grid.Row="1"
+                            Grid.Column="2"
                             IsToggled="{Binding PhotosOnly, Mode=TwoWay}" />
 
-                    <Label Grid.Row="3"
+                    <Label Grid.Row="2"
+                           Grid.Column="1"
                            Text="While charging"
                            Style="{StaticResource M3LabelLarge}"
                            MaxLines="1"
                            LineBreakMode="TailTruncation" />
 
-                    <Switch Grid.Row="3"
-                            Grid.Column="1"
+                    <Switch Grid.Row="2"
+                            Grid.Column="2"
                             IsToggled="{Binding ChargingOnly, Mode=TwoWay}" />
                 </Grid>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
                 <Grid RowDefinitions="Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      RowSpacing="{StaticResource Space12}"
-                      ColumnSpacing="{StaticResource Space12}">
-                    <Label Text="Wi-Fi only"
+                      ColumnDefinitions="Auto,*,Auto"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <Border Grid.RowSpan="2"
+                            Style="{StaticResource M3FileThumbnailSurface}"
+                            VerticalOptions="Start">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
+                                           Style="{StaticResource M3TransferThumbnailIcon}" />
+                    </Border>
+
+                    <Label Grid.Column="1"
+                           Text="Wi-Fi only"
                            Style="{StaticResource M3LabelLarge}"
                            MaxLines="1"
                            LineBreakMode="TailTruncation" />
 
-                    <Switch Grid.Column="1"
+                    <Switch Grid.Column="2"
                             IsToggled="{Binding WifiOnly, Mode=TwoWay}" />
 
                     <Label Grid.Row="1"
+                           Grid.Column="1"
                            Text="Allow cellular"
                            Style="{StaticResource M3LabelLarge}"
                            MaxLines="1"
                            LineBreakMode="TailTruncation" />
 
                     <Switch Grid.Row="1"
-                            Grid.Column="1"
+                            Grid.Column="2"
                             IsToggled="{Binding AllowCellular, Mode=TwoWay}" />
                 </Grid>
             </Border>

@@ -25,8 +25,7 @@ namespace Cotton.Mobile.Controls
 
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
-            BackgroundColor = Colors.Transparent;
-            Padding = new Thickness(0);
+            Style = MaterialResources.Get<Style>("M3ModalPage");
             Content = CreateContent(title, cancel, destruction, buttons);
         }
 

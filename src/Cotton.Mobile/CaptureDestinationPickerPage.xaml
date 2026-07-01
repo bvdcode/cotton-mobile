@@ -89,15 +89,22 @@
                                 <TapGestureRecognizer Command="{Binding OpenCommand}" />
                             </Border.GestureRecognizers>
 
-                            <Grid ColumnDefinitions="*,Auto"
+                            <Grid ColumnDefinitions="Auto,*,Auto"
                                   ColumnSpacing="{StaticResource Space12}">
-                                <Label Text="{Binding DisplayName}"
+                                <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                        VerticalOptions="Center">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                                       Style="{StaticResource M3FolderThumbnailIcon}" />
+                                </Border>
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding DisplayName}"
                                        Style="{StaticResource M3CardTitle}"
                                        MaxLines="1"
                                        LineBreakMode="TailTruncation"
                                        VerticalOptions="Center" />
 
-                                <controls:IconButton Grid.Column="1"
+                                <controls:IconButton Grid.Column="2"
                                                      IconData="{x:Static controls:IconPathData.ChevronRight}"
                                                      Command="{Binding OpenCommand}"
                                                      Style="{StaticResource M3FileChromeIconButton}"

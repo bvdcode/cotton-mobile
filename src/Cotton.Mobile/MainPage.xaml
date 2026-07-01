@@ -14,10 +14,7 @@
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
         <ScrollView>
-            <VerticalStackLayout Spacing="{StaticResource Space24}"
-                                 Padding="{StaticResource M3MainContentBottomPadding}"
-                                 VerticalOptions="Start"
-                                 HorizontalOptions="Fill">
+            <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                      Style="{StaticResource M3AuthShellStack}">
                     <Grid ColumnDefinitions="Auto,*"
@@ -137,8 +134,7 @@
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
                                      Style="{StaticResource M3FileBrowserProfileStack}">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="{StaticResource Space12}"
-                                             HorizontalOptions="Fill">
+                                             Style="{StaticResource M3FileBrowserContentStack}">
                             <Grid ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3FileBrowserTopBar}">
                                 <controls:IconButton Grid.Column="0"
@@ -307,7 +303,7 @@
                             <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
                                     Style="{StaticResource M3FileNoticePanel}">
                                 <Grid ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="{StaticResource Space12}">
+                                      Style="{StaticResource M3FileNoticeGrid}">
                                     <Border Style="{StaticResource M3FileNoticeIconFrame}">
                                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                                            Style="{StaticResource M3FileNoticeIcon}" />
@@ -358,7 +354,7 @@
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
                                     Style="{StaticResource M3SelectionBar}">
                                 <Grid ColumnDefinitions="*,Auto,Auto"
-                                      ColumnSpacing="{StaticResource Space8}">
+                                      Style="{StaticResource M3SelectionBarGrid}">
                                     <VerticalStackLayout Style="{StaticResource M3SelectionTextStack}">
                                         <Label Text="{Binding Display.FileSelection.TitleText}"
                                                Style="{StaticResource M3SelectionTitleText}" />
@@ -650,7 +646,7 @@
                 IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
                 Style="{StaticResource M3NavigationBarSurface}">
             <Grid ColumnDefinitions="*,*,*,*"
-                  ColumnSpacing="{StaticResource Space8}">
+                  Style="{StaticResource M3NavigationBarGrid}">
                 <controls:NavigationBarItem Grid.Column="0"
                                             Style="{StaticResource M3NavigationBarItemSelected}"
                                             IconData="{x:Static controls:IconPathData.Folder}"

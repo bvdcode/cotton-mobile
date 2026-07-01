@@ -185,6 +185,13 @@
         <Setter Property="Spacing" Value="{StaticResource Space16}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3MainContentStack">
+        <Setter Property="Spacing" Value="{StaticResource Space24}" />
+        <Setter Property="Padding" Value="{StaticResource M3MainContentBottomPadding}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3OutlinedInputField">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape">
@@ -393,6 +400,10 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3FileNoticeGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileSelectionMark">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
@@ -447,6 +458,11 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserContentStack">
+        <Setter Property="Spacing" Value="{StaticResource Space12}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3FileBrowserTopBar">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
@@ -493,8 +509,16 @@
         <Setter Property="Margin" Value="{StaticResource M3NavigationBarMargin}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3NavigationBarGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3SelectionBar" BasedOn="{StaticResource M3TonalPanel}">
         <Setter Property="Padding" Value="{StaticResource M3SelectionBarPadding}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3SelectionBarGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3SelectionTextStack">

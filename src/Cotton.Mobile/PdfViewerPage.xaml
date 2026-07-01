@@ -8,22 +8,22 @@
              x:DataType="viewModels:PdfViewerViewModel"
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
-             BackgroundColor="{StaticResource M3DarkSurface}">
+             Style="{StaticResource M3DarkViewerPage}">
 
     <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{StaticResource M3DarkSurface}">
+          Style="{StaticResource M3DarkViewerSurface}">
         <controls:TopAppBar TitleText="{Binding Title}"
-                                  UseDarkTheme="True"
-                                  PrimaryIconData="{x:Static controls:IconPathData.Share}"
-                                  PrimaryCommand="{Binding ShareCommand}"
-                                  PrimaryDescription="Share PDF"
-                                  SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
-                                  SecondaryCommand="{Binding OpenExternallyCommand}"
-                                  SecondaryDescription="Open PDF" />
+                            UseDarkTheme="True"
+                            PrimaryIconData="{x:Static controls:IconPathData.Share}"
+                            PrimaryCommand="{Binding ShareCommand}"
+                            PrimaryDescription="Share PDF"
+                            SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
+                            SecondaryCommand="{Binding OpenExternallyCommand}"
+                            SecondaryDescription="Open PDF" />
 
         <Grid Grid.Row="1"
               RowDefinitions="Auto,*"
-              BackgroundColor="{StaticResource M3DarkSurface}">
+              Style="{StaticResource M3DarkViewerSurface}">
             <VerticalStackLayout Padding="{StaticResource M3PdfHeaderPadding}"
                                  Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="{Binding Details}"
@@ -41,7 +41,7 @@
             <CollectionView Grid.Row="1"
                             ItemsSource="{Binding Pages}"
                             IsVisible="{Binding IsPreviewVisible}"
-                            BackgroundColor="{StaticResource M3DarkSurface}"
+                            Style="{StaticResource M3DarkViewerCollection}"
                             ItemSizingStrategy="MeasureAllItems">
                 <CollectionView.ItemsLayout>
                     <LinearItemsLayout Orientation="Vertical"
@@ -52,10 +52,8 @@
                         <Grid Padding="{StaticResource M3PdfPagePadding}">
                             <Border Style="{StaticResource M3PdfPageSurface}">
                                 <Image Source="{Binding ImageSource}"
-                                       Aspect="AspectFit"
                                        HeightRequest="{Binding DisplayHeight}"
-                                       BackgroundColor="{StaticResource M3DocumentSurface}"
-                                       HorizontalOptions="Fill" />
+                                       Style="{StaticResource M3PdfPageImage}" />
                             </Border>
                         </Grid>
                     </DataTemplate>

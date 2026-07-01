@@ -353,6 +353,19 @@
         <Setter Property="Padding" Value="{StaticResource M3TextViewerPadding}" />
     </Style>
 
+    <Style TargetType="ContentPage" x:Key="M3DarkViewerPage">
+        <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3DarkViewerSurface">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
+    </Style>
+
+    <Style TargetType="CollectionView" x:Key="M3DarkViewerCollection">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3ViewerEmptyStateCard">
         <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape">
@@ -388,6 +401,12 @@
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3DocumentSurface}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="Image" x:Key="M3PdfPageImage">
+        <Setter Property="Aspect" Value="AspectFit" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3DocumentSurface}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>

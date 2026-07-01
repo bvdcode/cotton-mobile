@@ -8,22 +8,22 @@
              x:DataType="viewModels:MediaViewerViewModel"
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}"
-             BackgroundColor="{StaticResource M3DarkSurface}">
+             Style="{StaticResource M3DarkViewerPage}">
 
     <Grid RowDefinitions="Auto,*"
-          BackgroundColor="{StaticResource M3DarkSurface}">
+          Style="{StaticResource M3DarkViewerSurface}">
         <controls:TopAppBar TitleText="{Binding Title}"
-                                  UseDarkTheme="True"
-                                  PrimaryIconData="{x:Static controls:IconPathData.Share}"
-                                  PrimaryCommand="{Binding ShareCommand}"
-                                  PrimaryDescription="Share media"
-                                  SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
-                                  SecondaryCommand="{Binding OpenExternallyCommand}"
-                                  SecondaryDescription="Open media" />
+                            UseDarkTheme="True"
+                            PrimaryIconData="{x:Static controls:IconPathData.Share}"
+                            PrimaryCommand="{Binding ShareCommand}"
+                            PrimaryDescription="Share media"
+                            SecondaryIconData="{x:Static controls:IconPathData.OpenInNew}"
+                            SecondaryCommand="{Binding OpenExternallyCommand}"
+                            SecondaryDescription="Open media" />
 
         <Grid Grid.Row="1"
-              BackgroundColor="{StaticResource M3DarkSurface}">
-            <Grid BackgroundColor="{StaticResource M3DarkSurface}">
+              Style="{StaticResource M3DarkViewerSurface}">
+            <Grid Style="{StaticResource M3DarkViewerSurface}">
                 <toolkit:MediaElement x:Name="MediaPlayer"
                                       Aspect="AspectFit"
                                       ShouldAutoPlay="False"

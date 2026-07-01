@@ -91,13 +91,31 @@
                            MaxLines="2"
                            LineBreakMode="TailTruncation" />
 
-                    <Button Grid.Row="2"
-                            Grid.ColumnSpan="2"
-                            Text="{Binding PermissionActionText}"
-                            Command="{Binding PermissionActionCommand}"
-                            IsVisible="{Binding IsPermissionActionVisible}"
-                            Style="{StaticResource FileChromeButton}"
-                            HorizontalOptions="Fill" />
+                    <Grid Grid.Row="2"
+                          Grid.ColumnSpan="2"
+                          ColumnDefinitions="Auto,*,Auto"
+                          IsVisible="{Binding IsPermissionActionVisible}"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Activity}"
+                                               Style="{StaticResource M3ActivityThumbnailIcon}" />
+                        </Border>
+
+                        <Label Grid.Column="1"
+                               Text="{Binding PermissionActionText}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.OpenInNew}"
+                                             Command="{Binding PermissionActionCommand}"
+                                             Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="{Binding PermissionActionText}" />
+                    </Grid>
                 </Grid>
             </Border>
 

@@ -40,28 +40,37 @@
                        LineBreakMode="TailTruncation" />
             </VerticalStackLayout>
 
-            <Button Grid.Column="1"
-                    Style="{StaticResource IconChromeButton}"
-                    Text="{Binding SearchButtonText}"
-                    Command="{Binding ToggleSearchCommand}"
-                    VerticalOptions="Center"
-                    SemanticProperties.Description="{Binding SearchButtonDescription}" />
+            <controls:IconButton Grid.Column="1"
+                                 IconData="{x:Static controls:IconPathData.Search}"
+                                 Style="{StaticResource M3FileChromeIconButton}"
+                                 Command="{Binding ToggleSearchCommand}"
+                                 VerticalOptions="Center"
+                                 SemanticProperties.Description="{Binding SearchButtonDescription}">
+                <controls:IconButton.Triggers>
+                    <DataTrigger TargetType="controls:IconButton"
+                                 Binding="{Binding IsSearchVisible}"
+                                 Value="True">
+                        <Setter Property="IconData"
+                                Value="{x:Static controls:IconPathData.Close}" />
+                    </DataTrigger>
+                </controls:IconButton.Triggers>
+            </controls:IconButton>
 
-            <Button Grid.Column="2"
-                    Style="{StaticResource IconChromeButton}"
-                    Text="{Binding SortButtonText}"
-                    Command="{Binding ShowSortActionsCommand}"
-                    IsVisible="{Binding IsSortButtonVisible}"
-                    VerticalOptions="Center"
-                    SemanticProperties.Description="Sort trash" />
+            <controls:IconButton Grid.Column="2"
+                                 IconData="{x:Static controls:IconPathData.Sort}"
+                                 Style="{StaticResource M3FileChromeIconButton}"
+                                 Command="{Binding ShowSortActionsCommand}"
+                                 IsVisible="{Binding IsSortButtonVisible}"
+                                 VerticalOptions="Center"
+                                 SemanticProperties.Description="Sort trash" />
 
-            <Button Grid.Column="3"
-                    Style="{StaticResource IconChromeButton}"
-                    Text="{Binding ViewButtonText}"
-                    Command="{Binding ShowViewActionsCommand}"
-                    IsVisible="{Binding IsViewButtonVisible}"
-                    VerticalOptions="Center"
-                    SemanticProperties.Description="Change trash view" />
+            <controls:IconButton Grid.Column="3"
+                                 IconData="{x:Static controls:IconPathData.ViewTiles}"
+                                 Style="{StaticResource M3FileChromeIconButton}"
+                                 Command="{Binding ShowViewActionsCommand}"
+                                 IsVisible="{Binding IsViewButtonVisible}"
+                                 VerticalOptions="Center"
+                                 SemanticProperties.Description="Change trash view" />
 
             <ActivityIndicator Grid.Column="4"
                                IsRunning="{Binding IsBusy}"

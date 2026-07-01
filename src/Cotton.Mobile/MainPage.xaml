@@ -176,13 +176,13 @@
                                         </controls:IconButton.Triggers>
                                     </controls:IconButton>
 
-                                    <Button Style="{StaticResource IconChromeButton}"
-                                            Text="{Binding Display.FileSortButtonText}"
-                                            Command="{Binding ShowFileSortActionsCommand}"
-                                            IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                            IsVisible="{Binding Display.IsFileSortButtonVisible}"
-                                            VerticalOptions="Center"
-                                            SemanticProperties.Description="Sort files" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Sort}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         Command="{Binding ShowFileSortActionsCommand}"
+                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                         IsVisible="{Binding Display.IsFileSortButtonVisible}"
+                                                         VerticalOptions="Center"
+                                                         SemanticProperties.Description="Sort files" />
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
                                                          Style="{StaticResource M3FileChromeIconButton}"

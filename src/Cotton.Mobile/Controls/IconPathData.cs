@@ -55,6 +55,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Share => Create("M18 16.1 C17.2 16.1 16.5 16.4 16 16.9 L8.9 12.8 C9 12.5 9 12.3 9 12 C9 11.7 9 11.5 8.9 11.2 L15.9 7.1 C16.4 7.6 17.1 7.9 18 7.9 C19.7 7.9 21 6.6 21 4.9 C21 3.3 19.7 2 18 2 C16.3 2 15 3.3 15 4.9 C15 5.2 15 5.4 15.1 5.7 L8.1 9.8 C7.6 9.3 6.9 9 6 9 C4.3 9 3 10.3 3 12 C3 13.7 4.3 15 6 15 C6.9 15 7.6 14.7 8.1 14.2 L15.1 18.3 C15 18.6 15 18.8 15 19.1 C15 20.7 16.3 22 18 22 C19.7 22 21 20.7 21 19.1 C21 17.4 19.7 16.1 18 16.1 Z");
 
+        public static Geometry Sort => Create("M4 6 L20 6 L20 8 L4 8 Z M7 11 L17 11 L17 13 L7 13 Z M10 16 L14 16 L14 18 L10 18 Z");
+
         public static Geometry Transfer => Create("M7 3 L3 7 L6 7 L6 14 L8 14 L8 7 L11 7 Z M17 21 L21 17 L18 17 L18 10 L16 10 L16 17 L13 17 Z");
 
         public static Geometry ViewTiles => Create("M4 5 L10 5 L10 11 L4 11 Z M14 5 L20 5 L20 11 L14 11 Z M4 13 L10 13 L10 19 L4 19 Z M14 13 L20 13 L20 19 L14 19 Z");

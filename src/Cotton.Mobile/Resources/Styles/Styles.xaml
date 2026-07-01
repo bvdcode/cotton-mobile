@@ -441,6 +441,11 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="controls:IconFrame" x:Key="M3CardErrorThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />

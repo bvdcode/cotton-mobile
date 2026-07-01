@@ -296,6 +296,11 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3ErrorSupportingLine" BasedOn="{StaticResource M3ErrorSupporting}">
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3ErrorSupportingBlock" BasedOn="{StaticResource M3ErrorSupporting}">
         <Setter Property="MaxLines" Value="2" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />

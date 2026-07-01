@@ -94,8 +94,8 @@
                                                      Value="True">
                                             <Setter Property="IconData"
                                                     Value="{x:Static controls:IconPathData.Error}" />
-                                            <Setter Property="IconColor"
-                                                    Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                            <Setter Property="Style"
+                                                    Value="{StaticResource M3CardErrorThumbnailFrame}" />
                                         </DataTrigger>
                                     </controls:IconFrame.Triggers>
                                 </controls:IconFrame>
@@ -111,8 +111,8 @@
                                         <DataTrigger TargetType="Label"
                                                      Binding="{Binding IsAttentionVisible}"
                                                      Value="True">
-                                            <Setter Property="TextColor"
-                                                    Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+                                            <Setter Property="Style"
+                                                    Value="{StaticResource M3ErrorSupportingLine}" />
                                         </DataTrigger>
                                     </Label.Triggers>
                                 </Label>

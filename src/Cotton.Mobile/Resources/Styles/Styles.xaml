@@ -300,6 +300,13 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
     </Style>
 
+    <Style TargetType="controls:IconView" x:Key="M3FileSelectionCheckIcon">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FileSelectionIconSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileAttentionChip">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="StrokeShape">

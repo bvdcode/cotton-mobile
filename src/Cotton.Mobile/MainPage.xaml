@@ -498,10 +498,7 @@
                                                     HorizontalOptions="End"
                                                     VerticalOptions="Start">
                                                 <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
-                                                                   IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                                   IconSize="{StaticResource M3FileSelectionIconSize}"
-                                                                   HorizontalOptions="Center"
-                                                                   VerticalOptions="Center" />
+                                                                   Style="{StaticResource M3FileSelectionCheckIcon}" />
                                             </Border>
 
                                             <VerticalStackLayout Grid.Column="1"
@@ -597,10 +594,7 @@
                                                             VerticalOptions="Start"
                                                             Margin="{StaticResource M3FileTileSelectionMarkMargin}">
                                                         <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
-                                                                           IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
-                                                                           IconSize="{StaticResource M3FileSelectionIconSize}"
-                                                                           HorizontalOptions="Center"
-                                                                           VerticalOptions="Center" />
+                                                                           Style="{StaticResource M3FileSelectionCheckIcon}" />
                                                     </Border>
 
                                                     <VerticalStackLayout Grid.Row="1"

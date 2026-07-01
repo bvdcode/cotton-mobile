@@ -59,9 +59,7 @@
                                Style="{StaticResource M3CardSupportingStrongLine}" />
 
                         <Label Text="{Binding CloudQuotaDetailText, FallbackValue=Storage limits are not shared by this server., TargetNullValue=Storage limits are not shared by this server.}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
                     <ProgressBar Grid.Row="1"
@@ -89,9 +87,7 @@
                                    Style="{StaticResource M3CardSupportingStrongLine}" />
 
                             <Label Text="Remove evictable local copies while keeping offline files."
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
                         </VerticalStackLayout>
 
                         <controls:IconButton Grid.Column="2"
@@ -112,9 +108,7 @@
                                    Style="{StaticResource M3CardSupportingStrongLine}" />
 
                             <Label Text="Clear thumbnails, folder listings, downloads, and recents."
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
                         </VerticalStackLayout>
 
                         <controls:IconButton Grid.Column="2"
@@ -139,9 +133,7 @@
                                    Style="{StaticResource M3CardTitle}" />
 
                             <Label Text="{Binding OnDeviceSummaryText}"
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
                         </VerticalStackLayout>
                     </Grid>
 
@@ -196,14 +188,10 @@
                                    Style="{StaticResource M3CardTitle}" />
 
                             <Label Text="{Binding StorageBudgetSummaryText}"
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
 
                             <Label Text="{Binding ProtectedOfflineText}"
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
                         </VerticalStackLayout>
                     </Grid>
 

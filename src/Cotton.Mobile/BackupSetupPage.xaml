@@ -52,9 +52,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding DestinationText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
                     <controls:IconButton Grid.Column="2"
@@ -74,9 +72,7 @@
                                Style="{StaticResource M3CardSupportingStrongLine}" />
 
                         <Label Text="{Binding DestinationStorageEstimateText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
                 </Grid>
             </Border>
@@ -96,9 +92,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding MediaAccessDetailText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
                     <Border Grid.Column="2"
@@ -144,9 +138,7 @@
                                LineBreakMode="TailTruncation" />
 
                         <Label Text="{Binding HealthStatusText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
                     <controls:IconButton Grid.Column="2"
@@ -172,9 +164,7 @@
                                Style="{StaticResource M3CardTitle}" />
 
                         <Label Text="{Binding LocalMediaRetentionText}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
                     <controls:ToggleSwitch Grid.Column="2"

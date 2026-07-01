@@ -75,9 +75,7 @@
                     <Label Grid.Row="1"
                            Grid.ColumnSpan="2"
                            Text="{Binding PermissionDetailText}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3CardSupportingBlock}" />
 
                     <Grid Grid.Row="2"
                           Grid.ColumnSpan="2"
@@ -131,9 +129,7 @@
                         <Label Grid.Row="1"
                                Grid.ColumnSpan="2"
                                Text="{Binding RemotePushUnavailableDetail}"
-                               Style="{StaticResource M3CardSupporting}"
-                               MaxLines="2"
-                               LineBreakMode="TailTruncation" />
+                               Style="{StaticResource M3CardSupportingBlock}" />
 
                         <controls:IconButton Grid.Row="2"
                                              Grid.Column="1"
@@ -158,9 +154,7 @@
                                                LineBreakMode="TailTruncation" />
 
                                         <Label Text="{Binding DetailText}"
-                                               Style="{StaticResource M3CardSupporting}"
-                                               MaxLines="2"
-                                               LineBreakMode="TailTruncation" />
+                                               Style="{StaticResource M3CardSupportingBlock}" />
                                     </VerticalStackLayout>
 
                                     <controls:ToggleSwitch Grid.Column="1"

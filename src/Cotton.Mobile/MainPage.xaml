@@ -127,9 +127,7 @@
                                    Style="{StaticResource M3CardSupportingStrong}" />
 
                             <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                                   Style="{StaticResource M3CardSupporting}"
-                                   MaxLines="2"
-                                   LineBreakMode="TailTruncation" />
+                                   Style="{StaticResource M3CardSupportingBlock}" />
                         </VerticalStackLayout>
 
                         <controls:IconButton Grid.Column="2"

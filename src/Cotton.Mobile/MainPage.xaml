@@ -249,10 +249,7 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.TransferActivityIndicator.Text}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center">
+                                           Style="{StaticResource M3FileStatusPrimaryText}">
                                         <Label.Triggers>
                                             <DataTrigger TargetType="Label"
                                                          Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
@@ -265,10 +262,7 @@
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.TransferActivityIndicator.Details}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3FileStatusMetaText}" />
 
                                     <Grid Grid.ColumnSpan="3"
                                           Style="{StaticResource M3ListItemTouchSurface}">
@@ -289,17 +283,11 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.BackupActivityIndicator.Text}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3FileStatusPrimaryText}" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.BackupActivityIndicator.Details}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3FileStatusMetaText}" />
 
                                     <Grid Grid.ColumnSpan="3"
                                           Style="{StaticResource M3ListItemTouchSurface}">
@@ -320,17 +308,11 @@
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Display.OfflinePackProgress.Text}"
-                                           Style="{StaticResource M3CardSupportingStrong}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3FileStatusPrimaryText}" />
 
                                     <Label Grid.Column="2"
                                            Text="{Binding Display.OfflinePackProgress.Details}"
-                                           Style="{StaticResource M3CardMeta}"
-                                           MaxLines="1"
-                                           LineBreakMode="TailTruncation"
-                                           VerticalTextAlignment="Center" />
+                                           Style="{StaticResource M3FileStatusMetaText}" />
                                 </Grid>
                             </Border>
 

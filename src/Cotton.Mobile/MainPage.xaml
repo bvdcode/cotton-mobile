@@ -273,9 +273,7 @@
                                     <Grid Grid.ColumnSpan="3"
                                           Style="{StaticResource M3ListItemTouchSurface}">
                                         <Grid.Behaviors>
-                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenTransfersCommand}"
-                                                                         RestingBackgroundColor="{StaticResource M3Transparent}"
-                                                                         PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenTransfersCommand}" />
                                         </Grid.Behaviors>
                                     </Grid>
                                 </Grid>
@@ -306,9 +304,7 @@
                                     <Grid Grid.ColumnSpan="3"
                                           Style="{StaticResource M3ListItemTouchSurface}">
                                         <Grid.Behaviors>
-                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenBackupSetupCommand}"
-                                                                         RestingBackgroundColor="{StaticResource M3Transparent}"
-                                                                         PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenBackupSetupCommand}" />
                                         </Grid.Behaviors>
                                     </Grid>
                                 </Grid>
@@ -549,9 +545,7 @@
                                                     <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                  CommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}"
                                                                                  TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                                 TapCommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}"
-                                                                                 RestingBackgroundColor="{StaticResource M3Transparent}"
-                                                                                 PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                                                                 TapCommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}" />
                                                 </Grid.Behaviors>
                                             </Grid>
 
@@ -661,9 +655,7 @@
                                                             <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                          CommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}"
                                                                                          TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                                         TapCommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}"
-                                                                                         RestingBackgroundColor="{StaticResource M3Transparent}"
-                                                                                         PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                                                                         TapCommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}" />
                                                         </Grid.Behaviors>
                                                     </Grid>
 

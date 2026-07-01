@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Controls;
 
 namespace Cotton.Mobile.Behaviors
 {
@@ -33,14 +34,14 @@ namespace Cotton.Mobile.Behaviors
             nameof(RestingBackgroundColor),
             typeof(Color),
             typeof(LongPressBehavior),
-            Colors.Transparent,
+            default(Color),
             propertyChanged: OnBackgroundColorChanged);
 
         public static readonly BindableProperty PressedBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedBackgroundColor),
             typeof(Color),
             typeof(LongPressBehavior),
-            Colors.Transparent,
+            default(Color),
             propertyChanged: OnBackgroundColorChanged);
 
         private VisualElement? _visualElement;
@@ -79,15 +80,15 @@ namespace Cotton.Mobile.Behaviors
             set => SetValue(TapCommandParameterProperty, value);
         }
 
-        public Color RestingBackgroundColor
+        public Color? RestingBackgroundColor
         {
-            get => (Color)GetValue(RestingBackgroundColorProperty);
+            get => (Color?)GetValue(RestingBackgroundColorProperty);
             set => SetValue(RestingBackgroundColorProperty, value);
         }
 
-        public Color PressedBackgroundColor
+        public Color? PressedBackgroundColor
         {
-            get => (Color)GetValue(PressedBackgroundColorProperty);
+            get => (Color?)GetValue(PressedBackgroundColorProperty);
             set => SetValue(PressedBackgroundColorProperty, value);
         }
 
@@ -149,7 +150,18 @@ namespace Cotton.Mobile.Behaviors
         {
             if (_visualElement is not null)
             {
-                _visualElement.BackgroundColor = PressedBackgroundColor;
+                Color? pressedBackgroundColor = PressedBackgroundColor;
+                if (pressedBackgroundColor is not null)
+                {
+                    _visualElement.BackgroundColor = pressedBackgroundColor;
+                    return;
+                }
+
+                MaterialResources.SetThemeColor(
+                    _visualElement,
+                    VisualElement.BackgroundColorProperty,
+                    "M3LightPressedStateLayer",
+                    "M3DarkPressedStateLayer");
             }
         }
 
@@ -157,7 +169,7 @@ namespace Cotton.Mobile.Behaviors
         {
             if (_visualElement is not null)
             {
-                _visualElement.BackgroundColor = RestingBackgroundColor;
+                _visualElement.BackgroundColor = RestingBackgroundColor ?? MaterialResources.Get<Color>("M3Transparent");
             }
         }
 

@@ -112,9 +112,7 @@
                                   Style="{StaticResource M3ListItemTouchSurface}">
                                 <Grid.Behaviors>
                                     <behaviors:LongPressBehavior TapCommand="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
-                                                                 TapCommandParameter="{Binding .}"
-                                                                 RestingBackgroundColor="{StaticResource M3Transparent}"
-                                                                 PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                                                 TapCommandParameter="{Binding .}" />
                                 </Grid.Behaviors>
                             </Grid>
                         </Grid>

@@ -10,10 +10,8 @@
     <Grid x:Name="RootLayout"
           Padding="{StaticResource M3MainPagePadding}"
           RowDefinitions="*,Auto,Auto,Auto">
-        <RefreshView Grid.Row="0"
-                     Command="{Binding RefreshFilesCommand}"
-                     IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
-        <ScrollView>
+        <ScrollView Grid.Row="0"
+                    IsVisible="{Binding Display.IsBrandHeaderVisible}">
             <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                      Style="{StaticResource M3AuthShellStack}">
@@ -117,7 +115,15 @@
                                              SemanticProperties.Description="Cancel browser approval" />
                     </Grid>
                 </Border>
+            </VerticalStackLayout>
+        </ScrollView>
 
+        <RefreshView Grid.Row="0"
+                     IsVisible="{Binding Display.IsProfileVisible}"
+                     Command="{Binding RefreshFilesCommand}"
+                     IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
+        <ScrollView>
+            <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
                                      Style="{StaticResource M3FileBrowserProfileStack}">
                         <VerticalStackLayout x:Name="FileBrowserContent"

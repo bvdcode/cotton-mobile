@@ -5,7 +5,11 @@
         <item name="colorAccent">@color/cotton_accent</item>
         <item name="android:statusBarColor">@color/cotton_surface</item>
         <item name="android:navigationBarColor">@color/cotton_surface</item>
+        <item name="android:navigationBarDividerColor">@color/cotton_surface</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
+        <item name="android:enforceStatusBarContrast">false</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

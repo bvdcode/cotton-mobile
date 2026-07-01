@@ -212,6 +212,14 @@ namespace Cotton.Mobile
             }
 
 #pragma warning disable CA1416, CA1422
+            Android.Graphics.Color systemBarColor = Resources.GetColor(Resource.Color.cotton_surface, Theme);
+            Window.SetStatusBarColor(systemBarColor);
+            Window.SetNavigationBarColor(systemBarColor);
+            if (Build.VERSION.SdkInt >= BuildVersionCodes.P)
+            {
+                Window.NavigationBarDividerColor = systemBarColor;
+            }
+
             bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
             if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
             {

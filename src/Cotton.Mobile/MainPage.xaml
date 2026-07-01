@@ -177,7 +177,6 @@
                                                          Style="{StaticResource M3FileChromeIconButton}"
                                                          Command="{Binding ToggleFileSearchCommand}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                         VerticalOptions="Center"
                                                          SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
                                         <controls:IconButton.Triggers>
                                             <DataTrigger TargetType="controls:IconButton"
@@ -385,14 +384,12 @@
                                                          IconData="{x:Static controls:IconPathData.MoreVertical}"
                                                          Command="{Binding ShowFileSelectionActionsCommand}"
                                                          Style="{StaticResource M3FileChromeIconButton}"
-                                                         VerticalOptions="Center"
                                                          SemanticProperties.Description="Selected file actions" />
 
                                     <controls:IconButton Grid.Column="2"
                                                          IconData="{x:Static controls:IconPathData.Close}"
                                                          Command="{Binding ClearFileSelectionCommand}"
                                                          Style="{StaticResource M3FileChromeIconButton}"
-                                                         VerticalOptions="Center"
                                                          SemanticProperties.Description="Cancel file selection" />
                                 </Grid>
                             </Border>
@@ -407,7 +404,6 @@
                                                      IsEnabled="{Binding Display.CanCancelFileAction}"
                                                      IsVisible="{Binding Display.CanCancelFileAction}"
                                                      Style="{StaticResource M3FileChromeIconButton}"
-                                                     VerticalOptions="Center"
                                                      SemanticProperties.Description="Cancel file operation" />
                             </HorizontalStackLayout>
 

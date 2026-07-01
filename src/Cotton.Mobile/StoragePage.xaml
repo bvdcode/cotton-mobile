@@ -120,7 +120,6 @@
                                              IconData="{x:Static controls:IconPathData.Download}"
                                              Command="{Binding FreeDeviceSpaceCommand}"
                                              Style="{StaticResource M3FileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="Free device storage" />
                     </Grid>
 
@@ -149,7 +148,6 @@
                                              IconData="{x:Static controls:IconPathData.Delete}"
                                              Command="{Binding ClearAllCommand}"
                                              Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="Clear all cached files" />
                     </Grid>
                 </VerticalStackLayout>

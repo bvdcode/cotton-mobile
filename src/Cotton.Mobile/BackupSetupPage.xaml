@@ -71,7 +71,6 @@
                                          IconData="{x:Static controls:IconPathData.Folder}"
                                          Command="{Binding ChooseDestinationCommand}"
                                          Style="{StaticResource M3FileChromeIconButton}"
-                                         VerticalOptions="Center"
                                          SemanticProperties.Description="Choose backup destination" />
 
                     <VerticalStackLayout Grid.Row="1"
@@ -144,7 +143,6 @@
                                              IconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding MediaAccessActionCommand}"
                                              Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="{Binding MediaAccessActionText}" />
                     </Grid>
                 </Grid>
@@ -181,7 +179,6 @@
                                          IconData="{x:Static controls:IconPathData.Play}"
                                          Command="{Binding QueueNowCommand}"
                                          Style="{StaticResource M3FileChromeIconButton}"
-                                         VerticalOptions="Center"
                                          SemanticProperties.Description="Queue camera backup now" />
                 </Grid>
             </Border>

@@ -56,7 +56,6 @@
                                          IconData="{x:Static controls:IconPathData.Refresh}"
                                          Command="{Binding LoadCommand}"
                                          Style="{StaticResource M3FileChromeIconButton}"
-                                         VerticalOptions="Center"
                                          SemanticProperties.Description="Retry notifications" />
                 </Grid>
             </Border>
@@ -112,7 +111,6 @@
                                              IconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding PermissionActionCommand}"
                                              Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="{Binding PermissionActionText}" />
                     </Grid>
                 </Grid>

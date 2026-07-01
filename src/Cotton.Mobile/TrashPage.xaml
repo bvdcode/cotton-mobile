@@ -44,7 +44,6 @@
                                  IconData="{x:Static controls:IconPathData.Search}"
                                  Style="{StaticResource M3FileChromeIconButton}"
                                  Command="{Binding ToggleSearchCommand}"
-                                 VerticalOptions="Center"
                                  SemanticProperties.Description="{Binding SearchButtonDescription}">
                 <controls:IconButton.Triggers>
                     <DataTrigger TargetType="controls:IconButton"
@@ -61,7 +60,6 @@
                                  Style="{StaticResource M3FileChromeIconButton}"
                                  Command="{Binding ShowSortActionsCommand}"
                                  IsVisible="{Binding IsSortButtonVisible}"
-                                 VerticalOptions="Center"
                                  SemanticProperties.Description="Sort trash" />
 
             <controls:IconButton Grid.Column="3"
@@ -69,7 +67,6 @@
                                  Style="{StaticResource M3FileChromeIconButton}"
                                  Command="{Binding ShowViewActionsCommand}"
                                  IsVisible="{Binding IsViewButtonVisible}"
-                                 VerticalOptions="Center"
                                  SemanticProperties.Description="Change trash view" />
 
             <ActivityIndicator Grid.Column="4"
@@ -127,7 +124,6 @@
                                      Command="{Binding RestoreSelectionCommand}"
                                      IsEnabled="{Binding IsBulkActionEnabled}"
                                      Style="{StaticResource M3FileChromeIconButton}"
-                                     VerticalOptions="Center"
                                      SemanticProperties.Description="Restore selected items" />
 
                 <controls:IconButton Grid.Column="2"
@@ -135,14 +131,12 @@
                                      Command="{Binding DeleteForeverSelectionCommand}"
                                      IsEnabled="{Binding IsBulkActionEnabled}"
                                      Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                     VerticalOptions="Center"
                                      SemanticProperties.Description="Delete selected items forever" />
 
                 <controls:IconButton Grid.Column="3"
                                      IconData="{x:Static controls:IconPathData.Close}"
                                      Command="{Binding CancelSelectionCommand}"
                                      Style="{StaticResource M3FileChromeIconButton}"
-                                     VerticalOptions="Center"
                                      SemanticProperties.Description="Cancel selection" />
             </Grid>
         </Border>

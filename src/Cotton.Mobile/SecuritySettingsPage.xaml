@@ -121,7 +121,6 @@
                                              Command="{Binding VerifyDeviceUnlockCommand}"
                                              IsEnabled="{Binding CanVerifyDeviceUnlock}"
                                              Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="{Binding DeviceUnlockActionText}" />
                     </Grid>
                 </Grid>
@@ -260,7 +259,6 @@
                                              Command="{Binding RevokeCurrentSessionCommand}"
                                              IsEnabled="{Binding CanRevokeCurrentSession}"
                                              Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="{Binding RevokeCurrentSessionActionText}" />
                     </Grid>
 

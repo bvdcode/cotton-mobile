@@ -81,7 +81,6 @@
                                              IconData="{x:Static controls:IconPathData.Folder}"
                                              Command="{Binding OpenFilesCommand}"
                                              Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                             VerticalOptions="Center"
                                              SemanticProperties.Description="Choose sync folder" />
                     </Grid>
                 </VerticalStackLayout>

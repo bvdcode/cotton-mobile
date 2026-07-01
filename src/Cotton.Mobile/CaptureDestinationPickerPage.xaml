@@ -70,14 +70,12 @@
                                          IconData="{x:Static controls:IconPathData.ArrowUp}"
                                          Command="{Binding UpCommand}"
                                          Style="{StaticResource M3FileChromeIconButton}"
-                                         VerticalOptions="Center"
                                          SemanticProperties.Description="Go to parent folder" />
 
                     <controls:IconButton Grid.Column="3"
                                          IconData="{x:Static controls:IconPathData.Check}"
                                          Command="{Binding ChooseCommand}"
                                          Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                         VerticalOptions="Center"
                                          SemanticProperties.Description="Choose current folder" />
                 </Grid>
             </Border>
@@ -125,7 +123,6 @@
                                                      IconData="{x:Static controls:IconPathData.ChevronRight}"
                                                      Command="{Binding OpenCommand}"
                                                      Style="{StaticResource M3FileChromeIconButton}"
-                                                     VerticalOptions="Center"
                                                      SemanticProperties.Description="{Binding DisplayName, StringFormat='Open {0}'}" />
                             </Grid>
                         </Border>

@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <x:Double x:Key="SpaceNone">0</x:Double>
     <x:Double x:Key="Space2">2</x:Double>
     <x:Double x:Key="Space4">4</x:Double>
     <x:Double x:Key="Space8">8</x:Double>
@@ -55,6 +56,7 @@
     <x:Double x:Key="M3TrashTileHeight">192</x:Double>
 
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
+    <Thickness x:Key="M3NoPadding">0</Thickness>
     <Thickness x:Key="M3AuthPanelPadding">16</Thickness>
     <Thickness x:Key="M3AppLockGatePadding">24</Thickness>
     <Thickness x:Key="M3BrandHeaderMargin">0,32,0,0</Thickness>

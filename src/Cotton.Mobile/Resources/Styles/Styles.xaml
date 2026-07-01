@@ -16,13 +16,13 @@
     <Style TargetType="Border">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 16" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3SurfaceCard">
-        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
-        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
@@ -37,22 +37,22 @@
     <Style TargetType="Border" x:Key="M3TonalPanel">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3AttentionStatusPanel">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3InlineStatusPanelPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3AuthPanel">
-        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 28" />
-        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
         <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
     </Style>
@@ -64,7 +64,7 @@
     <Style TargetType="Border" x:Key="M3OutlinedInputField">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 20" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3OutlinedInputPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainer}}" />
     </Style>
@@ -76,9 +76,9 @@
     <Style TargetType="Border" x:Key="M3AuthInputIconFrame">
         <Setter Property="WidthRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3AuthInputIconFrameSize}" />
-        <Setter Property="Stroke" Value="Transparent" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 16" />
-        <Setter Property="StrokeThickness" Value="0" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
@@ -93,7 +93,7 @@
     <Style TargetType="Border" x:Key="M3AccentOutlineChip">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3CompactChipPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
@@ -101,7 +101,7 @@
     <Style TargetType="Border" x:Key="M3NeutralChip">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3NeutralChipPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="VerticalOptions" Value="Start" />
@@ -112,8 +112,8 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
@@ -121,8 +121,8 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
@@ -135,9 +135,9 @@
 
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionRowOverlay" BasedOn="{StaticResource M3FileSelectionOverlay}">
@@ -162,8 +162,8 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
@@ -176,14 +176,14 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 10" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileAttentionChip">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="StrokeShape" Value="RoundRectangle 18" />
-        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3CompactChipPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
@@ -195,16 +195,16 @@
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserProfileStack">
-        <Setter Property="Spacing" Value="0" />
+        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileListStack">
-        <Setter Property="Spacing" Value="0" />
+        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileEntryTouchSurface">
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileTileCard" BasedOn="{StaticResource M3SurfaceCard}">
@@ -270,7 +270,7 @@
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ButtonFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
         <Setter Property="Padding" Value="{StaticResource M3PrimaryButtonPadding}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
@@ -310,7 +310,7 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
-        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
         <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
         <Setter Property="Padding" Value="{StaticResource M3ChromeButtonPadding}" />
@@ -329,7 +329,7 @@
                     <VisualState x:Name="Disabled">
                         <VisualState.Setters>
                             <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutlineVariant}}" />
-                            <Setter Property="BorderColor" Value="Transparent" />
+                            <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
                             <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
                             <Setter Property="Opacity" Value="0.54" />
                         </VisualState.Setters>
@@ -354,7 +354,7 @@
     <Style TargetType="Button" x:Key="IconChromeButton" BasedOn="{StaticResource FileChromeButton}">
         <Setter Property="FontSize" Value="{StaticResource M3ButtonFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="WidthRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
@@ -419,8 +419,8 @@
         <Setter Property="IconSize" Value="{StaticResource M3TopAppBarIconSize}" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="ButtonBackgroundColor" Value="Transparent" />
-        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3FileChromeIconButton">
@@ -469,8 +469,8 @@
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemUnselected" BasedOn="{StaticResource M3NavigationBarItem}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="FillColor" Value="Transparent" />
-        <Setter Property="BorderColor" Value="Transparent" />
+        <Setter Property="FillColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3ViewerOverlayIconButton">
@@ -493,8 +493,8 @@
 
     <Style TargetType="Button" x:Key="FooterLinkButton">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
         <Setter Property="Padding" Value="{StaticResource M3FooterLinkPadding}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3CompactButtonHeight}" />
@@ -509,7 +509,7 @@
 
     <Style TargetType="DatePicker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -517,7 +517,7 @@
 
     <Style TargetType="Editor">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -526,13 +526,13 @@
 
     <Style TargetType="Editor" x:Key="TextViewerContentEditor">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3TextViewerFontSize}" />
     </Style>
 
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -541,8 +541,8 @@
 
     <Style TargetType="ImageButton">
         <Setter Property="Opacity" Value="1" />
-        <Setter Property="BorderColor" Value="Transparent" />
-        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -550,7 +550,7 @@
 
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
@@ -558,7 +558,7 @@
     <Style TargetType="Picker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -569,7 +569,7 @@
     </Style>
 
     <Style TargetType="RadioButton">
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
@@ -593,7 +593,7 @@
     <Style TargetType="SearchHandler">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
     </Style>
 
@@ -614,14 +614,14 @@
 
     <Style TargetType="TimePicker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="Page" ApplyToDerivedTypes="True">
-        <Setter Property="Padding" Value="0" />
+        <Setter Property="Padding" Value="{StaticResource M3NoPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 

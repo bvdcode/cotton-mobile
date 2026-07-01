@@ -383,33 +383,33 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="8,0" />
-        <Setter Property="MinimumHeightRequest" Value="32" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
+        <Setter Property="Padding" Value="{StaticResource M3FooterLinkPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3CompactButtonHeight}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="CheckBox">
         <Setter Property="Color" Value="{StaticResource M3Accent}" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="DatePicker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="Editor">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="Editor" x:Key="TextViewerContentEditor">
@@ -421,19 +421,19 @@
     <Style TargetType="Entry">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="ImageButton">
         <Setter Property="Opacity" Value="1" />
         <Setter Property="BorderColor" Value="Transparent" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="22" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="Label">
@@ -447,9 +447,9 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="TitleColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="ProgressBar">
@@ -459,9 +459,9 @@
     <Style TargetType="RadioButton">
         <Setter Property="BackgroundColor" Value="Transparent" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="RefreshView">
@@ -473,16 +473,16 @@
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="CancelButtonColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="SearchHandler">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
     </Style>
 
     <Style TargetType="Slider">
@@ -503,9 +503,9 @@
     <Style TargetType="TimePicker">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="Transparent" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 
     <Style TargetType="Page" ApplyToDerivedTypes="True">

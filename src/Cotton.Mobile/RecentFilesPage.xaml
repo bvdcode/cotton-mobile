@@ -48,22 +48,11 @@
                                            IsBodyLineVisible="False"
                                            Style="{StaticResource M3MetadataListSkeletonView}" />
 
-        <Border Grid.Row="2"
-                IsVisible="{Binding IsEmpty}"
-                Style="{StaticResource M3EmptyStateCard}">
-            <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                    <controls:IconView IconData="{x:Static controls:IconPathData.File}"
-                                       Style="{StaticResource M3EmptyStateIcon}" />
-                </Border>
-
-                <Label Text="{Binding EmptyMessage}"
-                       Style="{StaticResource M3EmptyTitle}" />
-
-                <Label Text="{Binding EmptyDetails}"
-                       Style="{StaticResource M3EmptyBody}" />
-            </VerticalStackLayout>
-        </Border>
+        <controls:EmptyStateView Grid.Row="2"
+                                 IsVisible="{Binding IsEmpty}"
+                                 IconData="{x:Static controls:IconPathData.File}"
+                                 Title="{Binding EmptyMessage}"
+                                 Body="{Binding EmptyDetails}" />
 
         <CollectionView Grid.Row="2"
                         ItemsSource="{Binding Items}"

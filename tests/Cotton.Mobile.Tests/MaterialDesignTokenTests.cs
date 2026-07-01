@@ -152,6 +152,29 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("FocusedInputChromeBehavior", trashPage, StringComparison.Ordinal);
         }
 
+        [Fact]
+        public void Secondary_empty_states_use_reusable_material_control()
+        {
+            string[] screenPaths =
+            [
+                RecentFilesPagePath,
+                ActivityFeedPagePath,
+                TransfersPagePath,
+                FileVersionHistoryPagePath,
+                CaptureInboxPagePath,
+                CaptureDestinationPickerPagePath,
+                TrashPagePath,
+            ];
+
+            foreach (string screenPath in screenPaths)
+            {
+                string page = LoadText(screenPath);
+
+                Assert.Contains("<controls:EmptyStateView", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3EmptyStateStack", page, StringComparison.Ordinal);
+            }
+        }
+
         private static XDocument LoadResourceDictionary(string relativePath)
         {
             string repositoryRoot = FindRepositoryRoot(relativePath);

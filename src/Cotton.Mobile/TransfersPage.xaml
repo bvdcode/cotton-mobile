@@ -43,21 +43,10 @@
             <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                                Style="{StaticResource M3MetadataListSkeletonView}" />
 
-            <Border IsVisible="{Binding IsEmpty}"
-                    Style="{StaticResource M3EmptyStateCard}">
-                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                           Style="{StaticResource M3EmptyStateIcon}" />
-                    </Border>
-
-                    <Label Text="{Binding EmptyMessage}"
-                           Style="{StaticResource M3EmptyTitle}" />
-
-                    <Label Text="{Binding EmptyDetails}"
-                           Style="{StaticResource M3EmptyBody}" />
-                </VerticalStackLayout>
-            </Border>
+            <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
+                                     IconData="{x:Static controls:IconPathData.Transfer}"
+                                     Title="{Binding EmptyMessage}"
+                                     Body="{Binding EmptyDetails}" />
 
             <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                  IsVisible="{Binding IsListVisible}"

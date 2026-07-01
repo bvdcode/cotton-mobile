@@ -70,18 +70,9 @@
             <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                            Style="{StaticResource M3FileListSkeletonView}" />
 
-            <Border IsVisible="{Binding IsEmpty}"
-                    Style="{StaticResource M3EmptyStateCard}">
-                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
-                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                           Style="{StaticResource M3EmptyStateIcon}" />
-                    </Border>
-
-                    <Label Text="No subfolders here"
-                           Style="{StaticResource M3EmptyTitle}" />
-                </VerticalStackLayout>
-            </Border>
+            <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
+                                     IconData="{x:Static controls:IconPathData.Folder}"
+                                     Title="No subfolders here" />
 
             <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                  IsVisible="{Binding IsListVisible}"

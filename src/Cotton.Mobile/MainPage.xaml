@@ -427,13 +427,28 @@
                                 </Grid>
                             </Border>
 
-                            <controls:IconButton IconData="{x:Static controls:IconPathData.Refresh}"
-                                                 Command="{Binding RetryFileActionCommand}"
-                                                 IsEnabled="{Binding Display.CanRetryFileAction}"
-                                                 IsVisible="{Binding Display.CanRetryFileAction}"
-                                                 Style="{StaticResource M3FileChromeIconButton}"
-                                                 HorizontalOptions="Start"
-                                                 SemanticProperties.Description="{Binding Display.FileRetryActionText}" />
+                            <Border IsVisible="{Binding Display.CanRetryFileAction}"
+                                    Style="{StaticResource M3AttentionStatusPanel}">
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      Style="{StaticResource M3StatusGrid}">
+                                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
+                                                       Style="{StaticResource M3AttentionStatusIcon}" />
+
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Display.FilesStatus}"
+                                           Style="{StaticResource M3ErrorSupporting}"
+                                           MaxLines="2"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center" />
+
+                                    <controls:IconButton Grid.Column="2"
+                                                         IconData="{x:Static controls:IconPathData.Refresh}"
+                                                         Command="{Binding RetryFileActionCommand}"
+                                                         IsEnabled="{Binding Display.CanRetryFileAction}"
+                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                                         SemanticProperties.Description="{Binding Display.FileRetryActionText}" />
+                                </Grid>
+                            </Border>
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                     Style="{StaticResource M3EmptyStateCard}">

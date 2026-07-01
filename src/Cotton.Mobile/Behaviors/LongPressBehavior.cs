@@ -29,10 +29,26 @@ namespace Cotton.Mobile.Behaviors
             typeof(object),
             typeof(LongPressBehavior));
 
+        public static readonly BindableProperty RestingBackgroundColorProperty = BindableProperty.Create(
+            nameof(RestingBackgroundColor),
+            typeof(Color),
+            typeof(LongPressBehavior),
+            Colors.Transparent,
+            propertyChanged: OnBackgroundColorChanged);
+
+        public static readonly BindableProperty PressedBackgroundColorProperty = BindableProperty.Create(
+            nameof(PressedBackgroundColor),
+            typeof(Color),
+            typeof(LongPressBehavior),
+            Colors.Transparent,
+            propertyChanged: OnBackgroundColorChanged);
+
+        private VisualElement? _visualElement;
+        private bool _isPressed;
+
 #if ANDROID
         private Android.Views.View? _platformView;
         private Java.Lang.IRunnable? _longPressRunnable;
-        private bool _isPressed;
         private bool _isLongPressHandled;
         private float _touchStartX;
         private float _touchStartY;
@@ -63,18 +79,40 @@ namespace Cotton.Mobile.Behaviors
             set => SetValue(TapCommandParameterProperty, value);
         }
 
+        public Color RestingBackgroundColor
+        {
+            get => (Color)GetValue(RestingBackgroundColorProperty);
+            set => SetValue(RestingBackgroundColorProperty, value);
+        }
+
+        public Color PressedBackgroundColor
+        {
+            get => (Color)GetValue(PressedBackgroundColorProperty);
+            set => SetValue(PressedBackgroundColorProperty, value);
+        }
+
         protected override void OnAttachedTo(VisualElement bindable)
         {
             base.OnAttachedTo(bindable);
+            _visualElement = bindable;
+            ApplyCurrentBackgroundColor();
             bindable.HandlerChanged += OnHandlerChanged;
             AttachPlatformLongPress(bindable);
         }
 
         protected override void OnDetachingFrom(VisualElement bindable)
         {
+            ApplyRestingBackgroundColor();
+            _visualElement = null;
             bindable.HandlerChanged -= OnHandlerChanged;
             DetachPlatformLongPress();
             base.OnDetachingFrom(bindable);
+        }
+
+        private static void OnBackgroundColorChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            LongPressBehavior behavior = (LongPressBehavior)bindable;
+            behavior.ApplyCurrentBackgroundColor();
         }
 
         private void OnHandlerChanged(object? sender, EventArgs e)
@@ -82,6 +120,44 @@ namespace Cotton.Mobile.Behaviors
             if (sender is VisualElement visualElement)
             {
                 AttachPlatformLongPress(visualElement);
+            }
+        }
+
+        private void SetPressed(bool isPressed)
+        {
+            if (_isPressed == isPressed)
+            {
+                return;
+            }
+
+            _isPressed = isPressed;
+            ApplyCurrentBackgroundColor();
+        }
+
+        private void ApplyCurrentBackgroundColor()
+        {
+            if (_isPressed)
+            {
+                ApplyPressedBackgroundColor();
+                return;
+            }
+
+            ApplyRestingBackgroundColor();
+        }
+
+        private void ApplyPressedBackgroundColor()
+        {
+            if (_visualElement is not null)
+            {
+                _visualElement.BackgroundColor = PressedBackgroundColor;
+            }
+        }
+
+        private void ApplyRestingBackgroundColor()
+        {
+            if (_visualElement is not null)
+            {
+                _visualElement.BackgroundColor = RestingBackgroundColor;
             }
         }
 
@@ -165,7 +241,7 @@ namespace Cotton.Mobile.Behaviors
         private void BeginTouch(Android.Views.MotionEvent motionEvent)
         {
             CancelLongPress();
-            _isPressed = true;
+            SetPressed(true);
             _isLongPressHandled = false;
             _touchStartX = motionEvent.GetX();
             _touchStartY = motionEvent.GetY();
@@ -203,7 +279,7 @@ namespace Cotton.Mobile.Behaviors
 
         private void CancelLongPress()
         {
-            _isPressed = false;
+            SetPressed(false);
             if (_platformView is not null && _longPressRunnable is not null)
             {
                 _platformView.RemoveCallbacks(_longPressRunnable);
@@ -212,7 +288,7 @@ namespace Cotton.Mobile.Behaviors
             _longPressRunnable = null;
         }
 
-        private sealed class LongPressRunnable : Java.Lang.Object, Java.Lang.IRunnable
+        private class LongPressRunnable : Java.Lang.Object, Java.Lang.IRunnable
         {
             private readonly Action _action;
 

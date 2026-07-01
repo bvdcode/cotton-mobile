@@ -7,10 +7,10 @@
              Shell.NavBarIsVisible="False"
              Title="Cotton locked">
 
-    <Grid Padding="24"
+    <Grid Padding="{StaticResource M3AppLockGatePadding}"
           RowDefinitions="*,Auto,*">
         <VerticalStackLayout Grid.Row="1"
-                             Spacing="16"
+                             Spacing="{StaticResource Space16}"
                              HorizontalOptions="Fill">
             <Label Text="{Binding Title}"
                    Style="{StaticResource M3ScreenTitle}"

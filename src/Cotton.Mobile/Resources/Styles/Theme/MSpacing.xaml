@@ -40,6 +40,7 @@
 
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
     <Thickness x:Key="M3AuthPanelPadding">16</Thickness>
+    <Thickness x:Key="M3AppLockGatePadding">24</Thickness>
     <Thickness x:Key="M3BrandHeaderMargin">0,32,0,0</Thickness>
     <Thickness x:Key="M3FileAttentionChipPadding">5,1</Thickness>
     <Thickness x:Key="M3FileTileOuterPadding">4,4,4,6</Thickness>

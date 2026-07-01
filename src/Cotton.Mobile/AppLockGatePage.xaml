@@ -22,10 +22,7 @@
                 </Border>
 
                 <Label Text="{Binding Title}"
-                       Style="{StaticResource M3EmptyTitle}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation"
-                       HorizontalTextAlignment="Center" />
+                       Style="{StaticResource M3EmptyTitle}" />
 
                 <Label Text="{Binding StatusText}"
                        Style="{StaticResource M3CardSupporting}"

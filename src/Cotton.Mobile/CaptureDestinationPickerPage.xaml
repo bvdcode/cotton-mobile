@@ -81,8 +81,7 @@
                     </Border>
 
                     <Label Text="No subfolders here"
-                           Style="{StaticResource M3EmptyTitle}"
-                           HorizontalTextAlignment="Center" />
+                           Style="{StaticResource M3EmptyTitle}" />
                 </VerticalStackLayout>
             </Border>
 

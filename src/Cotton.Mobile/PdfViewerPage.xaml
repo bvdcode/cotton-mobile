@@ -73,8 +73,7 @@
                         </Border>
 
                         <Label Text="{Binding EmptyText}"
-                               Style="{StaticResource M3DarkEmptyTitle}"
-                               HorizontalTextAlignment="Center" />
+                               Style="{StaticResource M3DarkEmptyTitle}" />
                     </VerticalStackLayout>
                 </Border>
             </Grid>

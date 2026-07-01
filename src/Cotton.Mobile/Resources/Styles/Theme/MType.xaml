@@ -79,7 +79,11 @@
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
-    <Style TargetType="Label" x:Key="M3EmptyTitle" BasedOn="{StaticResource M3PanelTitle}" />
+    <Style TargetType="Label" x:Key="M3EmptyTitle" BasedOn="{StaticResource M3PanelTitle}">
+        <Setter Property="MaxLines" Value="2" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+    </Style>
 
     <Style TargetType="Label" x:Key="M3DarkEmptyTitle" BasedOn="{StaticResource M3EmptyTitle}">
         <Setter Property="TextColor" Value="{StaticResource M3DarkOnSurface}" />
@@ -157,6 +161,12 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3CardSupporting" BasedOn="{StaticResource M3LabelMedium}" />
+
+    <Style TargetType="Label" x:Key="M3EmptyBody" BasedOn="{StaticResource M3CardSupporting}">
+        <Setter Property="MaxLines" Value="2" />
+        <Setter Property="LineBreakMode" Value="WordWrap" />
+        <Setter Property="HorizontalTextAlignment" Value="Center" />
+    </Style>
 
     <Style TargetType="Label" x:Key="M3CardSupportingPrimary" BasedOn="{StaticResource M3LabelMedium}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />

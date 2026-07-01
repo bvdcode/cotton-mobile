@@ -411,15 +411,11 @@
                                     </Border>
 
                                     <Label Text="{Binding Display.FilesEmptyMessage}"
-                                           Style="{StaticResource M3EmptyTitle}"
-                                           HorizontalTextAlignment="Center" />
+                                           Style="{StaticResource M3EmptyTitle}" />
 
                                     <Label Text="{Binding Display.FilesEmptyDetails}"
                                            IsVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
-                                           Style="{StaticResource M3CardSupporting}"
-                                           MaxLines="2"
-                                           LineBreakMode="WordWrap"
-                                           HorizontalTextAlignment="Center" />
+                                           Style="{StaticResource M3EmptyBody}" />
 
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Plus}"
                                                          Command="{Binding ShowFileAddActionsCommand}"

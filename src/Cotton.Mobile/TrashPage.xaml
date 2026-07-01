@@ -145,14 +145,10 @@
                     </Border>
 
                     <Label Text="{Binding EmptyMessage}"
-                           Style="{StaticResource M3EmptyTitle}"
-                           HorizontalTextAlignment="Center" />
+                           Style="{StaticResource M3EmptyTitle}" />
 
                     <Label Text="{Binding EmptyDetails}"
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="WordWrap"
-                           HorizontalTextAlignment="Center" />
+                           Style="{StaticResource M3EmptyBody}" />
                 </VerticalStackLayout>
             </Border>
 

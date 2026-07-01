@@ -51,16 +51,10 @@
                     </Border>
 
                     <Label Text="No folders yet"
-                           Style="{StaticResource M3CardTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation"
-                           HorizontalTextAlignment="Center" />
+                           Style="{StaticResource M3EmptyTitle}" />
 
                     <Label Text="Pick a folder in Files to enable sync."
-                           Style="{StaticResource M3CardSupporting}"
-                           MaxLines="2"
-                           LineBreakMode="WordWrap"
-                           HorizontalTextAlignment="Center" />
+                           Style="{StaticResource M3EmptyBody}" />
 
                     <Grid ColumnDefinitions="Auto,Auto"
                           ColumnSpacing="{StaticResource Space12}"

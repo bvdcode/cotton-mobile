@@ -724,9 +724,9 @@
                                HorizontalOptions="Center"
                                VerticalOptions="Center"
                                IsVisible="{Binding Display.IsLegalFooterVisible}">
-            <Button Text="Privacy"
-                    Command="{Binding PrivacyPolicyCommand}"
-                    Style="{StaticResource FooterLinkButton}" />
+            <controls:TextAction Text="Privacy"
+                                 Command="{Binding PrivacyPolicyCommand}"
+                                 Style="{StaticResource M3FooterTextAction}" />
         </HorizontalStackLayout>
     </Grid>
 

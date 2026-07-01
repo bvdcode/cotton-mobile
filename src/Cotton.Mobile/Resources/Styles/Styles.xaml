@@ -547,13 +547,13 @@
         <Setter Property="BorderColor" Value="{StaticResource M3Accent}" />
     </Style>
 
-    <Style TargetType="Button" x:Key="FooterLinkButton">
+    <Style TargetType="controls:TextAction" x:Key="M3FooterTextAction">
+        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionPressedOpacityFactor}" />
+        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
-        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
-        <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
-        <Setter Property="Padding" Value="{StaticResource M3FooterLinkPadding}" />
-        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3CompactButtonHeight}" />
+        <Setter Property="TextFontSize" Value="{StaticResource M3FooterLinkFontSize}" />
+        <Setter Property="ContentPadding" Value="{StaticResource M3FooterLinkPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FooterLinkMinHeight}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
 

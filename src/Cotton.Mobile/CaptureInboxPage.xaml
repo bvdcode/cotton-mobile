@@ -41,19 +41,21 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Grid ColumnDefinitions="*,*,*"
+            <Grid ColumnDefinitions="Auto,Auto,*"
                   ColumnSpacing="{StaticResource Space12}"
                   IsVisible="{Binding IsActionBarVisible}">
-                <Button Text="Destination"
-                        Command="{Binding DestinationCommand}"
-                        Style="{StaticResource FileChromeButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton IconData="{x:Static controls:IconPathData.Folder}"
+                                     Command="{Binding DestinationCommand}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Choose destination" />
 
-                <Button Grid.Column="1"
-                        Text="Rename"
-                        Command="{Binding RenameCommand}"
-                        Style="{StaticResource FileChromeButton}"
-                        VerticalOptions="Center" />
+                <controls:IconButton Grid.Column="1"
+                                     IconData="{x:Static controls:IconPathData.Edit}"
+                                     Command="{Binding RenameCommand}"
+                                     Style="{StaticResource M3FileChromeIconButton}"
+                                     VerticalOptions="Center"
+                                     SemanticProperties.Description="Rename capture item" />
 
                 <Button Grid.Column="2"
                         Text="Queue"

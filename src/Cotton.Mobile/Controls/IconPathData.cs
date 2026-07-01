@@ -31,6 +31,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Download => Create("M11 4 L13 4 L13 13 L16.5 9.5 L18 11 L12 17 L6 11 L7.5 9.5 L11 13 Z M5 19 L19 19 L19 21 L5 21 Z");
 
+        public static Geometry Edit => Create("M5 17.2 L5 20 L7.8 20 L17.1 10.7 L14.3 7.9 Z M18.3 9.5 L19.7 8.1 C20.1 7.7 20.1 7.1 19.7 6.7 L18.3 5.3 C17.9 4.9 17.3 4.9 16.9 5.3 L15.5 6.7 Z");
+
         public static Geometry Error => Create("M12 3 L22 20 L2 20 Z M11 9 L13 9 L13 14 L11 14 Z M11 16 L13 16 L13 18 L11 18 Z");
 
         public static Geometry File => Create("M6 3 L14 3 L20 9 L20 21 L6 21 Z M8 5 L8 19 L18 19 L18 11 L12 11 L12 5 Z M14 5 L14 9 L18 9 Z");

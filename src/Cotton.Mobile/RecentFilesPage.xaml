@@ -83,38 +83,45 @@
                                                   CommandParameter="{Binding .}" />
                         </Border.GestureRecognizers>
 
-                        <Grid RowDefinitions="Auto,Auto"
-                              ColumnDefinitions="*,Auto"
-                              RowSpacing="{StaticResource Space8}"
+                        <Grid ColumnDefinitions="Auto,*,Auto"
                               ColumnSpacing="{StaticResource Space12}">
-                            <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
+                            <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                    VerticalOptions="Center">
+                                <controls:IconView IconData="{x:Static controls:IconPathData.File}"
+                                                   Style="{StaticResource M3FileThumbnailIcon}" />
+                            </Border>
+
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Style="{StaticResource M3CardTextStack}"
+                                                 VerticalOptions="Center">
                                 <Label Text="{Binding FileName}"
                                        Style="{StaticResource M3CardTitle}"
-                                       MaxLines="2"
+                                       MaxLines="1"
                                        LineBreakMode="TailTruncation" />
 
                                 <Label Text="{Binding DetailText}"
                                        Style="{StaticResource M3CardSupporting}"
-                                       MaxLines="2"
+                                       MaxLines="1"
                                        LineBreakMode="TailTruncation" />
                             </VerticalStackLayout>
 
-                            <Border Grid.Column="1"
-                                    Style="{StaticResource M3NeutralChip}">
-                                <Label Text="{Binding BadgeText}"
-                                       Style="{StaticResource M3ChipLabel}"
-                                       MaxLines="1"
-                                       LineBreakMode="NoWrap" />
-                            </Border>
+                            <HorizontalStackLayout Grid.Column="2"
+                                                   Spacing="{StaticResource Space8}"
+                                                   VerticalOptions="Center">
+                                <Border Style="{StaticResource M3NeutralChip}"
+                                        VerticalOptions="Center">
+                                    <Label Text="{Binding BadgeText}"
+                                           Style="{StaticResource M3ChipLabel}"
+                                           MaxLines="1"
+                                           LineBreakMode="NoWrap" />
+                                </Border>
 
-                            <Button Grid.Column="1"
-                                    Grid.Row="1"
-                                    Text="Remove"
-                                    Style="{StaticResource CompactActionChromeButton}"
-                                    VerticalOptions="Start"
-                                    Command="{Binding BindingContext.RemoveRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
-                                    CommandParameter="{Binding .}"
-                                    SemanticProperties.Description="Remove recent file" />
+                                <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
+                                                     Style="{StaticResource M3FileChromeIconButton}"
+                                                     Command="{Binding BindingContext.RemoveRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
+                                                     CommandParameter="{Binding .}"
+                                                     SemanticProperties.Description="Remove recent file" />
+                            </HorizontalStackLayout>
                         </Grid>
                     </Border>
                 </DataTemplate>

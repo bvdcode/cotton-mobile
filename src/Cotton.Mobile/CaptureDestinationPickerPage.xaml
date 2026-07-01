@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.CaptureDestinationPickerPage"
@@ -68,28 +67,15 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
                         <Border Style="{StaticResource M3ContentCard}">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}">
-                                <controls:IconFrame IconData="{x:Static controls:IconPathData.Folder}"
-                                                    Style="{StaticResource M3FolderThumbnailFrame}" />
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding DisplayName}"
-                                       Style="{StaticResource M3SingleLineListItemTitle}" />
-
-                                <controls:IconButton Grid.Column="2"
-                                                     IconData="{x:Static controls:IconPathData.ChevronRight}"
-                                                     Command="{Binding OpenCommand}"
-                                                     Style="{StaticResource M3FileChromeIconButton}"
-                                                     SemanticProperties.Description="{Binding DisplayName, StringFormat='Open {0}'}" />
-
-                                <Grid Grid.ColumnSpan="2"
-                                      Style="{StaticResource M3ListItemTouchSurface}">
-                                    <Grid.Behaviors>
-                                        <behaviors:LongPressBehavior TapCommand="{Binding OpenCommand}" />
-                                    </Grid.Behaviors>
-                                </Grid>
-                            </Grid>
+                            <controls:ActionListItemView Text="{Binding DisplayName}"
+                                                         LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                         IsLeadingIconVisible="True"
+                                                         LeadingIconFrameStyleResourceKey="M3FolderThumbnailFrame"
+                                                         ActionIconData="{x:Static controls:IconPathData.ChevronRight}"
+                                                         Command="{Binding OpenCommand}"
+                                                         GridStyleResourceKey="M3SettingsListItemGrid"
+                                                         TextStyleResourceKey="M3SingleLineListItemTitle"
+                                                         SemanticDescription="{Binding DisplayName, StringFormat='Open {0}'}" />
                         </Border>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

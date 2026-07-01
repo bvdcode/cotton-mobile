@@ -234,6 +234,7 @@ namespace Cotton.Mobile.Tests
         {
             string activityFeedPage = LoadText(ActivityFeedPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string storagePage = LoadText(StoragePagePath);
@@ -245,6 +246,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ActionListItemView Grid.Row=\"2\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding MediaAccessActionCommand}\"", backupSetupPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:ActionListItemView Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconData=\"{x:Static controls:IconPathData.ChevronRight}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"{Binding DisplayName, StringFormat='Open {0}'}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<behaviors:LongPressBehavior", captureDestinationPickerPage, StringComparison.Ordinal);
 
             Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);

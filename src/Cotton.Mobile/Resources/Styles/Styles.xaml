@@ -526,10 +526,11 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
-    <Style TargetType="ActivityIndicator" x:Key="M3ScreenHeaderActivityIndicator">
-        <Setter Property="Color" Value="{StaticResource M3Accent}" />
+    <Style TargetType="ActivityIndicator" x:Key="M3ScreenHeaderActivityIndicator" BasedOn="{StaticResource M3StatusActivityIndicator}">
         <Setter Property="HorizontalOptions" Value="End" />
         <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="WidthRequest" Value="{StaticResource M3ScreenHeaderActivityIndicatorSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3ScreenHeaderActivityIndicatorSize}" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3EmptyStateStack">

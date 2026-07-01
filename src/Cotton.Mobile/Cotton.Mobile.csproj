@@ -18,6 +18,8 @@
 		<RepositoryUrl>https://github.com/bvdcode/cotton-mobile</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<CottonSdkVersion>0.4.31</CottonSdkVersion>
+		<CottonBrandSurfaceColor>#090B0A</CottonBrandSurfaceColor>
+		<CottonBrandMarkBaseSize>128,128</CottonBrandMarkBaseSize>
 
 		<MauiXamlInflator>SourceGen</MauiXamlInflator>
 
@@ -39,12 +41,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<MauiIcon Include="Resources\AppIcon\cotton_app_icon_background.svg" ForegroundFile="Resources\AppIcon\cotton_app_icon_foreground.svg" Color="#090B0A" />
+		<MauiIcon Include="Resources\AppIcon\cotton_app_icon_background.svg" ForegroundFile="Resources\AppIcon\cotton_app_icon_foreground.svg" Color="$(CottonBrandSurfaceColor)" />
 
-		<MauiSplashScreen Include="Resources\Splash\cotton_splash.svg" Color="#090B0A" BaseSize="128,128" />
+		<MauiSplashScreen Include="Resources\Splash\cotton_splash.svg" Color="$(CottonBrandSurfaceColor)" BaseSize="$(CottonBrandMarkBaseSize)" />
 
 		<MauiImage Include="Resources\Images\*" />
-		<MauiImage Include="Resources\AppIcon\cotton_brand_mark.svg" BaseSize="128,128" />
+		<MauiImage Include="Resources\AppIcon\cotton_brand_mark.svg" BaseSize="$(CottonBrandMarkBaseSize)" />
 		<GoogleServicesJson
 			Include="Platforms\Android\google-services.json"
 			Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android' and Exists('Platforms\Android\google-services.json')" />

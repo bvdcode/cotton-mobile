@@ -32,7 +32,7 @@
 
                 <ActivityIndicator IsRunning="{Binding IsBusy}"
                                    IsVisible="{Binding IsBusy}"
-                                   HorizontalOptions="Center" />
+                                   Style="{StaticResource M3StatusActivityIndicator}" />
 
                 <controls:FilledButton Text="{Binding UnlockActionText}"
                                        Command="{Binding UnlockCommand}"

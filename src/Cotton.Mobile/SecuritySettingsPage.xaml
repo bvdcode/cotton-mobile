@@ -219,12 +219,30 @@
                                LineBreakMode="TailTruncation" />
                     </Grid>
 
-                    <Button Text="{Binding RevokeCurrentSessionActionText}"
-                            Command="{Binding RevokeCurrentSessionCommand}"
-                            IsEnabled="{Binding CanRevokeCurrentSession}"
-                            IsVisible="{Binding IsRevokeCurrentSessionVisible}"
-                            HorizontalOptions="Start"
-                            Style="{StaticResource DestructiveChromeButton}" />
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          IsVisible="{Binding IsRevokeCurrentSessionVisible}"
+                          Style="{StaticResource M3SettingsListItemGrid}">
+                        <Border Style="{StaticResource M3FileThumbnailSurface}"
+                                VerticalOptions="Start">
+                            <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
+                                               Style="{StaticResource M3SecurityThumbnailIcon}" />
+                        </Border>
+
+                        <Label Grid.Column="1"
+                               Text="{Binding RevokeCurrentSessionActionText}"
+                               Style="{StaticResource M3CardSupportingStrong}"
+                               MaxLines="1"
+                               LineBreakMode="TailTruncation"
+                               VerticalOptions="Center" />
+
+                        <controls:IconButton Grid.Column="2"
+                                             IconData="{x:Static controls:IconPathData.Delete}"
+                                             Command="{Binding RevokeCurrentSessionCommand}"
+                                             IsEnabled="{Binding CanRevokeCurrentSession}"
+                                             Style="{StaticResource M3DestructiveFileChromeIconButton}"
+                                             VerticalOptions="Center"
+                                             SemanticProperties.Description="{Binding RevokeCurrentSessionActionText}" />
+                    </Grid>
 
                     <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
                                          IsVisible="{Binding IsAccountSessionsEmptyVisible}">

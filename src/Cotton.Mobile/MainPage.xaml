@@ -391,18 +391,29 @@
                                 </Grid>
                             </Border>
 
-                            <HorizontalStackLayout Spacing="{StaticResource Space12}"
-                                                   IsVisible="{Binding Display.IsFilesLoading}">
-                                <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
-                                                   VerticalOptions="Center" />
+                            <Border IsVisible="{Binding Display.IsFilesLoading}"
+                                    Style="{StaticResource M3FileStatusPanel}">
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      Style="{StaticResource M3FileActionStatusGrid}">
+                                    <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
+                                                       Style="{StaticResource M3FileStatusActivityIndicator}" />
 
-                                <controls:IconButton IconData="{x:Static controls:IconPathData.Close}"
-                                                     Command="{Binding CancelFileActionCommand}"
-                                                     IsEnabled="{Binding Display.CanCancelFileAction}"
-                                                     IsVisible="{Binding Display.CanCancelFileAction}"
-                                                     Style="{StaticResource M3FileChromeIconButton}"
-                                                     SemanticProperties.Description="Cancel file operation" />
-                            </HorizontalStackLayout>
+                                    <Label Grid.Column="1"
+                                           Text="{Binding Display.LoadingMessage}"
+                                           Style="{StaticResource M3CardSupportingStrong}"
+                                           MaxLines="1"
+                                           LineBreakMode="TailTruncation"
+                                           VerticalTextAlignment="Center" />
+
+                                    <controls:IconButton Grid.Column="2"
+                                                         IconData="{x:Static controls:IconPathData.Close}"
+                                                         Command="{Binding CancelFileActionCommand}"
+                                                         IsEnabled="{Binding Display.CanCancelFileAction}"
+                                                         IsVisible="{Binding Display.CanCancelFileAction}"
+                                                         Style="{StaticResource M3FileChromeIconButton}"
+                                                         SemanticProperties.Description="Cancel file operation" />
+                                </Grid>
+                            </Border>
 
                             <controls:IconButton IconData="{x:Static controls:IconPathData.Refresh}"
                                                  Command="{Binding RetryFileActionCommand}"

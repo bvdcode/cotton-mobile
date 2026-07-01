@@ -14,6 +14,14 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="ActivityIndicator" x:Key="M3FileStatusActivityIndicator">
+        <Setter Property="Color" Value="{StaticResource M3Accent}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="WidthRequest" Value="{StaticResource M3FileInlineIconSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileInlineIconSize}" />
+    </Style>
+
     <Style TargetType="IndicatorView">
         <Setter Property="IndicatorColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="SelectedIndicatorColor" Value="{StaticResource M3Accent}" />
@@ -288,6 +296,10 @@
     <Style TargetType="Grid" x:Key="M3FileStatusGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusRowHeight}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileActionStatusGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FileStatusIcon">

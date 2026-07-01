@@ -686,6 +686,10 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3PdfPageContainerGrid">
+        <Setter Property="Padding" Value="{StaticResource M3PdfPagePadding}" />
+    </Style>
+
     <Style TargetType="Image" x:Key="M3ViewerImage">
         <Setter Property="HorizontalOptions" Value="Fill" />
         <Setter Property="VerticalOptions" Value="Fill" />
@@ -840,6 +844,10 @@
 
     <Style TargetType="VerticalStackLayout" x:Key="M3ScreenHeaderTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3PdfHeaderStack" BasedOn="{StaticResource M3ScreenHeaderTextStack}">
+        <Setter Property="Padding" Value="{StaticResource M3PdfHeaderPadding}" />
     </Style>
 
     <Style TargetType="ActivityIndicator" x:Key="M3ScreenHeaderActivityIndicator" BasedOn="{StaticResource M3StatusActivityIndicator}">

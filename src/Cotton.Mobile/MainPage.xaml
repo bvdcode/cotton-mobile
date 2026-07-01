@@ -458,15 +458,12 @@
 
                                                     <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                        IsVisible="{Binding Thumbnail.IsLoading}"
-                                                                       HorizontalOptions="Center"
-                                                                       VerticalOptions="Center" />
+                                                                       Style="{StaticResource M3ThumbnailActivityIndicator}" />
 
                                                     <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                            IsVisible="{Binding IsPlaceholderTextVisible}"
                                                            Style="{StaticResource M3ThumbnailPlaceholder}"
-                                                           FontSize="{Binding Thumbnail.PlaceholderFontSize}"
-                                                           HorizontalTextAlignment="Center"
-                                                           VerticalTextAlignment="Center" />
+                                                           FontSize="{Binding Thumbnail.PlaceholderFontSize}" />
                                                 </Grid>
                                             </Border>
 
@@ -551,15 +548,12 @@
 
                                                             <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
                                                                                IsVisible="{Binding Thumbnail.IsLoading}"
-                                                                               HorizontalOptions="Center"
-                                                                               VerticalOptions="Center" />
+                                                                               Style="{StaticResource M3ThumbnailActivityIndicator}" />
 
                                                             <Label Text="{Binding Thumbnail.PlaceholderText}"
                                                                    IsVisible="{Binding IsPlaceholderTextVisible}"
                                                                    Style="{StaticResource M3ThumbnailPlaceholder}"
-                                                                   FontSize="{Binding Thumbnail.PlaceholderFontSize}"
-                                                                   HorizontalTextAlignment="Center"
-                                                                   VerticalTextAlignment="Center" />
+                                                                   FontSize="{Binding Thumbnail.PlaceholderFontSize}" />
                                                         </Grid>
                                                     </Border>
 

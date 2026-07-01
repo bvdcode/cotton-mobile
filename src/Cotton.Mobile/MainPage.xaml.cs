@@ -2,27 +2,18 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.ComponentModel;
+using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
 	public partial class MainPage : ContentPage
 	{
-		private const double FileTileSlotHorizontalPadding = 2;
-		private const double FileTileSlotRoundingGuard = 1;
-		private const int FileTilePreferredColumnCount = 2;
-		private const double FileTileMinimumColumnWidth = 140;
-		private const double FileTilePreviewRatio = 0.62;
-		private const double FileTileFolderIconMinimumSize = 62;
-		private const double FileTileFolderIconMaximumSize = 92;
-		private const double FileTileFolderIconWidthRatio = 0.42;
-		private const double FileTileVerticalChrome = 68;
-
 		private readonly MainPageViewModel _viewModel;
-		private double _fileTileHeight = 146;
-		private double _fileTileFolderIconSize = FileTileFolderIconMinimumSize;
-		private double _fileTilePreviewHeight = 72;
-		private double _fileTileSlotWidth = 150;
+		private double _fileTileHeight = CottonFileTileLayoutPlanner.InitialMetrics.TileHeight;
+		private double _fileTileFolderIconSize = CottonFileTileLayoutPlanner.InitialMetrics.FolderIconSize;
+		private double _fileTilePreviewHeight = CottonFileTileLayoutPlanner.InitialMetrics.PreviewHeight;
+		private double _fileTileSlotWidth = CottonFileTileLayoutPlanner.InitialMetrics.SlotWidth;
 
 		public MainPage(MainPageViewModel viewModel)
 		{
@@ -144,28 +135,12 @@ namespace Cotton.Mobile
 				return;
 			}
 
-			double slotWidth = ResolveFileTileSlotWidth(contentWidth);
-			double tileWidth = slotWidth - FileTileSlotHorizontalPadding;
+			CottonFileTileLayoutMetrics metrics = CottonFileTileLayoutPlanner.Calculate(contentWidth);
 
-			double previewHeight = Math.Round(tileWidth * FileTilePreviewRatio);
-
-			FileTileSlotWidth = slotWidth;
-			FileTilePreviewHeight = previewHeight;
-			FileTileFolderIconSize = Math.Clamp(
-				Math.Round(tileWidth * FileTileFolderIconWidthRatio),
-				FileTileFolderIconMinimumSize,
-				FileTileFolderIconMaximumSize);
-			FileTileHeight = previewHeight + FileTileVerticalChrome;
-		}
-
-		private static double ResolveFileTileSlotWidth(double contentWidth)
-		{
-			int columnCount = contentWidth >= FileTileMinimumColumnWidth * FileTilePreferredColumnCount
-				? FileTilePreferredColumnCount
-				: 1;
-			return Math.Max(
-				1,
-				Math.Floor(contentWidth / columnCount) - FileTileSlotRoundingGuard);
+			FileTileSlotWidth = metrics.SlotWidth;
+			FileTilePreviewHeight = metrics.PreviewHeight;
+			FileTileFolderIconSize = metrics.FolderIconSize;
+			FileTileHeight = metrics.TileHeight;
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)

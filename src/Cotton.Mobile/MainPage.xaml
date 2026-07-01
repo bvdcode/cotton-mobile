@@ -18,23 +18,35 @@
                                  Padding="{StaticResource M3MainContentBottomPadding}"
                                  VerticalOptions="Start"
                                  HorizontalOptions="Fill">
-                <Image Source="appiconfg.svg"
-                       IsVisible="{Binding Display.IsBrandHeaderVisible}"
-                       HeightRequest="{StaticResource M3BrandMarkSize}"
-                       WidthRequest="{StaticResource M3BrandMarkSize}"
-                       Margin="{StaticResource M3BrandHeaderMargin}"
-                       Aspect="AspectFit"
-                       HorizontalOptions="Start"
-                       SemanticProperties.Description="Cotton Cloud" />
-
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
-                                     Spacing="{StaticResource Space8}">
-                    <Label Text="Cotton Cloud"
-                           Style="{StaticResource M3ScreenMetric}"
-                           SemanticProperties.HeadingLevel="Level1" />
+                                     Style="{StaticResource M3AuthShellStack}">
+                    <Grid ColumnDefinitions="Auto,*"
+                          Style="{StaticResource M3AuthBrandGrid}">
+                        <Border Style="{StaticResource M3AuthBrandMarkFrame}"
+                                SemanticProperties.Description="Cotton Cloud">
+                            <Image Source="appiconfg.svg"
+                                   HeightRequest="{StaticResource M3AuthBrandMarkImageSize}"
+                                   WidthRequest="{StaticResource M3AuthBrandMarkImageSize}"
+                                   Aspect="AspectFit"
+                                   HorizontalOptions="Center"
+                                   VerticalOptions="Center" />
+                        </Border>
 
-                    <Label Text="Sign in to your Cotton Cloud"
-                           Style="{StaticResource M3BodyMedium}" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="{StaticResource Space2}"
+                                             VerticalOptions="Center">
+                            <Label Text="Cotton Cloud"
+                                   Style="{StaticResource M3ScreenTitle}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation"
+                                   SemanticProperties.HeadingLevel="Level1" />
+
+                            <Label Text="Sign in to continue"
+                                   Style="{StaticResource M3BodyMedium}"
+                                   MaxLines="1"
+                                   LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Grid>
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"

@@ -24,7 +24,8 @@
     <x:Double x:Key="M3AuthInputIconSize">18</x:Double>
     <x:Double x:Key="M3AuthPanelMaxWidth">520</x:Double>
     <x:Double x:Key="M3AuthPrimaryButtonHeight">52</x:Double>
-    <x:Double x:Key="M3BrandMarkSize">64</x:Double>
+    <x:Double x:Key="M3AuthBrandMarkFrameSize">56</x:Double>
+    <x:Double x:Key="M3AuthBrandMarkImageSize">40</x:Double>
     <x:Double x:Key="M3FileActionSize">48</x:Double>
     <x:Double x:Key="M3FileActionIconSize">20</x:Double>
     <x:Double x:Key="M3FileInlineIconSize">18</x:Double>
@@ -60,8 +61,8 @@
     <Thickness x:Key="M3ScreenPadding">16</Thickness>
     <Thickness x:Key="M3NoPadding">0</Thickness>
     <Thickness x:Key="M3AuthPanelPadding">16</Thickness>
+    <Thickness x:Key="M3AuthShellMargin">0,32,0,0</Thickness>
     <Thickness x:Key="M3AppLockGatePadding">24</Thickness>
-    <Thickness x:Key="M3BrandHeaderMargin">0,32,0,0</Thickness>
     <Thickness x:Key="M3ChromeButtonPadding">10,0</Thickness>
     <Thickness x:Key="M3CompactChipPadding">5,1</Thickness>
     <Thickness x:Key="M3ContentCardPadding">16</Thickness>

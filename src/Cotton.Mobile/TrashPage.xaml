@@ -287,7 +287,7 @@
                             </Border.Triggers>
 
                             <Grid RowDefinitions="Auto,Auto,Auto"
-                                  RowSpacing="{StaticResource Space8}">
+                                  Style="{StaticResource M3FileTileContentGrid}">
                                 <Border HeightRequest="{StaticResource M3TrashTilePreviewHeight}"
                                         Style="{StaticResource M3FilePreviewSurface}">
                                     <Grid>
@@ -322,7 +322,7 @@
                                 </Border>
 
                                 <VerticalStackLayout Grid.Row="1"
-                                                     Spacing="{StaticResource Space2}">
+                                                     Style="{StaticResource M3FileTileTextStack}">
                                     <Label Text="{Binding Name}"
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 

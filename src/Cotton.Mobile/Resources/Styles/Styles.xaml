@@ -476,6 +476,18 @@
         <Setter Property="Padding" Value="{StaticResource M3FileTileInnerPadding}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3FileTileContentGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileTileTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileTileMetadataGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3NavigationBarSurface" BasedOn="{StaticResource M3SurfaceCard}">
         <Setter Property="Padding" Value="{StaticResource M3NavigationBarPadding}" />
         <Setter Property="Margin" Value="{StaticResource M3NavigationBarMargin}" />

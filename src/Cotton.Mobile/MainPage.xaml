@@ -538,7 +538,7 @@
                                               Padding="{StaticResource M3FileTileOuterPadding}">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                     Style="{StaticResource M3FileTileCard}">
-                                                <Grid RowSpacing="{StaticResource Space8}">
+                                                <Grid Style="{StaticResource M3FileTileContentGrid}">
                                                     <Border Grid.RowSpan="2"
                                                             IsVisible="{Binding IsSelected}"
                                                             Style="{StaticResource M3FileSelectionOverlay}" />
@@ -578,12 +578,12 @@
                                                     </Border>
 
                                                     <VerticalStackLayout Grid.Row="1"
-                                                                         Spacing="{StaticResource Space2}">
+                                                                         Style="{StaticResource M3FileTileTextStack}">
                                                         <Label Text="{Binding Name}"
                                                                Style="{StaticResource M3CardSupportingStrongLine}" />
 
                                                         <Grid ColumnDefinitions="*,Auto,Auto"
-                                                              ColumnSpacing="{StaticResource Space8}">
+                                                              Style="{StaticResource M3FileTileMetadataGrid}">
                                                             <Label Text="{Binding Details}"
                                                                    Style="{StaticResource M3CardMetaLine}" />
 

@@ -646,11 +646,13 @@
     <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
         <Setter Property="InputTransparent" Value="True" />
+        <Setter Property="AppearanceDuration" Value="{StaticResource M3MotionSkeletonEnterDuration}" />
     </Style>
 
     <Style TargetType="controls:MetadataListSkeletonView" x:Key="M3MetadataListSkeletonView">
         <Setter Property="Spacing" Value="{StaticResource M3CardListItemSpacing}" />
         <Setter Property="InputTransparent" Value="True" />
+        <Setter Property="AppearanceDuration" Value="{StaticResource M3MotionSkeletonEnterDuration}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileSkeletonRowGrid">

@@ -58,6 +58,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(GetDoubleResource(spacing, "M3MetadataSkeletonBodyLineWidth") > 0);
             Assert.True(GetDoubleResource(interaction, "M3SkeletonIdleOpacity") < 1);
             Assert.True(GetDoubleResource(interaction, "M3SkeletonPulseOpacity") > GetDoubleResource(interaction, "M3SkeletonIdleOpacity"));
+            Assert.InRange(GetIntResource(interaction, "M3MotionSkeletonEnterDuration"), 120, 220);
             Assert.True(GetIntResource(interaction, "M3MotionSkeletonPulseDuration") >= 1000);
 
             IReadOnlyDictionary<string, string> skeletonSetters = GetStyleSetters(styles, "M3SkeletonBlock");
@@ -73,8 +74,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("{StaticResource M3MotionSkeletonPulseDuration}", skeletonSetters["PulseDuration"]);
             Assert.Equal("{StaticResource SpaceNone}", listSetters["Spacing"]);
             Assert.Equal("True", listSetters["InputTransparent"]);
+            Assert.Equal("{StaticResource M3MotionSkeletonEnterDuration}", listSetters["AppearanceDuration"]);
             Assert.Equal("{StaticResource M3CardListItemSpacing}", metadataListSetters["Spacing"]);
             Assert.Equal("True", metadataListSetters["InputTransparent"]);
+            Assert.Equal("{StaticResource M3MotionSkeletonEnterDuration}", metadataListSetters["AppearanceDuration"]);
             Assert.Equal("{StaticResource Space8}", metadataGridSetters["RowSpacing"]);
             Assert.Equal("{StaticResource Space12}", metadataGridSetters["ColumnSpacing"]);
             Assert.Equal("{StaticResource M3MetadataSkeletonChipWidth}", metadataChipSetters["WidthRequest"]);

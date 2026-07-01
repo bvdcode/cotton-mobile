@@ -3,15 +3,8 @@
 
 namespace Cotton.Mobile.Controls
 {
-    public class MetadataListSkeletonView : VerticalStackLayout
+    public class MetadataListSkeletonView : SkeletonListView
     {
-        public static readonly BindableProperty RowCountProperty = BindableProperty.Create(
-            nameof(RowCount),
-            typeof(int),
-            typeof(MetadataListSkeletonView),
-            3,
-            propertyChanged: OnRowCountChanged);
-
         public static readonly BindableProperty IsBodyLineVisibleProperty = BindableProperty.Create(
             nameof(IsBodyLineVisible),
             typeof(bool),
@@ -21,14 +14,7 @@ namespace Cotton.Mobile.Controls
 
         public MetadataListSkeletonView()
         {
-            InputTransparent = true;
             RebuildRows();
-        }
-
-        public int RowCount
-        {
-            get => (int)GetValue(RowCountProperty);
-            set => SetValue(RowCountProperty, value);
         }
 
         public bool IsBodyLineVisible
@@ -37,28 +23,13 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsBodyLineVisibleProperty, value);
         }
 
-        private static void OnRowCountChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            MetadataListSkeletonView skeletonView = (MetadataListSkeletonView)bindable;
-            skeletonView.RebuildRows();
-        }
-
         private static void OnBodyLineVisibleChanged(BindableObject bindable, object oldValue, object newValue)
         {
             MetadataListSkeletonView skeletonView = (MetadataListSkeletonView)bindable;
             skeletonView.RebuildRows();
         }
 
-        private void RebuildRows()
-        {
-            Children.Clear();
-
-            int rowCount = Math.Max(0, RowCount);
-            for (int index = 0; index < rowCount; index++)
-            {
-                Children.Add(CreateCard(IsBodyLineVisible));
-            }
-        }
+        protected override View CreateRow() => CreateCard(IsBodyLineVisible);
 
         private static Border CreateCard(bool isBodyLineVisible)
         {

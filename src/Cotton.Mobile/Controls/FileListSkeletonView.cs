@@ -3,45 +3,14 @@
 
 namespace Cotton.Mobile.Controls
 {
-    public class FileListSkeletonView : VerticalStackLayout
+    public class FileListSkeletonView : SkeletonListView
     {
-        public static readonly BindableProperty RowCountProperty = BindableProperty.Create(
-            nameof(RowCount),
-            typeof(int),
-            typeof(FileListSkeletonView),
-            3,
-            propertyChanged: OnRowCountChanged);
-
         public FileListSkeletonView()
         {
-            InputTransparent = true;
             RebuildRows();
         }
 
-        public int RowCount
-        {
-            get => (int)GetValue(RowCountProperty);
-            set => SetValue(RowCountProperty, value);
-        }
-
-        private static void OnRowCountChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            FileListSkeletonView skeletonView = (FileListSkeletonView)bindable;
-            skeletonView.RebuildRows();
-        }
-
-        private void RebuildRows()
-        {
-            Children.Clear();
-
-            int rowCount = Math.Max(0, RowCount);
-            for (int index = 0; index < rowCount; index++)
-            {
-                Children.Add(CreateRow());
-            }
-        }
-
-        private static Grid CreateRow()
+        protected override View CreateRow()
         {
             Grid row = new();
             row.SetDynamicResource(StyleProperty, "M3FileSkeletonRowGrid");

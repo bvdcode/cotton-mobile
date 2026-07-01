@@ -23,7 +23,7 @@
 
         <controls:IconButton IconData="{x:Static controls:IconPathData.ArrowBack}"
                              Style="{StaticResource M3TopAppBarIconButton}"
-                             Clicked="OnBackClicked"
+                             Command="{Binding Source={x:Reference Root}, Path=BackCommand}"
                              SemanticProperties.Description="Back">
             <controls:IconButton.Triggers>
                 <DataTrigger TargetType="controls:IconButton"

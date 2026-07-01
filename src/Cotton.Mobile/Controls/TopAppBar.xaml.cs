@@ -91,8 +91,11 @@ namespace Cotton.Mobile.Controls
 
         public TopAppBar()
         {
+            BackCommand = new Command(ExecuteBackCommand);
             InitializeComponent();
         }
+
+        public ICommand BackCommand { get; }
 
         public string TitleText
         {
@@ -178,7 +181,7 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsTertiaryActionVisibleProperty, value);
         }
 
-        private async void OnBackClicked(object? sender, EventArgs e)
+        private async void ExecuteBackCommand()
         {
             INavigation navigation = Shell.Current.Navigation;
             await navigation.PopAsync();

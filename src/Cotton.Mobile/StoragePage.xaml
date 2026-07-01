@@ -72,7 +72,7 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Label Text="Free up storage"
                            Style="{StaticResource M3CardTitle}" />
 
@@ -135,7 +135,7 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
@@ -189,7 +189,7 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"

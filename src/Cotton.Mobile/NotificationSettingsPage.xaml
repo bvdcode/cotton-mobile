@@ -113,7 +113,7 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Spacing="{StaticResource Space12}">
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                     <Grid ColumnDefinitions="*,Auto"
                           ColumnSpacing="{StaticResource Space12}">
                         <Label Text="Server push"
@@ -166,7 +166,7 @@
                         </Grid>
                     </Grid>
 
-                    <VerticalStackLayout Spacing="{StaticResource Space12}"
+                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                          IsVisible="{Binding HasRemotePushPreferences}"
                                          BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
                         <BindableLayout.ItemTemplate>

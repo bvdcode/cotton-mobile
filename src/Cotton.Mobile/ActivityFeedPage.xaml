@@ -54,7 +54,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="{StaticResource Space12}"
+            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                  IsVisible="{Binding IsListVisible}"
                                  BindableLayout.ItemsSource="{Binding Items}">
                 <BindableLayout.ItemTemplate>

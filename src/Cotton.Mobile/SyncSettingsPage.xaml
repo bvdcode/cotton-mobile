@@ -79,7 +79,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <VerticalStackLayout Spacing="{StaticResource Space12}"
+            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                  BindableLayout.ItemsSource="{Binding Roots}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">

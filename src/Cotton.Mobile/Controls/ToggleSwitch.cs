@@ -304,7 +304,19 @@ namespace Cotton.Mobile.Controls
 
         protected override void ExecutePress()
         {
-            IsToggled = !IsToggled;
+            bool isToggled = !IsToggled;
+            IsToggled = isToggled;
+            PerformToggleHapticFeedback();
+        }
+
+        private void PerformToggleHapticFeedback()
+        {
+#if ANDROID
+            if (Handler?.PlatformView is Android.Views.View platformView)
+            {
+                platformView.PerformHapticFeedback(Android.Views.FeedbackConstants.VirtualKey);
+            }
+#endif
         }
 
         private void UpdateVisualState()

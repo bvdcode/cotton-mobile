@@ -207,8 +207,7 @@
                                                          IsVisible="{Binding Display.IsFileViewButtonVisible}"
                                                          SemanticProperties.Description="Change file view" />
 
-                                    <controls:InitialsButton Style="{StaticResource M3AccountInitialsButton}"
-                                                             Text="{Binding Display.ProfileInitials}"
+                                    <controls:InitialsButton Text="{Binding Display.ProfileInitials}"
                                                              Command="{Binding AccountCommand}"
                                                              IsEnabled="{Binding Display.IsAccountActionEnabled}"
                                                              SemanticProperties.Description="Account" />
@@ -742,8 +741,7 @@
                                VerticalOptions="Center"
                                IsVisible="{Binding Display.IsLegalFooterVisible}">
             <controls:TextAction Text="Privacy"
-                                 Command="{Binding PrivacyPolicyCommand}"
-                                 Style="{StaticResource M3FooterTextAction}" />
+                                 Command="{Binding PrivacyPolicyCommand}" />
         </HorizontalStackLayout>
     </Grid>
 

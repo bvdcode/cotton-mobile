@@ -672,6 +672,8 @@
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
     </Style>
 
+    <Style TargetType="controls:InitialsButton" BasedOn="{StaticResource M3AccountInitialsButton}" />
+
     <Style TargetType="controls:IconView">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
@@ -746,6 +748,8 @@
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3FooterLinkMinHeight}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>
+
+    <Style TargetType="controls:TextAction" BasedOn="{StaticResource M3FooterTextAction}" />
 
     <Style TargetType="controls:TextAction" x:Key="M3DialogTextAction" BasedOn="{StaticResource M3FooterTextAction}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />

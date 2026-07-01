@@ -28,7 +28,7 @@
                        SemanticProperties.Description="Cotton Cloud" />
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
-                                     Spacing="8">
+                                     Spacing="{StaticResource Space8}">
                     <Label Text="Cotton Cloud"
                            Style="{StaticResource M3ScreenMetric}"
                            SemanticProperties.HeadingLevel="Level1" />
@@ -38,7 +38,7 @@
                 </VerticalStackLayout>
 
                 <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"
-                                     Spacing="12">
+                                     Spacing="{StaticResource Space12}">
                     <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
                                        HorizontalOptions="Start" />
 
@@ -80,11 +80,11 @@
                         Padding="{StaticResource M3AuthPanelPadding}"
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
-                    <VerticalStackLayout Spacing="16">
+                    <VerticalStackLayout Spacing="{StaticResource Space16}">
                         <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
                                            HorizontalOptions="Start" />
 
-                        <VerticalStackLayout Spacing="4">
+                        <VerticalStackLayout Spacing="{StaticResource Space4}">
                             <Label Text="Waiting for browser approval"
                                    Style="{StaticResource M3PanelTitle}" />
 
@@ -104,12 +104,12 @@
                                      Spacing="0"
                                      HorizontalOptions="Fill">
                         <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Spacing="12"
+                                             Spacing="{StaticResource Space12}"
                                              HorizontalOptions="Fill">
                             <Grid RowDefinitions="Auto,Auto"
-                                  RowSpacing="8">
+                                  RowSpacing="{StaticResource Space8}">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="10">
+                                      ColumnSpacing="{StaticResource Space12}">
                                     <controls:IconButton Grid.Column="0"
                                                          IconData="{x:Static controls:IconPathData.ArrowUp}"
                                                          Style="{StaticResource M3FileChromeIconButton}"
@@ -121,7 +121,7 @@
                                                          SemanticProperties.Description="Up" />
 
                                     <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="1"
+                                                         Spacing="{StaticResource Space2}"
                                                          VerticalOptions="Center">
                                         <Label Text="{Binding Display.FilesTitle}"
                                                Style="{StaticResource M3BrowserTitle}"
@@ -150,7 +150,7 @@
                                 </Grid>
 
                                 <HorizontalStackLayout Grid.Row="1"
-                                                       Spacing="8"
+                                                       Spacing="{StaticResource Space8}"
                                                        HorizontalOptions="End">
                                     <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
                                                          Style="{StaticResource M3FileChromeIconButton}"
@@ -435,8 +435,8 @@
                                                     <Image Source="folder.svg"
                                                            Aspect="AspectFit"
                                                            IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                           HeightRequest="32"
-                                                           WidthRequest="32"
+                                                           HeightRequest="{StaticResource M3FolderThumbnailIconSize}"
+                                                           WidthRequest="{StaticResource M3FolderThumbnailIconSize}"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
 
@@ -468,7 +468,7 @@
 
                                             <VerticalStackLayout Grid.Column="1"
                                                                  VerticalOptions="Center"
-                                                                 Spacing="2">
+                                                                 Spacing="{StaticResource Space2}">
                                                 <Label Text="{Binding Name}"
                                                        Style="{StaticResource M3CardTitle}"
                                                        MaxLines="1"
@@ -569,7 +569,7 @@
                                                     </Border>
 
                                                     <VerticalStackLayout Grid.Row="1"
-                                                                         Spacing="1">
+                                                                         Spacing="{StaticResource Space2}">
                                                         <Label Text="{Binding Name}"
                                                                Style="{StaticResource M3CardSupportingStrong}"
                                                                MaxLines="1"
@@ -652,7 +652,7 @@
                 IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
                 Style="{StaticResource M3NavigationBarSurface}">
             <Grid ColumnDefinitions="*,*,*,*"
-                  ColumnSpacing="6">
+                  ColumnSpacing="{StaticResource Space8}">
                 <controls:NavigationBarItem Grid.Column="0"
                                             Style="{StaticResource M3NavigationBarItemSelected}"
                                             IconData="{x:Static controls:IconPathData.Folder}"

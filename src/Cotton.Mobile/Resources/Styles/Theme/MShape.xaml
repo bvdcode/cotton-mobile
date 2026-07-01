@@ -19,10 +19,4 @@
     <x:Int32 x:Key="M3ButtonCornerRadius">22</x:Int32>
     <x:Int32 x:Key="M3CompactButtonCornerRadius">18</x:Int32>
     <x:Int32 x:Key="M3PanelButtonCornerRadius">20</x:Int32>
-
-    <Shadow x:Key="M3ShadowSoft"
-            Brush="#000000"
-            Offset="0,4"
-            Radius="18"
-            Opacity="0.18" />
 </ResourceDictionary>

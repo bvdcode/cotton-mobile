@@ -113,11 +113,12 @@
                                    Style="{StaticResource M3BodyMedium}" />
                         </VerticalStackLayout>
 
-                        <Button Text="Cancel"
-                                Command="{Binding CancelAuthorizationCommand}"
-                                IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                Style="{StaticResource FileChromeButton}"
-                                HorizontalOptions="Fill" />
+                        <controls:IconButton IconData="{x:Static controls:IconPathData.Close}"
+                                             Command="{Binding CancelAuthorizationCommand}"
+                                             IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                             Style="{StaticResource M3FileChromeIconButton}"
+                                             HorizontalOptions="Start"
+                                             SemanticProperties.Description="Cancel browser approval" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -410,19 +411,22 @@
                                 <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
                                                    VerticalOptions="Center" />
 
-                                <Button Text="Cancel"
-                                        Command="{Binding CancelFileActionCommand}"
-                                        IsEnabled="{Binding Display.CanCancelFileAction}"
-                                        IsVisible="{Binding Display.CanCancelFileAction}"
-                                        Style="{StaticResource DenseActionChromeButton}" />
+                                <controls:IconButton IconData="{x:Static controls:IconPathData.Close}"
+                                                     Command="{Binding CancelFileActionCommand}"
+                                                     IsEnabled="{Binding Display.CanCancelFileAction}"
+                                                     IsVisible="{Binding Display.CanCancelFileAction}"
+                                                     Style="{StaticResource M3FileChromeIconButton}"
+                                                     VerticalOptions="Center"
+                                                     SemanticProperties.Description="Cancel file operation" />
                             </HorizontalStackLayout>
 
-                            <Button Text="{Binding Display.FileRetryActionText}"
-                                    Command="{Binding RetryFileActionCommand}"
-                                    IsEnabled="{Binding Display.CanRetryFileAction}"
-                                    IsVisible="{Binding Display.CanRetryFileAction}"
-                                    Style="{StaticResource CompactActionChromeButton}"
-                                    HorizontalOptions="Start" />
+                            <controls:IconButton IconData="{x:Static controls:IconPathData.Refresh}"
+                                                 Command="{Binding RetryFileActionCommand}"
+                                                 IsEnabled="{Binding Display.CanRetryFileAction}"
+                                                 IsVisible="{Binding Display.CanRetryFileAction}"
+                                                 Style="{StaticResource M3FileChromeIconButton}"
+                                                 HorizontalOptions="Start"
+                                                 SemanticProperties.Description="{Binding Display.FileRetryActionText}" />
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                     Style="{StaticResource M3EmptyStateCard}">
@@ -443,11 +447,12 @@
                                            LineBreakMode="WordWrap"
                                            HorizontalTextAlignment="Center" />
 
-                                    <Button Text="Add files"
-                                            Command="{Binding ShowFileAddActionsCommand}"
-                                            IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
-                                            Style="{StaticResource M3PrimaryButton}"
-                                            HorizontalOptions="Center" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Plus}"
+                                                         Command="{Binding ShowFileAddActionsCommand}"
+                                                         IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
+                                                         Style="{StaticResource M3PrimaryFileChromeIconButton}"
+                                                         HorizontalOptions="Center"
+                                                         SemanticProperties.Description="Add files" />
                                 </VerticalStackLayout>
                             </Border>
 

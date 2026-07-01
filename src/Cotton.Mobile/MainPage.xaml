@@ -69,15 +69,19 @@
                         MaximumWidthRequest="{StaticResource M3AuthPanelMaxWidth}"
                         HorizontalOptions="Fill">
                     <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
-                        <Border Style="{StaticResource M3OutlinedInputField}">
+                        <Border x:Name="InstanceUrlField"
+                                Style="{StaticResource M3OutlinedInputField}">
                             <Grid ColumnDefinitions="Auto,*"
                                   Style="{StaticResource M3InputGrid}">
-                                <Border Style="{StaticResource M3InputIconFrame}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Cloud}"
+                                <Border x:Name="InstanceUrlIconFrame"
+                                        Style="{StaticResource M3InputIconFrame}">
+                                    <controls:IconView x:Name="InstanceUrlIcon"
+                                                       IconData="{x:Static controls:IconPathData.Cloud}"
                                                        Style="{StaticResource M3InputIcon}" />
                                 </Border>
 
-                                <Entry Grid.Column="1"
+                                <Entry x:Name="InstanceUrlEntry"
+                                       Grid.Column="1"
                                        Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                        Placeholder="https://app.cottoncloud.dev/"
                                        Keyboard="Url"
@@ -85,7 +89,13 @@
                                        ClearButtonVisibility="WhileEditing"
                                        IsEnabled="{Binding Display.IsInputEnabled}"
                                        ReturnCommand="{Binding ConnectCommand}"
-                                       SemanticProperties.Hint="Cotton Cloud server URL" />
+                                       SemanticProperties.Hint="Cotton Cloud server URL">
+                                    <Entry.Behaviors>
+                                        <behaviors:FocusedInputChromeBehavior Field="{x:Reference InstanceUrlField}"
+                                                                             LeadingIconFrame="{x:Reference InstanceUrlIconFrame}"
+                                                                             LeadingIcon="{x:Reference InstanceUrlIcon}" />
+                                    </Entry.Behaviors>
+                                </Entry>
                             </Grid>
                         </Border>
 
@@ -352,11 +362,14 @@
 
                             <Border IsVisible="{Binding Display.IsFileSearchVisible}"
                                     IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                    x:Name="FileSearchField"
                                     Style="{StaticResource M3OutlinedInputField}">
                                 <Grid ColumnDefinitions="Auto,*"
                                       Style="{StaticResource M3InputGrid}">
-                                    <Border Style="{StaticResource M3InputIconFrame}">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Search}"
+                                    <Border x:Name="FileSearchIconFrame"
+                                            Style="{StaticResource M3InputIconFrame}">
+                                        <controls:IconView x:Name="FileSearchIcon"
+                                                           IconData="{x:Static controls:IconPathData.Search}"
                                                            Style="{StaticResource M3InputIcon}" />
                                     </Border>
 
@@ -368,7 +381,13 @@
                                            Placeholder="Search"
                                            ReturnType="Search"
                                            ClearButtonVisibility="WhileEditing"
-                                           SemanticProperties.Hint="Search files and folders" />
+                                           SemanticProperties.Hint="Search files and folders">
+                                        <Entry.Behaviors>
+                                            <behaviors:FocusedInputChromeBehavior Field="{x:Reference FileSearchField}"
+                                                                                 LeadingIconFrame="{x:Reference FileSearchIconFrame}"
+                                                                                 LeadingIcon="{x:Reference FileSearchIcon}" />
+                                        </Entry.Behaviors>
+                                    </Entry>
                                 </Grid>
                             </Border>
 

@@ -42,6 +42,27 @@
         <Setter Property="Padding" Value="{StaticResource M3EmptyStateCardPadding}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3EmptyStateIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3EmptyStateIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3EmptyStateIconFrameSize}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource ShapeExtraLarge}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:IconView" x:Key="M3EmptyStateIcon">
+        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconSize" Value="{StaticResource M3EmptyStateIconSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3TonalPanel">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape">

@@ -48,6 +48,11 @@
             <Border IsVisible="{Binding IsEmpty}"
                     Style="{StaticResource M3EmptyStateCard}">
                 <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
+                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
+                                           Style="{StaticResource M3EmptyStateIcon}" />
+                    </Border>
+
                     <Label Text="{Binding EmptyMessage}"
                            Style="{StaticResource M3EmptyTitle}"
                            HorizontalTextAlignment="Center" />

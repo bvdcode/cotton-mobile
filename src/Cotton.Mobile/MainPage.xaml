@@ -395,9 +395,12 @@
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                     Style="{StaticResource M3EmptyStateCard}">
-                                <VerticalStackLayout Spacing="{StaticResource Space8}"
-                                                     HorizontalOptions="Center"
-                                                     VerticalOptions="Center">
+                                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
+                                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
+                                        <controls:IconView IconData="{x:Static controls:IconPathData.File}"
+                                                           Style="{StaticResource M3EmptyStateIcon}" />
+                                    </Border>
+
                                     <Label Text="{Binding Display.FilesEmptyMessage}"
                                            Style="{StaticResource M3EmptyTitle}"
                                            HorizontalTextAlignment="Center" />

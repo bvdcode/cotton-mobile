@@ -48,18 +48,25 @@
                    MaxLines="2"
                    LineBreakMode="TailTruncation" />
 
-            <Border Style="{StaticResource M3ContentCard}"
+            <Border Style="{StaticResource M3EmptyStateCard}"
                     IsVisible="{Binding IsEmptyVisible}">
-                <VerticalStackLayout Spacing="{StaticResource Space8}">
+                <VerticalStackLayout Style="{StaticResource M3EmptyStateStack}">
+                    <Border Style="{StaticResource M3EmptyStateIconFrame}">
+                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
+                                           Style="{StaticResource M3EmptyStateIcon}" />
+                    </Border>
+
                     <Label Text="No folders yet"
                            Style="{StaticResource M3CardTitle}"
                            MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           LineBreakMode="TailTruncation"
+                           HorizontalTextAlignment="Center" />
 
                     <Label Text="Pick a folder in Files to enable sync."
                            Style="{StaticResource M3CardSupporting}"
                            MaxLines="2"
-                           LineBreakMode="TailTruncation" />
+                           LineBreakMode="WordWrap"
+                           HorizontalTextAlignment="Center" />
 
                     <Button Text="Choose folder"
                             Command="{Binding OpenFilesCommand}"

@@ -21,9 +21,7 @@
                   Style="{StaticResource M3ScreenHeaderGrid}">
                 <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="Notifications"
-                           Style="{StaticResource M3ScreenTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenTitle}" />
 
                     <Label Text="{Binding EnabledCategoriesText}"
                            Style="{StaticResource M3ScreenHeaderSupporting}" />

@@ -51,10 +51,14 @@
 
     <Style TargetType="Label" x:Key="M3ScreenMetric" BasedOn="{StaticResource M3HeadlineLarge}">
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3ScreenTitle" BasedOn="{StaticResource M3HeadlineMedium}">
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="MaxLines" Value="1" />
+        <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3TitleLarge">

@@ -23,9 +23,7 @@
               Style="{StaticResource M3ScreenHeaderGrid}">
             <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                 <Label Text="Version history"
-                       Style="{StaticResource M3ScreenTitle}"
-                       MaxLines="1"
-                       LineBreakMode="TailTruncation" />
+                       Style="{StaticResource M3ScreenTitle}" />
 
                 <Label Text="{Binding FileName}"
                        Style="{StaticResource M3CardTitle}"

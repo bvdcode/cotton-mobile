@@ -22,9 +22,7 @@
                   Style="{StaticResource M3ScreenHeaderGrid}">
                 <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="{Binding TotalSizeText}"
-                           Style="{StaticResource M3ScreenMetric}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenMetric}" />
 
                     <Label Text="{Binding TotalFileCountText}"
                            Style="{StaticResource M3ScreenHeaderSupporting}" />

@@ -37,8 +37,6 @@
                                              VerticalOptions="Center">
                             <Label Text="Cotton Cloud"
                                    Style="{StaticResource M3ScreenTitle}"
-                                   MaxLines="1"
-                                   LineBreakMode="TailTruncation"
                                    SemanticProperties.HeadingLevel="Level1" />
 
                             <Label Text="Sign in to continue"

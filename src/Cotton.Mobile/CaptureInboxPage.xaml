@@ -24,9 +24,7 @@
                   Style="{StaticResource M3ScreenHeaderGrid}">
                 <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="{Binding SummaryText}"
-                           Style="{StaticResource M3ScreenTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenTitle}" />
                 </VerticalStackLayout>
 
                 <ActivityIndicator Grid.Column="1"

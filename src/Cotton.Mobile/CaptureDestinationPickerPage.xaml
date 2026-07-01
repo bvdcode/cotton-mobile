@@ -21,9 +21,7 @@
                   Style="{StaticResource M3ScreenHeaderGrid}">
                 <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
                     <Label Text="{Binding CurrentFolderName}"
-                           Style="{StaticResource M3ScreenTitle}"
-                           MaxLines="1"
-                           LineBreakMode="TailTruncation" />
+                           Style="{StaticResource M3ScreenTitle}" />
 
                     <Label Text="{Binding PathText}"
                            IsVisible="{Binding IsPathTextVisible}"

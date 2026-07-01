@@ -191,8 +191,7 @@
                                    Style="{StaticResource M3BodyMedium}" />
 
                             <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
-                                    Style="{StaticResource M3TonalPanel}"
-                                    Padding="12,8"
+                                    Style="{StaticResource M3FileStatusPanel}"
                                     SemanticProperties.Description="{Binding Display.TransferActivityIndicator.AccessibilityText}">
                                 <Border.Triggers>
                                     <DataTrigger TargetType="Border"
@@ -208,8 +207,7 @@
                                 </Border.GestureRecognizers>
 
                                 <Grid ColumnDefinitions="Auto,*,*"
-                                      ColumnSpacing="8"
-                                      HeightRequest="32">
+                                      Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                                        IconSize="{StaticResource M3FileInlineIconSize}"
@@ -252,16 +250,14 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
-                                    Style="{StaticResource M3TonalPanel}"
-                                    Padding="12,8"
+                                    Style="{StaticResource M3FileStatusPanel}"
                                     SemanticProperties.Description="{Binding Display.BackupActivityIndicator.AccessibilityText}">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenBackupSetupCommand}" />
                                 </Border.GestureRecognizers>
 
                                 <Grid ColumnDefinitions="Auto,*,*"
-                                      ColumnSpacing="8"
-                                      HeightRequest="32">
+                                      Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                                        IconSize="{StaticResource M3FileInlineIconSize}"
@@ -284,12 +280,10 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
-                                    Style="{StaticResource M3TonalPanel}"
-                                    Padding="12,8"
+                                    Style="{StaticResource M3FileStatusPanel}"
                                     SemanticProperties.Description="{Binding Display.OfflinePackProgress.AccessibilityText}">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
-                                      ColumnSpacing="8"
-                                      HeightRequest="32">
+                                      Style="{StaticResource M3FileStatusGrid}">
                                     <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
                                                        IconColor="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}"
                                                        IconSize="{StaticResource M3FileInlineIconSize}"
@@ -312,26 +306,19 @@
                             </Border>
 
                             <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
-                                    Style="{StaticResource M3TonalPanel}"
-                                    Padding="14">
+                                    Style="{StaticResource M3FileNoticePanel}">
                                 <Grid ColumnDefinitions="Auto,*"
-                                      ColumnSpacing="10">
-                                    <Border WidthRequest="28"
-                                            HeightRequest="28"
-                                            Stroke="{StaticResource M3Accent}"
-                                            StrokeShape="RoundRectangle 18"
-                                            StrokeThickness="1"
-                                            BackgroundColor="Transparent"
-                                            VerticalOptions="Start">
+                                      ColumnSpacing="{StaticResource Space12}">
+                                    <Border Style="{StaticResource M3FileNoticeIconFrame}">
                                         <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
                                                            IconColor="{StaticResource M3Accent}"
-                                                           IconSize="15"
+                                                           IconSize="{StaticResource M3FileStatusIconSize}"
                                                            HorizontalOptions="Center"
                                                            VerticalOptions="Center" />
                                     </Border>
 
                                     <VerticalStackLayout Grid.Column="1"
-                                                         Spacing="2">
+                                                         Style="{StaticResource M3FileNoticeTextStack}">
                                         <Label Text="{Binding Display.FilesNoticeTitle}"
                                                Style="{StaticResource M3CardSupportingStrong}" />
 
@@ -350,12 +337,11 @@
                                        Placeholder="Search" />
 
                             <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
-                                    Style="{StaticResource M3TonalPanel}"
-                                    Padding="12,8">
+                                    Style="{StaticResource M3SelectionBar}">
                                 <Grid ColumnDefinitions="*,Auto,Auto"
-                                      ColumnSpacing="8"
-                                      HeightRequest="40">
-                                    <VerticalStackLayout Spacing="1"
+                                      ColumnSpacing="{StaticResource Space8}"
+                                      HeightRequest="{StaticResource M3PanelButtonHeight}">
+                                    <VerticalStackLayout Spacing="{StaticResource Space2}"
                                                          VerticalOptions="Center">
                                         <Label Text="{Binding Display.FileSelection.TitleText}"
                                                Style="{StaticResource M3CardSupportingStrong}"
@@ -382,7 +368,7 @@
                                 </Grid>
                             </Border>
 
-                            <HorizontalStackLayout Spacing="12"
+                            <HorizontalStackLayout Spacing="{StaticResource Space12}"
                                                    IsVisible="{Binding Display.IsFilesLoading}">
                                 <ActivityIndicator IsRunning="{Binding Display.IsFilesLoading}"
                                                    VerticalOptions="Center" />
@@ -401,12 +387,12 @@
                                     IsVisible="{Binding Display.CanRetryFileAction}"
                                     Style="{StaticResource CompactChromeButton}"
                                     HorizontalOptions="Start"
-                                    MinimumHeightRequest="32"
+                                    MinimumHeightRequest="{StaticResource M3CompactButtonHeight}"
                                     MinimumWidthRequest="64" />
 
                             <Border IsVisible="{Binding Display.IsFilesEmptyVisible}"
                                     Style="{StaticResource M3EmptyStateCard}">
-                                <VerticalStackLayout Spacing="8"
+                                <VerticalStackLayout Spacing="{StaticResource Space8}"
                                                      HorizontalOptions="Center"
                                                      VerticalOptions="Center">
                                     <Label Text="{Binding Display.FilesEmptyMessage}"
@@ -424,9 +410,6 @@
                                             Command="{Binding ShowFileAddActionsCommand}"
                                             IsVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
                                             Style="{StaticResource M3PrimaryButton}"
-                                            Padding="14,0"
-                                            HeightRequest="40"
-                                            MinimumHeightRequest="40"
                                             HorizontalOptions="Center" />
                                 </VerticalStackLayout>
                             </Border>
@@ -436,10 +419,8 @@
                                                  BindableLayout.ItemsSource="{Binding Display.FileEntries}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Padding="0,10"
-                                              HeightRequest="{StaticResource M3FileRowHeight}"
-                                              ColumnDefinitions="52,*,48"
-                                              ColumnSpacing="12">
+                                        <Grid Style="{StaticResource M3FileListRowGrid}"
+                                              ColumnDefinitions="52,*,48">
                                             <Border Grid.ColumnSpan="3"
                                                     IsVisible="{Binding IsSelected}"
                                                     Style="{StaticResource M3FileSelectionRowOverlay}" />
@@ -534,9 +515,8 @@
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
                                               Padding="{StaticResource M3FileTileOuterPadding}">
                                             <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                    Style="{StaticResource M3SurfaceCard}"
-                                                    Padding="6">
-                                                <Grid RowSpacing="6">
+                                                    Style="{StaticResource M3FileTileCard}">
+                                                <Grid RowSpacing="{StaticResource Space8}">
                                                     <Border Grid.RowSpan="2"
                                                             IsVisible="{Binding IsSelected}"
                                                             Style="{StaticResource M3FileSelectionOverlay}" />
@@ -580,7 +560,7 @@
                                                             Style="{StaticResource M3FileSelectionMark}"
                                                             HorizontalOptions="Start"
                                                             VerticalOptions="Start"
-                                                            Margin="4">
+                                                            Margin="{StaticResource M3FileTileSelectionMarkMargin}">
                                                         <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
                                                                            IconColor="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}"
                                                                            IconSize="{StaticResource M3FileSelectionIconSize}"
@@ -596,7 +576,7 @@
                                                                LineBreakMode="TailTruncation" />
 
                                                         <Grid ColumnDefinitions="*,Auto,Auto"
-                                                              ColumnSpacing="6">
+                                                              ColumnSpacing="{StaticResource Space8}">
                                                             <Label Text="{Binding Details}"
                                                                    Style="{StaticResource M3CardMeta}"
                                                                    MaxLines="1"
@@ -638,7 +618,7 @@
                                                                          Style="{StaticResource M3FileChromeIconButton}"
                                                                          HorizontalOptions="End"
                                                                          VerticalOptions="Start"
-                                                                         Margin="0,4,4,0"
+                                                                         Margin="{StaticResource M3FileTileActionMargin}"
                                                                          Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                                          CommandParameter="{Binding .}"
                                                                          IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
@@ -665,7 +645,7 @@
                              IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                              HorizontalOptions="End"
                              VerticalOptions="End"
-                             Margin="0,0,2,16"
+                             Margin="{StaticResource M3FloatingActionButtonMargin}"
                              SemanticProperties.Description="Add files" />
 
         <Border Grid.Row="2"

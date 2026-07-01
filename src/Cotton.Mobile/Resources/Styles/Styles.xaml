@@ -112,6 +112,33 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3TonalPanel}">
+        <Setter Property="Padding" Value="{StaticResource M3FileStatusPanelPadding}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileStatusGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusRowHeight}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileNoticePanel" BasedOn="{StaticResource M3TonalPanel}">
+        <Setter Property="Padding" Value="{StaticResource M3FileNoticePadding}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileNoticeIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
+        <Setter Property="StrokeShape" Value="RoundRectangle 18" />
+        <Setter Property="StrokeThickness" Value="1" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileNoticeTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileSelectionMark">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
@@ -127,6 +154,16 @@
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="Padding" Value="{StaticResource M3CompactChipPadding}" />
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileListRowGrid">
+        <Setter Property="Padding" Value="{StaticResource M3FileRowPadding}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileRowHeight}" />
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3FileTileCard" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3FileTileInnerPadding}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3NavigationBarSurface" BasedOn="{StaticResource M3SurfaceCard}">

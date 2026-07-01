@@ -24,6 +24,9 @@
     <x:Double x:Key="M3FileInlineIconSize">18</x:Double>
     <x:Double x:Key="M3FileSelectionIconSize">11</x:Double>
     <x:Double x:Key="M3FileSelectionMarkSize">18</x:Double>
+    <x:Double x:Key="M3FileStatusIconFrameSize">28</x:Double>
+    <x:Double x:Key="M3FileStatusIconSize">16</x:Double>
+    <x:Double x:Key="M3FileStatusRowHeight">32</x:Double>
     <x:Double x:Key="M3FileThumbnailSize">44</x:Double>
     <x:Double x:Key="M3FileRowHeight">72</x:Double>
     <x:Double x:Key="M3InlineStatusIconSize">24</x:Double>
@@ -53,8 +56,15 @@
     <Thickness x:Key="M3CompactChipPadding">5,1</Thickness>
     <Thickness x:Key="M3ContentCardPadding">16</Thickness>
     <Thickness x:Key="M3EmptyStateCardPadding">28,36</Thickness>
+    <Thickness x:Key="M3FileNoticePadding">16</Thickness>
+    <Thickness x:Key="M3FileRowPadding">0,8</Thickness>
+    <Thickness x:Key="M3FileStatusPanelPadding">12,8</Thickness>
+    <Thickness x:Key="M3FileTileActionMargin">0,4,4,0</Thickness>
+    <Thickness x:Key="M3FileTileInnerPadding">8</Thickness>
     <Thickness x:Key="M3FileTileOuterPadding">4,4,4,6</Thickness>
+    <Thickness x:Key="M3FileTileSelectionMarkMargin">4</Thickness>
     <Thickness x:Key="M3FooterLinkPadding">8,0</Thickness>
+    <Thickness x:Key="M3FloatingActionButtonMargin">0,0,0,16</Thickness>
     <Thickness x:Key="M3InlineStatusPanelPadding">12</Thickness>
     <Thickness x:Key="M3MainContentBottomPadding">0,0,0,16</Thickness>
     <Thickness x:Key="M3MainPagePadding">16,0,16,16</Thickness>

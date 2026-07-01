@@ -478,7 +478,7 @@
 
                                             <Grid x:Name="ListEntryTouchSurface"
                                                   Grid.ColumnSpan="2"
-                                                  Style="{StaticResource M3FileEntryTouchSurface}">
+                                                  Style="{StaticResource M3ListItemTouchSurface}">
                                                 <Grid.Behaviors>
                                                     <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                  CommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}"
@@ -590,7 +590,7 @@
 
                                                     <Grid x:Name="TileEntryTouchSurface"
                                                           Grid.RowSpan="2"
-                                                          Style="{StaticResource M3FileEntryTouchSurface}">
+                                                          Style="{StaticResource M3ListItemTouchSurface}">
                                                         <Grid.Behaviors>
                                                             <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
                                                                                          CommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}"

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -73,11 +74,6 @@
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
                     <Border Style="{StaticResource M3ContentCard}">
-                        <Border.GestureRecognizers>
-                            <TapGestureRecognizer Command="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
-                                                  CommandParameter="{Binding .}" />
-                        </Border.GestureRecognizers>
-
                         <Grid ColumnDefinitions="Auto,*,Auto"
                               ColumnSpacing="{StaticResource Space12}">
                             <controls:IconFrame IconData="{x:Static controls:IconPathData.File}"
@@ -111,6 +107,16 @@
                                                      CommandParameter="{Binding .}"
                                                      SemanticProperties.Description="Remove recent file" />
                             </HorizontalStackLayout>
+
+                            <Grid Grid.ColumnSpan="2"
+                                  Style="{StaticResource M3ListItemTouchSurface}">
+                                <Grid.Behaviors>
+                                    <behaviors:LongPressBehavior TapCommand="{Binding BindingContext.OpenRecentFileCommand, Source={x:Reference RecentFilesRoot}}"
+                                                                 TapCommandParameter="{Binding .}"
+                                                                 RestingBackgroundColor="{StaticResource M3Transparent}"
+                                                                 PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                </Grid.Behaviors>
+                            </Grid>
                         </Grid>
                     </Border>
                 </DataTemplate>

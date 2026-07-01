@@ -394,7 +394,7 @@
         <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3FileEntryTouchSurface">
+    <Style TargetType="Grid" x:Key="M3ListItemTouchSurface">
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
 

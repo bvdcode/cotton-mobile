@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -177,11 +178,6 @@
                                 </DataTrigger>
                             </Border.Triggers>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
-                                                      CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="Auto,*,Auto"
                                   RowSpacing="{StaticResource Space8}"
@@ -232,6 +228,16 @@
                                            MaxLines="1"
                                            LineBreakMode="NoWrap" />
                                 </Border>
+
+                                <Grid Grid.ColumnSpan="2"
+                                      Style="{StaticResource M3ListItemTouchSurface}">
+                                    <Grid.Behaviors>
+                                        <behaviors:LongPressBehavior TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                                     TapCommandParameter="{Binding .}"
+                                                                     RestingBackgroundColor="{StaticResource M3Transparent}"
+                                                                     PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                    </Grid.Behaviors>
+                                </Grid>
 
                                 <HorizontalStackLayout Grid.Row="1"
                                                        Grid.Column="1"
@@ -284,11 +290,6 @@
                                 </DataTrigger>
                             </Border.Triggers>
 
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
-                                                      CommandParameter="{Binding .}" />
-                            </Border.GestureRecognizers>
-
                             <Grid RowDefinitions="Auto,Auto,Auto"
                                   RowSpacing="{StaticResource Space8}">
                                 <Border HeightRequest="{StaticResource M3TrashTilePreviewHeight}"
@@ -339,6 +340,16 @@
                                            MaxLines="1"
                                            LineBreakMode="TailTruncation" />
                                 </VerticalStackLayout>
+
+                                <Grid Grid.RowSpan="2"
+                                      Style="{StaticResource M3ListItemTouchSurface}">
+                                    <Grid.Behaviors>
+                                        <behaviors:LongPressBehavior TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                                     TapCommandParameter="{Binding .}"
+                                                                     RestingBackgroundColor="{StaticResource M3Transparent}"
+                                                                     PressedBackgroundColor="{AppThemeBinding Light={StaticResource M3LightPressedStateLayer}, Dark={StaticResource M3DarkPressedStateLayer}}" />
+                                    </Grid.Behaviors>
+                                </Grid>
 
                                 <HorizontalStackLayout Grid.Row="2"
                                                        Spacing="{StaticResource Space8}"

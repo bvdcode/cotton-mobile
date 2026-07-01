@@ -161,12 +161,15 @@ namespace Cotton.Mobile.Behaviors
             }
         }
 
-        private void Execute(ICommand? command, object? parameter)
+        private bool TryExecute(ICommand? command, object? parameter)
         {
-            if (command?.CanExecute(parameter) == true)
+            if (command?.CanExecute(parameter) != true)
             {
-                command.Execute(parameter);
+                return false;
             }
+
+            command.Execute(parameter);
+            return true;
         }
 
         private void AttachPlatformLongPress(VisualElement visualElement)
@@ -255,7 +258,7 @@ namespace Cotton.Mobile.Behaviors
             CancelLongPress();
             if (shouldTap)
             {
-                Execute(TapCommand, TapCommandParameter);
+                TryExecute(TapCommand, TapCommandParameter);
             }
         }
 
@@ -273,8 +276,7 @@ namespace Cotton.Mobile.Behaviors
                 return;
             }
 
-            _isLongPressHandled = true;
-            Execute(Command, CommandParameter);
+            _isLongPressHandled = TryExecute(Command, CommandParameter);
         }
 
         private void CancelLongPress()

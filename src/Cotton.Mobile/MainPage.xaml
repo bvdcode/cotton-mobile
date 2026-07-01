@@ -454,8 +454,13 @@
                                                  BindableLayout.ItemsSource="{Binding Display.FileEntries}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Style="{StaticResource M3FileListRowGrid}"
-                                              ColumnDefinitions="52,*,48">
+                                        <Grid Style="{StaticResource M3FileListRowGrid}">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="{StaticResource M3FileListThumbnailColumnWidth}" />
+                                                <ColumnDefinition Width="*" />
+                                                <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
+                                            </Grid.ColumnDefinitions>
+
                                             <Border Grid.ColumnSpan="3"
                                                     IsVisible="{Binding IsSelected}"
                                                     Style="{StaticResource M3FileSelectionRowOverlay}" />
@@ -489,8 +494,7 @@
                                             </Border>
 
                                             <VerticalStackLayout Grid.Column="1"
-                                                                 VerticalOptions="Center"
-                                                                 Spacing="{StaticResource Space2}">
+                                                                 Style="{StaticResource M3FileListTextStack}">
                                                 <Label Text="{Binding Name}"
                                                        Style="{StaticResource M3CardTitle}" />
 

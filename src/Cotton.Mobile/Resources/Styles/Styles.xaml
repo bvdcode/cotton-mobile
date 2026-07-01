@@ -635,6 +635,10 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileListTextStack" BasedOn="{StaticResource M3CardTextStack}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="controls:FilledButton" x:Key="M3FilledButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="DisabledTextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />

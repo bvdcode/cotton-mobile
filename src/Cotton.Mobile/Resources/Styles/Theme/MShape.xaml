@@ -13,8 +13,9 @@
     <CornerRadius x:Key="M3InsetCornerRadius">10</CornerRadius>
     <CornerRadius x:Key="M3DefaultBorderCornerRadius">16</CornerRadius>
     <CornerRadius x:Key="M3ProminentCornerRadius">18</CornerRadius>
+    <CornerRadius x:Key="M3OutlinedInputCornerRadius">12</CornerRadius>
     <CornerRadius x:Key="M3ContainerCornerRadius">20</CornerRadius>
-    <CornerRadius x:Key="M3AuthPanelCornerRadius">28</CornerRadius>
+    <CornerRadius x:Key="M3AuthPanelCornerRadius">24</CornerRadius>
     <CornerRadius x:Key="M3ActionSheetCornerRadius">28,28,0,0</CornerRadius>
     <CornerRadius x:Key="M3DialogCornerRadius">28</CornerRadius>
     <x:Double x:Key="M3StrokeNone">0</x:Double>

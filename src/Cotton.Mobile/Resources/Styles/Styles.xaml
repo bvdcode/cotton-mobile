@@ -236,7 +236,7 @@
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
-                <RoundRectangle CornerRadius="{StaticResource M3ContainerCornerRadius}" />
+                <RoundRectangle CornerRadius="{StaticResource M3OutlinedInputCornerRadius}" />
             </Setter.Value>
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />

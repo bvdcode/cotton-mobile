@@ -168,13 +168,13 @@
     <Style TargetType="Button" x:Key="M3PrimaryButton">
         <Setter Property="TextColor" Value="{StaticResource M3OnAccent}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Accent}" />
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ButtonFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="BorderWidth" Value="0" />
-        <Setter Property="CornerRadius" Value="22" />
-        <Setter Property="Padding" Value="18,10" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
+        <Setter Property="Padding" Value="{StaticResource M3PrimaryButtonPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -206,11 +206,11 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
         <Setter Property="BorderWidth" Value="1" />
-        <Setter Property="CornerRadius" Value="22" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="10,0" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
+        <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
+        <Setter Property="Padding" Value="{StaticResource M3ChromeButtonPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="VisualStateManager.VisualStateGroups">
             <VisualStateGroupList>
                 <VisualStateGroup x:Name="CommonStates">
@@ -247,21 +247,21 @@
     </Style>
 
     <Style TargetType="Button" x:Key="IconChromeButton" BasedOn="{StaticResource FileChromeButton}">
-        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontSize" Value="{StaticResource M3ButtonFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="Padding" Value="0" />
-        <Setter Property="HeightRequest" Value="44" />
-        <Setter Property="WidthRequest" Value="44" />
-        <Setter Property="MinimumHeightRequest" Value="44" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="WidthRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
     </Style>
 
     <Style TargetType="Button" x:Key="CompactChromeButton" BasedOn="{StaticResource FileChromeButton}">
-        <Setter Property="CornerRadius" Value="18" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="Padding" Value="10,0" />
-        <Setter Property="MinimumHeightRequest" Value="32" />
-        <Setter Property="MinimumWidthRequest" Value="44" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3CompactButtonCornerRadius}" />
+        <Setter Property="FontSize" Value="{StaticResource M3ChromeButtonFontSize}" />
+        <Setter Property="Padding" Value="{StaticResource M3ChromeButtonPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3CompactButtonHeight}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
     </Style>
 
     <Style TargetType="Button" x:Key="CompactDestructiveChromeButton" BasedOn="{StaticResource CompactChromeButton}">
@@ -270,10 +270,10 @@
     </Style>
 
     <Style TargetType="Button" x:Key="PanelChromeButton" BasedOn="{StaticResource FileChromeButton}">
-        <Setter Property="CornerRadius" Value="20" />
-        <Setter Property="HeightRequest" Value="40" />
-        <Setter Property="MinimumHeightRequest" Value="40" />
-        <Setter Property="Padding" Value="12,0" />
+        <Setter Property="CornerRadius" Value="{StaticResource M3PanelButtonCornerRadius}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3PanelButtonHeight}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3PanelButtonHeight}" />
+        <Setter Property="Padding" Value="{StaticResource M3PanelButtonPadding}" />
     </Style>
 
     <Style TargetType="Button" x:Key="PanelDestructiveChromeButton" BasedOn="{StaticResource PanelChromeButton}">
@@ -282,8 +282,8 @@
     </Style>
 
     <Style TargetType="Button" x:Key="DenseChromeButton" BasedOn="{StaticResource CompactChromeButton}">
-        <Setter Property="HeightRequest" Value="36" />
-        <Setter Property="MinimumHeightRequest" Value="36" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3DenseButtonHeight}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3DenseButtonHeight}" />
     </Style>
 
     <Style TargetType="Button" x:Key="DenseDestructiveChromeButton" BasedOn="{StaticResource DenseChromeButton}">

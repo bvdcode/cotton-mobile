@@ -162,64 +162,13 @@ namespace Cotton.Mobile.Controls
                 IconData = ResolveIconData(displayLabel, isDestructive, isCancel),
                 IsSelected = isSelected,
                 Command = CreateDismissCommand(result),
-                RowCornerRadius = MaterialResources.Get<double>("ShapeExtraLarge"),
-                RowPadding = MaterialResources.Get<Thickness>("M3ActionSheetRowPadding"),
-                RowMinHeight = MaterialResources.Get<double>("M3ActionSheetRowMinHeight"),
-                IconFrameSize = MaterialResources.Get<double>("M3ActionSheetRowIconFrameSize"),
-                IconSize = MaterialResources.Get<double>("M3ActionSheetRowIconSize"),
-                IconFrameBorderWidth = MaterialResources.Get<double>("M3StrokeThin"),
-                TextFontSize = MaterialResources.Get<double>("M3LabelLargeFontSize"),
-                TextLineHeight = MaterialResources.Get<double>("M3LabelLargeLineHeight"),
-                ContentSpacing = MaterialResources.Get<double>("Space12"),
-                PressedOpacityMultiplier = MaterialResources.Get<double>("M3InteractionPressedOpacityFactor"),
-                DisabledOpacity = MaterialResources.Get<double>("M3InteractionDisabledOpacity"),
+                Style = MaterialResources.Get<Style>(
+                    isDestructive
+                        ? "M3ActionSheetDestructiveItem"
+                        : "M3ActionSheetItem"),
             };
 
             SemanticProperties.SetDescription(row, displayLabel);
-            MaterialResources.SetThemeColor(
-                row,
-                ActionSheetItemView.RowBackgroundColorProperty,
-                "M3LightSurfaceContainerLowest",
-                "M3DarkSurfaceContainerLow");
-            MaterialResources.SetThemeColor(
-                row,
-                ActionSheetItemView.PressedRowBackgroundColorProperty,
-                "M3LightSurfaceContainerHigh",
-                "M3DarkSurfaceContainerHigh");
-            MaterialResources.SetThemeColor(
-                row,
-                ActionSheetItemView.IconFrameBackgroundColorProperty,
-                "M3LightSurfaceContainer",
-                "M3DarkSurfaceContainer");
-            MaterialResources.SetThemeColor(
-                row,
-                ActionSheetItemView.IconFrameBorderColorProperty,
-                "M3LightOutlineVariant",
-                "M3DarkOutlineVariant");
-
-            if (isDestructive)
-            {
-                MaterialResources.SetThemeColor(
-                    row,
-                    ActionSheetItemView.TextColorProperty,
-                    "M3LightError",
-                    "M3DarkError");
-                MaterialResources.SetThemeColor(
-                    row,
-                    ActionSheetItemView.IconColorProperty,
-                    "M3LightError",
-                    "M3DarkError");
-            }
-            else
-            {
-                MaterialResources.SetThemeColor(
-                    row,
-                    ActionSheetItemView.TextColorProperty,
-                    "M3LightOnSurface",
-                    "M3DarkOnSurface");
-                row.IconColor = MaterialResources.Get<Color>("M3Accent");
-            }
-
             return row;
         }
 

@@ -230,11 +230,12 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Single_line_action_rows_use_reusable_material_control()
+        public void Action_rows_use_reusable_material_control()
         {
             string activityFeedPage = LoadText(ActivityFeedPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+            string storagePage = LoadText(StoragePagePath);
 
             Assert.Contains("<controls:ActionListItemView Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Load more activity\"", activityFeedPage, StringComparison.Ordinal);
@@ -248,6 +249,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(storagePage, "<controls:ActionListItemView"));
+            Assert.Contains("SupportingText=\"Remove evictable local copies while keeping offline files.\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<behaviors:LongPressBehavior", storagePage, StringComparison.Ordinal);
         }
 
         [Fact]

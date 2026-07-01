@@ -16,6 +16,20 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty SupportingTextProperty = BindableProperty.Create(
+            nameof(SupportingText),
+            typeof(string),
+            typeof(ActionListItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsSupportingTextVisibleProperty = BindableProperty.Create(
+            nameof(IsSupportingTextVisible),
+            typeof(bool),
+            typeof(ActionListItemView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
             typeof(Geometry),
@@ -78,6 +92,20 @@ namespace Cotton.Mobile.Controls
             "M3ActionListItemLabel",
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty SupportingTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(SupportingTextStyleResourceKey),
+            typeof(string),
+            typeof(ActionListItemView),
+            "M3CardSupportingBlock",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStackStyleResourceKey),
+            typeof(string),
+            typeof(ActionListItemView),
+            "M3CardTextStack",
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty = BindableProperty.Create(
             nameof(LeadingIconFrameStyleResourceKey),
             typeof(string),
@@ -95,7 +123,9 @@ namespace Cotton.Mobile.Controls
         private readonly IconButton _actionButton;
         private readonly Grid _container;
         private readonly IconFrame _leadingIcon;
+        private readonly Label _supportingText;
         private readonly Label _text;
+        private readonly VerticalStackLayout _textStack;
         private readonly LongPressBehavior _tapBehavior;
         private readonly Grid _touchSurface;
 
@@ -104,6 +134,17 @@ namespace Cotton.Mobile.Controls
             _leadingIcon = new IconFrame();
 
             _text = new Label();
+            _supportingText = new Label();
+
+            _textStack = new VerticalStackLayout
+            {
+                VerticalOptions = LayoutOptions.Center,
+                Children =
+                {
+                    _text,
+                    _supportingText,
+                },
+            };
 
             _tapBehavior = new LongPressBehavior();
 
@@ -135,7 +176,7 @@ namespace Cotton.Mobile.Controls
                 Children =
                 {
                     _leadingIcon,
-                    _text,
+                    _textStack,
                     _touchSurface,
                     _actionButton,
                 },
@@ -149,6 +190,18 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(TextProperty);
             set => SetValue(TextProperty, value);
+        }
+
+        public string SupportingText
+        {
+            get => (string)GetValue(SupportingTextProperty);
+            set => SetValue(SupportingTextProperty, value);
+        }
+
+        public bool IsSupportingTextVisible
+        {
+            get => (bool)GetValue(IsSupportingTextVisibleProperty);
+            set => SetValue(IsSupportingTextVisibleProperty, value);
         }
 
         public Geometry? LeadingIconData
@@ -205,6 +258,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TextStyleResourceKeyProperty, value);
         }
 
+        public string SupportingTextStyleResourceKey
+        {
+            get => (string)GetValue(SupportingTextStyleResourceKeyProperty);
+            set => SetValue(SupportingTextStyleResourceKeyProperty, value);
+        }
+
+        public string TextStackStyleResourceKey
+        {
+            get => (string)GetValue(TextStackStyleResourceKeyProperty);
+            set => SetValue(TextStackStyleResourceKeyProperty, value);
+        }
+
         public string LeadingIconFrameStyleResourceKey
         {
             get => (string)GetValue(LeadingIconFrameStyleResourceKeyProperty);
@@ -226,8 +291,9 @@ namespace Cotton.Mobile.Controls
         private void UpdateVisualState()
         {
             string text = Text ?? string.Empty;
+            string supportingText = SupportingText ?? string.Empty;
             string semanticDescription = string.IsNullOrWhiteSpace(SemanticDescription)
-                ? text
+                ? CreateSemanticDescription(text, supportingText)
                 : SemanticDescription;
             string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
                 ? "M3ActionListItemGrid"
@@ -235,6 +301,12 @@ namespace Cotton.Mobile.Controls
             string textStyleResourceKey = string.IsNullOrWhiteSpace(TextStyleResourceKey)
                 ? "M3ActionListItemLabel"
                 : TextStyleResourceKey;
+            string supportingTextStyleResourceKey = string.IsNullOrWhiteSpace(SupportingTextStyleResourceKey)
+                ? "M3CardSupportingBlock"
+                : SupportingTextStyleResourceKey;
+            string textStackStyleResourceKey = string.IsNullOrWhiteSpace(TextStackStyleResourceKey)
+                ? "M3CardTextStack"
+                : TextStackStyleResourceKey;
             string leadingIconFrameStyleResourceKey = string.IsNullOrWhiteSpace(LeadingIconFrameStyleResourceKey)
                 ? "M3ActivityThumbnailFrame"
                 : LeadingIconFrameStyleResourceKey;
@@ -246,14 +318,18 @@ namespace Cotton.Mobile.Controls
 
             _container.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
+            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
             _text.SetDynamicResource(StyleProperty, textStyleResourceKey);
+            _supportingText.SetDynamicResource(StyleProperty, supportingTextStyleResourceKey);
             _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
 
             _leadingIcon.IconData = LeadingIconData;
             _leadingIcon.IsVisible = isLeadingIconVisible;
             _text.Text = text;
-            Grid.SetColumn(_text, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_text, isLeadingIconVisible ? 1 : 2);
+            _supportingText.Text = supportingText;
+            _supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+            Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
+            Grid.SetColumnSpan(_textStack, isLeadingIconVisible ? 1 : 2);
 
             _actionButton.IconData = ActionIconData;
             _actionButton.Command = command;
@@ -263,6 +339,16 @@ namespace Cotton.Mobile.Controls
             _tapBehavior.TapCommand = IsActionEnabled ? command : null;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled;
             SemanticProperties.SetDescription(_container, semanticDescription);
+        }
+
+        private string CreateSemanticDescription(string text, string supportingText)
+        {
+            if (string.IsNullOrWhiteSpace(supportingText))
+            {
+                return text;
+            }
+
+            return $"{text}. {supportingText}";
         }
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -63,61 +62,28 @@
                     <Label Text="Free up storage"
                            Style="{StaticResource M3CardTitle}" />
 
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Download}"
-                                            Style="{StaticResource M3CardUtilityThumbnailFrame}" />
+                    <controls:ActionListItemView Text="Free space"
+                                                 SupportingText="Remove evictable local copies while keeping offline files."
+                                                 LeadingIconData="{x:Static controls:IconPathData.Download}"
+                                                 IsLeadingIconVisible="True"
+                                                 LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                 ActionIconData="{x:Static controls:IconPathData.Download}"
+                                                 Command="{Binding FreeDeviceSpaceCommand}"
+                                                 GridStyleResourceKey="M3SettingsListItemGrid"
+                                                 TextStyleResourceKey="M3CardSupportingStrongLine"
+                                                 SemanticDescription="Free device storage" />
 
-                        <VerticalStackLayout Grid.Column="1"
-                                             Style="{StaticResource M3CardTextStack}">
-                            <Label Text="Free space"
-                                   Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                            <Label Text="Remove evictable local copies while keeping offline files."
-                                   Style="{StaticResource M3CardSupportingBlock}" />
-                        </VerticalStackLayout>
-
-                        <Grid Grid.ColumnSpan="3"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding FreeDeviceSpaceCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.Download}"
-                                             Command="{Binding FreeDeviceSpaceCommand}"
-                                             Style="{StaticResource M3FileChromeIconButton}"
-                                             SemanticProperties.Description="Free device storage" />
-                    </Grid>
-
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Delete}"
-                                            Style="{StaticResource M3CardUtilityThumbnailFrame}" />
-
-                        <VerticalStackLayout Grid.Column="1"
-                                             Style="{StaticResource M3CardTextStack}">
-                            <Label Text="Clear all cached files"
-                                   Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                            <Label Text="Clear thumbnails, folder listings, downloads, and recents."
-                                   Style="{StaticResource M3CardSupportingBlock}" />
-                        </VerticalStackLayout>
-
-                        <Grid Grid.ColumnSpan="3"
-                              Style="{StaticResource M3ListItemTouchSurface}">
-                            <Grid.Behaviors>
-                                <behaviors:LongPressBehavior TapCommand="{Binding ClearAllCommand}" />
-                            </Grid.Behaviors>
-                        </Grid>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.Delete}"
-                                             Command="{Binding ClearAllCommand}"
-                                             Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                             SemanticProperties.Description="Clear all cached files" />
-                    </Grid>
+                    <controls:ActionListItemView Text="Clear all cached files"
+                                                 SupportingText="Clear thumbnails, folder listings, downloads, and recents."
+                                                 LeadingIconData="{x:Static controls:IconPathData.Delete}"
+                                                 IsLeadingIconVisible="True"
+                                                 LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                 ActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                 Command="{Binding ClearAllCommand}"
+                                                 GridStyleResourceKey="M3SettingsListItemGrid"
+                                                 TextStyleResourceKey="M3CardSupportingStrongLine"
+                                                 ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                 SemanticDescription="Clear all cached files" />
                 </VerticalStackLayout>
             </Border>
 

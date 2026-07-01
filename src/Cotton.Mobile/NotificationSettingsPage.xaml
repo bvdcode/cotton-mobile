@@ -38,13 +38,11 @@
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3ActionListItemGrid}">
                     <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                       Style="{StaticResource M3AttentionStatusIcon}"
-                                       VerticalOptions="Center" />
+                                       Style="{StaticResource M3AttentionStatusIcon}" />
 
                     <Label Grid.Column="1"
                            Text="{Binding Status}"
-                           Style="{StaticResource M3LabelLargeBlock}"
-                           VerticalOptions="Center" />
+                           Style="{StaticResource M3AttentionStatusMessage}" />
 
                     <Grid Grid.ColumnSpan="3"
                           Style="{StaticResource M3ListItemTouchSurface}">
@@ -91,8 +89,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding PermissionActionText}"
-                               Style="{StaticResource M3CardSupportingStrongLine}"
-                               VerticalOptions="Center" />
+                               Style="{StaticResource M3ActionListItemLabel}" />
 
                         <Grid Grid.ColumnSpan="3"
                               Style="{StaticResource M3ListItemTouchSurface}">
@@ -145,8 +142,7 @@
                               ColumnDefinitions="*,Auto"
                               Style="{StaticResource M3SettingsListItemGrid}">
                             <Label Text="Retry server push"
-                                   Style="{StaticResource M3CardSupportingStrongLine}"
-                                   VerticalOptions="Center" />
+                                   Style="{StaticResource M3ActionListItemLabel}" />
 
                             <Grid Grid.ColumnSpan="2"
                                   Style="{StaticResource M3ListItemTouchSurface}">

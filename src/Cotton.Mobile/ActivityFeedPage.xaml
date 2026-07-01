@@ -104,8 +104,7 @@
 
                     <Label Grid.Column="1"
                            Text="Load more"
-                           Style="{StaticResource M3CardTitle}"
-                           VerticalOptions="Center" />
+                           Style="{StaticResource M3ActionListItemTitle}" />
 
                     <Grid Grid.ColumnSpan="3"
                           Style="{StaticResource M3ListItemTouchSurface}">

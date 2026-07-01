@@ -87,8 +87,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding DeviceUnlockActionText}"
-                               Style="{StaticResource M3CardSupportingStrongLine}"
-                               VerticalOptions="Center" />
+                               Style="{StaticResource M3ActionListItemLabel}" />
 
                         <Grid Grid.ColumnSpan="3"
                               IsEnabled="{Binding CanVerifyDeviceUnlock}"
@@ -207,8 +206,7 @@
 
                         <Label Grid.Column="1"
                                Text="{Binding RevokeCurrentSessionActionText}"
-                               Style="{StaticResource M3CardSupportingStrongLine}"
-                               VerticalOptions="Center" />
+                               Style="{StaticResource M3ActionListItemLabel}" />
 
                         <Grid Grid.ColumnSpan="3"
                               IsEnabled="{Binding CanRevokeCurrentSession}"

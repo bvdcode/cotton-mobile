@@ -60,8 +60,7 @@
                           Style="{StaticResource M3ActionListItemGrid}"
                           Margin="{StaticResource M3PanelActionTopMargin}">
                         <Label Text="Choose folder"
-                               Style="{StaticResource M3CardSupportingStrongLine}"
-                               VerticalOptions="Center" />
+                               Style="{StaticResource M3ActionListItemLabel}" />
 
                         <Grid Grid.ColumnSpan="2"
                               Style="{StaticResource M3ListItemTouchSurface}">

@@ -149,6 +149,7 @@
     <Style TargetType="controls:IconView" x:Key="M3AttentionStatusIcon">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
         <Setter Property="IconSize" Value="{StaticResource M3InlineStatusIconSize}" />
+        <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3AttentionStatusMessage" BasedOn="{StaticResource M3ErrorSupportingBlock}">
@@ -733,6 +734,14 @@
 
     <Style TargetType="Grid" x:Key="M3ActionListItemGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ActionListItemLabel" BasedOn="{StaticResource M3CardSupportingStrongLine}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ActionListItemTitle" BasedOn="{StaticResource M3CardTitle}">
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 

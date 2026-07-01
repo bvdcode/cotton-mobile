@@ -40,6 +40,7 @@ namespace Cotton.Mobile.Controls
 
 #if ANDROID
         private Android.Views.View? _platformView;
+        private int _touchSlop;
 #endif
 
         protected PressableContentView()
@@ -179,6 +180,10 @@ namespace Cotton.Mobile.Controls
 
             DetachPlatformTouch();
             _platformView = platformView;
+            Android.Content.Context? context = platformView.Context;
+            _touchSlop = context is null
+                ? 8
+                : Android.Views.ViewConfiguration.Get(context)?.ScaledTouchSlop ?? 8;
             _platformView.Clickable = true;
             _platformView.Touch += OnPlatformTouch;
         }
@@ -212,8 +217,12 @@ namespace Cotton.Mobile.Controls
 
                     e.Handled = true;
                     break;
+                case Android.Views.MotionEventActions.Move:
+                    SetPressed(CanHandlePress() && IsTouchInsideBounds(motionEvent));
+                    e.Handled = false;
+                    break;
                 case Android.Views.MotionEventActions.Up:
-                    bool shouldExecute = IsPressed && CanHandlePress();
+                    bool shouldExecute = IsPressed && CanHandlePress() && IsTouchInsideBounds(motionEvent);
                     SetPressed(false);
                     if (shouldExecute)
                     {
@@ -230,6 +239,22 @@ namespace Cotton.Mobile.Controls
                     e.Handled = false;
                     break;
             }
+        }
+
+        private bool IsTouchInsideBounds(Android.Views.MotionEvent motionEvent)
+        {
+            Android.Views.View? platformView = _platformView;
+            if (platformView is null)
+            {
+                return false;
+            }
+
+            float x = motionEvent.GetX();
+            float y = motionEvent.GetY();
+            return x >= -_touchSlop
+                && y >= -_touchSlop
+                && x <= platformView.Width + _touchSlop
+                && y <= platformView.Height + _touchSlop;
         }
 #endif
     }

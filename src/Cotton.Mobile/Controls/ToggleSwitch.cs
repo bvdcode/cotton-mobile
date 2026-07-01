@@ -19,113 +19,113 @@ namespace Cotton.Mobile.Controls
             nameof(TrackOnColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty TrackOffColorProperty = BindableProperty.Create(
             nameof(TrackOffColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHighest"));
 
         public static readonly BindableProperty TrackDisabledColorProperty = BindableProperty.Create(
             nameof(TrackDisabledColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainer"));
 
         public static readonly BindableProperty TrackOnBorderColorProperty = BindableProperty.Create(
             nameof(TrackOnBorderColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty TrackOffBorderColorProperty = BindableProperty.Create(
             nameof(TrackOffBorderColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
 
         public static readonly BindableProperty TrackDisabledBorderColorProperty = BindableProperty.Create(
             nameof(TrackDisabledBorderColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.Transparent,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty ThumbOnColorProperty = BindableProperty.Create(
             nameof(ThumbOnColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnAccent"));
 
         public static readonly BindableProperty ThumbOffColorProperty = BindableProperty.Create(
             nameof(ThumbOffColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
 
         public static readonly BindableProperty ThumbDisabledColorProperty = BindableProperty.Create(
             nameof(ThumbDisabledColor),
             typeof(Color),
             typeof(ToggleSwitch),
-            Colors.White,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
 
         public static readonly BindableProperty TrackWidthProperty = BindableProperty.Create(
             nameof(TrackWidth),
             typeof(double),
             typeof(ToggleSwitch),
-            52.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchTrackWidth"));
 
         public static readonly BindableProperty TrackHeightProperty = BindableProperty.Create(
             nameof(TrackHeight),
             typeof(double),
             typeof(ToggleSwitch),
-            32.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchTrackHeight"));
 
         public static readonly BindableProperty TrackCornerRadiusProperty = BindableProperty.Create(
             nameof(TrackCornerRadius),
             typeof(double),
             typeof(ToggleSwitch),
-            16.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchTrackCornerRadius"));
 
         public static readonly BindableProperty TrackBorderWidthProperty = BindableProperty.Create(
             nameof(TrackBorderWidth),
             typeof(double),
             typeof(ToggleSwitch),
-            1.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3StrokeThin"));
 
         public static readonly BindableProperty ThumbSizeProperty = BindableProperty.Create(
             nameof(ThumbSize),
             typeof(double),
             typeof(ToggleSwitch),
-            24.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchThumbSize"));
 
         public static readonly BindableProperty ThumbCornerRadiusProperty = BindableProperty.Create(
             nameof(ThumbCornerRadius),
             typeof(double),
             typeof(ToggleSwitch),
-            12.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchThumbCornerRadius"));
 
         public static readonly BindableProperty ThumbInsetProperty = BindableProperty.Create(
             nameof(ThumbInset),
             typeof(double),
             typeof(ToggleSwitch),
-            4.0,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged,
+            defaultValueCreator: _ => MaterialResources.Get<double>("M3SwitchThumbInset"));
 
         private readonly Grid _trackContent;
         private readonly Border _track;
@@ -309,7 +309,7 @@ namespace Cotton.Mobile.Controls
 
             _thumb.WidthRequest = ThumbSize;
             _thumb.HeightRequest = ThumbSize;
-            _thumb.StrokeThickness = 0;
+            _thumb.StrokeThickness = MaterialResources.Get<double>("M3StrokeNone");
             _thumb.StrokeShape = new RoundRectangle
             {
                 CornerRadius = new CornerRadius(ThumbCornerRadius),

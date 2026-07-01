@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
@@ -92,6 +93,14 @@
                                Text="{Binding DeviceUnlockActionText}"
                                Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
+
+                        <Grid Grid.ColumnSpan="3"
+                              IsEnabled="{Binding CanVerifyDeviceUnlock}"
+                              Style="{StaticResource M3ListItemTouchSurface}">
+                            <Grid.Behaviors>
+                                <behaviors:LongPressBehavior TapCommand="{Binding VerifyDeviceUnlockCommand}" />
+                            </Grid.Behaviors>
+                        </Grid>
 
                         <controls:IconButton Grid.Column="2"
                                              IconData="{x:Static controls:IconPathData.Check}"
@@ -206,6 +215,14 @@
                                Text="{Binding RevokeCurrentSessionActionText}"
                                Style="{StaticResource M3CardSupportingStrongLine}"
                                VerticalOptions="Center" />
+
+                        <Grid Grid.ColumnSpan="3"
+                              IsEnabled="{Binding CanRevokeCurrentSession}"
+                              Style="{StaticResource M3ListItemTouchSurface}">
+                            <Grid.Behaviors>
+                                <behaviors:LongPressBehavior TapCommand="{Binding RevokeCurrentSessionCommand}" />
+                            </Grid.Behaviors>
+                        </Grid>
 
                         <controls:IconButton Grid.Column="2"
                                              IconData="{x:Static controls:IconPathData.Delete}"

@@ -83,8 +83,7 @@
                           IsVisible="{Binding IsDeviceUnlockActionVisible}"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3SecurityThumbnailFrame}"
-                                            VerticalOptions="Start" />
+                                            Style="{StaticResource M3CardSecurityThumbnailFrame}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding DeviceUnlockActionText}"
@@ -137,8 +136,7 @@
                                       Style="{StaticResource M3SettingsListItemGrid}">
                                     <controls:IconFrame Grid.RowSpan="2"
                                                         IconData="{x:Static controls:IconPathData.Check}"
-                                                        Style="{StaticResource M3SecurityThumbnailFrame}"
-                                                        VerticalOptions="Start">
+                                                        Style="{StaticResource M3CardSecurityThumbnailFrame}">
                                         <controls:IconFrame.Triggers>
                                             <DataTrigger TargetType="controls:IconFrame"
                                                          Binding="{Binding NeedsAttention}"
@@ -205,8 +203,7 @@
                           IsVisible="{Binding IsRevokeCurrentSessionVisible}"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3SecurityThumbnailFrame}"
-                                            VerticalOptions="Start" />
+                                            Style="{StaticResource M3CardSecurityThumbnailFrame}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding RevokeCurrentSessionActionText}"
@@ -248,8 +245,7 @@
                                       Style="{StaticResource M3SettingsListItemGrid}">
                                     <controls:IconFrame Grid.RowSpan="4"
                                                         IconData="{x:Static controls:IconPathData.Device}"
-                                                        Style="{StaticResource M3SecurityThumbnailFrame}"
-                                                        VerticalOptions="Start" />
+                                                        Style="{StaticResource M3CardSecurityThumbnailFrame}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"

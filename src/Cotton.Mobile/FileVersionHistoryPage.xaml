@@ -75,8 +75,7 @@
                                       Style="{StaticResource M3MetadataCardGrid}">
                                     <controls:IconFrame Grid.RowSpan="3"
                                                         IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3FileThumbnailFrame}"
-                                                        VerticalOptions="Start" />
+                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
 
                                     <VerticalStackLayout Grid.Column="1"
                                                          Style="{StaticResource M3CardTextStack}">

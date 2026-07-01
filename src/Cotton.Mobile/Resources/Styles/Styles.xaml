@@ -328,6 +328,34 @@
 
     <Style TargetType="controls:IconFrame" x:Key="M3SyncThumbnailFrame" BasedOn="{StaticResource M3FolderThumbnailFrame}" />
 
+    <Style TargetType="controls:IconFrame" x:Key="M3CardFolderThumbnailFrame" BasedOn="{StaticResource M3FolderThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardFileThumbnailFrame" BasedOn="{StaticResource M3FileThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardActivityThumbnailFrame" BasedOn="{StaticResource M3ActivityThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardTransferThumbnailFrame" BasedOn="{StaticResource M3TransferThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardCaptureThumbnailFrame" BasedOn="{StaticResource M3CaptureThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardSecurityThumbnailFrame" BasedOn="{StaticResource M3SecurityThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardSyncThumbnailFrame" BasedOn="{StaticResource M3SyncThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
         <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />

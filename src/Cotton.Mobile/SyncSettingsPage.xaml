@@ -89,8 +89,7 @@
                                   Style="{StaticResource M3SettingsListItemGrid}">
                                 <controls:IconFrame Grid.RowSpan="4"
                                                     IconData="{x:Static controls:IconPathData.Folder}"
-                                                    Style="{StaticResource M3SyncThumbnailFrame}"
-                                                    VerticalOptions="Start">
+                                                    Style="{StaticResource M3CardSyncThumbnailFrame}">
                                     <controls:IconFrame.Triggers>
                                         <DataTrigger TargetType="controls:IconFrame"
                                                      Binding="{Binding IsAttentionVisible}"

@@ -161,8 +161,7 @@
                                       IsVisible="{Binding IsVisible}">
                                     <controls:IconFrame Grid.RowSpan="2"
                                                         IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3FileThumbnailFrame}"
-                                                        VerticalOptions="Start" />
+                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"
@@ -193,8 +192,7 @@
                     <Grid ColumnDefinitions="Auto,*"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"
-                                            Style="{StaticResource M3TransferThumbnailFrame}"
-                                            VerticalOptions="Start" />
+                                            Style="{StaticResource M3CardTransferThumbnailFrame}" />
 
                         <VerticalStackLayout Grid.Column="1"
                                              Style="{StaticResource M3CardTextStack}">
@@ -219,8 +217,7 @@
                                       IsVisible="{Binding IsVisible}">
                                     <controls:IconFrame Grid.RowSpan="3"
                                                         IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3FileThumbnailFrame}"
-                                                        VerticalOptions="Start" />
+                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
 
                                     <Label Grid.Column="1"
                                            Text="{Binding Title}"

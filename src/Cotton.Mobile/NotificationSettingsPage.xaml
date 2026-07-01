@@ -87,8 +87,7 @@
                           IsVisible="{Binding IsPermissionActionVisible}"
                           Style="{StaticResource M3SettingsListItemGrid}">
                         <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
-                                            Style="{StaticResource M3ActivityThumbnailFrame}"
-                                            VerticalOptions="Start" />
+                                            Style="{StaticResource M3CardActivityThumbnailFrame}" />
 
                         <Label Grid.Column="1"
                                Text="{Binding PermissionActionText}"

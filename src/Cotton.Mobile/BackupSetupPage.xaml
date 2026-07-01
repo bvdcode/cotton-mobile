@@ -43,8 +43,7 @@
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame Grid.RowSpan="2"
                                         IconData="{x:Static controls:IconPathData.Folder}"
-                                        Style="{StaticResource M3FolderThumbnailFrame}"
-                                        VerticalOptions="Start" />
+                                        Style="{StaticResource M3CardFolderThumbnailFrame}" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -91,8 +90,7 @@
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame Grid.RowSpan="2"
                                         IconData="{x:Static controls:IconPathData.Image}"
-                                        Style="{StaticResource M3CaptureThumbnailFrame}"
-                                        VerticalOptions="Start" />
+                                        Style="{StaticResource M3CardCaptureThumbnailFrame}" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -139,8 +137,7 @@
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
-                                        Style="{StaticResource M3ActivityThumbnailFrame}"
-                                        VerticalOptions="Start" />
+                                        Style="{StaticResource M3CardActivityThumbnailFrame}" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -175,8 +172,7 @@
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame Grid.RowSpan="3"
                                         IconData="{x:Static controls:IconPathData.Backup}"
-                                        Style="{StaticResource M3CaptureThumbnailFrame}"
-                                        VerticalOptions="Start" />
+                                        Style="{StaticResource M3CardCaptureThumbnailFrame}" />
 
                     <VerticalStackLayout Grid.Column="1"
                                          Style="{StaticResource M3CardTextStack}">
@@ -217,8 +213,7 @@
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame Grid.RowSpan="2"
                                         IconData="{x:Static controls:IconPathData.Transfer}"
-                                        Style="{StaticResource M3TransferThumbnailFrame}"
-                                        VerticalOptions="Start" />
+                                        Style="{StaticResource M3CardTransferThumbnailFrame}" />
 
                     <Label Grid.Column="1"
                            Text="Wi-Fi only"

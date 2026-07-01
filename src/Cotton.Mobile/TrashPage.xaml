@@ -287,8 +287,7 @@
 
                             <Grid RowDefinitions="Auto,Auto,Auto"
                                   Style="{StaticResource M3FileTileContentGrid}">
-                                <Border HeightRequest="{StaticResource M3TrashTilePreviewHeight}"
-                                        Style="{StaticResource M3FilePreviewSurface}">
+                                <Border Style="{StaticResource M3TrashTilePreviewSurface}">
                                     <Grid>
                                         <Image Source="{Binding Thumbnail.Source}"
                                                Aspect="AspectFill"

@@ -34,8 +34,8 @@
                                             Text="{Binding Display.LoadingMessage}"
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
 
-                <Border IsVisible="{Binding Display.IsSignInVisible}"
-                        Style="{StaticResource M3AuthPanel}">
+                <controls:ContentCardView IsVisible="{Binding Display.IsSignInVisible}"
+                                          CardStyleResourceKey="M3AuthPanel">
                     <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
                         <controls:OutlinedInputField Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                                      Placeholder="https://app.cottoncloud.dev/"
@@ -56,7 +56,7 @@
                                                IsEnabled="{Binding Display.IsInputEnabled}"
                                                Style="{StaticResource M3AuthFilledButton}" />
                     </VerticalStackLayout>
-                </Border>
+                </controls:ContentCardView>
 
                 <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                             IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"

@@ -24,13 +24,13 @@
                                            Status="{Binding Status}"
                                            IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <Border Grid.Row="1"
-                    Style="{StaticResource M3TextViewerSurface}">
+            <controls:ContentCardView Grid.Row="1"
+                                      CardStyleResourceKey="M3TextViewerSurface">
                 <ScrollView>
                     <Label Text="{Binding Content}"
                            Style="{StaticResource M3TextViewerContent}" />
                 </ScrollView>
-            </Border>
+            </controls:ContentCardView>
         </Grid>
     </Grid>
 </ContentPage>

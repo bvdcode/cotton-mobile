@@ -38,6 +38,7 @@ namespace Cotton.Mobile.Tests
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
+        private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
@@ -809,6 +810,34 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", securitySettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Settings_toggle_rows_use_reusable_material_control()
+        {
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+            string settingsToggleItemView = LoadText(SettingsToggleItemViewPath);
+
+            Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsToggleItemView"));
+            Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsEnabled=\"{Binding CanEnableBackup}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding IsBackupEnabled, Mode=OneWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Photos only\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding PhotosOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Require charging\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding ChargingOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Wi-Fi only\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding WifiOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Cellular uploads\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding AllowCellular, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStackStyleResourceKey = \"M3SettingsDenseStack\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSwitchStyleResourceKey = \"M3Switch\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("new Binding(nameof(IsToggled), source: this, mode: BindingMode.TwoWay)", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("_toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey)", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ToggleSwitch", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3SettingsToggleGroupGrid", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Grid.RowSpan=\"3\"", backupSetupPage, StringComparison.Ordinal);
         }
 
         [Fact]

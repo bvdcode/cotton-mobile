@@ -8,10 +8,8 @@
              Shell.NavBarIsVisible="False"
              Title="Cotton locked">
 
-    <Grid RowDefinitions="*,Auto,*"
-          Style="{StaticResource M3AppLockGateGrid}">
-        <controls:EmptyStateView Grid.Row="1"
-                                 IconData="{x:Static controls:IconPathData.Device}"
+    <controls:CenteredGateView>
+        <controls:EmptyStateView IconData="{x:Static controls:IconPathData.Device}"
                                  Title="{Binding Title}"
                                  Body="{Binding StatusText}"
                                  IsBusy="{Binding IsBusy}"
@@ -22,5 +20,5 @@
                                  IsActionVisible="True"
                                  IsFilledAction="True"
                                  CardStyleResourceKey="M3AppLockCard" />
-    </Grid>
+    </controls:CenteredGateView>
 </ContentPage>

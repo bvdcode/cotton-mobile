@@ -211,56 +211,30 @@
                                         Style="{StaticResource M3FileTileWrapLayout}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                              Style="{StaticResource M3FileTileSlotGrid}">
-                                            <controls:ContentCardView HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                                      CardStyleResourceKey="M3FileTileCard">
-                                                <Grid Style="{StaticResource M3FileTileContentGrid}">
-                                                    <controls:SelectionOverlayView Grid.RowSpan="2"
-                                                                                   IsSelected="{Binding IsSelected}" />
-
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />
-                                                        <RowDefinition Height="*" />
-                                                    </Grid.RowDefinitions>
-
-                                                    <controls:FileThumbnailView HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
-                                                                                SurfaceStyleResourceKey="M3FilePreviewSurface"
-                                                                                SelectionMarkStyleResourceKey="M3FileTileSelectionMark"
-                                                                                ThumbnailSource="{Binding Thumbnail.Source}"
-                                                                                IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                                                IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                                                FolderIconSize="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
-                                                                                IsLoading="{Binding Thumbnail.IsLoading}"
-                                                                                PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                                                IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                                                IsSelected="{Binding IsSelected}" />
-
-                                                    <controls:FileTileMetadataView Grid.Row="1"
-                                                                                   Title="{Binding Name}"
-                                                                                   Detail="{Binding Details}"
-                                                                                   LocalCopyStatus="{Binding LocalCopyStatus}"
-                                                                                   IsLocalCopyVisible="{Binding HasLocalCopy}"
-                                                                                   OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
-                                                                                   IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}" />
-
-                                                    <controls:TouchSurfaceView Grid.RowSpan="2"
-                                                                               Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
-                                                                               CommandParameter="{Binding .}"
-                                                                               TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                               TapCommandParameter="{Binding .}" />
-
-                                                    <controls:FileEntryActionButtonView Grid.Row="0"
-                                                                                        Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                                        CommandParameter="{Binding .}"
-                                                                                        IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                                        IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                                        IconButtonStyleResourceKey="M3FileTileActionIconButton"
-                                                                                        SemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
-
-                                                </Grid>
-                                            </controls:ContentCardView>
-                                        </Grid>
+                                        <controls:FileTileEntryCardView Title="{Binding Name}"
+                                                                        Detail="{Binding Details}"
+                                                                        LocalCopyStatus="{Binding LocalCopyStatus}"
+                                                                        IsLocalCopyVisible="{Binding HasLocalCopy}"
+                                                                        OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
+                                                                        IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}"
+                                                                        ThumbnailSource="{Binding Thumbnail.Source}"
+                                                                        IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                                        IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                                        IsLoading="{Binding Thumbnail.IsLoading}"
+                                                                        PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                                        IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                                        IsSelected="{Binding IsSelected}"
+                                                                        SlotWidth="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
+                                                                        TileHeight="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
+                                                                        PreviewHeight="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
+                                                                        FolderIconSize="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
+                                                                        BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                        ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                        EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                        CommandParameter="{Binding .}"
+                                                                        IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                        IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                        ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </FlexLayout>

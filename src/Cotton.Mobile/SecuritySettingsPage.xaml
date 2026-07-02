@@ -124,20 +124,18 @@
                                            Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 
-                                    <Border Grid.Column="2"
-                                            Style="{StaticResource M3TrailingChip}">
-                                        <Label Text="{Binding StatusText}"
-                                               Style="{StaticResource M3ChipLabel}">
-                                            <Label.Triggers>
-                                                <DataTrigger TargetType="Label"
-                                                             Binding="{Binding NeedsAttention}"
-                                                             Value="True">
-                                                    <Setter Property="Style"
-                                                            Value="{StaticResource M3ErrorChipLabel}" />
-                                                </DataTrigger>
-                                            </Label.Triggers>
-                                        </Label>
-                                    </Border>
+                                    <controls:ChipView Grid.Column="2"
+                                                       Text="{Binding StatusText}"
+                                                       ChipStyleResourceKey="M3TrailingChip">
+                                        <controls:ChipView.Triggers>
+                                            <DataTrigger TargetType="controls:ChipView"
+                                                         Binding="{Binding NeedsAttention}"
+                                                         Value="True">
+                                                <Setter Property="LabelStyleResourceKey"
+                                                        Value="M3ErrorChipLabel" />
+                                            </DataTrigger>
+                                        </controls:ChipView.Triggers>
+                                    </controls:ChipView>
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"
@@ -206,11 +204,9 @@
                                            Text="{Binding Title}"
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
 
-                                    <Border Grid.Column="2"
-                                            Style="{StaticResource M3TrailingChip}">
-                                        <Label Text="{Binding BadgeText}"
-                                               Style="{StaticResource M3ChipLabel}" />
-                                    </Border>
+                                    <controls:ChipView Grid.Column="2"
+                                                       Text="{Binding BadgeText}"
+                                                       ChipStyleResourceKey="M3TrailingChip" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"

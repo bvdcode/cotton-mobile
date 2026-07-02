@@ -390,6 +390,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
@@ -406,6 +407,14 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
             Assert.Contains("Text=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", backupSetupPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:ChipView Grid.Column=\"2\""));
+            Assert.Contains("Text=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ChipStyleResourceKey=\"M3TrailingChip\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Property=\"LabelStyleResourceKey\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3TrailingChip}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

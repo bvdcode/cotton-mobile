@@ -637,6 +637,10 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
 
+            Assert.Contains("<controls:StackedItemsView IsVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3FileListStack\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileListEntryRowView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class FileListEntryRowView", fileListEntryRowView, StringComparison.Ordinal);
@@ -646,6 +650,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid Style=\"{StaticResource M3FileListRowGrid}\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileListThumbnailColumnWidth}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileActionSize}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3FileListStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(mainPage, "BindableLayout.ItemsSource=\"{Binding Display.FileEntries}\""));
         }
 
         [Fact]

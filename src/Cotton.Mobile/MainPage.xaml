@@ -181,10 +181,10 @@
                                                      IsActionVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
                                                      ActionSemanticDescription="Add files" />
 
-                            <VerticalStackLayout Style="{StaticResource M3FileListStack}"
-                                                 IsVisible="{Binding Display.IsFileListViewVisible}"
-                                                 BindableLayout.ItemsSource="{Binding Display.FileEntries}">
-                                <BindableLayout.ItemTemplate>
+                            <controls:StackedItemsView IsVisible="{Binding Display.IsFileListViewVisible}"
+                                                       ItemsSource="{Binding Display.FileEntries}"
+                                                       StackStyleResourceKey="M3FileListStack">
+                                <controls:StackedItemsView.ItemTemplate>
                                     <DataTemplate>
                                         <controls:FileListEntryRowView Title="{Binding Name}"
                                                                        Detail="{Binding DisplayDetails}"
@@ -203,8 +203,8 @@
                                                                        IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
                                                                        ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
                                     </DataTemplate>
-                                </BindableLayout.ItemTemplate>
-                            </VerticalStackLayout>
+                                </controls:StackedItemsView.ItemTemplate>
+                            </controls:StackedItemsView>
 
                             <FlexLayout IsVisible="{Binding Display.IsFileTileViewVisible}"
                                         BindableLayout.ItemsSource="{Binding Display.FileEntries}"

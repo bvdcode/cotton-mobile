@@ -18,9 +18,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh recent files" />
 
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,Auto,*"
-              Style="{StaticResource M3ScreenContentGrid}">
+        <controls:ScreenContentGridView Grid.Row="1">
         <controls:ScreenHeaderView Title="Recent files"
                                    SupportingText="{Binding SummaryText}"
                                    IsBusy="{Binding IsBusy}" />
@@ -70,6 +68,6 @@
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>
-        </Grid>
+        </controls:ScreenContentGridView>
     </Grid>
 </ContentPage>

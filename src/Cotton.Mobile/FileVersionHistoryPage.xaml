@@ -15,9 +15,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh versions" />
 
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,Auto,*"
-              Style="{StaticResource M3ScreenContentGrid}">
+        <controls:ScreenContentGridView Grid.Row="1">
         <controls:ScreenHeaderView Title="Version history"
                                    SupportingText="{Binding FileName}"
                                    SupportingTextStyleResourceKey="M3CardTitle"
@@ -56,6 +54,6 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
             </Grid>
-        </Grid>
+        </controls:ScreenContentGridView>
     </Grid>
 </ContentPage>

@@ -45,6 +45,9 @@ namespace Cotton.Mobile.Tests
         private const string SettingsInfoItemViewPath = "src/Cotton.Mobile/Controls/SettingsInfoItemView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
+        private const string TrashEntryCardViewBasePath = "src/Cotton.Mobile/Controls/TrashEntryCardViewBase.cs";
+        private const string TrashListEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashListEntryCardView.cs";
+        private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
@@ -604,17 +607,22 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
             Assert.Equal(2, CountOccurrences(mainPage, "<controls:FileThumbnailView"));
             Assert.Contains("SurfaceStyleResourceKey=\"M3FilePreviewSurface\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkStyleResourceKey=\"M3FileTileSelectionMark\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:FileThumbnailView"));
-            Assert.Contains("SurfaceStyleResourceKey=\"M3MetadataFileThumbnailSurface\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("SurfaceStyleResourceKey=\"M3TrashTilePreviewSurface\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("BadgeText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("IsBadgeVisible=\"True\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileThumbnailView", trashPage, StringComparison.Ordinal);
+            Assert.Contains("new FileThumbnailView", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new FileThumbnailView", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.SurfaceStyleResourceKey = \"M3MetadataFileThumbnailSurface\"", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("SurfaceStyleResourceKey = \"M3TrashTilePreviewSurface\"", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("SelectionMarkStyleResourceKey = \"M3FileTileSelectionMark\"", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("IsBadgeVisible = true", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.BadgeText = BadgeText", trashTileEntryCardView, StringComparison.Ordinal);
 
             string[] pages =
             [
@@ -638,14 +646,21 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
+            string trashEntryCardViewBase = LoadText(TrashEntryCardViewBasePath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
             Assert.Equal(2, CountOccurrences(mainPage, "<controls:TouchSurfaceView"));
             Assert.Contains("Command=\"{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("TapCommandParameter=\"{Binding .}\"", mainPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:TouchSurfaceView"));
-            Assert.Contains("TapCommand=\"{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:TouchSurfaceView", trashPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(trashPage, "ToggleSelectionCommand=\"{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}\""));
+            Assert.Contains("new TouchSurfaceView", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new TouchSurfaceView", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("touchSurface.TapCommand = ToggleSelectionCommand", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("touchSurface.TapCommandParameter = CommandParameter", trashEntryCardViewBase, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:TouchSurfaceView", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("new TouchSurfaceView", settingsSectionHeaderView, StringComparison.Ordinal);
@@ -677,6 +692,8 @@ namespace Cotton.Mobile.Tests
             string fileListMetadataView = LoadText(FileListMetadataViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileListMetadataView, StringComparison.Ordinal);
@@ -688,8 +705,9 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:ChipView", trashPage, StringComparison.Ordinal);
-            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("BadgeText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(trashPage, "BadgeText=\"{Binding BadgeText}\""));
+            Assert.Contains("_metadata.TrailingText = BadgeText", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.BadgeText = BadgeText", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", trashPage, StringComparison.Ordinal);
 
             Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
@@ -815,7 +833,6 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
 
             Assert.Equal(1, CountOccurrences(trashPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3ScreenHeaderActionCluster\""));
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView Grid.Row=\""));
             Assert.Contains("<controls:ActionClusterView ClusterStyleResourceKey=\"M3ScreenHeaderActionCluster\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ToggleSearchCommand}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"{Binding SearchButtonDescription}\"", trashPage, StringComparison.Ordinal);
@@ -835,16 +852,29 @@ namespace Cotton.Mobile.Tests
         public void Trash_entry_actions_use_reusable_material_control()
         {
             string trashPage = LoadText(TrashPagePath);
+            string trashEntryCardViewBase = LoadText(TrashEntryCardViewBasePath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView Grid.Row=\""));
-            Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("PrimaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("SecondaryActionCommand=\"{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("PrimaryActionSemanticDescription=\"{Binding Name, StringFormat='Delete {0} forever'}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("SecondaryActionSemanticDescription=\"{Binding Name, StringFormat='Restore {0}'}\"", trashPage, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:TrashListEntryCardView"));
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:TrashTileEntryCardView"));
+            Assert.Equal(2, CountOccurrences(trashPage, "DeleteForeverCommand=\"{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}\""));
+            Assert.Equal(2, CountOccurrences(trashPage, "RestoreCommand=\"{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}\""));
+            Assert.Contains("new ActionClusterView", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new ActionClusterView", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.PrimaryActionIconData = IconPathData.Delete", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.PrimaryActionCommand = DeleteForeverCommand", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.PrimaryActionIconButtonStyleResourceKey = \"M3DestructiveFileChromeIconButton\"", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.PrimaryActionSemanticDescription = $\"Delete {title} forever\"", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.SecondaryActionIconData = IconPathData.Reset", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.SecondaryActionCommand = RestoreCommand", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("actionCluster.SecondaryActionSemanticDescription = $\"Restore {title}\"", trashEntryCardViewBase, StringComparison.Ordinal);
             Assert.DoesNotContain("M3RowActionCluster", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ActionClusterView Grid.Row=\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Delete}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Reset}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto,Auto\"", trashPage, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1165,6 +1195,8 @@ namespace Cotton.Mobile.Tests
             string textViewerPage = LoadText(TextViewerPagePath);
             string trashPage = LoadText(TrashPagePath);
             string contentCardView = LoadText(ContentCardViewPath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
             Assert.Contains("public class ContentCardView", contentCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", contentCardView, StringComparison.Ordinal);
@@ -1177,13 +1209,15 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(pdfViewerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ContentCardView"));
+            Assert.DoesNotContain("<controls:ContentCardView", trashPage, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3AuthPanel\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3FileTileCard\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3PdfPageSurface\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);
-            Assert.Contains("CardStyleResourceKey=\"M3SelectableContentCard\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("CardStyleResourceKey=\"M3SelectableTrashTileCard\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey = \"M3SelectableContentCard\"", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey = \"M3SelectableTrashTileCard\"", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -1238,6 +1272,8 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string fileListMetadataView = LoadText(FileListMetadataViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+            string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
+            string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
             Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileListMetadataView"));
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
@@ -1245,10 +1281,11 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3FileListTextStack}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileEntryTextView", mainPage, StringComparison.Ordinal);
 
-            Assert.Equal(1, CountOccurrences(trashPage, "<controls:FileListMetadataView"));
-            Assert.Equal(1, CountOccurrences(trashPage, "<controls:FileTileMetadataView"));
-            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("IsTrailingTextVisible=\"True\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileListMetadataView", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileTileMetadataView", trashPage, StringComparison.Ordinal);
+            Assert.Contains("new FileListMetadataView", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new FileTileMetadataView", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("IsTrailingTextVisible = true", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileListMetadataGrid\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingLine\"", fileListMetadataView, StringComparison.Ordinal);

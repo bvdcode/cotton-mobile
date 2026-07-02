@@ -96,44 +96,21 @@
                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <controls:ContentCardView CardStyleResourceKey="M3SelectableContentCard">
-                            <Grid RowDefinitions="Auto,Auto"
-                                  ColumnDefinitions="Auto,*"
-                                  Style="{StaticResource M3MetadataCardGrid}">
-                                <controls:FileThumbnailView Grid.RowSpan="2"
-                                                            SurfaceStyleResourceKey="M3MetadataFileThumbnailSurface"
-                                                            ThumbnailSource="{Binding Thumbnail.Source}"
-                                                            IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                            IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                            IsLoading="{Binding Thumbnail.IsLoading}"
-                                                            PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                            IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                            IsSelected="{Binding IsSelected}" />
-
-                                <controls:FileListMetadataView Grid.Column="1"
-                                                               Title="{Binding Name}"
-                                                               Detail="{Binding DisplayDetails}"
-                                                               TrailingText="{Binding BadgeText}"
-                                                               IsTrailingTextVisible="True" />
-
-                                <controls:TouchSurfaceView Grid.ColumnSpan="2"
-                                                           TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
-                                                           TapCommandParameter="{Binding .}" />
-
-                                <controls:ActionClusterView Grid.Row="1"
-                                                            Grid.Column="1"
-                                                            IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
-                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Delete}"
-                                                            PrimaryActionCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                                            PrimaryActionCommandParameter="{Binding .}"
-                                                            PrimaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
-                                                            PrimaryActionSemanticDescription="{Binding Name, StringFormat='Delete {0} forever'}"
-                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Reset}"
-                                                            SecondaryActionCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                                            SecondaryActionCommandParameter="{Binding .}"
-                                                            SecondaryActionSemanticDescription="{Binding Name, StringFormat='Restore {0}'}" />
-                            </Grid>
-                        </controls:ContentCardView>
+                        <controls:TrashListEntryCardView Title="{Binding Name}"
+                                                         Detail="{Binding DisplayDetails}"
+                                                         BadgeText="{Binding BadgeText}"
+                                                         ThumbnailSource="{Binding Thumbnail.Source}"
+                                                         IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                         IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                         IsLoading="{Binding Thumbnail.IsLoading}"
+                                                         PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                         IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                         IsSelected="{Binding IsSelected}"
+                                                         ToggleSelectionCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEntryActionsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
+                                                         DeleteForeverCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                         RestoreCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}" />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
@@ -145,42 +122,21 @@
                             ItemsLayout="{StaticResource M3TrashTileItemsLayout}">
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                        <controls:ContentCardView CardStyleResourceKey="M3SelectableTrashTileCard">
-                            <Grid RowDefinitions="Auto,Auto,Auto"
-                                  Style="{StaticResource M3FileTileContentGrid}">
-                                <controls:FileThumbnailView SurfaceStyleResourceKey="M3TrashTilePreviewSurface"
-                                                            SelectionMarkStyleResourceKey="M3FileTileSelectionMark"
-                                                            ThumbnailSource="{Binding Thumbnail.Source}"
-                                                            IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                            IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                            IsLoading="{Binding Thumbnail.IsLoading}"
-                                                            PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                            IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                            IsSelected="{Binding IsSelected}"
-                                                            BadgeText="{Binding BadgeText}"
-                                                            IsBadgeVisible="True" />
-
-                                <controls:FileTileMetadataView Grid.Row="1"
-                                                               Title="{Binding Name}"
-                                                               Detail="{Binding DisplayDetails}" />
-
-                                <controls:TouchSurfaceView Grid.RowSpan="2"
-                                                           TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
-                                                           TapCommandParameter="{Binding .}" />
-
-                                <controls:ActionClusterView Grid.Row="2"
-                                                            IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
-                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Delete}"
-                                                            PrimaryActionCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                                            PrimaryActionCommandParameter="{Binding .}"
-                                                            PrimaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
-                                                            PrimaryActionSemanticDescription="{Binding Name, StringFormat='Delete {0} forever'}"
-                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Reset}"
-                                                            SecondaryActionCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                                            SecondaryActionCommandParameter="{Binding .}"
-                                                            SecondaryActionSemanticDescription="{Binding Name, StringFormat='Restore {0}'}" />
-                            </Grid>
-                        </controls:ContentCardView>
+                        <controls:TrashTileEntryCardView Title="{Binding Name}"
+                                                         Detail="{Binding DisplayDetails}"
+                                                         BadgeText="{Binding BadgeText}"
+                                                         ThumbnailSource="{Binding Thumbnail.Source}"
+                                                         IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                         IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                         IsLoading="{Binding Thumbnail.IsLoading}"
+                                                         PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                         IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                         IsSelected="{Binding IsSelected}"
+                                                         ToggleSelectionCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         IsEntryActionsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
+                                                         DeleteForeverCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                         RestoreCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}" />
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

@@ -153,18 +153,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Android.Views.View decorView = Window.DecorView;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("if (compatInsetsController is not null)", mainActivity, StringComparison.Ordinal);
-            Assert.Contains("bool useLightStatusBars = false;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("bool useLightStatusBars = !isNightMode;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("bool useLightNavigationBars = !isNightMode;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("compatInsetsController.AppearanceLightStatusBars = useLightStatusBars;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("compatInsetsController.AppearanceLightNavigationBars = useLightNavigationBars;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("decorView.WindowInsetsController?.SetSystemBarsAppearance(appearance, mask);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("decorView.SystemUiFlags = flags;", mainActivity, StringComparison.Ordinal);
-            Assert.Contains("<color name=\"cotton_status_bar\">#090B0A</color>", lightColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_status_bar\">#F7F8F7</color>", lightColors, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_status_bar\">#090B0A</color>", darkColors, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_status_bar</item>", lightStyles, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_status_bar</item>", darkStyles, StringComparison.Ordinal);
-            Assert.Contains("<item name=\"android:windowLightStatusBar\">false</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowLightStatusBar\">true</item>", lightStyles, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:windowLightStatusBar\">false</item>", darkStyles, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);\n                return;",

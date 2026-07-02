@@ -246,7 +246,7 @@ namespace Cotton.Mobile
             }
 
             bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
-            bool useLightStatusBars = false;
+            bool useLightStatusBars = !isNightMode;
             bool useLightNavigationBars = !isNightMode;
             WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);
             if (compatInsetsController is not null)

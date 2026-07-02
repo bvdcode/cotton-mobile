@@ -32,6 +32,7 @@ namespace Cotton.Mobile.Tests
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
+        private const string MetadataCardBodyViewPath = "src/Cotton.Mobile/Controls/MetadataCardBodyView.cs";
         private const string MetadataCardViewPath = "src/Cotton.Mobile/Controls/MetadataCardView.cs";
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
@@ -475,6 +476,7 @@ namespace Cotton.Mobile.Tests
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string transfersPage = LoadText(TransfersPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string metadataCardBodyView = LoadText(MetadataCardBodyViewPath);
             string metadataCardView = LoadText(MetadataCardViewPath);
             string metadataCardHeaderView = LoadText(MetadataCardHeaderViewPath);
             string styles = LoadText(StylesResourcePath);
@@ -513,8 +515,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("x:Key=\"M3MetadataCardBodyStack\"", styles, StringComparison.Ordinal);
+            Assert.Contains("public class MetadataCardBodyView", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3MetadataCardBodyStack\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("DefaultInlineGridStyleResourceKey = \"M3InlineMetadataGrid\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Equal(4, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "<controls:MetadataCardView"));
-            Assert.Equal(3, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "Style=\"{StaticResource M3MetadataCardBodyStack}\""));
+            Assert.Equal(4, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "<controls:MetadataCardBodyView"));
+            Assert.Contains("PrimaryText=\"{Binding ContentText}\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryText=\"{Binding ContentTypeText}\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingInlineText=\"{Binding KindText}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingInlineText=\"{Binding MetadataText}\"", captureInboxPage, StringComparison.Ordinal);
 
             string[] metadataCardPages =
             [
@@ -532,6 +543,8 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("Grid.RowSpan=\"3\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("Grid.RowSpan=\"4\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("ColumnDefinitions=\"Auto,*,Auto\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("Style=\"{StaticResource M3MetadataCardBodyStack}\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("Style=\"{StaticResource M3InlineMetadataGrid}\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", page, StringComparison.Ordinal);
             }
         }
@@ -579,14 +592,17 @@ namespace Cotton.Mobile.Tests
             string transfersPage = LoadText(TransfersPagePath);
             string storagePage = LoadText(StoragePagePath);
             string linearProgressView = LoadText(LinearProgressViewPath);
+            string metadataCardBodyView = LoadText(MetadataCardBodyViewPath);
 
-            Assert.Equal(1, CountOccurrences(transfersPage, "<controls:LinearProgressView"));
+            Assert.DoesNotContain("<controls:LinearProgressView", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MetadataCardBodyView Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
-            Assert.Contains("IsVisible=\"{Binding IsProgressVisible}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("IsProgressVisible=\"{Binding IsProgressVisible}\"", transfersPage, StringComparison.Ordinal);
             Assert.Equal(2, CountOccurrences(storagePage, "<controls:LinearProgressView"));
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("IsVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding UsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
             Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LinearProgressBar}\"", transfersPage + storagePage, StringComparison.Ordinal);

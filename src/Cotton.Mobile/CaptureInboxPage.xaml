@@ -64,25 +64,14 @@
                                                    Title="{Binding DisplayName}"
                                                    SupportingText="{Binding DetailText}"
                                                    TrailingText="{Binding StatusText}">
-                            <VerticalStackLayout Style="{StaticResource M3MetadataCardBodyStack}">
-                                <Grid ColumnDefinitions="Auto,*"
-                                      Style="{StaticResource M3InlineMetadataGrid}">
-                                    <Label Text="{Binding KindText}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding MetadataText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-                                </Grid>
-
-                                <Label Text="{Binding DestinationText}"
-                                       IsVisible="{Binding IsDestinationVisible}"
-                                       Style="{StaticResource M3CardSupportingStrongWrap}" />
-
-                                <Label Text="{Binding FailureMessage}"
-                                       IsVisible="{Binding IsFailureVisible}"
-                                       Style="{StaticResource M3ErrorSupportingWrap}" />
-                            </VerticalStackLayout>
+                            <controls:MetadataCardBodyView LeadingInlineText="{Binding KindText}"
+                                                           TrailingInlineText="{Binding MetadataText}"
+                                                           IsInlineMetadataVisible="True"
+                                                           PrimaryText="{Binding DestinationText}"
+                                                           IsPrimaryTextVisible="{Binding IsDestinationVisible}"
+                                                           PrimaryTextStyleResourceKey="M3CardSupportingStrongWrap"
+                                                           ErrorText="{Binding FailureMessage}"
+                                                           IsErrorTextVisible="{Binding IsFailureVisible}" />
                         </controls:MetadataCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

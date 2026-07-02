@@ -49,13 +49,8 @@
                                                        Title="{Binding VersionText}"
                                                        SupportingText="{Binding Name}"
                                                        TrailingText="{Binding KindText}">
-                                <VerticalStackLayout Style="{StaticResource M3MetadataCardBodyStack}">
-                                    <Label Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingWrap}" />
-
-                                    <Label Text="{Binding ContentTypeText}"
-                                           Style="{StaticResource M3CardMetaLine}" />
-                                </VerticalStackLayout>
+                                <controls:MetadataCardBodyView PrimaryText="{Binding DetailText}"
+                                                               SecondaryText="{Binding ContentTypeText}" />
                             </controls:MetadataCardView>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>

@@ -42,9 +42,9 @@
                                                    Title="{Binding Title}"
                                                    SupportingText="{Binding DetailText}"
                                                    TrailingText="{Binding BadgeText}">
-                            <Label Text="{Binding ContentText}"
-                                   IsVisible="{Binding IsContentVisible}"
-                                   Style="{StaticResource M3CardSupportingLongWrap}" />
+                            <controls:MetadataCardBodyView PrimaryText="{Binding ContentText}"
+                                                           IsPrimaryTextVisible="{Binding IsContentVisible}"
+                                                           PrimaryTextStyleResourceKey="M3CardSupportingLongWrap" />
                         </controls:MetadataCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

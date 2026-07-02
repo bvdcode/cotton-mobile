@@ -47,17 +47,12 @@
                                                    Title="{Binding DisplayName}"
                                                    SupportingText="{Binding DetailText}"
                                                    TrailingText="{Binding StatusText}">
-                            <VerticalStackLayout Style="{StaticResource M3MetadataCardBodyStack}">
-                                <controls:LinearProgressView Progress="{Binding ProgressFraction}"
-                                                             IsVisible="{Binding IsProgressVisible}" />
-
-                                <Label Text="{Binding ProgressText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Text="{Binding FailureMessage}"
-                                       IsVisible="{Binding IsFailureVisible}"
-                                       Style="{StaticResource M3ErrorSupportingWrap}" />
-                            </VerticalStackLayout>
+                            <controls:MetadataCardBodyView Progress="{Binding ProgressFraction}"
+                                                           IsProgressVisible="{Binding IsProgressVisible}"
+                                                           PrimaryText="{Binding ProgressText}"
+                                                           PrimaryTextStyleResourceKey="M3CardSupportingLine"
+                                                           ErrorText="{Binding FailureMessage}"
+                                                           IsErrorTextVisible="{Binding IsFailureVisible}" />
                         </controls:MetadataCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

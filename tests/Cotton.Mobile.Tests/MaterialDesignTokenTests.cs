@@ -541,24 +541,41 @@ namespace Cotton.Mobile.Tests
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsSummaryHeaderView = LoadText(SettingsSummaryHeaderViewPath);
 
+            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("StatusText=\"{Binding PermissionStatusText}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding PermissionDetailText}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("StatusStyleResourceKey=\"M3CardTitle\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"Server push\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding RemotePushStatusText}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding IsRemotePushStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsDetailVisible=\"False\"", notificationSettingsPage, StringComparison.Ordinal);
 
+            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("StatusText=\"{Binding AppLockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding AppLockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding DeviceUnlockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("StatusText=\"{Binding DeviceUnlockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding DeviceUnlockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding PermissionLedgerTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding PermissionLedgerStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding PermissionLedgerDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding AccountSessionsStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding AccountSessionsDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("StatusText=\"{Binding LogoutCacheCleanupStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding LogoutCacheCleanupDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
 
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsSummaryGrid\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingBlock\"", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding DeviceUnlockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding PermissionLedgerTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

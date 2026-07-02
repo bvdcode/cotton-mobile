@@ -25,47 +25,23 @@
                                        IsVisible="{Binding IsStatusVisible}" />
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid ColumnDefinitions="*,Auto"
-                      RowDefinitions="Auto,Auto,Auto"
-                      Style="{StaticResource M3SettingsSummaryGrid}">
-                    <Label Text="{Binding AppLockTitle}"
-                           Style="{StaticResource M3CardTitle}" />
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
+                    <controls:SettingsSummaryHeaderView Title="{Binding AppLockTitle}"
+                                                        StatusText="{Binding AppLockStatusText}"
+                                                        DetailText="{Binding AppLockDetailText}" />
 
-                    <Label Grid.Column="1"
-                           Text="{Binding AppLockStatusText}"
-                           Style="{StaticResource M3CardSupportingLine}" />
-
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding AppLockDetailText}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-
-                    <controls:ToggleSwitch Grid.Row="2"
-                                           Grid.ColumnSpan="2"
-                                           IsEnabled="{Binding CanToggleAppLock}"
+                    <controls:ToggleSwitch IsEnabled="{Binding CanToggleAppLock}"
                                            IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
-                </Grid>
+                </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid ColumnDefinitions="*,Auto"
-                      RowDefinitions="Auto,Auto,Auto"
-                      Style="{StaticResource M3SettingsSummaryGrid}">
-                    <Label Text="{Binding DeviceUnlockTitle}"
-                           Style="{StaticResource M3CardTitle}" />
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
+                    <controls:SettingsSummaryHeaderView Title="{Binding DeviceUnlockTitle}"
+                                                        StatusText="{Binding DeviceUnlockStatusText}"
+                                                        DetailText="{Binding DeviceUnlockDetailText}" />
 
-                    <Label Grid.Column="1"
-                           Text="{Binding DeviceUnlockStatusText}"
-                           Style="{StaticResource M3CardSupportingLine}" />
-
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding DeviceUnlockDetailText}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-
-                    <controls:ActionListItemView Grid.Row="2"
-                                                 Grid.ColumnSpan="2"
-                                                 Text="{Binding DeviceUnlockActionText}"
+                    <controls:ActionListItemView Text="{Binding DeviceUnlockActionText}"
                                                  LeadingIconData="{x:Static controls:IconPathData.Device}"
                                                  IsLeadingIconVisible="True"
                                                  LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
@@ -76,7 +52,7 @@
                                                  ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                  GridStyleResourceKey="M3SettingsListItemGrid"
                                                  SemanticDescription="{Binding DeviceUnlockActionText}" />
-                </Grid>
+                </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}"
@@ -209,26 +185,14 @@
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid ColumnDefinitions="*,Auto"
-                      RowDefinitions="Auto,Auto,Auto"
-                      Style="{StaticResource M3SettingsSummaryGrid}">
-                    <Label Text="{Binding LogoutCacheCleanupTitle}"
-                           Style="{StaticResource M3CardTitle}" />
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
+                    <controls:SettingsSummaryHeaderView Title="{Binding LogoutCacheCleanupTitle}"
+                                                        StatusText="{Binding LogoutCacheCleanupStatusText}"
+                                                        DetailText="{Binding LogoutCacheCleanupDetailText}" />
 
-                    <Label Grid.Column="1"
-                           Text="{Binding LogoutCacheCleanupStatusText}"
-                           Style="{StaticResource M3CardSupportingLine}" />
-
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding LogoutCacheCleanupDetailText}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-
-                    <controls:ToggleSwitch Grid.Row="2"
-                                           Grid.ColumnSpan="2"
-                                           IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
+                    <controls:ToggleSwitch IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
                                            IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
-                </Grid>
+                </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>
         </ScrollView>

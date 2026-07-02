@@ -33,24 +33,13 @@
                                        IsVisible="{Binding IsNeutralStatusVisible}" />
 
             <Border Style="{StaticResource M3ContentCard}">
-                <Grid RowDefinitions="Auto,Auto,Auto"
-                      ColumnDefinitions="*,Auto"
-                      Style="{StaticResource M3SettingsSummaryGrid}">
-                    <Label Text="{Binding PermissionTitle}"
-                           Style="{StaticResource M3CardTitle}" />
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
+                    <controls:SettingsSummaryHeaderView Title="{Binding PermissionTitle}"
+                                                        StatusText="{Binding PermissionStatusText}"
+                                                        DetailText="{Binding PermissionDetailText}"
+                                                        StatusStyleResourceKey="M3CardTitle" />
 
-                    <Label Grid.Column="1"
-                           Text="{Binding PermissionStatusText}"
-                           Style="{StaticResource M3CardTitle}" />
-
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding PermissionDetailText}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-
-                    <controls:ActionListItemView Grid.Row="2"
-                                                 Grid.ColumnSpan="2"
-                                                 Text="{Binding PermissionActionText}"
+                    <controls:ActionListItemView Text="{Binding PermissionActionText}"
                                                  LeadingIconData="{x:Static controls:IconPathData.Activity}"
                                                  IsLeadingIconVisible="True"
                                                  LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
@@ -60,7 +49,7 @@
                                                  GridStyleResourceKey="M3SettingsListItemGrid"
                                                  ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                  SemanticDescription="{Binding PermissionActionText}" />
-                </Grid>
+                </VerticalStackLayout>
             </Border>
 
             <Border Style="{StaticResource M3ContentCard}">

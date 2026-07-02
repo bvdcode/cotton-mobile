@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:behaviors="clr-namespace:Cotton.Mobile.Behaviors"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
@@ -301,16 +300,11 @@
                                                        Style="{StaticResource M3CardSupportingLine}" />
                                             </VerticalStackLayout>
 
-                                            <Grid x:Name="ListEntryTouchSurface"
-                                                  Grid.ColumnSpan="2"
-                                                  Style="{StaticResource M3ListItemTouchSurface}">
-                                                <Grid.Behaviors>
-                                                    <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
-                                                                                 CommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}"
-                                                                                 TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                                 TapCommandParameter="{Binding BindingContext, Source={x:Reference ListEntryTouchSurface}}" />
-                                                </Grid.Behaviors>
-                                            </Grid>
+                                            <controls:TouchSurfaceView Grid.ColumnSpan="2"
+                                                                       Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                       CommandParameter="{Binding .}"
+                                                                       TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                       TapCommandParameter="{Binding .}" />
 
                                             <controls:IconButton Grid.Column="2"
                                                                  IconData="{x:Static controls:IconPathData.MoreVertical}"
@@ -382,16 +376,11 @@
                                                         </Grid>
                                                     </VerticalStackLayout>
 
-                                                    <Grid x:Name="TileEntryTouchSurface"
-                                                          Grid.RowSpan="2"
-                                                          Style="{StaticResource M3ListItemTouchSurface}">
-                                                        <Grid.Behaviors>
-                                                            <behaviors:LongPressBehavior Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
-                                                                                         CommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}"
-                                                                                         TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                                         TapCommandParameter="{Binding BindingContext, Source={x:Reference TileEntryTouchSurface}}" />
-                                                        </Grid.Behaviors>
-                                                    </Grid>
+                                                    <controls:TouchSurfaceView Grid.RowSpan="2"
+                                                                               Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                               CommandParameter="{Binding .}"
+                                                                               TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                               TapCommandParameter="{Binding .}" />
 
                                                     <controls:IconButton Grid.Row="0"
                                                                          IconData="{x:Static controls:IconPathData.MoreVertical}"

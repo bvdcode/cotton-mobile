@@ -349,6 +349,40 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Touch_surfaces_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:TouchSurfaceView"));
+            Assert.Contains("Command=\"{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommand=\"{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommandParameter=\"{Binding .}\"", mainPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:TouchSurfaceView"));
+            Assert.Contains("TapCommand=\"{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:TouchSurfaceView"));
+            Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+
+            string[] pages =
+            [
+                mainPage,
+                trashPage,
+                backupSetupPage,
+            ];
+
+            foreach (string page in pages)
+            {
+                Assert.DoesNotContain("xmlns:behaviors", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<behaviors:LongPressBehavior", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3ListItemTouchSurface", page, StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

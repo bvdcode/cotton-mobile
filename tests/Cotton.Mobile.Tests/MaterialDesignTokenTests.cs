@@ -1826,6 +1826,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Text_action_animates_opacity_state_without_snap_assignment()
+        {
+            string textAction = LoadText(Path.Combine(ControlsDirectoryPath, "TextAction.cs"));
+
+            Assert.Contains("OpacityAnimationName = \"M3TextActionOpacity\"", textAction, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", textAction, StringComparison.Ordinal);
+            Assert.Contains("bool shouldAnimate = animateState && _hasAppliedVisualState", textAction, StringComparison.Ordinal);
+            Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", textAction, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(1);",
+                textAction,
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_chips_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

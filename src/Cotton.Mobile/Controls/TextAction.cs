@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
     public class TextAction : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3TextActionBackground";
+        private const string OpacityAnimationName = "M3TextActionOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -60,6 +61,7 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _container;
         private readonly Label _label;
+        private bool _hasAppliedVisualState;
 
         public TextAction()
         {
@@ -133,7 +135,7 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState(false);
+                UpdateVisualState(true);
             }
         }
 
@@ -150,17 +152,26 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState(false);
+            UpdateVisualState(true);
         }
 
-        private void UpdateVisualState(bool animateBackground)
+        private void UpdateVisualState(bool animateState)
         {
             if (_container is null || _label is null)
             {
                 return;
             }
 
-            Opacity = ResolvePressableOpacity(1);
+            int duration = IsPressed ? PressInDuration : PressOutDuration;
+            bool shouldAnimate = animateState && _hasAppliedVisualState;
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                ResolvePressableOpacity(1),
+                duration,
+                OpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity);
 
             _container.Padding = ContentPadding;
             _container.MinimumHeightRequest = MinimumHeightRequest;
@@ -172,13 +183,14 @@ namespace Cotton.Mobile.Controls
             MaterialMotion.UpdateBackgroundColor(
                 _container,
                 IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor,
-                IsPressed ? PressInDuration : PressOutDuration,
+                duration,
                 BackgroundAnimationName,
-                animateBackground);
+                shouldAnimate);
 
             _label.Text = Text;
             _label.TextColor = TextColor;
             _label.FontSize = TextFontSize;
+            _hasAppliedVisualState = true;
         }
     }
 }

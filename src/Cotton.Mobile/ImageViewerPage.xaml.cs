@@ -2,12 +2,13 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Controls;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
-    public partial class ImageViewerPage : ContentPage
+    public partial class ImageViewerPage : DarkViewerPage
     {
         private double _pinchStartScale = CottonImageViewerInteractionPolicy.MinimumScale;
         private double _panStartX;

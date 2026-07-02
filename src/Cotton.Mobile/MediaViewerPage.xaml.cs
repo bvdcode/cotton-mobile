@@ -3,11 +3,12 @@
 
 using System.Windows.Input;
 using CommunityToolkit.Maui.Views;
+using Cotton.Mobile.Controls;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
-    public partial class MediaViewerPage : ContentPage
+    public partial class MediaViewerPage : DarkViewerPage
     {
         private readonly MediaViewerViewModel _viewModel;
         private bool _isHandlerDisconnected;

@@ -22,9 +22,13 @@ namespace Cotton.Mobile.Tests
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
         private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
         private const string TextViewerPagePath = "src/Cotton.Mobile/TextViewerPage.xaml";
+        private const string TextViewerPageCodeBehindPath = "src/Cotton.Mobile/TextViewerPage.xaml.cs";
         private const string ImageViewerPagePath = "src/Cotton.Mobile/ImageViewerPage.xaml";
+        private const string ImageViewerPageCodeBehindPath = "src/Cotton.Mobile/ImageViewerPage.xaml.cs";
         private const string MediaViewerPagePath = "src/Cotton.Mobile/MediaViewerPage.xaml";
+        private const string MediaViewerPageCodeBehindPath = "src/Cotton.Mobile/MediaViewerPage.xaml.cs";
         private const string PdfViewerPagePath = "src/Cotton.Mobile/PdfViewerPage.xaml";
+        private const string PdfViewerPageCodeBehindPath = "src/Cotton.Mobile/PdfViewerPage.xaml.cs";
         private const string PdfPreviewPageViewPath = "src/Cotton.Mobile/Controls/PdfPreviewPageView.cs";
         private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
         private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
@@ -59,6 +63,8 @@ namespace Cotton.Mobile.Tests
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string DiagnosticsItemViewPath = "src/Cotton.Mobile/Controls/DiagnosticsItemView.cs";
+        private const string DarkViewerPagePath = "src/Cotton.Mobile/Controls/DarkViewerPage.cs";
+        private const string DocumentViewerPagePath = "src/Cotton.Mobile/Controls/DocumentViewerPage.cs";
         private const string TextDocumentContentViewPath = "src/Cotton.Mobile/Controls/TextDocumentContentView.cs";
         private const string DocumentViewerBodyViewPath = "src/Cotton.Mobile/Controls/DocumentViewerBodyView.cs";
         private const string TrashEntryCardViewBasePath = "src/Cotton.Mobile/Controls/TrashEntryCardViewBase.cs";
@@ -1406,6 +1412,43 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
             Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LinearProgressBar}\"", transfersPage + storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Viewer_pages_use_reusable_material_page_shells()
+        {
+            string textViewerPage = LoadText(TextViewerPagePath);
+            string textViewerPageCodeBehind = LoadText(TextViewerPageCodeBehindPath);
+            string imageViewerPage = LoadText(ImageViewerPagePath);
+            string imageViewerPageCodeBehind = LoadText(ImageViewerPageCodeBehindPath);
+            string mediaViewerPage = LoadText(MediaViewerPagePath);
+            string mediaViewerPageCodeBehind = LoadText(MediaViewerPageCodeBehindPath);
+            string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string pdfViewerPageCodeBehind = LoadText(PdfViewerPageCodeBehindPath);
+            string darkViewerPage = LoadText(DarkViewerPagePath);
+            string documentViewerPage = LoadText(DocumentViewerPagePath);
+            string combinedViewerPages = textViewerPage
+                + imageViewerPage
+                + mediaViewerPage
+                + pdfViewerPage;
+
+            Assert.Contains("<controls:DocumentViewerPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DocumentViewerPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DarkViewerPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DarkViewerPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("public partial class TextViewerPage : DocumentViewerPage", textViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public partial class PdfViewerPage : DocumentViewerPage", pdfViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public partial class ImageViewerPage : DarkViewerPage", imageViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public partial class MediaViewerPage : DarkViewerPage", mediaViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public class DocumentViewerPage : ContentPage", documentViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultPageStyleResourceKey = \"M3DocumentViewerPage\"", documentViewerPage, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultPageStyleResourceKey)", documentViewerPage, StringComparison.Ordinal);
+            Assert.Contains("public class DarkViewerPage : ContentPage", darkViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultPageStyleResourceKey = \"M3DarkViewerPage\"", darkViewerPage, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultPageStyleResourceKey)", darkViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<ContentPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", combinedViewerPages, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3DocumentViewerPage}\"", combinedViewerPages, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3DarkViewerPage}\"", combinedViewerPages, StringComparison.Ordinal);
         }
 
         [Fact]

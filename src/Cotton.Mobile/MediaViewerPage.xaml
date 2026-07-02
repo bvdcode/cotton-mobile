@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
-             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
-             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
-             x:Class="Cotton.Mobile.MediaViewerPage"
-             x:Name="RootPage"
-             x:DataType="viewModels:MediaViewerViewModel"
-             Shell.NavBarIsVisible="False"
-             Title="{Binding Title}"
-             Style="{StaticResource M3DarkViewerPage}">
+<controls:DarkViewerPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                         xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+                         xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+                         xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+                         x:Class="Cotton.Mobile.MediaViewerPage"
+                         x:Name="RootPage"
+                         x:DataType="viewModels:MediaViewerViewModel"
+                         Shell.NavBarIsVisible="False"
+                         Title="{Binding Title}">
 
     <controls:ScreenShellView GridStyleResourceKey="M3DarkViewerSurface">
         <controls:TopAppBar TitleText="{Binding Title}"
@@ -37,4 +36,4 @@
                                               IsVisible="{Binding IsStatusVisible}" />
         </controls:DarkViewerSurfaceView>
     </controls:ScreenShellView>
-</ContentPage>
+</controls:DarkViewerPage>

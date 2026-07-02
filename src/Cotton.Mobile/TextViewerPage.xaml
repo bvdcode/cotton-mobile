@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
-             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
-             x:Class="Cotton.Mobile.TextViewerPage"
-             x:DataType="viewModels:TextViewerViewModel"
-             Shell.NavBarIsVisible="False"
-             Title="{Binding Title}">
+<controls:DocumentViewerPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+                             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+                             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+                             x:Class="Cotton.Mobile.TextViewerPage"
+                             x:DataType="viewModels:TextViewerViewModel"
+                             Shell.NavBarIsVisible="False"
+                             Title="{Binding Title}">
 
     <controls:ScreenShellView>
         <controls:TopAppBar TitleText="{Binding Title}"
@@ -29,4 +29,4 @@
             </controls:ContentCardView>
         </controls:DocumentViewerBodyView>
     </controls:ScreenShellView>
-</ContentPage>
+</controls:DocumentViewerPage>

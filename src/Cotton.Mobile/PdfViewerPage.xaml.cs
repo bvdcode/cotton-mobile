@@ -1,11 +1,12 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Controls;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile
 {
-    public partial class PdfViewerPage : ContentPage
+    public partial class PdfViewerPage : DocumentViewerPage
     {
         private bool _didLoad;
 

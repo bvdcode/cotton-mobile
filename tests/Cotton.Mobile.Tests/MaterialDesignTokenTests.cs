@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Xunit;
 
@@ -9,6 +10,7 @@ namespace Cotton.Mobile.Tests
         private const string SpacingResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MSpacing.xaml";
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
+        private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
@@ -80,6 +82,29 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> switchSetters = GetStyleSetters(styles, "M3Switch");
 
             Assert.Equal("{StaticResource TouchTarget}", switchSetters["TouchTargetSize"]);
+        }
+
+        [Fact]
+        public void Material_controls_with_dark_color_defaults_have_theme_aware_implicit_styles()
+        {
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, IReadOnlyCollection<string>> darkDefaultProperties = GetControlDarkDefaultProperties();
+
+            Assert.NotEmpty(darkDefaultProperties);
+
+            foreach (KeyValuePair<string, IReadOnlyCollection<string>> control in darkDefaultProperties.OrderBy(item => item.Key, StringComparer.Ordinal))
+            {
+                string targetType = $"controls:{control.Key}";
+                IReadOnlyDictionary<string, string> setters = GetImplicitStyleSetters(styles, targetType);
+
+                foreach (string propertyName in control.Value.OrderBy(item => item, StringComparer.Ordinal))
+                {
+                    Assert.True(
+                        setters.TryGetValue(propertyName, out string? setterValue),
+                        $"{targetType}.{propertyName} must be set by the implicit Material style.");
+                    Assert.StartsWith("{AppThemeBinding", setterValue, StringComparison.Ordinal);
+                }
+            }
         }
 
         [Fact]
@@ -1457,7 +1482,107 @@ namespace Cotton.Mobile.Tests
 
         private static IReadOnlyDictionary<string, string> GetStyleSetters(XDocument document, string styleKey)
         {
+            XElement style = GetStyleByKey(document, styleKey);
+
+            return style.Elements()
+                .Where(element => string.Equals(element.Name.LocalName, "Setter", StringComparison.Ordinal))
+                .ToDictionary(
+                    element => (string)element.Attribute("Property")!,
+                    element => (string)element.Attribute("Value")!,
+                    StringComparer.Ordinal);
+        }
+
+        private static IReadOnlyDictionary<string, IReadOnlyCollection<string>> GetControlDarkDefaultProperties()
+        {
+            string repositoryRoot = FindRepositoryRoot(StylesResourcePath);
+            string controlsPath = Path.Combine(repositoryRoot, ControlsDirectoryPath);
+            Dictionary<string, IReadOnlyCollection<string>> result = new(StringComparer.Ordinal);
+
+            foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs").OrderBy(path => path, StringComparer.Ordinal))
+            {
+                string controlName = Path.GetFileNameWithoutExtension(filePath);
+                string source = File.ReadAllText(filePath);
+                string[] bindablePropertyBlocks = source.Split(
+                    "public static readonly BindableProperty",
+                    StringSplitOptions.RemoveEmptyEntries);
+                SortedSet<string> propertyNames = new(StringComparer.Ordinal);
+
+                foreach (string block in bindablePropertyBlocks)
+                {
+                    if (!block.Contains("MaterialResources.Get<Color>(\"M3Dark", StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    Match match = Regex.Match(
+                        block,
+                        "nameof\\((?<property>[A-Za-z_][A-Za-z0-9_]*)\\)",
+                        RegexOptions.CultureInvariant);
+
+                    if (match.Success)
+                    {
+                        propertyNames.Add(match.Groups["property"].Value);
+                    }
+                }
+
+                if (propertyNames.Count > 0)
+                {
+                    result[controlName] = propertyNames.ToArray();
+                }
+            }
+
+            return result;
+        }
+
+        private static IReadOnlyDictionary<string, string> GetImplicitStyleSetters(XDocument document, string targetType)
+        {
             XElement style = document.Descendants()
+                .Single(descendant => string.Equals(
+                    descendant.Name.LocalName,
+                    "Style",
+                    StringComparison.Ordinal)
+                    && string.Equals(
+                        (string?)descendant.Attribute("TargetType"),
+                        targetType,
+                        StringComparison.Ordinal)
+                    && descendant.Attribute(XamlNamespace + "Key") is null);
+
+            return GetStyleSettersIncludingBasedOn(document, style);
+        }
+
+        private static IReadOnlyDictionary<string, string> GetStyleSettersIncludingBasedOn(XDocument document, XElement style)
+        {
+            Dictionary<string, string> setters = new(StringComparer.Ordinal);
+            string? basedOn = (string?)style.Attribute("BasedOn");
+
+            if (basedOn is not null)
+            {
+                XElement baseStyle = GetStyleByKey(document, GetStaticResourceKey(basedOn));
+                IReadOnlyDictionary<string, string> baseSetters = GetStyleSettersIncludingBasedOn(document, baseStyle);
+
+                foreach (KeyValuePair<string, string> setter in baseSetters)
+                {
+                    setters[setter.Key] = setter.Value;
+                }
+            }
+
+            foreach (XElement setter in style.Elements().Where(element => string.Equals(element.Name.LocalName, "Setter", StringComparison.Ordinal)))
+            {
+                XAttribute? propertyAttribute = setter.Attribute("Property");
+                XAttribute? valueAttribute = setter.Attribute("Value");
+
+                if (propertyAttribute is not null && valueAttribute is not null)
+                {
+                    setters[propertyAttribute.Value] = valueAttribute.Value;
+                }
+            }
+
+            return setters;
+        }
+
+        private static XElement GetStyleByKey(XDocument document, string styleKey)
+        {
+            return document.Descendants()
                 .Single(descendant => string.Equals(
                     descendant.Name.LocalName,
                     "Style",
@@ -1466,13 +1591,19 @@ namespace Cotton.Mobile.Tests
                         (string?)descendant.Attribute(XamlNamespace + "Key"),
                         styleKey,
                         StringComparison.Ordinal));
+        }
 
-            return style.Elements()
-                .Where(element => string.Equals(element.Name.LocalName, "Setter", StringComparison.Ordinal))
-                .ToDictionary(
-                    element => (string)element.Attribute("Property")!,
-                    element => (string)element.Attribute("Value")!,
-                    StringComparer.Ordinal);
+        private static string GetStaticResourceKey(string value)
+        {
+            const string prefix = "{StaticResource ";
+            const string suffix = "}";
+
+            if (!value.StartsWith(prefix, StringComparison.Ordinal) || !value.EndsWith(suffix, StringComparison.Ordinal))
+            {
+                throw new FormatException($"Style BasedOn value '{value}' is not a StaticResource reference.");
+            }
+
+            return value.Substring(prefix.Length, value.Length - prefix.Length - suffix.Length);
         }
     }
 }

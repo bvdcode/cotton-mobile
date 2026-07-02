@@ -85,6 +85,7 @@ namespace Cotton.Mobile.Controls
         private readonly HorizontalStackLayout _actionCluster;
         private readonly ContentView _actionContentHost;
         private readonly ActivityIndicator _busyIndicator;
+        private readonly Border _busyIndicatorFrame;
         private readonly Grid _container;
         private readonly Label _detailText;
         private readonly Label _supportingText;
@@ -113,6 +114,12 @@ namespace Cotton.Mobile.Controls
             _busyIndicator = new ActivityIndicator();
             _busyIndicator.SetDynamicResource(StyleProperty, "M3ScreenHeaderActivityIndicator");
 
+            _busyIndicatorFrame = new Border
+            {
+                Content = _busyIndicator,
+            };
+            _busyIndicatorFrame.SetDynamicResource(StyleProperty, "M3ScreenHeaderBusyFrame");
+
             _actionContentHost = new ContentView();
 
             _actionCluster = new HorizontalStackLayout
@@ -120,7 +127,7 @@ namespace Cotton.Mobile.Controls
                 Children =
                 {
                     _actionContentHost,
-                    _busyIndicator,
+                    _busyIndicatorFrame,
                 },
             };
             _actionCluster.SetDynamicResource(StyleProperty, "M3ScreenHeaderActionCluster");
@@ -257,6 +264,7 @@ namespace Cotton.Mobile.Controls
             _actionCluster.IsVisible = actionContent is not null || IsBusy;
             _busyIndicator.IsRunning = IsBusy;
             _busyIndicator.IsVisible = IsBusy;
+            _busyIndicatorFrame.IsVisible = IsBusy;
 
             string description = CreateDescription(title, supportingText, detailText);
             SemanticProperties.SetDescription(_container, description);

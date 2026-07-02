@@ -82,6 +82,7 @@ namespace Cotton.Mobile.Tests
         private const string LayeredContentViewPath = "src/Cotton.Mobile/Controls/LayeredContentView.cs";
         private const string MaterialRefreshViewPath = "src/Cotton.Mobile/Controls/MaterialRefreshView.cs";
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
+        private const string ScreenHeaderViewPath = "src/Cotton.Mobile/Controls/ScreenHeaderView.cs";
         private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
         private const string MaterialCollectionViewPath = "src/Cotton.Mobile/Controls/MaterialCollectionView.cs";
@@ -2351,6 +2352,29 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenHeaderView Title=\"Trash\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView.ActionContent>", trashPage, StringComparison.Ordinal);
             Assert.Contains("IsBusy=\"{Binding IsBusy}\"", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Screen_header_busy_state_uses_material_action_frame()
+        {
+            string screenHeaderView = LoadText(ScreenHeaderViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+
+            IReadOnlyDictionary<string, string> busyFrameSetters = GetStyleSetters(styles, "M3ScreenHeaderBusyFrame");
+            IReadOnlyDictionary<string, string> busyIndicatorSetters = GetStyleSetters(styles, "M3ScreenHeaderActivityIndicator");
+
+            Assert.Contains("private readonly Border _busyIndicatorFrame;", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("_busyIndicatorFrame.SetDynamicResource(StyleProperty, \"M3ScreenHeaderBusyFrame\");", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("_busyIndicatorFrame.IsVisible = IsBusy;", screenHeaderView, StringComparison.Ordinal);
+            Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["WidthRequest"]);
+            Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["HeightRequest"]);
+            Assert.Equal("{StaticResource M3Transparent}", busyFrameSetters["Stroke"]);
+            Assert.Equal("{StaticResource M3StrokeNone}", busyFrameSetters["StrokeThickness"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
+                busyFrameSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3ScreenHeaderActivityIndicatorSize}", busyIndicatorSetters["WidthRequest"]);
+            Assert.Equal("{StaticResource M3ScreenHeaderActivityIndicatorSize}", busyIndicatorSetters["HeightRequest"]);
         }
 
         [Fact]

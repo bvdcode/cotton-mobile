@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
     public class ActionSheetItemView : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3ActionSheetItemBackground";
+        private const string SelectedIconOpacityAnimationName = "M3ActionSheetSelectedIconOpacity";
+        private const string SelectedIconScaleAnimationName = "M3ActionSheetSelectedIconScale";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -28,7 +30,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ActionSheetItemView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSelectedPropertyChanged);
 
         public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
             nameof(TextColor),
@@ -148,6 +150,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconView _leadingIcon;
         private readonly Label _label;
         private readonly IconView _selectedIcon;
+        private bool _hasAppliedSelectedIconState;
 
         public ActionSheetItemView()
         {
@@ -192,7 +195,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState(false);
+            UpdateVisualState(animateBackground: false, animateSelection: false);
         }
 
         public string Text
@@ -311,21 +314,27 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState(true);
+            UpdateVisualState(animateBackground: true, animateSelection: false);
         }
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState(false);
+            UpdateVisualState(animateBackground: false, animateSelection: false);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionSheetItemView itemView = (ActionSheetItemView)bindable;
-            itemView.UpdateVisualState(false);
+            itemView.UpdateVisualState(animateBackground: false, animateSelection: false);
         }
 
-        private void UpdateVisualState(bool animateBackground)
+        private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ActionSheetItemView itemView = (ActionSheetItemView)bindable;
+            itemView.UpdateVisualState(animateBackground: false, animateSelection: true);
+        }
+
+        private void UpdateVisualState(bool animateBackground, bool animateSelection)
         {
             if (_container is null || _grid is null || _iconFrame is null || _leadingIcon is null || _label is null || _selectedIcon is null)
             {
@@ -370,7 +379,38 @@ namespace Cotton.Mobile.Controls
 
             _selectedIcon.IconColor = SelectedIconColor;
             _selectedIcon.IconSize = IconSize;
-            _selectedIcon.IsVisible = IsSelected;
+            _selectedIcon.IsVisible = true;
+            UpdateSelectedIconState(animateSelection);
+        }
+
+        private void UpdateSelectedIconState(bool animateSelection)
+        {
+            double targetOpacity = IsSelected
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            double targetScale = IsSelected
+                ? MaterialMotion.Value("M3InteractionRestScale")
+                : MaterialMotion.Value("M3MotionSelectionHiddenScale");
+            bool shouldAnimate = animateSelection && _hasAppliedSelectedIconState;
+            int duration = MaterialResources.Get<int>("M3MotionSelectionDuration");
+
+            MaterialMotion.UpdateDouble(
+                _selectedIcon,
+                _selectedIcon.Opacity,
+                targetOpacity,
+                duration,
+                SelectedIconOpacityAnimationName,
+                shouldAnimate,
+                opacity => _selectedIcon.Opacity = opacity);
+            MaterialMotion.UpdateDouble(
+                _selectedIcon,
+                _selectedIcon.Scale,
+                targetScale,
+                duration,
+                SelectedIconScaleAnimationName,
+                shouldAnimate,
+                scale => _selectedIcon.Scale = scale);
+            _hasAppliedSelectedIconState = true;
         }
     }
 }

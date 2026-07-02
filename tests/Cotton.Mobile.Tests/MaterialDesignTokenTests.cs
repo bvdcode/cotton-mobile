@@ -418,6 +418,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Modal_pages_use_dynamic_material_style_resources()
         {
+            string actionSheetItemView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"));
             string materialDialogPage = LoadText(MaterialDialogPagePath);
             string materialActionSheetPage = LoadText(MaterialActionSheetPagePath);
             string combinedModalPages = materialDialogPage + materialActionSheetPage;
@@ -438,6 +439,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ApplyStyle(new ActionSheetItemView", materialActionSheetPage, StringComparison.Ordinal);
             Assert.Contains("ApplyStyle(new BoxView(), \"M3ActionSheetDivider\")", materialActionSheetPage, StringComparison.Ordinal);
             Assert.Contains("M3ActionSheetDestructiveItem", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("SelectedIconOpacityAnimationName = \"M3ActionSheetSelectedIconOpacity\"", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("SelectedIconScaleAnimationName = \"M3ActionSheetSelectedIconScale\"", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("OnSelectedPropertyChanged", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("M3MotionSelectionHiddenScale", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", actionSheetItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_selectedIcon.IsVisible = IsSelected", actionSheetItemView, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1389,8 +1397,17 @@ namespace Cotton.Mobile.Tests
                 string control = LoadText(controlPath);
 
                 Assert.Contains("BackgroundAnimationName = \"M3", control, StringComparison.Ordinal);
-                Assert.Contains("UpdateVisualState(true)", control, StringComparison.Ordinal);
-                Assert.Contains("UpdateVisualState(false)", control, StringComparison.Ordinal);
+                if (controlPath.EndsWith("ActionSheetItemView.cs", StringComparison.Ordinal))
+                {
+                    Assert.Contains("UpdateVisualState(animateBackground: true", control, StringComparison.Ordinal);
+                    Assert.Contains("UpdateVisualState(animateBackground: false", control, StringComparison.Ordinal);
+                }
+                else
+                {
+                    Assert.Contains("UpdateVisualState(true)", control, StringComparison.Ordinal);
+                    Assert.Contains("UpdateVisualState(false)", control, StringComparison.Ordinal);
+                }
+
                 Assert.Contains("MaterialMotion.UpdateBackgroundColor(", control, StringComparison.Ordinal);
                 Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", control, StringComparison.Ordinal);
                 Assert.DoesNotContain("_container.BackgroundColor = IsPressed", control, StringComparison.Ordinal);

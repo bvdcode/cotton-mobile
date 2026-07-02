@@ -963,6 +963,7 @@ namespace Cotton.Mobile.Tests
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string settingsActionHeaderCardView = LoadText(SettingsActionHeaderCardViewPath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:SettingsActionHeaderCardView LeadingIconData"));
             Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
@@ -979,6 +980,48 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("trailingContent = TrailingContent ?? (isTrailingTextVisible ? _trailingChip : null)", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("QuaternaryDetailTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("_trailingContentHost.Content = trailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains(
+                "PrimaryDetailTextOpacityAnimationName = \"M3SettingsSectionPrimaryDetailOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "SecondaryDetailTextOpacityAnimationName = \"M3SettingsSectionSecondaryDetailOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "TertiaryDetailTextOpacityAnimationName = \"M3SettingsSectionTertiaryDetailOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "QuaternaryDetailTextOpacityAnimationName = \"M3SettingsSectionQuaternaryDetailOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnPrimaryDetailTextVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnSecondaryDetailTextVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnTertiaryDetailTextVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnQuaternaryDetailTextVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains(
+                "MaterialResources.Get<int>(\"M3MotionStatusDuration\")",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains("CompletePrimaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteQuaternaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", backupSetupPage, StringComparison.Ordinal);
@@ -1000,6 +1043,22 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText)",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_secondaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(secondaryDetailText)",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText)",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_quaternaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(quaternaryDetailText)",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
         }
 
         [Fact]

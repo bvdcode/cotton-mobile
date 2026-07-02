@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
@@ -17,6 +18,10 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTitleStyleResourceKey = "M3CardTitle";
         private const string DefaultTrailingChipStyleResourceKey = "M3NeutralChip";
         private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
+        private const string PrimaryDetailTextOpacityAnimationName = "M3SettingsSectionPrimaryDetailOpacity";
+        private const string SecondaryDetailTextOpacityAnimationName = "M3SettingsSectionSecondaryDetailOpacity";
+        private const string TertiaryDetailTextOpacityAnimationName = "M3SettingsSectionTertiaryDetailOpacity";
+        private const string QuaternaryDetailTextOpacityAnimationName = "M3SettingsSectionQuaternaryDetailOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -30,28 +35,28 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(SettingsSectionHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPrimaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty SecondaryDetailTextProperty = BindableProperty.Create(
             nameof(SecondaryDetailText),
             typeof(string),
             typeof(SettingsSectionHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSecondaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty TertiaryDetailTextProperty = BindableProperty.Create(
             nameof(TertiaryDetailText),
             typeof(string),
             typeof(SettingsSectionHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTertiaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty QuaternaryDetailTextProperty = BindableProperty.Create(
             nameof(QuaternaryDetailText),
             typeof(string),
             typeof(SettingsSectionHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnQuaternaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
             nameof(Progress),
@@ -195,6 +200,10 @@ namespace Cotton.Mobile.Controls
         private readonly TouchSurfaceView _touchSurface;
         private readonly ChipView _trailingChip;
         private readonly ContentView _trailingContentHost;
+        private bool _hasAppliedPrimaryDetailTextVisibility;
+        private bool _hasAppliedSecondaryDetailTextVisibility;
+        private bool _hasAppliedTertiaryDetailTextVisibility;
+        private bool _hasAppliedQuaternaryDetailTextVisibility;
 
         public SettingsSectionHeaderView()
         {
@@ -255,7 +264,11 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _grid;
-            UpdateVisualState();
+            UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false);
         }
 
         public string Title
@@ -405,10 +418,70 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnPrimaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: true,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false);
+        }
+
+        private static void OnSecondaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: true,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false);
+        }
+
+        private static void OnTertiaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: true,
+                animateQuaternaryDetailTextVisibility: false);
+        }
+
+        private static void OnQuaternaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: true);
+        }
+
+        private void UpdateVisualState(
+            bool animatePrimaryDetailTextVisibility,
+            bool animateSecondaryDetailTextVisibility,
+            bool animateTertiaryDetailTextVisibility,
+            bool animateQuaternaryDetailTextVisibility)
         {
             string title = Title ?? string.Empty;
             string primaryDetailText = PrimaryDetailText ?? string.Empty;
@@ -450,16 +523,40 @@ namespace Cotton.Mobile.Controls
             _title.Text = title;
             _primaryDetailText.SetDynamicResource(StyleProperty, primaryDetailTextStyleResourceKey);
             _primaryDetailText.Text = primaryDetailText;
-            _primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText);
+            UpdateDetailTextVisibility(
+                _primaryDetailText,
+                primaryDetailText,
+                animatePrimaryDetailTextVisibility,
+                ref _hasAppliedPrimaryDetailTextVisibility,
+                PrimaryDetailTextOpacityAnimationName,
+                CompletePrimaryDetailTextVisibility);
             _secondaryDetailText.SetDynamicResource(StyleProperty, secondaryDetailTextStyleResourceKey);
             _secondaryDetailText.Text = secondaryDetailText;
-            _secondaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(secondaryDetailText);
+            UpdateDetailTextVisibility(
+                _secondaryDetailText,
+                secondaryDetailText,
+                animateSecondaryDetailTextVisibility,
+                ref _hasAppliedSecondaryDetailTextVisibility,
+                SecondaryDetailTextOpacityAnimationName,
+                CompleteSecondaryDetailTextVisibility);
             _tertiaryDetailText.SetDynamicResource(StyleProperty, tertiaryDetailTextStyleResourceKey);
             _tertiaryDetailText.Text = tertiaryDetailText;
-            _tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText);
+            UpdateDetailTextVisibility(
+                _tertiaryDetailText,
+                tertiaryDetailText,
+                animateTertiaryDetailTextVisibility,
+                ref _hasAppliedTertiaryDetailTextVisibility,
+                TertiaryDetailTextOpacityAnimationName,
+                CompleteTertiaryDetailTextVisibility);
             _quaternaryDetailText.SetDynamicResource(StyleProperty, quaternaryDetailTextStyleResourceKey);
             _quaternaryDetailText.Text = quaternaryDetailText;
-            _quaternaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(quaternaryDetailText);
+            UpdateDetailTextVisibility(
+                _quaternaryDetailText,
+                quaternaryDetailText,
+                animateQuaternaryDetailTextVisibility,
+                ref _hasAppliedQuaternaryDetailTextVisibility,
+                QuaternaryDetailTextOpacityAnimationName,
+                CompleteQuaternaryDetailTextVisibility);
             _progress.Progress = Progress;
             _progress.IsVisible = IsProgressVisible;
             _touchSurface.TapCommand = IsTapEnabled ? tapCommand : null;
@@ -489,6 +586,87 @@ namespace Cotton.Mobile.Controls
                     secondaryDetailText,
                     tertiaryDetailText,
                     quaternaryDetailText));
+        }
+
+        private void UpdateDetailTextVisibility(
+            Label detailTextLabel,
+            string detailText,
+            bool animateDetailTextVisibility,
+            ref bool hasAppliedDetailTextVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool isDetailTextVisible = IsDetailTextActuallyVisible(detailText);
+            bool shouldAnimate = animateDetailTextVisibility && hasAppliedDetailTextVisibility;
+            double targetOpacity = isDetailTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailTextVisible)
+            {
+                detailTextLabel.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                detailTextLabel,
+                detailTextLabel.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => detailTextLabel.Opacity = opacity,
+                completeVisibility);
+            hasAppliedDetailTextVisibility = true;
+        }
+
+        private void CompletePrimaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(PrimaryDetailText ?? string.Empty))
+            {
+                _primaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _primaryDetailText.IsVisible = false;
+        }
+
+        private void CompleteSecondaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(SecondaryDetailText ?? string.Empty))
+            {
+                _secondaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _secondaryDetailText.IsVisible = false;
+        }
+
+        private void CompleteTertiaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(TertiaryDetailText ?? string.Empty))
+            {
+                _tertiaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _tertiaryDetailText.IsVisible = false;
+        }
+
+        private void CompleteQuaternaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(QuaternaryDetailText ?? string.Empty))
+            {
+                _quaternaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _quaternaryDetailText.IsVisible = false;
+        }
+
+        private static bool IsDetailTextActuallyVisible(string detailText)
+        {
+            return !string.IsNullOrWhiteSpace(detailText);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

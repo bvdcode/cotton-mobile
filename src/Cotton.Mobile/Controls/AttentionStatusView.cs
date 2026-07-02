@@ -43,14 +43,14 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(AttentionStatusView),
             true,
-            propertyChanged: OnActionButtonVisibilityPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
             typeof(bool),
             typeof(AttentionStatusView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionButtonVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsRowTapEnabledProperty = BindableProperty.Create(
             nameof(IsRowTapEnabled),

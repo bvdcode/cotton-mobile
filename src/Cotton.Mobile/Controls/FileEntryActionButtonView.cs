@@ -35,14 +35,14 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileEntryActionButtonView),
             true,
-            propertyChanged: OnActionVisibilityPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
             typeof(bool),
             typeof(FileEntryActionButtonView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty SemanticDescriptionProperty = BindableProperty.Create(
             nameof(SemanticDescription),

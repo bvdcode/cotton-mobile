@@ -767,6 +767,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("ActionButtonOpacityAnimationName = \"M3AttentionStatusActionButtonOpacity\"", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("OnActionButtonVisibilityPropertyChanged", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains(
+                "nameof(IsActionVisible),\n            typeof(bool),\n            typeof(AttentionStatusView),\n            true,\n            propertyChanged: OnActionButtonVisibilityPropertyChanged);",
+                attentionStatusView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "nameof(IsActionEnabled),\n            typeof(bool),\n            typeof(AttentionStatusView),\n            true,\n            propertyChanged: OnVisualPropertyChanged);",
+                attentionStatusView,
+                StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", attentionStatusView, StringComparison.Ordinal);
@@ -2843,6 +2851,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_actionButton.Command = EntryActionsCommand", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("ActionButtonOpacityAnimationName = \"M3FileEntryActionButtonOpacity\"", fileEntryActionButtonView, StringComparison.Ordinal);
             Assert.Contains("OnActionVisibilityPropertyChanged", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains(
+                "nameof(IsActionVisible),\n            typeof(bool),\n            typeof(FileEntryActionButtonView),\n            true,\n            propertyChanged: OnActionVisibilityPropertyChanged);",
+                fileEntryActionButtonView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "nameof(IsActionEnabled),\n            typeof(bool),\n            typeof(FileEntryActionButtonView),\n            true,\n            propertyChanged: OnVisualPropertyChanged);",
+                fileEntryActionButtonView,
+                StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileEntryActionButtonView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileEntryActionButtonView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", fileEntryActionButtonView, StringComparison.Ordinal);

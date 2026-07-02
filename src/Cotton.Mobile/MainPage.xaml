@@ -12,12 +12,12 @@
         <controls:ScreenScrollBodyView Grid.Row="0"
                                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                        StackStyleResourceKey="M3MainContentStack">
-            <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
-                                 Style="{StaticResource M3AuthShellStack}">
+            <controls:StackedContentView IsVisible="{Binding Display.IsBrandHeaderVisible}"
+                                         StackStyleResourceKey="M3AuthShellStack">
                 <controls:BrandHeaderView Source="cotton_brand_mark.svg"
                                           Title="Cotton Cloud"
                                           SemanticDescription="Cotton Cloud" />
-            </VerticalStackLayout>
+            </controls:StackedContentView>
 
             <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
                                         IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
@@ -55,10 +55,10 @@
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
             <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
-                <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
-                                     Style="{StaticResource M3FileBrowserProfileStack}">
-                    <VerticalStackLayout x:Name="FileBrowserContent"
-                                         Style="{StaticResource M3FileBrowserContentStack}">
+                <controls:StackedContentView IsVisible="{Binding Display.IsProfileVisible}"
+                                             StackStyleResourceKey="M3FileBrowserProfileStack">
+                    <controls:StackedContentView x:Name="FileBrowserContent"
+                                                 StackStyleResourceKey="M3FileBrowserContentStack">
                             <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
                                                             PathText="{Binding Display.FilesPath}"
                                                             IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
@@ -219,8 +219,8 @@
                                     </DataTemplate>
                                 </controls:WrappedItemsView.ItemTemplate>
                             </controls:WrappedItemsView>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
+                    </controls:StackedContentView>
+                </controls:StackedContentView>
             </controls:ScreenScrollBodyView>
         </RefreshView>
 

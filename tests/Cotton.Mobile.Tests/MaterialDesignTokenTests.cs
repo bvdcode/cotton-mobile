@@ -1872,6 +1872,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Main_screen_stacked_sections_use_reusable_material_shell()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string stackedContentView = LoadText(StackedContentViewPath);
+
+            Assert.Contains("public class StackedContentView", stackedContentView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _stack.Children", stackedContentView, StringComparison.Ordinal);
+            Assert.Equal(3, CountOccurrences(mainPage, "<controls:StackedContentView"));
+            Assert.Contains("<controls:StackedContentView IsVisible=\"{Binding Display.IsBrandHeaderVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3AuthShellStack\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedContentView IsVisible=\"{Binding Display.IsProfileVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3FileBrowserProfileStack\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedContentView x:Name=\"FileBrowserContent\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3FileBrowserContentStack\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthShellStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserProfileStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserContentStack}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

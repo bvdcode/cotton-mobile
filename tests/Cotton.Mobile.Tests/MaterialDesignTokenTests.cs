@@ -1971,6 +1971,7 @@ namespace Cotton.Mobile.Tests
             string pdfViewerPage = LoadText(PdfViewerPagePath);
             string documentViewerBodyView = LoadText(DocumentViewerBodyViewPath);
             string viewerInfoHeaderView = LoadText(ViewerInfoHeaderViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Contains("<controls:ScreenShellView>", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DocumentViewerSurface\">", pdfViewerPage, StringComparison.Ordinal);
@@ -1988,6 +1989,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultStackStyleResourceKey = \"M3ScreenHeaderTextStack\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailsStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3ViewerInfoStatusOpacity\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_status.IsVisible = IsStatusVisible", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.Contains("public class DocumentViewerBodyView", documentViewerBodyView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3DocumentViewerSurface\"", documentViewerBodyView, StringComparison.Ordinal);
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", documentViewerBodyView, StringComparison.Ordinal);
@@ -2054,6 +2062,7 @@ namespace Cotton.Mobile.Tests
             string viewerOverlayActionButtonView = LoadText(ViewerOverlayActionButtonViewPath);
             string viewerPlayOverlayView = LoadText(ViewerPlayOverlayViewPath);
             string viewerStatusOverlayView = LoadText(ViewerStatusOverlayViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", mediaViewerPage, StringComparison.Ordinal);
@@ -2063,15 +2072,24 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ViewerImageView.GestureRecognizers>", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerMediaElementView x:Name=\"MediaPlayer\" />", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerOverlayActionButtonView x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Reset image\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerPlayOverlayView x:Name=\"StartOverlay\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Play media\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3ViewerOverlayStatus\"", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisibleProperty", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3ViewerOverlayStatusOpacity\"", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("_status.SetDynamicResource(StyleProperty, statusStyleResourceKey)", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.Contains("public class ViewerOverlayActionButtonView", viewerOverlayActionButtonView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3ViewerOverlayActionIconButton\"", viewerOverlayActionButtonView, StringComparison.Ordinal);
@@ -2116,6 +2134,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsStatusVisible}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsStatusVisible}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ViewerOverlayActionIconButton}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Reset image\"", imageViewerPage, StringComparison.Ordinal);

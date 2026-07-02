@@ -27,7 +27,7 @@
                                             SemanticDescription="Play media" />
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
-                                              IsVisible="{Binding IsStatusVisible}" />
+                                              IsStatusVisible="{Binding IsStatusVisible}" />
         </controls:DarkViewerSurfaceView>
     </controls:ScreenShellView>
 </controls:DarkViewerPage>

@@ -32,7 +32,7 @@
             </controls:ViewerImageView>
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
-                                              IsVisible="{Binding IsStatusVisible}"
+                                              IsStatusVisible="{Binding IsStatusVisible}"
                                               StatusStyleResourceKey="M3ViewerOverlayStatusWithTrailingAction" />
 
             <controls:ViewerOverlayActionButtonView x:Name="ResetButton"

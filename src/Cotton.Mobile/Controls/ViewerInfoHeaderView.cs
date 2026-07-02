@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultStackStyleResourceKey = "M3ScreenHeaderTextStack";
         private const string DefaultDetailsStyleResourceKey = "M3CardSupportingLine";
         private const string DefaultStatusStyleResourceKey = "M3CardSupportingLine";
+        private const string StatusOpacityAnimationName = "M3ViewerInfoStatusOpacity";
 
         public static readonly BindableProperty DetailsProperty = BindableProperty.Create(
             nameof(Details),
@@ -28,7 +29,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ViewerInfoHeaderView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnStatusVisiblePropertyChanged);
 
         public static readonly BindableProperty StackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(StackStyleResourceKey),
@@ -54,6 +55,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _details;
         private readonly Label _status;
         private readonly VerticalStackLayout _stack;
+        private bool _hasAppliedStatusVisibility;
 
         public ViewerInfoHeaderView()
         {
@@ -70,7 +72,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _stack;
-            UpdateVisualState();
+            UpdateVisualState(animateStatusVisibility: false);
         }
 
         public string Details
@@ -112,10 +114,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ViewerInfoHeaderView view = (ViewerInfoHeaderView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateStatusVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnStatusVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ViewerInfoHeaderView view = (ViewerInfoHeaderView)bindable;
+            view.UpdateVisualState(animateStatusVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateStatusVisibility)
         {
             string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
                 ? DefaultStackStyleResourceKey
@@ -132,7 +140,44 @@ namespace Cotton.Mobile.Controls
             _status.SetDynamicResource(StyleProperty, statusStyleResourceKey);
             _details.Text = Details ?? string.Empty;
             _status.Text = Status ?? string.Empty;
-            _status.IsVisible = IsStatusVisible;
+            UpdateStatusVisibility(animateStatusVisibility);
+        }
+
+        private void UpdateStatusVisibility(bool animateStatusVisibility)
+        {
+            bool isStatusVisible = IsStatusVisible;
+            bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
+            double targetOpacity = isStatusVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isStatusVisible)
+            {
+                _status.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _status,
+                _status.Opacity,
+                targetOpacity,
+                duration,
+                StatusOpacityAnimationName,
+                shouldAnimate,
+                opacity => _status.Opacity = opacity,
+                CompleteStatusVisibility);
+            _hasAppliedStatusVisibility = true;
+        }
+
+        private void CompleteStatusVisibility()
+        {
+            if (IsStatusVisible)
+            {
+                _status.IsVisible = true;
+                return;
+            }
+
+            _status.IsVisible = false;
         }
     }
 }

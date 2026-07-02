@@ -42,7 +42,7 @@
                 <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <controls:ContentCardView>
-                            <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}">
+                            <controls:StackedContentView StackStyleResourceKey="M3SettingsDenseStack">
                                 <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Folder}"
                                                                AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
                                                                IsAttentionState="{Binding IsAttentionVisible}"
@@ -79,7 +79,7 @@
                                                             QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
                                                             IsQuaternaryActionEnabled="{Binding CanStopSync}"
                                                             IsQuaternaryActionVisible="{Binding CanStopSync}" />
-                            </VerticalStackLayout>
+                            </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>
                 </controls:StackedItemsView.ItemTemplate>

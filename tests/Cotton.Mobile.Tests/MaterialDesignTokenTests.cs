@@ -1209,8 +1209,11 @@ namespace Cotton.Mobile.Tests
         public void Sync_root_actions_use_reusable_material_control()
         {
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string stackedContentView = LoadText(StackedContentViewPath);
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
 
+            Assert.Contains("public class StackedContentView", stackedContentView, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedContentView StackStyleResourceKey=\"M3SettingsDenseStack\">", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsInfoItemView LeadingIconData=\"{x:Static controls:IconPathData.Folder}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("AttentionLeadingIconData=\"{x:Static controls:IconPathData.Error}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsAttentionState=\"{Binding IsAttentionVisible}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -1240,6 +1243,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("TargetType=\"Label\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<HorizontalStackLayout Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsDenseStack}\">", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding RunNowActionText}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding StopSyncActionText}\"", syncSettingsPage, StringComparison.Ordinal);
         }

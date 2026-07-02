@@ -126,14 +126,10 @@
                                                             IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
                                                             IsSelected="{Binding IsSelected}" />
 
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Style="{StaticResource M3CardTextStack}">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardTitle}" />
-
-                                    <Label Text="{Binding DisplayDetails}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-                                </VerticalStackLayout>
+                                <controls:FileEntryTextView Grid.Column="1"
+                                                            Title="{Binding Name}"
+                                                            Detail="{Binding DisplayDetails}"
+                                                            StackStyleResourceKey="M3CardTextStack" />
 
                                 <controls:ChipView Grid.Column="2"
                                                    Text="{Binding BadgeText}" />
@@ -183,14 +179,12 @@
                                                             BadgeText="{Binding BadgeText}"
                                                             IsBadgeVisible="True" />
 
-                                <VerticalStackLayout Grid.Row="1"
-                                                     Style="{StaticResource M3FileTileTextStack}">
-                                    <Label Text="{Binding Name}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Text="{Binding DisplayDetails}"
-                                           Style="{StaticResource M3CardMetaLine}" />
-                                </VerticalStackLayout>
+                                <controls:FileEntryTextView Grid.Row="1"
+                                                            Title="{Binding Name}"
+                                                            Detail="{Binding DisplayDetails}"
+                                                            StackStyleResourceKey="M3FileTileTextStack"
+                                                            TitleStyleResourceKey="M3CardSupportingStrongLine"
+                                                            DetailStyleResourceKey="M3CardMetaLine" />
 
                                 <controls:TouchSurfaceView Grid.RowSpan="2"
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"

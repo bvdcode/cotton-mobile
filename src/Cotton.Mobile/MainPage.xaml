@@ -291,14 +291,9 @@
                                                                         IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
                                                                         IsSelected="{Binding IsSelected}" />
 
-                                            <VerticalStackLayout Grid.Column="1"
-                                                                 Style="{StaticResource M3FileListTextStack}">
-                                                <Label Text="{Binding Name}"
-                                                       Style="{StaticResource M3CardTitle}" />
-
-                                                <Label Text="{Binding DisplayDetails}"
-                                                       Style="{StaticResource M3CardSupportingLine}" />
-                                            </VerticalStackLayout>
+                                            <controls:FileEntryTextView Grid.Column="1"
+                                                                        Title="{Binding Name}"
+                                                                        Detail="{Binding DisplayDetails}" />
 
                                             <controls:TouchSurfaceView Grid.ColumnSpan="2"
                                                                        Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"

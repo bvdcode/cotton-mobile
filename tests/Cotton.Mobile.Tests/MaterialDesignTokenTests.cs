@@ -439,6 +439,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_entry_text_blocks_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+
+            Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileEntryTextView"));
+            Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileListTextStack}\"", mainPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:FileEntryTextView"));
+            Assert.Contains("StackStyleResourceKey=\"M3CardTextStack\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3FileTileTextStack\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("TitleStyleResourceKey=\"M3CardSupportingStrongLine\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("DetailStyleResourceKey=\"M3CardMetaLine\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3CardTextStack}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileTileTextStack}\"", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

@@ -21,8 +21,7 @@
                             SecondaryCommand="{Binding OpenExternallyCommand}"
                             SecondaryDescription="Open image" />
 
-        <Grid Grid.Row="1"
-              Style="{StaticResource M3DarkViewerSurface}">
+        <controls:DarkViewerSurfaceView Grid.Row="1">
             <Grid x:Name="ImageSurface"
                   Style="{StaticResource M3DarkViewerSurface}">
                 <Image x:Name="PreviewImage"
@@ -47,6 +46,6 @@
                                                     Command="{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}"
                                                     IsVisible="False"
                                                     SemanticDescription="Reset image" />
-        </Grid>
+        </controls:DarkViewerSurfaceView>
     </Grid>
 </ContentPage>

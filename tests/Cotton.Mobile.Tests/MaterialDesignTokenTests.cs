@@ -66,6 +66,7 @@ namespace Cotton.Mobile.Tests
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
+        private const string DarkViewerSurfaceViewPath = "src/Cotton.Mobile/Controls/DarkViewerSurfaceView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private const string ViewerPlayOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerPlayOverlayView.cs";
         private const string ViewerOverlayActionButtonViewPath = "src/Cotton.Mobile/Controls/ViewerOverlayActionButtonView.cs";
@@ -1185,10 +1186,13 @@ namespace Cotton.Mobile.Tests
         {
             string imageViewerPage = LoadText(ImageViewerPagePath);
             string mediaViewerPage = LoadText(MediaViewerPagePath);
+            string darkViewerSurfaceView = LoadText(DarkViewerSurfaceViewPath);
             string viewerOverlayActionButtonView = LoadText(ViewerOverlayActionButtonViewPath);
             string viewerPlayOverlayView = LoadText(ViewerPlayOverlayViewPath);
             string viewerStatusOverlayView = LoadText(ViewerStatusOverlayViewPath);
 
+            Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerOverlayActionButtonView x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
@@ -1209,6 +1213,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3ViewerCenteredPlayIconButton\"", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("IconData = IconPathData.Play", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("_playButton.Command = Command", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("public class DarkViewerSurfaceView", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3DarkViewerSurface\"", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("new Grid()", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _surface.Children", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("_surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);

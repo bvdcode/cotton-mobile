@@ -22,8 +22,7 @@
                             SecondaryCommand="{Binding OpenExternallyCommand}"
                             SecondaryDescription="Open media" />
 
-        <Grid Grid.Row="1"
-              Style="{StaticResource M3DarkViewerSurface}">
+        <controls:DarkViewerSurfaceView Grid.Row="1">
             <Grid Style="{StaticResource M3DarkViewerSurface}">
                 <toolkit:MediaElement x:Name="MediaPlayer"
                                       Aspect="AspectFit"
@@ -40,6 +39,6 @@
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
                                               IsVisible="{Binding IsStatusVisible}" />
-        </Grid>
+        </controls:DarkViewerSurfaceView>
     </Grid>
 </ContentPage>

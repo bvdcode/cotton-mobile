@@ -1830,6 +1830,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<double>(\"M3FileThumbnailSize\")", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("Grid.SetColumnSpan(_header, 3)", metadataCardView, StringComparison.Ordinal);
+            Assert.Contains("BodyContentOpacityAnimationName = \"M3MetadataCardBodyContentOpacity\"", metadataCardView, StringComparison.Ordinal);
+            Assert.Contains("OnBodyContentVisibilityPropertyChanged", metadataCardView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", metadataCardView, StringComparison.Ordinal);
+            Assert.Contains("CompleteBodyContentVisibility", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_bodyContentHost.IsVisible = bodyContent is not null", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("new FileEntryTextView", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);

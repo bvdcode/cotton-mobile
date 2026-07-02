@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
     [ContentProperty(nameof(BodyContent))]
     public class MetadataCardView : ContentView
     {
+        private const string BodyContentOpacityAnimationName = "M3MetadataCardBodyContentOpacity";
         private const string DefaultCardStyleResourceKey = "M3ContentCard";
         private const string DefaultGridStyleResourceKey = "M3MetadataCardGrid";
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardFileThumbnailFrame";
@@ -73,12 +74,13 @@ namespace Cotton.Mobile.Controls
             typeof(View),
             typeof(MetadataCardView),
             default(View),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnBodyContentVisibilityPropertyChanged);
 
         private readonly ContentView _bodyContentHost;
         private readonly Border _card;
         private readonly Grid _grid;
         private readonly MetadataCardHeaderView _header;
+        private bool _hasAppliedBodyContentVisibility;
 
         public MetadataCardView()
         {
@@ -116,7 +118,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _card;
-            UpdateVisualState();
+            UpdateVisualState(animateBodyContentVisibility: false);
         }
 
         public string Title
@@ -176,10 +178,19 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             MetadataCardView view = (MetadataCardView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateBodyContentVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnBodyContentVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            MetadataCardView view = (MetadataCardView)bindable;
+            view.UpdateVisualState(animateBodyContentVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateBodyContentVisibility)
         {
             string cardStyleResourceKey = string.IsNullOrWhiteSpace(CardStyleResourceKey)
                 ? DefaultCardStyleResourceKey
@@ -201,12 +212,56 @@ namespace Cotton.Mobile.Controls
             _header.LeadingIconData = LeadingIconData;
             _header.LeadingIconFrameStyleResourceKey = leadingIconFrameStyleResourceKey;
 
-            if (_bodyContentHost.Content != bodyContent)
+            bool hasBodyContent = bodyContent is not null;
+            if (hasBodyContent && _bodyContentHost.Content != bodyContent)
             {
                 _bodyContentHost.Content = bodyContent;
             }
 
-            _bodyContentHost.IsVisible = bodyContent is not null;
+            UpdateBodyContentVisibility(hasBodyContent, animateBodyContentVisibility);
+        }
+
+        private void UpdateBodyContentVisibility(bool hasBodyContent, bool animateBodyContentVisibility)
+        {
+            bool shouldAnimate = animateBodyContentVisibility && _hasAppliedBodyContentVisibility;
+            double targetOpacity = hasBodyContent
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (hasBodyContent)
+            {
+                _bodyContentHost.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _bodyContentHost,
+                _bodyContentHost.Opacity,
+                targetOpacity,
+                duration,
+                BodyContentOpacityAnimationName,
+                shouldAnimate,
+                opacity => _bodyContentHost.Opacity = opacity,
+                CompleteBodyContentVisibility);
+            _hasAppliedBodyContentVisibility = true;
+        }
+
+        private void CompleteBodyContentVisibility()
+        {
+            View? bodyContent = BodyContent;
+            if (bodyContent is not null)
+            {
+                if (_bodyContentHost.Content != bodyContent)
+                {
+                    _bodyContentHost.Content = bodyContent;
+                }
+
+                _bodyContentHost.IsVisible = true;
+                return;
+            }
+
+            _bodyContentHost.Content = null;
+            _bodyContentHost.IsVisible = false;
         }
     }
 }

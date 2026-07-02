@@ -42,9 +42,8 @@
 
             </Grid>
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3ViewerOverlayStatus}" />
+            <controls:ViewerStatusOverlayView Text="{Binding Status}"
+                                              IsVisible="{Binding IsStatusVisible}" />
         </Grid>
     </Grid>
 </ContentPage>

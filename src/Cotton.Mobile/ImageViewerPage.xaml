@@ -38,9 +38,9 @@
                 </Image>
             </Grid>
 
-            <Label Text="{Binding Status}"
-                   IsVisible="{Binding IsStatusVisible}"
-                   Style="{StaticResource M3ViewerOverlayStatusWithTrailingAction}" />
+            <controls:ViewerStatusOverlayView Text="{Binding Status}"
+                                              IsVisible="{Binding IsStatusVisible}"
+                                              StatusStyleResourceKey="M3ViewerOverlayStatusWithTrailingAction" />
 
             <controls:IconButton x:Name="ResetButton"
                                  IconData="{x:Static controls:IconPathData.Reset}"

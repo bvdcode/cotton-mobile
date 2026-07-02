@@ -20,6 +20,8 @@ namespace Cotton.Mobile.Tests
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
         private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
         private const string TextViewerPagePath = "src/Cotton.Mobile/TextViewerPage.xaml";
+        private const string ImageViewerPagePath = "src/Cotton.Mobile/ImageViewerPage.xaml";
+        private const string MediaViewerPagePath = "src/Cotton.Mobile/MediaViewerPage.xaml";
         private const string PdfViewerPagePath = "src/Cotton.Mobile/PdfViewerPage.xaml";
         private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
         private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
@@ -35,6 +37,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
+        private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -590,6 +593,22 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenHeaderTextStack}\">", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3PdfHeaderStack}\">", pdfViewerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Dark_viewer_status_overlays_use_reusable_material_control()
+        {
+            string imageViewerPage = LoadText(ImageViewerPagePath);
+            string mediaViewerPage = LoadText(MediaViewerPagePath);
+            string viewerStatusOverlayView = LoadText(ViewerStatusOverlayViewPath);
+
+            Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultStatusStyleResourceKey = \"M3ViewerOverlayStatus\"", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("_status.SetDynamicResource(StyleProperty, statusStyleResourceKey)", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
         }
 
         [Fact]

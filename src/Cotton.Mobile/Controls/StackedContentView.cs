@@ -41,9 +41,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
-                ? DefaultStackStyleResourceKey
-                : StackStyleResourceKey;
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StackStyleResourceKey,
+                DefaultStackStyleResourceKey);
 
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);
         }

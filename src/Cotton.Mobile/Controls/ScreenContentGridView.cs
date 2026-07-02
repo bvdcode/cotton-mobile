@@ -54,9 +54,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             RebuildRows();

@@ -67,9 +67,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string layoutStyleResourceKey = string.IsNullOrWhiteSpace(LayoutStyleResourceKey)
-                ? DefaultLayoutStyleResourceKey
-                : LayoutStyleResourceKey;
+            string layoutStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LayoutStyleResourceKey,
+                DefaultLayoutStyleResourceKey);
 
             _layout.SetDynamicResource(StyleProperty, layoutStyleResourceKey);
             BindableLayout.SetItemsSource(_layout, ItemsSource);

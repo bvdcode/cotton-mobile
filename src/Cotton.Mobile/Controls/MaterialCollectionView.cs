@@ -106,9 +106,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string collectionStyleResourceKey = string.IsNullOrWhiteSpace(CollectionStyleResourceKey)
-                ? DefaultCollectionStyleResourceKey
-                : CollectionStyleResourceKey;
+            string collectionStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                CollectionStyleResourceKey,
+                DefaultCollectionStyleResourceKey);
 
             _collection.SetDynamicResource(StyleProperty, collectionStyleResourceKey);
             _collection.ItemsSource = ItemsSource;

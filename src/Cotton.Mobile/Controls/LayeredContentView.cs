@@ -6,11 +6,13 @@ namespace Cotton.Mobile.Controls
     [ContentProperty(nameof(Items))]
     public class LayeredContentView : ContentView
     {
+        private const string DefaultGridStyleResourceKey = "M3LayeredContent";
+
         public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
             nameof(GridStyleResourceKey),
             typeof(string),
             typeof(LayeredContentView),
-            string.Empty,
+            DefaultGridStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Grid _grid;
@@ -39,13 +41,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            if (string.IsNullOrWhiteSpace(GridStyleResourceKey))
-            {
-                _grid.ClearValue(StyleProperty);
-                return;
-            }
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
 
-            _grid.SetDynamicResource(StyleProperty, GridStyleResourceKey);
+            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
         }
     }
 }

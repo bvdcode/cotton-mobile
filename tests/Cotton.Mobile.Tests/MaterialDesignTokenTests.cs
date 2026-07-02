@@ -1967,6 +1967,20 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public static string ResolveStyleResourceKey(", materialResources, StringComparison.Ordinal);
             Assert.Contains("string.IsNullOrWhiteSpace(resourceKey)", materialResources, StringComparison.Ordinal);
 
+            string[] baseContainerControls =
+            [
+                "ContentCardView.cs",
+                "LayeredContentView.cs",
+                "MaterialCollectionView.cs",
+                "ScreenContentGridView.cs",
+                "ScreenScrollBodyView.cs",
+                "ScreenShellView.cs",
+                "SettingsCardView.cs",
+                "StackedContentView.cs",
+                "StackedItemsView.cs",
+                "WrappedItemsView.cs",
+            ];
+
             foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))
             {
                 string fileName = Path.GetFileName(filePath);
@@ -1978,6 +1992,14 @@ namespace Cotton.Mobile.Tests
                 }
 
                 Assert.DoesNotContain("private static string ResolveStyleResourceKey", control, StringComparison.Ordinal);
+            }
+
+            foreach (string controlName in baseContainerControls)
+            {
+                string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
+
+                Assert.Contains("MaterialResources.ResolveStyleResourceKey(", control, StringComparison.Ordinal);
+                Assert.DoesNotContain("string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
             }
         }
 
@@ -3425,6 +3447,7 @@ namespace Cotton.Mobile.Tests
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string screenContentGridView = LoadText(ScreenContentGridViewPath);
             string screenShellView = LoadText(ScreenShellViewPath);
+            string styles = LoadText(StylesResourcePath);
             string trashPage = LoadText(TrashPagePath);
 
             Assert.Contains("<controls:ScreenShellView>", fileVersionHistoryPage, StringComparison.Ordinal);
@@ -3437,18 +3460,22 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"2\">", trashPage, StringComparison.Ordinal);
             Assert.Contains("public class LayeredContentView", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKeyProperty", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3LayeredContent\"", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("new Grid()", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", layeredContentView, StringComparison.Ordinal);
-            Assert.Contains("_grid.ClearValue(StyleProperty)", layeredContentView, StringComparison.Ordinal);
-            Assert.Contains("_grid.SetDynamicResource(StyleProperty, GridStyleResourceKey)", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.ResolveStyleResourceKey(", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("public class ScreenShellView", screenShellView, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKeyProperty", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3ScreenShell\"", screenShellView, StringComparison.Ordinal);
             Assert.Contains("new Grid()", screenShellView, StringComparison.Ordinal);
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", screenShellView, StringComparison.Ordinal);
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", screenShellView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", screenShellView, StringComparison.Ordinal);
-            Assert.Contains("_grid.ClearValue(StyleProperty)", screenShellView, StringComparison.Ordinal);
-            Assert.Contains("_grid.SetDynamicResource(StyleProperty, GridStyleResourceKey)", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.ResolveStyleResourceKey(", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3ScreenShell\"", styles, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3LayeredContent\"", styles, StringComparison.Ordinal);
             Assert.Contains("public class ScreenContentGridView", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new Grid", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new RowDefinition { Height = GridLength.Auto }", screenContentGridView, StringComparison.Ordinal);

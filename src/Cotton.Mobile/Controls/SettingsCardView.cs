@@ -61,12 +61,12 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string cardStyleResourceKey = string.IsNullOrWhiteSpace(CardStyleResourceKey)
-                ? DefaultCardStyleResourceKey
-                : CardStyleResourceKey;
-            string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
-                ? DefaultStackStyleResourceKey
-                : StackStyleResourceKey;
+            string cardStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                CardStyleResourceKey,
+                DefaultCardStyleResourceKey);
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StackStyleResourceKey,
+                DefaultStackStyleResourceKey);
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);

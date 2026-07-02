@@ -48,6 +48,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string DiagnosticsItemViewPath = "src/Cotton.Mobile/Controls/DiagnosticsItemView.cs";
+        private const string TextDocumentContentViewPath = "src/Cotton.Mobile/Controls/TextDocumentContentView.cs";
         private const string TrashEntryCardViewBasePath = "src/Cotton.Mobile/Controls/TrashEntryCardViewBase.cs";
         private const string TrashListEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashListEntryCardView.cs";
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
@@ -1069,6 +1070,23 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenHeaderTextStack}\">", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3PdfHeaderStack}\">", pdfViewerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Text_viewer_body_uses_reusable_material_control()
+        {
+            string textViewerPage = LoadText(TextViewerPagePath);
+            string textDocumentContentView = LoadText(TextDocumentContentViewPath);
+
+            Assert.Contains("<controls:TextDocumentContentView Text=\"{Binding Content}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Content}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3TextViewerContent}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("public class TextDocumentContentView", textDocumentContentView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStyleResourceKey = \"M3TextViewerContent\"", textDocumentContentView, StringComparison.Ordinal);
+            Assert.Contains("new Label()", textDocumentContentView, StringComparison.Ordinal);
+            Assert.Contains("ScrollView scrollView = new()", textDocumentContentView, StringComparison.Ordinal);
+            Assert.Contains("_text.SetDynamicResource(StyleProperty, textStyleResourceKey)", textDocumentContentView, StringComparison.Ordinal);
+            Assert.Contains("_text.Text = Text ?? string.Empty", textDocumentContentView, StringComparison.Ordinal);
         }
 
         [Fact]

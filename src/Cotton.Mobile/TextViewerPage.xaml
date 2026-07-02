@@ -26,10 +26,7 @@
 
             <controls:ContentCardView Grid.Row="1"
                                       CardStyleResourceKey="M3TextViewerSurface">
-                <ScrollView>
-                    <Label Text="{Binding Content}"
-                           Style="{StaticResource M3TextViewerContent}" />
-                </ScrollView>
+                <controls:TextDocumentContentView Text="{Binding Content}" />
             </controls:ContentCardView>
         </Grid>
     </Grid>

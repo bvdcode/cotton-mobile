@@ -480,6 +480,7 @@ namespace Cotton.Mobile.Tests
             string appLockGatePage = LoadText(AppLockGatePagePath);
             string centeredGateView = LoadText(CenteredGateViewPath);
             string emptyStateView = LoadText(EmptyStateViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string styles = LoadText(StylesResourcePath);
             XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> emptyIconFrameSetters =
@@ -508,6 +509,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsFilledActionProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("BusyIndicatorOpacityAnimationName = \"M3EmptyStateBusyIndicatorOpacity\"", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("OnBusyPropertyChanged", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("CompleteBusyState", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_loadingIndicator.IsVisible = IsBusy", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("private readonly TouchSurfaceView _actionTouchSurface;", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("_actionTouchSurface = new TouchSurfaceView();", emptyStateView, StringComparison.Ordinal);

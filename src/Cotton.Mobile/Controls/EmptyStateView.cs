@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
 {
     public class EmptyStateView : ContentView
     {
+        private const string BusyIndicatorOpacityAnimationName = "M3EmptyStateBusyIndicatorOpacity";
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -41,7 +43,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(EmptyStateView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnBusyPropertyChanged);
 
         public static readonly BindableProperty CardStyleResourceKeyProperty = BindableProperty.Create(
             nameof(CardStyleResourceKey),
@@ -138,6 +140,7 @@ namespace Cotton.Mobile.Controls
         private readonly LoadingIndicatorView _loadingIndicator;
         private readonly Label _title;
         private readonly Label _body;
+        private bool _hasAppliedBusyState;
 
         public EmptyStateView()
         {
@@ -155,7 +158,11 @@ namespace Cotton.Mobile.Controls
             _body = new Label();
             _body.SetDynamicResource(StyleProperty, "M3EmptyBody");
 
-            _loadingIndicator = new LoadingIndicatorView();
+            _loadingIndicator = new LoadingIndicatorView
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
 
             _actionLabel = new Label();
             _actionLabel.SetDynamicResource(StyleProperty, "M3ActionListItemLabel");
@@ -212,7 +219,7 @@ namespace Cotton.Mobile.Controls
             _card.SetDynamicResource(StyleProperty, "M3EmptyStateCard");
 
             Content = _card;
-            UpdateVisualState();
+            UpdateVisualState(animateBusy: false);
         }
 
         public Geometry? IconData
@@ -320,10 +327,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             EmptyStateView emptyStateView = (EmptyStateView)bindable;
-            emptyStateView.UpdateVisualState();
+            emptyStateView.UpdateVisualState(animateBusy: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnBusyPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            EmptyStateView emptyStateView = (EmptyStateView)bindable;
+            emptyStateView.UpdateVisualState(animateBusy: true);
+        }
+
+        private void UpdateVisualState(bool animateBusy)
         {
             string title = Title ?? string.Empty;
             string body = Body ?? string.Empty;
@@ -353,8 +366,7 @@ namespace Cotton.Mobile.Controls
             _title.Text = title;
             _body.Text = body;
             _body.IsVisible = IsBodyVisible && !string.IsNullOrWhiteSpace(body);
-            _loadingIndicator.IsRunning = IsBusy;
-            _loadingIndicator.IsVisible = IsBusy;
+            UpdateBusyState(animateBusy);
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);
             _iconFrame.SetDynamicResource(StyleProperty, iconFrameStyleResourceKey);
@@ -388,6 +400,46 @@ namespace Cotton.Mobile.Controls
                 ? title
                 : $"{title}. {body}";
             SemanticProperties.SetDescription(_card, description);
+        }
+
+        private void UpdateBusyState(bool animateBusy)
+        {
+            bool isBusy = IsBusy;
+            bool shouldAnimate = animateBusy && _hasAppliedBusyState;
+            double targetOpacity = isBusy
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isBusy)
+            {
+                _loadingIndicator.IsVisible = true;
+                _loadingIndicator.IsRunning = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _loadingIndicator,
+                _loadingIndicator.Opacity,
+                targetOpacity,
+                duration,
+                BusyIndicatorOpacityAnimationName,
+                shouldAnimate,
+                opacity => _loadingIndicator.Opacity = opacity,
+                CompleteBusyState);
+            _hasAppliedBusyState = true;
+        }
+
+        private void CompleteBusyState()
+        {
+            if (IsBusy)
+            {
+                _loadingIndicator.IsVisible = true;
+                _loadingIndicator.IsRunning = true;
+                return;
+            }
+
+            _loadingIndicator.IsRunning = false;
+            _loadingIndicator.IsVisible = false;
         }
     }
 }

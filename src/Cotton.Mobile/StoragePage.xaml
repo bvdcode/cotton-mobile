@@ -27,7 +27,7 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
@@ -54,151 +54,145 @@
                                                  Progress="{Binding CloudQuotaUsageFraction}"
                                                  IsVisible="{Binding IsCloudQuotaProgressVisible}" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Label Text="Free up storage"
-                           Style="{StaticResource M3CardTitle}" />
+            <controls:SettingsCardView>
+                <Label Text="Free up storage"
+                       Style="{StaticResource M3CardTitle}" />
 
-                    <controls:ActionListItemView Text="Free space"
-                                                 SupportingText="Remove evictable local copies while keeping offline files."
-                                                 LeadingIconData="{x:Static controls:IconPathData.Download}"
-                                                 IsLeadingIconVisible="True"
-                                                 LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                                 ActionIconData="{x:Static controls:IconPathData.Download}"
-                                                 Command="{Binding FreeDeviceSpaceCommand}"
-                                                 GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 TextStyleResourceKey="M3CardSupportingStrongLine"
-                                                 SemanticDescription="Free device storage" />
+                <controls:ActionListItemView Text="Free space"
+                                             SupportingText="Remove evictable local copies while keeping offline files."
+                                             LeadingIconData="{x:Static controls:IconPathData.Download}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Download}"
+                                             Command="{Binding FreeDeviceSpaceCommand}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             TextStyleResourceKey="M3CardSupportingStrongLine"
+                                             SemanticDescription="Free device storage" />
 
-                    <controls:ActionListItemView Text="Clear all cached files"
-                                                 SupportingText="Clear thumbnails, folder listings, downloads, and recents."
-                                                 LeadingIconData="{x:Static controls:IconPathData.Delete}"
-                                                 IsLeadingIconVisible="True"
-                                                 LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                                 ActionIconData="{x:Static controls:IconPathData.Delete}"
-                                                 Command="{Binding ClearAllCommand}"
-                                                 GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 TextStyleResourceKey="M3CardSupportingStrongLine"
-                                                 ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
-                                                 SemanticDescription="Clear all cached files" />
-                </VerticalStackLayout>
-            </Border>
+                <controls:ActionListItemView Text="Clear all cached files"
+                                             SupportingText="Clear thumbnails, folder listings, downloads, and recents."
+                                             LeadingIconData="{x:Static controls:IconPathData.Delete}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Delete}"
+                                             Command="{Binding ClearAllCommand}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             TextStyleResourceKey="M3CardSupportingStrongLine"
+                                             ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                             SemanticDescription="Clear all cached files" />
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Grid ColumnDefinitions="Auto,*"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                            Style="{StaticResource M3CardUtilityThumbnailFrame}" />
+            <controls:SettingsCardView>
+                <Grid ColumnDefinitions="Auto,*"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
+                                        Style="{StaticResource M3CardUtilityThumbnailFrame}" />
 
-                        <VerticalStackLayout Grid.Column="1"
-                                             Style="{StaticResource M3CardTextStack}">
-                            <Label Text="Files on this device"
-                                   Style="{StaticResource M3CardTitle}" />
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="Files on this device"
+                               Style="{StaticResource M3CardTitle}" />
 
-                            <Label Text="{Binding OnDeviceSummaryText}"
-                                   Style="{StaticResource M3CardSupportingBlock}" />
-                        </VerticalStackLayout>
-                    </Grid>
-
-                    <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
-                                         BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
-                                <Grid RowDefinitions="Auto,Auto"
-                                      ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3SettingsListItemGrid}"
-                                      IsVisible="{Binding IsVisible}">
-                                    <controls:IconFrame Grid.RowSpan="2"
-                                                        IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding SizeText}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="2"
-                                           Text="{Binding CountText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
+                        <Label Text="{Binding OnDeviceSummaryText}"
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
+                                     BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
+                            <Grid RowDefinitions="Auto,Auto"
+                                  ColumnDefinitions="Auto,*,Auto"
+                                  Style="{StaticResource M3SettingsListItemGrid}"
+                                  IsVisible="{Binding IsVisible}">
+                                <controls:IconFrame Grid.RowSpan="2"
+                                                    IconData="{x:Static controls:IconPathData.File}"
+                                                    Style="{StaticResource M3CardFileThumbnailFrame}" />
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                                <Label Grid.Column="2"
+                                       Text="{Binding SizeText}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding DetailText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="2"
+                                       Text="{Binding CountText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Grid ColumnDefinitions="Auto,*"
-                          Style="{StaticResource M3SettingsListItemGrid}">
-                        <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"
-                                            Style="{StaticResource M3CardTransferThumbnailFrame}" />
+            <controls:SettingsCardView>
+                <Grid ColumnDefinitions="Auto,*"
+                      Style="{StaticResource M3SettingsListItemGrid}">
+                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"
+                                        Style="{StaticResource M3CardTransferThumbnailFrame}" />
 
-                        <VerticalStackLayout Grid.Column="1"
-                                             Style="{StaticResource M3CardTextStack}">
-                            <Label Text="Temporary files"
-                                   Style="{StaticResource M3CardTitle}" />
+                    <VerticalStackLayout Grid.Column="1"
+                                         Style="{StaticResource M3CardTextStack}">
+                        <Label Text="Temporary files"
+                               Style="{StaticResource M3CardTitle}" />
 
-                            <Label Text="{Binding StorageBudgetSummaryText}"
-                                   Style="{StaticResource M3CardSupportingBlock}" />
+                        <Label Text="{Binding StorageBudgetSummaryText}"
+                               Style="{StaticResource M3CardSupportingBlock}" />
 
-                            <Label Text="{Binding ProtectedOfflineText}"
-                                   Style="{StaticResource M3CardSupportingBlock}" />
-                        </VerticalStackLayout>
-                    </Grid>
-
-                    <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
-                                         BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
-                                <Grid RowDefinitions="Auto,Auto,Auto"
-                                      ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3SettingsListItemGrid}"
-                                      IsVisible="{Binding IsVisible}">
-                                    <controls:IconFrame Grid.RowSpan="3"
-                                                        IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding UsageText}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="2"
-                                           Text="{Binding StatusText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-
-                                    <controls:LinearProgressView Grid.Row="2"
-                                                                 Grid.Column="1"
-                                                                 Grid.ColumnSpan="2"
-                                                                 Progress="{Binding UsageFraction}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
+                        <Label Text="{Binding ProtectedOfflineText}"
+                               Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
+                </Grid>
+
+                <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
+                                     BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
+                            <Grid RowDefinitions="Auto,Auto,Auto"
+                                  ColumnDefinitions="Auto,*,Auto"
+                                  Style="{StaticResource M3SettingsListItemGrid}"
+                                  IsVisible="{Binding IsVisible}">
+                                <controls:IconFrame Grid.RowSpan="3"
+                                                    IconData="{x:Static controls:IconPathData.File}"
+                                                    Style="{StaticResource M3CardFileThumbnailFrame}" />
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                                <Label Grid.Column="2"
+                                       Text="{Binding UsageText}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Text="{Binding DetailText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="2"
+                                       Text="{Binding StatusText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+
+                                <controls:LinearProgressView Grid.Row="2"
+                                                             Grid.Column="1"
+                                                             Grid.ColumnSpan="2"
+                                                             Progress="{Binding UsageFraction}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
+            </controls:SettingsCardView>
 
         </VerticalStackLayout>
         </ScrollView>

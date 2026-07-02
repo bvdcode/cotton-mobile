@@ -37,6 +37,7 @@ namespace Cotton.Mobile.Tests
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileListEntryRowViewPath = "src/Cotton.Mobile/Controls/FileListEntryRowView.cs";
         private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
+        private const string FloatingActionButtonViewPath = "src/Cotton.Mobile/Controls/FloatingActionButtonView.cs";
         private const string FileTileEntryCardViewPath = "src/Cotton.Mobile/Controls/FileTileEntryCardView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
@@ -1433,6 +1434,28 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3TextViewerSurface}\"", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableContentCard}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableTrashTileCard}\"", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Main_floating_action_button_uses_reusable_material_control()
+        {
+            string floatingActionButtonView = LoadText(FloatingActionButtonViewPath);
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Contains("<controls:FloatingActionButtonView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IconData=\"{x:Static controls:IconPathData.Plus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Command=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsVisible=\"{Binding Display.IsFileAddButtonVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsEnabled=\"{Binding Display.IsFileBrowserChromeEnabled}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"Add files\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class FloatingActionButtonView", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3FloatingActionIconButton\"", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("new IconButton()", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("_button.IconData = IconData ?? IconPathData.Plus", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("_button.IsEnabled = IsEnabled", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FloatingActionIconButton}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Add files\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

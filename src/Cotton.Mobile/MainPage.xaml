@@ -244,13 +244,12 @@
         </ScrollView>
         </RefreshView>
 
-        <controls:IconButton Grid.Row="1"
-                             IconData="{x:Static controls:IconPathData.Plus}"
-                             Style="{StaticResource M3FloatingActionIconButton}"
-                             Command="{Binding ShowFileAddActionsCommand}"
-                             IsVisible="{Binding Display.IsFileAddButtonVisible}"
-                             IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                             SemanticProperties.Description="Add files" />
+        <controls:FloatingActionButtonView Grid.Row="1"
+                                           IconData="{x:Static controls:IconPathData.Plus}"
+                                           Command="{Binding ShowFileAddActionsCommand}"
+                                           IsVisible="{Binding Display.IsFileAddButtonVisible}"
+                                           IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                           SemanticDescription="Add files" />
 
         <controls:NavigationBarView Grid.Row="2"
                                     IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}">

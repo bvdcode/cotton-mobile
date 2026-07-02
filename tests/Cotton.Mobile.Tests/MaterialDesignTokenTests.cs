@@ -2286,6 +2286,7 @@ namespace Cotton.Mobile.Tests
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsToggleItemView = LoadText(SettingsToggleItemViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string styles = LoadText(StylesResourcePath);
 
             Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsToggleItemView"));
@@ -2322,6 +2323,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultSwitchStyleResourceKey = \"M3Switch\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DetailTextProperty", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailTextStyleResourceKey = \"M3CardSupportingBlock\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("SupportingTextOpacityAnimationName = \"M3SettingsToggleSupportingTextOpacity\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DetailTextOpacityAnimationName = \"M3SettingsToggleDetailTextOpacity\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("OnSupportingTextVisibilityPropertyChanged", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("OnDetailTextVisibilityPropertyChanged", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSupportingTextVisibility", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteDetailTextVisibility", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_supportingText.IsVisible = IsSupportingTextVisible", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_detailText.IsVisible = IsDetailTextVisible", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("new Binding(nameof(IsToggled), source: this, mode: BindingMode.TwoWay)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("_toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", settingsToggleItemView, StringComparison.Ordinal);

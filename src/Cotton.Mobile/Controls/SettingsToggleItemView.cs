@@ -15,6 +15,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultSwitchStyleResourceKey = "M3Switch";
         private const string DefaultTextStackStyleResourceKey = "M3SettingsDenseStack";
         private const string DefaultTextStyleResourceKey = "M3LabelLargeLine";
+        private const string DetailTextOpacityAnimationName = "M3SettingsToggleDetailTextOpacity";
+        private const string SupportingTextOpacityAnimationName = "M3SettingsToggleSupportingTextOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -28,28 +30,28 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(SettingsToggleItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsSupportingTextVisibleProperty = BindableProperty.Create(
             nameof(IsSupportingTextVisible),
             typeof(bool),
             typeof(SettingsToggleItemView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty DetailTextProperty = BindableProperty.Create(
             nameof(DetailText),
             typeof(string),
             typeof(SettingsToggleItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsDetailTextVisibleProperty = BindableProperty.Create(
             nameof(IsDetailTextVisible),
             typeof(bool),
             typeof(SettingsToggleItemView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
@@ -145,6 +147,8 @@ namespace Cotton.Mobile.Controls
         private readonly TouchSurfaceView _touchSurface;
         private readonly Command _toggleCommand;
         private readonly ToggleSwitch _toggleSwitch;
+        private bool _hasAppliedDetailTextVisibility;
+        private bool _hasAppliedSupportingTextVisibility;
 
         public SettingsToggleItemView()
         {
@@ -201,7 +205,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
         }
 
         public string Text
@@ -313,14 +317,32 @@ namespace Cotton.Mobile.Controls
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
                 _toggleCommand.ChangeCanExecute();
-                UpdateVisualState();
+                UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
             }
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsToggleItemView view = (SettingsToggleItemView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
+        }
+
+        private static void OnSupportingTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsToggleItemView view = (SettingsToggleItemView)bindable;
+            view.UpdateVisualState(animateSupportingTextVisibility: true, animateDetailTextVisibility: false);
+        }
+
+        private static void OnDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsToggleItemView view = (SettingsToggleItemView)bindable;
+            view.UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: true);
         }
 
         private bool CanToggle()
@@ -333,7 +355,7 @@ namespace Cotton.Mobile.Controls
             IsToggled = !IsToggled;
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateSupportingTextVisibility, bool animateDetailTextVisibility)
         {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
@@ -373,9 +395,9 @@ namespace Cotton.Mobile.Controls
             _leadingIcon.IsVisible = isLeadingIconVisible;
             _text.Text = text;
             _supportingText.Text = supportingText;
-            _supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+            UpdateSupportingTextVisibility(supportingText, animateSupportingTextVisibility);
             _detailText.Text = detailText;
-            _detailText.IsVisible = IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
+            UpdateDetailTextVisibility(detailText, animateDetailTextVisibility);
             _toggleSwitch.IsEnabled = IsEnabled;
             _touchSurface.TapCommand = IsEnabled ? _toggleCommand : null;
             _touchSurface.IsVisible = IsEnabled;
@@ -385,6 +407,90 @@ namespace Cotton.Mobile.Controls
 
             SemanticProperties.SetDescription(_container, semanticDescription);
             SemanticProperties.SetDescription(_toggleSwitch, toggleSemanticDescription);
+        }
+
+        private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
+        {
+            bool isSupportingTextVisible = IsSupportingTextActuallyVisible(supportingText);
+            bool shouldAnimate = animateSupportingTextVisibility && _hasAppliedSupportingTextVisibility;
+            double targetOpacity = isSupportingTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isSupportingTextVisible)
+            {
+                _supportingText.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _supportingText,
+                _supportingText.Opacity,
+                targetOpacity,
+                duration,
+                SupportingTextOpacityAnimationName,
+                shouldAnimate,
+                opacity => _supportingText.Opacity = opacity,
+                CompleteSupportingTextVisibility);
+            _hasAppliedSupportingTextVisibility = true;
+        }
+
+        private void UpdateDetailTextVisibility(string detailText, bool animateDetailTextVisibility)
+        {
+            bool isDetailTextVisible = IsDetailTextActuallyVisible(detailText);
+            bool shouldAnimate = animateDetailTextVisibility && _hasAppliedDetailTextVisibility;
+            double targetOpacity = isDetailTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailTextVisible)
+            {
+                _detailText.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _detailText,
+                _detailText.Opacity,
+                targetOpacity,
+                duration,
+                DetailTextOpacityAnimationName,
+                shouldAnimate,
+                opacity => _detailText.Opacity = opacity,
+                CompleteDetailTextVisibility);
+            _hasAppliedDetailTextVisibility = true;
+        }
+
+        private void CompleteSupportingTextVisibility()
+        {
+            if (IsSupportingTextActuallyVisible(SupportingText ?? string.Empty))
+            {
+                _supportingText.IsVisible = true;
+                return;
+            }
+
+            _supportingText.IsVisible = false;
+        }
+
+        private void CompleteDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(DetailText ?? string.Empty))
+            {
+                _detailText.IsVisible = true;
+                return;
+            }
+
+            _detailText.IsVisible = false;
+        }
+
+        private bool IsSupportingTextActuallyVisible(string supportingText)
+        {
+            return IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+        }
+
+        private bool IsDetailTextActuallyVisible(string detailText)
+        {
+            return IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

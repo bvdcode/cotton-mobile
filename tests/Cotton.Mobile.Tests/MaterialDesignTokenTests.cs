@@ -11,6 +11,11 @@ namespace Cotton.Mobile.Tests
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
+        private const string MainActivityPath = "src/Cotton.Mobile/Platforms/Android/MainActivity.cs";
+        private const string AndroidLightColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/colors.xml";
+        private const string AndroidDarkColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/colors.xml";
+        private const string AndroidLightStylesPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/styles.xml";
+        private const string AndroidDarkStylesPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/styles.xml";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
@@ -122,6 +127,49 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> switchSetters = GetStyleSetters(styles, "M3Switch");
 
             Assert.Equal("{StaticResource TouchTarget}", switchSetters["TouchTargetSize"]);
+        }
+
+        [Fact]
+        public void Android_system_bars_apply_theme_appearance_after_r()
+        {
+            string mainActivity = LoadText(MainActivityPath);
+            string lightColors = LoadText(AndroidLightColorsPath);
+            string darkColors = LoadText(AndroidDarkColorsPath);
+            string lightStyles = LoadText(AndroidLightStylesPath);
+            string darkStyles = LoadText(AndroidDarkStylesPath);
+
+            Assert.Contains("using AndroidX.Core.View;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Resource.Color.cotton_status_bar", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("private Android.Views.View? _statusBarScrim;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("WindowCompat.SetDecorFitsSystemWindows(Window, true);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Window.SetStatusBarColor(statusBarColor);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ApplyStatusBarScrim(statusBarColor);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Window.SetNavigationBarColor(navigationBarColor);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("new FrameLayout.LayoutParams(", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("GravityFlags.Top", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Resources.GetIdentifier(\"status_bar_height\", \"dimen\", \"android\")", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Android.Views.View decorView = Window.DecorView;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("if (compatInsetsController is not null)", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("bool useLightStatusBars = false;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("bool useLightNavigationBars = !isNightMode;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("compatInsetsController.AppearanceLightStatusBars = useLightStatusBars;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("compatInsetsController.AppearanceLightNavigationBars = useLightNavigationBars;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("decorView.WindowInsetsController?.SetSystemBarsAppearance(appearance, mask);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("decorView.SystemUiFlags = flags;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_status_bar\">#090B0A</color>", lightColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_status_bar\">#090B0A</color>", darkColors, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_status_bar</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_status_bar</item>", darkStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowLightStatusBar\">false</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowLightStatusBar\">false</item>", darkStyles, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);\n                return;",
+                mainActivity,
+                StringComparison.Ordinal);
         }
 
         [Fact]

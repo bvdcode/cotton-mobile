@@ -8,6 +8,8 @@ using Android.Content.Res;
 using Android.OS;
 using Android.Util;
 using Android.Views;
+using Android.Widget;
+using AndroidX.Core.View;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,6 +22,7 @@ namespace Cotton.Mobile
     {
         private const string ShareIntentLogTag = "CottonShare";
         private const string NotificationIntentLogTag = "CottonNotification";
+        private Android.Views.View? _statusBarScrim;
 
         protected override void OnCreate(Bundle? savedInstanceState)
         {
@@ -228,33 +231,100 @@ namespace Cotton.Mobile
             }
 
 #pragma warning disable CA1416, CA1422
-            Android.Graphics.Color systemBarColor = Resources.GetColor(Resource.Color.cotton_surface, Theme);
-            Window.SetStatusBarColor(systemBarColor);
-            Window.SetNavigationBarColor(systemBarColor);
+            Android.Graphics.Color statusBarColor = Resources.GetColor(Resource.Color.cotton_status_bar, Theme);
+            Android.Graphics.Color navigationBarColor = Resources.GetColor(Resource.Color.cotton_surface, Theme);
+            Android.Views.View decorView = Window.DecorView;
+            WindowCompat.SetDecorFitsSystemWindows(Window, true);
+            Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
+            Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
+            Window.SetStatusBarColor(statusBarColor);
+            Window.SetNavigationBarColor(navigationBarColor);
+            ApplyStatusBarScrim(statusBarColor);
             if (Build.VERSION.SdkInt >= BuildVersionCodes.P)
             {
-                Window.NavigationBarDividerColor = systemBarColor;
+                Window.NavigationBarDividerColor = navigationBarColor;
             }
 
             bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
+            bool useLightStatusBars = false;
+            bool useLightNavigationBars = !isNightMode;
+            WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);
+            if (compatInsetsController is not null)
+            {
+                compatInsetsController.AppearanceLightStatusBars = useLightStatusBars;
+                compatInsetsController.AppearanceLightNavigationBars = useLightNavigationBars;
+            }
+
             if (Build.VERSION.SdkInt >= BuildVersionCodes.R)
             {
                 int mask = (int)(
                     WindowInsetsControllerAppearance.LightStatusBars
                     | WindowInsetsControllerAppearance.LightNavigationBars);
-                int appearance = isNightMode ? (int)WindowInsetsControllerAppearance.None : mask;
+                int appearance = 0;
+                if (useLightStatusBars)
+                {
+                    appearance |= (int)WindowInsetsControllerAppearance.LightStatusBars;
+                }
+
+                if (useLightNavigationBars)
+                {
+                    appearance |= (int)WindowInsetsControllerAppearance.LightNavigationBars;
+                }
+
                 Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);
-                return;
+                decorView.WindowInsetsController?.SetSystemBarsAppearance(appearance, mask);
             }
 
-            SystemUiFlags flags = isNightMode ? 0 : SystemUiFlags.LightStatusBar;
-            if (!isNightMode && Build.VERSION.SdkInt >= BuildVersionCodes.O)
+            SystemUiFlags flags = useLightStatusBars ? SystemUiFlags.LightStatusBar : 0;
+            if (useLightNavigationBars && Build.VERSION.SdkInt >= BuildVersionCodes.O)
             {
                 flags |= SystemUiFlags.LightNavigationBar;
             }
 
-            Window.DecorView.SystemUiFlags = flags;
+            decorView.SystemUiFlags = flags;
 #pragma warning restore CA1416, CA1422
+        }
+
+        private void ApplyStatusBarScrim(Android.Graphics.Color statusBarColor)
+        {
+            if (Window?.DecorView is not ViewGroup decorView || Resources is null)
+            {
+                return;
+            }
+
+            int statusBarHeight = GetStatusBarHeight();
+            if (statusBarHeight <= 0)
+            {
+                return;
+            }
+
+            if (_statusBarScrim is null)
+            {
+                _statusBarScrim = new Android.Views.View(this)
+                {
+                    Clickable = false,
+                    Focusable = false,
+                };
+                decorView.AddView(_statusBarScrim);
+            }
+
+            _statusBarScrim.SetBackgroundColor(statusBarColor);
+            _statusBarScrim.LayoutParameters = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MatchParent,
+                statusBarHeight,
+                GravityFlags.Top);
+            _statusBarScrim.BringToFront();
+        }
+
+        private int GetStatusBarHeight()
+        {
+            if (Resources is null)
+            {
+                return 0;
+            }
+
+            int resourceId = Resources.GetIdentifier("status_bar_height", "dimen", "android");
+            return resourceId <= 0 ? 0 : Resources.GetDimensionPixelSize(resourceId);
         }
     }
 }

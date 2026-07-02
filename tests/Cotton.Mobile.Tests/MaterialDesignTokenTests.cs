@@ -1275,7 +1275,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
             Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 accountButtonSetters["TextColor"]);
             Assert.Equal("Bold", accountButtonSetters["TextFontAttributes"]);
             Assert.Contains("TextFontAttributesProperty", initialsButton, StringComparison.Ordinal);
@@ -2102,13 +2102,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultLocalChipLabelStyleResourceKey = \"M3LocalCopyChipLabel\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 localCopyChipSetters["Stroke"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 localCopyChipLabelSetters["TextColor"]);
             Assert.DoesNotContain("M3AccentChipLabel", type.ToString(), StringComparison.Ordinal);
             Assert.DoesNotContain("M3AccentOutlineChip", styles.ToString() + type.ToString() + fileTileMetadataView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3Accent", styles.ToString() + type, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LocalCopyChip}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 

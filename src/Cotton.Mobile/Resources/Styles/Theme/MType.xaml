@@ -267,7 +267,7 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3LocalCopyChipLabel">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="FontSize" Value="{StaticResource M3CompactChipLabelFontSize}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="LineHeight" Value="{StaticResource M3LabelSmallLineHeight}" />

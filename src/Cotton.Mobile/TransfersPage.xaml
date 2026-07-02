@@ -36,10 +36,9 @@
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                 IsVisible="{Binding IsListVisible}"
-                                 BindableLayout.ItemsSource="{Binding Items}">
-                <BindableLayout.ItemTemplate>
+            <controls:StackedItemsView IsVisible="{Binding IsListVisible}"
+                                       ItemsSource="{Binding Items}">
+                <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonTransferListItem">
                         <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
                                                    LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
@@ -54,8 +53,8 @@
                                                            IsErrorTextVisible="{Binding IsFailureVisible}" />
                         </controls:MetadataCardView>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </controls:StackedItemsView.ItemTemplate>
+            </controls:StackedItemsView>
         </controls:ScreenScrollBodyView>
     </controls:ScreenShellView>
 </ContentPage>

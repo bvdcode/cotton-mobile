@@ -43,10 +43,9 @@
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No subfolders here" />
 
-            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                 IsVisible="{Binding IsListVisible}"
-                                 BindableLayout.ItemsSource="{Binding Folders}">
-                <BindableLayout.ItemTemplate>
+            <controls:StackedItemsView IsVisible="{Binding IsListVisible}"
+                                       ItemsSource="{Binding Folders}">
+                <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
                         <controls:ContentCardView>
                             <controls:ActionListItemView Text="{Binding DisplayName}"
@@ -60,8 +59,8 @@
                                                          SemanticDescription="{Binding DisplayName, StringFormat='Open {0}'}" />
                         </controls:ContentCardView>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </controls:StackedItemsView.ItemTemplate>
+            </controls:StackedItemsView>
         </controls:ScreenScrollBodyView>
     </controls:ScreenShellView>
 </ContentPage>

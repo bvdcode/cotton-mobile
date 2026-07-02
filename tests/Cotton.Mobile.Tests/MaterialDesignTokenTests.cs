@@ -62,6 +62,7 @@ namespace Cotton.Mobile.Tests
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
         private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
+        private const string StackedItemsViewPath = "src/Cotton.Mobile/Controls/StackedItemsView.cs";
         private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
@@ -955,6 +956,36 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("Style=\"{StaticResource M3InlineMetadataGrid}\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", page, StringComparison.Ordinal);
             }
+        }
+
+        [Fact]
+        public void Secondary_feed_lists_use_reusable_stacked_items_control()
+        {
+            string activityFeedPage = LoadText(ActivityFeedPagePath);
+            string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string stackedItemsView = LoadText(StackedItemsViewPath);
+            string transfersPage = LoadText(TransfersPagePath);
+
+            string combinedPages = activityFeedPage + captureDestinationPickerPage + captureInboxPage + transfersPage;
+
+            Assert.Equal(4, CountOccurrences(combinedPages, "<controls:StackedItemsView IsVisible=\"{Binding IsListVisible}\""));
+            Assert.Contains("ItemsSource=\"{Binding Items}\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding Items}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding Items}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding Folders}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedItemsView.ItemTemplate>", combinedPages, StringComparison.Ordinal);
+            Assert.Contains("public class StackedItemsView", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("using System.Collections;", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("ItemsSourceProperty", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("ItemTemplateProperty", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKeyProperty", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("_stack.SetDynamicResource(StyleProperty, stackStyleResourceKey)", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("BindableLayout.SetItemsSource(_stack, ItemsSource)", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("BindableLayout.SetItemTemplate(_stack, ItemTemplate)", stackedItemsView, StringComparison.Ordinal);
+            Assert.DoesNotContain("BindableLayout.ItemsSource", combinedPages, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\"\n                                 IsVisible=\"{Binding IsListVisible}\"", combinedPages, StringComparison.Ordinal);
         }
 
         [Fact]

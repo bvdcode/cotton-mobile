@@ -62,7 +62,7 @@ namespace Cotton.Mobile.Controls
                 Keyboard = Keyboard.Url,
                 ReturnType = ReturnType.Go,
                 ClearButtonVisibility = ClearButtonVisibility.WhileEditing,
-                SemanticHint = "Cotton Cloud server URL",
+                SemanticHint = "Cotton Cloud address",
             };
             _urlField.SetBinding(OutlinedInputField.TextProperty, new Binding(nameof(InstanceUrl), BindingMode.TwoWay, source: this));
 

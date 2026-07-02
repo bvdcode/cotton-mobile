@@ -441,6 +441,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Auth_surface_uses_compact_title_and_roomy_panel_tokens()
+        {
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            string spacing = LoadText(SpacingResourcePath);
+
+            XElement authTitleStyle = GetStyleByKey(styles, "M3AuthTitle");
+            IReadOnlyDictionary<string, string> authTitleSetters = GetStyleSetters(styles, "M3AuthTitle");
+
+            Assert.Equal("{StaticResource M3TitleLarge}", (string?)authTitleStyle.Attribute("BasedOn"));
+            Assert.Equal("Bold", authTitleSetters["FontAttributes"]);
+            Assert.Equal("1", authTitleSetters["MaxLines"]);
+            Assert.Equal("TailTruncation", authTitleSetters["LineBreakMode"]);
+            Assert.Equal("Center", authTitleSetters["VerticalOptions"]);
+            Assert.Contains("<Thickness x:Key=\"M3AuthPanelPadding\">20</Thickness>", spacing, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Thickness x:Key=\"M3AuthPanelPadding\">16</Thickness>", spacing, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Auth_sign_in_panel_uses_reusable_material_control()
         {
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
@@ -459,7 +477,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultButtonStyleResourceKey = \"M3AuthFilledButton\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("SemanticHint = \"Cotton Cloud server URL\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Text = \"Connect\"", authSignInPanelView, StringComparison.Ordinal);

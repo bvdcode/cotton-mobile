@@ -44,6 +44,7 @@ namespace Cotton.Mobile.Tests
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
+        private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
@@ -458,6 +459,31 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Top_app_bar_actions_use_reusable_material_control()
+        {
+            string topAppBar = LoadText(TopAppBarPath);
+
+            Assert.Equal(1, CountOccurrences(topAppBar, "<controls:IconButton IconData="));
+            Assert.Contains("<controls:ActionClusterView Grid.Column=\"2\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("ClusterStyleResourceKey=\"M3TopAppBarActionCluster\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionIconData=\"{Binding Source={x:Reference Root}, Path=PrimaryIconData}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding Source={x:Reference Root}, Path=PrimaryCommand}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("IsPrimaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding Source={x:Reference Root}, Path=SecondaryCommand}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("IsSecondaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsSecondaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding Source={x:Reference Root}, Path=TertiaryCommand}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("IsTertiaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("TargetType=\"controls:ActionClusterView\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("Property=\"PrimaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("Property=\"SecondaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("Property=\"TertiaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<HorizontalStackLayout Grid.Column=\"2\"", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=PrimaryDescription}\"", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=SecondaryDescription}\"", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=TertiaryDescription}\"", topAppBar, StringComparison.Ordinal);
         }
 
         [Fact]

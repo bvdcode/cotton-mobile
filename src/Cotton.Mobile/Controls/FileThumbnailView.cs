@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
+
 namespace Cotton.Mobile.Controls
 {
     public class FileThumbnailView : ContentView
@@ -9,7 +11,10 @@ namespace Cotton.Mobile.Controls
         private const string DefaultBadgeStyleResourceKey = "M3FileTileOverlayChip";
         private const string DefaultSelectionMarkStyleResourceKey = "M3FileListSelectionMark";
         private const string DefaultSurfaceStyleResourceKey = "M3FileListThumbnailSurface";
+        private const string FolderIconOpacityAnimationName = "M3FileThumbnailFolderOpacity";
         private const string LoadingIndicatorOpacityAnimationName = "M3FileThumbnailLoadingOpacity";
+        private const string PlaceholderOpacityAnimationName = "M3FileThumbnailPlaceholderOpacity";
+        private const string PreviewImageOpacityAnimationName = "M3FileThumbnailPreviewOpacity";
         private const string SelectionMarkOpacityAnimationName = "M3FileSelectionMarkOpacity";
         private const string SelectionMarkScaleAnimationName = "M3FileSelectionMarkScale";
 
@@ -18,21 +23,21 @@ namespace Cotton.Mobile.Controls
             typeof(ImageSource),
             typeof(FileThumbnailView),
             default(ImageSource),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPreviewImageVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsPreviewImageVisibleProperty = BindableProperty.Create(
             nameof(IsPreviewImageVisible),
             typeof(bool),
             typeof(FileThumbnailView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPreviewImageVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsFolderThumbnailVisibleProperty = BindableProperty.Create(
             nameof(IsFolderThumbnailVisible),
             typeof(bool),
             typeof(FileThumbnailView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnFolderIconVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsLoadingProperty = BindableProperty.Create(
             nameof(IsLoading),
@@ -46,14 +51,14 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(FileThumbnailView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPlaceholderVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsPlaceholderTextVisibleProperty = BindableProperty.Create(
             nameof(IsPlaceholderTextVisible),
             typeof(bool),
             typeof(FileThumbnailView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPlaceholderVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(
             nameof(IsSelected),
@@ -119,7 +124,10 @@ namespace Cotton.Mobile.Controls
         private readonly Border _selectionMark;
         private readonly IconView _selectionMarkIcon;
         private readonly Border _surface;
+        private bool _hasAppliedFolderIconVisibility;
         private bool _hasAppliedLoadingState;
+        private bool _hasAppliedPlaceholderVisibility;
+        private bool _hasAppliedPreviewImageVisibility;
         private bool _hasAppliedSelectionState;
 
         public FileThumbnailView()
@@ -273,27 +281,94 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileThumbnailView view = (FileThumbnailView)bindable;
-            view.UpdateVisualState(animateSelection: false);
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: false,
+                animateLoading: false,
+                animateSelection: false);
+        }
+
+        private static void OnPreviewImageVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileThumbnailView view = (FileThumbnailView)bindable;
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: true,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: false,
+                animateLoading: false,
+                animateSelection: false);
+        }
+
+        private static void OnFolderIconVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileThumbnailView view = (FileThumbnailView)bindable;
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: true,
+                animatePlaceholderVisibility: false,
+                animateLoading: false,
+                animateSelection: false);
+        }
+
+        private static void OnPlaceholderVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileThumbnailView view = (FileThumbnailView)bindable;
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: true,
+                animateLoading: false,
+                animateSelection: false);
         }
 
         private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileThumbnailView view = (FileThumbnailView)bindable;
-            view.UpdateVisualState(animateSelection: true);
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: false,
+                animateLoading: false,
+                animateSelection: true);
         }
 
         private static void OnLoadingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileThumbnailView view = (FileThumbnailView)bindable;
-            view.UpdateVisualState(animateLoading: true, animateSelection: false);
+            view.UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: false,
+                animateLoading: true,
+                animateSelection: false);
         }
 
         private void UpdateVisualState(bool animateSelection)
         {
-            UpdateVisualState(animateLoading: false, animateSelection);
+            UpdateVisualState(
+                animatePreviewImageVisibility: false,
+                animateFolderIconVisibility: false,
+                animatePlaceholderVisibility: false,
+                animateLoading: false,
+                animateSelection);
         }
 
-        private void UpdateVisualState(bool animateLoading, bool animateSelection)
+        private void UpdateVisualState(
+            bool animatePreviewImageVisibility,
+            bool animateFolderIconVisibility,
+            bool animatePlaceholderVisibility,
+            bool animateLoading,
+            bool animateSelection)
         {
             string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
                 ? DefaultSurfaceStyleResourceKey
@@ -315,11 +390,11 @@ namespace Cotton.Mobile.Controls
             _selectionMark.SetDynamicResource(StyleProperty, selectionMarkStyleResourceKey);
             _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
             _image.Source = ThumbnailSource;
-            _image.IsVisible = IsPreviewImageVisible;
-            _folderIcon.IsVisible = IsFolderThumbnailVisible;
+            UpdatePreviewImageVisibility(animatePreviewImageVisibility);
+            UpdateFolderIconVisibility(animateFolderIconVisibility);
             UpdateLoadingState(animateLoading);
             _placeholder.Text = PlaceholderText ?? string.Empty;
-            _placeholder.IsVisible = IsPlaceholderTextVisible;
+            UpdatePlaceholderVisibility(animatePlaceholderVisibility);
             _selectionMark.IsVisible = true;
             UpdateSelectionState(animateSelection);
             _badge.Text = BadgeText ?? string.Empty;
@@ -334,6 +409,108 @@ namespace Cotton.Mobile.Controls
             }
 
             _folderIcon.ClearValue(IconView.IconSizeProperty);
+        }
+
+        private void UpdatePreviewImageVisibility(bool animatePreviewImageVisibility)
+        {
+            UpdateThumbnailLayerVisibility(
+                _image,
+                IsPreviewImageVisible,
+                animatePreviewImageVisibility,
+                ref _hasAppliedPreviewImageVisibility,
+                PreviewImageOpacityAnimationName,
+                CompletePreviewImageVisibility);
+        }
+
+        private void UpdateFolderIconVisibility(bool animateFolderIconVisibility)
+        {
+            UpdateThumbnailLayerVisibility(
+                _folderIcon,
+                IsFolderThumbnailVisible,
+                animateFolderIconVisibility,
+                ref _hasAppliedFolderIconVisibility,
+                FolderIconOpacityAnimationName,
+                CompleteFolderIconVisibility);
+        }
+
+        private void UpdatePlaceholderVisibility(bool animatePlaceholderVisibility)
+        {
+            UpdateThumbnailLayerVisibility(
+                _placeholder,
+                IsPlaceholderActuallyVisible(),
+                animatePlaceholderVisibility,
+                ref _hasAppliedPlaceholderVisibility,
+                PlaceholderOpacityAnimationName,
+                CompletePlaceholderVisibility);
+        }
+
+        private void UpdateThumbnailLayerVisibility(
+            VisualElement layer,
+            bool isLayerVisible,
+            bool animateLayerVisibility,
+            ref bool hasAppliedLayerVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool shouldAnimate = animateLayerVisibility && hasAppliedLayerVisibility;
+            double targetOpacity = isLayerVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isLayerVisible)
+            {
+                layer.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                layer,
+                layer.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => layer.Opacity = opacity,
+                completeVisibility);
+            hasAppliedLayerVisibility = true;
+        }
+
+        private void CompletePreviewImageVisibility()
+        {
+            if (IsPreviewImageVisible)
+            {
+                _image.IsVisible = true;
+                return;
+            }
+
+            _image.IsVisible = false;
+        }
+
+        private void CompleteFolderIconVisibility()
+        {
+            if (IsFolderThumbnailVisible)
+            {
+                _folderIcon.IsVisible = true;
+                return;
+            }
+
+            _folderIcon.IsVisible = false;
+        }
+
+        private void CompletePlaceholderVisibility()
+        {
+            if (IsPlaceholderActuallyVisible())
+            {
+                _placeholder.IsVisible = true;
+                return;
+            }
+
+            _placeholder.IsVisible = false;
+        }
+
+        private bool IsPlaceholderActuallyVisible()
+        {
+            return IsPlaceholderTextVisible && !string.IsNullOrWhiteSpace(PlaceholderText);
         }
 
         private void UpdateLoadingState(bool animateLoading)

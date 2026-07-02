@@ -539,11 +539,18 @@ namespace Cotton.Mobile.Tests
         public void Backup_setup_card_actions_use_reusable_material_control()
         {
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string settingsActionHeaderCardView = LoadText(SettingsActionHeaderCardViewPath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
 
-            Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
-            Assert.Equal(2, CountOccurrences(backupSetupPage, "ClusterStyleResourceKey=\"M3InlineActionCluster\""));
-            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView.TrailingContent>\n"));
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:SettingsActionHeaderCardView LeadingIconData"));
+            Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
+            Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3InlineActionCluster\"", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailTextProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("TertiaryDetailTextProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("QuaternaryDetailTextProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("TapCommandProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("_header.TapCommand = TapCommand", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("_header.IsTapEnabled = IsTapEnabled", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("TrailingContentProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", settingsSectionHeaderView, StringComparison.Ordinal);
@@ -552,12 +559,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_trailingContentHost.Content = trailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailTextStyleResourceKey=\"M3CardSupportingLine\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryDetailTextStyleResourceKey=\"M3CardSupportingStrongLine\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingStrongBlock\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "IsTapEnabled=\"True\""));
             Assert.Contains("PrimaryActionCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ClusterStyleResourceKey=\"M3InlineActionCluster\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsSectionHeaderView.TrailingContent>", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:TouchSurfaceView", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto,Auto\"", backupSetupPage, StringComparison.Ordinal);
@@ -1266,7 +1280,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:SettingsCardView"));
             Assert.Equal(5, CountOccurrences(securitySettingsPage, "<controls:SettingsCardView"));
             Assert.Equal(4, CountOccurrences(storagePage, "<controls:SettingsCardView"));
-            Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsCardView"));
+            Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsCardView"));
             Assert.Contains("Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"Free up storage\"", storagePage, StringComparison.Ordinal);

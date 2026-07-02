@@ -41,11 +41,53 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty SecondaryDetailTextProperty = BindableProperty.Create(
+            nameof(SecondaryDetailText),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryDetailTextProperty = BindableProperty.Create(
+            nameof(TertiaryDetailText),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryDetailTextProperty = BindableProperty.Create(
+            nameof(QuaternaryDetailText),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty PrimaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(PrimaryDetailTextStyleResourceKey),
             typeof(string),
             typeof(SettingsActionHeaderCardView),
             DefaultPrimaryDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty SecondaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(SecondaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TertiaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(QuaternaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsActionHeaderCardView),
+            string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty CardStyleResourceKeyProperty = BindableProperty.Create(
@@ -60,6 +102,25 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(SettingsActionHeaderCardView),
             DefaultActionClusterStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TapCommandProperty = BindableProperty.Create(
+            nameof(TapCommand),
+            typeof(ICommand),
+            typeof(SettingsActionHeaderCardView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TapCommandParameterProperty = BindableProperty.Create(
+            nameof(TapCommandParameter),
+            typeof(object),
+            typeof(SettingsActionHeaderCardView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTapEnabledProperty = BindableProperty.Create(
+            nameof(IsTapEnabled),
+            typeof(bool),
+            typeof(SettingsActionHeaderCardView),
+            false,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty PrimaryActionIconDataProperty = BindableProperty.Create(
@@ -118,7 +179,6 @@ namespace Cotton.Mobile.Controls
             _actions = new ActionClusterView();
             _header = new SettingsSectionHeaderView
             {
-                IsTapEnabled = false,
                 TrailingContent = _actions,
             };
             _card = new ContentCardView
@@ -154,10 +214,46 @@ namespace Cotton.Mobile.Controls
             set => SetValue(PrimaryDetailTextProperty, value);
         }
 
+        public string SecondaryDetailText
+        {
+            get => (string)GetValue(SecondaryDetailTextProperty);
+            set => SetValue(SecondaryDetailTextProperty, value);
+        }
+
+        public string TertiaryDetailText
+        {
+            get => (string)GetValue(TertiaryDetailTextProperty);
+            set => SetValue(TertiaryDetailTextProperty, value);
+        }
+
+        public string QuaternaryDetailText
+        {
+            get => (string)GetValue(QuaternaryDetailTextProperty);
+            set => SetValue(QuaternaryDetailTextProperty, value);
+        }
+
         public string PrimaryDetailTextStyleResourceKey
         {
             get => (string)GetValue(PrimaryDetailTextStyleResourceKeyProperty);
             set => SetValue(PrimaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string SecondaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(SecondaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(SecondaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string TertiaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(TertiaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(TertiaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string QuaternaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(QuaternaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(QuaternaryDetailTextStyleResourceKeyProperty, value);
         }
 
         public string CardStyleResourceKey
@@ -170,6 +266,24 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(ActionClusterStyleResourceKeyProperty);
             set => SetValue(ActionClusterStyleResourceKeyProperty, value);
+        }
+
+        public ICommand? TapCommand
+        {
+            get => (ICommand?)GetValue(TapCommandProperty);
+            set => SetValue(TapCommandProperty, value);
+        }
+
+        public object? TapCommandParameter
+        {
+            get => GetValue(TapCommandParameterProperty);
+            set => SetValue(TapCommandParameterProperty, value);
+        }
+
+        public bool IsTapEnabled
+        {
+            get => (bool)GetValue(IsTapEnabledProperty);
+            set => SetValue(IsTapEnabledProperty, value);
         }
 
         public Geometry? PrimaryActionIconData
@@ -243,6 +357,15 @@ namespace Cotton.Mobile.Controls
             _header.Title = Title ?? string.Empty;
             _header.PrimaryDetailText = PrimaryDetailText ?? string.Empty;
             _header.PrimaryDetailTextStyleResourceKey = primaryDetailTextStyleResourceKey;
+            _header.SecondaryDetailText = SecondaryDetailText ?? string.Empty;
+            _header.SecondaryDetailTextStyleResourceKey = SecondaryDetailTextStyleResourceKey;
+            _header.TertiaryDetailText = TertiaryDetailText ?? string.Empty;
+            _header.TertiaryDetailTextStyleResourceKey = TertiaryDetailTextStyleResourceKey;
+            _header.QuaternaryDetailText = QuaternaryDetailText ?? string.Empty;
+            _header.QuaternaryDetailTextStyleResourceKey = QuaternaryDetailTextStyleResourceKey;
+            _header.TapCommand = TapCommand;
+            _header.TapCommandParameter = TapCommandParameter;
+            _header.IsTapEnabled = IsTapEnabled;
 
             _actions.ClusterStyleResourceKey = actionClusterStyleResourceKey;
             _actions.PrimaryActionIconData = PrimaryActionIconData;

@@ -24,25 +24,21 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <controls:SettingsCardView>
-                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Folder}"
-                                                    LeadingIconFrameStyleResourceKey="M3CardFolderThumbnailFrame"
-                                                    Title="Destination"
-                                                    PrimaryDetailText="{Binding DestinationText}"
-                                                    SecondaryDetailText="{Binding PolicySummaryText}"
-                                                    SecondaryDetailTextStyleResourceKey="M3CardSupportingLine"
-                                                    TertiaryDetailText="{Binding DestinationStorageEstimateTitle}"
-                                                    TertiaryDetailTextStyleResourceKey="M3CardSupportingStrongLine"
-                                                    QuaternaryDetailText="{Binding DestinationStorageEstimateText}"
-                                                    TapCommand="{Binding ChooseDestinationCommand}">
-                    <controls:SettingsSectionHeaderView.TrailingContent>
-                        <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
-                                                    PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
-                                                    PrimaryActionCommand="{Binding ChooseDestinationCommand}"
-                                                    PrimaryActionSemanticDescription="Choose backup destination" />
-                    </controls:SettingsSectionHeaderView.TrailingContent>
-                </controls:SettingsSectionHeaderView>
-            </controls:SettingsCardView>
+            <controls:SettingsActionHeaderCardView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                   LeadingIconFrameStyleResourceKey="M3CardFolderThumbnailFrame"
+                                                   Title="Destination"
+                                                   PrimaryDetailText="{Binding DestinationText}"
+                                                   PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
+                                                   SecondaryDetailText="{Binding PolicySummaryText}"
+                                                   SecondaryDetailTextStyleResourceKey="M3CardSupportingLine"
+                                                   TertiaryDetailText="{Binding DestinationStorageEstimateTitle}"
+                                                   TertiaryDetailTextStyleResourceKey="M3CardSupportingStrongLine"
+                                                   QuaternaryDetailText="{Binding DestinationStorageEstimateText}"
+                                                   IsTapEnabled="True"
+                                                   TapCommand="{Binding ChooseDestinationCommand}"
+                                                   PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
+                                                   PrimaryActionCommand="{Binding ChooseDestinationCommand}"
+                                                   PrimaryActionSemanticDescription="Choose backup destination" />
 
             <controls:SettingsCardView>
                 <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Image}"
@@ -60,22 +56,17 @@
                                              SemanticDescription="{Binding MediaAccessActionText}" />
             </controls:SettingsCardView>
 
-            <controls:SettingsCardView>
-                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Activity}"
-                                                    LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
-                                                    Title="{Binding HealthTitle}"
-                                                    PrimaryDetailText="{Binding HealthCountsText}"
-                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingStrongBlock"
-                                                    SecondaryDetailText="{Binding HealthStatusText}"
-                                                    TapCommand="{Binding QueueNowCommand}">
-                    <controls:SettingsSectionHeaderView.TrailingContent>
-                        <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
-                                                    PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
-                                                    PrimaryActionCommand="{Binding QueueNowCommand}"
-                                                    PrimaryActionSemanticDescription="Queue camera backup now" />
-                    </controls:SettingsSectionHeaderView.TrailingContent>
-                </controls:SettingsSectionHeaderView>
-            </controls:SettingsCardView>
+            <controls:SettingsActionHeaderCardView LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                                   LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
+                                                   Title="{Binding HealthTitle}"
+                                                   PrimaryDetailText="{Binding HealthCountsText}"
+                                                   PrimaryDetailTextStyleResourceKey="M3CardSupportingStrongBlock"
+                                                   SecondaryDetailText="{Binding HealthStatusText}"
+                                                   IsTapEnabled="True"
+                                                   TapCommand="{Binding QueueNowCommand}"
+                                                   PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                   PrimaryActionCommand="{Binding QueueNowCommand}"
+                                                   PrimaryActionSemanticDescription="Queue camera backup now" />
 
             <controls:SettingsCardView>
                 <controls:SettingsToggleItemView Text="Camera backup"

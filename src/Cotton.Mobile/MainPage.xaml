@@ -175,84 +175,21 @@
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"
                                    Style="{StaticResource M3BodyMedium}" />
 
-                            <Border IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
-                                    Style="{StaticResource M3FileStatusPanel}"
-                                    SemanticProperties.Description="{Binding Display.TransferActivityIndicator.AccessibilityText}">
-                                <Border.Triggers>
-                                    <DataTrigger TargetType="Border"
-                                                 Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
-                                                 Value="True">
-                                        <Setter Property="Style"
-                                                Value="{StaticResource M3FileErrorStatusPanel}" />
-                                    </DataTrigger>
-                                </Border.Triggers>
+                            <controls:FileStatusActionView IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
+                                                           Text="{Binding Display.TransferActivityIndicator.Text}"
+                                                           Details="{Binding Display.TransferActivityIndicator.Details}"
+                                                           AccessibilityText="{Binding Display.TransferActivityIndicator.AccessibilityText}"
+                                                           IconData="{x:Static controls:IconPathData.Transfer}"
+                                                           ErrorIconData="{x:Static controls:IconPathData.Error}"
+                                                           IsError="{Binding Display.TransferActivityIndicator.HasFailures}"
+                                                           Command="{Binding OpenTransfersCommand}" />
 
-                                <Grid ColumnDefinitions="Auto,*,*"
-                                      Style="{StaticResource M3FileStatusGrid}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Transfer}"
-                                                       Style="{StaticResource M3FileStatusIcon}">
-                                        <controls:IconView.Triggers>
-                                            <DataTrigger TargetType="controls:IconView"
-                                                         Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
-                                                         Value="True">
-                                                <Setter Property="IconData"
-                                                        Value="{x:Static controls:IconPathData.Error}" />
-                                                <Setter Property="Style"
-                                                        Value="{StaticResource M3FileErrorStatusIcon}" />
-                                            </DataTrigger>
-                                        </controls:IconView.Triggers>
-                                    </controls:IconView>
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Display.TransferActivityIndicator.Text}"
-                                           Style="{StaticResource M3FileStatusPrimaryText}">
-                                        <Label.Triggers>
-                                            <DataTrigger TargetType="Label"
-                                                         Binding="{Binding Display.TransferActivityIndicator.HasFailures}"
-                                                         Value="True">
-                                                <Setter Property="Style"
-                                                        Value="{StaticResource M3FileErrorStatusPrimaryText}" />
-                                            </DataTrigger>
-                                        </Label.Triggers>
-                                    </Label>
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding Display.TransferActivityIndicator.Details}"
-                                           Style="{StaticResource M3FileStatusMetaText}" />
-
-                                    <Grid Grid.ColumnSpan="3"
-                                          Style="{StaticResource M3ListItemTouchSurface}">
-                                        <Grid.Behaviors>
-                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenTransfersCommand}" />
-                                        </Grid.Behaviors>
-                                    </Grid>
-                                </Grid>
-                            </Border>
-
-                            <Border IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
-                                    Style="{StaticResource M3FileStatusPanel}"
-                                    SemanticProperties.Description="{Binding Display.BackupActivityIndicator.AccessibilityText}">
-                                <Grid ColumnDefinitions="Auto,*,*"
-                                      Style="{StaticResource M3FileStatusGrid}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Backup}"
-                                                       Style="{StaticResource M3FileStatusIcon}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Display.BackupActivityIndicator.Text}"
-                                           Style="{StaticResource M3FileStatusPrimaryText}" />
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding Display.BackupActivityIndicator.Details}"
-                                           Style="{StaticResource M3FileStatusMetaText}" />
-
-                                    <Grid Grid.ColumnSpan="3"
-                                          Style="{StaticResource M3ListItemTouchSurface}">
-                                        <Grid.Behaviors>
-                                            <behaviors:LongPressBehavior TapCommand="{Binding OpenBackupSetupCommand}" />
-                                        </Grid.Behaviors>
-                                    </Grid>
-                                </Grid>
-                            </Border>
+                            <controls:FileStatusActionView IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
+                                                           Text="{Binding Display.BackupActivityIndicator.Text}"
+                                                           Details="{Binding Display.BackupActivityIndicator.Details}"
+                                                           AccessibilityText="{Binding Display.BackupActivityIndicator.AccessibilityText}"
+                                                           IconData="{x:Static controls:IconPathData.Backup}"
+                                                           Command="{Binding OpenBackupSetupCommand}" />
 
                             <Border IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
                                     Style="{StaticResource M3FileStatusPanel}"

@@ -279,6 +279,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_status_action_rows_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
+            Assert.Contains("Command=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsError=\"{Binding Display.TransferActivityIndicator.HasFailures}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Command=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TapCommand=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TapCommand=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

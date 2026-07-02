@@ -810,6 +810,8 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3FileBrowserActionsContainer");
             IReadOnlyDictionary<string, string> actionClusterSetters =
                 GetStyleSetters(styles, "M3FileBrowserActionCluster");
+            IReadOnlyDictionary<string, string> accountButtonSetters =
+                GetStyleSetters(styles, "M3AccountInitialsButton");
 
             Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileBrowserTopBarView"));
             Assert.Contains("Title=\"{Binding Display.FilesTitle}\"", mainPage, StringComparison.Ordinal);
@@ -833,6 +835,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
             Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                accountButtonSetters["TextColor"]);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\"", mainPage, StringComparison.Ordinal);

@@ -62,6 +62,7 @@ namespace Cotton.Mobile.Tests
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
         private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
+        private const string StackedContentViewPath = "src/Cotton.Mobile/Controls/StackedContentView.cs";
         private const string StackedItemsViewPath = "src/Cotton.Mobile/Controls/StackedItemsView.cs";
         private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
@@ -1155,16 +1156,28 @@ namespace Cotton.Mobile.Tests
         {
             string diagnosticsPage = LoadText(DiagnosticsPagePath);
             string diagnosticsItemView = LoadText(DiagnosticsItemViewPath);
+            string stackedContentView = LoadText(StackedContentViewPath);
 
+            Assert.Contains("<controls:StackedItemsView ItemsSource=\"{Binding Sections}\"\n                                       StackStyleResourceKey=\"M3DiagnosticsSectionListStack\">", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedContentView>", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:StackedItemsView ItemsSource=\"{Binding Items}\"\n                                                           StackStyleResourceKey=\"M3DiagnosticsItemListStack\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSectionHeaderView Title=\"{Binding Title}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("IsTapEnabled=\"False\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DiagnosticsItemView LabelText=\"{Binding Label}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("ValueText=\"{Binding Value}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("public class StackedContentView", stackedContentView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", stackedContentView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _stack.Children", stackedContentView, StringComparison.Ordinal);
+            Assert.Contains("_stack.SetDynamicResource(StyleProperty, stackStyleResourceKey)", stackedContentView, StringComparison.Ordinal);
             Assert.Contains("public class DiagnosticsItemView", diagnosticsItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3DiagnosticsItemGrid\"", diagnosticsItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultLabelTextStyleResourceKey = \"M3CardSupporting\"", diagnosticsItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultValueTextStyleResourceKey = \"M3CardSupportingPrimaryBlock\"", diagnosticsItemView, StringComparison.Ordinal);
             Assert.Contains("M3DiagnosticsLabelColumnWidth", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("BindableLayout.ItemsSource", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3DiagnosticsSectionListStack}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3DiagnosticsItemListStack}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Title}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Style=\"{StaticResource M3DiagnosticsItemGrid}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Label}\"", diagnosticsPage, StringComparison.Ordinal);

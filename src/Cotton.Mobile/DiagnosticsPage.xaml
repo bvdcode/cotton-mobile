@@ -24,29 +24,29 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <VerticalStackLayout Style="{StaticResource M3DiagnosticsSectionListStack}"
-                                 BindableLayout.ItemsSource="{Binding Sections}">
-                <BindableLayout.ItemTemplate>
+            <controls:StackedItemsView ItemsSource="{Binding Sections}"
+                                       StackStyleResourceKey="M3DiagnosticsSectionListStack">
+                <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:DiagnosticsSectionViewModel">
                         <controls:ContentCardView>
-                            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
+                            <controls:StackedContentView>
                                 <controls:SettingsSectionHeaderView Title="{Binding Title}"
                                                                     IsTapEnabled="False" />
 
-                                <VerticalStackLayout Style="{StaticResource M3DiagnosticsItemListStack}"
-                                                     BindableLayout.ItemsSource="{Binding Items}">
-                                    <BindableLayout.ItemTemplate>
+                                <controls:StackedItemsView ItemsSource="{Binding Items}"
+                                                           StackStyleResourceKey="M3DiagnosticsItemListStack">
+                                    <controls:StackedItemsView.ItemTemplate>
                                         <DataTemplate x:DataType="viewModels:DiagnosticsItemViewModel">
                                             <controls:DiagnosticsItemView LabelText="{Binding Label}"
                                                                           ValueText="{Binding Value}" />
                                         </DataTemplate>
-                                    </BindableLayout.ItemTemplate>
-                                </VerticalStackLayout>
-                            </VerticalStackLayout>
+                                    </controls:StackedItemsView.ItemTemplate>
+                                </controls:StackedItemsView>
+                            </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </controls:StackedItemsView.ItemTemplate>
+            </controls:StackedItemsView>
         </controls:ScreenScrollBodyView>
     </controls:ScreenShellView>
 </ContentPage>

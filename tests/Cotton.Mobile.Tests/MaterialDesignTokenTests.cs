@@ -883,6 +883,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileBrowserTopBarView = LoadText(FileBrowserTopBarViewPath);
             string initialsButton = LoadText(Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"));
+            string interaction = LoadText(InteractionResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> actionsContainerSetters =
                 GetStyleSetters(styles, "M3FileBrowserActionsContainer");
@@ -911,6 +912,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsSearchActive ? IconPathData.Close : IconPathData.Search", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionsContainer.SetDynamicResource(StyleProperty, actionsContainerStyleResourceKey)", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("PathTextOpacityAnimationName = \"M3FileBrowserPathTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("StatusTextOpacityAnimationName = \"M3FileBrowserStatusTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("OnPathTextVisibilityPropertyChanged", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusTextVisibilityPropertyChanged", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("CompletePathTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
             Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
             Assert.Equal(
@@ -929,6 +939,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.ViewTiles}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TargetType=\"controls:ActionClusterView\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Property=\"PrimaryActionIconData\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_pathText.IsVisible = IsPathTextVisible", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_statusText.IsVisible = IsStatusTextVisible", fileBrowserTopBarView, StringComparison.Ordinal);
         }
 
         [Fact]

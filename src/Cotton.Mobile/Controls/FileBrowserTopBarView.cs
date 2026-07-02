@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Windows.Input;
 
 namespace Cotton.Mobile.Controls
@@ -14,6 +15,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultGridStyleResourceKey = "M3FileBrowserTopBar";
         private const string DefaultTitleStackStyleResourceKey = "M3FileBrowserTitleStack";
         private const string DefaultTitleTextStyleResourceKey = "M3BrowserTitleLine";
+        private const string PathTextOpacityAnimationName = "M3FileBrowserPathTextOpacity";
+        private const string StatusTextOpacityAnimationName = "M3FileBrowserStatusTextOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -27,28 +30,28 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(FileBrowserTopBarView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPathTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty StatusTextProperty = BindableProperty.Create(
             nameof(StatusText),
             typeof(string),
             typeof(FileBrowserTopBarView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnStatusTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsPathTextVisibleProperty = BindableProperty.Create(
             nameof(IsPathTextVisible),
             typeof(bool),
             typeof(FileBrowserTopBarView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPathTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsStatusTextVisibleProperty = BindableProperty.Create(
             nameof(IsStatusTextVisible),
             typeof(bool),
             typeof(FileBrowserTopBarView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnStatusTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty NavigateUpCommandProperty = BindableProperty.Create(
             nameof(NavigateUpCommand),
@@ -208,6 +211,8 @@ namespace Cotton.Mobile.Controls
         private readonly Label _titleText;
         private readonly VerticalStackLayout _titleStack;
         private readonly IconButton _upButton;
+        private bool _hasAppliedPathTextVisibility;
+        private bool _hasAppliedStatusTextVisibility;
 
         public FileBrowserTopBarView()
         {
@@ -258,7 +263,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _grid;
-            UpdateVisualState();
+            UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: false);
         }
 
         public string Title
@@ -426,10 +431,28 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnPathTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
+            view.UpdateVisualState(animatePathTextVisibility: true, animateStatusTextVisibility: false);
+        }
+
+        private static void OnStatusTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
+            view.UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animatePathTextVisibility, bool animateStatusTextVisibility)
         {
             string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string titleStackStyleResourceKey =
@@ -461,9 +484,9 @@ namespace Cotton.Mobile.Controls
 
             _titleText.Text = Title ?? string.Empty;
             _pathText.Text = PathText ?? string.Empty;
-            _pathText.IsVisible = IsPathTextVisible;
+            UpdatePathTextVisibility(animatePathTextVisibility);
             _statusText.Text = StatusText ?? string.Empty;
-            _statusText.IsVisible = IsStatusTextVisible;
+            UpdateStatusTextVisibility(animateStatusTextVisibility);
 
             _actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey;
             _actionCluster.PrimaryActionIconData = IsSearchActive ? IconPathData.Close : IconPathData.Search;
@@ -488,6 +511,91 @@ namespace Cotton.Mobile.Controls
             _accountButton.Command = AccountCommand;
             _accountButton.IsEnabled = IsAccountEnabled;
             SemanticProperties.SetDescription(_accountButton, "Account");
+        }
+
+        private void UpdatePathTextVisibility(bool animatePathTextVisibility)
+        {
+            UpdateTextVisibility(
+                _pathText,
+                IsPathTextActuallyVisible(),
+                animatePathTextVisibility,
+                ref _hasAppliedPathTextVisibility,
+                PathTextOpacityAnimationName,
+                CompletePathTextVisibility);
+        }
+
+        private void UpdateStatusTextVisibility(bool animateStatusTextVisibility)
+        {
+            UpdateTextVisibility(
+                _statusText,
+                IsStatusTextActuallyVisible(),
+                animateStatusTextVisibility,
+                ref _hasAppliedStatusTextVisibility,
+                StatusTextOpacityAnimationName,
+                CompleteStatusTextVisibility);
+        }
+
+        private void UpdateTextVisibility(
+            Label textLabel,
+            bool isTextVisible,
+            bool animateTextVisibility,
+            ref bool hasAppliedTextVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool shouldAnimate = animateTextVisibility && hasAppliedTextVisibility;
+            double targetOpacity = isTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isTextVisible)
+            {
+                textLabel.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                textLabel,
+                textLabel.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => textLabel.Opacity = opacity,
+                completeVisibility);
+            hasAppliedTextVisibility = true;
+        }
+
+        private void CompletePathTextVisibility()
+        {
+            if (IsPathTextActuallyVisible())
+            {
+                _pathText.IsVisible = true;
+                return;
+            }
+
+            _pathText.IsVisible = false;
+        }
+
+        private void CompleteStatusTextVisibility()
+        {
+            if (IsStatusTextActuallyVisible())
+            {
+                _statusText.IsVisible = true;
+                return;
+            }
+
+            _statusText.IsVisible = false;
+        }
+
+        private bool IsPathTextActuallyVisible()
+        {
+            return IsPathTextVisible && !string.IsNullOrWhiteSpace(PathText);
+        }
+
+        private bool IsStatusTextActuallyVisible()
+        {
+            return IsStatusTextVisible && !string.IsNullOrWhiteSpace(StatusText);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

@@ -343,6 +343,44 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void App_background_surfaces_use_bright_and_dim_roles()
+        {
+            const string appSurfaceBinding = "{AppThemeBinding Light={StaticResource M3LightSurfaceBright}, Dark={StaticResource M3DarkSurfaceDim}}";
+            const string darkSurfaceDim = "{StaticResource M3DarkSurfaceDim}";
+
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> pageSetters = GetImplicitStyleSetters(styles, "Page");
+            IReadOnlyDictionary<string, string> shellSetters = GetImplicitStyleSetters(styles, "Shell");
+            IReadOnlyDictionary<string, string> documentViewerPageSetters =
+                GetStyleSetters(styles, "M3DocumentViewerPage");
+            IReadOnlyDictionary<string, string> documentViewerSurfaceSetters =
+                GetStyleSetters(styles, "M3DocumentViewerSurface");
+            IReadOnlyDictionary<string, string> documentViewerCollectionSetters =
+                GetStyleSetters(styles, "M3DocumentViewerCollection");
+            IReadOnlyDictionary<string, string> topAppBarSetters =
+                GetStyleSetters(styles, "M3TopAppBarSurface");
+            IReadOnlyDictionary<string, string> darkViewerPageSetters =
+                GetStyleSetters(styles, "M3DarkViewerPage");
+            IReadOnlyDictionary<string, string> darkViewerSurfaceSetters =
+                GetStyleSetters(styles, "M3DarkViewerSurface");
+            IReadOnlyDictionary<string, string> darkViewerCollectionSetters =
+                GetStyleSetters(styles, "M3DarkViewerCollection");
+            IReadOnlyDictionary<string, string> darkTopAppBarSetters =
+                GetStyleSetters(styles, "M3DarkTopAppBarSurface");
+
+            Assert.Equal(appSurfaceBinding, pageSetters["BackgroundColor"]);
+            Assert.Equal(appSurfaceBinding, shellSetters["Shell.BackgroundColor"]);
+            Assert.Equal(appSurfaceBinding, documentViewerPageSetters["BackgroundColor"]);
+            Assert.Equal(appSurfaceBinding, documentViewerSurfaceSetters["BackgroundColor"]);
+            Assert.Equal(appSurfaceBinding, documentViewerCollectionSetters["BackgroundColor"]);
+            Assert.Equal(appSurfaceBinding, topAppBarSetters["BackgroundColor"]);
+            Assert.Equal(darkSurfaceDim, darkViewerPageSetters["BackgroundColor"]);
+            Assert.Equal(darkSurfaceDim, darkViewerSurfaceSetters["BackgroundColor"]);
+            Assert.Equal(darkSurfaceDim, darkViewerCollectionSetters["BackgroundColor"]);
+            Assert.Equal(darkSurfaceDim, darkTopAppBarSetters["BackgroundColor"]);
+        }
+
+        [Fact]
         public void Control_color_fallbacks_use_brand_accent_not_primary_alias()
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));

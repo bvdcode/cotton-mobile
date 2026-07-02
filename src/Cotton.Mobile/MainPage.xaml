@@ -300,8 +300,8 @@
                                     <DataTemplate>
                                         <Grid WidthRequest="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
                                               Style="{StaticResource M3FileTileSlotGrid}">
-                                            <Border HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                    Style="{StaticResource M3FileTileCard}">
+                                            <controls:ContentCardView HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
+                                                                      CardStyleResourceKey="M3FileTileCard">
                                                 <Grid Style="{StaticResource M3FileTileContentGrid}">
                                                     <Border Grid.RowSpan="2"
                                                             IsVisible="{Binding IsSelected}"
@@ -347,7 +347,7 @@
                                                                                         SemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
 
                                                 </Grid>
-                                            </Border>
+                                            </controls:ContentCardView>
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>

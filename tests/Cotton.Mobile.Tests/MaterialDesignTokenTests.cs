@@ -752,11 +752,12 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
             Assert.Equal(2, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(diagnosticsPage, "<controls:ContentCardView"));
-            Assert.Equal(1, CountOccurrences(mainPage, "<controls:ContentCardView"));
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
             Assert.Equal(2, CountOccurrences(trashPage, "<controls:ContentCardView"));
             Assert.Contains("CardStyleResourceKey=\"M3AuthPanel\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey=\"M3FileTileCard\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3SelectableContentCard\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3SelectableTrashTileCard\"", trashPage, StringComparison.Ordinal);
@@ -783,6 +784,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthPanel}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileTileCard}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3TextViewerSurface}\"", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableContentCard}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableTrashTileCard}\"", trashPage, StringComparison.Ordinal);

@@ -1676,10 +1676,25 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3FolderThumbnailIcon");
             IReadOnlyDictionary<string, string> folderThumbnailFrameSetters =
                 GetStyleSetters(styles, "M3FolderThumbnailFrame");
+            IReadOnlyDictionary<string, string> fileThumbnailSurfaceSetters =
+                GetStyleSetters(styles, "M3FileThumbnailSurface");
+            IReadOnlyDictionary<string, string> filePreviewSurfaceSetters =
+                GetStyleSetters(styles, "M3FilePreviewSurface");
+            IReadOnlyDictionary<string, string> thumbnailIconFrameSetters =
+                GetStyleSetters(styles, "M3ThumbnailIconFrame");
             IReadOnlyDictionary<string, string> thumbnailPlaceholderSetters =
                 GetStyleSetters(type, "M3ThumbnailPlaceholder");
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileThumbnailView"));
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceVariant}, Dark={StaticResource M3DarkSurfaceVariant}}",
+                fileThumbnailSurfaceSetters["BackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceVariant}, Dark={StaticResource M3DarkSurfaceVariant}}",
+                filePreviewSurfaceSetters["BackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceVariant}, Dark={StaticResource M3DarkSurfaceVariant}}",
+                thumbnailIconFrameSetters["FrameBackgroundColor"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
                 folderThumbnailIconSetters["IconColor"]);

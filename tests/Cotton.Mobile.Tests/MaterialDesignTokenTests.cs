@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
@@ -240,17 +241,28 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Auth_brand_mark_uses_reusable_material_control()
+        public void Auth_brand_header_uses_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);
+            string brandHeaderView = LoadText(BrandHeaderViewPath);
             string brandMarkView = LoadText(BrandMarkViewPath);
 
-            Assert.Contains("<controls:BrandMarkView Source=\"cotton_brand_mark.svg\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:BrandHeaderView Source=\"cotton_brand_mark.svg\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"Cotton Cloud\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Cotton Cloud\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class BrandHeaderView", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("new BrandMarkView", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3AuthBrandGrid\"", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTitleStyleResourceKey = \"M3AuthTitle\"", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("SemanticProperties.SetHeadingLevel(_titleLabel, SemanticHeadingLevel.Level1)", brandHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultFrameStyleResourceKey = \"M3AuthBrandMarkFrame\"", brandMarkView, StringComparison.Ordinal);
             Assert.Contains("DefaultImageStyleResourceKey = \"M3AuthBrandMarkImage\"", brandMarkView, StringComparison.Ordinal);
             Assert.Contains("_frame.SetDynamicResource(StyleProperty, frameStyleResourceKey)", brandMarkView, StringComparison.Ordinal);
             Assert.Contains("_image.SetDynamicResource(StyleProperty, imageStyleResourceKey)", brandMarkView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:BrandMarkView", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthBrandGrid}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthTitle}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.HeadingLevel=\"Level1\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3AuthBrandMarkFrame}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthBrandMarkImage}\"", mainPage, StringComparison.Ordinal);
         }

@@ -14,16 +14,9 @@
             <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
                 <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                      Style="{StaticResource M3AuthShellStack}">
-                    <Grid ColumnDefinitions="Auto,*"
-                          Style="{StaticResource M3AuthBrandGrid}">
-                        <controls:BrandMarkView Source="cotton_brand_mark.svg"
-                                                SemanticDescription="Cotton Cloud" />
-
-                        <Label Grid.Column="1"
-                               Text="Cotton Cloud"
-                               Style="{StaticResource M3AuthTitle}"
-                               SemanticProperties.HeadingLevel="Level1" />
-                    </Grid>
+                    <controls:BrandHeaderView Source="cotton_brand_mark.svg"
+                                              Title="Cotton Cloud"
+                                              SemanticDescription="Cotton Cloud" />
                 </VerticalStackLayout>
 
                 <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"

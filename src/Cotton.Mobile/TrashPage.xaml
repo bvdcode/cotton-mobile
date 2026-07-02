@@ -10,7 +10,7 @@
              Shell.NavBarIsVisible="False"
              Title="Trash">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding EmptyTrashCommand}"
                             PrimaryDescription="Empty trash"
@@ -141,5 +141,5 @@
             </CollectionView>
         </Grid>
         </controls:ScreenContentGridView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

@@ -10,7 +10,7 @@
              Shell.NavBarIsVisible="False"
              Title="Recent files">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearRecentFilesCommand}"
                             PrimaryDescription="Clear recent files"
@@ -69,5 +69,5 @@
             </CollectionView.ItemTemplate>
         </CollectionView>
         </controls:ScreenContentGridView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

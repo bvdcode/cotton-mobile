@@ -59,6 +59,7 @@ namespace Cotton.Mobile.Tests
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
+        private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
         private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
@@ -1561,11 +1562,20 @@ namespace Cotton.Mobile.Tests
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string screenContentGridView = LoadText(ScreenContentGridViewPath);
+            string screenShellView = LoadText(ScreenShellViewPath);
             string trashPage = LoadText(TrashPagePath);
 
+            Assert.Contains("<controls:ScreenShellView>", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenShellView>", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenShellView>", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"2\">", trashPage, StringComparison.Ordinal);
+            Assert.Contains("public class ScreenShellView", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("new Grid()", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _grid.Children", screenShellView, StringComparison.Ordinal);
             Assert.Contains("public class ScreenContentGridView", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new Grid", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new RowDefinition { Height = GridLength.Auto }", screenContentGridView, StringComparison.Ordinal);
@@ -1577,6 +1587,9 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,Auto,Auto,*\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", recentFilesPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", trashPage, StringComparison.Ordinal);

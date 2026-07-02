@@ -26,14 +26,14 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(NoticePanelView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTitleVisibilityPropertyChanged);
 
         public static readonly BindableProperty MessageProperty = BindableProperty.Create(
             nameof(Message),
             typeof(string),
             typeof(NoticePanelView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnMessageVisibilityPropertyChanged);
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(NoticePanelView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
             nameof(ActionIconData),
@@ -60,7 +60,7 @@ namespace Cotton.Mobile.Controls
             nameof(ActionCommand),
             typeof(ICommand),
             typeof(NoticePanelView),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionCommandVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
             nameof(IsActionEnabled),
@@ -74,7 +74,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(NoticePanelView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
             nameof(ActionSemanticDescription),
@@ -218,7 +218,10 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _panel;
-            UpdateVisualState();
+            UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: false,
+                animateActionVisibility: false);
         }
 
         public string Title
@@ -332,12 +335,71 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             NoticePanelView view = (NoticePanelView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: false,
+                animateActionVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnTitleVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            bool shouldAnimateVisibility = _hasAppliedVisibilityState;
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState(
+                animateTitleVisibility: HasTextVisibilityChanged(oldValue, newValue),
+                animateMessageVisibility: false,
+                animateActionVisibility: false);
+        }
+
+        private static void OnMessageVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: HasTextVisibilityChanged(oldValue, newValue),
+                animateActionVisibility: false);
+        }
+
+        private static void OnActionTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: false,
+                animateActionVisibility: view.HasActionTextVisibilityChanged(oldValue, newValue));
+        }
+
+        private static void OnActionCommandVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: false,
+                animateActionVisibility: view.HasActionCommandVisibilityChanged(oldValue, newValue));
+        }
+
+        private static void OnActionVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState(
+                animateTitleVisibility: false,
+                animateMessageVisibility: false,
+                animateActionVisibility: view.HasActionVisibleFlagChanged(oldValue, newValue));
+        }
+
+        private void UpdateVisualState(
+            bool animateTitleVisibility,
+            bool animateMessageVisibility,
+            bool animateActionVisibility)
+        {
+            bool shouldAnimateTitleVisibility = animateTitleVisibility && _hasAppliedVisibilityState;
+            bool shouldAnimateMessageVisibility = animateMessageVisibility && _hasAppliedVisibilityState;
+            bool shouldAnimateActionVisibility = animateActionVisibility && _hasAppliedVisibilityState;
             string title = Title ?? string.Empty;
             string message = Message ?? string.Empty;
             string actionText = ActionText ?? string.Empty;
@@ -371,9 +433,9 @@ namespace Cotton.Mobile.Controls
 
             _icon.IconData = IconData;
             _title.Text = title;
-            UpdateElementVisibility(_title, isTitleVisible, TitleOpacityAnimationName, shouldAnimateVisibility);
+            UpdateElementVisibility(_title, isTitleVisible, TitleOpacityAnimationName, shouldAnimateTitleVisibility);
             _message.Text = message;
-            UpdateElementVisibility(_message, isMessageVisible, MessageOpacityAnimationName, shouldAnimateVisibility);
+            UpdateElementVisibility(_message, isMessageVisible, MessageOpacityAnimationName, shouldAnimateMessageVisibility);
             _actionItem.Text = actionText;
             _actionItem.ActionIconData = ActionIconData;
             _actionItem.Command = actionCommand;
@@ -381,9 +443,45 @@ namespace Cotton.Mobile.Controls
             _actionItem.GridStyleResourceKey = actionGridStyleResourceKey;
             _actionItem.ActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
             _actionItem.SemanticDescription = actionSemanticDescription;
-            UpdateElementVisibility(_actionItem, isActionVisible, ActionItemOpacityAnimationName, shouldAnimateVisibility);
+            UpdateElementVisibility(_actionItem, isActionVisible, ActionItemOpacityAnimationName, shouldAnimateActionVisibility);
             SemanticProperties.SetDescription(this, BuildSemanticDescription(title, message));
             _hasAppliedVisibilityState = true;
+        }
+
+        private static bool HasTextVisibilityChanged(object oldValue, object newValue)
+        {
+            return IsTextVisible(oldValue) != IsTextVisible(newValue);
+        }
+
+        private bool HasActionTextVisibilityChanged(object oldValue, object newValue)
+        {
+            bool wasActionVisible = IsActionVisible && ActionCommand is not null && IsTextVisible(oldValue);
+            bool isActionVisible = IsActionVisible && ActionCommand is not null && IsTextVisible(newValue);
+
+            return wasActionVisible != isActionVisible;
+        }
+
+        private bool HasActionCommandVisibilityChanged(object oldValue, object newValue)
+        {
+            bool hasActionText = !string.IsNullOrWhiteSpace(ActionText);
+            bool wasActionVisible = IsActionVisible && hasActionText && oldValue is not null;
+            bool isActionVisible = IsActionVisible && hasActionText && newValue is not null;
+
+            return wasActionVisible != isActionVisible;
+        }
+
+        private bool HasActionVisibleFlagChanged(object oldValue, object newValue)
+        {
+            bool hasActionContent = !string.IsNullOrWhiteSpace(ActionText) && ActionCommand is not null;
+            bool wasActionVisible = oldValue is bool oldIsActionVisible && oldIsActionVisible && hasActionContent;
+            bool isActionVisible = newValue is bool newIsActionVisible && newIsActionVisible && hasActionContent;
+
+            return wasActionVisible != isActionVisible;
+        }
+
+        private static bool IsTextVisible(object value)
+        {
+            return value is string text && !string.IsNullOrWhiteSpace(text);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

@@ -828,6 +828,27 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TitleOpacityAnimationName = \"M3NoticePanelTitleOpacity\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("MessageOpacityAnimationName = \"M3NoticePanelMessageOpacity\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("ActionItemOpacityAnimationName = \"M3NoticePanelActionItemOpacity\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnTitleVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnMessageVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnActionTextVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnActionCommandVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnActionVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("HasTextVisibilityChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("HasActionTextVisibilityChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("HasActionCommandVisibilityChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("HasActionVisibleFlagChanged", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains(
+                "bool shouldAnimateTitleVisibility = animateTitleVisibility && _hasAppliedVisibilityState;",
+                noticePanelView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "bool shouldAnimateMessageVisibility = animateMessageVisibility && _hasAppliedVisibilityState;",
+                noticePanelView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "bool shouldAnimateActionVisibility = animateActionVisibility && _hasAppliedVisibilityState;",
+                noticePanelView,
+                StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("CompleteElementVisibility", noticePanelView, StringComparison.Ordinal);
@@ -853,6 +874,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("_title.IsVisible = !string.IsNullOrWhiteSpace(title)", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_message.IsVisible = !string.IsNullOrWhiteSpace(message)", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_actionItem.IsVisible = isActionVisible", noticePanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("bool shouldAnimateVisibility = _hasAppliedVisibilityState;", noticePanelView, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -2847,12 +2847,26 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("private readonly Border _busyIndicatorFrame;", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("_busyIndicatorFrame.SetDynamicResource(StyleProperty, \"M3ScreenHeaderBusyFrame\");", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("BusyFrameOpacityAnimationName = \"M3ScreenHeaderBusyFrameOpacity\"", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("SupportingTextOpacityAnimationName = \"M3ScreenHeaderSupportingTextOpacity\"", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DetailTextOpacityAnimationName = \"M3ScreenHeaderDetailTextOpacity\"", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("OnBusyPropertyChanged", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnSupportingTextVisibilityPropertyChanged", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnDetailTextVisibilityPropertyChanged", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteBusyState", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSupportingTextVisibility", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteDetailTextVisibility", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("_busyIndicatorFrame.IsVisible = IsBusy;", screenHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText)",
+                screenHeaderView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_detailText.IsVisible = IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText)",
+                screenHeaderView,
+                StringComparison.Ordinal);
             Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["WidthRequest"]);
             Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["HeightRequest"]);
             Assert.Equal("{StaticResource M3Transparent}", busyFrameSetters["Stroke"]);

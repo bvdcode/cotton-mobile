@@ -536,19 +536,19 @@
     <Style TargetType="Border" x:Key="M3FileNoticeIconFrame">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
             </Setter.Value>
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}" />
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FileNoticeIcon">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnTertiaryContainer}, Dark={StaticResource M3DarkOnTertiaryContainer}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileStatusIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />

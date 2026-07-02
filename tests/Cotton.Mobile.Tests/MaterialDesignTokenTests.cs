@@ -640,6 +640,11 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string noticePanelView = LoadText(NoticePanelViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> noticeIconFrameSetters =
+                GetStyleSetters(styles, "M3FileNoticeIconFrame");
+            IReadOnlyDictionary<string, string> noticeIconSetters =
+                GetStyleSetters(styles, "M3FileNoticeIcon");
 
             Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IconData=\"{x:Static controls:IconPathData.Error}\"", mainPage, StringComparison.Ordinal);
@@ -659,6 +664,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionTextProperty", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("new ActionListItemView", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("_actionItem.Command = actionCommand", noticePanelView, StringComparison.Ordinal);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}",
+                noticeIconFrameSetters["BackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}",
+                noticeIconFrameSetters["Stroke"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightOnTertiaryContainer}, Dark={StaticResource M3DarkOnTertiaryContainer}}",
+                noticeIconSetters["IconColor"]);
+            Assert.DoesNotContain("M3LightPrimaryContainer", noticeIconFrameSetters["BackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimaryContainer", noticeIconSetters["IconColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticePanel", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticeGrid", mainPage, StringComparison.Ordinal);

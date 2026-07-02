@@ -3,80 +3,36 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.Controls.TopAppBar"
-             x:Name="Root"
-             Style="{StaticResource M3TopAppBarSurface}">
-    <ContentView.Triggers>
-        <DataTrigger TargetType="ContentView"
-                     Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
-                     Value="True">
-            <Setter Property="Style"
-                    Value="{StaticResource M3DarkTopAppBarSurface}" />
-        </DataTrigger>
-    </ContentView.Triggers>
-
-    <Grid Style="{StaticResource M3TopAppBarContentGrid}">
+             x:Name="Root">
+    <Grid x:Name="ContentGrid">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="{StaticResource TouchTarget}" />
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="Auto" />
         </Grid.ColumnDefinitions>
 
-        <controls:IconButton IconData="{x:Static controls:IconPathData.ArrowBack}"
-                             Style="{StaticResource M3TopAppBarIconButton}"
+        <controls:IconButton x:Name="BackButton"
+                             IconData="{x:Static controls:IconPathData.ArrowBack}"
                              Command="{Binding Source={x:Reference Root}, Path=BackCommand}"
-                             SemanticProperties.Description="Back">
-            <controls:IconButton.Triggers>
-                <DataTrigger TargetType="controls:IconButton"
-                             Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
-                             Value="True">
-                    <Setter Property="Style"
-                            Value="{StaticResource M3DarkTopAppBarIconButton}" />
-                </DataTrigger>
-            </controls:IconButton.Triggers>
-        </controls:IconButton>
+                             SemanticProperties.Description="Back" />
 
-        <Label Grid.Column="1"
-               Text="{Binding Source={x:Reference Root}, Path=TitleText}"
-               Style="{StaticResource M3AppBarTitleLine}">
-            <Label.Triggers>
-                <DataTrigger TargetType="Label"
-                             Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
-                             Value="True">
-                    <Setter Property="Style"
-                            Value="{StaticResource M3DarkAppBarTitleLine}" />
-                </DataTrigger>
-            </Label.Triggers>
-        </Label>
+        <Label x:Name="TitleLabel"
+               Grid.Column="1"
+               Text="{Binding Source={x:Reference Root}, Path=TitleText}" />
 
-        <controls:ActionClusterView Grid.Column="2"
-                                    ClusterStyleResourceKey="M3TopAppBarActionCluster"
+        <controls:ActionClusterView x:Name="Actions"
+                                    Grid.Column="2"
                                     PrimaryActionIconData="{Binding Source={x:Reference Root}, Path=PrimaryIconData}"
                                     PrimaryActionCommand="{Binding Source={x:Reference Root}, Path=PrimaryCommand}"
-                                    PrimaryActionIconButtonStyleResourceKey="M3TopAppBarIconButton"
                                     PrimaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=PrimaryDescription}"
                                     IsPrimaryActionVisible="{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}"
                                     SecondaryActionIconData="{Binding Source={x:Reference Root}, Path=SecondaryIconData}"
                                     SecondaryActionCommand="{Binding Source={x:Reference Root}, Path=SecondaryCommand}"
-                                    SecondaryActionIconButtonStyleResourceKey="M3TopAppBarIconButton"
                                     SecondaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=SecondaryDescription}"
                                     IsSecondaryActionVisible="{Binding Source={x:Reference Root}, Path=IsSecondaryActionVisible}"
                                     TertiaryActionIconData="{Binding Source={x:Reference Root}, Path=TertiaryIconData}"
                                     TertiaryActionCommand="{Binding Source={x:Reference Root}, Path=TertiaryCommand}"
-                                    TertiaryActionIconButtonStyleResourceKey="M3TopAppBarIconButton"
                                     TertiaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=TertiaryDescription}"
-                                    IsTertiaryActionVisible="{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}">
-            <controls:ActionClusterView.Triggers>
-                <DataTrigger TargetType="controls:ActionClusterView"
-                             Binding="{Binding Source={x:Reference Root}, Path=UseDarkTheme}"
-                             Value="True">
-                    <Setter Property="PrimaryActionIconButtonStyleResourceKey"
-                            Value="M3DarkTopAppBarIconButton" />
-                    <Setter Property="SecondaryActionIconButtonStyleResourceKey"
-                            Value="M3DarkTopAppBarIconButton" />
-                    <Setter Property="TertiaryActionIconButtonStyleResourceKey"
-                            Value="M3DarkTopAppBarIconButton" />
-                </DataTrigger>
-            </controls:ActionClusterView.Triggers>
-        </controls:ActionClusterView>
+                                    IsTertiaryActionVisible="{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}" />
     </Grid>
 </ContentView>

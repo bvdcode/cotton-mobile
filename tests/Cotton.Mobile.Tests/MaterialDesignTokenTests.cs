@@ -88,6 +88,7 @@ namespace Cotton.Mobile.Tests
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
+        private const string TopAppBarCodeBehindPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private const string DarkViewerSurfaceViewPath = "src/Cotton.Mobile/Controls/DarkViewerSurfaceView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
@@ -688,10 +689,13 @@ namespace Cotton.Mobile.Tests
         public void Top_app_bar_actions_use_reusable_material_control()
         {
             string topAppBar = LoadText(TopAppBarPath);
+            string topAppBarCodeBehind = LoadText(TopAppBarCodeBehindPath);
 
-            Assert.Equal(1, CountOccurrences(topAppBar, "<controls:IconButton IconData="));
-            Assert.Contains("<controls:ActionClusterView Grid.Column=\"2\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("ClusterStyleResourceKey=\"M3TopAppBarActionCluster\"", topAppBar, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(topAppBar, "<controls:IconButton"));
+            Assert.Contains("<Grid x:Name=\"ContentGrid\">", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("<controls:IconButton x:Name=\"BackButton\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("<Label x:Name=\"TitleLabel\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("<controls:ActionClusterView x:Name=\"Actions\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionIconData=\"{Binding Source={x:Reference Root}, Path=PrimaryIconData}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding Source={x:Reference Root}, Path=PrimaryCommand}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("IsPrimaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
@@ -699,10 +703,29 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsSecondaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsSecondaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding Source={x:Reference Root}, Path=TertiaryCommand}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("IsTertiaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("TargetType=\"controls:ActionClusterView\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("Property=\"PrimaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("Property=\"SecondaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("Property=\"TertiaryActionIconButtonStyleResourceKey\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3TopAppBarSurface\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DarkSurfaceStyleResourceKey = \"M3DarkTopAppBarSurface\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DefaultContentGridStyleResourceKey = \"M3TopAppBarContentGrid\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3TopAppBarActionCluster\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionIconButtonStyleResourceKey = \"M3TopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DarkActionIconButtonStyleResourceKey = \"M3DarkTopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DefaultTitleStyleResourceKey = \"M3AppBarTitleLine\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("DarkTitleStyleResourceKey = \"M3DarkAppBarTitleLine\"", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("propertyChanged: OnVisualPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("ContentGrid.SetDynamicResource(StyleProperty, DefaultContentGridStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("BackButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("TitleLabel.SetDynamicResource(Label.StyleProperty, titleStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("Actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("Actions.PrimaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("Actions.SecondaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("Actions.TertiaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<ContentView.Triggers>", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton.Triggers>", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label.Triggers>", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ActionClusterView.Triggers>", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("DataTrigger", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("<HorizontalStackLayout Grid.Column=\"2\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=PrimaryDescription}\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=SecondaryDescription}\"", topAppBar, StringComparison.Ordinal);

@@ -48,6 +48,7 @@ namespace Cotton.Mobile.Tests
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
+        private const string ActionListItemViewPath = "src/Cotton.Mobile/Controls/ActionListItemView.cs";
         private const string MainPageRootViewPath = "src/Cotton.Mobile/Controls/MainPageRootView.cs";
         private const string FileListSkeletonViewPath = "src/Cotton.Mobile/Controls/FileListSkeletonView.cs";
         private const string MetadataListSkeletonViewPath = "src/Cotton.Mobile/Controls/MetadataListSkeletonView.cs";
@@ -688,6 +689,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Action_rows_use_reusable_material_control()
         {
+            string actionListItemView = LoadText(ActionListItemViewPath);
             string activityFeedPage = LoadText(ActivityFeedPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
@@ -695,6 +697,12 @@ namespace Cotton.Mobile.Tests
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string storagePage = LoadText(StoragePagePath);
+
+            Assert.Contains("private readonly TouchSurfaceView _touchSurface;", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface = new TouchSurfaceView();", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? rowTapCommand : null;", actionListItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("LongPressBehavior", actionListItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3ListItemTouchSurface", actionListItemView, StringComparison.Ordinal);
 
             Assert.Contains("<controls:ActionListItemView Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Load more activity\"", activityFeedPage, StringComparison.Ordinal);

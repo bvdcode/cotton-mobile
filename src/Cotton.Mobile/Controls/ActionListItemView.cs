@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Windows.Input;
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -180,8 +179,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _supportingText;
         private readonly Label _text;
         private readonly VerticalStackLayout _textStack;
-        private readonly LongPressBehavior _tapBehavior;
-        private readonly Grid _touchSurface;
+        private readonly TouchSurfaceView _touchSurface;
         private readonly Border _trailingChip;
         private readonly Label _trailingText;
 
@@ -203,11 +201,7 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            _tapBehavior = new LongPressBehavior();
-
-            _touchSurface = new Grid();
-            _touchSurface.SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
-            _touchSurface.Behaviors.Add(_tapBehavior);
+            _touchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_touchSurface, 4);
 
             _trailingChip = new Border
@@ -474,8 +468,8 @@ namespace Cotton.Mobile.Controls
             _actionButton.IsEnabled = IsActionEnabled;
             SemanticProperties.SetDescription(_actionButton, actionSemanticDescription);
 
-            _tapBehavior.TapCommand = IsActionEnabled ? rowTapCommand : null;
-            _tapBehavior.TapCommandParameter = rowTapCommandParameter;
+            _touchSurface.TapCommand = IsActionEnabled ? rowTapCommand : null;
+            _touchSurface.TapCommandParameter = rowTapCommandParameter;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && rowTapCommand is not null;
             SemanticProperties.SetDescription(_container, semanticDescription);
         }

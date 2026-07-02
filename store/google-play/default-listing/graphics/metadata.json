@@ -5,24 +5,16 @@
   },
   "featureGraphic": {
     "path": "feature-graphic.png",
-    "altText": "Cotton Cloud mobile sign-in with browser approval."
+    "altText": "Cotton Cloud mobile file browser with preview and share actions."
   },
   "phoneScreenshots": [
     {
       "path": "phone-screenshots/01-sign-in.png",
-      "altText": "Cotton Cloud instance URL sign-in screen."
+      "altText": "Cotton Cloud dark sign-in screen."
     },
     {
-      "path": "phone-screenshots/02-file-browser.png",
-      "altText": "Cotton Cloud authenticated file browser."
-    },
-    {
-      "path": "phone-screenshots/03-image-viewer.png",
-      "altText": "Cotton Cloud image viewer with share and system-open actions."
-    },
-    {
-      "path": "phone-screenshots/04-file-actions.png",
-      "altText": "Cotton Cloud file actions for opening, downloading, sharing, and viewing details."
+      "path": "phone-screenshots/02-sign-in-light.png",
+      "altText": "Cotton Cloud light sign-in screen."
     }
   ]
 }

@@ -407,6 +407,22 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Trash_entry_actions_use_reusable_material_control()
+        {
+            string trashPage = LoadText(TrashPagePath);
+
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView"));
+            Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"{Binding Name, StringFormat='Delete {0} forever'}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionSemanticDescription=\"{Binding Name, StringFormat='Restore {0}'}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3RowActionCluster", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Delete}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Reset}\"", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

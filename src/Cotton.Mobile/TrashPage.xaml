@@ -142,23 +142,19 @@
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
                                                            TapCommandParameter="{Binding .}" />
 
-                                <HorizontalStackLayout Grid.Row="1"
-                                                       Grid.Column="1"
-                                                       Grid.ColumnSpan="2"
-                                                       Style="{StaticResource M3RowActionCluster}"
-                                                       IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
-                                                         Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} forever'}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Reset}"
-                                                         Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding Name, StringFormat='Restore {0}'}" />
-                                </HorizontalStackLayout>
+                                <controls:ActionClusterView Grid.Row="1"
+                                                            Grid.Column="1"
+                                                            Grid.ColumnSpan="2"
+                                                            IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
+                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                            PrimaryActionCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                            PrimaryActionCommandParameter="{Binding .}"
+                                                            PrimaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                            PrimaryActionSemanticDescription="{Binding Name, StringFormat='Delete {0} forever'}"
+                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Reset}"
+                                                            SecondaryActionCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                                            SecondaryActionCommandParameter="{Binding .}"
+                                                            SecondaryActionSemanticDescription="{Binding Name, StringFormat='Restore {0}'}" />
                             </Grid>
                         </Border>
                     </DataTemplate>
@@ -200,21 +196,17 @@
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
                                                            TapCommandParameter="{Binding .}" />
 
-                                <HorizontalStackLayout Grid.Row="2"
-                                                       Style="{StaticResource M3RowActionCluster}"
-                                                       IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}">
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
-                                                         Command="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding Name, StringFormat='Delete {0} forever'}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Reset}"
-                                                         Command="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding Name, StringFormat='Restore {0}'}" />
-                                </HorizontalStackLayout>
+                                <controls:ActionClusterView Grid.Row="2"
+                                                            IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
+                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                            PrimaryActionCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
+                                                            PrimaryActionCommandParameter="{Binding .}"
+                                                            PrimaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                            PrimaryActionSemanticDescription="{Binding Name, StringFormat='Delete {0} forever'}"
+                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Reset}"
+                                                            SecondaryActionCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}"
+                                                            SecondaryActionCommandParameter="{Binding .}"
+                                                            SecondaryActionSemanticDescription="{Binding Name, StringFormat='Restore {0}'}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

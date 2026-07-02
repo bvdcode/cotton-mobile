@@ -253,25 +253,14 @@
                                 </Grid>
                             </Border>
 
-                            <Border IsVisible="{Binding Display.IsFilesLoading}"
-                                    Style="{StaticResource M3LoadingStatusPanel}">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3LoadingStatusGrid}">
-                                    <controls:LoadingIndicatorView IsRunning="{Binding Display.IsFilesLoading}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Display.LoadingMessage}"
-                                           Style="{StaticResource M3LoadingMessage}" />
-
-                                    <controls:IconButton Grid.Column="2"
-                                                         IconData="{x:Static controls:IconPathData.Close}"
-                                                         Command="{Binding CancelFileActionCommand}"
-                                                         IsEnabled="{Binding Display.CanCancelFileAction}"
-                                                         IsVisible="{Binding Display.CanCancelFileAction}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="Cancel file operation" />
-                                </Grid>
-                            </Border>
+                            <controls:LoadingStatusView IsVisible="{Binding Display.IsFilesLoading}"
+                                                        IsRunning="{Binding Display.IsFilesLoading}"
+                                                        Text="{Binding Display.LoadingMessage}"
+                                                        ActionIconData="{x:Static controls:IconPathData.Close}"
+                                                        ActionCommand="{Binding CancelFileActionCommand}"
+                                                        IsActionEnabled="{Binding Display.CanCancelFileAction}"
+                                                        IsActionVisible="{Binding Display.CanCancelFileAction}"
+                                                        ActionSemanticDescription="Cancel file operation" />
 
                             <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}"
                                                            Style="{StaticResource M3FileListSkeletonView}" />

@@ -203,8 +203,12 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string appLockGatePage = LoadText(AppLockGatePagePath);
 
+            Assert.Contains("<controls:LoadingStatusView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ActionCommand=\"{Binding CancelFileActionCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ActionSemanticDescription=\"Cancel file operation\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:LoadingIndicatorView", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:LoadingIndicatorView", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LoadingStatusPanel", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", appLockGatePage, StringComparison.Ordinal);

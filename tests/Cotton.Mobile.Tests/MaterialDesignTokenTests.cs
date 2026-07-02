@@ -38,6 +38,7 @@ namespace Cotton.Mobile.Tests
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
+        private const string MainPageRootViewPath = "src/Cotton.Mobile/Controls/MainPageRootView.cs";
         private const string FileListSkeletonViewPath = "src/Cotton.Mobile/Controls/FileListSkeletonView.cs";
         private const string MetadataListSkeletonViewPath = "src/Cotton.Mobile/Controls/MetadataListSkeletonView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
@@ -697,6 +698,23 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=PrimaryDescription}\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=SecondaryDescription}\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=TertiaryDescription}\"", topAppBar, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Main_page_root_uses_reusable_material_shell()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string mainPageRootView = LoadText(MainPageRootViewPath);
+
+            Assert.Contains("<controls:MainPageRootView x:Name=\"RootLayout\">", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class MainPageRootView : Grid", mainPageRootView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3MainPageRootGrid\"", mainPageRootView, StringComparison.Ordinal);
+            Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", mainPageRootView, StringComparison.Ordinal);
+            Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", mainPageRootView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultGridStyleResourceKey)", mainPageRootView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid x:Name=\"RootLayout\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("RowDefinitions=\"*,Auto,Auto\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3MainPageRootGrid}\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -6,9 +6,7 @@
              x:Name="RootPage"
              Shell.NavBarIsVisible="False">
 
-    <Grid x:Name="RootLayout"
-          RowDefinitions="*,Auto,Auto"
-          Style="{StaticResource M3MainPageRootGrid}">
+    <controls:MainPageRootView x:Name="RootLayout">
         <controls:ScreenScrollBodyView Grid.Row="0"
                                        IsVisible="{Binding Display.IsBrandHeaderVisible}"
                                        StackStyleResourceKey="M3MainContentStack">
@@ -242,6 +240,6 @@
                                                IsMoreEnabled="{Binding Display.IsAccountActionEnabled}"
                                                MoreSemanticDescription="{Binding Display.SettingsNavigation.AccessibilityText}" />
 
-    </Grid>
+    </controls:MainPageRootView>
 
 </ContentPage>

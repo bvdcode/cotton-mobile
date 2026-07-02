@@ -645,6 +645,7 @@ namespace Cotton.Mobile.Tests
                 FileVersionHistoryPagePath,
                 CaptureInboxPagePath,
                 CaptureDestinationPickerPagePath,
+                TrashPagePath,
                 DiagnosticsPagePath,
                 SyncSettingsPagePath,
                 NotificationSettingsPagePath,
@@ -667,6 +668,7 @@ namespace Cotton.Mobile.Tests
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string storagePage = LoadText(StoragePagePath);
+            string trashPage = LoadText(TrashPagePath);
 
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
@@ -676,6 +678,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DetailTextStyleResourceKey=\"M3ScreenHeaderSupportingMultiline\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("TitleStyleResourceKey=\"M3ScreenMetric\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("DetailTextStyleResourceKey=\"M3CardSupportingLine\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenHeaderView Title=\"Trash\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenHeaderView.ActionContent>", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsBusy=\"{Binding IsBusy}\"", trashPage, StringComparison.Ordinal);
         }
 
         [Fact]

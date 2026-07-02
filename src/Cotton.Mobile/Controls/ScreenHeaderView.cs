@@ -75,6 +75,15 @@ namespace Cotton.Mobile.Controls
             false,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty ActionContentProperty = BindableProperty.Create(
+            nameof(ActionContent),
+            typeof(View),
+            typeof(ScreenHeaderView),
+            default(View),
+            propertyChanged: OnVisualPropertyChanged);
+
+        private readonly HorizontalStackLayout _actionCluster;
+        private readonly ContentView _actionContentHost;
         private readonly ActivityIndicator _busyIndicator;
         private readonly Grid _container;
         private readonly Label _detailText;
@@ -104,6 +113,18 @@ namespace Cotton.Mobile.Controls
             _busyIndicator = new ActivityIndicator();
             _busyIndicator.SetDynamicResource(StyleProperty, "M3ScreenHeaderActivityIndicator");
 
+            _actionContentHost = new ContentView();
+
+            _actionCluster = new HorizontalStackLayout
+            {
+                Children =
+                {
+                    _actionContentHost,
+                    _busyIndicator,
+                },
+            };
+            _actionCluster.SetDynamicResource(StyleProperty, "M3ScreenHeaderActionCluster");
+
             _container = new Grid
             {
                 ColumnDefinitions =
@@ -120,11 +141,11 @@ namespace Cotton.Mobile.Controls
                 Children =
                 {
                     textStack,
-                    _busyIndicator,
+                    _actionCluster,
                 },
             };
             _container.SetDynamicResource(StyleProperty, "M3ScreenHeaderGrid");
-            Grid.SetColumn(_busyIndicator, 1);
+            Grid.SetColumn(_actionCluster, 1);
 
             Content = _container;
             UpdateVisualState();
@@ -190,6 +211,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsBusyProperty, value);
         }
 
+        public View? ActionContent
+        {
+            get => (View?)GetValue(ActionContentProperty);
+            set => SetValue(ActionContentProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
@@ -220,6 +247,14 @@ namespace Cotton.Mobile.Controls
             _detailText.IsVisible = IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
             _detailText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
 
+            View? actionContent = ActionContent;
+            if (_actionContentHost.Content != actionContent)
+            {
+                _actionContentHost.Content = actionContent;
+            }
+
+            _actionContentHost.IsVisible = actionContent is not null;
+            _actionCluster.IsVisible = actionContent is not null || IsBusy;
             _busyIndicator.IsRunning = IsBusy;
             _busyIndicator.IsVisible = IsBusy;
 

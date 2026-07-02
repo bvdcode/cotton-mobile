@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(MetadataCardHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTrailingChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
             nameof(IsTrailingTextVisible),
@@ -256,12 +256,12 @@ namespace Cotton.Mobile.Controls
             _trailingChip.Text = TrailingText ?? string.Empty;
             _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
             _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
-            UpdateTrailingChipVisibility(animateTrailingChipVisibility);
+            UpdateTrailingChipVisibility(TrailingText ?? string.Empty, animateTrailingChipVisibility);
         }
 
-        private void UpdateTrailingChipVisibility(bool animateTrailingChipVisibility)
+        private void UpdateTrailingChipVisibility(string trailingText, bool animateTrailingChipVisibility)
         {
-            bool isTrailingChipVisible = IsTrailingTextVisible;
+            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText);
             bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
             double targetOpacity = isTrailingChipVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -287,13 +287,18 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteTrailingChipVisibility()
         {
-            if (IsTrailingTextVisible)
+            if (IsTrailingChipActuallyVisible(TrailingText ?? string.Empty))
             {
                 _trailingChip.IsVisible = true;
                 return;
             }
 
             _trailingChip.IsVisible = false;
+        }
+
+        private bool IsTrailingChipActuallyVisible(string trailingText)
+        {
+            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
         }
     }
 }

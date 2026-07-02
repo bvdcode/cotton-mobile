@@ -38,14 +38,14 @@ namespace Cotton.Mobile.Behaviors
         private const string LightOnPrimaryContainerResourceKey = "M3LightOnPrimaryContainer";
         private const string LightOutlineVariantResourceKey = "M3LightOutlineVariant";
         private const string LightSurfaceContainerHighResourceKey = "M3LightSurfaceContainerHigh";
-        private const string LightSurfaceContainerLowestResourceKey = "M3LightSurfaceContainerLowest";
+        private const string LightSurfaceContainerLowResourceKey = "M3LightSurfaceContainerLow";
         private const string LightOnSurfaceVariantResourceKey = "M3LightOnSurfaceVariant";
         private const string DarkPrimaryResourceKey = "M3DarkPrimary";
         private const string DarkPrimaryContainerResourceKey = "M3DarkPrimaryContainer";
         private const string DarkOnPrimaryContainerResourceKey = "M3DarkOnPrimaryContainer";
         private const string DarkOutlineVariantResourceKey = "M3DarkOutlineVariant";
-        private const string DarkSurfaceContainerResourceKey = "M3DarkSurfaceContainer";
         private const string DarkSurfaceContainerHighResourceKey = "M3DarkSurfaceContainerHigh";
+        private const string DarkSurfaceContainerLowResourceKey = "M3DarkSurfaceContainerLow";
         private const string DarkOnSurfaceVariantResourceKey = "M3DarkOnSurfaceVariant";
         private const string TransparentResourceKey = "M3Transparent";
         private const string FocusStrokeResourceKey = "M3StrokeFocus";
@@ -197,7 +197,7 @@ namespace Cotton.Mobile.Behaviors
             Application application = GetApplication();
             if (application.RequestedTheme == AppTheme.Light)
             {
-                return LightSurfaceContainerLowestResourceKey;
+                return LightSurfaceContainerHighResourceKey;
             }
 
             return DarkSurfaceContainerHighResourceKey;
@@ -208,10 +208,10 @@ namespace Cotton.Mobile.Behaviors
             Application application = GetApplication();
             if (application.RequestedTheme == AppTheme.Light)
             {
-                return LightSurfaceContainerLowestResourceKey;
+                return LightSurfaceContainerLowResourceKey;
             }
 
-            return DarkSurfaceContainerResourceKey;
+            return DarkSurfaceContainerLowResourceKey;
         }
 
         private static string GetSurfaceContainerHighResourceKey()

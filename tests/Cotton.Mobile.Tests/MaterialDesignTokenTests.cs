@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Tests
         private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
         private const string CaptureDestinationPickerPagePath = "src/Cotton.Mobile/CaptureDestinationPickerPage.xaml";
+        private const string TextViewerPagePath = "src/Cotton.Mobile/TextViewerPage.xaml";
         private const string PdfViewerPagePath = "src/Cotton.Mobile/PdfViewerPage.xaml";
         private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
         private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
@@ -33,6 +34,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
+        private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -567,6 +569,27 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
             Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LinearProgressBar}\"", transfersPage + storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Document_viewer_headers_use_reusable_material_control()
+        {
+            string textViewerPage = LoadText(TextViewerPagePath);
+            string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string viewerInfoHeaderView = LoadText(ViewerInfoHeaderViewPath);
+
+            Assert.Contains("<controls:ViewerInfoHeaderView Details=\"{Binding Details}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("Status=\"{Binding Status}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ViewerInfoHeaderView Details=\"{Binding Details}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("Status=\"{Binding Status}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKey=\"M3PdfHeaderStack\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3ScreenHeaderTextStack\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultDetailsStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenHeaderTextStack}\">", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3PdfHeaderStack}\">", pdfViewerPage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -23,14 +23,10 @@
         <Grid Grid.Row="1"
               RowDefinitions="Auto,*"
               Style="{StaticResource M3DocumentViewerSurface}">
-            <VerticalStackLayout Style="{StaticResource M3PdfHeaderStack}">
-                <Label Text="{Binding Details}"
-                       Style="{StaticResource M3CardSupportingLine}" />
-
-                <Label Text="{Binding Status}"
-                       IsVisible="{Binding IsStatusVisible}"
-                       Style="{StaticResource M3CardSupportingLine}" />
-            </VerticalStackLayout>
+            <controls:ViewerInfoHeaderView Details="{Binding Details}"
+                                           Status="{Binding Status}"
+                                           IsStatusVisible="{Binding IsStatusVisible}"
+                                           StackStyleResourceKey="M3PdfHeaderStack" />
 
             <CollectionView Grid.Row="1"
                             ItemsSource="{Binding Pages}"

@@ -20,14 +20,9 @@
         <Grid Grid.Row="1"
               RowDefinitions="Auto,*"
               Style="{StaticResource M3TextViewerContentGrid}">
-            <VerticalStackLayout Style="{StaticResource M3ScreenHeaderTextStack}">
-                <Label Text="{Binding Details}"
-                       Style="{StaticResource M3CardSupportingLine}" />
-
-                <Label Text="{Binding Status}"
-                       IsVisible="{Binding IsStatusVisible}"
-                       Style="{StaticResource M3CardSupportingLine}" />
-            </VerticalStackLayout>
+            <controls:ViewerInfoHeaderView Details="{Binding Details}"
+                                           Status="{Binding Status}"
+                                           IsStatusVisible="{Binding IsStatusVisible}" />
 
             <Border Grid.Row="1"
                     Style="{StaticResource M3TextViewerSurface}">

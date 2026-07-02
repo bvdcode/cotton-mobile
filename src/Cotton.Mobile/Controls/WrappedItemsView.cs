@@ -6,7 +6,7 @@ using System.Collections;
 namespace Cotton.Mobile.Controls
 {
     [ContentProperty(nameof(ItemTemplate))]
-    public class WrappedItemsView : ContentView
+    public class WrappedItemsView : MaterialAnimatedContentView
     {
         private const string DefaultLayoutStyleResourceKey = "M3FileTileWrapLayout";
 

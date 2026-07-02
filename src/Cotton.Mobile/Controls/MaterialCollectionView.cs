@@ -6,7 +6,7 @@ using System.Collections;
 namespace Cotton.Mobile.Controls
 {
     [ContentProperty(nameof(ItemTemplate))]
-    public class MaterialCollectionView : ContentView
+    public class MaterialCollectionView : MaterialAnimatedContentView
     {
         private const string DefaultCollectionStyleResourceKey = "M3MaterialCollectionView";
 

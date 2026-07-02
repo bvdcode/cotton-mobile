@@ -2162,6 +2162,7 @@ namespace Cotton.Mobile.Tests
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string interaction = LoadText(InteractionResourcePath);
             string wrappedItemsView = LoadText(WrappedItemsViewPath);
+            string materialAnimatedContentView = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialAnimatedContentView.cs"));
 
             Assert.Contains("<controls:WrappedItemsView IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("LayoutStyleResourceKey=\"M3FileTileWrapLayout\"", mainPage, StringComparison.Ordinal);
@@ -2193,7 +2194,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteOfflineAttentionChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("public class WrappedItemsView", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("WrappedItemsView : MaterialAnimatedContentView", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("DefaultLayoutStyleResourceKey = \"M3FileTileWrapLayout\"", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("public abstract class MaterialAnimatedContentView : ContentView", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("AppearanceDurationProperty", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionContentEnterDuration\")", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("Opacity = MaterialMotion.Value(\"M3MotionHiddenOpacity\")", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("new FlexLayout()", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("BindableLayout.SetItemsSource(_layout, ItemsSource)", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("BindableLayout.SetItemTemplate(_layout, ItemTemplate)", wrappedItemsView, StringComparison.Ordinal);
@@ -2241,6 +2248,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CollectionStyleResourceKey=\"M3DocumentViewerCollection\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("public class MaterialCollectionView", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("MaterialCollectionView : MaterialAnimatedContentView", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("DefaultCollectionStyleResourceKey = \"M3MaterialCollectionView\"", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("typeof(IItemsLayout)", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("LinearItemsLayout.Vertical", materialCollectionView, StringComparison.Ordinal);
@@ -2253,6 +2261,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_collection.SelectionMode = SelectionMode", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("x:Key=\"M3MaterialCollectionView\"", styles, StringComparison.Ordinal);
             Assert.Contains("x:Key=\"M3DocumentViewerCollection\" BasedOn=\"{StaticResource M3MaterialCollectionView}\"", styles, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionContentEnterDuration\">140</x:Int32>", LoadText(InteractionResourcePath), StringComparison.Ordinal);
 
             foreach (string pagePath in pagePaths)
             {
@@ -2414,6 +2423,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:StackedItemsView.ItemTemplate>", combinedPages, StringComparison.Ordinal);
             Assert.Contains("public class StackedItemsView", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("using System.Collections;", stackedItemsView, StringComparison.Ordinal);
+            Assert.Contains("StackedItemsView : MaterialAnimatedContentView", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("ItemsSourceProperty", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("ItemTemplateProperty", stackedItemsView, StringComparison.Ordinal);

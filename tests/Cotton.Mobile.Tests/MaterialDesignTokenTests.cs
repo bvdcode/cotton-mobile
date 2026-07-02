@@ -2479,6 +2479,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("AttentionTrailingTextStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains(
+                "LeadingIconOpacityAnimationName = \"M3SettingsInfoLeadingIconOpacity\"",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 "PrimaryDetailTextOpacityAnimationName = \"M3SettingsInfoPrimaryDetailOpacity\"",
                 settingsInfoItemView,
                 StringComparison.Ordinal);
@@ -2494,18 +2498,22 @@ namespace Cotton.Mobile.Tests
                 "TrailingChipOpacityAnimationName = \"M3SettingsInfoTrailingChipOpacity\"",
                 settingsInfoItemView,
                 StringComparison.Ordinal);
+            Assert.Contains("OnLeadingIconVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnPrimaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnSecondaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnTertiaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnTrailingChipVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteLeadingIconVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompletePrimaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteTrailingChipVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("ResolveLeadingIconLayoutVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("ResolveTrailingChipLayoutVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_leadingIcon.IsVisible = leadingIconData is not null", settingsInfoItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconFrame Grid.RowSpan", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TargetType=\"controls:IconFrame\"", securitySettingsPage, StringComparison.Ordinal);

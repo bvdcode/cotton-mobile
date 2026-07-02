@@ -191,6 +191,15 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3AttentionNoticeIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3AttentionStatusMessage" BasedOn="{StaticResource M3ErrorSupportingBlock}">
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
@@ -547,6 +556,7 @@
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileNoticeGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space12}" />
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 

@@ -56,30 +56,19 @@
                                                     IsStatusVisible="{Binding IsRemotePushStatusVisible}"
                                                     IsDetailVisible="False" />
 
-                <Grid IsVisible="{Binding IsRemotePushUnavailable}"
-                      ColumnDefinitions="Auto,*"
-                      RowDefinitions="Auto,Auto,Auto"
-                      Style="{StaticResource M3SettingsSummaryGrid}">
-                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                       Style="{StaticResource M3AttentionStatusIconTop}" />
-
-                    <Label Grid.Column="1"
-                           Text="{Binding RemotePushUnavailableTitle}"
-                           Style="{StaticResource M3CardTitle}" />
-
-                    <Label Grid.Row="1"
-                           Grid.ColumnSpan="2"
-                           Text="{Binding RemotePushUnavailableDetail}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-
-                    <controls:ActionListItemView Grid.Row="2"
-                                                 Grid.ColumnSpan="2"
-                                                 Text="Retry server push"
-                                                 ActionIconData="{x:Static controls:IconPathData.Refresh}"
-                                                 Command="{Binding LoadCommand}"
-                                                 GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 SemanticDescription="Retry server push" />
-                </Grid>
+                <controls:NoticePanelView IsVisible="{Binding IsRemotePushUnavailable}"
+                                          Title="{Binding RemotePushUnavailableTitle}"
+                                          Message="{Binding RemotePushUnavailableDetail}"
+                                          IconData="{x:Static controls:IconPathData.Error}"
+                                          PanelStyleResourceKey="M3AttentionStatusPanel"
+                                          IconFrameStyleResourceKey="M3AttentionNoticeIconFrame"
+                                          IconStyleResourceKey="M3AttentionStatusIconTop"
+                                          TitleStyleResourceKey="M3CardTitle"
+                                          MessageStyleResourceKey="M3CardSupportingBlock"
+                                          ActionText="Retry server push"
+                                          ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                          ActionCommand="{Binding LoadCommand}"
+                                          ActionSemanticDescription="Retry server push" />
 
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                      IsVisible="{Binding HasRemotePushPreferences}"

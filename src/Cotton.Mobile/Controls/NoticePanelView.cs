@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -8,6 +9,8 @@ namespace Cotton.Mobile.Controls
     public class NoticePanelView : ContentView
     {
         private const string DefaultGridStyleResourceKey = "M3FileNoticeGrid";
+        private const string DefaultActionGridStyleResourceKey = "M3SettingsListItemGrid";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
         private const string DefaultIconFrameStyleResourceKey = "M3FileNoticeIconFrame";
         private const string DefaultIconStyleResourceKey = "M3FileNoticeIcon";
         private const string DefaultMessageStyleResourceKey = "M3CardSupportingWrap";
@@ -36,6 +39,47 @@ namespace Cotton.Mobile.Controls
             default(Geometry),
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty ActionTextProperty = BindableProperty.Create(
+            nameof(ActionText),
+            typeof(string),
+            typeof(NoticePanelView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
+            nameof(ActionIconData),
+            typeof(Geometry),
+            typeof(NoticePanelView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionCommandProperty = BindableProperty.Create(
+            nameof(ActionCommand),
+            typeof(ICommand),
+            typeof(NoticePanelView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
+            nameof(IsActionEnabled),
+            typeof(bool),
+            typeof(NoticePanelView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
+            nameof(IsActionVisible),
+            typeof(bool),
+            typeof(NoticePanelView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
+            nameof(ActionSemanticDescription),
+            typeof(string),
+            typeof(NoticePanelView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty PanelStyleResourceKeyProperty = BindableProperty.Create(
             nameof(PanelStyleResourceKey),
             typeof(string),
@@ -48,6 +92,20 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(NoticePanelView),
             DefaultGridStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionGridStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ActionGridStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultActionGridStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ActionIconButtonStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultActionIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IconFrameStyleResourceKeyProperty = BindableProperty.Create(
@@ -85,6 +143,7 @@ namespace Cotton.Mobile.Controls
             DefaultMessageStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        private readonly ActionListItemView _actionItem;
         private readonly Grid _grid;
         private readonly IconView _icon;
         private readonly Border _iconFrame;
@@ -113,8 +172,23 @@ namespace Cotton.Mobile.Controls
             };
             Grid.SetColumn(_textStack, 1);
 
+            _actionItem = new ActionListItemView();
+            Grid.SetRow(_actionItem, 1);
+            Grid.SetColumnSpan(_actionItem, 2);
+
             _grid = new Grid
             {
+                RowDefinitions =
+                {
+                    new RowDefinition
+                    {
+                        Height = GridLength.Auto,
+                    },
+                    new RowDefinition
+                    {
+                        Height = GridLength.Auto,
+                    },
+                },
                 ColumnDefinitions =
                 {
                     new ColumnDefinition
@@ -130,6 +204,7 @@ namespace Cotton.Mobile.Controls
                 {
                     _iconFrame,
                     _textStack,
+                    _actionItem,
                 },
             };
 
@@ -160,6 +235,42 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IconDataProperty, value);
         }
 
+        public string ActionText
+        {
+            get => (string)GetValue(ActionTextProperty);
+            set => SetValue(ActionTextProperty, value);
+        }
+
+        public Geometry? ActionIconData
+        {
+            get => (Geometry?)GetValue(ActionIconDataProperty);
+            set => SetValue(ActionIconDataProperty, value);
+        }
+
+        public ICommand? ActionCommand
+        {
+            get => (ICommand?)GetValue(ActionCommandProperty);
+            set => SetValue(ActionCommandProperty, value);
+        }
+
+        public bool IsActionEnabled
+        {
+            get => (bool)GetValue(IsActionEnabledProperty);
+            set => SetValue(IsActionEnabledProperty, value);
+        }
+
+        public bool IsActionVisible
+        {
+            get => (bool)GetValue(IsActionVisibleProperty);
+            set => SetValue(IsActionVisibleProperty, value);
+        }
+
+        public string ActionSemanticDescription
+        {
+            get => (string)GetValue(ActionSemanticDescriptionProperty);
+            set => SetValue(ActionSemanticDescriptionProperty, value);
+        }
+
         public string PanelStyleResourceKey
         {
             get => (string)GetValue(PanelStyleResourceKeyProperty);
@@ -170,6 +281,18 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(GridStyleResourceKeyProperty);
             set => SetValue(GridStyleResourceKeyProperty, value);
+        }
+
+        public string ActionGridStyleResourceKey
+        {
+            get => (string)GetValue(ActionGridStyleResourceKeyProperty);
+            set => SetValue(ActionGridStyleResourceKeyProperty, value);
+        }
+
+        public string ActionIconButtonStyleResourceKey
+        {
+            get => (string)GetValue(ActionIconButtonStyleResourceKeyProperty);
+            set => SetValue(ActionIconButtonStyleResourceKeyProperty, value);
         }
 
         public string IconFrameStyleResourceKey
@@ -212,13 +335,24 @@ namespace Cotton.Mobile.Controls
         {
             string title = Title ?? string.Empty;
             string message = Message ?? string.Empty;
+            string actionText = ActionText ?? string.Empty;
+            string actionSemanticDescription = string.IsNullOrWhiteSpace(ActionSemanticDescription)
+                ? actionText
+                : ActionSemanticDescription;
+            ICommand? actionCommand = ActionCommand;
             string panelStyleResourceKey = ResolveStyleResourceKey(PanelStyleResourceKey, DefaultPanelStyleResourceKey);
             string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string actionGridStyleResourceKey =
+                ResolveStyleResourceKey(ActionGridStyleResourceKey, DefaultActionGridStyleResourceKey);
+            string actionIconButtonStyleResourceKey = ResolveStyleResourceKey(
+                ActionIconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
             string iconFrameStyleResourceKey = ResolveStyleResourceKey(IconFrameStyleResourceKey, DefaultIconFrameStyleResourceKey);
             string iconStyleResourceKey = ResolveStyleResourceKey(IconStyleResourceKey, DefaultIconStyleResourceKey);
             string textStackStyleResourceKey = ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
             string titleStyleResourceKey = ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
             string messageStyleResourceKey = ResolveStyleResourceKey(MessageStyleResourceKey, DefaultMessageStyleResourceKey);
+            bool isActionVisible = IsActionVisible && !string.IsNullOrWhiteSpace(actionText) && actionCommand is not null;
 
             _panel.SetDynamicResource(StyleProperty, panelStyleResourceKey);
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
@@ -233,6 +367,14 @@ namespace Cotton.Mobile.Controls
             _title.IsVisible = !string.IsNullOrWhiteSpace(title);
             _message.Text = message;
             _message.IsVisible = !string.IsNullOrWhiteSpace(message);
+            _actionItem.Text = actionText;
+            _actionItem.ActionIconData = ActionIconData;
+            _actionItem.Command = actionCommand;
+            _actionItem.IsActionEnabled = IsActionEnabled;
+            _actionItem.IsVisible = isActionVisible;
+            _actionItem.GridStyleResourceKey = actionGridStyleResourceKey;
+            _actionItem.ActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
+            _actionItem.SemanticDescription = actionSemanticDescription;
             SemanticProperties.SetDescription(this, BuildSemanticDescription(title, message));
         }
 

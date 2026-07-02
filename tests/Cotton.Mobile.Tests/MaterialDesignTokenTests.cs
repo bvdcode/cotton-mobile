@@ -294,7 +294,6 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:AttentionStatusView", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsRowTapEnabled=\"True\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKey=\"M3ActionListItemGrid\"", notificationSettingsPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("M3AttentionStatusPanel", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry notifications\"", notificationSettingsPage, StringComparison.Ordinal);
         }
 
@@ -302,6 +301,7 @@ namespace Cotton.Mobile.Tests
         public void File_notice_panels_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string noticePanelView = LoadText(NoticePanelViewPath);
 
             Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
@@ -312,11 +312,23 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileNoticeGrid\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconFrameStyleResourceKey = \"M3FileNoticeIconFrame\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStackStyleResourceKey = \"M3FileNoticeTextStack\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding RemotePushUnavailableTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Message=\"{Binding RemotePushUnavailableDetail}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PanelStyleResourceKey=\"M3AttentionStatusPanel\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IconFrameStyleResourceKey=\"M3AttentionNoticeIconFrame\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionText=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionCommand=\"{Binding LoadCommand}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionTextProperty", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("new ActionListItemView", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("_actionItem.Command = actionCommand", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticePanel", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticeGrid", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticeIconFrame", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticeTextStack", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid IsVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ActionListItemView Grid.Row=\"2\"", notificationSettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -350,9 +362,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionSemanticDescription=\"Remove recent file\"", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", recentFilesPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
+            Assert.Equal(1, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Text=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding PermissionActionText}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
 
             Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:ActionListItemView"));

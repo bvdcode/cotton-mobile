@@ -10,7 +10,7 @@
              Shell.NavBarIsVisible="False"
              Title="Sync">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Play}"
                             PrimaryCommand="{Binding RunAllCommand}"
                             PrimaryDescription="Run all sync roots"
@@ -86,5 +86,5 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
         </controls:ScreenScrollBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

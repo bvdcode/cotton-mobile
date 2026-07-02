@@ -1598,6 +1598,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Secondary_screen_scroll_bodies_use_reusable_material_shell()
         {
+            string screenShellView = LoadText(ScreenShellViewPath);
             string screenScrollBodyView = LoadText(ScreenScrollBodyViewPath);
 
             string[] scrollBodyScreenPaths =
@@ -1614,6 +1615,7 @@ namespace Cotton.Mobile.Tests
                 TransfersPagePath,
             ];
 
+            Assert.Contains("public class ScreenShellView", screenShellView, StringComparison.Ordinal);
             Assert.Contains("public class ScreenScrollBodyView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("new ScrollView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("new VerticalStackLayout", screenScrollBodyView, StringComparison.Ordinal);
@@ -1624,7 +1626,9 @@ namespace Cotton.Mobile.Tests
             {
                 string page = LoadText(screenPath);
 
+                Assert.Contains("<controls:ScreenShellView>", page, StringComparison.Ordinal);
                 Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"1\">", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("<ScrollView Grid.Row=\"1\">", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenContentStack}\">", page, StringComparison.Ordinal);
             }

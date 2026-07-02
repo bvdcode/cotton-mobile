@@ -8,7 +8,7 @@
              Shell.NavBarIsVisible="False"
              Title="Camera Backup">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar IsPrimaryActionVisible="False"
                             SecondaryIconData="{x:Static controls:IconPathData.Save}"
                             SecondaryCommand="{Binding SaveCommand}"
@@ -103,5 +103,5 @@
                                                  IsToggled="{Binding AllowCellular, Mode=TwoWay}" />
             </controls:SettingsCardView>
         </controls:ScreenScrollBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

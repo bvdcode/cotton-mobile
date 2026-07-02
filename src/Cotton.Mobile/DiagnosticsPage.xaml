@@ -8,7 +8,7 @@
              Shell.NavBarIsVisible="False"
              Title="Diagnostics">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Copy}"
                             PrimaryCommand="{Binding CopyCommand}"
                             PrimaryDescription="Copy diagnostics"
@@ -48,5 +48,5 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
         </controls:ScreenScrollBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

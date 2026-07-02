@@ -9,7 +9,7 @@
              Shell.NavBarIsVisible="False"
              Title="Transfers">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Play}"
                             PrimaryCommand="{Binding RunWaitingCommand}"
                             PrimaryDescription="Run waiting transfers"
@@ -57,5 +57,5 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
         </controls:ScreenScrollBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

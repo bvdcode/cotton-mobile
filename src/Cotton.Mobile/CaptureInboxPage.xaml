@@ -9,7 +9,7 @@
              Shell.NavBarIsVisible="False"
              Title="Capture Inbox">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearCommand}"
                             PrimaryDescription="Clear capture inbox"
@@ -68,5 +68,5 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
         </controls:ScreenScrollBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

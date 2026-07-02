@@ -48,7 +48,7 @@
                         ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
             <CollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
-                    <Border Style="{StaticResource M3ContentCard}">
+                    <controls:ContentCardView>
                         <controls:ActionListItemView Text="{Binding FileName}"
                                                      SupportingText="{Binding DetailText}"
                                                      TrailingText="{Binding BadgeText}"
@@ -66,7 +66,7 @@
                                                      SupportingTextStyleResourceKey="M3CardSupportingLine"
                                                      ActionSemanticDescription="Remove recent file"
                                                      SemanticDescription="{Binding FileName, StringFormat='Open {0}'}" />
-                    </Border>
+                    </controls:ContentCardView>
                 </DataTemplate>
             </CollectionView.ItemTemplate>
         </CollectionView>

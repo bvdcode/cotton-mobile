@@ -50,8 +50,7 @@
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
 
-            <Border Style="{StaticResource M3ContentCard}"
-                    IsVisible="{Binding IsLoadMoreVisible}">
+            <controls:ContentCardView IsVisible="{Binding IsLoadMoreVisible}">
                 <controls:ActionListItemView Text="Load more"
                                              LeadingIconData="{x:Static controls:IconPathData.Activity}"
                                              IsLeadingIconVisible="True"
@@ -60,7 +59,7 @@
                                              TextStyleResourceKey="M3ActionListItemTitle"
                                              ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                              SemanticDescription="Load more activity" />
-            </Border>
+            </controls:ContentCardView>
         </VerticalStackLayout>
         </ScrollView>
     </Grid>

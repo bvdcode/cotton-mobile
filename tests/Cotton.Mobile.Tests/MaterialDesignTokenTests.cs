@@ -27,6 +27,7 @@ namespace Cotton.Mobile.Tests
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
+        private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
         private const string MetadataCardViewPath = "src/Cotton.Mobile/Controls/MetadataCardView.cs";
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
@@ -640,6 +641,43 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", securitySettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Secondary_content_cards_use_reusable_material_shell()
+        {
+            string recentFilesPage = LoadText(RecentFilesPagePath);
+            string activityFeedPage = LoadText(ActivityFeedPagePath);
+            string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string diagnosticsPage = LoadText(DiagnosticsPagePath);
+            string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string contentCardView = LoadText(ContentCardViewPath);
+
+            Assert.Contains("public class ContentCardView", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("_card.Content = BodyContent", contentCardView, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(recentFilesPage, "<controls:ContentCardView"));
+            Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
+            Assert.Equal(2, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
+            Assert.Equal(1, CountOccurrences(diagnosticsPage, "<controls:ContentCardView"));
+            Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
+            Assert.Contains("Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
+
+            string[] pages =
+            [
+                recentFilesPage,
+                activityFeedPage,
+                captureDestinationPickerPage,
+                diagnosticsPage,
+                syncSettingsPage,
+            ];
+
+            foreach (string page in pages)
+            {
+                Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", page, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

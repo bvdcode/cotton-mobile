@@ -43,7 +43,7 @@
                                  BindableLayout.ItemsSource="{Binding Roots}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Border Style="{StaticResource M3ContentCard}">
+                        <controls:ContentCardView>
                             <Grid ColumnDefinitions="Auto,*,Auto"
                                   RowDefinitions="Auto,Auto,Auto,Auto"
                                   Style="{StaticResource M3SettingsListItemGrid}">
@@ -121,7 +121,7 @@
                                                             IsQuaternaryActionEnabled="{Binding CanStopSync}"
                                                             IsQuaternaryActionVisible="{Binding CanStopSync}" />
                             </Grid>
-                        </Border>
+                        </controls:ContentCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>

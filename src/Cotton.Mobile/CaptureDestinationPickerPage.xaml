@@ -25,7 +25,7 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:ContentCardView>
                 <Grid ColumnDefinitions="Auto,*,Auto,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame IconData="{x:Static controls:IconPathData.Folder}"
@@ -52,7 +52,7 @@
                                          Style="{StaticResource M3PrimaryFileChromeIconButton}"
                                          SemanticProperties.Description="Choose current folder" />
                 </Grid>
-            </Border>
+            </controls:ContentCardView>
 
             <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                            Style="{StaticResource M3FileListSkeletonView}" />
@@ -66,7 +66,7 @@
                                  BindableLayout.ItemsSource="{Binding Folders}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
-                        <Border Style="{StaticResource M3ContentCard}">
+                        <controls:ContentCardView>
                             <controls:ActionListItemView Text="{Binding DisplayName}"
                                                          LeadingIconData="{x:Static controls:IconPathData.Folder}"
                                                          IsLeadingIconVisible="True"
@@ -76,7 +76,7 @@
                                                          GridStyleResourceKey="M3SettingsListItemGrid"
                                                          TextStyleResourceKey="M3SingleLineListItemTitle"
                                                          SemanticDescription="{Binding DisplayName, StringFormat='Open {0}'}" />
-                        </Border>
+                        </controls:ContentCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>

@@ -29,7 +29,7 @@
                                  BindableLayout.ItemsSource="{Binding Sections}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:DiagnosticsSectionViewModel">
-                        <Border Style="{StaticResource M3ContentCard}">
+                        <controls:ContentCardView>
                             <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
                                 <Label Text="{Binding Title}"
                                        Style="{StaticResource M3CardTitle}" />
@@ -55,7 +55,7 @@
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>
                             </VerticalStackLayout>
-                        </Border>
+                        </controls:ContentCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>

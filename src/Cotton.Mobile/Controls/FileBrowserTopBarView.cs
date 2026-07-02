@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultGridStyleResourceKey = "M3FileBrowserTopBar";
         private const string DefaultTitleStackStyleResourceKey = "M3FileBrowserTitleStack";
         private const string DefaultTitleTextStyleResourceKey = "M3BrowserTitleLine";
+        private const string NavigateUpButtonOpacityAnimationName = "M3FileBrowserNavigateUpButtonOpacity";
         private const string PathTextOpacityAnimationName = "M3FileBrowserPathTextOpacity";
         private const string StatusTextOpacityAnimationName = "M3FileBrowserStatusTextOpacity";
 
@@ -71,7 +72,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileBrowserTopBarView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnNavigateUpVisibilityPropertyChanged);
 
         public static readonly BindableProperty NavigateUpButtonOpacityProperty = BindableProperty.Create(
             nameof(NavigateUpButtonOpacity),
@@ -211,6 +212,8 @@ namespace Cotton.Mobile.Controls
         private readonly Label _titleText;
         private readonly VerticalStackLayout _titleStack;
         private readonly IconButton _upButton;
+        private readonly ContentView _upButtonHost;
+        private bool _hasAppliedNavigateUpButtonVisibility;
         private bool _hasAppliedPathTextVisibility;
         private bool _hasAppliedStatusTextVisibility;
 
@@ -219,6 +222,10 @@ namespace Cotton.Mobile.Controls
             _upButton = new IconButton
             {
                 IconData = IconPathData.ArrowUp,
+            };
+            _upButtonHost = new ContentView
+            {
+                Content = _upButton,
             };
             _titleText = new Label();
             _pathText = new Label();
@@ -256,14 +263,17 @@ namespace Cotton.Mobile.Controls
                 },
                 Children =
                 {
-                    _upButton,
+                    _upButtonHost,
                     _titleStack,
                     _actionsContainer,
                 },
             };
 
             Content = _grid;
-            UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: false);
+            UpdateVisualState(
+                animateNavigateUpButtonVisibility: false,
+                animatePathTextVisibility: false,
+                animateStatusTextVisibility: false);
         }
 
         public string Title
@@ -431,7 +441,22 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
-            view.UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: false);
+            view.UpdateVisualState(
+                animateNavigateUpButtonVisibility: false,
+                animatePathTextVisibility: false,
+                animateStatusTextVisibility: false);
+        }
+
+        private static void OnNavigateUpVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
+            view.UpdateVisualState(
+                animateNavigateUpButtonVisibility: true,
+                animatePathTextVisibility: false,
+                animateStatusTextVisibility: false);
         }
 
         private static void OnPathTextVisibilityPropertyChanged(
@@ -440,7 +465,10 @@ namespace Cotton.Mobile.Controls
             object newValue)
         {
             FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
-            view.UpdateVisualState(animatePathTextVisibility: true, animateStatusTextVisibility: false);
+            view.UpdateVisualState(
+                animateNavigateUpButtonVisibility: false,
+                animatePathTextVisibility: true,
+                animateStatusTextVisibility: false);
         }
 
         private static void OnStatusTextVisibilityPropertyChanged(
@@ -449,10 +477,16 @@ namespace Cotton.Mobile.Controls
             object newValue)
         {
             FileBrowserTopBarView view = (FileBrowserTopBarView)bindable;
-            view.UpdateVisualState(animatePathTextVisibility: false, animateStatusTextVisibility: true);
+            view.UpdateVisualState(
+                animateNavigateUpButtonVisibility: false,
+                animatePathTextVisibility: false,
+                animateStatusTextVisibility: true);
         }
 
-        private void UpdateVisualState(bool animatePathTextVisibility, bool animateStatusTextVisibility)
+        private void UpdateVisualState(
+            bool animateNavigateUpButtonVisibility,
+            bool animatePathTextVisibility,
+            bool animateStatusTextVisibility)
         {
             string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string titleStackStyleResourceKey =
@@ -478,8 +512,8 @@ namespace Cotton.Mobile.Controls
 
             _upButton.Command = NavigateUpCommand;
             _upButton.IsEnabled = IsNavigateUpEnabled;
-            _upButton.IsVisible = IsNavigateUpVisible;
             _upButton.ButtonOpacity = NavigateUpButtonOpacity;
+            UpdateNavigateUpButtonVisibility(animateNavigateUpButtonVisibility);
             SemanticProperties.SetDescription(_upButton, "Up");
 
             _titleText.Text = Title ?? string.Empty;
@@ -513,9 +547,20 @@ namespace Cotton.Mobile.Controls
             SemanticProperties.SetDescription(_accountButton, "Account");
         }
 
+        private void UpdateNavigateUpButtonVisibility(bool animateNavigateUpButtonVisibility)
+        {
+            UpdateElementVisibility(
+                _upButtonHost,
+                IsNavigateUpVisible,
+                animateNavigateUpButtonVisibility,
+                ref _hasAppliedNavigateUpButtonVisibility,
+                NavigateUpButtonOpacityAnimationName,
+                CompleteNavigateUpButtonVisibility);
+        }
+
         private void UpdatePathTextVisibility(bool animatePathTextVisibility)
         {
-            UpdateTextVisibility(
+            UpdateElementVisibility(
                 _pathText,
                 IsPathTextActuallyVisible(),
                 animatePathTextVisibility,
@@ -526,7 +571,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateStatusTextVisibility(bool animateStatusTextVisibility)
         {
-            UpdateTextVisibility(
+            UpdateElementVisibility(
                 _statusText,
                 IsStatusTextActuallyVisible(),
                 animateStatusTextVisibility,
@@ -535,35 +580,46 @@ namespace Cotton.Mobile.Controls
                 CompleteStatusTextVisibility);
         }
 
-        private void UpdateTextVisibility(
-            Label textLabel,
-            bool isTextVisible,
-            bool animateTextVisibility,
-            ref bool hasAppliedTextVisibility,
+        private void UpdateElementVisibility(
+            VisualElement element,
+            bool isElementVisible,
+            bool animateVisibility,
+            ref bool hasAppliedVisibility,
             string animationName,
             Action completeVisibility)
         {
-            bool shouldAnimate = animateTextVisibility && hasAppliedTextVisibility;
-            double targetOpacity = isTextVisible
+            bool shouldAnimate = animateVisibility && hasAppliedVisibility;
+            double targetOpacity = isElementVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
                 : MaterialMotion.Value("M3MotionHiddenOpacity");
             int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
 
-            if (isTextVisible)
+            if (isElementVisible)
             {
-                textLabel.IsVisible = true;
+                element.IsVisible = true;
             }
 
             MaterialMotion.UpdateDouble(
-                textLabel,
-                textLabel.Opacity,
+                element,
+                element.Opacity,
                 targetOpacity,
                 duration,
                 animationName,
                 shouldAnimate,
-                opacity => textLabel.Opacity = opacity,
+                opacity => element.Opacity = opacity,
                 completeVisibility);
-            hasAppliedTextVisibility = true;
+            hasAppliedVisibility = true;
+        }
+
+        private void CompleteNavigateUpButtonVisibility()
+        {
+            if (IsNavigateUpVisible)
+            {
+                _upButtonHost.IsVisible = true;
+                return;
+            }
+
+            _upButtonHost.IsVisible = false;
         }
 
         private void CompletePathTextVisibility()

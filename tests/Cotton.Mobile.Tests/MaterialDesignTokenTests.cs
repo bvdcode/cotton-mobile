@@ -949,11 +949,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3FileBrowserActionCluster\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("new ActionClusterView", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("new InitialsButton", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_upButtonHost = new ContentView", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("IsSearchActive ? IconPathData.Close : IconPathData.Search", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionsContainer.SetDynamicResource(StyleProperty, actionsContainerStyleResourceKey)", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("NavigateUpButtonOpacityAnimationName = \"M3FileBrowserNavigateUpButtonOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("PathTextOpacityAnimationName = \"M3FileBrowserPathTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("StatusTextOpacityAnimationName = \"M3FileBrowserStatusTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("OnNavigateUpVisibilityPropertyChanged", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("OnPathTextVisibilityPropertyChanged", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("OnStatusTextVisibilityPropertyChanged", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionButtonOpacityAnimationName = \"M3ActionClusterPrimaryButtonOpacity\"", actionClusterView, StringComparison.Ordinal);
@@ -964,6 +967,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialMotion.UpdateDouble(", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("CompleteNavigateUpButtonVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("CompletePathTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("CompleteStatusTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", actionClusterView, StringComparison.Ordinal);
@@ -986,6 +990,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.ViewTiles}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TargetType=\"controls:ActionClusterView\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Property=\"PrimaryActionIconData\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_upButton.IsVisible = IsNavigateUpVisible", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.DoesNotContain("_pathText.IsVisible = IsPathTextVisible", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.DoesNotContain("_statusText.IsVisible = IsStatusTextVisible", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.DoesNotContain(

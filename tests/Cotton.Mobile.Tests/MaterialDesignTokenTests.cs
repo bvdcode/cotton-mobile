@@ -1537,19 +1537,25 @@ namespace Cotton.Mobile.Tests
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string screenContentGridView = LoadText(ScreenContentGridViewPath);
+            string trashPage = LoadText(TrashPagePath);
 
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"2\">", trashPage, StringComparison.Ordinal);
             Assert.Contains("public class ScreenContentGridView", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new Grid", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new RowDefinition { Height = GridLength.Auto }", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new RowDefinition { Height = GridLength.Star }", screenContentGridView, StringComparison.Ordinal);
+            Assert.Contains("ExtraAutoRowsProperty", screenContentGridView, StringComparison.Ordinal);
+            Assert.Contains("int extraAutoRows = Math.Max(0, ExtraAutoRows)", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3ScreenContentGrid\"", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", screenContentGridView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,Auto,Auto,*\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", trashPage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -22,9 +22,8 @@
                             TertiaryCommand="{Binding LoadCommand}"
                             TertiaryDescription="Refresh trash" />
 
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,Auto,Auto,Auto,*"
-              Style="{StaticResource M3ScreenContentGrid}">
+        <controls:ScreenContentGridView Grid.Row="1"
+                                        ExtraAutoRows="2">
         <controls:ScreenHeaderView Title="Trash"
                                    SupportingText="{Binding SummaryText}"
                                    IsBusy="{Binding IsBusy}">
@@ -141,6 +140,6 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
         </Grid>
-        </Grid>
+        </controls:ScreenContentGridView>
     </Grid>
 </ContentPage>

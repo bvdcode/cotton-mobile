@@ -22,19 +22,16 @@
                             SecondaryDescription="Open media" />
 
         <controls:DarkViewerSurfaceView Grid.Row="1">
-            <Grid Style="{StaticResource M3DarkViewerSurface}">
-                <toolkit:MediaElement x:Name="MediaPlayer"
-                                      Aspect="AspectFit"
-                                      ShouldAutoPlay="False"
-                                      ShouldLoopPlayback="False"
-                                      ShouldShowPlaybackControls="True"
-                                      Style="{StaticResource M3ViewerMediaElement}" />
+            <toolkit:MediaElement x:Name="MediaPlayer"
+                                  Aspect="AspectFit"
+                                  ShouldAutoPlay="False"
+                                  ShouldLoopPlayback="False"
+                                  ShouldShowPlaybackControls="True"
+                                  Style="{StaticResource M3ViewerMediaElement}" />
 
-                <controls:ViewerPlayOverlayView x:Name="StartOverlay"
-                                                Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
-                                                SemanticDescription="Play media" />
-
-            </Grid>
+            <controls:ViewerPlayOverlayView x:Name="StartOverlay"
+                                            Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
+                                            SemanticDescription="Play media" />
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
                                               IsVisible="{Binding IsStatusVisible}" />

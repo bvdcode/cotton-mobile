@@ -20,21 +20,19 @@
                             SecondaryCommand="{Binding OpenExternallyCommand}"
                             SecondaryDescription="Open image" />
 
-        <controls:DarkViewerSurfaceView Grid.Row="1">
-            <Grid x:Name="ImageSurface"
-                  Style="{StaticResource M3DarkViewerSurface}">
-                <Image x:Name="PreviewImage"
-                       Source="{Binding ImageSource}"
-                       Aspect="AspectFit"
-                       Style="{StaticResource M3ViewerImage}">
-                    <Image.GestureRecognizers>
-                        <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
-                        <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
-                        <TapGestureRecognizer NumberOfTapsRequired="2"
-                                              Tapped="OnImageDoubleTapped" />
-                    </Image.GestureRecognizers>
-                </Image>
-            </Grid>
+        <controls:DarkViewerSurfaceView Grid.Row="1"
+                                        x:Name="ImageSurface">
+            <Image x:Name="PreviewImage"
+                   Source="{Binding ImageSource}"
+                   Aspect="AspectFit"
+                   Style="{StaticResource M3ViewerImage}">
+                <Image.GestureRecognizers>
+                    <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
+                    <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
+                    <TapGestureRecognizer NumberOfTapsRequired="2"
+                                          Tapped="OnImageDoubleTapped" />
+                </Image.GestureRecognizers>
+            </Image>
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
                                               IsVisible="{Binding IsStatusVisible}"

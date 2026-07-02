@@ -1430,8 +1430,10 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", mediaViewerPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\"\n                                        x:Name=\"ImageSurface\">", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<Image x:Name=\"PreviewImage\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<toolkit:MediaElement x:Name=\"MediaPlayer\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerOverlayActionButtonView x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
@@ -1459,6 +1461,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", darkViewerSurfaceView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\"\n          Style=\"{StaticResource M3DarkViewerSurface}\">", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\"\n          Style=\"{StaticResource M3DarkViewerSurface}\">", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3DarkViewerSurface}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3DarkViewerSurface}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid x:Name=\"ImageSurface\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);

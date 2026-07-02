@@ -290,6 +290,59 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Error_attention_surfaces_use_container_roles()
+        {
+            const string errorContainerBinding = "{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}";
+            const string onErrorContainerBinding = "{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}";
+            const string errorBinding = "{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}";
+
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            XDocument type = LoadResourceDictionary(TypeResourcePath);
+            IReadOnlyDictionary<string, string> attentionPanelSetters =
+                GetStyleSetters(styles, "M3AttentionStatusPanel");
+            IReadOnlyDictionary<string, string> attentionIconSetters =
+                GetStyleSetters(styles, "M3AttentionStatusIcon");
+            IReadOnlyDictionary<string, string> attentionIconFrameSetters =
+                GetStyleSetters(styles, "M3AttentionNoticeIconFrame");
+            IReadOnlyDictionary<string, string> attentionMessageSetters =
+                GetStyleSetters(styles, "M3AttentionStatusMessage");
+            IReadOnlyDictionary<string, string> fileErrorPanelSetters =
+                GetStyleSetters(styles, "M3FileErrorStatusPanel");
+            IReadOnlyDictionary<string, string> fileErrorIconSetters =
+                GetStyleSetters(styles, "M3FileErrorStatusIcon");
+            IReadOnlyDictionary<string, string> fileErrorTextSetters =
+                GetStyleSetters(styles, "M3FileErrorStatusPrimaryText");
+            IReadOnlyDictionary<string, string> fileAttentionChipSetters =
+                GetStyleSetters(styles, "M3FileAttentionChip");
+            IReadOnlyDictionary<string, string> errorChipLabelSetters =
+                GetStyleSetters(type, "M3ErrorChipLabel");
+            IReadOnlyDictionary<string, string> destructiveIconButtonSetters =
+                GetStyleSetters(styles, "M3DestructiveFileChromeIconButton");
+            IReadOnlyDictionary<string, string> destructiveActionSheetSetters =
+                GetStyleSetters(styles, "M3ActionSheetDestructiveItem");
+
+            Assert.Equal(errorContainerBinding, attentionPanelSetters["Stroke"]);
+            Assert.Equal(errorContainerBinding, attentionPanelSetters["BackgroundColor"]);
+            Assert.Equal(onErrorContainerBinding, attentionIconSetters["IconColor"]);
+            Assert.Equal(errorContainerBinding, attentionIconFrameSetters["Stroke"]);
+            Assert.Equal(errorContainerBinding, attentionIconFrameSetters["BackgroundColor"]);
+            Assert.Equal(onErrorContainerBinding, attentionMessageSetters["TextColor"]);
+
+            Assert.Equal(errorContainerBinding, fileErrorPanelSetters["Stroke"]);
+            Assert.Equal(errorContainerBinding, fileErrorPanelSetters["BackgroundColor"]);
+            Assert.Equal(onErrorContainerBinding, fileErrorIconSetters["IconColor"]);
+            Assert.Equal(onErrorContainerBinding, fileErrorTextSetters["TextColor"]);
+            Assert.Equal(errorContainerBinding, fileAttentionChipSetters["Stroke"]);
+            Assert.Equal(errorContainerBinding, fileAttentionChipSetters["BackgroundColor"]);
+            Assert.Equal(onErrorContainerBinding, errorChipLabelSetters["TextColor"]);
+
+            Assert.Equal(errorBinding, destructiveIconButtonSetters["IconColor"]);
+            Assert.Equal(errorBinding, destructiveActionSheetSetters["TextColor"]);
+            Assert.Equal(errorBinding, destructiveActionSheetSetters["IconColor"]);
+            Assert.Equal(errorBinding, destructiveActionSheetSetters["SelectedIconColor"]);
+        }
+
+        [Fact]
         public void Control_color_fallbacks_use_brand_accent_not_primary_alias()
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));

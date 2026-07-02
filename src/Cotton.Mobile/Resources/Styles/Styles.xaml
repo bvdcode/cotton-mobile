@@ -170,7 +170,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3AttentionStatusPanel">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
@@ -178,11 +178,11 @@
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3InlineStatusPanelPadding}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3AttentionStatusIcon">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
         <Setter Property="IconSize" Value="{StaticResource M3InlineStatusIconSize}" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
@@ -194,13 +194,14 @@
     <Style TargetType="Border" x:Key="M3AttentionNoticeIconFrame">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
-        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
-        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
-        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3AttentionStatusMessage" BasedOn="{StaticResource M3ErrorSupportingBlock}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
 
@@ -487,7 +488,8 @@
     <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3StatusPanel}" />
 
     <Style TargetType="Border" x:Key="M3FileErrorStatusPanel" BasedOn="{StaticResource M3FileStatusPanel}">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileStatusGrid">
@@ -508,7 +510,7 @@
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FileErrorStatusIcon" BasedOn="{StaticResource M3FileStatusIcon}">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3FileStatusPrimaryText" BasedOn="{StaticResource M3CardSupportingStrong}">
@@ -519,7 +521,7 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3FileErrorStatusPrimaryText" BasedOn="{StaticResource M3FileStatusPrimaryText}">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3FileStatusMetaText" BasedOn="{StaticResource M3CardMeta}">
@@ -595,7 +597,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileAttentionChip">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
@@ -603,7 +605,7 @@
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Padding" Value="{StaticResource M3CompactChipPadding}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileListRowGrid">

@@ -336,19 +336,18 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string cardStyleResourceKey = string.IsNullOrWhiteSpace(CardStyleResourceKey)
-                ? DefaultCardStyleResourceKey
-                : CardStyleResourceKey;
-            string actionClusterStyleResourceKey = string.IsNullOrWhiteSpace(ActionClusterStyleResourceKey)
-                ? DefaultActionClusterStyleResourceKey
-                : ActionClusterStyleResourceKey;
-            string primaryDetailTextStyleResourceKey = string.IsNullOrWhiteSpace(PrimaryDetailTextStyleResourceKey)
-                ? DefaultPrimaryDetailTextStyleResourceKey
-                : PrimaryDetailTextStyleResourceKey;
-            string secondaryActionIconButtonStyleResourceKey =
-                string.IsNullOrWhiteSpace(SecondaryActionIconButtonStyleResourceKey)
-                    ? DefaultSecondaryActionIconButtonStyleResourceKey
-                    : SecondaryActionIconButtonStyleResourceKey;
+            string cardStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                CardStyleResourceKey,
+                DefaultCardStyleResourceKey);
+            string actionClusterStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionClusterStyleResourceKey,
+                DefaultActionClusterStyleResourceKey);
+            string primaryDetailTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                PrimaryDetailTextStyleResourceKey,
+                DefaultPrimaryDetailTextStyleResourceKey);
+            string secondaryActionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SecondaryActionIconButtonStyleResourceKey,
+                DefaultSecondaryActionIconButtonStyleResourceKey);
 
             _card.CardStyleResourceKey = cardStyleResourceKey;
 

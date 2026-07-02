@@ -9,6 +9,10 @@ namespace Cotton.Mobile.Controls
     {
         private const string ActionContentOpacityAnimationName = "M3ScreenHeaderActionContentOpacity";
         private const string BusyFrameOpacityAnimationName = "M3ScreenHeaderBusyFrameOpacity";
+        private const string DefaultDetailTextStyleResourceKey = "M3ScreenHeaderSupporting";
+        private const string DefaultSupportingTextMultilineStyleResourceKey = "M3ScreenHeaderSupportingMultiline";
+        private const string DefaultSupportingTextStyleResourceKey = "M3ScreenHeaderSupporting";
+        private const string DefaultTitleStyleResourceKey = "M3ScreenTitle";
         private const string DetailTextOpacityAnimationName = "M3ScreenHeaderDetailTextOpacity";
         private const string SupportingTextOpacityAnimationName = "M3ScreenHeaderSupportingTextOpacity";
 
@@ -23,7 +27,7 @@ namespace Cotton.Mobile.Controls
             nameof(TitleStyleResourceKey),
             typeof(string),
             typeof(ScreenHeaderView),
-            "M3ScreenTitle",
+            DefaultTitleStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty SupportingTextProperty = BindableProperty.Create(
@@ -65,7 +69,7 @@ namespace Cotton.Mobile.Controls
             nameof(DetailTextStyleResourceKey),
             typeof(string),
             typeof(ScreenHeaderView),
-            "M3ScreenHeaderSupporting",
+            DefaultDetailTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IsDetailTextVisibleProperty = BindableProperty.Create(
@@ -105,7 +109,7 @@ namespace Cotton.Mobile.Controls
         public ScreenHeaderView()
         {
             _title = new Label();
-            _title.SetDynamicResource(StyleProperty, "M3ScreenTitle");
+            _title.SetDynamicResource(StyleProperty, DefaultTitleStyleResourceKey);
 
             _supportingText = new Label();
 
@@ -309,15 +313,18 @@ namespace Cotton.Mobile.Controls
             string title = Title ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
             string detailText = DetailText ?? string.Empty;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? "M3ScreenTitle"
-                : TitleStyleResourceKey;
-            string supportingTextStyleResourceKey = string.IsNullOrWhiteSpace(SupportingTextStyleResourceKey)
-                ? IsSupportingTextMultiline ? "M3ScreenHeaderSupportingMultiline" : "M3ScreenHeaderSupporting"
-                : SupportingTextStyleResourceKey;
-            string detailTextStyleResourceKey = string.IsNullOrWhiteSpace(DetailTextStyleResourceKey)
-                ? "M3ScreenHeaderSupporting"
-                : DetailTextStyleResourceKey;
+            string defaultSupportingTextStyleResourceKey = IsSupportingTextMultiline
+                ? DefaultSupportingTextMultilineStyleResourceKey
+                : DefaultSupportingTextStyleResourceKey;
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SupportingTextStyleResourceKey,
+                defaultSupportingTextStyleResourceKey);
+            string detailTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailTextStyleResourceKey,
+                DefaultDetailTextStyleResourceKey);
 
             _title.Text = title;
             _title.SetDynamicResource(StyleProperty, titleStyleResourceKey);

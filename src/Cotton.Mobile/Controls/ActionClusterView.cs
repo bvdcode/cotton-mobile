@@ -419,9 +419,9 @@ namespace Cotton.Mobile.Controls
         private void UpdateVisualState(bool animateActionVisibility)
         {
             bool shouldAnimateVisibility = animateActionVisibility && _hasAppliedActionVisibilityState;
-            string clusterStyleResourceKey = string.IsNullOrWhiteSpace(ClusterStyleResourceKey)
-                ? DefaultClusterStyleResourceKey
-                : ClusterStyleResourceKey;
+            string clusterStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ClusterStyleResourceKey,
+                DefaultClusterStyleResourceKey);
 
             SetDynamicResource(StyleProperty, clusterStyleResourceKey);
 
@@ -484,9 +484,9 @@ namespace Cotton.Mobile.Controls
             string opacityAnimationName,
             bool animateVisibility)
         {
-            string styleResourceKey = string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
-                ? DefaultActionIconButtonStyleResourceKey
-                : iconButtonStyleResourceKey;
+            string styleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                iconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
             bool isActionVisible = isVisible && iconData is not null && command is not null;
             double targetOpacity = isActionVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")

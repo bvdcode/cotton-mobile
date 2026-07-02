@@ -74,12 +74,12 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
-            string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
-                ? DefaultSurfaceStyleResourceKey
-                : SurfaceStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SurfaceStyleResourceKey,
+                DefaultSurfaceStyleResourceKey);
             int columnCount = Math.Max(1, ColumnCount);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);

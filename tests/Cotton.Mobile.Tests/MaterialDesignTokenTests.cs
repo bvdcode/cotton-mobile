@@ -2006,6 +2006,14 @@ namespace Cotton.Mobile.Tests
                 ("MetadataCardHeaderView.cs", 7),
                 ("MetadataCardView.cs", 3),
             ];
+            (string ControlName, int ExpectedResolutionCount)[] chromeControls =
+            [
+                ("ActionClusterView.cs", 2),
+                ("FloatingActionButtonView.cs", 1),
+                ("NavigationBarView.cs", 2),
+                ("ScreenHeaderView.cs", 3),
+                ("SettingsActionHeaderCardView.cs", 4),
+            ];
 
             foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))
             {
@@ -2049,6 +2057,16 @@ namespace Cotton.Mobile.Tests
             }
 
             foreach ((string controlName, int expectedResolutionCount) in actionMetadataControls)
+            {
+                string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
+
+                Assert.Equal(
+                    expectedResolutionCount,
+                    CountOccurrences(control, "MaterialResources.ResolveStyleResourceKey("));
+                Assert.DoesNotContain("StyleResourceKey = string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
+            }
+
+            foreach ((string controlName, int expectedResolutionCount) in chromeControls)
             {
                 string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
 

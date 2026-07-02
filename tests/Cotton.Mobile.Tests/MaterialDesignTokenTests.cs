@@ -612,6 +612,11 @@ namespace Cotton.Mobile.Tests
             string materialDialogPage = LoadText(MaterialDialogPagePath);
             string materialActionSheetPage = LoadText(MaterialActionSheetPagePath);
             string combinedModalPages = materialDialogPage + materialActionSheetPage;
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> dialogSurfaceSetters =
+                GetStyleSetters(styles, "M3DialogSurface");
+            IReadOnlyDictionary<string, string> actionSheetSurfaceSetters =
+                GetStyleSetters(styles, "M3ActionSheetSurface");
 
             Assert.DoesNotContain("Style = MaterialResources.Get<Style>", combinedModalPages, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, \"M3ModalPage\")", materialDialogPage, StringComparison.Ordinal);
@@ -635,6 +640,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialMotion.UpdateDouble(", actionSheetItemView, StringComparison.Ordinal);
             Assert.Contains("M3MotionSelectionHiddenScale", actionSheetItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}",
+                dialogSurfaceSetters["BackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
+                actionSheetSurfaceSetters["BackgroundColor"]);
             Assert.DoesNotContain("_selectedIcon.IsVisible = IsSelected", actionSheetItemView, StringComparison.Ordinal);
         }
 

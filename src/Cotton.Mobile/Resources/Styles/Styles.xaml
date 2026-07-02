@@ -1156,7 +1156,7 @@
                 <RoundRectangle CornerRadius="{StaticResource M3DialogCornerRadius}" />
             </Setter.Value>
         </Setter>
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3DialogTitle" BasedOn="{StaticResource M3PanelTitle}">
@@ -1423,7 +1423,7 @@
                 <RoundRectangle CornerRadius="{StaticResource M3ActionSheetCornerRadius}" />
             </Setter.Value>
         </Setter>
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3ActionSheetStack">

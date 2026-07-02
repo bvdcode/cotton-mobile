@@ -67,6 +67,7 @@ namespace Cotton.Mobile.Tests
         private const string StackedContentViewPath = "src/Cotton.Mobile/Controls/StackedContentView.cs";
         private const string StackedItemsViewPath = "src/Cotton.Mobile/Controls/StackedItemsView.cs";
         private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
+        private const string FileBrowserNavigationBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserNavigationBarView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
@@ -736,19 +737,41 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Bottom_navigation_uses_reusable_material_shell()
         {
+            string fileBrowserNavigationBarView = LoadText(FileBrowserNavigationBarViewPath);
             string mainPage = LoadText(MainPagePath);
             string navigationBarView = LoadText(NavigationBarViewPath);
 
-            Assert.Contains("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Equal(4, CountOccurrences(mainPage, "<controls:NavigationBarItem"));
+            Assert.Contains("FilesText=\"{Binding Display.FilesNavigation.Label}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("FilesSemanticDescription=\"{Binding Display.FilesNavigation.AccessibilityText}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SyncCommand=\"{Binding OpenSyncSettingsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsSyncEnabled=\"{Binding Display.IsProfileVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("BackupText=\"{Binding Display.BackupNavigation.Label}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("BackupCommand=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("MoreCommand=\"{Binding AccountCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsMoreEnabled=\"{Binding Display.IsAccountActionEnabled}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class FileBrowserNavigationBarView", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("new NavigationBarView", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Equal(4, CountOccurrences(fileBrowserNavigationBarView, "CreateItem(IconPathData."));
+            Assert.Contains("CreateItem(IconPathData.Folder, DefaultSelectedItemStyleResourceKey, 0)", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("CreateItem(IconPathData.Transfer, DefaultUnselectedItemStyleResourceKey, 1)", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("CreateItem(IconPathData.Backup, DefaultUnselectedItemStyleResourceKey, 2)", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("CreateItem(IconPathData.MoreVertical, DefaultUnselectedItemStyleResourceKey, 3)", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSelectedItemStyleResourceKey = \"M3NavigationBarItemSelected\"", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultUnselectedItemStyleResourceKey = \"M3NavigationBarItemUnselected\"", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("SemanticProperties.SetDescription(item, semanticDescription ?? string.Empty)", fileBrowserNavigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultColumnCount = 4", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3NavigationBarGrid\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3NavigationBarSurface\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", navigationBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:NavigationBarItem", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarSurface}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarGrid}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarItemSelected}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarItemUnselected}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ColumnDefinitions=\"*,*,*,*\"", mainPage, StringComparison.Ordinal);
         }
 

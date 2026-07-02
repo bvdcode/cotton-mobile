@@ -234,38 +234,20 @@
                                            IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                            SemanticDescription="Add files" />
 
-        <controls:NavigationBarView Grid.Row="2"
-                                    IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}">
-            <controls:NavigationBarItem Grid.Column="0"
-                                        Style="{StaticResource M3NavigationBarItemSelected}"
-                                        IconData="{x:Static controls:IconPathData.Folder}"
-                                        Text="{Binding Display.FilesNavigation.Label}"
-                                        SemanticProperties.Description="{Binding Display.FilesNavigation.AccessibilityText}" />
-
-            <controls:NavigationBarItem Grid.Column="1"
-                                        Style="{StaticResource M3NavigationBarItemUnselected}"
-                                        IconData="{x:Static controls:IconPathData.Transfer}"
-                                        Text="Sync"
-                                        Command="{Binding OpenSyncSettingsCommand}"
-                                        IsEnabled="{Binding Display.IsProfileVisible}"
-                                        SemanticProperties.Description="Open sync folders" />
-
-            <controls:NavigationBarItem Grid.Column="2"
-                                        Style="{StaticResource M3NavigationBarItemUnselected}"
-                                        IconData="{x:Static controls:IconPathData.Backup}"
-                                        Text="{Binding Display.BackupNavigation.Label}"
-                                        Command="{Binding OpenBackupSetupCommand}"
-                                        IsEnabled="{Binding Display.IsProfileVisible}"
-                                        SemanticProperties.Description="{Binding Display.BackupNavigation.AccessibilityText}" />
-
-            <controls:NavigationBarItem Grid.Column="3"
-                                        Style="{StaticResource M3NavigationBarItemUnselected}"
-                                        IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                        Text="More"
-                                        Command="{Binding AccountCommand}"
-                                        IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                        SemanticProperties.Description="{Binding Display.SettingsNavigation.AccessibilityText}" />
-        </controls:NavigationBarView>
+        <controls:FileBrowserNavigationBarView Grid.Row="2"
+                                               IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
+                                               FilesText="{Binding Display.FilesNavigation.Label}"
+                                               FilesSemanticDescription="{Binding Display.FilesNavigation.AccessibilityText}"
+                                               SyncCommand="{Binding OpenSyncSettingsCommand}"
+                                               IsSyncEnabled="{Binding Display.IsProfileVisible}"
+                                               SyncSemanticDescription="Open sync folders"
+                                               BackupText="{Binding Display.BackupNavigation.Label}"
+                                               BackupCommand="{Binding OpenBackupSetupCommand}"
+                                               IsBackupEnabled="{Binding Display.IsProfileVisible}"
+                                               BackupSemanticDescription="{Binding Display.BackupNavigation.AccessibilityText}"
+                                               MoreCommand="{Binding AccountCommand}"
+                                               IsMoreEnabled="{Binding Display.IsAccountActionEnabled}"
+                                               MoreSemanticDescription="{Binding Display.SettingsNavigation.AccessibilityText}" />
 
     </Grid>
 

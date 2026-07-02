@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionListItemView : ContentView
     {
+        private const string LeadingIconOpacityAnimationName = "M3ActionListLeadingIconOpacity";
         private const string SupportingTextOpacityAnimationName = "M3ActionListSupportingTextOpacity";
         private const string TrailingChipOpacityAnimationName = "M3ActionListTrailingChipOpacity";
 
@@ -53,14 +54,14 @@ namespace Cotton.Mobile.Controls
             typeof(Geometry),
             typeof(ActionListItemView),
             default(Geometry),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsLeadingIconVisibleProperty = BindableProperty.Create(
             nameof(IsLeadingIconVisible),
             typeof(bool),
             typeof(ActionListItemView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
 
         public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
             nameof(ActionIconData),
@@ -186,6 +187,7 @@ namespace Cotton.Mobile.Controls
         private readonly TouchSurfaceView _touchSurface;
         private readonly Border _trailingChip;
         private readonly Label _trailingText;
+        private bool _hasAppliedLeadingIconVisibility;
         private bool _hasAppliedSupportingTextVisibility;
         private bool _hasAppliedTrailingChipVisibility;
 
@@ -251,7 +253,10 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState(animateSupportingTextVisibility: false, animateTrailingChipVisibility: false);
+            UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: false,
+                animateTrailingChipVisibility: false);
         }
 
         public string Text
@@ -402,6 +407,19 @@ namespace Cotton.Mobile.Controls
         {
             ActionListItemView actionListItemView = (ActionListItemView)bindable;
             actionListItemView.UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: false,
+                animateTrailingChipVisibility: false);
+        }
+
+        private static void OnLeadingIconVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            ActionListItemView actionListItemView = (ActionListItemView)bindable;
+            actionListItemView.UpdateVisualState(
+                animateLeadingIconVisibility: true,
                 animateSupportingTextVisibility: false,
                 animateTrailingChipVisibility: false);
         }
@@ -413,6 +431,7 @@ namespace Cotton.Mobile.Controls
         {
             ActionListItemView actionListItemView = (ActionListItemView)bindable;
             actionListItemView.UpdateVisualState(
+                animateLeadingIconVisibility: false,
                 animateSupportingTextVisibility: true,
                 animateTrailingChipVisibility: false);
         }
@@ -424,11 +443,15 @@ namespace Cotton.Mobile.Controls
         {
             ActionListItemView actionListItemView = (ActionListItemView)bindable;
             actionListItemView.UpdateVisualState(
+                animateLeadingIconVisibility: false,
                 animateSupportingTextVisibility: false,
                 animateTrailingChipVisibility: true);
         }
 
-        private void UpdateVisualState(bool animateSupportingTextVisibility, bool animateTrailingChipVisibility)
+        private void UpdateVisualState(
+            bool animateLeadingIconVisibility,
+            bool animateSupportingTextVisibility,
+            bool animateTrailingChipVisibility)
         {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
@@ -464,6 +487,9 @@ namespace Cotton.Mobile.Controls
                 ? "M3FileChromeIconButton"
                 : ActionIconButtonStyleResourceKey;
             bool isLeadingIconVisible = IsLeadingIconVisible && LeadingIconData is not null;
+            bool isLeadingIconLayoutVisible = ResolveLeadingIconLayoutVisibility(
+                isLeadingIconVisible,
+                animateLeadingIconVisibility);
             bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText);
             bool isTrailingChipLayoutVisible = ResolveTrailingChipLayoutVisibility(
                 isTrailingChipVisible,
@@ -484,13 +510,17 @@ namespace Cotton.Mobile.Controls
             _trailingText.SetDynamicResource(StyleProperty, trailingTextStyleResourceKey);
             _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
 
-            _leadingIcon.IconData = LeadingIconData;
-            _leadingIcon.IsVisible = isLeadingIconVisible;
+            if (isLeadingIconVisible)
+            {
+                _leadingIcon.IconData = LeadingIconData;
+            }
+
+            UpdateLeadingIconVisibility(isLeadingIconVisible, animateLeadingIconVisibility);
             _text.Text = text;
             _supportingText.Text = supportingText;
             UpdateSupportingTextVisibility(supportingText, animateSupportingTextVisibility);
-            Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(isLeadingIconVisible, isTrailingChipLayoutVisible));
+            Grid.SetColumn(_textStack, isLeadingIconLayoutVisible ? 1 : 0);
+            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(isLeadingIconLayoutVisible, isTrailingChipLayoutVisible));
 
             _trailingText.Text = trailingText;
             UpdateTrailingChipVisibility(trailingText, animateTrailingChipVisibility);
@@ -505,6 +535,31 @@ namespace Cotton.Mobile.Controls
             _touchSurface.TapCommandParameter = rowTapCommandParameter;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && rowTapCommand is not null;
             SemanticProperties.SetDescription(_container, semanticDescription);
+        }
+
+        private void UpdateLeadingIconVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
+        {
+            bool shouldAnimate = animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility;
+            double targetOpacity = isLeadingIconVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isLeadingIconVisible)
+            {
+                _leadingIcon.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _leadingIcon,
+                _leadingIcon.Opacity,
+                targetOpacity,
+                duration,
+                LeadingIconOpacityAnimationName,
+                shouldAnimate,
+                opacity => _leadingIcon.Opacity = opacity,
+                CompleteLeadingIconVisibility);
+            _hasAppliedLeadingIconVisibility = true;
         }
 
         private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
@@ -570,6 +625,23 @@ namespace Cotton.Mobile.Controls
             _supportingText.IsVisible = false;
         }
 
+        private void CompleteLeadingIconVisibility()
+        {
+            if (IsLeadingIconActuallyVisible())
+            {
+                _leadingIcon.IconData = LeadingIconData;
+                _leadingIcon.IsVisible = true;
+                return;
+            }
+
+            _leadingIcon.IconData = null;
+            _leadingIcon.IsVisible = false;
+            bool isTrailingChipLayoutVisible =
+                IsTrailingChipActuallyVisible(TrailingText ?? string.Empty) || _trailingChip.IsVisible;
+            Grid.SetColumn(_textStack, 0);
+            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(false, isTrailingChipLayoutVisible));
+        }
+
         private void CompleteTrailingChipVisibility()
         {
             if (IsTrailingChipActuallyVisible(TrailingText ?? string.Empty))
@@ -599,6 +671,23 @@ namespace Cotton.Mobile.Controls
             }
 
             return animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility && _trailingChip.IsVisible;
+        }
+
+        private bool ResolveLeadingIconLayoutVisibility(
+            bool isLeadingIconVisible,
+            bool animateLeadingIconVisibility)
+        {
+            if (isLeadingIconVisible)
+            {
+                return true;
+            }
+
+            return animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility && _leadingIcon.IsVisible;
+        }
+
+        private bool IsLeadingIconActuallyVisible()
+        {
+            return IsLeadingIconVisible && LeadingIconData is not null;
         }
 
         private bool IsTrailingChipActuallyVisible(string trailingText)

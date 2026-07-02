@@ -16,6 +16,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTextStackStyleResourceKey = "M3SettingsDenseStack";
         private const string DefaultTextStyleResourceKey = "M3LabelLargeLine";
         private const string DetailTextOpacityAnimationName = "M3SettingsToggleDetailTextOpacity";
+        private const string LeadingIconOpacityAnimationName = "M3SettingsToggleLeadingIconOpacity";
         private const string SupportingTextOpacityAnimationName = "M3SettingsToggleSupportingTextOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
@@ -58,14 +59,14 @@ namespace Cotton.Mobile.Controls
             typeof(Geometry),
             typeof(SettingsToggleItemView),
             default(Geometry),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsLeadingIconVisibleProperty = BindableProperty.Create(
             nameof(IsLeadingIconVisible),
             typeof(bool),
             typeof(SettingsToggleItemView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsToggledProperty = BindableProperty.Create(
             nameof(IsToggled),
@@ -148,6 +149,7 @@ namespace Cotton.Mobile.Controls
         private readonly Command _toggleCommand;
         private readonly ToggleSwitch _toggleSwitch;
         private bool _hasAppliedDetailTextVisibility;
+        private bool _hasAppliedLeadingIconVisibility;
         private bool _hasAppliedSupportingTextVisibility;
 
         public SettingsToggleItemView()
@@ -205,7 +207,10 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
+            UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: false,
+                animateDetailTextVisibility: false);
         }
 
         public string Text
@@ -317,14 +322,32 @@ namespace Cotton.Mobile.Controls
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
                 _toggleCommand.ChangeCanExecute();
-                UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
+                UpdateVisualState(
+                    animateLeadingIconVisibility: false,
+                    animateSupportingTextVisibility: false,
+                    animateDetailTextVisibility: false);
             }
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsToggleItemView view = (SettingsToggleItemView)bindable;
-            view.UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: false);
+            view.UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: false,
+                animateDetailTextVisibility: false);
+        }
+
+        private static void OnLeadingIconVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsToggleItemView view = (SettingsToggleItemView)bindable;
+            view.UpdateVisualState(
+                animateLeadingIconVisibility: true,
+                animateSupportingTextVisibility: false,
+                animateDetailTextVisibility: false);
         }
 
         private static void OnSupportingTextVisibilityPropertyChanged(
@@ -333,7 +356,10 @@ namespace Cotton.Mobile.Controls
             object newValue)
         {
             SettingsToggleItemView view = (SettingsToggleItemView)bindable;
-            view.UpdateVisualState(animateSupportingTextVisibility: true, animateDetailTextVisibility: false);
+            view.UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: true,
+                animateDetailTextVisibility: false);
         }
 
         private static void OnDetailTextVisibilityPropertyChanged(
@@ -342,7 +368,10 @@ namespace Cotton.Mobile.Controls
             object newValue)
         {
             SettingsToggleItemView view = (SettingsToggleItemView)bindable;
-            view.UpdateVisualState(animateSupportingTextVisibility: false, animateDetailTextVisibility: true);
+            view.UpdateVisualState(
+                animateLeadingIconVisibility: false,
+                animateSupportingTextVisibility: false,
+                animateDetailTextVisibility: true);
         }
 
         private bool CanToggle()
@@ -355,7 +384,10 @@ namespace Cotton.Mobile.Controls
             IsToggled = !IsToggled;
         }
 
-        private void UpdateVisualState(bool animateSupportingTextVisibility, bool animateDetailTextVisibility)
+        private void UpdateVisualState(
+            bool animateLeadingIconVisibility,
+            bool animateSupportingTextVisibility,
+            bool animateDetailTextVisibility)
         {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
@@ -382,6 +414,9 @@ namespace Cotton.Mobile.Controls
                 DefaultLeadingIconFrameStyleResourceKey);
             string switchStyleResourceKey = ResolveStyleResourceKey(SwitchStyleResourceKey, DefaultSwitchStyleResourceKey);
             bool isLeadingIconVisible = IsLeadingIconVisible && LeadingIconData is not null;
+            bool hasLeadingIconLayout = ResolveLeadingIconLayoutVisibility(
+                isLeadingIconVisible,
+                animateLeadingIconVisibility);
 
             _container.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
@@ -391,8 +426,12 @@ namespace Cotton.Mobile.Controls
             _detailText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
             _toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey);
 
-            _leadingIcon.IconData = LeadingIconData;
-            _leadingIcon.IsVisible = isLeadingIconVisible;
+            if (isLeadingIconVisible)
+            {
+                _leadingIcon.IconData = LeadingIconData;
+            }
+
+            UpdateLeadingIconVisibility(isLeadingIconVisible, animateLeadingIconVisibility);
             _text.Text = text;
             _supportingText.Text = supportingText;
             UpdateSupportingTextVisibility(supportingText, animateSupportingTextVisibility);
@@ -402,11 +441,36 @@ namespace Cotton.Mobile.Controls
             _touchSurface.TapCommand = IsEnabled ? _toggleCommand : null;
             _touchSurface.IsVisible = IsEnabled;
 
-            Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_textStack, isLeadingIconVisible ? 1 : 2);
+            Grid.SetColumn(_textStack, hasLeadingIconLayout ? 1 : 0);
+            Grid.SetColumnSpan(_textStack, hasLeadingIconLayout ? 1 : 2);
 
             SemanticProperties.SetDescription(_container, semanticDescription);
             SemanticProperties.SetDescription(_toggleSwitch, toggleSemanticDescription);
+        }
+
+        private void UpdateLeadingIconVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
+        {
+            bool shouldAnimate = animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility;
+            double targetOpacity = isLeadingIconVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isLeadingIconVisible)
+            {
+                _leadingIcon.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _leadingIcon,
+                _leadingIcon.Opacity,
+                targetOpacity,
+                duration,
+                LeadingIconOpacityAnimationName,
+                shouldAnimate,
+                opacity => _leadingIcon.Opacity = opacity,
+                CompleteLeadingIconVisibility);
+            _hasAppliedLeadingIconVisibility = true;
         }
 
         private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
@@ -483,6 +547,21 @@ namespace Cotton.Mobile.Controls
             _detailText.IsVisible = false;
         }
 
+        private void CompleteLeadingIconVisibility()
+        {
+            if (IsLeadingIconActuallyVisible())
+            {
+                _leadingIcon.IconData = LeadingIconData;
+                _leadingIcon.IsVisible = true;
+                return;
+            }
+
+            _leadingIcon.IconData = null;
+            _leadingIcon.IsVisible = false;
+            Grid.SetColumn(_textStack, 0);
+            Grid.SetColumnSpan(_textStack, 2);
+        }
+
         private bool IsSupportingTextActuallyVisible(string supportingText)
         {
             return IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
@@ -491,6 +570,21 @@ namespace Cotton.Mobile.Controls
         private bool IsDetailTextActuallyVisible(string detailText)
         {
             return IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
+        }
+
+        private bool IsLeadingIconActuallyVisible()
+        {
+            return IsLeadingIconVisible && LeadingIconData is not null;
+        }
+
+        private bool ResolveLeadingIconLayoutVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
+        {
+            if (isLeadingIconVisible)
+            {
+                return true;
+            }
+
+            return animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility && _leadingIcon.IsVisible;
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

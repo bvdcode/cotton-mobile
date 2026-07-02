@@ -24,6 +24,7 @@ namespace Cotton.Mobile
         private const string ShareIntentLogTag = "CottonShare";
         private const long SecondSystemBarReapplyDelayMilliseconds = 1000;
         private const long ThirdSystemBarReapplyDelayMilliseconds = 2500;
+        private const long FourthSystemBarReapplyDelayMilliseconds = 5000;
         private const string NotificationIntentLogTag = "CottonNotification";
         private Android.Views.View? _statusBarScrim;
 
@@ -222,6 +223,7 @@ namespace Cotton.Mobile
             decorView.PostDelayed(ApplySystemBars, FirstSystemBarReapplyDelayMilliseconds);
             decorView.PostDelayed(ApplySystemBars, SecondSystemBarReapplyDelayMilliseconds);
             decorView.PostDelayed(ApplySystemBars, ThirdSystemBarReapplyDelayMilliseconds);
+            decorView.PostDelayed(ApplySystemBars, FourthSystemBarReapplyDelayMilliseconds);
         }
 
         private void ApplySystemBars()

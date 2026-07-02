@@ -283,10 +283,12 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
 
-            Assert.Equal(2, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
+            Assert.Equal(3, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
             Assert.Contains("Command=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsError=\"{Binding Display.TransferActivityIndicator.HasFailures}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding Display.OfflinePackProgress.Text}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IconData=\"{x:Static controls:IconPathData.Download}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TapCommand=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TapCommand=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
         }

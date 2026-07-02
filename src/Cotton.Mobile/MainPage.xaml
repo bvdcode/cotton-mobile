@@ -191,23 +191,11 @@
                                                            IconData="{x:Static controls:IconPathData.Backup}"
                                                            Command="{Binding OpenBackupSetupCommand}" />
 
-                            <Border IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
-                                    Style="{StaticResource M3FileStatusPanel}"
-                                    SemanticProperties.Description="{Binding Display.OfflinePackProgress.AccessibilityText}">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      Style="{StaticResource M3FileStatusGrid}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Download}"
-                                                       Style="{StaticResource M3FileStatusIcon}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Display.OfflinePackProgress.Text}"
-                                           Style="{StaticResource M3FileStatusPrimaryText}" />
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding Display.OfflinePackProgress.Details}"
-                                           Style="{StaticResource M3FileStatusMetaText}" />
-                                </Grid>
-                            </Border>
+                            <controls:FileStatusActionView IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
+                                                           Text="{Binding Display.OfflinePackProgress.Text}"
+                                                           Details="{Binding Display.OfflinePackProgress.Details}"
+                                                           AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"
+                                                           IconData="{x:Static controls:IconPathData.Download}" />
 
                             <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
                                     Style="{StaticResource M3FileNoticePanel}">

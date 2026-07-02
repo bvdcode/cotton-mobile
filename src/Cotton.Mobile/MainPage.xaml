@@ -253,9 +253,9 @@
                                                                         IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
                                                                         IsSelected="{Binding IsSelected}" />
 
-                                            <controls:FileEntryTextView Grid.Column="1"
-                                                                        Title="{Binding Name}"
-                                                                        Detail="{Binding DisplayDetails}" />
+                                            <controls:FileListMetadataView Grid.Column="1"
+                                                                           Title="{Binding Name}"
+                                                                           Detail="{Binding DisplayDetails}" />
 
                                             <controls:TouchSurfaceView Grid.ColumnSpan="2"
                                                                        Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"

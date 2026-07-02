@@ -98,7 +98,7 @@
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                         <controls:ContentCardView CardStyleResourceKey="M3SelectableContentCard">
                             <Grid RowDefinitions="Auto,Auto"
-                                  ColumnDefinitions="Auto,*,Auto"
+                                  ColumnDefinitions="Auto,*"
                                   Style="{StaticResource M3MetadataCardGrid}">
                                 <controls:FileThumbnailView Grid.RowSpan="2"
                                                             SurfaceStyleResourceKey="M3MetadataFileThumbnailSurface"
@@ -110,13 +110,11 @@
                                                             IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
                                                             IsSelected="{Binding IsSelected}" />
 
-                                <controls:FileEntryTextView Grid.Column="1"
-                                                            Title="{Binding Name}"
-                                                            Detail="{Binding DisplayDetails}"
-                                                            StackStyleResourceKey="M3CardTextStack" />
-
-                                <controls:ChipView Grid.Column="2"
-                                                   Text="{Binding BadgeText}" />
+                                <controls:FileListMetadataView Grid.Column="1"
+                                                               Title="{Binding Name}"
+                                                               Detail="{Binding DisplayDetails}"
+                                                               TrailingText="{Binding BadgeText}"
+                                                               IsTrailingTextVisible="True" />
 
                                 <controls:TouchSurfaceView Grid.ColumnSpan="2"
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"
@@ -124,7 +122,6 @@
 
                                 <controls:ActionClusterView Grid.Row="1"
                                                             Grid.Column="1"
-                                                            Grid.ColumnSpan="2"
                                                             IsVisible="{Binding BindingContext.IsTrashEntryActionsVisible, Source={x:Reference TrashRoot}}"
                                                             PrimaryActionIconData="{x:Static controls:IconPathData.Delete}"
                                                             PrimaryActionCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
@@ -163,12 +160,9 @@
                                                             BadgeText="{Binding BadgeText}"
                                                             IsBadgeVisible="True" />
 
-                                <controls:FileEntryTextView Grid.Row="1"
-                                                            Title="{Binding Name}"
-                                                            Detail="{Binding DisplayDetails}"
-                                                            StackStyleResourceKey="M3FileTileTextStack"
-                                                            TitleStyleResourceKey="M3CardSupportingStrongLine"
-                                                            DetailStyleResourceKey="M3CardMetaLine" />
+                                <controls:FileTileMetadataView Grid.Row="1"
+                                                               Title="{Binding Name}"
+                                                               Detail="{Binding DisplayDetails}" />
 
                                 <controls:TouchSurfaceView Grid.RowSpan="2"
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"

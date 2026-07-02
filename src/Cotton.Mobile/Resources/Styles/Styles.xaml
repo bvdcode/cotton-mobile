@@ -1061,6 +1061,12 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3FileListMetadataGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space2}" />
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3SecondaryFileListTextStack" BasedOn="{StaticResource M3CardTextStack}">
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>

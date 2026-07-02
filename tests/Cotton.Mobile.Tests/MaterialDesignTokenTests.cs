@@ -31,6 +31,7 @@ namespace Cotton.Mobile.Tests
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
+        private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
         private const string MetadataCardBodyViewPath = "src/Cotton.Mobile/Controls/MetadataCardBodyView.cs";
@@ -646,18 +647,22 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
+            string fileListMetadataView = LoadText(FileListMetadataViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3AccentOutlineChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AccentOutlineChip}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 
-            Assert.Equal(1, CountOccurrences(trashPage, "<controls:ChipView"));
-            Assert.Contains("Text=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ChipView", trashPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("BadgeText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", trashPage, StringComparison.Ordinal);
 
             Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
@@ -1200,23 +1205,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void File_entry_text_blocks_use_reusable_material_control()
+        public void File_entry_metadata_blocks_use_reusable_material_controls()
         {
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
+            string fileListMetadataView = LoadText(FileListMetadataViewPath);
+            string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
 
-            Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileEntryTextView"));
+            Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileListMetadataView"));
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileListTextStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileEntryTextView", mainPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:FileEntryTextView"));
-            Assert.Contains("StackStyleResourceKey=\"M3CardTextStack\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("StackStyleResourceKey=\"M3FileTileTextStack\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("TitleStyleResourceKey=\"M3CardSupportingStrongLine\"", trashPage, StringComparison.Ordinal);
-            Assert.Contains("DetailStyleResourceKey=\"M3CardMetaLine\"", trashPage, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:FileListMetadataView"));
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:FileTileMetadataView"));
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsTrailingTextVisible=\"True\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileListMetadataGrid\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingLine\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3FileTileTextStack\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3CardTextStack}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileTextStack}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileEntryTextView", trashPage, StringComparison.Ordinal);
         }
 
         [Fact]

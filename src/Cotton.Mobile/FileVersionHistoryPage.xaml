@@ -46,26 +46,19 @@
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">
                             <Border Style="{StaticResource M3ContentCard}">
                                 <Grid RowDefinitions="Auto,Auto,Auto"
-                                      ColumnDefinitions="Auto,*,Auto"
                                       Style="{StaticResource M3MetadataCardGrid}">
-                                    <controls:IconFrame Grid.RowSpan="3"
-                                                        IconData="{x:Static controls:IconPathData.File}"
-                                                        Style="{StaticResource M3CardFileThumbnailFrame}" />
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="{StaticResource M3FileThumbnailSize}" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
 
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Style="{StaticResource M3CardTextStack}">
-                                        <Label Text="{Binding VersionText}"
-                                               Style="{StaticResource M3CardTitle}" />
-
-                                        <Label Text="{Binding Name}"
-                                               Style="{StaticResource M3CardSupportingLine}" />
-                                    </VerticalStackLayout>
-
-                                    <Border Grid.Column="2"
-                                            Style="{StaticResource M3NeutralChip}">
-                                        <Label Text="{Binding KindText}"
-                                               Style="{StaticResource M3ChipLabel}" />
-                                    </Border>
+                                    <controls:MetadataCardHeaderView Grid.ColumnSpan="3"
+                                                                     LeadingIconData="{x:Static controls:IconPathData.File}"
+                                                                     LeadingIconFrameStyleResourceKey="M3CardFileThumbnailFrame"
+                                                                     Title="{Binding VersionText}"
+                                                                     SupportingText="{Binding Name}"
+                                                                     TrailingText="{Binding KindText}" />
 
                                     <Label Grid.Row="1"
                                            Grid.Column="1"

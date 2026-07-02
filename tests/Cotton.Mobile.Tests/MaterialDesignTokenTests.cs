@@ -27,6 +27,7 @@ namespace Cotton.Mobile.Tests
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
+        private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -428,6 +429,54 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileMetadataGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Metadata_card_headers_use_reusable_material_control()
+        {
+            string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
+            string transfersPage = LoadText(TransfersPagePath);
+            string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string metadataCardHeaderView = LoadText(MetadataCardHeaderViewPath);
+
+            Assert.Contains("<controls:MetadataCardHeaderView Grid.ColumnSpan=\"3\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardFileThumbnailFrame\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding VersionText}\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding Name}\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding KindText}\"", fileVersionHistoryPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:MetadataCardHeaderView Grid.ColumnSpan=\"3\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardTransferThumbnailFrame\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding DisplayName}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding DetailText}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding StatusText}\"", transfersPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:MetadataCardHeaderView Grid.ColumnSpan=\"3\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardCaptureThumbnailFrame\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding DisplayName}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding DetailText}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding StatusText}\"", captureInboxPage, StringComparison.Ordinal);
+
+            Assert.Contains("new FileEntryTextView", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Equal(3, CountOccurrences(fileVersionHistoryPage + transfersPage + captureInboxPage, "Width=\"{StaticResource M3FileThumbnailSize}\""));
+
+            string[] metadataCardPages =
+            [
+                fileVersionHistoryPage,
+                transfersPage,
+                captureInboxPage,
+            ];
+
+            foreach (string page in metadataCardPages)
+            {
+                Assert.DoesNotContain("Grid.RowSpan=\"3\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("Grid.RowSpan=\"4\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("ColumnDefinitions=\"Auto,*,Auto\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", page, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

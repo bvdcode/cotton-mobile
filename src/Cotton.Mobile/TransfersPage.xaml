@@ -44,26 +44,19 @@
                     <DataTemplate x:DataType="services:CottonTransferListItem">
                         <Border Style="{StaticResource M3ContentCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                                  ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3MetadataCardGrid}">
-                                <controls:IconFrame Grid.RowSpan="4"
-                                                    IconData="{x:Static controls:IconPathData.Transfer}"
-                                                    Style="{StaticResource M3CardTransferThumbnailFrame}" />
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="{StaticResource M3FileThumbnailSize}" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
 
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Style="{StaticResource M3CardTextStack}">
-                                    <Label Text="{Binding DisplayName}"
-                                           Style="{StaticResource M3CardTitle}" />
-
-                                    <Label Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-                                </VerticalStackLayout>
-
-                                <Border Grid.Column="2"
-                                        Style="{StaticResource M3NeutralChip}">
-                                    <Label Text="{Binding StatusText}"
-                                           Style="{StaticResource M3ChipLabel}" />
-                                </Border>
+                                <controls:MetadataCardHeaderView Grid.ColumnSpan="3"
+                                                                 LeadingIconData="{x:Static controls:IconPathData.Transfer}"
+                                                                 LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
+                                                                 Title="{Binding DisplayName}"
+                                                                 SupportingText="{Binding DetailText}"
+                                                                 TrailingText="{Binding StatusText}" />
 
                                 <ProgressBar Grid.Row="1"
                                              Grid.Column="1"

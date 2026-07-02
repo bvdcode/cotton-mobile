@@ -55,6 +55,7 @@ namespace Cotton.Mobile.Tests
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileListEntryRowViewPath = "src/Cotton.Mobile/Controls/FileListEntryRowView.cs";
         private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
+        private const string FileStatusActionViewPath = "src/Cotton.Mobile/Controls/FileStatusActionView.cs";
         private const string FloatingActionButtonViewPath = "src/Cotton.Mobile/Controls/FloatingActionButtonView.cs";
         private const string FileTileEntryCardViewPath = "src/Cotton.Mobile/Controls/FileTileEntryCardView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
@@ -81,6 +82,7 @@ namespace Cotton.Mobile.Tests
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string LayeredContentViewPath = "src/Cotton.Mobile/Controls/LayeredContentView.cs";
+        private const string AttentionStatusViewPath = "src/Cotton.Mobile/Controls/AttentionStatusView.cs";
         private const string MaterialRefreshViewPath = "src/Cotton.Mobile/Controls/MaterialRefreshView.cs";
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
         private const string ScreenHeaderViewPath = "src/Cotton.Mobile/Controls/ScreenHeaderView.cs";
@@ -622,8 +624,15 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Retry_attention_panels_use_reusable_material_control()
         {
+            string attentionStatusView = LoadText(AttentionStatusViewPath);
             string mainPage = LoadText(MainPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+
+            Assert.Contains("private readonly TouchSurfaceView _touchSurface;", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface = new TouchSurfaceView();", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;", attentionStatusView, StringComparison.Ordinal);
+            Assert.DoesNotContain("LongPressBehavior", attentionStatusView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3ListItemTouchSurface", attentionStatusView, StringComparison.Ordinal);
 
             Assert.Contains("<controls:AttentionStatusView", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", mainPage, StringComparison.Ordinal);
@@ -985,7 +994,14 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void File_status_action_rows_use_reusable_material_control()
         {
+            string fileStatusActionView = LoadText(FileStatusActionViewPath);
             string mainPage = LoadText(MainPagePath);
+
+            Assert.Contains("private readonly TouchSurfaceView _touchSurface;", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface = new TouchSurfaceView();", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? command : null;", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("LongPressBehavior", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3ListItemTouchSurface", fileStatusActionView, StringComparison.Ordinal);
 
             Assert.Equal(3, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
             Assert.Contains("Command=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);

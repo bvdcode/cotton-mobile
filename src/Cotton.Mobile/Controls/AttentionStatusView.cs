@@ -2,7 +2,6 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -97,8 +96,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconView _icon;
         private readonly Label _message;
         private readonly Border _panel;
-        private readonly LongPressBehavior _tapBehavior;
-        private readonly Grid _touchSurface;
+        private readonly TouchSurfaceView _touchSurface;
 
         public AttentionStatusView()
         {
@@ -108,11 +106,7 @@ namespace Cotton.Mobile.Controls
             _message = new Label();
             _message.SetDynamicResource(StyleProperty, "M3AttentionStatusMessage");
 
-            _tapBehavior = new LongPressBehavior();
-
-            _touchSurface = new Grid();
-            _touchSurface.SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
-            _touchSurface.Behaviors.Add(_tapBehavior);
+            _touchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_touchSurface, 3);
 
             _actionButton = new IconButton();
@@ -265,8 +259,8 @@ namespace Cotton.Mobile.Controls
             _actionButton.IsVisible = IsActionVisible;
             SemanticProperties.SetDescription(_actionButton, actionSemanticDescription);
 
-            _tapBehavior.TapCommand = actionCommand;
-            _touchSurface.IsVisible = IsRowTapEnabled;
+            _touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;
+            _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && actionCommand is not null;
             SemanticProperties.SetDescription(_panel, message);
         }
     }

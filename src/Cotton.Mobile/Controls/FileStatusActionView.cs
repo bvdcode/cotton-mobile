@@ -2,7 +2,6 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -69,8 +68,7 @@ namespace Cotton.Mobile.Controls
         private readonly Grid _grid;
         private readonly IconView _icon;
         private readonly Label _text;
-        private readonly LongPressBehavior _tapBehavior;
-        private readonly Grid _touchSurface;
+        private readonly TouchSurfaceView _touchSurface;
 
         public FileStatusActionView()
         {
@@ -82,11 +80,7 @@ namespace Cotton.Mobile.Controls
             _details = new Label();
             Grid.SetColumn(_details, 2);
 
-            _tapBehavior = new LongPressBehavior();
-
-            _touchSurface = new Grid();
-            _touchSurface.SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
-            _touchSurface.Behaviors.Add(_tapBehavior);
+            _touchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_touchSurface, 3);
 
             _grid = new Grid
@@ -199,7 +193,7 @@ namespace Cotton.Mobile.Controls
                 : IconData;
             _text.Text = text;
             _details.Text = details;
-            _tapBehavior.TapCommand = IsActionEnabled ? command : null;
+            _touchSurface.TapCommand = IsActionEnabled ? command : null;
             _touchSurface.IsVisible = IsActionEnabled && command is not null;
             SemanticProperties.SetDescription(_container, accessibilityText);
         }

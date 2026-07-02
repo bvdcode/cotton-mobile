@@ -1313,6 +1313,7 @@
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
+        <Setter Property="TextFontAttributes" Value="Bold" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}" />
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
@@ -1359,6 +1360,7 @@
         <Setter Property="ItemCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
+        <Setter Property="TextFontAttributes" Value="Bold" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />

@@ -65,6 +65,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<double>("M3ButtonFontSize"));
 
+        public static readonly BindableProperty TextFontAttributesProperty = BindableProperty.Create(
+            nameof(TextFontAttributes),
+            typeof(FontAttributes),
+            typeof(InitialsButton),
+            FontAttributes.None,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
@@ -86,7 +93,6 @@ namespace Cotton.Mobile.Controls
         {
             _label = new Label
             {
-                FontAttributes = FontAttributes.Bold,
                 HorizontalOptions = LayoutOptions.Center,
                 HorizontalTextAlignment = TextAlignment.Center,
                 LineBreakMode = LineBreakMode.TailTruncation,
@@ -153,6 +159,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (double)GetValue(TextFontSizeProperty);
             set => SetValue(TextFontSizeProperty, value);
+        }
+
+        public FontAttributes TextFontAttributes
+        {
+            get => (FontAttributes)GetValue(TextFontAttributesProperty);
+            set => SetValue(TextFontAttributesProperty, value);
         }
 
         public double ButtonCornerRadius
@@ -226,6 +238,7 @@ namespace Cotton.Mobile.Controls
             _label.Text = Text;
             _label.TextColor = TextColor;
             _label.FontSize = TextFontSize;
+            _label.FontAttributes = TextFontAttributes;
         }
     }
 }

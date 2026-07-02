@@ -108,6 +108,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<double>("M3NavigationBarLabelFontSize"));
 
+        public static readonly BindableProperty TextFontAttributesProperty = BindableProperty.Create(
+            nameof(TextFontAttributes),
+            typeof(FontAttributes),
+            typeof(NavigationBarItem),
+            FontAttributes.None,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -135,7 +142,6 @@ namespace Cotton.Mobile.Controls
 
             _label = new Label
             {
-                FontAttributes = FontAttributes.Bold,
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center,
                 LineBreakMode = LineBreakMode.TailTruncation,
@@ -253,6 +259,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (double)GetValue(TextFontSizeProperty);
             set => SetValue(TextFontSizeProperty, value);
+        }
+
+        public FontAttributes TextFontAttributes
+        {
+            get => (FontAttributes)GetValue(TextFontAttributesProperty);
+            set => SetValue(TextFontAttributesProperty, value);
         }
 
         public ICommand? Command
@@ -373,6 +385,7 @@ namespace Cotton.Mobile.Controls
             _label.Text = Text;
             _label.TextColor = TextColor;
             _label.FontSize = TextFontSize;
+            _label.FontAttributes = TextFontAttributes;
         }
     }
 }

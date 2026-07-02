@@ -824,6 +824,7 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
             string fileBrowserTopBarView = LoadText(FileBrowserTopBarViewPath);
+            string initialsButton = LoadText(Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"));
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> actionsContainerSetters =
                 GetStyleSetters(styles, "M3FileBrowserActionsContainer");
@@ -857,6 +858,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
                 accountButtonSetters["TextColor"]);
+            Assert.Equal("Bold", accountButtonSetters["TextFontAttributes"]);
+            Assert.Contains("TextFontAttributesProperty", initialsButton, StringComparison.Ordinal);
+            Assert.Contains("_label.FontAttributes = TextFontAttributes", initialsButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", initialsButton, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\"", mainPage, StringComparison.Ordinal);
@@ -1171,7 +1176,11 @@ namespace Cotton.Mobile.Tests
         {
             string fileBrowserNavigationBarView = LoadText(FileBrowserNavigationBarViewPath);
             string mainPage = LoadText(MainPagePath);
+            string navigationBarItem = LoadText(Path.Combine(ControlsDirectoryPath, "NavigationBarItem.cs"));
             string navigationBarView = LoadText(NavigationBarViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> navigationItemSetters =
+                GetStyleSetters(styles, "M3NavigationBarItem");
 
             Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
@@ -1197,6 +1206,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3NavigationBarGrid\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3NavigationBarSurface\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", navigationBarView, StringComparison.Ordinal);
+            Assert.Equal("Bold", navigationItemSetters["TextFontAttributes"]);
+            Assert.Contains("TextFontAttributesProperty", navigationBarItem, StringComparison.Ordinal);
+            Assert.Contains("_label.FontAttributes = TextFontAttributes", navigationBarItem, StringComparison.Ordinal);
+            Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarItem", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);

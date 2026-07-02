@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
@@ -230,6 +231,22 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Border Grid.Row=\"1\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AppLockContentStack", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AppLockContentStack", styles, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Auth_brand_mark_uses_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string brandMarkView = LoadText(BrandMarkViewPath);
+
+            Assert.Contains("<controls:BrandMarkView Source=\"cotton_brand_mark.svg\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"Cotton Cloud\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultFrameStyleResourceKey = \"M3AuthBrandMarkFrame\"", brandMarkView, StringComparison.Ordinal);
+            Assert.Contains("DefaultImageStyleResourceKey = \"M3AuthBrandMarkImage\"", brandMarkView, StringComparison.Ordinal);
+            Assert.Contains("_frame.SetDynamicResource(StyleProperty, frameStyleResourceKey)", brandMarkView, StringComparison.Ordinal);
+            Assert.Contains("_image.SetDynamicResource(StyleProperty, imageStyleResourceKey)", brandMarkView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3AuthBrandMarkFrame}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthBrandMarkImage}\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

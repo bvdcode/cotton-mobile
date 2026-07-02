@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
+
 namespace Cotton.Mobile.Controls
 {
     public class FileTileMetadataView : ContentView
@@ -13,6 +15,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultOfflineChipStyleResourceKey = "M3FileAttentionChip";
         private const string DefaultStackStyleResourceKey = "M3FileTileTextStack";
         private const string DefaultTitleStyleResourceKey = "M3CardSupportingStrongLine";
+        private const string LocalCopyChipOpacityAnimationName = "M3FileTileLocalChipOpacity";
+        private const string OfflineAttentionChipOpacityAnimationName = "M3FileTileOfflineChipOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -33,28 +37,28 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(FileTileMetadataView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLocalCopyChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsLocalCopyVisibleProperty = BindableProperty.Create(
             nameof(IsLocalCopyVisible),
             typeof(bool),
             typeof(FileTileMetadataView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLocalCopyChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty OfflineAttentionStatusProperty = BindableProperty.Create(
             nameof(OfflineAttentionStatus),
             typeof(string),
             typeof(FileTileMetadataView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnOfflineAttentionChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsOfflineAttentionVisibleProperty = BindableProperty.Create(
             nameof(IsOfflineAttentionVisible),
             typeof(bool),
             typeof(FileTileMetadataView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnOfflineAttentionChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty StackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(StackStyleResourceKey),
@@ -118,6 +122,8 @@ namespace Cotton.Mobile.Controls
         private readonly ChipView _offlineAttentionChip;
         private readonly VerticalStackLayout _stack;
         private readonly Label _titleLabel;
+        private bool _hasAppliedLocalCopyChipVisibility;
+        private bool _hasAppliedOfflineAttentionChipVisibility;
 
         public FileTileMetadataView()
         {
@@ -155,7 +161,7 @@ namespace Cotton.Mobile.Controls
             Grid.SetColumn(_offlineAttentionChip, 2);
 
             Content = _stack;
-            UpdateVisualState();
+            UpdateVisualState(animateLocalCopyChipVisibility: false, animateOfflineAttentionChipVisibility: false);
         }
 
         public string Title
@@ -245,10 +251,28 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileTileMetadataView view = (FileTileMetadataView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateLocalCopyChipVisibility: false, animateOfflineAttentionChipVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnLocalCopyChipVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileTileMetadataView view = (FileTileMetadataView)bindable;
+            view.UpdateVisualState(animateLocalCopyChipVisibility: true, animateOfflineAttentionChipVisibility: false);
+        }
+
+        private static void OnOfflineAttentionChipVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            FileTileMetadataView view = (FileTileMetadataView)bindable;
+            view.UpdateVisualState(animateLocalCopyChipVisibility: false, animateOfflineAttentionChipVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateLocalCopyChipVisibility, bool animateOfflineAttentionChipVisibility)
         {
             string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
                 ? DefaultStackStyleResourceKey
@@ -279,17 +303,106 @@ namespace Cotton.Mobile.Controls
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);
             _metadataGrid.SetDynamicResource(StyleProperty, metadataGridStyleResourceKey);
             _detailLabel.SetDynamicResource(StyleProperty, detailStyleResourceKey);
+            _localCopyChip.ChipStyleResourceKey = localChipStyleResourceKey;
+            _localCopyChip.LabelStyleResourceKey = localChipLabelStyleResourceKey;
+            _offlineAttentionChip.ChipStyleResourceKey = offlineChipStyleResourceKey;
+            _offlineAttentionChip.LabelStyleResourceKey = offlineChipLabelStyleResourceKey;
 
             _titleLabel.Text = Title ?? string.Empty;
             _detailLabel.Text = Detail ?? string.Empty;
-            _localCopyChip.Text = LocalCopyStatus ?? string.Empty;
-            _localCopyChip.IsVisible = IsLocalCopyVisible;
-            _localCopyChip.ChipStyleResourceKey = localChipStyleResourceKey;
-            _localCopyChip.LabelStyleResourceKey = localChipLabelStyleResourceKey;
-            _offlineAttentionChip.Text = OfflineAttentionStatus ?? string.Empty;
-            _offlineAttentionChip.IsVisible = IsOfflineAttentionVisible;
-            _offlineAttentionChip.ChipStyleResourceKey = offlineChipStyleResourceKey;
-            _offlineAttentionChip.LabelStyleResourceKey = offlineChipLabelStyleResourceKey;
+            string localCopyStatus = LocalCopyStatus ?? string.Empty;
+            string offlineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
+            _localCopyChip.Text = localCopyStatus;
+            _offlineAttentionChip.Text = offlineAttentionStatus;
+            UpdateLocalCopyChipVisibility(localCopyStatus, animateLocalCopyChipVisibility);
+            UpdateOfflineAttentionChipVisibility(offlineAttentionStatus, animateOfflineAttentionChipVisibility);
+        }
+
+        private void UpdateLocalCopyChipVisibility(string localCopyStatus, bool animateLocalCopyChipVisibility)
+        {
+            UpdateChipVisibility(
+                _localCopyChip,
+                IsLocalCopyChipVisible(localCopyStatus),
+                animateLocalCopyChipVisibility,
+                ref _hasAppliedLocalCopyChipVisibility,
+                LocalCopyChipOpacityAnimationName,
+                CompleteLocalCopyChipVisibility);
+        }
+
+        private void UpdateOfflineAttentionChipVisibility(
+            string offlineAttentionStatus,
+            bool animateOfflineAttentionChipVisibility)
+        {
+            UpdateChipVisibility(
+                _offlineAttentionChip,
+                IsOfflineAttentionChipVisible(offlineAttentionStatus),
+                animateOfflineAttentionChipVisibility,
+                ref _hasAppliedOfflineAttentionChipVisibility,
+                OfflineAttentionChipOpacityAnimationName,
+                CompleteOfflineAttentionChipVisibility);
+        }
+
+        private void UpdateChipVisibility(
+            ChipView chip,
+            bool isChipVisible,
+            bool animateChipVisibility,
+            ref bool hasAppliedChipVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool shouldAnimate = animateChipVisibility && hasAppliedChipVisibility;
+            double targetOpacity = isChipVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isChipVisible)
+            {
+                chip.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                chip,
+                chip.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => chip.Opacity = opacity,
+                completeVisibility);
+            hasAppliedChipVisibility = true;
+        }
+
+        private void CompleteLocalCopyChipVisibility()
+        {
+            if (IsLocalCopyChipVisible(LocalCopyStatus ?? string.Empty))
+            {
+                _localCopyChip.IsVisible = true;
+                return;
+            }
+
+            _localCopyChip.IsVisible = false;
+        }
+
+        private void CompleteOfflineAttentionChipVisibility()
+        {
+            if (IsOfflineAttentionChipVisible(OfflineAttentionStatus ?? string.Empty))
+            {
+                _offlineAttentionChip.IsVisible = true;
+                return;
+            }
+
+            _offlineAttentionChip.IsVisible = false;
+        }
+
+        private bool IsLocalCopyChipVisible(string localCopyStatus)
+        {
+            return IsLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus);
+        }
+
+        private bool IsOfflineAttentionChipVisible(string offlineAttentionStatus)
+        {
+            return IsOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus);
         }
     }
 }

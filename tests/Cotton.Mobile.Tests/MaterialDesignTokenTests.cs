@@ -1604,6 +1604,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string wrappedItemsView = LoadText(WrappedItemsViewPath);
 
             Assert.Contains("<controls:WrappedItemsView IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
@@ -1626,6 +1627,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultMetadataGridStyleResourceKey = \"M3FileTileMetadataGrid\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardSupportingStrongLine\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardMetaLine\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("LocalCopyChipOpacityAnimationName = \"M3FileTileLocalChipOpacity\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("OfflineAttentionChipOpacityAnimationName = \"M3FileTileOfflineChipOpacity\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("OnLocalCopyChipVisibilityPropertyChanged", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("OnOfflineAttentionChipVisibilityPropertyChanged", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("CompleteLocalCopyChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("CompleteOfflineAttentionChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("public class WrappedItemsView", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("DefaultLayoutStyleResourceKey = \"M3FileTileWrapLayout\"", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("new FlexLayout()", wrappedItemsView, StringComparison.Ordinal);
@@ -1640,6 +1650,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileMetadataGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_localCopyChip.IsVisible = IsLocalCopyVisible", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_offlineAttentionChip.IsVisible = IsOfflineAttentionVisible", fileTileMetadataView, StringComparison.Ordinal);
         }
 
         [Fact]

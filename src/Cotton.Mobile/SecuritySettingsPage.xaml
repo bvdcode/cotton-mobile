@@ -25,12 +25,15 @@
                                        IsVisible="{Binding IsStatusVisible}" />
 
             <controls:SettingsCardView>
-                <controls:SettingsSummaryHeaderView Title="{Binding AppLockTitle}"
-                                                    StatusText="{Binding AppLockStatusText}"
-                                                    DetailText="{Binding AppLockDetailText}" />
-
-                <controls:ToggleSwitch IsEnabled="{Binding CanToggleAppLock}"
-                                       IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
+                <controls:SettingsToggleItemView Text="{Binding AppLockTitle}"
+                                                 SupportingText="{Binding AppLockStatusText}"
+                                                 DetailText="{Binding AppLockDetailText}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                 TextStyleResourceKey="M3CardTitle"
+                                                 TextStackStyleResourceKey="M3CardTextStack"
+                                                 IsEnabled="{Binding CanToggleAppLock}"
+                                                 IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
@@ -176,12 +179,15 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <controls:SettingsSummaryHeaderView Title="{Binding LogoutCacheCleanupTitle}"
-                                                    StatusText="{Binding LogoutCacheCleanupStatusText}"
-                                                    DetailText="{Binding LogoutCacheCleanupDetailText}" />
-
-                <controls:ToggleSwitch IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
-                                       IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
+                <controls:SettingsToggleItemView Text="{Binding LogoutCacheCleanupTitle}"
+                                                 SupportingText="{Binding LogoutCacheCleanupStatusText}"
+                                                 DetailText="{Binding LogoutCacheCleanupDetailText}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Delete}"
+                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                 TextStyleResourceKey="M3CardTitle"
+                                                 TextStackStyleResourceKey="M3CardTextStack"
+                                                 IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
+                                                 IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
             </controls:SettingsCardView>
         </VerticalStackLayout>
         </ScrollView>

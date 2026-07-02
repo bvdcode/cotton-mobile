@@ -754,9 +754,6 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsStatusVisible=\"{Binding IsRemotePushStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsDetailVisible=\"False\"", notificationSettingsPage, StringComparison.Ordinal);
 
-            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("StatusText=\"{Binding AppLockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("DetailText=\"{Binding AppLockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding DeviceUnlockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding DeviceUnlockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding DeviceUnlockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
@@ -766,19 +763,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding AccountSessionsStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding AccountSessionsDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("StatusText=\"{Binding LogoutCacheCleanupStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("DetailText=\"{Binding LogoutCacheCleanupDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
-
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsSummaryGrid\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingBlock\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsSummaryHeaderView Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding DeviceUnlockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding PermissionLedgerTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsSummaryHeaderView Title=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
@@ -796,7 +791,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(4, CountOccurrences(storagePage, "<controls:SettingsCardView"));
             Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsCardView"));
             Assert.Contains("Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
@@ -816,9 +811,11 @@ namespace Cotton.Mobile.Tests
         public void Settings_toggle_rows_use_reusable_material_control()
         {
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsToggleItemView = LoadText(SettingsToggleItemViewPath);
 
             Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsToggleItemView"));
+            Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:SettingsToggleItemView"));
             Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsEnabled=\"{Binding CanEnableBackup}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding IsBackupEnabled, Mode=OneWay}\"", backupSetupPage, StringComparison.Ordinal);
@@ -830,12 +827,25 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsToggled=\"{Binding WifiOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Cellular uploads\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding AllowCellular, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding AppLockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding AppLockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsEnabled=\"{Binding CanToggleAppLock}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding IsAppLockEnabled, Mode=TwoWay}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding LogoutCacheCleanupStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding LogoutCacheCleanupDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsEnabled=\"{Binding CanToggleLogoutCacheCleanup}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStackStyleResourceKey = \"M3SettingsDenseStack\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultSwitchStyleResourceKey = \"M3Switch\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DetailTextProperty", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultDetailTextStyleResourceKey = \"M3CardSupportingBlock\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("new Binding(nameof(IsToggled), source: this, mode: BindingMode.TwoWay)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("_toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ToggleSwitch", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SettingsToggleGroupGrid", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Grid.RowSpan=\"3\"", backupSetupPage, StringComparison.Ordinal);
         }

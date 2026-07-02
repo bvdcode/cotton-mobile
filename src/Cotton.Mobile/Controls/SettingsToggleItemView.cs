@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System.Collections.Generic;
 using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -9,6 +10,7 @@ namespace Cotton.Mobile.Controls
     public class SettingsToggleItemView : ContentView
     {
         private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
+        private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardUtilityThumbnailFrame";
         private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingLine";
         private const string DefaultSwitchStyleResourceKey = "M3Switch";
@@ -31,6 +33,20 @@ namespace Cotton.Mobile.Controls
 
         public static readonly BindableProperty IsSupportingTextVisibleProperty = BindableProperty.Create(
             nameof(IsSupportingTextVisible),
+            typeof(bool),
+            typeof(SettingsToggleItemView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DetailTextProperty = BindableProperty.Create(
+            nameof(DetailText),
+            typeof(string),
+            typeof(SettingsToggleItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsDetailTextVisibleProperty = BindableProperty.Create(
+            nameof(IsDetailTextVisible),
             typeof(bool),
             typeof(SettingsToggleItemView),
             true,
@@ -93,6 +109,13 @@ namespace Cotton.Mobile.Controls
             DefaultSupportingTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty DetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(DetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsToggleItemView),
+            DefaultDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TextStackStyleResourceKey),
             typeof(string),
@@ -115,6 +138,7 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Grid _container;
+        private readonly Label _detailText;
         private readonly IconFrame _leadingIcon;
         private readonly Label _supportingText;
         private readonly Label _text;
@@ -131,6 +155,7 @@ namespace Cotton.Mobile.Controls
 
             _text = new Label();
             _supportingText = new Label();
+            _detailText = new Label();
             _textStack = new VerticalStackLayout
             {
                 VerticalOptions = LayoutOptions.Center,
@@ -138,6 +163,7 @@ namespace Cotton.Mobile.Controls
                 {
                     _text,
                     _supportingText,
+                    _detailText,
                 },
             };
 
@@ -205,6 +231,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsSupportingTextVisibleProperty, value);
         }
 
+        public string DetailText
+        {
+            get => (string)GetValue(DetailTextProperty);
+            set => SetValue(DetailTextProperty, value);
+        }
+
+        public bool IsDetailTextVisible
+        {
+            get => (bool)GetValue(IsDetailTextVisibleProperty);
+            set => SetValue(IsDetailTextVisibleProperty, value);
+        }
+
         public Geometry? LeadingIconData
         {
             get => (Geometry?)GetValue(LeadingIconDataProperty);
@@ -251,6 +289,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(SupportingTextStyleResourceKeyProperty);
             set => SetValue(SupportingTextStyleResourceKeyProperty, value);
+        }
+
+        public string DetailTextStyleResourceKey
+        {
+            get => (string)GetValue(DetailTextStyleResourceKeyProperty);
+            set => SetValue(DetailTextStyleResourceKeyProperty, value);
         }
 
         public string TextStackStyleResourceKey
@@ -302,8 +346,9 @@ namespace Cotton.Mobile.Controls
         {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
+            string detailText = DetailText ?? string.Empty;
             string semanticDescription = string.IsNullOrWhiteSpace(SemanticDescription)
-                ? CreateSemanticDescription(text, supportingText)
+                ? CreateSemanticDescription(text, supportingText, detailText)
                 : SemanticDescription;
             string toggleSemanticDescription = string.IsNullOrWhiteSpace(ToggleSemanticDescription)
                 ? semanticDescription
@@ -313,6 +358,9 @@ namespace Cotton.Mobile.Controls
             string supportingTextStyleResourceKey = ResolveStyleResourceKey(
                 SupportingTextStyleResourceKey,
                 DefaultSupportingTextStyleResourceKey);
+            string detailTextStyleResourceKey = ResolveStyleResourceKey(
+                DetailTextStyleResourceKey,
+                DefaultDetailTextStyleResourceKey);
             string textStackStyleResourceKey = ResolveStyleResourceKey(
                 TextStackStyleResourceKey,
                 DefaultTextStackStyleResourceKey);
@@ -327,6 +375,7 @@ namespace Cotton.Mobile.Controls
             _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
             _text.SetDynamicResource(StyleProperty, textStyleResourceKey);
             _supportingText.SetDynamicResource(StyleProperty, supportingTextStyleResourceKey);
+            _detailText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
             _toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey);
 
             _leadingIcon.IconData = LeadingIconData;
@@ -334,6 +383,8 @@ namespace Cotton.Mobile.Controls
             _text.Text = text;
             _supportingText.Text = supportingText;
             _supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+            _detailText.Text = detailText;
+            _detailText.IsVisible = IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
             _toggleSwitch.IsEnabled = IsEnabled;
 
             Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
@@ -350,19 +401,25 @@ namespace Cotton.Mobile.Controls
                 : resourceKey;
         }
 
-        private static string CreateSemanticDescription(string text, string supportingText)
+        private static string CreateSemanticDescription(string text, string supportingText, string detailText)
         {
-            if (string.IsNullOrWhiteSpace(supportingText))
+            List<string> semanticParts = [];
+            if (!string.IsNullOrWhiteSpace(text))
             {
-                return text;
+                semanticParts.Add(text);
             }
 
-            if (string.IsNullOrWhiteSpace(text))
+            if (!string.IsNullOrWhiteSpace(supportingText))
             {
-                return supportingText;
+                semanticParts.Add(supportingText);
             }
 
-            return string.Join(". ", text, supportingText);
+            if (!string.IsNullOrWhiteSpace(detailText))
+            {
+                semanticParts.Add(detailText);
+            }
+
+            return string.Join(". ", semanticParts);
         }
     }
 }

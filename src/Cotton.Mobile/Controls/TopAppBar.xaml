@@ -4,21 +4,15 @@
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.Controls.TopAppBar"
              x:Name="Root">
-    <Grid x:Name="ContentGrid">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="{StaticResource TouchTarget}" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto" />
-        </Grid.ColumnDefinitions>
-
+    <controls:TopAppBarContentGridView>
         <controls:IconButton x:Name="BackButton"
                              IconData="{x:Static controls:IconPathData.ArrowBack}"
                              Command="{Binding Source={x:Reference Root}, Path=BackCommand}"
                              SemanticProperties.Description="Back" />
 
-        <Label x:Name="TitleLabel"
-               Grid.Column="1"
-               Text="{Binding Source={x:Reference Root}, Path=TitleText}" />
+        <controls:TopAppBarTitleLabel Grid.Column="1"
+                                      Text="{Binding Source={x:Reference Root}, Path=TitleText}"
+                                      UseDarkTheme="{Binding Source={x:Reference Root}, Path=UseDarkTheme}" />
 
         <controls:ActionClusterView x:Name="Actions"
                                     Grid.Column="2"
@@ -34,5 +28,5 @@
                                     TertiaryActionCommand="{Binding Source={x:Reference Root}, Path=TertiaryCommand}"
                                     TertiaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=TertiaryDescription}"
                                     IsTertiaryActionVisible="{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}" />
-    </Grid>
+    </controls:TopAppBarContentGridView>
 </ContentView>

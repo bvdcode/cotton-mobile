@@ -89,6 +89,8 @@ namespace Cotton.Mobile.Tests
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
         private const string TopAppBarCodeBehindPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml.cs";
+        private const string TopAppBarContentGridViewPath = "src/Cotton.Mobile/Controls/TopAppBarContentGridView.cs";
+        private const string TopAppBarTitleLabelPath = "src/Cotton.Mobile/Controls/TopAppBarTitleLabel.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private const string DarkViewerSurfaceViewPath = "src/Cotton.Mobile/Controls/DarkViewerSurfaceView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
@@ -690,11 +692,14 @@ namespace Cotton.Mobile.Tests
         {
             string topAppBar = LoadText(TopAppBarPath);
             string topAppBarCodeBehind = LoadText(TopAppBarCodeBehindPath);
+            string topAppBarContentGridView = LoadText(TopAppBarContentGridViewPath);
+            string topAppBarTitleLabel = LoadText(TopAppBarTitleLabelPath);
 
             Assert.Equal(1, CountOccurrences(topAppBar, "<controls:IconButton"));
-            Assert.Contains("<Grid x:Name=\"ContentGrid\">", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("<controls:TopAppBarContentGridView>", topAppBar, StringComparison.Ordinal);
             Assert.Contains("<controls:IconButton x:Name=\"BackButton\"", topAppBar, StringComparison.Ordinal);
-            Assert.Contains("<Label x:Name=\"TitleLabel\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("<controls:TopAppBarTitleLabel Grid.Column=\"1\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("UseDarkTheme=\"{Binding Source={x:Reference Root}, Path=UseDarkTheme}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("<controls:ActionClusterView x:Name=\"Actions\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionIconData=\"{Binding Source={x:Reference Root}, Path=PrimaryIconData}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding Source={x:Reference Root}, Path=PrimaryCommand}\"", topAppBar, StringComparison.Ordinal);
@@ -705,22 +710,33 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsTertiaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3TopAppBarSurface\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DarkSurfaceStyleResourceKey = \"M3DarkTopAppBarSurface\"", topAppBarCodeBehind, StringComparison.Ordinal);
-            Assert.Contains("DefaultContentGridStyleResourceKey = \"M3TopAppBarContentGrid\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3TopAppBarActionCluster\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DefaultActionIconButtonStyleResourceKey = \"M3TopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DarkActionIconButtonStyleResourceKey = \"M3DarkTopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
-            Assert.Contains("DefaultTitleStyleResourceKey = \"M3AppBarTitleLine\"", topAppBarCodeBehind, StringComparison.Ordinal);
-            Assert.Contains("DarkTitleStyleResourceKey = \"M3DarkAppBarTitleLine\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("propertyChanged: OnVisualPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
-            Assert.Contains("ContentGrid.SetDynamicResource(StyleProperty, DefaultContentGridStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("BackButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
-            Assert.Contains("TitleLabel.SetDynamicResource(Label.StyleProperty, titleStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("Actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("Actions.PrimaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("Actions.SecondaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("Actions.TertiaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public class TopAppBarContentGridView : Grid", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3TopAppBarContentGrid\"", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<double>(\"TouchTarget\")", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(touchTarget) })", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star })", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto })", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultGridStyleResourceKey)", topAppBarContentGridView, StringComparison.Ordinal);
+            Assert.Contains("public class TopAppBarTitleLabel : Label", topAppBarTitleLabel, StringComparison.Ordinal);
+            Assert.Contains("DefaultTitleStyleResourceKey = \"M3AppBarTitleLine\"", topAppBarTitleLabel, StringComparison.Ordinal);
+            Assert.Contains("DarkTitleStyleResourceKey = \"M3DarkAppBarTitleLine\"", topAppBarTitleLabel, StringComparison.Ordinal);
+            Assert.Contains("UseDarkThemeProperty", topAppBarTitleLabel, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, titleStyleResourceKey)", topAppBarTitleLabel, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid.ColumnDefinitions>", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<ColumnDefinition", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("<ContentView.Triggers>", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton.Triggers>", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label.Triggers>", topAppBar, StringComparison.Ordinal);
@@ -730,6 +746,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=PrimaryDescription}\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=SecondaryDescription}\"", topAppBar, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Source={x:Reference Root}, Path=TertiaryDescription}\"", topAppBar, StringComparison.Ordinal);
+            Assert.DoesNotContain("ContentGrid.SetDynamicResource", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.DoesNotContain("TitleLabel.SetDynamicResource", topAppBarCodeBehind, StringComparison.Ordinal);
         }
 
         [Fact]

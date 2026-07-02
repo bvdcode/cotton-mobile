@@ -10,12 +10,9 @@ namespace Cotton.Mobile.Controls
     {
         private const string DarkActionIconButtonStyleResourceKey = "M3DarkTopAppBarIconButton";
         private const string DarkSurfaceStyleResourceKey = "M3DarkTopAppBarSurface";
-        private const string DarkTitleStyleResourceKey = "M3DarkAppBarTitleLine";
         private const string DefaultActionClusterStyleResourceKey = "M3TopAppBarActionCluster";
         private const string DefaultActionIconButtonStyleResourceKey = "M3TopAppBarIconButton";
-        private const string DefaultContentGridStyleResourceKey = "M3TopAppBarContentGrid";
         private const string DefaultSurfaceStyleResourceKey = "M3TopAppBarSurface";
-        private const string DefaultTitleStyleResourceKey = "M3AppBarTitleLine";
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(
             nameof(TitleText),
@@ -209,17 +206,12 @@ namespace Cotton.Mobile.Controls
             string surfaceStyleResourceKey = UseDarkTheme
                 ? DarkSurfaceStyleResourceKey
                 : DefaultSurfaceStyleResourceKey;
-            string titleStyleResourceKey = UseDarkTheme
-                ? DarkTitleStyleResourceKey
-                : DefaultTitleStyleResourceKey;
             string actionIconButtonStyleResourceKey = UseDarkTheme
                 ? DarkActionIconButtonStyleResourceKey
                 : DefaultActionIconButtonStyleResourceKey;
 
             SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
-            ContentGrid.SetDynamicResource(StyleProperty, DefaultContentGridStyleResourceKey);
             BackButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
-            TitleLabel.SetDynamicResource(Label.StyleProperty, titleStyleResourceKey);
             Actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey;
             Actions.PrimaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
             Actions.SecondaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;

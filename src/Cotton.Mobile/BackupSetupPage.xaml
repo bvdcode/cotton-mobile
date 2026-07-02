@@ -59,11 +59,11 @@
                                                Grid.ColumnSpan="3"
                                                TapCommand="{Binding ChooseDestinationCommand}" />
 
-                    <controls:IconButton Grid.Column="2"
-                                         IconData="{x:Static controls:IconPathData.Folder}"
-                                         Command="{Binding ChooseDestinationCommand}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         SemanticProperties.Description="Choose backup destination" />
+                    <controls:ActionClusterView Grid.Column="2"
+                                                ClusterStyleResourceKey="M3InlineActionCluster"
+                                                PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
+                                                PrimaryActionCommand="{Binding ChooseDestinationCommand}"
+                                                PrimaryActionSemanticDescription="Choose backup destination" />
                 </Grid>
             </controls:SettingsCardView>
 
@@ -120,11 +120,11 @@
                     <controls:TouchSurfaceView Grid.ColumnSpan="3"
                                                TapCommand="{Binding QueueNowCommand}" />
 
-                    <controls:IconButton Grid.Column="2"
-                                         IconData="{x:Static controls:IconPathData.Play}"
-                                         Command="{Binding QueueNowCommand}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         SemanticProperties.Description="Queue camera backup now" />
+                    <controls:ActionClusterView Grid.Column="2"
+                                                ClusterStyleResourceKey="M3InlineActionCluster"
+                                                PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                PrimaryActionCommand="{Binding QueueNowCommand}"
+                                                PrimaryActionSemanticDescription="Queue camera backup now" />
                 </Grid>
             </controls:SettingsCardView>
 

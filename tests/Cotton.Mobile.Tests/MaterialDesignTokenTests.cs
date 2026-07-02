@@ -443,6 +443,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Backup_setup_card_actions_use_reusable_material_control()
+        {
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:ActionClusterView Grid.Column=\"2\""));
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "ClusterStyleResourceKey=\"M3InlineActionCluster\""));
+            Assert.Contains("PrimaryActionCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_action_rows_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

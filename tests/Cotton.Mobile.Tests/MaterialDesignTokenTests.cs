@@ -1097,7 +1097,11 @@ namespace Cotton.Mobile.Tests
             string storagePage = LoadText(StoragePagePath);
             string storageBucketItemView = LoadText(StorageBucketItemViewPath);
 
+            Assert.Equal(2, CountOccurrences(storagePage, "<controls:StackedItemsView ItemsSource=\"{Binding "));
+            Assert.Equal(2, CountOccurrences(storagePage, "StackStyleResourceKey=\"M3SettingsItemListStack\""));
             Assert.Equal(2, CountOccurrences(storagePage, "<controls:StorageBucketItemView"));
+            Assert.Contains("ItemsSource=\"{Binding OnDeviceBuckets}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding StorageBudgetBuckets}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryMetricText=\"{Binding SizeText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("SecondaryMetricText=\"{Binding CountText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryMetricText=\"{Binding UsageText}\"", storagePage, StringComparison.Ordinal);
@@ -1112,6 +1116,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("x:DataType=\"services:CottonStorageBudgetBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:LinearProgressView Grid.Row=\"2\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3CardFileThumbnailFrame}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("BindableLayout.ItemsSource", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsItemListStack}\"", storagePage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -71,9 +71,9 @@
                                                     Title="Files on this device"
                                                     PrimaryDetailText="{Binding OnDeviceSummaryText}" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
-                                     BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
-                    <BindableLayout.ItemTemplate>
+                <controls:StackedItemsView ItemsSource="{Binding OnDeviceBuckets}"
+                                           StackStyleResourceKey="M3SettingsItemListStack">
+                    <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
                             <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
                                                             LeadingIconData="{x:Static controls:IconPathData.File}"
@@ -82,8 +82,8 @@
                                                             DetailText="{Binding DetailText}"
                                                             SecondaryMetricText="{Binding CountText}" />
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                    </controls:StackedItemsView.ItemTemplate>
+                </controls:StackedItemsView>
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
@@ -93,9 +93,9 @@
                                                     PrimaryDetailText="{Binding StorageBudgetSummaryText}"
                                                     SecondaryDetailText="{Binding ProtectedOfflineText}" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
-                                     BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
-                    <BindableLayout.ItemTemplate>
+                <controls:StackedItemsView ItemsSource="{Binding StorageBudgetBuckets}"
+                                           StackStyleResourceKey="M3SettingsItemListStack">
+                    <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
                             <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
                                                             LeadingIconData="{x:Static controls:IconPathData.File}"
@@ -106,8 +106,8 @@
                                                             Progress="{Binding UsageFraction}"
                                                             IsProgressVisible="True" />
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                    </controls:StackedItemsView.ItemTemplate>
+                </controls:StackedItemsView>
             </controls:SettingsCardView>
 
         </controls:ScreenScrollBodyView>

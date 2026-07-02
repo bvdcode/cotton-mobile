@@ -15,6 +15,13 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty DetailTextProperty = BindableProperty.Create(
+            nameof(DetailText),
+            typeof(string),
+            typeof(LoadingStatusView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty IsRunningProperty = BindableProperty.Create(
             nameof(IsRunning),
             typeof(bool),
@@ -56,18 +63,72 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty ContainerStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ContainerStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3LoadingStatusPanel",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(GridStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3LoadingStatusGrid",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStackStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3CardTextStack",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3LoadingMessage",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(DetailTextStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3CardSupportingBlock",
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ActionIconButtonStyleResourceKey),
+            typeof(string),
+            typeof(LoadingStatusView),
+            "M3FileChromeIconButton",
+            propertyChanged: OnVisualPropertyChanged);
+
         private readonly IconButton _actionButton;
         private readonly Border _container;
+        private readonly Label _detailMessage;
         private readonly Grid _grid;
         private readonly LoadingIndicatorView _loadingIndicator;
         private readonly Label _message;
+        private readonly VerticalStackLayout _textStack;
 
         public LoadingStatusView()
         {
             _loadingIndicator = new LoadingIndicatorView();
 
             _message = new Label();
-            Grid.SetColumn(_message, 1);
+            _detailMessage = new Label();
+
+            _textStack = new VerticalStackLayout
+            {
+                Children =
+                {
+                    _message,
+                    _detailMessage,
+                },
+            };
+            Grid.SetColumn(_textStack, 1);
 
             _actionButton = new IconButton();
             Grid.SetColumn(_actionButton, 2);
@@ -92,7 +153,7 @@ namespace Cotton.Mobile.Controls
                 Children =
                 {
                     _loadingIndicator,
-                    _message,
+                    _textStack,
                     _actionButton,
                 },
             };
@@ -110,6 +171,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(TextProperty);
             set => SetValue(TextProperty, value);
+        }
+
+        public string DetailText
+        {
+            get => (string)GetValue(DetailTextProperty);
+            set => SetValue(DetailTextProperty, value);
         }
 
         public bool IsRunning
@@ -148,6 +215,42 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ActionSemanticDescriptionProperty, value);
         }
 
+        public string ContainerStyleResourceKey
+        {
+            get => (string)GetValue(ContainerStyleResourceKeyProperty);
+            set => SetValue(ContainerStyleResourceKeyProperty, value);
+        }
+
+        public string GridStyleResourceKey
+        {
+            get => (string)GetValue(GridStyleResourceKeyProperty);
+            set => SetValue(GridStyleResourceKeyProperty, value);
+        }
+
+        public string TextStackStyleResourceKey
+        {
+            get => (string)GetValue(TextStackStyleResourceKeyProperty);
+            set => SetValue(TextStackStyleResourceKeyProperty, value);
+        }
+
+        public string TextStyleResourceKey
+        {
+            get => (string)GetValue(TextStyleResourceKeyProperty);
+            set => SetValue(TextStyleResourceKeyProperty, value);
+        }
+
+        public string DetailTextStyleResourceKey
+        {
+            get => (string)GetValue(DetailTextStyleResourceKeyProperty);
+            set => SetValue(DetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string ActionIconButtonStyleResourceKey
+        {
+            get => (string)GetValue(ActionIconButtonStyleResourceKeyProperty);
+            set => SetValue(ActionIconButtonStyleResourceKeyProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             LoadingStatusView view = (LoadingStatusView)bindable;
@@ -158,14 +261,37 @@ namespace Cotton.Mobile.Controls
         {
             ICommand? actionCommand = ActionCommand;
             bool isActionVisible = IsActionVisible && actionCommand is not null;
+            string detailText = DetailText ?? string.Empty;
+            string containerStyleResourceKey = string.IsNullOrWhiteSpace(ContainerStyleResourceKey)
+                ? "M3LoadingStatusPanel"
+                : ContainerStyleResourceKey;
+            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
+                ? "M3LoadingStatusGrid"
+                : GridStyleResourceKey;
+            string textStackStyleResourceKey = string.IsNullOrWhiteSpace(TextStackStyleResourceKey)
+                ? "M3CardTextStack"
+                : TextStackStyleResourceKey;
+            string textStyleResourceKey = string.IsNullOrWhiteSpace(TextStyleResourceKey)
+                ? "M3LoadingMessage"
+                : TextStyleResourceKey;
+            string detailTextStyleResourceKey = string.IsNullOrWhiteSpace(DetailTextStyleResourceKey)
+                ? "M3CardSupportingBlock"
+                : DetailTextStyleResourceKey;
+            string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
+                ? "M3FileChromeIconButton"
+                : ActionIconButtonStyleResourceKey;
 
-            _container.SetDynamicResource(StyleProperty, "M3LoadingStatusPanel");
-            _grid.SetDynamicResource(StyleProperty, "M3LoadingStatusGrid");
-            _message.SetDynamicResource(StyleProperty, "M3LoadingMessage");
-            _actionButton.SetDynamicResource(StyleProperty, "M3FileChromeIconButton");
+            _container.SetDynamicResource(StyleProperty, containerStyleResourceKey);
+            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
+            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
+            _message.SetDynamicResource(StyleProperty, textStyleResourceKey);
+            _detailMessage.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
+            _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
 
             _loadingIndicator.IsRunning = IsRunning;
             _message.Text = Text ?? string.Empty;
+            _detailMessage.Text = detailText;
+            _detailMessage.IsVisible = !string.IsNullOrWhiteSpace(detailText);
             _actionButton.IconData = ActionIconData;
             _actionButton.Command = actionCommand;
             _actionButton.IsEnabled = IsActionEnabled;

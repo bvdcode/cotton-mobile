@@ -29,17 +29,10 @@
                     </Grid>
                 </VerticalStackLayout>
 
-                <Border IsVisible="{Binding Display.IsLoadingVisible}"
-                        Style="{StaticResource M3AuthLoadingStatusPanel}">
-                    <Grid ColumnDefinitions="Auto,*"
-                          Style="{StaticResource M3LoadingStatusGrid}">
-                        <controls:LoadingIndicatorView IsRunning="{Binding Display.IsLoadingIndicatorRunning}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding Display.LoadingMessage}"
-                               Style="{StaticResource M3LoadingMessage}" />
-                    </Grid>
-                </Border>
+                <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
+                                            IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                            Text="{Binding Display.LoadingMessage}"
+                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
 
                 <Border IsVisible="{Binding Display.IsSignInVisible}"
                         Style="{StaticResource M3AuthPanel}">
@@ -65,29 +58,17 @@
                     </VerticalStackLayout>
                 </Border>
 
-                <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                        Style="{StaticResource M3AuthLoadingStatusPanel}">
-                    <Grid ColumnDefinitions="Auto,*,Auto"
-                          Style="{StaticResource M3LoadingStatusGrid}">
-                        <controls:LoadingIndicatorView IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}" />
-
-                        <VerticalStackLayout Grid.Column="1"
-                                             Style="{StaticResource M3CardTextStack}">
-                            <Label Text="Waiting for browser approval"
-                                   Style="{StaticResource M3CardSupportingStrong}" />
-
-                            <Label Text="{Binding Display.AuthorizationProgressMessage}"
-                                   Style="{StaticResource M3CardSupportingBlock}" />
-                        </VerticalStackLayout>
-
-                        <controls:IconButton Grid.Column="2"
-                                             IconData="{x:Static controls:IconPathData.Close}"
-                                             Command="{Binding CancelAuthorizationCommand}"
-                                             IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                             Style="{StaticResource M3FileChromeIconButton}"
-                                             SemanticProperties.Description="Cancel browser approval" />
-                    </Grid>
-                </Border>
+                <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                                            IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                            Text="Waiting for browser approval"
+                                            DetailText="{Binding Display.AuthorizationProgressMessage}"
+                                            ActionIconData="{x:Static controls:IconPathData.Close}"
+                                            ActionCommand="{Binding CancelAuthorizationCommand}"
+                                            IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                            IsActionVisible="True"
+                                            ActionSemanticDescription="Cancel browser approval"
+                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
+                                            TextStyleResourceKey="M3CardSupportingStrong" />
 
                 <HorizontalStackLayout IsVisible="{Binding Display.IsLegalFooterVisible}"
                                        Style="{StaticResource M3LegalFooterBar}">

@@ -10,8 +10,7 @@
              Title="{Binding Title}"
              Style="{StaticResource M3DocumentViewerPage}">
 
-    <Grid RowDefinitions="Auto,*"
-          Style="{StaticResource M3DocumentViewerSurface}">
+    <controls:ScreenShellView GridStyleResourceKey="M3DocumentViewerSurface">
         <controls:TopAppBar TitleText="{Binding Title}"
                             PrimaryIconData="{x:Static controls:IconPathData.Share}"
                             PrimaryCommand="{Binding ShareCommand}"
@@ -54,5 +53,5 @@
                                          IconFrameStyleResourceKey="M3PdfEmptyStateIconFrame" />
             </Grid>
         </controls:DocumentViewerBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

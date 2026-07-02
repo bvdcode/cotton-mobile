@@ -11,8 +11,7 @@
              Title="{Binding Title}"
              Style="{StaticResource M3DarkViewerPage}">
 
-    <Grid RowDefinitions="Auto,*"
-          Style="{StaticResource M3DarkViewerSurface}">
+    <controls:ScreenShellView GridStyleResourceKey="M3DarkViewerSurface">
         <controls:TopAppBar TitleText="{Binding Title}"
                             UseDarkTheme="True"
                             PrimaryIconData="{x:Static controls:IconPathData.Share}"
@@ -40,5 +39,5 @@
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
                                               IsVisible="{Binding IsStatusVisible}" />
         </controls:DarkViewerSurfaceView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

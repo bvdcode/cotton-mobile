@@ -8,7 +8,7 @@
              Shell.NavBarIsVisible="False"
              Title="{Binding Title}">
 
-    <Grid RowDefinitions="Auto,*">
+    <controls:ScreenShellView>
         <controls:TopAppBar TitleText="{Binding Title}"
                                   PrimaryIconData="{x:Static controls:IconPathData.Share}"
                                   PrimaryCommand="{Binding ShareCommand}"
@@ -28,5 +28,5 @@
                 <controls:TextDocumentContentView Text="{Binding Content}" />
             </controls:ContentCardView>
         </controls:DocumentViewerBodyView>
-    </Grid>
+    </controls:ScreenShellView>
 </ContentPage>

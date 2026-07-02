@@ -1153,6 +1153,8 @@ namespace Cotton.Mobile.Tests
             string documentViewerBodyView = LoadText(DocumentViewerBodyViewPath);
             string viewerInfoHeaderView = LoadText(ViewerInfoHeaderViewPath);
 
+            Assert.Contains("<controls:ScreenShellView>", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DocumentViewerSurface\">", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKey=\"M3TextViewerContentGrid\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\">", pdfViewerPage, StringComparison.Ordinal);
@@ -1172,6 +1174,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", documentViewerBodyView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", documentViewerBodyView, StringComparison.Ordinal);
             Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\"\n          Style=\"{StaticResource M3DocumentViewerSurface}\">", pdfViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,*\"", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,*\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenHeaderTextStack}\">", textViewerPage, StringComparison.Ordinal);
@@ -1205,6 +1209,8 @@ namespace Cotton.Mobile.Tests
             string viewerPlayOverlayView = LoadText(ViewerPlayOverlayViewPath);
             string viewerStatusOverlayView = LoadText(ViewerStatusOverlayViewPath);
 
+            Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenShellView GridStyleResourceKey=\"M3DarkViewerSurface\">", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DarkViewerSurfaceView Grid.Row=\"1\">", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
@@ -1232,6 +1238,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new Grid()", darkViewerSurfaceView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _surface.Children", darkViewerSurfaceView, StringComparison.Ordinal);
             Assert.Contains("_surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", darkViewerSurfaceView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\"\n          Style=\"{StaticResource M3DarkViewerSurface}\">", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\"\n          Style=\"{StaticResource M3DarkViewerSurface}\">", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
@@ -1572,10 +1580,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"2\">", trashPage, StringComparison.Ordinal);
             Assert.Contains("public class ScreenShellView", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("GridStyleResourceKeyProperty", screenShellView, StringComparison.Ordinal);
             Assert.Contains("new Grid()", screenShellView, StringComparison.Ordinal);
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", screenShellView, StringComparison.Ordinal);
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", screenShellView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("_grid.ClearValue(StyleProperty)", screenShellView, StringComparison.Ordinal);
+            Assert.Contains("_grid.SetDynamicResource(StyleProperty, GridStyleResourceKey)", screenShellView, StringComparison.Ordinal);
             Assert.Contains("public class ScreenContentGridView", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new Grid", screenContentGridView, StringComparison.Ordinal);
             Assert.Contains("new RowDefinition { Height = GridLength.Auto }", screenContentGridView, StringComparison.Ordinal);

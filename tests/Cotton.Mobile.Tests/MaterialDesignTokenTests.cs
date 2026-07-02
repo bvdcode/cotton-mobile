@@ -406,6 +406,11 @@ namespace Cotton.Mobile.Tests
             string centeredGateView = LoadText(CenteredGateViewPath);
             string emptyStateView = LoadText(EmptyStateViewPath);
             string styles = LoadText(StylesResourcePath);
+            XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> emptyIconFrameSetters =
+                GetStyleSetters(stylesDocument, "M3EmptyStateIconFrame");
+            IReadOnlyDictionary<string, string> emptyIconSetters =
+                GetStyleSetters(stylesDocument, "M3EmptyStateIcon");
 
             Assert.Contains("ActionCommand=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
@@ -429,6 +434,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", emptyStateView, StringComparison.Ordinal);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}",
+                emptyIconFrameSetters["BackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}",
+                emptyIconFrameSetters["Stroke"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightOnTertiaryContainer}, Dark={StaticResource M3DarkOnTertiaryContainer}}",
+                emptyIconSetters["IconColor"]);
+            Assert.DoesNotContain("M3LightPrimaryContainer", emptyIconFrameSetters["BackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimaryContainer", emptyIconFrameSetters["Stroke"], StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.Row=\"1\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"*,Auto,*\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AppLockGateGrid}\"", appLockGatePage, StringComparison.Ordinal);

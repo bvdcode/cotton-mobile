@@ -28,32 +28,14 @@
                                        IsVisible="{Binding IsStatusVisible}" />
 
             <controls:SettingsCardView>
-                <Grid RowDefinitions="Auto,Auto"
-                      ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame Grid.RowSpan="2"
-                                        IconData="{x:Static controls:IconPathData.Cloud}"
-                                        Style="{StaticResource M3CardUtilityThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Grid.ColumnSpan="2"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="{Binding CloudQuotaTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding CloudQuotaSummaryText}"
-                               Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                        <Label Text="{Binding CloudQuotaDetailText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <controls:LinearProgressView Grid.Row="1"
-                                                 Grid.Column="1"
-                                                 Grid.ColumnSpan="2"
-                                                 Progress="{Binding CloudQuotaUsageFraction}"
-                                                 IsVisible="{Binding IsCloudQuotaProgressVisible}" />
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Cloud}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                    Title="{Binding CloudQuotaTitle}"
+                                                    PrimaryDetailText="{Binding CloudQuotaSummaryText}"
+                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingStrongLine"
+                                                    SecondaryDetailText="{Binding CloudQuotaDetailText}"
+                                                    Progress="{Binding CloudQuotaUsageFraction}"
+                                                    IsProgressVisible="{Binding IsCloudQuotaProgressVisible}" />
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
@@ -85,20 +67,10 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <Grid ColumnDefinitions="Auto,*"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Device}"
-                                        Style="{StaticResource M3CardUtilityThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="Files on this device"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding OnDeviceSummaryText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                    Title="Files on this device"
+                                                    PrimaryDetailText="{Binding OnDeviceSummaryText}" />
 
                 <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
                                      BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
@@ -116,23 +88,11 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <Grid ColumnDefinitions="Auto,*"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Transfer}"
-                                        Style="{StaticResource M3CardTransferThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="Temporary files"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding StorageBudgetSummaryText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-
-                        <Label Text="{Binding ProtectedOfflineText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
+                                                    Title="Temporary files"
+                                                    PrimaryDetailText="{Binding StorageBudgetSummaryText}"
+                                                    SecondaryDetailText="{Binding ProtectedOfflineText}" />
 
                 <VerticalStackLayout Style="{StaticResource M3SettingsItemListStack}"
                                      BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">

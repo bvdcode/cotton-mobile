@@ -38,6 +38,7 @@ namespace Cotton.Mobile.Tests
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
+        private const string SettingsSectionHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSectionHeaderView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
@@ -844,23 +845,53 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Storage_section_headers_use_reusable_material_control()
+        {
+            string storagePage = LoadText(StoragePagePath);
+            string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
+
+            Assert.Equal(3, CountOccurrences(storagePage, "<controls:SettingsSectionHeaderView"));
+            Assert.Contains("Title=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding CloudQuotaSummaryText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingStrongLine\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailText=\"{Binding CloudQuotaDetailText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("IsProgressVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"Files on this device\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"Temporary files\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailText=\"{Binding ProtectedOfflineText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("public class SettingsSectionHeaderView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLeadingIconFrameStyleResourceKey = \"M3CardUtilityThumbnailFrame\"", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Grid.RowSpan=\"2\"\n                                        IconData=\"{x:Static controls:IconPathData.Cloud}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Linear_progress_indicators_use_reusable_material_control()
         {
             string transfersPage = LoadText(TransfersPagePath);
             string storagePage = LoadText(StoragePagePath);
             string linearProgressView = LoadText(LinearProgressViewPath);
             string metadataCardBodyView = LoadText(MetadataCardBodyViewPath);
+            string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
             string storageBucketItemView = LoadText(StorageBucketItemViewPath);
 
             Assert.DoesNotContain("<controls:LinearProgressView", transfersPage, StringComparison.Ordinal);
             Assert.Contains("<controls:MetadataCardBodyView Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("IsProgressVisible=\"{Binding IsProgressVisible}\"", transfersPage, StringComparison.Ordinal);
-            Assert.Equal(1, CountOccurrences(storagePage, "<controls:LinearProgressView"));
+            Assert.Equal(0, CountOccurrences(storagePage, "<controls:LinearProgressView"));
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
-            Assert.Contains("IsVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("IsProgressVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding UsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
             Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);

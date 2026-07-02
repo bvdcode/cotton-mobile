@@ -10,6 +10,10 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
         private const string DefaultClusterStyleResourceKey = "M3RowActionCluster";
+        private const string PrimaryActionButtonOpacityAnimationName = "M3ActionClusterPrimaryButtonOpacity";
+        private const string SecondaryActionButtonOpacityAnimationName = "M3ActionClusterSecondaryButtonOpacity";
+        private const string TertiaryActionButtonOpacityAnimationName = "M3ActionClusterTertiaryButtonOpacity";
+        private const string QuaternaryActionButtonOpacityAnimationName = "M3ActionClusterQuaternaryButtonOpacity";
 
         public static readonly BindableProperty ClusterStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ClusterStyleResourceKey),
@@ -210,6 +214,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconButton _quaternaryActionButton;
         private readonly IconButton _secondaryActionButton;
         private readonly IconButton _tertiaryActionButton;
+        private bool _hasAppliedActionVisibilityState;
 
         public ActionClusterView()
         {
@@ -407,6 +412,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            bool shouldAnimateVisibility = _hasAppliedActionVisibilityState;
             string clusterStyleResourceKey = string.IsNullOrWhiteSpace(ClusterStyleResourceKey)
                 ? DefaultClusterStyleResourceKey
                 : ClusterStyleResourceKey;
@@ -421,7 +427,9 @@ namespace Cotton.Mobile.Controls
                 PrimaryActionIconButtonStyleResourceKey,
                 PrimaryActionSemanticDescription ?? string.Empty,
                 IsPrimaryActionEnabled,
-                IsPrimaryActionVisible);
+                IsPrimaryActionVisible,
+                PrimaryActionButtonOpacityAnimationName,
+                shouldAnimateVisibility);
             UpdateActionButton(
                 _secondaryActionButton,
                 SecondaryActionIconData,
@@ -430,7 +438,9 @@ namespace Cotton.Mobile.Controls
                 SecondaryActionIconButtonStyleResourceKey,
                 SecondaryActionSemanticDescription ?? string.Empty,
                 IsSecondaryActionEnabled,
-                IsSecondaryActionVisible);
+                IsSecondaryActionVisible,
+                SecondaryActionButtonOpacityAnimationName,
+                shouldAnimateVisibility);
             UpdateActionButton(
                 _tertiaryActionButton,
                 TertiaryActionIconData,
@@ -439,7 +449,9 @@ namespace Cotton.Mobile.Controls
                 TertiaryActionIconButtonStyleResourceKey,
                 TertiaryActionSemanticDescription ?? string.Empty,
                 IsTertiaryActionEnabled,
-                IsTertiaryActionVisible);
+                IsTertiaryActionVisible,
+                TertiaryActionButtonOpacityAnimationName,
+                shouldAnimateVisibility);
             UpdateActionButton(
                 _quaternaryActionButton,
                 QuaternaryActionIconData,
@@ -448,7 +460,10 @@ namespace Cotton.Mobile.Controls
                 QuaternaryActionIconButtonStyleResourceKey,
                 QuaternaryActionSemanticDescription ?? string.Empty,
                 IsQuaternaryActionEnabled,
-                IsQuaternaryActionVisible);
+                IsQuaternaryActionVisible,
+                QuaternaryActionButtonOpacityAnimationName,
+                shouldAnimateVisibility);
+            _hasAppliedActionVisibilityState = true;
         }
 
         private static void UpdateActionButton(
@@ -459,19 +474,50 @@ namespace Cotton.Mobile.Controls
             string iconButtonStyleResourceKey,
             string semanticDescription,
             bool isEnabled,
-            bool isVisible)
+            bool isVisible,
+            string opacityAnimationName,
+            bool animateVisibility)
         {
             string styleResourceKey = string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
                 ? DefaultActionIconButtonStyleResourceKey
                 : iconButtonStyleResourceKey;
+            bool isActionVisible = isVisible && iconData is not null && command is not null;
+            double targetOpacity = isActionVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
 
             actionButton.SetDynamicResource(StyleProperty, styleResourceKey);
             actionButton.IconData = iconData;
             actionButton.Command = command;
             actionButton.CommandParameter = commandParameter;
             actionButton.IsEnabled = isEnabled;
-            actionButton.IsVisible = isVisible && iconData is not null && command is not null;
+            if (isActionVisible)
+            {
+                actionButton.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                actionButton,
+                actionButton.Opacity,
+                targetOpacity,
+                duration,
+                opacityAnimationName,
+                animateVisibility,
+                opacity => actionButton.Opacity = opacity,
+                () => CompleteActionButtonVisibility(actionButton, isActionVisible));
             SemanticProperties.SetDescription(actionButton, semanticDescription);
+        }
+
+        private static void CompleteActionButtonVisibility(IconButton actionButton, bool isActionVisible)
+        {
+            if (isActionVisible)
+            {
+                actionButton.IsVisible = true;
+                return;
+            }
+
+            actionButton.IsVisible = false;
         }
     }
 }

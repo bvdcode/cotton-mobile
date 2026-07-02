@@ -115,9 +115,22 @@ namespace Cotton.Mobile.Controls
             string animationName,
             Action<double> applyValue)
         {
+            AnimateDouble(element, startValue, targetValue, duration, animationName, applyValue, finished: null);
+        }
+
+        public static void AnimateDouble(
+            VisualElement element,
+            double startValue,
+            double targetValue,
+            int duration,
+            string animationName,
+            Action<double> applyValue,
+            Action? finished)
+        {
             if (duration <= 0 || Math.Abs(startValue - targetValue) <= ColorTolerance)
             {
                 SetDouble(element, targetValue, animationName, applyValue);
+                finished?.Invoke();
                 return;
             }
 
@@ -128,7 +141,18 @@ namespace Cotton.Mobile.Controls
                 0d,
                 1d,
                 Easing.CubicOut);
-            animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
+            animation.Commit(
+                element,
+                animationName,
+                rate: FrameRate,
+                length: Duration(duration),
+                finished: (_, wasCancelled) =>
+                {
+                    if (!wasCancelled)
+                    {
+                        finished?.Invoke();
+                    }
+                });
         }
 
         public static void UpdateColor(
@@ -158,13 +182,27 @@ namespace Cotton.Mobile.Controls
             bool animate,
             Action<double> applyValue)
         {
+            UpdateDouble(element, startValue, targetValue, duration, animationName, animate, applyValue, finished: null);
+        }
+
+        public static void UpdateDouble(
+            VisualElement element,
+            double startValue,
+            double targetValue,
+            int duration,
+            string animationName,
+            bool animate,
+            Action<double> applyValue,
+            Action? finished)
+        {
             if (animate)
             {
-                AnimateDouble(element, startValue, targetValue, duration, animationName, applyValue);
+                AnimateDouble(element, startValue, targetValue, duration, animationName, applyValue, finished);
                 return;
             }
 
             SetDouble(element, targetValue, animationName, applyValue);
+            finished?.Invoke();
         }
 
         private static Color Interpolate(Color startColor, Color targetColor, double progress)

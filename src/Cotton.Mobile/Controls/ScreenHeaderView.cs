@@ -5,6 +5,8 @@ namespace Cotton.Mobile.Controls
 {
     public class ScreenHeaderView : ContentView
     {
+        private const string BusyFrameOpacityAnimationName = "M3ScreenHeaderBusyFrameOpacity";
+
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
             typeof(string),
@@ -73,7 +75,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ScreenHeaderView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnBusyPropertyChanged);
 
         public static readonly BindableProperty ActionContentProperty = BindableProperty.Create(
             nameof(ActionContent),
@@ -90,6 +92,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _detailText;
         private readonly Label _supportingText;
         private readonly Label _title;
+        private bool _hasAppliedBusyState;
 
         public ScreenHeaderView()
         {
@@ -117,6 +120,8 @@ namespace Cotton.Mobile.Controls
             _busyIndicatorFrame = new Border
             {
                 Content = _busyIndicator,
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
             };
             _busyIndicatorFrame.SetDynamicResource(StyleProperty, "M3ScreenHeaderBusyFrame");
 
@@ -155,7 +160,7 @@ namespace Cotton.Mobile.Controls
             Grid.SetColumn(_actionCluster, 1);
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(animateBusy: false);
         }
 
         public string Title
@@ -227,10 +232,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
-            screenHeaderView.UpdateVisualState();
+            screenHeaderView.UpdateVisualState(animateBusy: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnBusyPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
+            screenHeaderView.UpdateVisualState(animateBusy: true);
+        }
+
+        private void UpdateVisualState(bool animateBusy)
         {
             string title = Title ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
@@ -260,14 +271,61 @@ namespace Cotton.Mobile.Controls
                 _actionContentHost.Content = actionContent;
             }
 
-            _actionContentHost.IsVisible = actionContent is not null;
-            _actionCluster.IsVisible = actionContent is not null || IsBusy;
-            _busyIndicator.IsRunning = IsBusy;
-            _busyIndicator.IsVisible = IsBusy;
-            _busyIndicatorFrame.IsVisible = IsBusy;
+            bool hasActionContent = actionContent is not null;
+            _actionContentHost.IsVisible = hasActionContent;
+            UpdateBusyState(hasActionContent, animateBusy);
 
             string description = CreateDescription(title, supportingText, detailText);
             SemanticProperties.SetDescription(_container, description);
+        }
+
+        private void UpdateBusyState(bool hasActionContent, bool animateBusy)
+        {
+            bool isBusy = IsBusy;
+            bool shouldAnimate = animateBusy && _hasAppliedBusyState;
+            double targetOpacity = isBusy
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isBusy)
+            {
+                _busyIndicatorFrame.IsVisible = true;
+                _busyIndicator.IsVisible = true;
+                _actionCluster.IsVisible = true;
+                _busyIndicator.IsRunning = true;
+            }
+            else
+            {
+                _busyIndicator.IsRunning = false;
+                _actionCluster.IsVisible = hasActionContent || _busyIndicatorFrame.IsVisible;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _busyIndicatorFrame,
+                _busyIndicatorFrame.Opacity,
+                targetOpacity,
+                duration,
+                BusyFrameOpacityAnimationName,
+                shouldAnimate,
+                opacity => _busyIndicatorFrame.Opacity = opacity,
+                () => CompleteBusyState(hasActionContent));
+            _hasAppliedBusyState = true;
+        }
+
+        private void CompleteBusyState(bool hasActionContent)
+        {
+            if (IsBusy)
+            {
+                _busyIndicatorFrame.IsVisible = true;
+                _busyIndicator.IsVisible = true;
+                _actionCluster.IsVisible = true;
+                return;
+            }
+
+            _busyIndicatorFrame.IsVisible = false;
+            _busyIndicator.IsVisible = false;
+            _actionCluster.IsVisible = hasActionContent;
         }
 
         private string CreateDescription(string title, string supportingText, string detailText)

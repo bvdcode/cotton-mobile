@@ -23,6 +23,7 @@
     <x:Int32 x:Key="M3MotionPressOutDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionFocusDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionSelectionDuration">120</x:Int32>
+    <x:Int32 x:Key="M3MotionStatusDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionModalEnterDuration">180</x:Int32>
     <x:Int32 x:Key="M3MotionModalExitDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionSkeletonEnterDuration">160</x:Int32>

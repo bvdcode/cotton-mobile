@@ -2602,6 +2602,7 @@ namespace Cotton.Mobile.Tests
         public void Screen_header_busy_state_uses_material_action_frame()
         {
             string screenHeaderView = LoadText(ScreenHeaderViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
             IReadOnlyDictionary<string, string> busyFrameSetters = GetStyleSetters(styles, "M3ScreenHeaderBusyFrame");
@@ -2609,7 +2610,13 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("private readonly Border _busyIndicatorFrame;", screenHeaderView, StringComparison.Ordinal);
             Assert.Contains("_busyIndicatorFrame.SetDynamicResource(StyleProperty, \"M3ScreenHeaderBusyFrame\");", screenHeaderView, StringComparison.Ordinal);
-            Assert.Contains("_busyIndicatorFrame.IsVisible = IsBusy;", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("BusyFrameOpacityAnimationName = \"M3ScreenHeaderBusyFrameOpacity\"", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnBusyPropertyChanged", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteBusyState", screenHeaderView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_busyIndicatorFrame.IsVisible = IsBusy;", screenHeaderView, StringComparison.Ordinal);
             Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["WidthRequest"]);
             Assert.Equal("{StaticResource TouchTarget}", busyFrameSetters["HeightRequest"]);
             Assert.Equal("{StaticResource M3Transparent}", busyFrameSetters["Stroke"]);

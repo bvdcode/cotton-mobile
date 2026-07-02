@@ -496,6 +496,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Sync_root_actions_use_reusable_material_control()
+        {
+            string syncSettingsPage = LoadText(SyncSettingsPagePath);
+
+            Assert.Contains("<controls:ActionClusterView Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ClusterStyleResourceKey=\"M3PanelActionCluster\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsPrimaryActionVisible=\"{Binding CanRunNow}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsSecondaryActionVisible=\"{Binding CanPauseSync}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsTertiaryActionVisible=\"{Binding CanResumeSync}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("QuaternaryActionCommand=\"{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("QuaternaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsQuaternaryActionVisible=\"{Binding CanStopSync}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<HorizontalStackLayout Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding RunNowActionText}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding StopSyncActionText}\"", syncSettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Main_file_entry_actions_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

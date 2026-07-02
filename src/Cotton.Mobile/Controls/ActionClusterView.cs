@@ -9,6 +9,14 @@ namespace Cotton.Mobile.Controls
     public class ActionClusterView : HorizontalStackLayout
     {
         private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultClusterStyleResourceKey = "M3RowActionCluster";
+
+        public static readonly BindableProperty ClusterStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ClusterStyleResourceKey),
+            typeof(string),
+            typeof(ActionClusterView),
+            DefaultClusterStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty PrimaryActionIconDataProperty = BindableProperty.Create(
             nameof(PrimaryActionIconData),
@@ -41,6 +49,20 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(ActionClusterView),
             string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsPrimaryActionEnabledProperty = BindableProperty.Create(
+            nameof(IsPrimaryActionEnabled),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsPrimaryActionVisibleProperty = BindableProperty.Create(
+            nameof(IsPrimaryActionVisible),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty SecondaryActionIconDataProperty = BindableProperty.Create(
@@ -76,17 +98,137 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsSecondaryActionEnabledProperty = BindableProperty.Create(
+            nameof(IsSecondaryActionEnabled),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsSecondaryActionVisibleProperty = BindableProperty.Create(
+            nameof(IsSecondaryActionVisible),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryActionIconDataProperty = BindableProperty.Create(
+            nameof(TertiaryActionIconData),
+            typeof(Geometry),
+            typeof(ActionClusterView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryActionCommandProperty = BindableProperty.Create(
+            nameof(TertiaryActionCommand),
+            typeof(ICommand),
+            typeof(ActionClusterView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryActionCommandParameterProperty = BindableProperty.Create(
+            nameof(TertiaryActionCommandParameter),
+            typeof(object),
+            typeof(ActionClusterView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TertiaryActionIconButtonStyleResourceKey),
+            typeof(string),
+            typeof(ActionClusterView),
+            DefaultActionIconButtonStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryActionSemanticDescriptionProperty = BindableProperty.Create(
+            nameof(TertiaryActionSemanticDescription),
+            typeof(string),
+            typeof(ActionClusterView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTertiaryActionEnabledProperty = BindableProperty.Create(
+            nameof(IsTertiaryActionEnabled),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTertiaryActionVisibleProperty = BindableProperty.Create(
+            nameof(IsTertiaryActionVisible),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryActionIconDataProperty = BindableProperty.Create(
+            nameof(QuaternaryActionIconData),
+            typeof(Geometry),
+            typeof(ActionClusterView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryActionCommandProperty = BindableProperty.Create(
+            nameof(QuaternaryActionCommand),
+            typeof(ICommand),
+            typeof(ActionClusterView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryActionCommandParameterProperty = BindableProperty.Create(
+            nameof(QuaternaryActionCommandParameter),
+            typeof(object),
+            typeof(ActionClusterView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(QuaternaryActionIconButtonStyleResourceKey),
+            typeof(string),
+            typeof(ActionClusterView),
+            DefaultActionIconButtonStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty QuaternaryActionSemanticDescriptionProperty = BindableProperty.Create(
+            nameof(QuaternaryActionSemanticDescription),
+            typeof(string),
+            typeof(ActionClusterView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsQuaternaryActionEnabledProperty = BindableProperty.Create(
+            nameof(IsQuaternaryActionEnabled),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsQuaternaryActionVisibleProperty = BindableProperty.Create(
+            nameof(IsQuaternaryActionVisible),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
         private readonly IconButton _primaryActionButton;
+        private readonly IconButton _quaternaryActionButton;
         private readonly IconButton _secondaryActionButton;
+        private readonly IconButton _tertiaryActionButton;
 
         public ActionClusterView()
         {
             _primaryActionButton = new IconButton();
             _secondaryActionButton = new IconButton();
+            _tertiaryActionButton = new IconButton();
+            _quaternaryActionButton = new IconButton();
 
             Children.Add(_primaryActionButton);
             Children.Add(_secondaryActionButton);
+            Children.Add(_tertiaryActionButton);
+            Children.Add(_quaternaryActionButton);
             UpdateVisualState();
+        }
+
+        public string ClusterStyleResourceKey
+        {
+            get => (string)GetValue(ClusterStyleResourceKeyProperty);
+            set => SetValue(ClusterStyleResourceKeyProperty, value);
         }
 
         public Geometry? PrimaryActionIconData
@@ -119,6 +261,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(PrimaryActionSemanticDescriptionProperty, value);
         }
 
+        public bool IsPrimaryActionEnabled
+        {
+            get => (bool)GetValue(IsPrimaryActionEnabledProperty);
+            set => SetValue(IsPrimaryActionEnabledProperty, value);
+        }
+
+        public bool IsPrimaryActionVisible
+        {
+            get => (bool)GetValue(IsPrimaryActionVisibleProperty);
+            set => SetValue(IsPrimaryActionVisibleProperty, value);
+        }
+
         public Geometry? SecondaryActionIconData
         {
             get => (Geometry?)GetValue(SecondaryActionIconDataProperty);
@@ -149,6 +303,102 @@ namespace Cotton.Mobile.Controls
             set => SetValue(SecondaryActionSemanticDescriptionProperty, value);
         }
 
+        public bool IsSecondaryActionEnabled
+        {
+            get => (bool)GetValue(IsSecondaryActionEnabledProperty);
+            set => SetValue(IsSecondaryActionEnabledProperty, value);
+        }
+
+        public bool IsSecondaryActionVisible
+        {
+            get => (bool)GetValue(IsSecondaryActionVisibleProperty);
+            set => SetValue(IsSecondaryActionVisibleProperty, value);
+        }
+
+        public Geometry? TertiaryActionIconData
+        {
+            get => (Geometry?)GetValue(TertiaryActionIconDataProperty);
+            set => SetValue(TertiaryActionIconDataProperty, value);
+        }
+
+        public ICommand? TertiaryActionCommand
+        {
+            get => (ICommand?)GetValue(TertiaryActionCommandProperty);
+            set => SetValue(TertiaryActionCommandProperty, value);
+        }
+
+        public object? TertiaryActionCommandParameter
+        {
+            get => GetValue(TertiaryActionCommandParameterProperty);
+            set => SetValue(TertiaryActionCommandParameterProperty, value);
+        }
+
+        public string TertiaryActionIconButtonStyleResourceKey
+        {
+            get => (string)GetValue(TertiaryActionIconButtonStyleResourceKeyProperty);
+            set => SetValue(TertiaryActionIconButtonStyleResourceKeyProperty, value);
+        }
+
+        public string TertiaryActionSemanticDescription
+        {
+            get => (string)GetValue(TertiaryActionSemanticDescriptionProperty);
+            set => SetValue(TertiaryActionSemanticDescriptionProperty, value);
+        }
+
+        public bool IsTertiaryActionEnabled
+        {
+            get => (bool)GetValue(IsTertiaryActionEnabledProperty);
+            set => SetValue(IsTertiaryActionEnabledProperty, value);
+        }
+
+        public bool IsTertiaryActionVisible
+        {
+            get => (bool)GetValue(IsTertiaryActionVisibleProperty);
+            set => SetValue(IsTertiaryActionVisibleProperty, value);
+        }
+
+        public Geometry? QuaternaryActionIconData
+        {
+            get => (Geometry?)GetValue(QuaternaryActionIconDataProperty);
+            set => SetValue(QuaternaryActionIconDataProperty, value);
+        }
+
+        public ICommand? QuaternaryActionCommand
+        {
+            get => (ICommand?)GetValue(QuaternaryActionCommandProperty);
+            set => SetValue(QuaternaryActionCommandProperty, value);
+        }
+
+        public object? QuaternaryActionCommandParameter
+        {
+            get => GetValue(QuaternaryActionCommandParameterProperty);
+            set => SetValue(QuaternaryActionCommandParameterProperty, value);
+        }
+
+        public string QuaternaryActionIconButtonStyleResourceKey
+        {
+            get => (string)GetValue(QuaternaryActionIconButtonStyleResourceKeyProperty);
+            set => SetValue(QuaternaryActionIconButtonStyleResourceKeyProperty, value);
+        }
+
+        public string QuaternaryActionSemanticDescription
+        {
+            get => (string)GetValue(QuaternaryActionSemanticDescriptionProperty);
+            set => SetValue(QuaternaryActionSemanticDescriptionProperty, value);
+        }
+
+        public bool IsQuaternaryActionEnabled
+        {
+            get => (bool)GetValue(IsQuaternaryActionEnabledProperty);
+            set => SetValue(IsQuaternaryActionEnabledProperty, value);
+        }
+
+        public bool IsQuaternaryActionVisible
+        {
+            get => (bool)GetValue(IsQuaternaryActionVisibleProperty);
+            set => SetValue(IsQuaternaryActionVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionClusterView view = (ActionClusterView)bindable;
@@ -157,7 +407,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            SetDynamicResource(StyleProperty, "M3RowActionCluster");
+            string clusterStyleResourceKey = string.IsNullOrWhiteSpace(ClusterStyleResourceKey)
+                ? DefaultClusterStyleResourceKey
+                : ClusterStyleResourceKey;
+
+            SetDynamicResource(StyleProperty, clusterStyleResourceKey);
 
             UpdateActionButton(
                 _primaryActionButton,
@@ -165,14 +419,36 @@ namespace Cotton.Mobile.Controls
                 PrimaryActionCommand,
                 PrimaryActionCommandParameter,
                 PrimaryActionIconButtonStyleResourceKey,
-                PrimaryActionSemanticDescription ?? string.Empty);
+                PrimaryActionSemanticDescription ?? string.Empty,
+                IsPrimaryActionEnabled,
+                IsPrimaryActionVisible);
             UpdateActionButton(
                 _secondaryActionButton,
                 SecondaryActionIconData,
                 SecondaryActionCommand,
                 SecondaryActionCommandParameter,
                 SecondaryActionIconButtonStyleResourceKey,
-                SecondaryActionSemanticDescription ?? string.Empty);
+                SecondaryActionSemanticDescription ?? string.Empty,
+                IsSecondaryActionEnabled,
+                IsSecondaryActionVisible);
+            UpdateActionButton(
+                _tertiaryActionButton,
+                TertiaryActionIconData,
+                TertiaryActionCommand,
+                TertiaryActionCommandParameter,
+                TertiaryActionIconButtonStyleResourceKey,
+                TertiaryActionSemanticDescription ?? string.Empty,
+                IsTertiaryActionEnabled,
+                IsTertiaryActionVisible);
+            UpdateActionButton(
+                _quaternaryActionButton,
+                QuaternaryActionIconData,
+                QuaternaryActionCommand,
+                QuaternaryActionCommandParameter,
+                QuaternaryActionIconButtonStyleResourceKey,
+                QuaternaryActionSemanticDescription ?? string.Empty,
+                IsQuaternaryActionEnabled,
+                IsQuaternaryActionVisible);
         }
 
         private static void UpdateActionButton(
@@ -181,7 +457,9 @@ namespace Cotton.Mobile.Controls
             ICommand? command,
             object? commandParameter,
             string iconButtonStyleResourceKey,
-            string semanticDescription)
+            string semanticDescription,
+            bool isEnabled,
+            bool isVisible)
         {
             string styleResourceKey = string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
                 ? DefaultActionIconButtonStyleResourceKey
@@ -191,7 +469,8 @@ namespace Cotton.Mobile.Controls
             actionButton.IconData = iconData;
             actionButton.Command = command;
             actionButton.CommandParameter = commandParameter;
-            actionButton.IsVisible = iconData is not null && command is not null;
+            actionButton.IsEnabled = isEnabled;
+            actionButton.IsVisible = isVisible && iconData is not null && command is not null;
             SemanticProperties.SetDescription(actionButton, semanticDescription);
         }
     }

@@ -91,42 +91,35 @@
                                        Text="{Binding DetailText}"
                                        Style="{StaticResource M3CardSupportingLine}" />
 
-                                <HorizontalStackLayout Grid.Row="3"
-                                                       Grid.Column="1"
-                                                       Grid.ColumnSpan="2"
-                                                       Style="{StaticResource M3PanelActionCluster}">
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                                         Command="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         IsEnabled="{Binding CanRunNow}"
-                                                         IsVisible="{Binding CanRunNow}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding RunNowActionText}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Pause}"
-                                                         Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         IsEnabled="{Binding CanPauseSync}"
-                                                         IsVisible="{Binding CanPauseSync}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding PauseSyncActionText}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                                         Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         IsEnabled="{Binding CanResumeSync}"
-                                                         IsVisible="{Binding CanResumeSync}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding ResumeSyncActionText}" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Delete}"
-                                                         Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         IsEnabled="{Binding CanStopSync}"
-                                                         IsVisible="{Binding CanStopSync}"
-                                                         Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                                         SemanticProperties.Description="{Binding StopSyncActionText}" />
-                                </HorizontalStackLayout>
+                                <controls:ActionClusterView Grid.Row="3"
+                                                            Grid.Column="1"
+                                                            Grid.ColumnSpan="2"
+                                                            ClusterStyleResourceKey="M3PanelActionCluster"
+                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                            PrimaryActionCommand="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                            PrimaryActionCommandParameter="{Binding .}"
+                                                            PrimaryActionSemanticDescription="{Binding RunNowActionText}"
+                                                            IsPrimaryActionEnabled="{Binding CanRunNow}"
+                                                            IsPrimaryActionVisible="{Binding CanRunNow}"
+                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Pause}"
+                                                            SecondaryActionCommand="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                            SecondaryActionCommandParameter="{Binding .}"
+                                                            SecondaryActionSemanticDescription="{Binding PauseSyncActionText}"
+                                                            IsSecondaryActionEnabled="{Binding CanPauseSync}"
+                                                            IsSecondaryActionVisible="{Binding CanPauseSync}"
+                                                            TertiaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                            TertiaryActionCommand="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                            TertiaryActionCommandParameter="{Binding .}"
+                                                            TertiaryActionSemanticDescription="{Binding ResumeSyncActionText}"
+                                                            IsTertiaryActionEnabled="{Binding CanResumeSync}"
+                                                            IsTertiaryActionVisible="{Binding CanResumeSync}"
+                                                            QuaternaryActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                            QuaternaryActionCommand="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
+                                                            QuaternaryActionCommandParameter="{Binding .}"
+                                                            QuaternaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                            QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
+                                                            IsQuaternaryActionEnabled="{Binding CanStopSync}"
+                                                            IsQuaternaryActionVisible="{Binding CanStopSync}" />
                             </Grid>
                         </Border>
                     </DataTemplate>

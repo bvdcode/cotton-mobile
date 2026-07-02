@@ -37,11 +37,11 @@
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
                         <Grid Style="{StaticResource M3PdfPageContainerGrid}">
-                            <Border Style="{StaticResource M3PdfPageSurface}">
+                            <controls:ContentCardView CardStyleResourceKey="M3PdfPageSurface">
                                 <Image Source="{Binding ImageSource}"
                                        HeightRequest="{Binding DisplayHeight}"
                                        Style="{StaticResource M3PdfPageImage}" />
-                            </Border>
+                            </controls:ContentCardView>
                         </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>

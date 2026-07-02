@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Tests
     {
         private const string SpacingResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MSpacing.xaml";
         private const string ColorsResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MColors.xaml";
+        private const string TypeResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MType.xaml";
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
@@ -1278,6 +1279,12 @@ namespace Cotton.Mobile.Tests
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            XDocument type = LoadResourceDictionary(TypeResourcePath);
+            IReadOnlyDictionary<string, string> accentOutlineChipSetters =
+                GetStyleSetters(styles, "M3AccentOutlineChip");
+            IReadOnlyDictionary<string, string> accentOutlineChipLabelSetters =
+                GetStyleSetters(type, "M3AccentOutlineChipLabel");
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileListMetadataView, StringComparison.Ordinal);
@@ -1285,6 +1292,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3AccentOutlineChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                accentOutlineChipSetters["Stroke"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
+                accentOutlineChipLabelSetters["TextColor"]);
             Assert.DoesNotContain("Style=\"{StaticResource M3AccentOutlineChip}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 

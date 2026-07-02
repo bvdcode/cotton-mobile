@@ -320,7 +320,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3AccentOutlineChip">
-        <Setter Property="Stroke" Value="{StaticResource M3Accent}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />

@@ -242,6 +242,54 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_color_tokens_expose_full_light_and_dark_role_set()
+        {
+            string colors = LoadText(ColorsResourcePath);
+            string[] roles =
+            [
+                "Primary",
+                "OnPrimary",
+                "PrimaryContainer",
+                "OnPrimaryContainer",
+                "Secondary",
+                "OnSecondary",
+                "SecondaryContainer",
+                "OnSecondaryContainer",
+                "Tertiary",
+                "OnTertiary",
+                "TertiaryContainer",
+                "OnTertiaryContainer",
+                "Error",
+                "OnError",
+                "ErrorContainer",
+                "OnErrorContainer",
+                "Surface",
+                "SurfaceDim",
+                "SurfaceBright",
+                "OnSurface",
+                "SurfaceVariant",
+                "OnSurfaceVariant",
+                "SurfaceContainerLowest",
+                "SurfaceContainerLow",
+                "SurfaceContainer",
+                "SurfaceContainerHigh",
+                "SurfaceContainerHighest",
+                "Outline",
+                "OutlineVariant",
+                "InverseSurface",
+                "InverseOnSurface",
+                "InversePrimary",
+                "Scrim",
+            ];
+
+            foreach (string role in roles)
+            {
+                Assert.Contains($"<Color x:Key=\"M3Light{role}\">", colors, StringComparison.Ordinal);
+                Assert.Contains($"<Color x:Key=\"M3Dark{role}\">", colors, StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void Control_color_fallbacks_use_brand_accent_not_primary_alias()
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));

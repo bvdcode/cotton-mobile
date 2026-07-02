@@ -25,26 +25,18 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Grid ColumnDefinitions="Auto,Auto,Auto,*"
-                  Style="{StaticResource M3InlineActionBarGrid}"
-                  IsVisible="{Binding IsActionBarVisible}">
-                <controls:IconButton IconData="{x:Static controls:IconPathData.Folder}"
-                                     Command="{Binding DestinationCommand}"
-                                     Style="{StaticResource M3FileChromeIconButton}"
-                                     SemanticProperties.Description="Choose destination" />
-
-                <controls:IconButton Grid.Column="1"
-                                     IconData="{x:Static controls:IconPathData.Edit}"
-                                     Command="{Binding RenameCommand}"
-                                     Style="{StaticResource M3FileChromeIconButton}"
-                                     SemanticProperties.Description="Rename capture item" />
-
-                <controls:IconButton Grid.Column="2"
-                                     IconData="{x:Static controls:IconPathData.Transfer}"
-                                     Command="{Binding EnqueueCommand}"
-                                     Style="{StaticResource M3PrimaryFileChromeIconButton}"
-                                     SemanticProperties.Description="Queue captured items" />
-            </Grid>
+            <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
+                                        IsVisible="{Binding IsActionBarVisible}"
+                                        PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
+                                        PrimaryActionCommand="{Binding DestinationCommand}"
+                                        PrimaryActionSemanticDescription="Choose destination"
+                                        SecondaryActionIconData="{x:Static controls:IconPathData.Edit}"
+                                        SecondaryActionCommand="{Binding RenameCommand}"
+                                        SecondaryActionSemanticDescription="Rename capture item"
+                                        TertiaryActionIconData="{x:Static controls:IconPathData.Transfer}"
+                                        TertiaryActionCommand="{Binding EnqueueCommand}"
+                                        TertiaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                        TertiaryActionSemanticDescription="Queue captured items" />
 
             <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                                Style="{StaticResource M3MetadataListSkeletonView}" />

@@ -967,8 +967,8 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3InlineActionBarGrid">
-        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    <Style TargetType="HorizontalStackLayout" x:Key="M3InlineActionCluster">
+        <Setter Property="Spacing" Value="{StaticResource Space12}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3InlineMetadataGrid">

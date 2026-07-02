@@ -401,6 +401,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Capture_inbox_action_bar_uses_reusable_material_control()
+        {
+            string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string styles = LoadText(StylesResourcePath);
+
+            Assert.Equal(1, CountOccurrences(captureInboxPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3InlineActionCluster\""));
+            Assert.Contains("x:Key=\"M3InlineActionCluster\"", styles, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding DestinationCommand}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"Choose destination\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding RenameCommand}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionSemanticDescription=\"Rename capture item\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding EnqueueCommand}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionSemanticDescription=\"Queue captured items\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3InlineActionBarGrid", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3InlineActionBarGrid", styles, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,Auto,Auto,*\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Folder}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Column=\"1\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", captureInboxPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_action_rows_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

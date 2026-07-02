@@ -17,6 +17,9 @@ namespace Cotton.Mobile.Controls
         private const string DefaultPanelStyleResourceKey = "M3FileNoticePanel";
         private const string DefaultTextStackStyleResourceKey = "M3FileNoticeTextStack";
         private const string DefaultTitleStyleResourceKey = "M3CardSupportingStrong";
+        private const string ActionItemOpacityAnimationName = "M3NoticePanelActionItemOpacity";
+        private const string MessageOpacityAnimationName = "M3NoticePanelMessageOpacity";
+        private const string TitleOpacityAnimationName = "M3NoticePanelTitleOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -151,6 +154,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _panel;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
+        private bool _hasAppliedVisibilityState;
 
         public NoticePanelView()
         {
@@ -333,6 +337,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            bool shouldAnimateVisibility = _hasAppliedVisibilityState;
             string title = Title ?? string.Empty;
             string message = Message ?? string.Empty;
             string actionText = ActionText ?? string.Empty;
@@ -352,6 +357,8 @@ namespace Cotton.Mobile.Controls
             string textStackStyleResourceKey = ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
             string titleStyleResourceKey = ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
             string messageStyleResourceKey = ResolveStyleResourceKey(MessageStyleResourceKey, DefaultMessageStyleResourceKey);
+            bool isTitleVisible = !string.IsNullOrWhiteSpace(title);
+            bool isMessageVisible = !string.IsNullOrWhiteSpace(message);
             bool isActionVisible = IsActionVisible && !string.IsNullOrWhiteSpace(actionText) && actionCommand is not null;
 
             _panel.SetDynamicResource(StyleProperty, panelStyleResourceKey);
@@ -364,18 +371,19 @@ namespace Cotton.Mobile.Controls
 
             _icon.IconData = IconData;
             _title.Text = title;
-            _title.IsVisible = !string.IsNullOrWhiteSpace(title);
+            UpdateElementVisibility(_title, isTitleVisible, TitleOpacityAnimationName, shouldAnimateVisibility);
             _message.Text = message;
-            _message.IsVisible = !string.IsNullOrWhiteSpace(message);
+            UpdateElementVisibility(_message, isMessageVisible, MessageOpacityAnimationName, shouldAnimateVisibility);
             _actionItem.Text = actionText;
             _actionItem.ActionIconData = ActionIconData;
             _actionItem.Command = actionCommand;
             _actionItem.IsActionEnabled = IsActionEnabled;
-            _actionItem.IsVisible = isActionVisible;
             _actionItem.GridStyleResourceKey = actionGridStyleResourceKey;
             _actionItem.ActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
             _actionItem.SemanticDescription = actionSemanticDescription;
+            UpdateElementVisibility(_actionItem, isActionVisible, ActionItemOpacityAnimationName, shouldAnimateVisibility);
             SemanticProperties.SetDescription(this, BuildSemanticDescription(title, message));
+            _hasAppliedVisibilityState = true;
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
@@ -398,6 +406,44 @@ namespace Cotton.Mobile.Controls
             }
 
             return $"{title} {message}";
+        }
+
+        private static void UpdateElementVisibility(
+            VisualElement element,
+            bool isElementVisible,
+            string opacityAnimationName,
+            bool animateVisibility)
+        {
+            double targetOpacity = isElementVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                element,
+                element.Opacity,
+                targetOpacity,
+                duration,
+                opacityAnimationName,
+                animateVisibility,
+                opacity => element.Opacity = opacity,
+                () => CompleteElementVisibility(element, isElementVisible));
+        }
+
+        private static void CompleteElementVisibility(VisualElement element, bool isElementVisible)
+        {
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+                return;
+            }
+
+            element.IsVisible = false;
         }
     }
 }

@@ -28,8 +28,7 @@
                                    IsVisible="{Binding IsStatusVisible}" />
 
             <controls:LayeredContentView Grid.Row="2">
-                <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
-                                                   Style="{StaticResource M3MetadataListSkeletonView}" />
+                <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
                 <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
                                          IconData="{x:Static controls:IconPathData.File}"

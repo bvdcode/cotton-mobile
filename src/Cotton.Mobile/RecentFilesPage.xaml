@@ -29,8 +29,7 @@
 
         <controls:MetadataListSkeletonView Grid.Row="2"
                                            IsVisible="{Binding IsLoadingPlaceholderVisible}"
-                                           IsBodyLineVisible="False"
-                                           Style="{StaticResource M3MetadataListSkeletonView}" />
+                                           IsBodyLineVisible="False" />
 
         <controls:EmptyStateView Grid.Row="2"
                                  IsVisible="{Binding IsEmpty}"

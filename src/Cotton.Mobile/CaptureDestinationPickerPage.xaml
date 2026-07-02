@@ -36,8 +36,7 @@
                                                    SecondaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                    SecondaryActionSemanticDescription="Choose current folder" />
 
-            <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
-                                           Style="{StaticResource M3FileListSkeletonView}" />
+            <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
             <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Folder}"

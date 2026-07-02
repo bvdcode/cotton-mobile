@@ -5,8 +5,11 @@ namespace Cotton.Mobile.Controls
 {
     public class FileListSkeletonView : SkeletonListView
     {
+        private const string DefaultStyleResourceKey = "M3FileListSkeletonView";
+
         public FileListSkeletonView()
         {
+            SetDynamicResource(StyleProperty, DefaultStyleResourceKey);
             RebuildRows();
         }
 

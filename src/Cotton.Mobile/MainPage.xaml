@@ -137,8 +137,7 @@
                                                         IsActionVisible="{Binding Display.CanCancelFileAction}"
                                                         ActionSemanticDescription="Cancel file operation" />
 
-                            <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}"
-                                                           Style="{StaticResource M3FileListSkeletonView}" />
+                            <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
 
                             <controls:AttentionStatusView IsVisible="{Binding Display.CanRetryFileAction}"
                                                           Message="{Binding Display.FilesStatus}"

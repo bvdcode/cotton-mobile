@@ -38,6 +38,8 @@ namespace Cotton.Mobile.Tests
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
+        private const string FileListSkeletonViewPath = "src/Cotton.Mobile/Controls/FileListSkeletonView.cs";
+        private const string MetadataListSkeletonViewPath = "src/Cotton.Mobile/Controls/MetadataListSkeletonView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileListEntryRowViewPath = "src/Cotton.Mobile/Controls/FileListEntryRowView.cs";
         private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
@@ -179,9 +181,13 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Main_file_browser_uses_reusable_loading_skeleton_view()
         {
+            string fileListSkeletonView = LoadText(FileListSkeletonViewPath);
             string mainPage = LoadText(MainPagePath);
 
             Assert.Contains("<controls:FileListSkeletonView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultStyleResourceKey = \"M3FileListSkeletonView\"", fileListSkeletonView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultStyleResourceKey)", fileListSkeletonView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileListSkeletonView}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileSkeletonRowGrid", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileSkeletonPrimaryLineBlock", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileSkeletonSecondaryLineBlock", mainPage, StringComparison.Ordinal);
@@ -190,6 +196,8 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Secondary_list_screens_use_initial_loading_skeletons()
         {
+            string metadataListSkeletonView = LoadText(MetadataListSkeletonViewPath);
+
             string[] screenPaths =
             [
                 RecentFilesPagePath,
@@ -205,11 +213,13 @@ namespace Cotton.Mobile.Tests
 
                 Assert.Contains("<controls:MetadataListSkeletonView", page, StringComparison.Ordinal);
                 Assert.Contains("IsLoadingPlaceholderVisible", page, StringComparison.Ordinal);
-                Assert.Contains("M3MetadataListSkeletonView", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("Style=\"{StaticResource M3MetadataListSkeletonView}\"", page, StringComparison.Ordinal);
             }
 
             string recentFilesPage = LoadText(RecentFilesPagePath);
 
+            Assert.Contains("DefaultStyleResourceKey = \"M3MetadataListSkeletonView\"", metadataListSkeletonView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultStyleResourceKey)", metadataListSkeletonView, StringComparison.Ordinal);
             Assert.Contains("IsBodyLineVisible=\"False\"", recentFilesPage, StringComparison.Ordinal);
         }
 
@@ -217,10 +227,12 @@ namespace Cotton.Mobile.Tests
         public void Folder_picker_screens_use_file_loading_skeletons()
         {
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string fileListSkeletonView = LoadText(FileListSkeletonViewPath);
 
             Assert.Contains("<controls:FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("IsLoadingPlaceholderVisible", destinationPickerPage, StringComparison.Ordinal);
-            Assert.Contains("M3FileListSkeletonView", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultStyleResourceKey = \"M3FileListSkeletonView\"", fileListSkeletonView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileListSkeletonView}\"", destinationPickerPage, StringComparison.Ordinal);
         }
 
         [Fact]

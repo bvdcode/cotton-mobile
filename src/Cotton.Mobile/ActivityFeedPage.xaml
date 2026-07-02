@@ -23,8 +23,7 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
-                                               Style="{StaticResource M3MetadataListSkeletonView}" />
+            <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
             <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Activity}"

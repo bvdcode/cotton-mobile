@@ -5,6 +5,8 @@ namespace Cotton.Mobile.Controls
 {
     public class MetadataListSkeletonView : SkeletonListView
     {
+        private const string DefaultStyleResourceKey = "M3MetadataListSkeletonView";
+
         public static readonly BindableProperty IsBodyLineVisibleProperty = BindableProperty.Create(
             nameof(IsBodyLineVisible),
             typeof(bool),
@@ -14,6 +16,7 @@ namespace Cotton.Mobile.Controls
 
         public MetadataListSkeletonView()
         {
+            SetDynamicResource(StyleProperty, DefaultStyleResourceKey);
             RebuildRows();
         }
 

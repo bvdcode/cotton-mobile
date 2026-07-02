@@ -37,8 +37,7 @@
                                         TertiaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                         TertiaryActionSemanticDescription="Queue captured items" />
 
-            <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
-                                               Style="{StaticResource M3MetadataListSkeletonView}" />
+            <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
             <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Transfer}"

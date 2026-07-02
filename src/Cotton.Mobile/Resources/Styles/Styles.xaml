@@ -936,10 +936,6 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3SettingsToggleGroupGrid" BasedOn="{StaticResource M3SettingsListItemGrid}">
-        <Setter Property="RowSpacing" Value="{StaticResource Space12}" />
-    </Style>
-
     <Style TargetType="Grid" x:Key="M3ActionListItemGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
         <Setter Property="VerticalOptions" Value="Center" />

@@ -86,20 +86,12 @@
                                      BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
-                            <Grid ColumnDefinitions="*,Auto"
-                                  Style="{StaticResource M3SettingsSummaryGrid}">
-                                <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
-                                    <Label Text="{Binding Title}"
-                                           Style="{StaticResource M3LabelLargeLine}" />
-
-                                    <Label Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingBlock}" />
-                                </VerticalStackLayout>
-
-                                <controls:ToggleSwitch Grid.Column="1"
-                                                       IsEnabled="{Binding CanToggle}"
-                                                       IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
-                            </Grid>
+                            <controls:SettingsToggleItemView Text="{Binding Title}"
+                                                             SupportingText="{Binding DetailText}"
+                                                             IsLeadingIconVisible="False"
+                                                             SupportingTextStyleResourceKey="M3CardSupportingBlock"
+                                                             IsEnabled="{Binding CanToggle}"
+                                                             IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>

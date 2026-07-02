@@ -811,10 +811,13 @@ namespace Cotton.Mobile.Tests
         public void Settings_toggle_rows_use_reusable_material_control()
         {
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsToggleItemView = LoadText(SettingsToggleItemViewPath);
+            string styles = LoadText(StylesResourcePath);
 
             Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsToggleItemView"));
+            Assert.Equal(1, CountOccurrences(notificationSettingsPage, "<controls:SettingsToggleItemView"));
             Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:SettingsToggleItemView"));
             Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsEnabled=\"{Binding CanEnableBackup}\"", backupSetupPage, StringComparison.Ordinal);
@@ -827,6 +830,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsToggled=\"{Binding WifiOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Cellular uploads\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding AllowCellular, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding Title}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding DetailText}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsLeadingIconVisible=\"False\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsEnabled=\"{Binding CanToggle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding IsEnabled, Mode=TwoWay}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding AppLockStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding AppLockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
@@ -845,8 +853,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new Binding(nameof(IsToggled), source: this, mode: BindingMode.TwoWay)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("_toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ToggleSwitch", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SettingsToggleGroupGrid", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3SettingsToggleGroupGrid", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("Grid.RowSpan=\"3\"", backupSetupPage, StringComparison.Ordinal);
         }
 

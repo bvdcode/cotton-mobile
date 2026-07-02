@@ -101,9 +101,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string iconButtonStyleResourceKey = string.IsNullOrWhiteSpace(IconButtonStyleResourceKey)
-                ? DefaultIconButtonStyleResourceKey
-                : IconButtonStyleResourceKey;
+            string iconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                IconButtonStyleResourceKey,
+                DefaultIconButtonStyleResourceKey);
 
             _button.SetDynamicResource(StyleProperty, iconButtonStyleResourceKey);
             _button.IconData = IconData ?? IconPathData.Reset;

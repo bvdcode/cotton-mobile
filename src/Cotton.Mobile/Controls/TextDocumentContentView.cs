@@ -56,9 +56,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string textStyleResourceKey = string.IsNullOrWhiteSpace(TextStyleResourceKey)
-                ? DefaultTextStyleResourceKey
-                : TextStyleResourceKey;
+            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStyleResourceKey,
+                DefaultTextStyleResourceKey);
 
             _text.SetDynamicResource(StyleProperty, textStyleResourceKey);
             _text.Text = Text ?? string.Empty;

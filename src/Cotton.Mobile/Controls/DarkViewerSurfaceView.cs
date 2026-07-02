@@ -41,9 +41,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
-                ? DefaultSurfaceStyleResourceKey
-                : SurfaceStyleResourceKey;
+            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SurfaceStyleResourceKey,
+                DefaultSurfaceStyleResourceKey);
 
             _surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
         }

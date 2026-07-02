@@ -102,12 +102,12 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string containerStyleResourceKey = string.IsNullOrWhiteSpace(ContainerStyleResourceKey)
-                ? DefaultContainerStyleResourceKey
-                : ContainerStyleResourceKey;
-            string iconButtonStyleResourceKey = string.IsNullOrWhiteSpace(IconButtonStyleResourceKey)
-                ? DefaultIconButtonStyleResourceKey
-                : IconButtonStyleResourceKey;
+            string containerStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ContainerStyleResourceKey,
+                DefaultContainerStyleResourceKey);
+            string iconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                IconButtonStyleResourceKey,
+                DefaultIconButtonStyleResourceKey);
 
             _container.SetDynamicResource(StyleProperty, containerStyleResourceKey);
             _playButton.SetDynamicResource(StyleProperty, iconButtonStyleResourceKey);

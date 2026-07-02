@@ -976,6 +976,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryActionButtonOpacityAnimationName = \"M3ActionClusterSecondaryButtonOpacity\"", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionButtonOpacityAnimationName = \"M3ActionClusterTertiaryButtonOpacity\"", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("QuaternaryActionButtonOpacityAnimationName = \"M3ActionClusterQuaternaryButtonOpacity\"", actionClusterView, StringComparison.Ordinal);
+            Assert.Equal(4, CountOccurrences(actionClusterView, "propertyChanged: OnActionVisibilityPropertyChanged);"));
+            Assert.Contains("private static void OnActionVisibilityPropertyChanged", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("view.UpdateVisualState(animateActionVisibility: true);", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("view.UpdateVisualState(animateActionVisibility: false);", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("bool shouldAnimateVisibility = animateActionVisibility && _hasAppliedActionVisibilityState;", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileBrowserTopBarView, StringComparison.Ordinal);
@@ -1010,6 +1015,7 @@ namespace Cotton.Mobile.Tests
                 "actionButton.IsVisible = isVisible && iconData is not null && command is not null",
                 actionClusterView,
                 StringComparison.Ordinal);
+            Assert.DoesNotContain("bool shouldAnimateVisibility = _hasAppliedActionVisibilityState;", actionClusterView, StringComparison.Ordinal);
         }
 
         [Fact]

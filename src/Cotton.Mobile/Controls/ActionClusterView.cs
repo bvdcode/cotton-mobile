@@ -67,7 +67,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ActionClusterView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty SecondaryActionIconDataProperty = BindableProperty.Create(
             nameof(SecondaryActionIconData),
@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ActionClusterView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty TertiaryActionIconDataProperty = BindableProperty.Create(
             nameof(TertiaryActionIconData),
@@ -161,7 +161,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ActionClusterView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty QuaternaryActionIconDataProperty = BindableProperty.Create(
             nameof(QuaternaryActionIconData),
@@ -208,7 +208,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(ActionClusterView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         private readonly IconButton _primaryActionButton;
         private readonly IconButton _quaternaryActionButton;
@@ -227,7 +227,7 @@ namespace Cotton.Mobile.Controls
             Children.Add(_secondaryActionButton);
             Children.Add(_tertiaryActionButton);
             Children.Add(_quaternaryActionButton);
-            UpdateVisualState();
+            UpdateVisualState(animateActionVisibility: false);
         }
 
         public string ClusterStyleResourceKey
@@ -407,12 +407,18 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionClusterView view = (ActionClusterView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateActionVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnActionVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            bool shouldAnimateVisibility = _hasAppliedActionVisibilityState;
+            ActionClusterView view = (ActionClusterView)bindable;
+            view.UpdateVisualState(animateActionVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateActionVisibility)
+        {
+            bool shouldAnimateVisibility = animateActionVisibility && _hasAppliedActionVisibilityState;
             string clusterStyleResourceKey = string.IsNullOrWhiteSpace(ClusterStyleResourceKey)
                 ? DefaultClusterStyleResourceKey
                 : ClusterStyleResourceKey;

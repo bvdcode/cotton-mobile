@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
     public class TextAction : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3TextActionBackground";
+        private const string LabelTextColorAnimationName = "M3TextActionTextColor";
         private const string OpacityAnimationName = "M3TextActionOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
@@ -142,7 +143,7 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             TextAction textAction = (TextAction)bindable;
-            textAction.UpdateVisualState(false);
+            textAction.UpdateVisualState(true);
         }
 
         protected override void OnPressedStateChanged()
@@ -188,7 +189,12 @@ namespace Cotton.Mobile.Controls
                 shouldAnimate);
 
             _label.Text = Text;
-            _label.TextColor = TextColor;
+            MaterialMotion.UpdateTextColor(
+                _label,
+                TextColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                LabelTextColorAnimationName,
+                shouldAnimate);
             _label.FontSize = TextFontSize;
             _hasAppliedVisualState = true;
         }

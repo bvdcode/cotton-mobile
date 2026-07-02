@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Controls
     {
         private const string BackgroundAnimationName = "M3NavigationBarItemBackground";
         private const string BorderColorAnimationName = "M3NavigationBarItemBorderColor";
+        private const string LabelTextColorAnimationName = "M3NavigationBarItemTextColor";
         private const string OpacityAnimationName = "M3NavigationBarItemOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
@@ -295,7 +296,7 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             NavigationBarItem item = (NavigationBarItem)bindable;
-            item.UpdateVisualState(false);
+            item.UpdateVisualState(true);
         }
 
         private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -403,7 +404,12 @@ namespace Cotton.Mobile.Controls
             _icon.IconColor = IconColor;
             _icon.IconSize = IconSize;
             _label.Text = Text;
-            _label.TextColor = TextColor;
+            MaterialMotion.UpdateTextColor(
+                _label,
+                TextColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                LabelTextColorAnimationName,
+                shouldAnimate);
             _label.FontSize = TextFontSize;
             _label.FontAttributes = TextFontAttributes;
             _hasAppliedVisualState = true;

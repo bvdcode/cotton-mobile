@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Controls
     {
         private const string BackgroundAnimationName = "M3InitialsButtonBackground";
         private const string BorderColorAnimationName = "M3InitialsButtonBorderColor";
+        private const string LabelTextColorAnimationName = "M3InitialsButtonTextColor";
         private const string OpacityAnimationName = "M3InitialsButtonOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
@@ -195,7 +196,7 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             InitialsButton initialsButton = (InitialsButton)bindable;
-            initialsButton.UpdateVisualState(false);
+            initialsButton.UpdateVisualState(true);
         }
 
         protected override void OnPressedStateChanged()
@@ -257,7 +258,12 @@ namespace Cotton.Mobile.Controls
             _label.WidthRequest = ButtonSize;
             _label.HeightRequest = ButtonSize;
             _label.Text = Text;
-            _label.TextColor = TextColor;
+            MaterialMotion.UpdateTextColor(
+                _label,
+                TextColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                LabelTextColorAnimationName,
+                shouldAnimate);
             _label.FontSize = TextFontSize;
             _label.FontAttributes = TextFontAttributes;
             _hasAppliedVisualState = true;

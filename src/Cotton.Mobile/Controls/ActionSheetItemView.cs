@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Controls
         private const string BackgroundAnimationName = "M3ActionSheetItemBackground";
         private const string IconFrameBackgroundAnimationName = "M3ActionSheetIconFrameBackground";
         private const string IconFrameBorderColorAnimationName = "M3ActionSheetIconFrameBorderColor";
+        private const string LabelTextColorAnimationName = "M3ActionSheetItemTextColor";
         private const string RowOpacityAnimationName = "M3ActionSheetItemOpacity";
         private const string SelectedIconOpacityAnimationName = "M3ActionSheetSelectedIconOpacity";
         private const string SelectedIconScaleAnimationName = "M3ActionSheetSelectedIconScale";
@@ -398,7 +399,12 @@ namespace Cotton.Mobile.Controls
             _leadingIcon.IconSize = IconSize;
 
             _label.Text = Text;
-            _label.TextColor = TextColor;
+            MaterialMotion.UpdateTextColor(
+                _label,
+                TextColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                LabelTextColorAnimationName,
+                shouldAnimateChrome);
             _label.FontSize = TextFontSize;
             _label.LineHeight = TextLineHeight;
 

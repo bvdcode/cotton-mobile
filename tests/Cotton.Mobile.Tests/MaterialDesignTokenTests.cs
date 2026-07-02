@@ -1841,6 +1841,37 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Shared_pressable_labels_animate_text_color_state()
+        {
+            string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
+            string[] controlPaths =
+            [
+                Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"),
+                Path.Combine(ControlsDirectoryPath, "FilledButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "NavigationBarItem.cs"),
+                Path.Combine(ControlsDirectoryPath, "TextAction.cs"),
+            ];
+
+            Assert.Contains("public static void UpdateTextColor(", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("Color? currentTextColor = label.TextColor;", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("color => label.TextColor = color", materialMotion, StringComparison.Ordinal);
+
+            foreach (string controlPath in controlPaths)
+            {
+                string control = LoadText(controlPath);
+
+                Assert.Contains("LabelTextColorAnimationName = \"M3", control, StringComparison.Ordinal);
+                Assert.Contains("MaterialMotion.UpdateTextColor(", control, StringComparison.Ordinal);
+                Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", control, StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    $"{Environment.NewLine}            _label.TextColor =",
+                    control,
+                    StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void File_status_chips_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

@@ -173,6 +173,25 @@ namespace Cotton.Mobile.Controls
             SetColor(element, targetColor, animationName, applyColor);
         }
 
+        public static void UpdateTextColor(
+            Label label,
+            Color targetColor,
+            int duration,
+            string animationName,
+            bool animate)
+        {
+            Color? currentTextColor = label.TextColor;
+            Color startColor = currentTextColor ?? targetColor;
+            UpdateColor(
+                label,
+                startColor,
+                targetColor,
+                duration,
+                animationName,
+                animate,
+                color => label.TextColor = color);
+        }
+
         public static void UpdateDouble(
             VisualElement element,
             double startValue,

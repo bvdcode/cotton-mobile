@@ -15,8 +15,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh security" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Security"
                                        SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
@@ -129,7 +128,6 @@
                                                  IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
                                                  IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
             </controls:SettingsCardView>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

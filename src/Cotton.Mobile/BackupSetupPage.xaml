@@ -14,8 +14,7 @@
                             SecondaryCommand="{Binding SaveCommand}"
                             SecondaryDescription="Save camera backup" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Camera Backup"
                                        SupportingText="{Binding ExecutionStatusText}"
                                        IsSupportingTextMultiline="True"
@@ -103,7 +102,6 @@
                                                  LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
                                                  IsToggled="{Binding AllowCellular, Mode=TwoWay}" />
             </controls:SettingsCardView>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

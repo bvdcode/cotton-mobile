@@ -14,8 +14,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh destinations" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="{Binding CurrentFolderName}"
                                        SupportingText="{Binding PathText}"
                                        IsSupportingTextVisible="{Binding IsPathTextVisible}"
@@ -63,7 +62,6 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

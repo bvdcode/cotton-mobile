@@ -18,8 +18,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh sync settings" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Folders"
                                        SupportingText="{Binding SummaryText}"
                                        IsSupportingTextVisible="{Binding IsSummaryVisible}"
@@ -86,7 +85,6 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

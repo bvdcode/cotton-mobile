@@ -17,8 +17,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh capture inbox" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
@@ -68,7 +67,6 @@
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

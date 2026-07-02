@@ -14,8 +14,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh notifications" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Notifications"
                                        SupportingText="{Binding EnabledCategoriesText}"
                                        IsBusy="{Binding IsBusy}" />
@@ -85,7 +84,6 @@
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
             </controls:SettingsCardView>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

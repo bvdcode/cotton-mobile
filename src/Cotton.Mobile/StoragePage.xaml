@@ -15,8 +15,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh storage" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="{Binding TotalSizeText}"
                                        TitleStyleResourceKey="M3ScreenMetric"
                                        SupportingText="{Binding TotalFileCountText}"
@@ -111,7 +110,6 @@
                 </VerticalStackLayout>
             </controls:SettingsCardView>
 
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

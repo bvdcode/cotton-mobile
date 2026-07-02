@@ -1533,21 +1533,36 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Secondary_screen_scroll_bodies_use_reusable_material_shell()
         {
-            string activityFeedPage = LoadText(ActivityFeedPagePath);
             string screenScrollBodyView = LoadText(ScreenScrollBodyViewPath);
-            string transfersPage = LoadText(TransfersPagePath);
 
-            Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"1\">", activityFeedPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"1\">", transfersPage, StringComparison.Ordinal);
+            string[] scrollBodyScreenPaths =
+            [
+                ActivityFeedPagePath,
+                BackupSetupPagePath,
+                CaptureDestinationPickerPagePath,
+                CaptureInboxPagePath,
+                DiagnosticsPagePath,
+                NotificationSettingsPagePath,
+                SecuritySettingsPagePath,
+                StoragePagePath,
+                SyncSettingsPagePath,
+                TransfersPagePath,
+            ];
+
             Assert.Contains("public class ScreenScrollBodyView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("new ScrollView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("new VerticalStackLayout", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3ScreenContentStack\"", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _stack.Children", screenScrollBodyView, StringComparison.Ordinal);
-            Assert.DoesNotContain("<ScrollView Grid.Row=\"1\">", activityFeedPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<ScrollView Grid.Row=\"1\">", transfersPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenContentStack}\">", activityFeedPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenContentStack}\">", transfersPage, StringComparison.Ordinal);
+
+            foreach (string screenPath in scrollBodyScreenPaths)
+            {
+                string page = LoadText(screenPath);
+
+                Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"1\">", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<ScrollView Grid.Row=\"1\">", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenContentStack}\">", page, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

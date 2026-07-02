@@ -36,11 +36,10 @@
                                          Title="{Binding EmptyMessage}"
                                          Body="{Binding EmptyDetails}" />
 
-                <CollectionView ItemsSource="{Binding Items}"
-                                IsVisible="{Binding IsListVisible}"
-                                SelectionMode="None"
-                                ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
-                    <CollectionView.ItemTemplate>
+                <controls:MaterialCollectionView ItemsSource="{Binding Items}"
+                                                 IsVisible="{Binding IsListVisible}"
+                                                 ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                    <controls:MaterialCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">
                             <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.File}"
                                                        LeadingIconFrameStyleResourceKey="M3CardFileThumbnailFrame"
@@ -51,8 +50,8 @@
                                                                SecondaryText="{Binding ContentTypeText}" />
                             </controls:MetadataCardView>
                         </DataTemplate>
-                    </CollectionView.ItemTemplate>
-                </CollectionView>
+                    </controls:MaterialCollectionView.ItemTemplate>
+                </controls:MaterialCollectionView>
             </controls:LayeredContentView>
         </controls:ScreenContentGridView>
     </controls:ScreenShellView>

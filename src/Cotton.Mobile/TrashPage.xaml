@@ -88,12 +88,11 @@
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <CollectionView ItemsSource="{Binding Items}"
-                            IsVisible="{Binding IsListVisible}"
-                            SelectionMode="None"
-                            ItemSizingStrategy="MeasureFirstItem"
-                            ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
-                <CollectionView.ItemTemplate>
+            <controls:MaterialCollectionView ItemsSource="{Binding Items}"
+                                             IsVisible="{Binding IsListVisible}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                         <controls:TrashListEntryCardView Title="{Binding Name}"
                                                          Detail="{Binding DisplayDetails}"
@@ -111,15 +110,14 @@
                                                          DeleteForeverCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                                          RestoreCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}" />
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
 
-            <CollectionView ItemsSource="{Binding Items}"
-                            IsVisible="{Binding IsTileVisible}"
-                            SelectionMode="None"
-                            ItemSizingStrategy="MeasureFirstItem"
-                            ItemsLayout="{StaticResource M3TrashTileItemsLayout}">
-                <CollectionView.ItemTemplate>
+            <controls:MaterialCollectionView ItemsSource="{Binding Items}"
+                                             IsVisible="{Binding IsTileVisible}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3TrashTileItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                         <controls:TrashTileEntryCardView Title="{Binding Name}"
                                                          Detail="{Binding DisplayDetails}"
@@ -137,8 +135,8 @@
                                                          DeleteForeverCommand="{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}"
                                                          RestoreCommand="{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}" />
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
         </controls:LayeredContentView>
         </controls:ScreenContentGridView>
     </controls:ScreenShellView>

@@ -38,13 +38,12 @@
                                  Title="{Binding EmptyMessage}"
                                  Body="{Binding EmptyDetails}" />
 
-        <CollectionView Grid.Row="2"
-                        ItemsSource="{Binding Items}"
-                        IsVisible="{Binding IsListVisible}"
-                        SelectionMode="None"
-                        ItemSizingStrategy="MeasureFirstItem"
-                        ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
-            <CollectionView.ItemTemplate>
+        <controls:MaterialCollectionView Grid.Row="2"
+                                         ItemsSource="{Binding Items}"
+                                         IsVisible="{Binding IsListVisible}"
+                                         ItemSizingStrategy="MeasureFirstItem"
+                                         ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+            <controls:MaterialCollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">
                     <controls:ContentCardView>
                         <controls:ActionListItemView Text="{Binding FileName}"
@@ -66,8 +65,8 @@
                                                      SemanticDescription="{Binding FileName, StringFormat='Open {0}'}" />
                     </controls:ContentCardView>
                 </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+            </controls:MaterialCollectionView.ItemTemplate>
+        </controls:MaterialCollectionView>
         </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

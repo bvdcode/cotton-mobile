@@ -752,6 +752,12 @@
                      HorizontalItemSpacing="{StaticResource M3CardListItemSpacing}"
                      VerticalItemSpacing="{StaticResource M3CardListItemSpacing}" />
 
+    <Style TargetType="CollectionView" x:Key="M3MaterialCollectionView">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3ListItemTouchSurface">
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
@@ -856,11 +862,11 @@
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 
-    <Style TargetType="CollectionView" x:Key="M3DarkViewerCollection">
+    <Style TargetType="CollectionView" x:Key="M3DarkViewerCollection" BasedOn="{StaticResource M3MaterialCollectionView}">
         <Setter Property="BackgroundColor" Value="{StaticResource M3DarkSurface}" />
     </Style>
 
-    <Style TargetType="CollectionView" x:Key="M3DocumentViewerCollection">
+    <Style TargetType="CollectionView" x:Key="M3DocumentViewerCollection" BasedOn="{StaticResource M3MaterialCollectionView}">
         <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurface}, Dark={StaticResource M3DarkSurface}}" />
     </Style>
 

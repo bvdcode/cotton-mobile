@@ -62,6 +62,7 @@ namespace Cotton.Mobile.Tests
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
         private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
+        private const string MaterialCollectionViewPath = "src/Cotton.Mobile/Controls/MaterialCollectionView.cs";
         private const string StackedContentViewPath = "src/Cotton.Mobile/Controls/StackedContentView.cs";
         private const string StackedItemsViewPath = "src/Cotton.Mobile/Controls/StackedItemsView.cs";
         private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
@@ -895,6 +896,60 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileMetadataGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Collection_screens_use_reusable_material_collection_control()
+        {
+            string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
+            string materialCollectionView = LoadText(MaterialCollectionViewPath);
+            string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string recentFilesPage = LoadText(RecentFilesPagePath);
+            string styles = LoadText(StylesResourcePath);
+            string trashPage = LoadText(TrashPagePath);
+
+            string combinedPages = fileVersionHistoryPage
+                + pdfViewerPage
+                + recentFilesPage
+                + trashPage;
+
+            string[] pagePaths =
+            [
+                FileVersionHistoryPagePath,
+                PdfViewerPagePath,
+                RecentFilesPagePath,
+                TrashPagePath,
+            ];
+
+            Assert.Equal(5, CountOccurrences(combinedPages, "<controls:MaterialCollectionView "));
+            Assert.Equal(5, CountOccurrences(combinedPages, "<controls:MaterialCollectionView.ItemTemplate>"));
+            Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsLayout=\"{StaticResource M3TrashTileItemsLayout}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("CollectionStyleResourceKey=\"M3DocumentViewerCollection\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("public class MaterialCollectionView", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultCollectionStyleResourceKey = \"M3MaterialCollectionView\"", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("typeof(IItemsLayout)", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("LinearItemsLayout.Vertical", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy.MeasureFirstItem", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("SelectionMode.None", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("_collection.SetDynamicResource(StyleProperty, collectionStyleResourceKey)", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("_collection.ItemsSource = ItemsSource", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("_collection.ItemTemplate = ItemTemplate", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("_collection.ItemsLayout = ItemsLayout", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("_collection.SelectionMode = SelectionMode", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3MaterialCollectionView\"", styles, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3DocumentViewerCollection\" BasedOn=\"{StaticResource M3MaterialCollectionView}\"", styles, StringComparison.Ordinal);
+
+            foreach (string pagePath in pagePaths)
+            {
+                string page = LoadText(pagePath);
+
+                Assert.DoesNotContain("<CollectionView", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("SelectionMode=\"None\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<CollectionView.ItemTemplate>", page, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

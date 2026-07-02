@@ -25,13 +25,13 @@
                                            IsStatusVisible="{Binding IsStatusVisible}"
                                            StackStyleResourceKey="M3PdfHeaderStack" />
 
-            <CollectionView Grid.Row="1"
-                            ItemsSource="{Binding Pages}"
-                            IsVisible="{Binding IsPreviewVisible}"
-                            Style="{StaticResource M3DocumentViewerCollection}"
-                            ItemSizingStrategy="MeasureAllItems"
-                            ItemsLayout="{StaticResource M3PdfPreviewItemsLayout}">
-                <CollectionView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="1"
+                                             ItemsSource="{Binding Pages}"
+                                             IsVisible="{Binding IsPreviewVisible}"
+                                             CollectionStyleResourceKey="M3DocumentViewerCollection"
+                                             ItemSizingStrategy="MeasureAllItems"
+                                             ItemsLayout="{StaticResource M3PdfPreviewItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
                         <Grid Style="{StaticResource M3PdfPageContainerGrid}">
                             <controls:ContentCardView CardStyleResourceKey="M3PdfPageSurface">
@@ -41,8 +41,8 @@
                             </controls:ContentCardView>
                         </Grid>
                     </DataTemplate>
-                </CollectionView.ItemTemplate>
-            </CollectionView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
 
             <controls:LayeredContentView Grid.Row="1"
                                          IsVisible="{Binding IsEmptyVisible}"

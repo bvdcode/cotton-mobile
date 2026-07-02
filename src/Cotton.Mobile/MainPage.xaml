@@ -227,31 +227,15 @@
                                                          ClearButtonVisibility="WhileEditing"
                                                          SemanticHint="Search files and folders" />
 
-                            <Border IsVisible="{Binding Display.IsFileSelectionBarVisible}"
-                                    Style="{StaticResource M3SelectionBar}">
-                                <Grid ColumnDefinitions="*,Auto,Auto"
-                                      Style="{StaticResource M3SelectionBarGrid}">
-                                    <VerticalStackLayout Style="{StaticResource M3SelectionTextStack}">
-                                        <Label Text="{Binding Display.FileSelection.TitleText}"
-                                               Style="{StaticResource M3SelectionTitleText}" />
-
-                                        <Label Text="{Binding Display.FileSelection.DetailText}"
-                                               Style="{StaticResource M3SelectionDetailText}" />
-                                    </VerticalStackLayout>
-
-                                    <controls:IconButton Grid.Column="1"
-                                                         IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                         Command="{Binding ShowFileSelectionActionsCommand}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="Selected file actions" />
-
-                                    <controls:IconButton Grid.Column="2"
-                                                         IconData="{x:Static controls:IconPathData.Close}"
-                                                         Command="{Binding ClearFileSelectionCommand}"
-                                                         Style="{StaticResource M3FileChromeIconButton}"
-                                                         SemanticProperties.Description="Cancel file selection" />
-                                </Grid>
-                            </Border>
+                            <controls:SelectionBarView IsVisible="{Binding Display.IsFileSelectionBarVisible}"
+                                                       TitleText="{Binding Display.FileSelection.TitleText}"
+                                                       DetailText="{Binding Display.FileSelection.DetailText}"
+                                                       PrimaryActionIconData="{x:Static controls:IconPathData.MoreVertical}"
+                                                       PrimaryActionCommand="{Binding ShowFileSelectionActionsCommand}"
+                                                       PrimaryActionSemanticDescription="Selected file actions"
+                                                       SecondaryActionIconData="{x:Static controls:IconPathData.Close}"
+                                                       SecondaryActionCommand="{Binding ClearFileSelectionCommand}"
+                                                       SecondaryActionSemanticDescription="Cancel file selection" />
 
                             <controls:LoadingStatusView IsVisible="{Binding Display.IsFilesLoading}"
                                                         IsRunning="{Binding Display.IsFilesLoading}"

@@ -83,40 +83,22 @@
                                    Text="{Binding Status}"
                                    IsVisible="{Binding IsStatusVisible}" />
 
-        <Border Grid.Row="3"
-                IsVisible="{Binding IsSelectionBarVisible}"
-                Style="{StaticResource M3SelectionBar}">
-            <Grid ColumnDefinitions="*,Auto,Auto,Auto"
-                  Style="{StaticResource M3SelectionBarGrid}">
-                <VerticalStackLayout Style="{StaticResource M3SelectionTextStack}">
-                    <Label Text="{Binding SelectionTitleText}"
-                           Style="{StaticResource M3SelectionTitleText}" />
-
-                    <Label Text="{Binding SelectionDetailText}"
-                           Style="{StaticResource M3SelectionDetailText}" />
-                </VerticalStackLayout>
-
-                <controls:IconButton Grid.Column="1"
-                                     IconData="{x:Static controls:IconPathData.Reset}"
-                                     Command="{Binding RestoreSelectionCommand}"
-                                     IsEnabled="{Binding IsBulkActionEnabled}"
-                                     Style="{StaticResource M3FileChromeIconButton}"
-                                     SemanticProperties.Description="Restore selected items" />
-
-                <controls:IconButton Grid.Column="2"
-                                     IconData="{x:Static controls:IconPathData.Delete}"
-                                     Command="{Binding DeleteForeverSelectionCommand}"
-                                     IsEnabled="{Binding IsBulkActionEnabled}"
-                                     Style="{StaticResource M3DestructiveFileChromeIconButton}"
-                                     SemanticProperties.Description="Delete selected items forever" />
-
-                <controls:IconButton Grid.Column="3"
-                                     IconData="{x:Static controls:IconPathData.Close}"
-                                     Command="{Binding CancelSelectionCommand}"
-                                     Style="{StaticResource M3FileChromeIconButton}"
-                                     SemanticProperties.Description="Cancel selection" />
-            </Grid>
-        </Border>
+        <controls:SelectionBarView Grid.Row="3"
+                                   IsVisible="{Binding IsSelectionBarVisible}"
+                                   TitleText="{Binding SelectionTitleText}"
+                                   DetailText="{Binding SelectionDetailText}"
+                                   PrimaryActionIconData="{x:Static controls:IconPathData.Reset}"
+                                   PrimaryActionCommand="{Binding RestoreSelectionCommand}"
+                                   PrimaryActionIsEnabled="{Binding IsBulkActionEnabled}"
+                                   PrimaryActionSemanticDescription="Restore selected items"
+                                   SecondaryActionIconData="{x:Static controls:IconPathData.Delete}"
+                                   SecondaryActionCommand="{Binding DeleteForeverSelectionCommand}"
+                                   SecondaryActionIsEnabled="{Binding IsBulkActionEnabled}"
+                                   SecondaryActionSemanticDescription="Delete selected items forever"
+                                   SecondaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                   TertiaryActionIconData="{x:Static controls:IconPathData.Close}"
+                                   TertiaryActionCommand="{Binding CancelSelectionCommand}"
+                                   TertiaryActionSemanticDescription="Cancel selection" />
 
         <Grid Grid.Row="4">
             <controls:EmptyStateView IsVisible="{Binding IsEmpty}"

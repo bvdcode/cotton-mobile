@@ -298,6 +298,25 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Selection_bars_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+
+            Assert.Contains("<controls:SelectionBarView IsVisible=\"{Binding Display.IsFileSelectionBarVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding ShowFileSelectionActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding ClearFileSelectionCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3SelectionBar", mainPage, StringComparison.Ordinal);
+
+            Assert.Contains("<controls:SelectionBarView Grid.Row=\"3\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding RestoreSelectionCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding DeleteForeverSelectionCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding CancelSelectionCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3SelectionBar", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

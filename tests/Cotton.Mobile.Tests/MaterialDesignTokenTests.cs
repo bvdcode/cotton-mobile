@@ -2173,6 +2173,7 @@ namespace Cotton.Mobile.Tests
         {
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:SettingsInfoItemView"));
             Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Check}\"", securitySettingsPage, StringComparison.Ordinal);
@@ -2196,6 +2197,27 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("AttentionLeadingIconFrameStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("AttentionTrailingTextStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains(
+                "PrimaryDetailTextOpacityAnimationName = \"M3SettingsInfoPrimaryDetailOpacity\"",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "SecondaryDetailTextOpacityAnimationName = \"M3SettingsInfoSecondaryDetailOpacity\"",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "TertiaryDetailTextOpacityAnimationName = \"M3SettingsInfoTertiaryDetailOpacity\"",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.Contains("OnPrimaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("OnSecondaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("OnTertiaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("CompletePrimaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconFrame Grid.RowSpan", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TargetType=\"controls:IconFrame\"", securitySettingsPage, StringComparison.Ordinal);
@@ -2204,6 +2226,18 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Label Grid.Row=\"1\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyDetails}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText)",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_secondaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(secondaryDetailText)",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText)",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
         }
 
         [Fact]

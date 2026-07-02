@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Maui.Controls.Shapes;
@@ -18,6 +19,9 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTitleTextStyleResourceKey = "M3CardSupportingStrongLine";
         private const string DefaultTrailingChipStyleResourceKey = "M3TrailingChip";
         private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
+        private const string PrimaryDetailTextOpacityAnimationName = "M3SettingsInfoPrimaryDetailOpacity";
+        private const string SecondaryDetailTextOpacityAnimationName = "M3SettingsInfoSecondaryDetailOpacity";
+        private const string TertiaryDetailTextOpacityAnimationName = "M3SettingsInfoTertiaryDetailOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -31,21 +35,21 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(SettingsInfoItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPrimaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty SecondaryDetailTextProperty = BindableProperty.Create(
             nameof(SecondaryDetailText),
             typeof(string),
             typeof(SettingsInfoItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSecondaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty TertiaryDetailTextProperty = BindableProperty.Create(
             nameof(TertiaryDetailText),
             typeof(string),
             typeof(SettingsInfoItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTertiaryDetailTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
             nameof(TrailingText),
@@ -169,6 +173,9 @@ namespace Cotton.Mobile.Controls
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
         private readonly ChipView _trailingChip;
+        private bool _hasAppliedPrimaryDetailTextVisibility;
+        private bool _hasAppliedSecondaryDetailTextVisibility;
+        private bool _hasAppliedTertiaryDetailTextVisibility;
 
         public SettingsInfoItemView()
         {
@@ -211,7 +218,10 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _grid;
-            UpdateVisualState();
+            UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false);
         }
 
         public string Title
@@ -337,10 +347,52 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsInfoItemView view = (SettingsInfoItemView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnPrimaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsInfoItemView view = (SettingsInfoItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: true,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false);
+        }
+
+        private static void OnSecondaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsInfoItemView view = (SettingsInfoItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: true,
+                animateTertiaryDetailTextVisibility: false);
+        }
+
+        private static void OnTertiaryDetailTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsInfoItemView view = (SettingsInfoItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: true);
+        }
+
+        private void UpdateVisualState(
+            bool animatePrimaryDetailTextVisibility,
+            bool animateSecondaryDetailTextVisibility,
+            bool animateTertiaryDetailTextVisibility)
         {
             string title = Title ?? string.Empty;
             string primaryDetailText = PrimaryDetailText ?? string.Empty;
@@ -384,13 +436,31 @@ namespace Cotton.Mobile.Controls
             _title.Text = title;
             _primaryDetailText.SetDynamicResource(StyleProperty, primaryDetailTextStyleResourceKey);
             _primaryDetailText.Text = primaryDetailText;
-            _primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText);
+            UpdateDetailTextVisibility(
+                _primaryDetailText,
+                primaryDetailText,
+                animatePrimaryDetailTextVisibility,
+                ref _hasAppliedPrimaryDetailTextVisibility,
+                PrimaryDetailTextOpacityAnimationName,
+                CompletePrimaryDetailTextVisibility);
             _secondaryDetailText.SetDynamicResource(StyleProperty, secondaryDetailTextStyleResourceKey);
             _secondaryDetailText.Text = secondaryDetailText;
-            _secondaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(secondaryDetailText);
+            UpdateDetailTextVisibility(
+                _secondaryDetailText,
+                secondaryDetailText,
+                animateSecondaryDetailTextVisibility,
+                ref _hasAppliedSecondaryDetailTextVisibility,
+                SecondaryDetailTextOpacityAnimationName,
+                CompleteSecondaryDetailTextVisibility);
             _tertiaryDetailText.SetDynamicResource(StyleProperty, tertiaryDetailTextStyleResourceKey);
             _tertiaryDetailText.Text = tertiaryDetailText;
-            _tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText);
+            UpdateDetailTextVisibility(
+                _tertiaryDetailText,
+                tertiaryDetailText,
+                animateTertiaryDetailTextVisibility,
+                ref _hasAppliedTertiaryDetailTextVisibility,
+                TertiaryDetailTextOpacityAnimationName,
+                CompleteTertiaryDetailTextVisibility);
             _trailingChip.Text = trailingText;
             _trailingChip.IsVisible = isTrailingTextVisible;
             _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
@@ -406,6 +476,76 @@ namespace Cotton.Mobile.Controls
                     secondaryDetailText,
                     tertiaryDetailText,
                     trailingText));
+        }
+
+        private void UpdateDetailTextVisibility(
+            Label detailTextLabel,
+            string detailText,
+            bool animateDetailTextVisibility,
+            ref bool hasAppliedDetailTextVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool isDetailTextVisible = IsDetailTextActuallyVisible(detailText);
+            bool shouldAnimate = animateDetailTextVisibility && hasAppliedDetailTextVisibility;
+            double targetOpacity = isDetailTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailTextVisible)
+            {
+                detailTextLabel.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                detailTextLabel,
+                detailTextLabel.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => detailTextLabel.Opacity = opacity,
+                completeVisibility);
+            hasAppliedDetailTextVisibility = true;
+        }
+
+        private void CompletePrimaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(PrimaryDetailText ?? string.Empty))
+            {
+                _primaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _primaryDetailText.IsVisible = false;
+        }
+
+        private void CompleteSecondaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(SecondaryDetailText ?? string.Empty))
+            {
+                _secondaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _secondaryDetailText.IsVisible = false;
+        }
+
+        private void CompleteTertiaryDetailTextVisibility()
+        {
+            if (IsDetailTextActuallyVisible(TertiaryDetailText ?? string.Empty))
+            {
+                _tertiaryDetailText.IsVisible = true;
+                return;
+            }
+
+            _tertiaryDetailText.IsVisible = false;
+        }
+
+        private static bool IsDetailTextActuallyVisible(string detailText)
+        {
+            return !string.IsNullOrWhiteSpace(detailText);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

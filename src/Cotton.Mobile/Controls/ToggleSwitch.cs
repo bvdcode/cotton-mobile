@@ -7,13 +7,19 @@ namespace Cotton.Mobile.Controls
 {
     public class ToggleSwitch : PressableContentView
     {
+        private const string OpacityAnimationName = "M3SwitchOpacity";
+        private const string ThumbColorAnimationName = "M3SwitchThumbColor";
+        private const string ThumbTranslationAnimationName = "M3SwitchThumbTranslation";
+        private const string TrackBorderColorAnimationName = "M3SwitchTrackBorderColor";
+        private const string TrackColorAnimationName = "M3SwitchTrackColor";
+
         public static readonly BindableProperty IsToggledProperty = BindableProperty.Create(
             nameof(IsToggled),
             typeof(bool),
             typeof(ToggleSwitch),
             false,
             defaultBindingMode: BindingMode.TwoWay,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnToggledPropertyChanged);
 
         public static readonly BindableProperty TrackOnColorProperty = BindableProperty.Create(
             nameof(TrackOnColor),
@@ -151,6 +157,7 @@ namespace Cotton.Mobile.Controls
         private readonly Grid _trackContent;
         private readonly Border _track;
         private readonly Border _thumb;
+        private bool _hasAppliedVisualState;
 
         public ToggleSwitch()
         {
@@ -171,7 +178,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _track;
-            UpdateVisualState();
+            UpdateVisualState(animateState: false, animateThumbTranslation: false);
         }
 
         public bool IsToggled
@@ -300,19 +307,25 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState();
+                UpdateVisualState(animateState: true, animateThumbTranslation: false);
             }
+        }
+
+        private static void OnToggledPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ToggleSwitch toggleSwitch = (ToggleSwitch)bindable;
+            toggleSwitch.UpdateVisualState(animateState: true, animateThumbTranslation: true);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ToggleSwitch toggleSwitch = (ToggleSwitch)bindable;
-            toggleSwitch.UpdateVisualState();
+            toggleSwitch.UpdateVisualState(animateState: false, animateThumbTranslation: false);
         }
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(animateState: true, animateThumbTranslation: false);
         }
 
         protected override void ExecutePress()
@@ -332,14 +345,31 @@ namespace Cotton.Mobile.Controls
 #endif
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateState, bool animateThumbTranslation)
         {
             if (_track is null || _trackContent is null || _thumb is null)
             {
                 return;
             }
 
-            Opacity = ResolvePressableOpacity(1);
+            bool shouldAnimateState = animateState && _hasAppliedVisualState;
+            bool shouldAnimateThumbTranslation = animateThumbTranslation && _hasAppliedVisualState;
+            int stateDuration = ResolveStateMotionDuration();
+            int thumbDuration = MaterialResources.Get<int>("M3MotionSelectionDuration");
+            double targetOpacity = ResolvePressableOpacity(1);
+            Color targetTrackColor = ResolveTrackColor();
+            Color targetTrackBorderColor = ResolveTrackBorderColor();
+            Color targetThumbColor = ResolveThumbColor();
+            double targetThumbTranslation = ResolveThumbTranslation();
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                stateDuration,
+                OpacityAnimationName,
+                shouldAnimateState,
+                opacity => Opacity = opacity);
 
             double touchWidth = Math.Max(TrackWidth, TouchTargetSize);
             double touchHeight = Math.Max(TrackHeight, TouchTargetSize);
@@ -355,8 +385,20 @@ namespace Cotton.Mobile.Controls
                 CornerRadius = new CornerRadius(TrackCornerRadius),
             };
             _track.StrokeThickness = TrackBorderWidth;
-            _track.Stroke = new SolidColorBrush(ResolveTrackBorderColor());
-            _track.BackgroundColor = ResolveTrackColor();
+            MaterialMotion.UpdateColor(
+                _track,
+                ResolveCurrentTrackBorderColor(),
+                targetTrackBorderColor,
+                stateDuration,
+                TrackBorderColorAnimationName,
+                shouldAnimateState,
+                color => _track.Stroke = new SolidColorBrush(color));
+            MaterialMotion.UpdateBackgroundColor(
+                _track,
+                targetTrackColor,
+                stateDuration,
+                TrackColorAnimationName,
+                shouldAnimateState);
 
             _trackContent.Padding = new Thickness(ThumbInset, 0);
 
@@ -367,8 +409,22 @@ namespace Cotton.Mobile.Controls
             {
                 CornerRadius = new CornerRadius(ThumbCornerRadius),
             };
-            _thumb.BackgroundColor = ResolveThumbColor();
-            _thumb.HorizontalOptions = IsToggled ? LayoutOptions.End : LayoutOptions.Start;
+            _thumb.HorizontalOptions = LayoutOptions.Start;
+            MaterialMotion.UpdateBackgroundColor(
+                _thumb,
+                targetThumbColor,
+                stateDuration,
+                ThumbColorAnimationName,
+                shouldAnimateState);
+            MaterialMotion.UpdateDouble(
+                _thumb,
+                _thumb.TranslationX,
+                targetThumbTranslation,
+                thumbDuration,
+                ThumbTranslationAnimationName,
+                shouldAnimateThumbTranslation,
+                translation => _thumb.TranslationX = translation);
+            _hasAppliedVisualState = true;
         }
 
         private Color ResolveTrackColor()
@@ -404,6 +460,32 @@ namespace Cotton.Mobile.Controls
             }
 
             return IsToggled ? ThumbOnColor : ThumbOffColor;
+        }
+
+        private Color ResolveCurrentTrackBorderColor()
+        {
+            if (_track.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return ResolveTrackBorderColor();
+        }
+
+        private double ResolveThumbTranslation()
+        {
+            if (!IsToggled)
+            {
+                return MaterialMotion.Value("M3MotionRestOffset");
+            }
+
+            double contentWidth = TrackWidth - (ThumbInset * 2d);
+            return Math.Max(MaterialMotion.Value("M3MotionRestOffset"), contentWidth - ThumbSize);
+        }
+
+        private int ResolveStateMotionDuration()
+        {
+            return IsPressed ? PressInDuration : PressOutDuration;
         }
     }
 }

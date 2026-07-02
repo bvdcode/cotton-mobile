@@ -140,6 +140,33 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_switch_animates_state_and_thumb_motion()
+        {
+            string toggleSwitch = LoadText(Path.Combine(ControlsDirectoryPath, "ToggleSwitch.cs"));
+            string interaction = LoadText(InteractionResourcePath);
+
+            Assert.Contains("TrackColorAnimationName = \"M3SwitchTrackColor\"", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("TrackBorderColorAnimationName = \"M3SwitchTrackBorderColor\"", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("ThumbColorAnimationName = \"M3SwitchThumbColor\"", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("ThumbTranslationAnimationName = \"M3SwitchThumbTranslation\"", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("OpacityAnimationName = \"M3SwitchOpacity\"", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("propertyChanged: OnToggledPropertyChanged", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("UpdateVisualState(animateState: true, animateThumbTranslation: true)", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("ResolveThumbTranslation", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("M3MotionSelectionDuration", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionSelectionDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_track.BackgroundColor = ResolveTrackColor()", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumb.BackgroundColor = ResolveThumbColor()", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_thumb.HorizontalOptions = IsToggled ? LayoutOptions.End : LayoutOptions.Start",
+                toggleSwitch,
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Material_progress_styles_use_quiet_tonal_role()
         {
             XDocument styles = LoadResourceDictionary(StylesResourcePath);

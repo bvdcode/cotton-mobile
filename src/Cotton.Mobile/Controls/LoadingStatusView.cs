@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -8,6 +9,9 @@ namespace Cotton.Mobile.Controls
 {
     public class LoadingStatusView : ContentView
     {
+        private const string ActionButtonOpacityAnimationName = "M3LoadingStatusActionButtonOpacity";
+        private const string DetailMessageOpacityAnimationName = "M3LoadingStatusDetailMessageOpacity";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -20,7 +24,7 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(LoadingStatusView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnDetailMessageVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsRunningProperty = BindableProperty.Create(
             nameof(IsRunning),
@@ -40,14 +44,14 @@ namespace Cotton.Mobile.Controls
             nameof(ActionCommand),
             typeof(ICommand),
             typeof(LoadingStatusView),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionButtonVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
             typeof(bool),
             typeof(LoadingStatusView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionButtonVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
             nameof(IsActionEnabled),
@@ -112,6 +116,8 @@ namespace Cotton.Mobile.Controls
         private readonly LoadingIndicatorView _loadingIndicator;
         private readonly Label _message;
         private readonly VerticalStackLayout _textStack;
+        private bool _hasAppliedActionButtonVisibility;
+        private bool _hasAppliedDetailMessageVisibility;
 
         public LoadingStatusView()
         {
@@ -164,7 +170,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
         }
 
         public string Text
@@ -254,10 +260,28 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             LoadingStatusView view = (LoadingStatusView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnDetailMessageVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            LoadingStatusView view = (LoadingStatusView)bindable;
+            view.UpdateVisualState(animateDetailMessageVisibility: true, animateActionButtonVisibility: false);
+        }
+
+        private static void OnActionButtonVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            LoadingStatusView view = (LoadingStatusView)bindable;
+            view.UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateDetailMessageVisibility, bool animateActionButtonVisibility)
         {
             ICommand? actionCommand = ActionCommand;
             bool isActionVisible = IsActionVisible && actionCommand is not null;
@@ -291,12 +315,95 @@ namespace Cotton.Mobile.Controls
             _loadingIndicator.IsRunning = IsRunning;
             _message.Text = Text ?? string.Empty;
             _detailMessage.Text = detailText;
-            _detailMessage.IsVisible = !string.IsNullOrWhiteSpace(detailText);
+            UpdateDetailMessageVisibility(detailText, animateDetailMessageVisibility);
             _actionButton.IconData = ActionIconData;
             _actionButton.Command = actionCommand;
             _actionButton.IsEnabled = IsActionEnabled;
-            _actionButton.IsVisible = isActionVisible;
+            UpdateActionButtonVisibility(isActionVisible, animateActionButtonVisibility);
             SemanticProperties.SetDescription(_actionButton, ActionSemanticDescription ?? string.Empty);
+        }
+
+        private void UpdateDetailMessageVisibility(string detailText, bool animateDetailMessageVisibility)
+        {
+            bool isDetailMessageVisible = IsDetailMessageActuallyVisible(detailText);
+            bool shouldAnimate = animateDetailMessageVisibility && _hasAppliedDetailMessageVisibility;
+            double targetOpacity = isDetailMessageVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailMessageVisible)
+            {
+                _detailMessage.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _detailMessage,
+                _detailMessage.Opacity,
+                targetOpacity,
+                duration,
+                DetailMessageOpacityAnimationName,
+                shouldAnimate,
+                opacity => _detailMessage.Opacity = opacity,
+                CompleteDetailMessageVisibility);
+            _hasAppliedDetailMessageVisibility = true;
+        }
+
+        private void UpdateActionButtonVisibility(bool isActionVisible, bool animateActionButtonVisibility)
+        {
+            bool shouldAnimate = animateActionButtonVisibility && _hasAppliedActionButtonVisibility;
+            double targetOpacity = isActionVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isActionVisible)
+            {
+                _actionButton.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _actionButton,
+                _actionButton.Opacity,
+                targetOpacity,
+                duration,
+                ActionButtonOpacityAnimationName,
+                shouldAnimate,
+                opacity => _actionButton.Opacity = opacity,
+                CompleteActionButtonVisibility);
+            _hasAppliedActionButtonVisibility = true;
+        }
+
+        private void CompleteDetailMessageVisibility()
+        {
+            if (IsDetailMessageActuallyVisible(DetailText ?? string.Empty))
+            {
+                _detailMessage.IsVisible = true;
+                return;
+            }
+
+            _detailMessage.IsVisible = false;
+        }
+
+        private void CompleteActionButtonVisibility()
+        {
+            if (IsActionButtonActuallyVisible(ActionCommand))
+            {
+                _actionButton.IsVisible = true;
+                return;
+            }
+
+            _actionButton.IsVisible = false;
+        }
+
+        private static bool IsDetailMessageActuallyVisible(string detailText)
+        {
+            return !string.IsNullOrWhiteSpace(detailText);
+        }
+
+        private bool IsActionButtonActuallyVisible(ICommand? actionCommand)
+        {
+            return IsActionVisible && actionCommand is not null;
         }
     }
 }

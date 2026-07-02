@@ -10,6 +10,14 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionListItemView : ContentView
     {
+        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultGridStyleResourceKey = "M3ActionListItemGrid";
+        private const string DefaultLeadingIconFrameStyleResourceKey = "M3ActivityThumbnailFrame";
+        private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingBlock";
+        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
+        private const string DefaultTextStyleResourceKey = "M3ActionListItemLabel";
+        private const string DefaultTrailingChipStyleResourceKey = "M3RowActionChip";
+        private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
         private const string LeadingIconOpacityAnimationName = "M3ActionListLeadingIconOpacity";
         private const string SupportingTextOpacityAnimationName = "M3ActionListSupportingTextOpacity";
         private const string TrailingChipOpacityAnimationName = "M3ActionListTrailingChipOpacity";
@@ -126,56 +134,56 @@ namespace Cotton.Mobile.Controls
             nameof(GridStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3ActionListItemGrid",
+            DefaultGridStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TextStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3ActionListItemLabel",
+            DefaultTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty SupportingTextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(SupportingTextStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3CardSupportingBlock",
+            DefaultSupportingTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TextStackStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3CardTextStack",
+            DefaultTextStackStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TrailingChipStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TrailingChipStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3RowActionChip",
+            DefaultTrailingChipStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TrailingTextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TrailingTextStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3ChipLabel",
+            DefaultTrailingTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty = BindableProperty.Create(
             nameof(LeadingIconFrameStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3ActivityThumbnailFrame",
+            DefaultLeadingIconFrameStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ActionIconButtonStyleResourceKey),
             typeof(string),
             typeof(ActionListItemView),
-            "M3FileChromeIconButton",
+            DefaultActionIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
@@ -462,30 +470,30 @@ namespace Cotton.Mobile.Controls
             string actionSemanticDescription = string.IsNullOrWhiteSpace(ActionSemanticDescription)
                 ? semanticDescription
                 : ActionSemanticDescription;
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? "M3ActionListItemGrid"
-                : GridStyleResourceKey;
-            string textStyleResourceKey = string.IsNullOrWhiteSpace(TextStyleResourceKey)
-                ? "M3ActionListItemLabel"
-                : TextStyleResourceKey;
-            string supportingTextStyleResourceKey = string.IsNullOrWhiteSpace(SupportingTextStyleResourceKey)
-                ? "M3CardSupportingBlock"
-                : SupportingTextStyleResourceKey;
-            string textStackStyleResourceKey = string.IsNullOrWhiteSpace(TextStackStyleResourceKey)
-                ? "M3CardTextStack"
-                : TextStackStyleResourceKey;
-            string trailingChipStyleResourceKey = string.IsNullOrWhiteSpace(TrailingChipStyleResourceKey)
-                ? "M3RowActionChip"
-                : TrailingChipStyleResourceKey;
-            string trailingTextStyleResourceKey = string.IsNullOrWhiteSpace(TrailingTextStyleResourceKey)
-                ? "M3ChipLabel"
-                : TrailingTextStyleResourceKey;
-            string leadingIconFrameStyleResourceKey = string.IsNullOrWhiteSpace(LeadingIconFrameStyleResourceKey)
-                ? "M3ActivityThumbnailFrame"
-                : LeadingIconFrameStyleResourceKey;
-            string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
-                ? "M3FileChromeIconButton"
-                : ActionIconButtonStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStyleResourceKey,
+                DefaultTextStyleResourceKey);
+            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SupportingTextStyleResourceKey,
+                DefaultSupportingTextStyleResourceKey);
+            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStackStyleResourceKey,
+                DefaultTextStackStyleResourceKey);
+            string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingChipStyleResourceKey,
+                DefaultTrailingChipStyleResourceKey);
+            string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingTextStyleResourceKey,
+                DefaultTrailingTextStyleResourceKey);
+            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LeadingIconFrameStyleResourceKey,
+                DefaultLeadingIconFrameStyleResourceKey);
+            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionIconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
             bool isLeadingIconVisible = IsLeadingIconVisible && LeadingIconData is not null;
             bool isLeadingIconLayoutVisible = ResolveLeadingIconLayoutVisibility(
                 isLeadingIconVisible,

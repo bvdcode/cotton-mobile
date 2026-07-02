@@ -313,27 +313,27 @@ namespace Cotton.Mobile.Controls
         private void UpdateVisualState()
         {
             bool shouldAnimateVisibility = _hasAppliedVisibilityState;
-            string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
-                ? DefaultStackStyleResourceKey
-                : StackStyleResourceKey;
-            string inlineGridStyleResourceKey = string.IsNullOrWhiteSpace(InlineGridStyleResourceKey)
-                ? DefaultInlineGridStyleResourceKey
-                : InlineGridStyleResourceKey;
-            string leadingInlineTextStyleResourceKey = string.IsNullOrWhiteSpace(LeadingInlineTextStyleResourceKey)
-                ? DefaultLeadingInlineTextStyleResourceKey
-                : LeadingInlineTextStyleResourceKey;
-            string trailingInlineTextStyleResourceKey = string.IsNullOrWhiteSpace(TrailingInlineTextStyleResourceKey)
-                ? DefaultTrailingInlineTextStyleResourceKey
-                : TrailingInlineTextStyleResourceKey;
-            string primaryTextStyleResourceKey = string.IsNullOrWhiteSpace(PrimaryTextStyleResourceKey)
-                ? DefaultPrimaryTextStyleResourceKey
-                : PrimaryTextStyleResourceKey;
-            string secondaryTextStyleResourceKey = string.IsNullOrWhiteSpace(SecondaryTextStyleResourceKey)
-                ? DefaultSecondaryTextStyleResourceKey
-                : SecondaryTextStyleResourceKey;
-            string errorTextStyleResourceKey = string.IsNullOrWhiteSpace(ErrorTextStyleResourceKey)
-                ? DefaultErrorTextStyleResourceKey
-                : ErrorTextStyleResourceKey;
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StackStyleResourceKey,
+                DefaultStackStyleResourceKey);
+            string inlineGridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                InlineGridStyleResourceKey,
+                DefaultInlineGridStyleResourceKey);
+            string leadingInlineTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LeadingInlineTextStyleResourceKey,
+                DefaultLeadingInlineTextStyleResourceKey);
+            string trailingInlineTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingInlineTextStyleResourceKey,
+                DefaultTrailingInlineTextStyleResourceKey);
+            string primaryTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                PrimaryTextStyleResourceKey,
+                DefaultPrimaryTextStyleResourceKey);
+            string secondaryTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SecondaryTextStyleResourceKey,
+                DefaultSecondaryTextStyleResourceKey);
+            string errorTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ErrorTextStyleResourceKey,
+                DefaultErrorTextStyleResourceKey);
             string leadingInlineText = LeadingInlineText ?? string.Empty;
             string trailingInlineText = TrailingInlineText ?? string.Empty;
             string primaryText = PrimaryText ?? string.Empty;

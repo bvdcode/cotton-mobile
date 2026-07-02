@@ -192,15 +192,15 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateBodyContentVisibility)
         {
-            string cardStyleResourceKey = string.IsNullOrWhiteSpace(CardStyleResourceKey)
-                ? DefaultCardStyleResourceKey
-                : CardStyleResourceKey;
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
-            string leadingIconFrameStyleResourceKey = string.IsNullOrWhiteSpace(LeadingIconFrameStyleResourceKey)
-                ? DefaultLeadingIconFrameStyleResourceKey
-                : LeadingIconFrameStyleResourceKey;
+            string cardStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                CardStyleResourceKey,
+                DefaultCardStyleResourceKey);
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LeadingIconFrameStyleResourceKey,
+                DefaultLeadingIconFrameStyleResourceKey);
             View? bodyContent = BodyContent;
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);

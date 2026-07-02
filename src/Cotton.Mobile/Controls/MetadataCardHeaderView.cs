@@ -223,27 +223,27 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateTrailingChipVisibility)
         {
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
-            string leadingIconFrameStyleResourceKey = string.IsNullOrWhiteSpace(LeadingIconFrameStyleResourceKey)
-                ? DefaultLeadingIconFrameStyleResourceKey
-                : LeadingIconFrameStyleResourceKey;
-            string textStackStyleResourceKey = string.IsNullOrWhiteSpace(TextStackStyleResourceKey)
-                ? DefaultTextStackStyleResourceKey
-                : TextStackStyleResourceKey;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? DefaultTitleStyleResourceKey
-                : TitleStyleResourceKey;
-            string supportingTextStyleResourceKey = string.IsNullOrWhiteSpace(SupportingTextStyleResourceKey)
-                ? DefaultSupportingTextStyleResourceKey
-                : SupportingTextStyleResourceKey;
-            string trailingChipStyleResourceKey = string.IsNullOrWhiteSpace(TrailingChipStyleResourceKey)
-                ? DefaultTrailingChipStyleResourceKey
-                : TrailingChipStyleResourceKey;
-            string trailingTextStyleResourceKey = string.IsNullOrWhiteSpace(TrailingTextStyleResourceKey)
-                ? DefaultTrailingTextStyleResourceKey
-                : TrailingTextStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LeadingIconFrameStyleResourceKey,
+                DefaultLeadingIconFrameStyleResourceKey);
+            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStackStyleResourceKey,
+                DefaultTextStackStyleResourceKey);
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SupportingTextStyleResourceKey,
+                DefaultSupportingTextStyleResourceKey);
+            string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingChipStyleResourceKey,
+                DefaultTrailingChipStyleResourceKey);
+            string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingTextStyleResourceKey,
+                DefaultTrailingTextStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);

@@ -1999,6 +1999,13 @@ namespace Cotton.Mobile.Tests
                 ("FileTileMetadataView.cs", 8),
                 ("SelectionOverlayView.cs", 1),
             ];
+            (string ControlName, int ExpectedResolutionCount)[] actionMetadataControls =
+            [
+                ("ActionListItemView.cs", 8),
+                ("MetadataCardBodyView.cs", 7),
+                ("MetadataCardHeaderView.cs", 7),
+                ("MetadataCardView.cs", 3),
+            ];
 
             foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))
             {
@@ -2032,6 +2039,16 @@ namespace Cotton.Mobile.Tests
             }
 
             foreach ((string controlName, int expectedResolutionCount) in fileItemControls)
+            {
+                string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
+
+                Assert.Equal(
+                    expectedResolutionCount,
+                    CountOccurrences(control, "MaterialResources.ResolveStyleResourceKey("));
+                Assert.DoesNotContain("StyleResourceKey = string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
+            }
+
+            foreach ((string controlName, int expectedResolutionCount) in actionMetadataControls)
             {
                 string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
 

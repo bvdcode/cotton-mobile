@@ -1224,7 +1224,9 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("public class TouchSurfaceView : Border", touchSurfaceView, StringComparison.Ordinal);
             Assert.Contains("_longPressBehavior = new LongPressBehavior();", touchSurfaceView, StringComparison.Ordinal);
-            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ListItemTouchSurface\")", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3ListItemTouchSurface\"", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.ResolveStyleResourceKey(", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", touchSurfaceView, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"controls:TouchSurfaceView\" x:Key=\"M3ListItemTouchSurface\">", styles, StringComparison.Ordinal);
             Assert.Contains(
                 "MaterialResources.GetThemeColor(\n                        \"M3LightPressedStateLayer\",\n                        \"M3DarkPressedStateLayer\")",
@@ -2029,6 +2031,7 @@ namespace Cotton.Mobile.Tests
                 ("CenteredGateView.cs", 1),
                 ("SelectionBarView.cs", 1),
                 ("SettingsSummaryHeaderView.cs", 4),
+                ("TouchSurfaceView.cs", 1),
             ];
 
             foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))

@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
 {
     public class TouchSurfaceView : Border
     {
+        private const string DefaultSurfaceStyleResourceKey = "M3ListItemTouchSurface";
+
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -30,6 +32,13 @@ namespace Cotton.Mobile.Controls
             nameof(TapCommandParameter),
             typeof(object),
             typeof(TouchSurfaceView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty SurfaceStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(SurfaceStyleResourceKey),
+            typeof(string),
+            typeof(TouchSurfaceView),
+            DefaultSurfaceStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly LongPressBehavior _longPressBehavior;
@@ -65,6 +74,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TapCommandParameterProperty, value);
         }
 
+        public string SurfaceStyleResourceKey
+        {
+            get => (string)GetValue(SurfaceStyleResourceKeyProperty);
+            set => SetValue(SurfaceStyleResourceKeyProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             TouchSurfaceView view = (TouchSurfaceView)bindable;
@@ -73,7 +88,11 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
+            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SurfaceStyleResourceKey,
+                DefaultSurfaceStyleResourceKey);
+
+            SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
             _longPressBehavior.Command = Command;
             _longPressBehavior.CommandParameter = CommandParameter;
             _longPressBehavior.TapCommand = TapCommand;

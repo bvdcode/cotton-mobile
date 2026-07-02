@@ -191,18 +191,18 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateStatusVisibility, bool animateDetailVisibility)
         {
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? DefaultTitleStyleResourceKey
-                : TitleStyleResourceKey;
-            string statusStyleResourceKey = string.IsNullOrWhiteSpace(StatusStyleResourceKey)
-                ? DefaultStatusStyleResourceKey
-                : StatusStyleResourceKey;
-            string detailStyleResourceKey = string.IsNullOrWhiteSpace(DetailStyleResourceKey)
-                ? DefaultDetailStyleResourceKey
-                : DetailStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string statusStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StatusStyleResourceKey,
+                DefaultStatusStyleResourceKey);
+            string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailStyleResourceKey,
+                DefaultDetailStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);

@@ -2023,6 +2023,13 @@ namespace Cotton.Mobile.Tests
                 ("ViewerPlayOverlayView.cs", 2),
                 ("ViewerOverlayActionButtonView.cs", 1),
             ];
+            (string ControlName, int ExpectedResolutionCount)[] miscControls =
+            [
+                ("AuthLegalFooterView.cs", 1),
+                ("CenteredGateView.cs", 1),
+                ("SelectionBarView.cs", 1),
+                ("SettingsSummaryHeaderView.cs", 4),
+            ];
 
             foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))
             {
@@ -2093,6 +2100,17 @@ namespace Cotton.Mobile.Tests
                     expectedResolutionCount,
                     CountOccurrences(control, "MaterialResources.ResolveStyleResourceKey("));
                 Assert.DoesNotContain("StyleResourceKey = string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
+            }
+
+            foreach ((string controlName, int expectedResolutionCount) in miscControls)
+            {
+                string control = File.ReadAllText(Path.Combine(controlsPath, controlName));
+
+                Assert.Equal(
+                    expectedResolutionCount,
+                    CountOccurrences(control, "MaterialResources.ResolveStyleResourceKey("));
+                Assert.DoesNotContain("StyleResourceKey = string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
+                Assert.DoesNotContain("return string.IsNullOrWhiteSpace(", control, StringComparison.Ordinal);
             }
         }
 

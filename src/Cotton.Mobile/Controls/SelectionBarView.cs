@@ -329,9 +329,9 @@ namespace Cotton.Mobile.Controls
 
         private static string ResolveIconButtonStyleResourceKey(string iconButtonStyleResourceKey)
         {
-            return string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
-                ? DefaultIconButtonStyleResourceKey
-                : iconButtonStyleResourceKey;
+            return MaterialResources.ResolveStyleResourceKey(
+                iconButtonStyleResourceKey,
+                DefaultIconButtonStyleResourceKey);
         }
     }
 }

@@ -75,9 +75,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string footerStyleResourceKey = string.IsNullOrWhiteSpace(FooterStyleResourceKey)
-                ? DefaultFooterStyleResourceKey
-                : FooterStyleResourceKey;
+            string footerStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                FooterStyleResourceKey,
+                DefaultFooterStyleResourceKey);
 
             _footer.SetDynamicResource(StyleProperty, footerStyleResourceKey);
             _privacyAction.Text = PrivacyText ?? string.Empty;

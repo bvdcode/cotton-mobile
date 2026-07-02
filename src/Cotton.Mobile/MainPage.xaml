@@ -24,29 +24,12 @@
                                             Text="{Binding Display.LoadingMessage}"
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
 
-                <controls:ContentCardView IsVisible="{Binding Display.IsSignInVisible}"
-                                          CardStyleResourceKey="M3AuthPanel">
-                    <VerticalStackLayout Style="{StaticResource M3AuthFormStack}">
-                        <controls:OutlinedInputField Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                                     Placeholder="https://app.cottoncloud.dev/"
-                                                     IconData="{x:Static controls:IconPathData.Cloud}"
-                                                     Keyboard="Url"
-                                                     ReturnType="Go"
-                                                     ClearButtonVisibility="WhileEditing"
-                                                     IsEnabled="{Binding Display.IsInputEnabled}"
-                                                     ReturnCommand="{Binding ConnectCommand}"
-                                                     SemanticHint="Cotton Cloud server URL" />
-
-                        <controls:ScreenStatusView Text="{Binding Display.Status}"
-                                                   IsVisible="{Binding Display.IsStatusVisible}"
-                                                   TextStyleResourceKey="M3AuthStatus" />
-
-                        <controls:FilledButton Text="Connect"
-                                               Command="{Binding ConnectCommand}"
-                                               IsEnabled="{Binding Display.IsInputEnabled}"
-                                               Style="{StaticResource M3AuthFilledButton}" />
-                    </VerticalStackLayout>
-                </controls:ContentCardView>
+                <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
+                                              InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                              Status="{Binding Display.Status}"
+                                              IsStatusVisible="{Binding Display.IsStatusVisible}"
+                                              IsInputEnabled="{Binding Display.IsInputEnabled}"
+                                              ConnectCommand="{Binding ConnectCommand}" />
 
                 <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                             IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"

@@ -31,6 +31,7 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string AuthSignInPanelViewPath = "src/Cotton.Mobile/Controls/AuthSignInPanelView.cs";
         private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
@@ -316,6 +317,39 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Auth_sign_in_panel_uses_reusable_material_control()
+        {
+            string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Contains("<controls:AuthSignInPanelView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Status=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsStatusVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsInputEnabled=\"{Binding Display.IsInputEnabled}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ConnectCommand=\"{Binding ConnectCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class AuthSignInPanelView", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3AuthPanel\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultFormStackStyleResourceKey = \"M3AuthFormStack\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStatusTextStyleResourceKey = \"M3AuthStatus\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultButtonStyleResourceKey = \"M3AuthFilledButton\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("SemanticHint = \"Cotton Cloud server URL\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new FilledButton", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("Text = \"Connect\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey = DefaultCardStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3AuthFormStack}\">", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Placeholder=\"https://app.cottoncloud.dev/\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Text=\"Connect\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TextStyleResourceKey=\"M3AuthStatus\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthFilledButton}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Loading_indicator_frames_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);
@@ -348,11 +382,12 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Main_screen_status_text_uses_reusable_material_control()
         {
+            string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
             string mainPage = LoadText(MainPagePath);
             string screenStatusView = LoadText(ScreenStatusViewPath);
 
-            Assert.Contains("<controls:ScreenStatusView Text=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("TextStyleResourceKey=\"M3AuthStatus\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("TextStyleResourceKey = DefaultStatusTextStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenStatusView Text=\"{Binding Display.ProfileStatus}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKey=\"M3BodyMedium\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKeyProperty", screenStatusView, StringComparison.Ordinal);
@@ -1557,6 +1592,7 @@ namespace Cotton.Mobile.Tests
         {
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string activityFeedPage = LoadText(ActivityFeedPagePath);
+            string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string diagnosticsPage = LoadText(DiagnosticsPagePath);
             string mainPage = LoadText(MainPagePath);
@@ -1577,16 +1613,17 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(diagnosticsPage, "<controls:ContentCardView"));
-            Assert.Equal(1, CountOccurrences(mainPage, "<controls:ContentCardView"));
+            Assert.Equal(0, CountOccurrences(mainPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(pdfViewerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
             Assert.DoesNotContain("<controls:ContentCardView", trashPage, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("CardStyleResourceKey=\"M3AuthPanel\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3AuthPanel\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3FileTileCard\"", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3PdfPageSurface\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);

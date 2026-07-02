@@ -27,5 +27,14 @@ namespace Cotton.Mobile.Controls
                 Get<Color>(lightResourceKey),
                 Get<Color>(darkResourceKey));
         }
+
+        public static Color GetThemeColor(string lightResourceKey, string darkResourceKey)
+        {
+            string resourceKey = Application.Current?.RequestedTheme == AppTheme.Light
+                ? lightResourceKey
+                : darkResourceKey;
+
+            return Get<Color>(resourceKey);
+        }
     }
 }

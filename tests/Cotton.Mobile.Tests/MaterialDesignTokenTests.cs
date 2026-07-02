@@ -48,6 +48,7 @@ namespace Cotton.Mobile.Tests
         private const string AuthSignInPanelViewPath = "src/Cotton.Mobile/Controls/AuthSignInPanelView.cs";
         private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
+        private const string LongPressBehaviorPath = "src/Cotton.Mobile/Behaviors/LongPressBehavior.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string ActionListItemViewPath = "src/Cotton.Mobile/Controls/ActionListItemView.cs";
@@ -1281,6 +1282,26 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("<behaviors:LongPressBehavior", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("M3ListItemTouchSurface", page, StringComparison.Ordinal);
             }
+        }
+
+        [Fact]
+        public void List_touch_state_layer_uses_material_motion()
+        {
+            string longPressBehavior = LoadText(LongPressBehaviorPath);
+            string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
+            string materialResources = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialResources.cs"));
+
+            Assert.Contains("StateLayerAnimationName = \"M3ListItemStateLayer\"", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.AnimateBackgroundColor(", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.SetBackgroundColor(visualElement, backgroundColor, StateLayerAnimationName)", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressInDuration\")", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressOutDuration\")", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("public static void AnimateBackgroundColor(", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("Animation animation = new(", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("Easing.CubicOut", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("public static Color GetThemeColor(", materialResources, StringComparison.Ordinal);
+            Assert.DoesNotContain("VisualElement.BackgroundColorProperty", longPressBehavior, StringComparison.Ordinal);
         }
 
         [Fact]

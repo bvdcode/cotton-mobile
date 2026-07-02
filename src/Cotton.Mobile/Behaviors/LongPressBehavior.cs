@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Behaviors
 {
     public class LongPressBehavior : Behavior<VisualElement>
     {
+        private const string StateLayerAnimationName = "M3ListItemStateLayer";
+
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -94,14 +96,14 @@ namespace Cotton.Mobile.Behaviors
         {
             base.OnAttachedTo(bindable);
             _visualElement = bindable;
-            ApplyCurrentBackgroundColor();
+            ApplyCurrentBackgroundColor(false);
             bindable.HandlerChanged += OnHandlerChanged;
             AttachPlatformLongPress(bindable);
         }
 
         protected override void OnDetachingFrom(VisualElement bindable)
         {
-            ApplyRestingBackgroundColor();
+            ApplyRestingBackgroundColor(false);
             _visualElement = null;
             bindable.HandlerChanged -= OnHandlerChanged;
             DetachPlatformLongPress();
@@ -111,7 +113,7 @@ namespace Cotton.Mobile.Behaviors
         private static void OnBackgroundColorChanged(BindableObject bindable, object oldValue, object newValue)
         {
             LongPressBehavior behavior = (LongPressBehavior)bindable;
-            behavior.ApplyCurrentBackgroundColor();
+            behavior.ApplyCurrentBackgroundColor(false);
         }
 
         private void OnHandlerChanged(object? sender, EventArgs e)
@@ -130,45 +132,65 @@ namespace Cotton.Mobile.Behaviors
             }
 
             _isPressed = isPressed;
-            ApplyCurrentBackgroundColor();
+            ApplyCurrentBackgroundColor(true);
         }
 
-        private void ApplyCurrentBackgroundColor()
+        private void ApplyCurrentBackgroundColor(bool animate)
         {
             if (_isPressed)
             {
-                ApplyPressedBackgroundColor();
+                ApplyPressedBackgroundColor(animate);
                 return;
             }
 
-            ApplyRestingBackgroundColor();
+            ApplyRestingBackgroundColor(animate);
         }
 
-        private void ApplyPressedBackgroundColor()
+        private void ApplyPressedBackgroundColor(bool animate)
         {
             if (_visualElement is not null)
             {
-                Color? pressedBackgroundColor = PressedBackgroundColor;
-                if (pressedBackgroundColor is not null)
-                {
-                    _visualElement.BackgroundColor = pressedBackgroundColor;
-                    return;
-                }
-
-                MaterialResources.SetThemeColor(
-                    _visualElement,
-                    VisualElement.BackgroundColorProperty,
-                    "M3LightPressedStateLayer",
-                    "M3DarkPressedStateLayer");
+                Color pressedBackgroundColor = PressedBackgroundColor
+                    ?? MaterialResources.GetThemeColor(
+                        "M3LightPressedStateLayer",
+                        "M3DarkPressedStateLayer");
+                ApplyBackgroundColor(
+                    pressedBackgroundColor,
+                    MaterialResources.Get<int>("M3MotionPressInDuration"),
+                    animate);
             }
         }
 
-        private void ApplyRestingBackgroundColor()
+        private void ApplyRestingBackgroundColor(bool animate)
         {
             if (_visualElement is not null)
             {
-                _visualElement.BackgroundColor = RestingBackgroundColor ?? MaterialResources.Get<Color>("M3Transparent");
+                ApplyBackgroundColor(
+                    RestingBackgroundColor ?? MaterialResources.Get<Color>("M3Transparent"),
+                    MaterialResources.Get<int>("M3MotionPressOutDuration"),
+                    animate);
             }
+        }
+
+        private void ApplyBackgroundColor(Color backgroundColor, int duration, bool animate)
+        {
+            VisualElement? visualElement = _visualElement;
+            if (visualElement is null)
+            {
+                return;
+            }
+
+            if (animate)
+            {
+                MaterialMotion.AnimateBackgroundColor(
+                    visualElement,
+                    backgroundColor,
+                    duration,
+                    StateLayerAnimationName);
+                return;
+            }
+
+            MaterialMotion.SetBackgroundColor(visualElement, backgroundColor, StateLayerAnimationName);
         }
 
         private bool TryExecute(ICommand? command, object? parameter)

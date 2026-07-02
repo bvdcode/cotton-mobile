@@ -130,6 +130,24 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_progress_styles_use_quiet_tonal_role()
+        {
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+
+            IReadOnlyDictionary<string, string> implicitProgressSetters = GetImplicitStyleSetters(styles, "ProgressBar");
+            IReadOnlyDictionary<string, string> linearProgressSetters = GetStyleSetters(styles, "M3LinearProgressBar");
+
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                implicitProgressSetters["ProgressColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                linearProgressSetters["ProgressColor"]);
+            Assert.DoesNotContain("M3LightPrimary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Android_system_bars_apply_theme_appearance_after_r()
         {
             string mainActivity = LoadText(MainActivityPath);

@@ -1518,12 +1518,12 @@
     </Style>
 
     <Style TargetType="ProgressBar">
-        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
     </Style>
 
     <Style TargetType="ProgressBar" x:Key="M3LinearProgressBar">
         <Setter Property="HeightRequest" Value="{StaticResource Space4}" />
-        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
     </Style>
 
     <Style TargetType="RefreshView" x:Key="M3RefreshViewBase">

@@ -435,8 +435,9 @@ namespace Cotton.Mobile.Tests
             string spacing = LoadText(SpacingResourcePath);
             string styles = LoadText(StylesResourcePath);
 
-            Assert.Contains("<Thickness x:Key=\"M3AuthShellMargin\">0,56,0,0</Thickness>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<Thickness x:Key=\"M3AuthShellMargin\">0,32,0,0</Thickness>", spacing, StringComparison.Ordinal);
             Assert.Contains("<Setter Property=\"Margin\" Value=\"{StaticResource M3AuthShellMargin}\" />", styles, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Thickness x:Key=\"M3AuthShellMargin\">0,56,0,0</Thickness>", spacing, StringComparison.Ordinal);
             Assert.DoesNotContain("<Thickness x:Key=\"M3AuthShellMargin\">0,88,0,0</Thickness>", spacing, StringComparison.Ordinal);
         }
 

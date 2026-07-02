@@ -134,15 +134,32 @@ namespace Cotton.Mobile.Tests
         {
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
+            IReadOnlyDictionary<string, string> implicitActivitySetters =
+                GetImplicitStyleSetters(styles, "ActivityIndicator");
+            IReadOnlyDictionary<string, string> thumbnailActivitySetters =
+                GetStyleSetters(styles, "M3ThumbnailActivityIndicator");
+            IReadOnlyDictionary<string, string> statusActivitySetters =
+                GetStyleSetters(styles, "M3StatusActivityIndicator");
             IReadOnlyDictionary<string, string> implicitProgressSetters = GetImplicitStyleSetters(styles, "ProgressBar");
             IReadOnlyDictionary<string, string> linearProgressSetters = GetStyleSetters(styles, "M3LinearProgressBar");
 
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                implicitActivitySetters["Color"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                thumbnailActivitySetters["Color"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                statusActivitySetters["Color"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
                 implicitProgressSetters["ProgressColor"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
                 linearProgressSetters["ProgressColor"]);
+            Assert.DoesNotContain("M3LightPrimary", implicitActivitySetters["Color"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimary", statusActivitySetters["Color"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3DarkPrimary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
         }

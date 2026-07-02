@@ -2038,6 +2038,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultDetailTextStyleResourceKey = \"M3CardSupportingBlock\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("new Binding(nameof(IsToggled), source: this, mode: BindingMode.TwoWay)", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("_toggleSwitch.SetDynamicResource(StyleProperty, switchStyleResourceKey)", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("private readonly TouchSurfaceView _touchSurface;", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface = new TouchSurfaceView();", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("_touchSurface.TapCommand = IsEnabled ? _toggleCommand : null;", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("LongPressBehavior", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3ListItemTouchSurface", settingsToggleItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ToggleSwitch", securitySettingsPage, StringComparison.Ordinal);

@@ -2,7 +2,6 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Collections.Generic;
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -143,8 +142,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _supportingText;
         private readonly Label _text;
         private readonly VerticalStackLayout _textStack;
-        private readonly LongPressBehavior _tapBehavior;
-        private readonly Grid _touchSurface;
+        private readonly TouchSurfaceView _touchSurface;
         private readonly Command _toggleCommand;
         private readonly ToggleSwitch _toggleSwitch;
 
@@ -167,14 +165,7 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            _tapBehavior = new LongPressBehavior
-            {
-                TapCommand = _toggleCommand,
-            };
-
-            _touchSurface = new Grid();
-            _touchSurface.SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
-            _touchSurface.Behaviors.Add(_tapBehavior);
+            _touchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_touchSurface, 2);
 
             _toggleSwitch = new ToggleSwitch();
@@ -386,6 +377,8 @@ namespace Cotton.Mobile.Controls
             _detailText.Text = detailText;
             _detailText.IsVisible = IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
             _toggleSwitch.IsEnabled = IsEnabled;
+            _touchSurface.TapCommand = IsEnabled ? _toggleCommand : null;
+            _touchSurface.IsVisible = IsEnabled;
 
             Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
             Grid.SetColumnSpan(_textStack, isLeadingIconVisible ? 1 : 2);

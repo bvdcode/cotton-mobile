@@ -15,34 +15,34 @@
                 <controls:BrandHeaderView Source="cotton_brand_mark.svg"
                                           Title="Cotton Cloud"
                                           SemanticDescription="Cotton Cloud" />
+
+                <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
+                                            IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                            Text="{Binding Display.LoadingMessage}"
+                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
+
+                <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
+                                              InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                              Status="{Binding Display.Status}"
+                                              IsStatusVisible="{Binding Display.IsStatusVisible}"
+                                              IsInputEnabled="{Binding Display.IsInputEnabled}"
+                                              ConnectCommand="{Binding ConnectCommand}" />
+
+                <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                                            IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                            Text="Waiting for browser approval"
+                                            DetailText="{Binding Display.AuthorizationProgressMessage}"
+                                            ActionIconData="{x:Static controls:IconPathData.Close}"
+                                            ActionCommand="{Binding CancelAuthorizationCommand}"
+                                            IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                            IsActionVisible="True"
+                                            ActionSemanticDescription="Cancel browser approval"
+                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
+                                            TextStyleResourceKey="M3CardSupportingStrong" />
+
+                <controls:AuthLegalFooterView IsVisible="{Binding Display.IsLegalFooterVisible}"
+                                              PrivacyCommand="{Binding PrivacyPolicyCommand}" />
             </controls:StackedContentView>
-
-            <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
-                                        IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                        Text="{Binding Display.LoadingMessage}"
-                                        ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
-
-            <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
-                                          InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                          Status="{Binding Display.Status}"
-                                          IsStatusVisible="{Binding Display.IsStatusVisible}"
-                                          IsInputEnabled="{Binding Display.IsInputEnabled}"
-                                          ConnectCommand="{Binding ConnectCommand}" />
-
-            <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                                        IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                        Text="Waiting for browser approval"
-                                        DetailText="{Binding Display.AuthorizationProgressMessage}"
-                                        ActionIconData="{x:Static controls:IconPathData.Close}"
-                                        ActionCommand="{Binding CancelAuthorizationCommand}"
-                                        IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                        IsActionVisible="True"
-                                        ActionSemanticDescription="Cancel browser approval"
-                                        ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
-                                        TextStyleResourceKey="M3CardSupportingStrong" />
-
-            <controls:AuthLegalFooterView IsVisible="{Binding Display.IsLegalFooterVisible}"
-                                          PrivacyCommand="{Binding PrivacyPolicyCommand}" />
         </controls:ScreenScrollBodyView>
 
         <controls:MaterialRefreshView Grid.Row="0"

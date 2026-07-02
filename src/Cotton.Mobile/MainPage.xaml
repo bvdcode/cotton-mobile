@@ -306,14 +306,12 @@
                                                                        TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                        TapCommandParameter="{Binding .}" />
 
-                                            <controls:IconButton Grid.Column="2"
-                                                                 IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                                 Style="{StaticResource M3FileChromeIconButton}"
-                                                                 Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                 CommandParameter="{Binding .}"
-                                                                 IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                 IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                 SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
+                                            <controls:FileEntryActionButtonView Grid.Column="2"
+                                                                                Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                                CommandParameter="{Binding .}"
+                                                                                IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                                IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                                SemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
@@ -380,14 +378,13 @@
                                                                                TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
                                                                                TapCommandParameter="{Binding .}" />
 
-                                                    <controls:IconButton Grid.Row="0"
-                                                                         IconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                                         Style="{StaticResource M3FileTileActionIconButton}"
-                                                                         Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                         CommandParameter="{Binding .}"
-                                                                         IsEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                         IsVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                         SemanticProperties.Description="{Binding Name, StringFormat='Actions for {0}'}" />
+                                                    <controls:FileEntryActionButtonView Grid.Row="0"
+                                                                                        Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                                        CommandParameter="{Binding .}"
+                                                                                        IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                                        IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                                        IconButtonStyleResourceKey="M3FileTileActionIconButton"
+                                                                                        SemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
 
                                                 </Grid>
                                             </Border>

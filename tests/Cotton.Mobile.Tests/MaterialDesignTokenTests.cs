@@ -423,6 +423,22 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Main_file_entry_actions_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:FileEntryActionButtonView"));
+            Assert.Contains("Command=\"{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("CommandParameter=\"{Binding .}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsActionEnabled=\"{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsActionVisible=\"{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IconButtonStyleResourceKey=\"M3FileTileActionIconButton\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"{Binding Name, StringFormat='Actions for {0}'}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Name, StringFormat='Actions for {0}'}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileTileActionIconButton}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

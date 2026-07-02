@@ -43,11 +43,8 @@
                                         ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
                                         TextStyleResourceKey="M3CardSupportingStrong" />
 
-            <HorizontalStackLayout IsVisible="{Binding Display.IsLegalFooterVisible}"
-                                   Style="{StaticResource M3LegalFooterBar}">
-                <controls:TextAction Text="Privacy"
-                                     Command="{Binding PrivacyPolicyCommand}" />
-            </HorizontalStackLayout>
+            <controls:AuthLegalFooterView IsVisible="{Binding Display.IsLegalFooterVisible}"
+                                          PrivacyCommand="{Binding PrivacyPolicyCommand}" />
         </controls:ScreenScrollBodyView>
 
         <RefreshView Grid.Row="0"

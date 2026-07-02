@@ -15,6 +15,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardUtilityThumbnailFrame";
         private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
         private const string DefaultTitleStyleResourceKey = "M3CardTitle";
+        private const string DefaultTrailingChipStyleResourceKey = "M3NeutralChip";
+        private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -76,6 +78,20 @@ namespace Cotton.Mobile.Controls
             nameof(TrailingContent),
             typeof(View),
             typeof(SettingsSectionHeaderView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
+            nameof(TrailingText),
+            typeof(string),
+            typeof(SettingsSectionHeaderView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
+            nameof(IsTrailingTextVisible),
+            typeof(bool),
+            typeof(SettingsSectionHeaderView),
+            false,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TapCommandProperty = BindableProperty.Create(
@@ -153,6 +169,20 @@ namespace Cotton.Mobile.Controls
             DefaultDetailTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty TrailingChipStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TrailingChipStyleResourceKey),
+            typeof(string),
+            typeof(SettingsSectionHeaderView),
+            DefaultTrailingChipStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TrailingTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsSectionHeaderView),
+            DefaultTrailingTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
         private readonly Label _primaryDetailText;
         private readonly Label _quaternaryDetailText;
         private readonly Grid _grid;
@@ -163,6 +193,7 @@ namespace Cotton.Mobile.Controls
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
         private readonly TouchSurfaceView _touchSurface;
+        private readonly ChipView _trailingChip;
         private readonly ContentView _trailingContentHost;
 
         public SettingsSectionHeaderView()
@@ -175,6 +206,7 @@ namespace Cotton.Mobile.Controls
             _quaternaryDetailText = new Label();
             _progress = new LinearProgressView();
             _touchSurface = new TouchSurfaceView();
+            _trailingChip = new ChipView();
             _trailingContentHost = new ContentView
             {
                 HorizontalOptions = LayoutOptions.End,
@@ -280,6 +312,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TrailingContentProperty, value);
         }
 
+        public string TrailingText
+        {
+            get => (string)GetValue(TrailingTextProperty);
+            set => SetValue(TrailingTextProperty, value);
+        }
+
+        public bool IsTrailingTextVisible
+        {
+            get => (bool)GetValue(IsTrailingTextVisibleProperty);
+            set => SetValue(IsTrailingTextVisibleProperty, value);
+        }
+
         public ICommand? TapCommand
         {
             get => (ICommand?)GetValue(TapCommandProperty);
@@ -346,6 +390,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(QuaternaryDetailTextStyleResourceKeyProperty, value);
         }
 
+        public string TrailingChipStyleResourceKey
+        {
+            get => (string)GetValue(TrailingChipStyleResourceKeyProperty);
+            set => SetValue(TrailingChipStyleResourceKeyProperty, value);
+        }
+
+        public string TrailingTextStyleResourceKey
+        {
+            get => (string)GetValue(TrailingTextStyleResourceKeyProperty);
+            set => SetValue(TrailingTextStyleResourceKeyProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
@@ -359,6 +415,7 @@ namespace Cotton.Mobile.Controls
             string secondaryDetailText = SecondaryDetailText ?? string.Empty;
             string tertiaryDetailText = TertiaryDetailText ?? string.Empty;
             string quaternaryDetailText = QuaternaryDetailText ?? string.Empty;
+            string trailingText = TrailingText ?? string.Empty;
             string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string leadingIconFrameStyleResourceKey =
                 ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
@@ -374,8 +431,14 @@ namespace Cotton.Mobile.Controls
                 ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string quaternaryDetailTextStyleResourceKey =
                 ResolveStyleResourceKey(QuaternaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+            string trailingChipStyleResourceKey =
+                ResolveStyleResourceKey(TrailingChipStyleResourceKey, DefaultTrailingChipStyleResourceKey);
+            string trailingTextStyleResourceKey =
+                ResolveStyleResourceKey(TrailingTextStyleResourceKey, DefaultTrailingTextStyleResourceKey);
             bool isLeadingIconVisible = LeadingIconData is not null;
-            bool isTrailingContentVisible = TrailingContent is not null;
+            bool isTrailingTextVisible = IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
+            View? trailingContent = TrailingContent ?? (isTrailingTextVisible ? _trailingChip : null);
+            bool isTrailingContentVisible = trailingContent is not null;
             ICommand? tapCommand = TapCommand;
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
@@ -402,9 +465,13 @@ namespace Cotton.Mobile.Controls
             _touchSurface.TapCommand = IsTapEnabled ? tapCommand : null;
             _touchSurface.TapCommandParameter = TapCommandParameter;
             _touchSurface.IsVisible = IsTapEnabled && tapCommand is not null;
-            if (_trailingContentHost.Content != TrailingContent)
+            _trailingChip.Text = trailingText;
+            _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
+            _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
+
+            if (_trailingContentHost.Content != trailingContent)
             {
-                _trailingContentHost.Content = TrailingContent;
+                _trailingContentHost.Content = trailingContent;
             }
 
             _trailingContentHost.IsVisible = isTrailingContentVisible;

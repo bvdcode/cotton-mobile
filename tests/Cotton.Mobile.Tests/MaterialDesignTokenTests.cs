@@ -487,10 +487,15 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
             Assert.Equal(2, CountOccurrences(backupSetupPage, "ClusterStyleResourceKey=\"M3InlineActionCluster\""));
-            Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView.TrailingContent>\n"));
+            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView.TrailingContent>\n"));
             Assert.Contains("TrailingContentProperty", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("TrailingTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("trailingContent = TrailingContent ?? (isTrailingTextVisible ? _trailingChip : null)", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("QuaternaryDetailTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
-            Assert.Contains("_trailingContentHost.Content = TrailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("_trailingContentHost.Content = trailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
@@ -691,6 +696,7 @@ namespace Cotton.Mobile.Tests
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string fileListMetadataView = LoadText(FileListMetadataViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+            string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
             string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
@@ -710,8 +716,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_thumbnail.BadgeText = BadgeText", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", trashPage, StringComparison.Ordinal);
 
-            Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
-            Assert.Contains("Text=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ChipView", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", backupSetupPage, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:ChipView", securitySettingsPage, StringComparison.Ordinal);

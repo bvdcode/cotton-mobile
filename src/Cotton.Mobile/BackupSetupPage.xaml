@@ -48,11 +48,9 @@
                 <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Image}"
                                                     LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
                                                     Title="{Binding MediaAccessTitle}"
-                                                    PrimaryDetailText="{Binding MediaAccessDetailText}">
-                    <controls:SettingsSectionHeaderView.TrailingContent>
-                        <controls:ChipView Text="{Binding MediaAccessStatusText}" />
-                    </controls:SettingsSectionHeaderView.TrailingContent>
-                </controls:SettingsSectionHeaderView>
+                                                    PrimaryDetailText="{Binding MediaAccessDetailText}"
+                                                    TrailingText="{Binding MediaAccessStatusText}"
+                                                    IsTrailingTextVisible="True" />
 
                 <controls:ActionListItemView Text="{Binding MediaAccessActionText}"
                                              ActionIconData="{x:Static controls:IconPathData.OpenInNew}"

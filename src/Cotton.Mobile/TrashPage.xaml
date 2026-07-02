@@ -29,33 +29,27 @@
                                    SupportingText="{Binding SummaryText}"
                                    IsBusy="{Binding IsBusy}">
             <controls:ScreenHeaderView.ActionContent>
-                <HorizontalStackLayout Style="{StaticResource M3ScreenHeaderActionCluster}">
-                    <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         Command="{Binding ToggleSearchCommand}"
-                                         SemanticProperties.Description="{Binding SearchButtonDescription}">
-                        <controls:IconButton.Triggers>
-                            <DataTrigger TargetType="controls:IconButton"
-                                         Binding="{Binding IsSearchVisible}"
-                                         Value="True">
-                                <Setter Property="IconData"
-                                        Value="{x:Static controls:IconPathData.Close}" />
-                            </DataTrigger>
-                        </controls:IconButton.Triggers>
-                    </controls:IconButton>
-
-                    <controls:IconButton IconData="{x:Static controls:IconPathData.Sort}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         Command="{Binding ShowSortActionsCommand}"
-                                         IsVisible="{Binding IsSortButtonVisible}"
-                                         SemanticProperties.Description="Sort trash" />
-
-                    <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                         Style="{StaticResource M3FileChromeIconButton}"
-                                         Command="{Binding ShowViewActionsCommand}"
-                                         IsVisible="{Binding IsViewButtonVisible}"
-                                         SemanticProperties.Description="Change trash view" />
-                </HorizontalStackLayout>
+                <controls:ActionClusterView ClusterStyleResourceKey="M3ScreenHeaderActionCluster"
+                                            PrimaryActionIconData="{x:Static controls:IconPathData.Search}"
+                                            PrimaryActionCommand="{Binding ToggleSearchCommand}"
+                                            PrimaryActionSemanticDescription="{Binding SearchButtonDescription}"
+                                            SecondaryActionIconData="{x:Static controls:IconPathData.Sort}"
+                                            SecondaryActionCommand="{Binding ShowSortActionsCommand}"
+                                            SecondaryActionSemanticDescription="Sort trash"
+                                            IsSecondaryActionVisible="{Binding IsSortButtonVisible}"
+                                            TertiaryActionIconData="{x:Static controls:IconPathData.ViewTiles}"
+                                            TertiaryActionCommand="{Binding ShowViewActionsCommand}"
+                                            TertiaryActionSemanticDescription="Change trash view"
+                                            IsTertiaryActionVisible="{Binding IsViewButtonVisible}">
+                    <controls:ActionClusterView.Triggers>
+                        <DataTrigger TargetType="controls:ActionClusterView"
+                                     Binding="{Binding IsSearchVisible}"
+                                     Value="True">
+                            <Setter Property="PrimaryActionIconData"
+                                    Value="{x:Static controls:IconPathData.Close}" />
+                        </DataTrigger>
+                    </controls:ActionClusterView.Triggers>
+                </controls:ActionClusterView>
             </controls:ScreenHeaderView.ActionContent>
         </controls:ScreenHeaderView>
 

@@ -655,11 +655,33 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Trash_header_actions_use_reusable_material_control()
+        {
+            string trashPage = LoadText(TrashPagePath);
+
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3ScreenHeaderActionCluster\""));
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView Grid.Row=\""));
+            Assert.Contains("<controls:ActionClusterView ClusterStyleResourceKey=\"M3ScreenHeaderActionCluster\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding ToggleSearchCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"{Binding SearchButtonDescription}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("TargetType=\"controls:ActionClusterView\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("Property=\"PrimaryActionIconData\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding ShowSortActionsCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsSecondaryActionVisible=\"{Binding IsSortButtonVisible}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding ShowViewActionsCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsTertiaryActionVisible=\"{Binding IsViewButtonVisible}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<HorizontalStackLayout Style=\"{StaticResource M3ScreenHeaderActionCluster}\">", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Search}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Sort}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.ViewTiles}\"", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Trash_entry_actions_use_reusable_material_control()
         {
             string trashPage = LoadText(TrashPagePath);
 
-            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView"));
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ActionClusterView Grid.Row=\""));
             Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.DeleteForeverCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding BindingContext.RestoreCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);

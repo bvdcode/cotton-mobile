@@ -63,47 +63,14 @@
                                      BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  RowDefinitions="Auto,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}">
-                                <controls:IconFrame Grid.RowSpan="2"
-                                                    IconData="{x:Static controls:IconPathData.Check}"
-                                                    Style="{StaticResource M3CardSecurityThumbnailFrame}">
-                                    <controls:IconFrame.Triggers>
-                                        <DataTrigger TargetType="controls:IconFrame"
-                                                     Binding="{Binding NeedsAttention}"
-                                                     Value="True">
-                                            <Setter Property="IconData"
-                                                    Value="{x:Static controls:IconPathData.Error}" />
-                                            <Setter Property="Style"
-                                                    Value="{StaticResource M3CardErrorThumbnailFrame}" />
-                                        </DataTrigger>
-                                    </controls:IconFrame.Triggers>
-                                </controls:IconFrame>
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding Title}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <controls:ChipView Grid.Column="2"
-                                                   Text="{Binding StatusText}"
-                                                   ChipStyleResourceKey="M3TrailingChip">
-                                    <controls:ChipView.Triggers>
-                                        <DataTrigger TargetType="controls:ChipView"
-                                                     Binding="{Binding NeedsAttention}"
-                                                     Value="True">
-                                            <Setter Property="LabelStyleResourceKey"
-                                                    Value="M3ErrorChipLabel" />
-                                        </DataTrigger>
-                                    </controls:ChipView.Triggers>
-                                </controls:ChipView>
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingBlock}" />
-                            </Grid>
+                            <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Check}"
+                                                           AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
+                                                           IsAttentionState="{Binding NeedsAttention}"
+                                                           LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                           Title="{Binding Title}"
+                                                           PrimaryDetailText="{Binding DetailText}"
+                                                           PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
+                                                           TrailingText="{Binding StatusText}" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
@@ -140,39 +107,13 @@
                                      BindableLayout.ItemsSource="{Binding AccountSessions}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonAccountSessionListItem">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  RowDefinitions="Auto,Auto,Auto,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}">
-                                <controls:IconFrame Grid.RowSpan="4"
-                                                    IconData="{x:Static controls:IconPathData.Device}"
-                                                    Style="{StaticResource M3CardSecurityThumbnailFrame}" />
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding Title}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <controls:ChipView Grid.Column="2"
-                                                   Text="{Binding BadgeText}"
-                                                   ChipStyleResourceKey="M3TrailingChip" />
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Grid.Row="2"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding AccessText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Grid.Row="3"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding DurationText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-                            </Grid>
+                            <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                                           LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                                           Title="{Binding Title}"
+                                                           PrimaryDetailText="{Binding DetailText}"
+                                                           SecondaryDetailText="{Binding AccessText}"
+                                                           TertiaryDetailText="{Binding DurationText}"
+                                                           TrailingText="{Binding BadgeText}" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>

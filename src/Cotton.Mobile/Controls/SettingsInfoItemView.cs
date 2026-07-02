@@ -1,0 +1,437 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
+
+using System.Collections.Generic;
+using System.Linq;
+using Microsoft.Maui.Controls.Shapes;
+
+namespace Cotton.Mobile.Controls
+{
+    public class SettingsInfoItemView : ContentView
+    {
+        private const string DefaultAttentionLeadingIconFrameStyleResourceKey = "M3CardErrorThumbnailFrame";
+        private const string DefaultAttentionTrailingTextStyleResourceKey = "M3ErrorChipLabel";
+        private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingLine";
+        private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
+        private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardUtilityThumbnailFrame";
+        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
+        private const string DefaultTitleTextStyleResourceKey = "M3CardSupportingStrongLine";
+        private const string DefaultTrailingChipStyleResourceKey = "M3TrailingChip";
+        private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
+
+        public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+            nameof(Title),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty PrimaryDetailTextProperty = BindableProperty.Create(
+            nameof(PrimaryDetailText),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty SecondaryDetailTextProperty = BindableProperty.Create(
+            nameof(SecondaryDetailText),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryDetailTextProperty = BindableProperty.Create(
+            nameof(TertiaryDetailText),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
+            nameof(TrailingText),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
+            nameof(IsTrailingTextVisible),
+            typeof(bool),
+            typeof(SettingsInfoItemView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
+            nameof(LeadingIconData),
+            typeof(Geometry),
+            typeof(SettingsInfoItemView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty AttentionLeadingIconDataProperty = BindableProperty.Create(
+            nameof(AttentionLeadingIconData),
+            typeof(Geometry),
+            typeof(SettingsInfoItemView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsAttentionStateProperty = BindableProperty.Create(
+            nameof(IsAttentionState),
+            typeof(bool),
+            typeof(SettingsInfoItemView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(GridStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultGridStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(LeadingIconFrameStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultLeadingIconFrameStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty AttentionLeadingIconFrameStyleResourceKeyProperty =
+            BindableProperty.Create(
+                nameof(AttentionLeadingIconFrameStyleResourceKey),
+                typeof(string),
+                typeof(SettingsInfoItemView),
+                DefaultAttentionLeadingIconFrameStyleResourceKey,
+                propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStackStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultTextStackStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TitleTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TitleTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultTitleTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty PrimaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(PrimaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty SecondaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(SecondaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TertiaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TertiaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingChipStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TrailingChipStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultTrailingChipStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TrailingTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsInfoItemView),
+            DefaultTrailingTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty AttentionTrailingTextStyleResourceKeyProperty =
+            BindableProperty.Create(
+                nameof(AttentionTrailingTextStyleResourceKey),
+                typeof(string),
+                typeof(SettingsInfoItemView),
+                DefaultAttentionTrailingTextStyleResourceKey,
+                propertyChanged: OnVisualPropertyChanged);
+
+        private readonly Grid _grid;
+        private readonly IconFrame _leadingIcon;
+        private readonly Label _primaryDetailText;
+        private readonly Label _secondaryDetailText;
+        private readonly Label _tertiaryDetailText;
+        private readonly VerticalStackLayout _textStack;
+        private readonly Label _title;
+        private readonly ChipView _trailingChip;
+
+        public SettingsInfoItemView()
+        {
+            InputTransparent = true;
+
+            _leadingIcon = new IconFrame();
+            _title = new Label();
+            _primaryDetailText = new Label();
+            _secondaryDetailText = new Label();
+            _tertiaryDetailText = new Label();
+            _trailingChip = new ChipView();
+            _textStack = new VerticalStackLayout
+            {
+                Children =
+                {
+                    _title,
+                    _primaryDetailText,
+                    _secondaryDetailText,
+                    _tertiaryDetailText,
+                },
+            };
+
+            Grid.SetColumn(_textStack, 1);
+            Grid.SetColumn(_trailingChip, 2);
+
+            _grid = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                },
+                Children =
+                {
+                    _leadingIcon,
+                    _textStack,
+                    _trailingChip,
+                },
+            };
+
+            Content = _grid;
+            UpdateVisualState();
+        }
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
+        }
+
+        public string PrimaryDetailText
+        {
+            get => (string)GetValue(PrimaryDetailTextProperty);
+            set => SetValue(PrimaryDetailTextProperty, value);
+        }
+
+        public string SecondaryDetailText
+        {
+            get => (string)GetValue(SecondaryDetailTextProperty);
+            set => SetValue(SecondaryDetailTextProperty, value);
+        }
+
+        public string TertiaryDetailText
+        {
+            get => (string)GetValue(TertiaryDetailTextProperty);
+            set => SetValue(TertiaryDetailTextProperty, value);
+        }
+
+        public string TrailingText
+        {
+            get => (string)GetValue(TrailingTextProperty);
+            set => SetValue(TrailingTextProperty, value);
+        }
+
+        public bool IsTrailingTextVisible
+        {
+            get => (bool)GetValue(IsTrailingTextVisibleProperty);
+            set => SetValue(IsTrailingTextVisibleProperty, value);
+        }
+
+        public Geometry? LeadingIconData
+        {
+            get => (Geometry?)GetValue(LeadingIconDataProperty);
+            set => SetValue(LeadingIconDataProperty, value);
+        }
+
+        public Geometry? AttentionLeadingIconData
+        {
+            get => (Geometry?)GetValue(AttentionLeadingIconDataProperty);
+            set => SetValue(AttentionLeadingIconDataProperty, value);
+        }
+
+        public bool IsAttentionState
+        {
+            get => (bool)GetValue(IsAttentionStateProperty);
+            set => SetValue(IsAttentionStateProperty, value);
+        }
+
+        public string GridStyleResourceKey
+        {
+            get => (string)GetValue(GridStyleResourceKeyProperty);
+            set => SetValue(GridStyleResourceKeyProperty, value);
+        }
+
+        public string LeadingIconFrameStyleResourceKey
+        {
+            get => (string)GetValue(LeadingIconFrameStyleResourceKeyProperty);
+            set => SetValue(LeadingIconFrameStyleResourceKeyProperty, value);
+        }
+
+        public string AttentionLeadingIconFrameStyleResourceKey
+        {
+            get => (string)GetValue(AttentionLeadingIconFrameStyleResourceKeyProperty);
+            set => SetValue(AttentionLeadingIconFrameStyleResourceKeyProperty, value);
+        }
+
+        public string TextStackStyleResourceKey
+        {
+            get => (string)GetValue(TextStackStyleResourceKeyProperty);
+            set => SetValue(TextStackStyleResourceKeyProperty, value);
+        }
+
+        public string TitleTextStyleResourceKey
+        {
+            get => (string)GetValue(TitleTextStyleResourceKeyProperty);
+            set => SetValue(TitleTextStyleResourceKeyProperty, value);
+        }
+
+        public string PrimaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(PrimaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(PrimaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string SecondaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(SecondaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(SecondaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string TertiaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(TertiaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(TertiaryDetailTextStyleResourceKeyProperty, value);
+        }
+
+        public string TrailingChipStyleResourceKey
+        {
+            get => (string)GetValue(TrailingChipStyleResourceKeyProperty);
+            set => SetValue(TrailingChipStyleResourceKeyProperty, value);
+        }
+
+        public string TrailingTextStyleResourceKey
+        {
+            get => (string)GetValue(TrailingTextStyleResourceKeyProperty);
+            set => SetValue(TrailingTextStyleResourceKeyProperty, value);
+        }
+
+        public string AttentionTrailingTextStyleResourceKey
+        {
+            get => (string)GetValue(AttentionTrailingTextStyleResourceKeyProperty);
+            set => SetValue(AttentionTrailingTextStyleResourceKeyProperty, value);
+        }
+
+        private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SettingsInfoItemView view = (SettingsInfoItemView)bindable;
+            view.UpdateVisualState();
+        }
+
+        private void UpdateVisualState()
+        {
+            string title = Title ?? string.Empty;
+            string primaryDetailText = PrimaryDetailText ?? string.Empty;
+            string secondaryDetailText = SecondaryDetailText ?? string.Empty;
+            string tertiaryDetailText = TertiaryDetailText ?? string.Empty;
+            string trailingText = TrailingText ?? string.Empty;
+            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string leadingIconFrameStyleResourceKey = ResolveStyleResourceKey(
+                IsAttentionState ? AttentionLeadingIconFrameStyleResourceKey : LeadingIconFrameStyleResourceKey,
+                IsAttentionState
+                    ? DefaultAttentionLeadingIconFrameStyleResourceKey
+                    : DefaultLeadingIconFrameStyleResourceKey);
+            string textStackStyleResourceKey =
+                ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
+            string titleTextStyleResourceKey =
+                ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleTextStyleResourceKey);
+            string primaryDetailTextStyleResourceKey =
+                ResolveStyleResourceKey(PrimaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+            string secondaryDetailTextStyleResourceKey =
+                ResolveStyleResourceKey(SecondaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+            string tertiaryDetailTextStyleResourceKey =
+                ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+            string trailingChipStyleResourceKey =
+                ResolveStyleResourceKey(TrailingChipStyleResourceKey, DefaultTrailingChipStyleResourceKey);
+            string trailingTextStyleResourceKey = ResolveStyleResourceKey(
+                IsAttentionState ? AttentionTrailingTextStyleResourceKey : TrailingTextStyleResourceKey,
+                IsAttentionState
+                    ? DefaultAttentionTrailingTextStyleResourceKey
+                    : DefaultTrailingTextStyleResourceKey);
+            Geometry? leadingIconData = IsAttentionState && AttentionLeadingIconData is not null
+                ? AttentionLeadingIconData
+                : LeadingIconData;
+            bool isTrailingTextVisible = IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
+
+            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
+            _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
+            _leadingIcon.IconData = leadingIconData;
+            _leadingIcon.IsVisible = leadingIconData is not null;
+            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
+            _title.SetDynamicResource(StyleProperty, titleTextStyleResourceKey);
+            _title.Text = title;
+            _primaryDetailText.SetDynamicResource(StyleProperty, primaryDetailTextStyleResourceKey);
+            _primaryDetailText.Text = primaryDetailText;
+            _primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText);
+            _secondaryDetailText.SetDynamicResource(StyleProperty, secondaryDetailTextStyleResourceKey);
+            _secondaryDetailText.Text = secondaryDetailText;
+            _secondaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(secondaryDetailText);
+            _tertiaryDetailText.SetDynamicResource(StyleProperty, tertiaryDetailTextStyleResourceKey);
+            _tertiaryDetailText.Text = tertiaryDetailText;
+            _tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText);
+            _trailingChip.Text = trailingText;
+            _trailingChip.IsVisible = isTrailingTextVisible;
+            _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
+            _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
+
+            Grid.SetColumn(_textStack, leadingIconData is null ? 0 : 1);
+            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(leadingIconData is not null, isTrailingTextVisible));
+            SemanticProperties.SetDescription(
+                this,
+                CreateSemanticDescription(
+                    title,
+                    primaryDetailText,
+                    secondaryDetailText,
+                    tertiaryDetailText,
+                    trailingText));
+        }
+
+        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
+        {
+            return string.IsNullOrWhiteSpace(resourceKey) ? defaultResourceKey : resourceKey;
+        }
+
+        private static int ResolveTextColumnSpan(bool isLeadingIconVisible, bool isTrailingTextVisible)
+        {
+            if (isLeadingIconVisible)
+            {
+                return isTrailingTextVisible ? 1 : 2;
+            }
+
+            return isTrailingTextVisible ? 2 : 3;
+        }
+
+        private static string CreateSemanticDescription(
+            string title,
+            string primaryDetailText,
+            string secondaryDetailText,
+            string tertiaryDetailText,
+            string trailingText)
+        {
+            List<string> parts = [title, primaryDetailText, secondaryDetailText, tertiaryDetailText, trailingText];
+            return string.Join(". ", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
+        }
+    }
+}

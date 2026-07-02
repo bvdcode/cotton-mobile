@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string SettingsSectionHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSectionHeaderView.cs";
+        private const string SettingsInfoItemViewPath = "src/Cotton.Mobile/Controls/SettingsInfoItemView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
@@ -646,6 +647,7 @@ namespace Cotton.Mobile.Tests
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+            string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
@@ -662,11 +664,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", backupSetupPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:ChipView Grid.Column=\"2\""));
-            Assert.Contains("Text=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Text=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("ChipStyleResourceKey=\"M3TrailingChip\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Property=\"LabelStyleResourceKey\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ChipView", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3TrailingChip\"", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultAttentionTrailingTextStyleResourceKey = \"M3ErrorChipLabel\"", settingsInfoItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3TrailingChip}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
         }
@@ -945,6 +948,36 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_status.SetDynamicResource(StyleProperty, statusStyleResourceKey)", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Security_info_rows_use_reusable_material_control()
+        {
+            string securitySettingsPage = LoadText(SecuritySettingsPagePath);
+            string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
+
+            Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:SettingsInfoItemView"));
+            Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Check}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("AttentionLeadingIconData=\"{x:Static controls:IconPathData.Error}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsAttentionState=\"{Binding NeedsAttention}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding DetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding StatusText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Device}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailText=\"{Binding AccessText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryDetailText=\"{Binding DurationText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("public class SettingsInfoItemView", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("IsAttentionStateProperty", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("AttentionLeadingIconFrameStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("AttentionTrailingTextStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconFrame Grid.RowSpan", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TargetType=\"controls:IconFrame\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TargetType=\"controls:ChipView\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Grid.Column=\"1\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Grid.Row=\"1\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

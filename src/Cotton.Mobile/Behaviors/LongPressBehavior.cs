@@ -180,17 +180,12 @@ namespace Cotton.Mobile.Behaviors
                 return;
             }
 
-            if (animate)
-            {
-                MaterialMotion.AnimateBackgroundColor(
-                    visualElement,
-                    backgroundColor,
-                    duration,
-                    StateLayerAnimationName);
-                return;
-            }
-
-            MaterialMotion.SetBackgroundColor(visualElement, backgroundColor, StateLayerAnimationName);
+            MaterialMotion.UpdateBackgroundColor(
+                visualElement,
+                backgroundColor,
+                duration,
+                StateLayerAnimationName,
+                animate);
         }
 
         private bool TryExecute(ICommand? command, object? parameter)

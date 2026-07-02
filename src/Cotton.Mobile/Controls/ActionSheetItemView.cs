@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionSheetItemView : CommandPressableContentView
     {
+        private const string BackgroundAnimationName = "M3ActionSheetItemBackground";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -190,7 +192,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
         public string Text
@@ -309,21 +311,21 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(true);
         }
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionSheetItemView itemView = (ActionSheetItemView)bindable;
-            itemView.UpdateVisualState();
+            itemView.UpdateVisualState(false);
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateBackground)
         {
             if (_container is null || _grid is null || _iconFrame is null || _leadingIcon is null || _label is null || _selectedIcon is null)
             {
@@ -333,7 +335,12 @@ namespace Cotton.Mobile.Controls
             Opacity = ResolvePressableOpacity(1);
             MinimumHeightRequest = RowMinHeight;
 
-            _container.BackgroundColor = IsPressed ? PressedRowBackgroundColor : RowBackgroundColor;
+            MaterialMotion.UpdateBackgroundColor(
+                _container,
+                IsPressed ? PressedRowBackgroundColor : RowBackgroundColor,
+                IsPressed ? PressInDuration : PressOutDuration,
+                BackgroundAnimationName,
+                animateBackground);
             _container.Padding = RowPadding;
             _container.MinimumHeightRequest = RowMinHeight;
             _container.StrokeShape = new RoundRectangle

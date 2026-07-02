@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
 {
     public class NavigationBarItem : PressableContentView
     {
+        private const string BackgroundAnimationName = "M3NavigationBarItemBackground";
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -166,7 +168,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
         public Geometry? IconData
@@ -271,14 +273,14 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState();
+                UpdateVisualState(false);
             }
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             NavigationBarItem item = (NavigationBarItem)bindable;
-            item.UpdateVisualState();
+            item.UpdateVisualState(false);
         }
 
         private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -288,7 +290,7 @@ namespace Cotton.Mobile.Controls
             ICommand? newCommand = newValue as ICommand;
 
             item.ObserveCommand(oldCommand, newCommand);
-            item.UpdateVisualState();
+            item.UpdateVisualState(false);
         }
 
         protected override bool CanHandlePress()
@@ -298,7 +300,7 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(true);
         }
 
         protected override void ExecutePress()
@@ -339,10 +341,10 @@ namespace Cotton.Mobile.Controls
 
         private void OnCommandCanExecuteChanged(object? sender, EventArgs e)
         {
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateBackground)
         {
             if (_container is null || _content is null || _icon is null || _label is null)
             {
@@ -350,7 +352,12 @@ namespace Cotton.Mobile.Controls
             }
 
             Opacity = ResolvePressableOpacity(1);
-            _container.BackgroundColor = IsPressed ? PressedFillColor : FillColor;
+            MaterialMotion.UpdateBackgroundColor(
+                _container,
+                IsPressed ? PressedFillColor : FillColor,
+                IsPressed ? PressInDuration : PressOutDuration,
+                BackgroundAnimationName,
+                animateBackground);
             _container.HeightRequest = ItemHeight;
             _container.Padding = ContentPadding;
             _container.Stroke = new SolidColorBrush(BorderColor);

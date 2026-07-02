@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Controls
 {
     public class IconButton : CommandPressableContentView
     {
+        private const string BackgroundAnimationName = "M3IconButtonBackground";
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -92,7 +94,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
         public Geometry? IconData
@@ -161,27 +163,27 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState();
+                UpdateVisualState(false);
             }
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             IconButton iconButton = (IconButton)bindable;
-            iconButton.UpdateVisualState();
+            iconButton.UpdateVisualState(false);
         }
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(true);
         }
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateBackground)
         {
             if (_container is null || _icon is null)
             {
@@ -200,7 +202,12 @@ namespace Cotton.Mobile.Controls
             {
                 CornerRadius = new CornerRadius(ButtonCornerRadius),
             };
-            _container.BackgroundColor = IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor;
+            MaterialMotion.UpdateBackgroundColor(
+                _container,
+                IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor,
+                IsPressed ? PressInDuration : PressOutDuration,
+                BackgroundAnimationName,
+                animateBackground);
             _container.Stroke = new SolidColorBrush(BorderColor);
             _container.StrokeThickness = BorderWidth;
 

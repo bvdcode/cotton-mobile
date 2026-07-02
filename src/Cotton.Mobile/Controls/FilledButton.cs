@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
 {
     public class FilledButton : CommandPressableContentView
     {
+        private const string BackgroundAnimationName = "M3FilledButtonBackground";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -122,7 +124,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
         public string Text
@@ -209,27 +211,27 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState();
+                UpdateVisualState(false);
             }
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FilledButton filledButton = (FilledButton)bindable;
-            filledButton.UpdateVisualState();
+            filledButton.UpdateVisualState(false);
         }
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(true);
         }
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState();
+            UpdateVisualState(false);
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateBackground)
         {
             if (_container is null || _label is null)
             {
@@ -248,7 +250,12 @@ namespace Cotton.Mobile.Controls
             };
             _container.Stroke = new SolidColorBrush(canPress ? BorderColor : DisabledBorderColor);
             _container.StrokeThickness = BorderWidth;
-            _container.BackgroundColor = ResolveBackgroundColor(canPress);
+            MaterialMotion.UpdateBackgroundColor(
+                _container,
+                ResolveBackgroundColor(canPress),
+                IsPressed ? PressInDuration : PressOutDuration,
+                BackgroundAnimationName,
+                animateBackground);
 
             _label.Text = Text;
             _label.TextColor = canPress ? TextColor : DisabledTextColor;

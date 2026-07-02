@@ -1292,16 +1292,45 @@ namespace Cotton.Mobile.Tests
             string materialResources = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialResources.cs"));
 
             Assert.Contains("StateLayerAnimationName = \"M3ListItemStateLayer\"", longPressBehavior, StringComparison.Ordinal);
-            Assert.Contains("MaterialMotion.AnimateBackgroundColor(", longPressBehavior, StringComparison.Ordinal);
-            Assert.Contains("MaterialMotion.SetBackgroundColor(visualElement, backgroundColor, StateLayerAnimationName)", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressInDuration\")", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressOutDuration\")", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("public static void UpdateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("public static void AnimateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("Animation animation = new(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("Easing.CubicOut", materialMotion, StringComparison.Ordinal);
             Assert.Contains("public static Color GetThemeColor(", materialResources, StringComparison.Ordinal);
             Assert.DoesNotContain("VisualElement.BackgroundColorProperty", longPressBehavior, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Pressable_chrome_controls_animate_pressed_backgrounds()
+        {
+            string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
+            string[] controlPaths =
+            [
+                Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"),
+                Path.Combine(ControlsDirectoryPath, "FilledButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "IconButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "NavigationBarItem.cs"),
+                Path.Combine(ControlsDirectoryPath, "TextAction.cs"),
+            ];
+
+            Assert.Contains("public static void UpdateBackgroundColor(", materialMotion, StringComparison.Ordinal);
+
+            foreach (string controlPath in controlPaths)
+            {
+                string control = LoadText(controlPath);
+
+                Assert.Contains("BackgroundAnimationName = \"M3", control, StringComparison.Ordinal);
+                Assert.Contains("UpdateVisualState(true)", control, StringComparison.Ordinal);
+                Assert.Contains("UpdateVisualState(false)", control, StringComparison.Ordinal);
+                Assert.Contains("MaterialMotion.UpdateBackgroundColor(", control, StringComparison.Ordinal);
+                Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", control, StringComparison.Ordinal);
+                Assert.DoesNotContain("_container.BackgroundColor = IsPressed", control, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

@@ -54,6 +54,22 @@ namespace Cotton.Mobile.Controls
             animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
         }
 
+        public static void UpdateBackgroundColor(
+            VisualElement element,
+            Color targetColor,
+            int duration,
+            string animationName,
+            bool animate)
+        {
+            if (animate)
+            {
+                AnimateBackgroundColor(element, targetColor, duration, animationName);
+                return;
+            }
+
+            SetBackgroundColor(element, targetColor, animationName);
+        }
+
         private static Color Interpolate(Color startColor, Color targetColor, double progress)
         {
             float red = InterpolateChannel(startColor.Red, targetColor.Red, progress);

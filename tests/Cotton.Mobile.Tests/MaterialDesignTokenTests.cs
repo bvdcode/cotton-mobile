@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Tests
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
+        private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -532,6 +533,25 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<HorizontalStackLayout Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding RunNowActionText}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding StopSyncActionText}\"", syncSettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Linear_progress_indicators_use_reusable_material_control()
+        {
+            string transfersPage = LoadText(TransfersPagePath);
+            string storagePage = LoadText(StoragePagePath);
+            string linearProgressView = LoadText(LinearProgressViewPath);
+
+            Assert.Equal(1, CountOccurrences(transfersPage, "<controls:LinearProgressView"));
+            Assert.Contains("Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("IsVisible=\"{Binding IsProgressVisible}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(storagePage, "<controls:LinearProgressView"));
+            Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("IsVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Progress=\"{Binding UsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3LinearProgressBar}\"", transfersPage + storagePage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -58,12 +58,11 @@
                                                                  SupportingText="{Binding DetailText}"
                                                                  TrailingText="{Binding StatusText}" />
 
-                                <ProgressBar Grid.Row="1"
-                                             Grid.Column="1"
-                                             Grid.ColumnSpan="2"
-                                             Progress="{Binding ProgressFraction}"
-                                             IsVisible="{Binding IsProgressVisible}"
-                                             Style="{StaticResource M3LinearProgressBar}" />
+                                <controls:LinearProgressView Grid.Row="1"
+                                                             Grid.Column="1"
+                                                             Grid.ColumnSpan="2"
+                                                             Progress="{Binding ProgressFraction}"
+                                                             IsVisible="{Binding IsProgressVisible}" />
 
                                 <Label Grid.Row="2"
                                        Grid.Column="1"

@@ -48,12 +48,11 @@
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
-                    <ProgressBar Grid.Row="1"
-                                 Grid.Column="1"
-                                 Grid.ColumnSpan="2"
-                                 Progress="{Binding CloudQuotaUsageFraction}"
-                                 IsVisible="{Binding IsCloudQuotaProgressVisible}"
-                                 Style="{StaticResource M3LinearProgressBar}" />
+                    <controls:LinearProgressView Grid.Row="1"
+                                                 Grid.Column="1"
+                                                 Grid.ColumnSpan="2"
+                                                 Progress="{Binding CloudQuotaUsageFraction}"
+                                                 IsVisible="{Binding IsCloudQuotaProgressVisible}" />
                 </Grid>
             </Border>
 
@@ -190,11 +189,10 @@
                                            Text="{Binding StatusText}"
                                            Style="{StaticResource M3CardSupportingLine}" />
 
-                                    <ProgressBar Grid.Row="2"
-                                                 Grid.Column="1"
-                                                 Grid.ColumnSpan="2"
-                                                 Progress="{Binding UsageFraction}"
-                                                 Style="{StaticResource M3LinearProgressBar}" />
+                                    <controls:LinearProgressView Grid.Row="2"
+                                                                 Grid.Column="1"
+                                                                 Grid.ColumnSpan="2"
+                                                                 Progress="{Binding UsageFraction}" />
                                 </Grid>
                             </DataTemplate>
                         </BindableLayout.ItemTemplate>

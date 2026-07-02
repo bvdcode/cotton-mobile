@@ -50,6 +50,7 @@ namespace Cotton.Mobile.Tests
         private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string LongPressBehaviorPath = "src/Cotton.Mobile/Behaviors/LongPressBehavior.cs";
+        private const string LoadingIndicatorViewPath = "src/Cotton.Mobile/Controls/LoadingIndicatorView.cs";
         private const string TouchSurfaceViewPath = "src/Cotton.Mobile/Controls/TouchSurfaceView.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
@@ -938,6 +939,7 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
             string appLockGatePage = LoadText(AppLockGatePagePath);
+            string loadingIndicatorView = LoadText(LoadingIndicatorViewPath);
             string loadingStatusView = LoadText(LoadingStatusViewPath);
             string interaction = LoadText(InteractionResourcePath);
 
@@ -955,6 +957,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ContainerStyleResourceKeyProperty", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKeyProperty", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", loadingStatusView, StringComparison.Ordinal);
+            Assert.Contains("DefaultFrameStyleResourceKey = \"M3LoadingIndicatorFrame\"", loadingIndicatorView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIndicatorStyleResourceKey = \"M3LoadingActivityIndicator\"", loadingIndicatorView, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(loadingIndicatorView, "MaterialResources.ResolveStyleResourceKey("));
+            Assert.Contains("_frame.SetDynamicResource(StyleProperty, frameStyleResourceKey)", loadingIndicatorView, StringComparison.Ordinal);
+            Assert.Contains("_indicator.SetDynamicResource(StyleProperty, indicatorStyleResourceKey)", loadingIndicatorView, StringComparison.Ordinal);
             Assert.Contains(
                 "DetailMessageOpacityAnimationName = \"M3LoadingStatusDetailMessageOpacity\"",
                 loadingStatusView,
@@ -980,6 +987,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingActivityIndicator", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_indicator.SetDynamicResource(StyleProperty, \"M3LoadingActivityIndicator\")", loadingIndicatorView, StringComparison.Ordinal);
+            Assert.DoesNotContain("frame.SetDynamicResource(StyleProperty, \"M3LoadingIndicatorFrame\")", loadingIndicatorView, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "_detailMessage.IsVisible = !string.IsNullOrWhiteSpace(detailText)",
                 loadingStatusView,
@@ -2047,6 +2056,7 @@ namespace Cotton.Mobile.Tests
                 ("AuthLegalFooterView.cs", 1),
                 ("CenteredGateView.cs", 1),
                 ("FileStatusActionView.cs", 5),
+                ("LoadingIndicatorView.cs", 2),
                 ("SelectionBarView.cs", 1),
                 ("SettingsSummaryHeaderView.cs", 4),
                 ("TouchSurfaceView.cs", 1),

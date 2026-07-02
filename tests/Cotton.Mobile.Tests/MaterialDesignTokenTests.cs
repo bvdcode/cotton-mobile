@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
         private const string MetadataCardViewPath = "src/Cotton.Mobile/Controls/MetadataCardView.cs";
@@ -187,6 +188,7 @@ namespace Cotton.Mobile.Tests
                 TrashPagePath,
                 SyncSettingsPagePath,
                 PdfViewerPagePath,
+                AppLockGatePagePath,
             ];
 
             foreach (string screenPath in screenPaths)
@@ -200,6 +202,9 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string appLockGatePage = LoadText(AppLockGatePagePath);
+            string emptyStateView = LoadText(EmptyStateViewPath);
+            string styles = LoadText(StylesResourcePath);
 
             Assert.Contains("ActionCommand=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
@@ -207,6 +212,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3CenteredPdfEmptyStateCard\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("IconFrameStyleResourceKey=\"M3PdfEmptyStateIconFrame\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:EmptyStateView Grid.Row=\"1\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsBusy=\"{Binding IsBusy}\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsActionEnabled=\"{Binding CanUnlock}\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsFilledAction=\"True\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey=\"M3AppLockCard\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsBusyProperty", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("IsFilledActionProperty", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("new FilledButton", emptyStateView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Grid.Row=\"1\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AppLockContentStack", appLockGatePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AppLockContentStack", styles, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -219,7 +237,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionCommand=\"{Binding CancelFileActionCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionSemanticDescription=\"Cancel file operation\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:LoadingIndicatorView", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:LoadingIndicatorView", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsBusy=\"{Binding IsBusy}\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingStatusPanel", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);

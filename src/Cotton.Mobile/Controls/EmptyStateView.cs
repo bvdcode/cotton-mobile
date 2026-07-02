@@ -37,6 +37,13 @@ namespace Cotton.Mobile.Controls
             true,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsBusyProperty = BindableProperty.Create(
+            nameof(IsBusy),
+            typeof(bool),
+            typeof(EmptyStateView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty CardStyleResourceKeyProperty = BindableProperty.Create(
             nameof(CardStyleResourceKey),
             typeof(string),
@@ -78,6 +85,20 @@ namespace Cotton.Mobile.Controls
             false,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
+            nameof(IsActionEnabled),
+            typeof(bool),
+            typeof(EmptyStateView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsFilledActionProperty = BindableProperty.Create(
+            nameof(IsFilledAction),
+            typeof(bool),
+            typeof(EmptyStateView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
             nameof(ActionSemanticDescription),
             typeof(string),
@@ -99,6 +120,13 @@ namespace Cotton.Mobile.Controls
             "M3PanelActionListItemGrid",
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty FilledActionButtonStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(FilledActionButtonStyleResourceKey),
+            typeof(string),
+            typeof(EmptyStateView),
+            "M3PanelActionFilledButton",
+            propertyChanged: OnVisualPropertyChanged);
+
         private readonly IconButton _actionButton;
         private readonly IconButton _actionIconOnlyButton;
         private readonly Label _actionLabel;
@@ -106,8 +134,10 @@ namespace Cotton.Mobile.Controls
         private readonly LongPressBehavior _actionTapBehavior;
         private readonly Grid _actionTouchSurface;
         private readonly Border _card;
+        private readonly FilledButton _filledActionButton;
         private readonly IconView _icon;
         private readonly Border _iconFrame;
+        private readonly LoadingIndicatorView _loadingIndicator;
         private readonly Label _title;
         private readonly Label _body;
 
@@ -126,6 +156,8 @@ namespace Cotton.Mobile.Controls
 
             _body = new Label();
             _body.SetDynamicResource(StyleProperty, "M3EmptyBody");
+
+            _loadingIndicator = new LoadingIndicatorView();
 
             _actionLabel = new Label();
             _actionLabel.SetDynamicResource(StyleProperty, "M3ActionListItemLabel");
@@ -162,6 +194,7 @@ namespace Cotton.Mobile.Controls
             };
 
             _actionIconOnlyButton = new IconButton();
+            _filledActionButton = new FilledButton();
 
             VerticalStackLayout stack = new()
             {
@@ -170,8 +203,10 @@ namespace Cotton.Mobile.Controls
                     _iconFrame,
                     _title,
                     _body,
+                    _loadingIndicator,
                     _actionRow,
                     _actionIconOnlyButton,
+                    _filledActionButton,
                 },
             };
             stack.SetDynamicResource(StyleProperty, "M3EmptyStateStack");
@@ -210,6 +245,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsBodyVisibleProperty, value);
         }
 
+        public bool IsBusy
+        {
+            get => (bool)GetValue(IsBusyProperty);
+            set => SetValue(IsBusyProperty, value);
+        }
+
         public string CardStyleResourceKey
         {
             get => (string)GetValue(CardStyleResourceKeyProperty);
@@ -246,6 +287,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsActionVisibleProperty, value);
         }
 
+        public bool IsActionEnabled
+        {
+            get => (bool)GetValue(IsActionEnabledProperty);
+            set => SetValue(IsActionEnabledProperty, value);
+        }
+
+        public bool IsFilledAction
+        {
+            get => (bool)GetValue(IsFilledActionProperty);
+            set => SetValue(IsFilledActionProperty, value);
+        }
+
         public string ActionSemanticDescription
         {
             get => (string)GetValue(ActionSemanticDescriptionProperty);
@@ -262,6 +315,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(ActionRowStyleResourceKeyProperty);
             set => SetValue(ActionRowStyleResourceKeyProperty, value);
+        }
+
+        public string FilledActionButtonStyleResourceKey
+        {
+            get => (string)GetValue(FilledActionButtonStyleResourceKeyProperty);
+            set => SetValue(FilledActionButtonStyleResourceKeyProperty, value);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -288,32 +347,47 @@ namespace Cotton.Mobile.Controls
             string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
                 ? "M3EmptyStateActionIconButton"
                 : ActionIconButtonStyleResourceKey;
-            bool isActionTextVisible = IsActionVisible && !string.IsNullOrWhiteSpace(actionText);
-            bool isIconOnlyActionVisible = IsActionVisible && string.IsNullOrWhiteSpace(actionText);
+            string filledActionButtonStyleResourceKey = string.IsNullOrWhiteSpace(FilledActionButtonStyleResourceKey)
+                ? "M3PanelActionFilledButton"
+                : FilledActionButtonStyleResourceKey;
+            bool isFilledActionVisible = IsActionVisible && IsFilledAction && !string.IsNullOrWhiteSpace(actionText);
+            bool isActionTextVisible = IsActionVisible && !IsFilledAction && !string.IsNullOrWhiteSpace(actionText);
+            bool isIconOnlyActionVisible = IsActionVisible && !IsFilledAction && string.IsNullOrWhiteSpace(actionText);
             ICommand? actionCommand = ActionCommand;
 
             _icon.IconData = IconData;
             _title.Text = title;
             _body.Text = body;
             _body.IsVisible = IsBodyVisible && !string.IsNullOrWhiteSpace(body);
+            _loadingIndicator.IsRunning = IsBusy;
+            _loadingIndicator.IsVisible = IsBusy;
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);
             _iconFrame.SetDynamicResource(StyleProperty, iconFrameStyleResourceKey);
             _actionRow.SetDynamicResource(StyleProperty, actionRowStyleResourceKey);
             _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
             _actionIconOnlyButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
+            _filledActionButton.SetDynamicResource(StyleProperty, filledActionButtonStyleResourceKey);
 
             _actionLabel.Text = actionText;
             _actionButton.IconData = ActionIconData;
             _actionButton.Command = actionCommand;
+            _actionButton.IsEnabled = IsActionEnabled;
             SemanticProperties.SetDescription(_actionButton, actionSemanticDescription);
             _actionIconOnlyButton.IconData = ActionIconData;
             _actionIconOnlyButton.Command = actionCommand;
+            _actionIconOnlyButton.IsEnabled = IsActionEnabled;
             SemanticProperties.SetDescription(_actionIconOnlyButton, actionSemanticDescription);
+            _filledActionButton.Text = actionText;
+            _filledActionButton.Command = actionCommand;
+            _filledActionButton.IsEnabled = IsActionEnabled;
+            SemanticProperties.SetDescription(_filledActionButton, actionSemanticDescription);
             _actionTapBehavior.TapCommand = actionCommand;
+            _actionRow.IsEnabled = IsActionEnabled;
 
             _actionRow.IsVisible = isActionTextVisible;
             _actionIconOnlyButton.IsVisible = isIconOnlyActionVisible;
+            _filledActionButton.IsVisible = isFilledActionVisible;
 
             string description = !_body.IsVisible
                 ? title

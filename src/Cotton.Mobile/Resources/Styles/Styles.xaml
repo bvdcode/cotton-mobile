@@ -250,11 +250,6 @@
         <Setter Property="Spacing" Value="{StaticResource Space16}" />
     </Style>
 
-    <Style TargetType="VerticalStackLayout" x:Key="M3AppLockContentStack">
-        <Setter Property="Spacing" Value="{StaticResource Space16}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-    </Style>
-
     <Style TargetType="Grid" x:Key="M3AppLockGateGrid">
         <Setter Property="Padding" Value="{StaticResource M3AppLockGatePadding}" />
     </Style>

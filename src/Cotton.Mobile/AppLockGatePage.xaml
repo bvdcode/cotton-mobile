@@ -10,28 +10,17 @@
 
     <Grid RowDefinitions="*,Auto,*"
           Style="{StaticResource M3AppLockGateGrid}">
-        <Border Grid.Row="1"
-                Style="{StaticResource M3AppLockCard}">
-            <VerticalStackLayout Style="{StaticResource M3AppLockContentStack}">
-                <Border Style="{StaticResource M3EmptyStateIconFrame}">
-                    <controls:IconView IconData="{x:Static controls:IconPathData.Device}"
-                                       Style="{StaticResource M3EmptyStateIcon}" />
-                </Border>
-
-                <Label Text="{Binding Title}"
-                       Style="{StaticResource M3EmptyTitle}" />
-
-                <Label Text="{Binding StatusText}"
-                       Style="{StaticResource M3CardSupportingCenteredLongWrap}" />
-
-                <controls:LoadingIndicatorView IsVisible="{Binding IsBusy}"
-                                               IsRunning="{Binding IsBusy}" />
-
-                <controls:FilledButton Text="{Binding UnlockActionText}"
-                                       Command="{Binding UnlockCommand}"
-                                       IsEnabled="{Binding CanUnlock}"
-                                       Style="{StaticResource M3PanelActionFilledButton}" />
-            </VerticalStackLayout>
-        </Border>
+        <controls:EmptyStateView Grid.Row="1"
+                                 IconData="{x:Static controls:IconPathData.Device}"
+                                 Title="{Binding Title}"
+                                 Body="{Binding StatusText}"
+                                 IsBusy="{Binding IsBusy}"
+                                 ActionText="{Binding UnlockActionText}"
+                                 ActionCommand="{Binding UnlockCommand}"
+                                 ActionSemanticDescription="{Binding UnlockActionText}"
+                                 IsActionEnabled="{Binding CanUnlock}"
+                                 IsActionVisible="True"
+                                 IsFilledAction="True"
+                                 CardStyleResourceKey="M3AppLockCard" />
     </Grid>
 </ContentPage>

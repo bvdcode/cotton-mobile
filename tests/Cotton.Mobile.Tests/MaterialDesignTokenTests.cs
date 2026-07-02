@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
+        private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
@@ -358,6 +359,25 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding CancelSelectionCommand}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SelectionBar", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Selection_overlays_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string selectionOverlayView = LoadText(SelectionOverlayViewPath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:SelectionOverlayView"));
+            Assert.Contains("Grid.ColumnSpan=\"3\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Grid.RowSpan=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("OverlayStyleResourceKey=\"M3FileSelectionRowOverlay\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultOverlayStyleResourceKey = \"M3FileSelectionOverlay\"", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = true", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("_overlay.IsVisible = IsSelected", selectionOverlayView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Grid.ColumnSpan=\"3\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Grid.RowSpan=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileSelectionRowOverlay}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileSelectionOverlay}\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

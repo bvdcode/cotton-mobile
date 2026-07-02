@@ -260,9 +260,9 @@
                                                 <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
                                             </Grid.ColumnDefinitions>
 
-                                            <Border Grid.ColumnSpan="3"
-                                                    IsVisible="{Binding IsSelected}"
-                                                    Style="{StaticResource M3FileSelectionRowOverlay}" />
+                                            <controls:SelectionOverlayView Grid.ColumnSpan="3"
+                                                                           IsSelected="{Binding IsSelected}"
+                                                                           OverlayStyleResourceKey="M3FileSelectionRowOverlay" />
 
                                             <controls:FileThumbnailView ThumbnailSource="{Binding Thumbnail.Source}"
                                                                         IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
@@ -303,9 +303,8 @@
                                             <controls:ContentCardView HeightRequest="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
                                                                       CardStyleResourceKey="M3FileTileCard">
                                                 <Grid Style="{StaticResource M3FileTileContentGrid}">
-                                                    <Border Grid.RowSpan="2"
-                                                            IsVisible="{Binding IsSelected}"
-                                                            Style="{StaticResource M3FileSelectionOverlay}" />
+                                                    <controls:SelectionOverlayView Grid.RowSpan="2"
+                                                                                   IsSelected="{Binding IsSelected}" />
 
                                                     <Grid.RowDefinitions>
                                                         <RowDefinition Height="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}" />

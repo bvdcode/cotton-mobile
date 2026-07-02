@@ -742,6 +742,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string textViewerPage = LoadText(TextViewerPagePath);
+            string trashPage = LoadText(TrashPagePath);
             string contentCardView = LoadText(ContentCardViewPath);
 
             Assert.Contains("public class ContentCardView", contentCardView, StringComparison.Ordinal);
@@ -754,8 +755,11 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(mainPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:ContentCardView"));
             Assert.Contains("CardStyleResourceKey=\"M3AuthPanel\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey=\"M3SelectableContentCard\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("CardStyleResourceKey=\"M3SelectableTrashTileCard\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -769,6 +773,7 @@ namespace Cotton.Mobile.Tests
                 mainPage,
                 syncSettingsPage,
                 textViewerPage,
+                trashPage,
             ];
 
             foreach (string page in pages)
@@ -779,6 +784,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthPanel}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3TextViewerSurface}\"", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableContentCard}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3SelectableTrashTileCard}\"", trashPage, StringComparison.Ordinal);
         }
 
         [Fact]

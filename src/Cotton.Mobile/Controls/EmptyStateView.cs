@@ -8,7 +8,11 @@ namespace Cotton.Mobile.Controls
 {
     public class EmptyStateView : ContentView
     {
+        private const string ActionIconOnlyButtonOpacityAnimationName = "M3EmptyStateActionIconOnlyOpacity";
+        private const string ActionRowOpacityAnimationName = "M3EmptyStateActionRowOpacity";
+        private const string BodyOpacityAnimationName = "M3EmptyStateBodyOpacity";
         private const string BusyIndicatorOpacityAnimationName = "M3EmptyStateBusyIndicatorOpacity";
+        private const string FilledActionButtonOpacityAnimationName = "M3EmptyStateFilledActionOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -141,6 +145,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _title;
         private readonly Label _body;
         private bool _hasAppliedBusyState;
+        private bool _hasAppliedContentVisibilityState;
 
         public EmptyStateView()
         {
@@ -338,6 +343,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateBusy)
         {
+            bool shouldAnimateContentVisibility = _hasAppliedContentVisibilityState;
             string title = Title ?? string.Empty;
             string body = Body ?? string.Empty;
             string actionText = ActionText ?? string.Empty;
@@ -357,6 +363,7 @@ namespace Cotton.Mobile.Controls
             string filledActionButtonStyleResourceKey = string.IsNullOrWhiteSpace(FilledActionButtonStyleResourceKey)
                 ? "M3PanelActionFilledButton"
                 : FilledActionButtonStyleResourceKey;
+            bool isBodyVisible = IsBodyVisible && !string.IsNullOrWhiteSpace(body);
             bool isFilledActionVisible = IsActionVisible && IsFilledAction && !string.IsNullOrWhiteSpace(actionText);
             bool isActionTextVisible = IsActionVisible && !IsFilledAction && !string.IsNullOrWhiteSpace(actionText);
             bool isIconOnlyActionVisible = IsActionVisible && !IsFilledAction && string.IsNullOrWhiteSpace(actionText);
@@ -365,7 +372,7 @@ namespace Cotton.Mobile.Controls
             _icon.IconData = IconData;
             _title.Text = title;
             _body.Text = body;
-            _body.IsVisible = IsBodyVisible && !string.IsNullOrWhiteSpace(body);
+            UpdateElementVisibility(_body, isBodyVisible, BodyOpacityAnimationName, shouldAnimateContentVisibility);
             UpdateBusyState(animateBusy);
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);
@@ -392,14 +399,27 @@ namespace Cotton.Mobile.Controls
             _actionTouchSurface.IsVisible = isActionTextVisible && IsActionEnabled && actionCommand is not null;
             _actionRow.IsEnabled = IsActionEnabled;
 
-            _actionRow.IsVisible = isActionTextVisible;
-            _actionIconOnlyButton.IsVisible = isIconOnlyActionVisible;
-            _filledActionButton.IsVisible = isFilledActionVisible;
+            UpdateElementVisibility(
+                _actionRow,
+                isActionTextVisible,
+                ActionRowOpacityAnimationName,
+                shouldAnimateContentVisibility);
+            UpdateElementVisibility(
+                _actionIconOnlyButton,
+                isIconOnlyActionVisible,
+                ActionIconOnlyButtonOpacityAnimationName,
+                shouldAnimateContentVisibility);
+            UpdateElementVisibility(
+                _filledActionButton,
+                isFilledActionVisible,
+                FilledActionButtonOpacityAnimationName,
+                shouldAnimateContentVisibility);
 
-            string description = !_body.IsVisible
+            string description = !isBodyVisible
                 ? title
                 : $"{title}. {body}";
             SemanticProperties.SetDescription(_card, description);
+            _hasAppliedContentVisibilityState = true;
         }
 
         private void UpdateBusyState(bool animateBusy)
@@ -440,6 +460,44 @@ namespace Cotton.Mobile.Controls
 
             _loadingIndicator.IsRunning = false;
             _loadingIndicator.IsVisible = false;
+        }
+
+        private static void UpdateElementVisibility(
+            VisualElement element,
+            bool isElementVisible,
+            string opacityAnimationName,
+            bool animateVisibility)
+        {
+            double targetOpacity = isElementVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                element,
+                element.Opacity,
+                targetOpacity,
+                duration,
+                opacityAnimationName,
+                animateVisibility,
+                opacity => element.Opacity = opacity,
+                () => CompleteElementVisibility(element, isElementVisible));
+        }
+
+        private static void CompleteElementVisibility(VisualElement element, bool isElementVisible)
+        {
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+                return;
+            }
+
+            element.IsVisible = false;
         }
     }
 }

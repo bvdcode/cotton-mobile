@@ -78,67 +78,26 @@
                                      Style="{StaticResource M3FileBrowserProfileStack}">
                         <VerticalStackLayout x:Name="FileBrowserContent"
                                              Style="{StaticResource M3FileBrowserContentStack}">
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  Style="{StaticResource M3FileBrowserTopBar}">
-                                <controls:IconButton Grid.Column="0"
-                                                     IconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                     Style="{StaticResource M3FileBrowserTopBarIconButton}"
-                                                     Command="{Binding NavigateFilesUpCommand}"
-                                                     IsEnabled="{Binding Display.IsFileUpButtonEnabled}"
-                                                     IsVisible="{Binding Display.IsFileUpButtonVisible}"
-                                                     ButtonOpacity="{Binding Display.FileUpButtonOpacity}"
-                                                     SemanticProperties.Description="Up" />
-
-                                <VerticalStackLayout Grid.Column="1"
-                                                     Style="{StaticResource M3FileBrowserTitleStack}">
-                                    <Label Text="{Binding Display.FilesTitle}"
-                                           Style="{StaticResource M3BrowserTitleLine}" />
-
-                                    <Label Text="{Binding Display.FilesPath}"
-                                           IsVisible="{Binding Display.IsFilesPathVisible}"
-                                           Style="{StaticResource M3CardMetaLine}" />
-
-                                    <Label Text="{Binding Display.FilesStatus}"
-                                           IsVisible="{Binding Display.IsFilesStatusVisible}"
-                                           Style="{StaticResource M3CardMetaLine}" />
-                                </VerticalStackLayout>
-
-                                <HorizontalStackLayout Grid.Column="2"
-                                                       Style="{StaticResource M3FileBrowserActionCluster}">
-                                    <controls:ActionClusterView ClusterStyleResourceKey="M3FileBrowserActionCluster"
-                                                                PrimaryActionIconData="{x:Static controls:IconPathData.Search}"
-                                                                PrimaryActionCommand="{Binding ToggleFileSearchCommand}"
-                                                                PrimaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
-                                                                PrimaryActionSemanticDescription="{Binding Display.FileSearchButtonDescription}"
-                                                                IsPrimaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                                SecondaryActionIconData="{x:Static controls:IconPathData.Sort}"
-                                                                SecondaryActionCommand="{Binding ShowFileSortActionsCommand}"
-                                                                SecondaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
-                                                                SecondaryActionSemanticDescription="Sort files"
-                                                                IsSecondaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                                IsSecondaryActionVisible="{Binding Display.IsFileSortButtonVisible}"
-                                                                TertiaryActionIconData="{x:Static controls:IconPathData.ViewTiles}"
-                                                                TertiaryActionCommand="{Binding ShowFileViewActionsCommand}"
-                                                                TertiaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
-                                                                TertiaryActionSemanticDescription="Change file view"
-                                                                IsTertiaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                                IsTertiaryActionVisible="{Binding Display.IsFileViewButtonVisible}">
-                                        <controls:ActionClusterView.Triggers>
-                                            <DataTrigger TargetType="controls:ActionClusterView"
-                                                         Binding="{Binding Display.IsFileSearchVisible}"
-                                                         Value="True">
-                                                <Setter Property="PrimaryActionIconData"
-                                                        Value="{x:Static controls:IconPathData.Close}" />
-                                            </DataTrigger>
-                                        </controls:ActionClusterView.Triggers>
-                                    </controls:ActionClusterView>
-
-                                    <controls:InitialsButton Text="{Binding Display.ProfileInitials}"
-                                                             Command="{Binding AccountCommand}"
-                                                             IsEnabled="{Binding Display.IsAccountActionEnabled}"
-                                                             SemanticProperties.Description="Account" />
-                                </HorizontalStackLayout>
-                            </Grid>
+                            <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
+                                                            PathText="{Binding Display.FilesPath}"
+                                                            IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
+                                                            StatusText="{Binding Display.FilesStatus}"
+                                                            IsStatusTextVisible="{Binding Display.IsFilesStatusVisible}"
+                                                            NavigateUpCommand="{Binding NavigateFilesUpCommand}"
+                                                            IsNavigateUpEnabled="{Binding Display.IsFileUpButtonEnabled}"
+                                                            IsNavigateUpVisible="{Binding Display.IsFileUpButtonVisible}"
+                                                            NavigateUpButtonOpacity="{Binding Display.FileUpButtonOpacity}"
+                                                            SearchCommand="{Binding ToggleFileSearchCommand}"
+                                                            SearchSemanticDescription="{Binding Display.FileSearchButtonDescription}"
+                                                            IsSearchActive="{Binding Display.IsFileSearchVisible}"
+                                                            IsChromeEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                            SortCommand="{Binding ShowFileSortActionsCommand}"
+                                                            IsSortVisible="{Binding Display.IsFileSortButtonVisible}"
+                                                            ViewCommand="{Binding ShowFileViewActionsCommand}"
+                                                            IsViewVisible="{Binding Display.IsFileViewButtonVisible}"
+                                                            ProfileInitials="{Binding Display.ProfileInitials}"
+                                                            AccountCommand="{Binding AccountCommand}"
+                                                            IsAccountEnabled="{Binding Display.IsAccountActionEnabled}" />
 
                             <Label Text="{Binding Display.ProfileStatus}"
                                    IsVisible="{Binding Display.IsProfileStatusVisible}"

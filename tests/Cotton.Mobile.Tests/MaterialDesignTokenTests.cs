@@ -33,6 +33,7 @@ namespace Cotton.Mobile.Tests
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
+        private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string ContentCardViewPath = "src/Cotton.Mobile/Controls/ContentCardView.cs";
         private const string MetadataCardBodyViewPath = "src/Cotton.Mobile/Controls/MetadataCardBodyView.cs";
@@ -401,20 +402,34 @@ namespace Cotton.Mobile.Tests
         public void Main_file_browser_header_actions_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);
+            string fileBrowserTopBarView = LoadText(FileBrowserTopBarViewPath);
 
-            Assert.Equal(1, CountOccurrences(mainPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\""));
-            Assert.Contains("PrimaryActionCommand=\"{Binding ToggleFileSearchCommand}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("PrimaryActionSemanticDescription=\"{Binding Display.FileSearchButtonDescription}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("TargetType=\"controls:ActionClusterView\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("Property=\"PrimaryActionIconData\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("SecondaryActionCommand=\"{Binding ShowFileSortActionsCommand}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsSecondaryActionVisible=\"{Binding Display.IsFileSortButtonVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("TertiaryActionCommand=\"{Binding ShowFileViewActionsCommand}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsTertiaryActionVisible=\"{Binding Display.IsFileViewButtonVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:InitialsButton Text=\"{Binding Display.ProfileInitials}\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileBrowserTopBarView"));
+            Assert.Contains("Title=\"{Binding Display.FilesTitle}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("PathText=\"{Binding Display.FilesPath}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SearchCommand=\"{Binding ToggleFileSearchCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SearchSemanticDescription=\"{Binding Display.FileSearchButtonDescription}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsSearchActive=\"{Binding Display.IsFileSearchVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SortCommand=\"{Binding ShowFileSortActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsSortVisible=\"{Binding Display.IsFileSortButtonVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ViewCommand=\"{Binding ShowFileViewActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsViewVisible=\"{Binding Display.IsFileViewButtonVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ProfileInitials=\"{Binding Display.ProfileInitials}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class FileBrowserTopBarView", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileBrowserTopBar\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3FileBrowserActionCluster\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("new ActionClusterView", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("new InitialsButton", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("IsSearchActive ? IconPathData.Close : IconPathData.Search", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:InitialsButton Text=\"{Binding Display.ProfileInitials}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Search}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Sort}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.ViewTiles}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TargetType=\"controls:ActionClusterView\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Property=\"PrimaryActionIconData\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

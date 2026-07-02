@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Tests
     public class MaterialDesignTokenTests
     {
         private const string SpacingResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MSpacing.xaml";
+        private const string ColorsResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MColors.xaml";
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
@@ -166,6 +167,19 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3DarkPrimary", statusActivitySetters["Color"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3DarkPrimary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Light_theme_primary_fill_is_quieter_than_lime_accent()
+        {
+            string colors = LoadText(ColorsResourcePath);
+
+            Assert.Contains("<Color x:Key=\"M3Accent\">#C6FF00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightPrimary\">#4F6200</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightPrimaryPressed\">#405100</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightOnPrimary\">#FFFFFF</Color>", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Color x:Key=\"M3LightPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
         }
 
         [Fact]

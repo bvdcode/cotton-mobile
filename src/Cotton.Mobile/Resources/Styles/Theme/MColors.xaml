@@ -11,12 +11,12 @@
     <Color x:Key="M3Transparent">Transparent</Color>
     <Color x:Key="M3Shadow">#000000</Color>
 
-    <Color x:Key="M3LightPrimary">#C6FF00</Color>
-    <Color x:Key="M3LightPrimaryPressed">#B2E600</Color>
-    <Color x:Key="M3LightOnPrimary">#151900</Color>
-    <Color x:Key="M3LightPrimaryContainer">#DFFB73</Color>
-    <Color x:Key="M3LightPrimaryContainerPressed">#D2EE66</Color>
-    <Color x:Key="M3LightOnPrimaryContainer">#1B2300</Color>
+    <Color x:Key="M3LightPrimary">#4F6200</Color>
+    <Color x:Key="M3LightPrimaryPressed">#405100</Color>
+    <Color x:Key="M3LightOnPrimary">#FFFFFF</Color>
+    <Color x:Key="M3LightPrimaryContainer">#DDE7B2</Color>
+    <Color x:Key="M3LightPrimaryContainerPressed">#CED9A4</Color>
+    <Color x:Key="M3LightOnPrimaryContainer">#161F00</Color>
     <Color x:Key="M3LightSecondary">#596248</Color>
     <Color x:Key="M3LightOnSecondary">#FFFFFF</Color>
     <Color x:Key="M3LightSecondaryContainer">#DDE8C7</Color>

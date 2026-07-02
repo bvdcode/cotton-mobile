@@ -10,6 +10,12 @@ namespace Cotton.Mobile.Controls
     public class LoadingStatusView : ContentView
     {
         private const string ActionButtonOpacityAnimationName = "M3LoadingStatusActionButtonOpacity";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultContainerStyleResourceKey = "M3LoadingStatusPanel";
+        private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
+        private const string DefaultGridStyleResourceKey = "M3LoadingStatusGrid";
+        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
+        private const string DefaultTextStyleResourceKey = "M3LoadingMessage";
         private const string DetailMessageOpacityAnimationName = "M3LoadingStatusDetailMessageOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
@@ -71,42 +77,42 @@ namespace Cotton.Mobile.Controls
             nameof(ContainerStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3LoadingStatusPanel",
+            DefaultContainerStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
             nameof(GridStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3LoadingStatusGrid",
+            DefaultGridStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TextStackStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3CardTextStack",
+            DefaultTextStackStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(TextStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3LoadingMessage",
+            DefaultTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty DetailTextStyleResourceKeyProperty = BindableProperty.Create(
             nameof(DetailTextStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3CardSupportingBlock",
+            DefaultDetailTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ActionIconButtonStyleResourceKey),
             typeof(string),
             typeof(LoadingStatusView),
-            "M3FileChromeIconButton",
+            DefaultActionIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
@@ -286,24 +292,24 @@ namespace Cotton.Mobile.Controls
             ICommand? actionCommand = ActionCommand;
             bool isActionVisible = IsActionVisible && actionCommand is not null;
             string detailText = DetailText ?? string.Empty;
-            string containerStyleResourceKey = string.IsNullOrWhiteSpace(ContainerStyleResourceKey)
-                ? "M3LoadingStatusPanel"
-                : ContainerStyleResourceKey;
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? "M3LoadingStatusGrid"
-                : GridStyleResourceKey;
-            string textStackStyleResourceKey = string.IsNullOrWhiteSpace(TextStackStyleResourceKey)
-                ? "M3CardTextStack"
-                : TextStackStyleResourceKey;
-            string textStyleResourceKey = string.IsNullOrWhiteSpace(TextStyleResourceKey)
-                ? "M3LoadingMessage"
-                : TextStyleResourceKey;
-            string detailTextStyleResourceKey = string.IsNullOrWhiteSpace(DetailTextStyleResourceKey)
-                ? "M3CardSupportingBlock"
-                : DetailTextStyleResourceKey;
-            string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
-                ? "M3FileChromeIconButton"
-                : ActionIconButtonStyleResourceKey;
+            string containerStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ContainerStyleResourceKey,
+                DefaultContainerStyleResourceKey);
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStackStyleResourceKey,
+                DefaultTextStackStyleResourceKey);
+            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TextStyleResourceKey,
+                DefaultTextStyleResourceKey);
+            string detailTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailTextStyleResourceKey,
+                DefaultDetailTextStyleResourceKey);
+            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionIconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
 
             _container.SetDynamicResource(StyleProperty, containerStyleResourceKey);
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);

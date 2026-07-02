@@ -10,6 +10,10 @@ namespace Cotton.Mobile.Controls
     public class AttentionStatusView : ContentView
     {
         private const string ActionButtonOpacityAnimationName = "M3AttentionStatusActionButtonOpacity";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultGridStyleResourceKey = "M3StatusGrid";
+        private const string DefaultIconStyleResourceKey = "M3AttentionStatusIcon";
+        private const string DefaultPanelStyleResourceKey = "M3AttentionStatusPanel";
 
         public static readonly BindableProperty MessageProperty = BindableProperty.Create(
             nameof(Message),
@@ -70,28 +74,28 @@ namespace Cotton.Mobile.Controls
             nameof(PanelStyleResourceKey),
             typeof(string),
             typeof(AttentionStatusView),
-            "M3AttentionStatusPanel",
+            DefaultPanelStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
             nameof(GridStyleResourceKey),
             typeof(string),
             typeof(AttentionStatusView),
-            "M3StatusGrid",
+            DefaultGridStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IconStyleResourceKeyProperty = BindableProperty.Create(
             nameof(IconStyleResourceKey),
             typeof(string),
             typeof(AttentionStatusView),
-            "M3AttentionStatusIcon",
+            DefaultIconStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ActionIconButtonStyleResourceKey),
             typeof(string),
             typeof(AttentionStatusView),
-            "M3FileChromeIconButton",
+            DefaultActionIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
@@ -105,7 +109,7 @@ namespace Cotton.Mobile.Controls
         public AttentionStatusView()
         {
             _icon = new IconView();
-            _icon.SetDynamicResource(StyleProperty, "M3AttentionStatusIcon");
+            _icon.SetDynamicResource(StyleProperty, DefaultIconStyleResourceKey);
 
             _message = new Label();
             _message.SetDynamicResource(StyleProperty, "M3AttentionStatusMessage");
@@ -245,18 +249,18 @@ namespace Cotton.Mobile.Controls
         {
             string message = Message ?? string.Empty;
             string actionSemanticDescription = ActionSemanticDescription ?? string.Empty;
-            string panelStyleResourceKey = string.IsNullOrWhiteSpace(PanelStyleResourceKey)
-                ? "M3AttentionStatusPanel"
-                : PanelStyleResourceKey;
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? "M3StatusGrid"
-                : GridStyleResourceKey;
-            string iconStyleResourceKey = string.IsNullOrWhiteSpace(IconStyleResourceKey)
-                ? "M3AttentionStatusIcon"
-                : IconStyleResourceKey;
-            string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
-                ? "M3FileChromeIconButton"
-                : ActionIconButtonStyleResourceKey;
+            string panelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                PanelStyleResourceKey,
+                DefaultPanelStyleResourceKey);
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string iconStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                IconStyleResourceKey,
+                DefaultIconStyleResourceKey);
+            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionIconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
             ICommand? actionCommand = ActionCommand;
 
             _panel.SetDynamicResource(StyleProperty, panelStyleResourceKey);

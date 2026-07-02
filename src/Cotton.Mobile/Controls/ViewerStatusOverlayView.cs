@@ -72,9 +72,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateStatusVisibility)
         {
-            string statusStyleResourceKey = string.IsNullOrWhiteSpace(StatusStyleResourceKey)
-                ? DefaultStatusStyleResourceKey
-                : StatusStyleResourceKey;
+            string statusStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StatusStyleResourceKey,
+                DefaultStatusStyleResourceKey);
 
             _status.SetDynamicResource(StyleProperty, statusStyleResourceKey);
             _status.Text = Text ?? string.Empty;

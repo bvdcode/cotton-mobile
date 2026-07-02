@@ -12,6 +12,11 @@ namespace Cotton.Mobile.Controls
         private const string ActionRowOpacityAnimationName = "M3EmptyStateActionRowOpacity";
         private const string BodyOpacityAnimationName = "M3EmptyStateBodyOpacity";
         private const string BusyIndicatorOpacityAnimationName = "M3EmptyStateBusyIndicatorOpacity";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3EmptyStateActionIconButton";
+        private const string DefaultActionRowStyleResourceKey = "M3PanelActionListItemGrid";
+        private const string DefaultCardStyleResourceKey = "M3EmptyStateCard";
+        private const string DefaultFilledActionButtonStyleResourceKey = "M3PanelActionFilledButton";
+        private const string DefaultIconFrameStyleResourceKey = "M3EmptyStateIconFrame";
         private const string FilledActionButtonOpacityAnimationName = "M3EmptyStateFilledActionOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
@@ -53,14 +58,14 @@ namespace Cotton.Mobile.Controls
             nameof(CardStyleResourceKey),
             typeof(string),
             typeof(EmptyStateView),
-            "M3EmptyStateCard",
+            DefaultCardStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IconFrameStyleResourceKeyProperty = BindableProperty.Create(
             nameof(IconFrameStyleResourceKey),
             typeof(string),
             typeof(EmptyStateView),
-            "M3EmptyStateIconFrame",
+            DefaultIconFrameStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionTextProperty = BindableProperty.Create(
@@ -115,21 +120,21 @@ namespace Cotton.Mobile.Controls
             nameof(ActionIconButtonStyleResourceKey),
             typeof(string),
             typeof(EmptyStateView),
-            "M3EmptyStateActionIconButton",
+            DefaultActionIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionRowStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ActionRowStyleResourceKey),
             typeof(string),
             typeof(EmptyStateView),
-            "M3PanelActionListItemGrid",
+            DefaultActionRowStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty FilledActionButtonStyleResourceKeyProperty = BindableProperty.Create(
             nameof(FilledActionButtonStyleResourceKey),
             typeof(string),
             typeof(EmptyStateView),
-            "M3PanelActionFilledButton",
+            DefaultFilledActionButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
@@ -348,21 +353,21 @@ namespace Cotton.Mobile.Controls
             string body = Body ?? string.Empty;
             string actionText = ActionText ?? string.Empty;
             string actionSemanticDescription = ActionSemanticDescription ?? string.Empty;
-            string cardStyleResourceKey = string.IsNullOrWhiteSpace(CardStyleResourceKey)
-                ? "M3EmptyStateCard"
-                : CardStyleResourceKey;
-            string iconFrameStyleResourceKey = string.IsNullOrWhiteSpace(IconFrameStyleResourceKey)
-                ? "M3EmptyStateIconFrame"
-                : IconFrameStyleResourceKey;
-            string actionRowStyleResourceKey = string.IsNullOrWhiteSpace(ActionRowStyleResourceKey)
-                ? "M3PanelActionListItemGrid"
-                : ActionRowStyleResourceKey;
-            string actionIconButtonStyleResourceKey = string.IsNullOrWhiteSpace(ActionIconButtonStyleResourceKey)
-                ? "M3EmptyStateActionIconButton"
-                : ActionIconButtonStyleResourceKey;
-            string filledActionButtonStyleResourceKey = string.IsNullOrWhiteSpace(FilledActionButtonStyleResourceKey)
-                ? "M3PanelActionFilledButton"
-                : FilledActionButtonStyleResourceKey;
+            string cardStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                CardStyleResourceKey,
+                DefaultCardStyleResourceKey);
+            string iconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                IconFrameStyleResourceKey,
+                DefaultIconFrameStyleResourceKey);
+            string actionRowStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionRowStyleResourceKey,
+                DefaultActionRowStyleResourceKey);
+            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ActionIconButtonStyleResourceKey,
+                DefaultActionIconButtonStyleResourceKey);
+            string filledActionButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                FilledActionButtonStyleResourceKey,
+                DefaultFilledActionButtonStyleResourceKey);
             bool isBodyVisible = IsBodyVisible && !string.IsNullOrWhiteSpace(body);
             bool isFilledActionVisible = IsActionVisible && IsFilledAction && !string.IsNullOrWhiteSpace(actionText);
             bool isActionTextVisible = IsActionVisible && !IsFilledAction && !string.IsNullOrWhiteSpace(actionText);

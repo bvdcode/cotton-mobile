@@ -52,9 +52,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string progressStyleResourceKey = string.IsNullOrWhiteSpace(ProgressStyleResourceKey)
-                ? DefaultProgressStyleResourceKey
-                : ProgressStyleResourceKey;
+            string progressStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ProgressStyleResourceKey,
+                DefaultProgressStyleResourceKey);
 
             _progressBar.SetDynamicResource(StyleProperty, progressStyleResourceKey);
             _progressBar.Progress = Progress;

@@ -7,13 +7,14 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultChipStyleResourceKey = "M3NeutralChip";
         private const string DefaultLabelStyleResourceKey = "M3ChipLabel";
+        private const string ChipOpacityAnimationName = "M3ChipOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
             typeof(ChipView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTextPropertyChanged);
 
         public static readonly BindableProperty ChipStyleResourceKeyProperty = BindableProperty.Create(
             nameof(ChipStyleResourceKey),
@@ -31,6 +32,7 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _chip;
         private readonly Label _label;
+        private bool _hasAppliedTextVisibility;
 
         public ChipView()
         {
@@ -43,7 +45,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _chip;
-            UpdateVisualState();
+            UpdateVisualState(animateTextVisibility: false);
         }
 
         public string Text
@@ -64,14 +66,21 @@ namespace Cotton.Mobile.Controls
             set => SetValue(LabelStyleResourceKeyProperty, value);
         }
 
+        private static void OnTextPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ChipView view = (ChipView)bindable;
+            view.UpdateVisualState(animateTextVisibility: true);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ChipView view = (ChipView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private void UpdateVisualState(bool animateTextVisibility)
         {
+            string text = Text ?? string.Empty;
             string chipStyleResourceKey = string.IsNullOrWhiteSpace(ChipStyleResourceKey)
                 ? DefaultChipStyleResourceKey
                 : ChipStyleResourceKey;
@@ -81,7 +90,58 @@ namespace Cotton.Mobile.Controls
 
             _chip.SetDynamicResource(StyleProperty, chipStyleResourceKey);
             _label.SetDynamicResource(StyleProperty, labelStyleResourceKey);
+            if (!ShouldDeferHiddenTextUpdate(text, animateTextVisibility))
+            {
+                _label.Text = text;
+            }
+
+            UpdateTextVisibility(text, animateTextVisibility);
+        }
+
+        private void UpdateTextVisibility(string text, bool animateTextVisibility)
+        {
+            bool isTextVisible = !string.IsNullOrWhiteSpace(text);
+            bool shouldAnimate = animateTextVisibility && _hasAppliedTextVisibility;
+            double targetOpacity = isTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isTextVisible)
+            {
+                _chip.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _chip,
+                _chip.Opacity,
+                targetOpacity,
+                duration,
+                ChipOpacityAnimationName,
+                shouldAnimate,
+                opacity => _chip.Opacity = opacity,
+                CompleteTextVisibility);
+            _hasAppliedTextVisibility = true;
+        }
+
+        private void CompleteTextVisibility()
+        {
+            if (!string.IsNullOrWhiteSpace(Text))
+            {
+                _chip.IsVisible = true;
+                return;
+            }
+
             _label.Text = Text ?? string.Empty;
+            _chip.IsVisible = false;
+        }
+
+        private bool ShouldDeferHiddenTextUpdate(string text, bool animateTextVisibility)
+        {
+            return string.IsNullOrWhiteSpace(text)
+                && animateTextVisibility
+                && _hasAppliedTextVisibility
+                && _chip.IsVisible;
         }
     }
 }

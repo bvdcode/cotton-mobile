@@ -1747,6 +1747,28 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_chip_collapses_empty_text_with_status_motion()
+        {
+            string chipView = LoadText(Path.Combine(ControlsDirectoryPath, "ChipView.cs"));
+            string interaction = LoadText(InteractionResourcePath);
+
+            Assert.Contains("ChipOpacityAnimationName = \"M3ChipOpacity\"", chipView, StringComparison.Ordinal);
+            Assert.Contains("propertyChanged: OnTextPropertyChanged", chipView, StringComparison.Ordinal);
+            Assert.Contains("UpdateVisualState(animateTextVisibility: true)", chipView, StringComparison.Ordinal);
+            Assert.Contains("UpdateVisualState(animateTextVisibility: false)", chipView, StringComparison.Ordinal);
+            Assert.Contains("UpdateTextVisibility(text, animateTextVisibility)", chipView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", chipView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", chipView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTextVisibility", chipView, StringComparison.Ordinal);
+            Assert.Contains("ShouldDeferHiddenTextUpdate", chipView, StringComparison.Ordinal);
+            Assert.Contains("!string.IsNullOrWhiteSpace(text)", chipView, StringComparison.Ordinal);
+            Assert.Contains("_chip.IsVisible = false", chipView, StringComparison.Ordinal);
+            Assert.Contains("_label.Text = text;", chipView, StringComparison.Ordinal);
+            Assert.Contains("_label.Text = Text ?? string.Empty;", chipView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Main_file_tile_metadata_uses_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

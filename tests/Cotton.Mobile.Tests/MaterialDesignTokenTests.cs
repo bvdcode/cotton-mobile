@@ -500,6 +500,28 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Action_sheet_items_animate_row_and_icon_frame_chrome()
+        {
+            string actionSheetItemView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"));
+
+            Assert.Contains("RowOpacityAnimationName = \"M3ActionSheetItemOpacity\"", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("IconFrameBackgroundAnimationName = \"M3ActionSheetIconFrameBackground\"", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("IconFrameBorderColorAnimationName = \"M3ActionSheetIconFrameBorderColor\"", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("bool shouldAnimateChrome = animateChrome && _hasAppliedChromeState", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("ResolveCurrentIconFrameBorderColor()", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", actionSheetItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(1);",
+                actionSheetItemView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain("_iconFrame.BackgroundColor = IconFrameBackgroundColor;", actionSheetItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_iconFrame.Stroke = new SolidColorBrush(IconFrameBorderColor);", actionSheetItemView, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_empty_states_use_reusable_material_control()
         {
             string[] screenPaths =

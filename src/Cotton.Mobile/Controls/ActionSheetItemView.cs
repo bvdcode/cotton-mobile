@@ -8,6 +8,9 @@ namespace Cotton.Mobile.Controls
     public class ActionSheetItemView : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3ActionSheetItemBackground";
+        private const string IconFrameBackgroundAnimationName = "M3ActionSheetIconFrameBackground";
+        private const string IconFrameBorderColorAnimationName = "M3ActionSheetIconFrameBorderColor";
+        private const string RowOpacityAnimationName = "M3ActionSheetItemOpacity";
         private const string SelectedIconOpacityAnimationName = "M3ActionSheetSelectedIconOpacity";
         private const string SelectedIconScaleAnimationName = "M3ActionSheetSelectedIconScale";
 
@@ -150,6 +153,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconView _leadingIcon;
         private readonly Label _label;
         private readonly IconView _selectedIcon;
+        private bool _hasAppliedChromeState;
         private bool _hasAppliedSelectedIconState;
 
         public ActionSheetItemView()
@@ -195,7 +199,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState(animateBackground: false, animateSelection: false);
+            UpdateVisualState(animateBackground: false, animateSelection: false, animateChrome: false);
         }
 
         public string Text
@@ -314,40 +318,49 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnPressedStateChanged()
         {
-            UpdateVisualState(animateBackground: true, animateSelection: false);
+            UpdateVisualState(animateBackground: true, animateSelection: false, animateChrome: true);
         }
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState(animateBackground: false, animateSelection: false);
+            UpdateVisualState(animateBackground: false, animateSelection: false, animateChrome: true);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionSheetItemView itemView = (ActionSheetItemView)bindable;
-            itemView.UpdateVisualState(animateBackground: false, animateSelection: false);
+            itemView.UpdateVisualState(animateBackground: false, animateSelection: false, animateChrome: true);
         }
 
         private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionSheetItemView itemView = (ActionSheetItemView)bindable;
-            itemView.UpdateVisualState(animateBackground: false, animateSelection: true);
+            itemView.UpdateVisualState(animateBackground: false, animateSelection: true, animateChrome: false);
         }
 
-        private void UpdateVisualState(bool animateBackground, bool animateSelection)
+        private void UpdateVisualState(bool animateBackground, bool animateSelection, bool animateChrome)
         {
             if (_container is null || _grid is null || _iconFrame is null || _leadingIcon is null || _label is null || _selectedIcon is null)
             {
                 return;
             }
 
-            Opacity = ResolvePressableOpacity(1);
+            int pressDuration = IsPressed ? PressInDuration : PressOutDuration;
+            bool shouldAnimateChrome = animateChrome && _hasAppliedChromeState;
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                ResolvePressableOpacity(1),
+                pressDuration,
+                RowOpacityAnimationName,
+                shouldAnimateChrome,
+                opacity => Opacity = opacity);
             MinimumHeightRequest = RowMinHeight;
 
             MaterialMotion.UpdateBackgroundColor(
                 _container,
                 IsPressed ? PressedRowBackgroundColor : RowBackgroundColor,
-                IsPressed ? PressInDuration : PressOutDuration,
+                pressDuration,
                 BackgroundAnimationName,
                 animateBackground);
             _container.Padding = RowPadding;
@@ -361,8 +374,20 @@ namespace Cotton.Mobile.Controls
             _iconFrame.WidthRequest = IconFrameSize;
             _iconFrame.HeightRequest = IconFrameSize;
             _iconFrame.StrokeThickness = IconFrameBorderWidth;
-            _iconFrame.BackgroundColor = IconFrameBackgroundColor;
-            _iconFrame.Stroke = new SolidColorBrush(IconFrameBorderColor);
+            MaterialMotion.UpdateBackgroundColor(
+                _iconFrame,
+                IconFrameBackgroundColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                IconFrameBackgroundAnimationName,
+                shouldAnimateChrome);
+            MaterialMotion.UpdateColor(
+                _iconFrame,
+                ResolveCurrentIconFrameBorderColor(),
+                IconFrameBorderColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                IconFrameBorderColorAnimationName,
+                shouldAnimateChrome,
+                color => _iconFrame.Stroke = new SolidColorBrush(color));
             _iconFrame.StrokeShape = new RoundRectangle
             {
                 CornerRadius = new CornerRadius(RowCornerRadius),
@@ -381,6 +406,7 @@ namespace Cotton.Mobile.Controls
             _selectedIcon.IconSize = IconSize;
             _selectedIcon.IsVisible = true;
             UpdateSelectedIconState(animateSelection);
+            _hasAppliedChromeState = true;
         }
 
         private void UpdateSelectedIconState(bool animateSelection)
@@ -411,6 +437,16 @@ namespace Cotton.Mobile.Controls
                 shouldAnimate,
                 scale => _selectedIcon.Scale = scale);
             _hasAppliedSelectedIconState = true;
+        }
+
+        private Color ResolveCurrentIconFrameBorderColor()
+        {
+            if (_iconFrame.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return IconFrameBorderColor;
         }
     }
 }

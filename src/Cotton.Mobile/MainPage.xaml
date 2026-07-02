@@ -112,34 +112,33 @@
 
                                 <HorizontalStackLayout Grid.Column="2"
                                                        Style="{StaticResource M3FileBrowserActionCluster}">
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Search}"
-                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
-                                                         Command="{Binding ToggleFileSearchCommand}"
-                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                         SemanticProperties.Description="{Binding Display.FileSearchButtonDescription}">
-                                        <controls:IconButton.Triggers>
-                                            <DataTrigger TargetType="controls:IconButton"
+                                    <controls:ActionClusterView ClusterStyleResourceKey="M3FileBrowserActionCluster"
+                                                                PrimaryActionIconData="{x:Static controls:IconPathData.Search}"
+                                                                PrimaryActionCommand="{Binding ToggleFileSearchCommand}"
+                                                                PrimaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
+                                                                PrimaryActionSemanticDescription="{Binding Display.FileSearchButtonDescription}"
+                                                                IsPrimaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                                SecondaryActionIconData="{x:Static controls:IconPathData.Sort}"
+                                                                SecondaryActionCommand="{Binding ShowFileSortActionsCommand}"
+                                                                SecondaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
+                                                                SecondaryActionSemanticDescription="Sort files"
+                                                                IsSecondaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                                IsSecondaryActionVisible="{Binding Display.IsFileSortButtonVisible}"
+                                                                TertiaryActionIconData="{x:Static controls:IconPathData.ViewTiles}"
+                                                                TertiaryActionCommand="{Binding ShowFileViewActionsCommand}"
+                                                                TertiaryActionIconButtonStyleResourceKey="M3FileBrowserTopBarIconButton"
+                                                                TertiaryActionSemanticDescription="Change file view"
+                                                                IsTertiaryActionEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                                IsTertiaryActionVisible="{Binding Display.IsFileViewButtonVisible}">
+                                        <controls:ActionClusterView.Triggers>
+                                            <DataTrigger TargetType="controls:ActionClusterView"
                                                          Binding="{Binding Display.IsFileSearchVisible}"
                                                          Value="True">
-                                                <Setter Property="IconData"
+                                                <Setter Property="PrimaryActionIconData"
                                                         Value="{x:Static controls:IconPathData.Close}" />
                                             </DataTrigger>
-                                        </controls:IconButton.Triggers>
-                                    </controls:IconButton>
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Sort}"
-                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
-                                                         Command="{Binding ShowFileSortActionsCommand}"
-                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                         IsVisible="{Binding Display.IsFileSortButtonVisible}"
-                                                         SemanticProperties.Description="Sort files" />
-
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.ViewTiles}"
-                                                         Style="{StaticResource M3FileBrowserTopBarIconButton}"
-                                                         Command="{Binding ShowFileViewActionsCommand}"
-                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                         IsVisible="{Binding Display.IsFileViewButtonVisible}"
-                                                         SemanticProperties.Description="Change file view" />
+                                        </controls:ActionClusterView.Triggers>
+                                    </controls:ActionClusterView>
 
                                     <controls:InitialsButton Text="{Binding Display.ProfileInitials}"
                                                              Command="{Binding AccountCommand}"

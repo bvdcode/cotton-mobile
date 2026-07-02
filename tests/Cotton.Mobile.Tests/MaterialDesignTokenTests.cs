@@ -381,6 +381,26 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Main_file_browser_header_actions_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+
+            Assert.Equal(1, CountOccurrences(mainPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\""));
+            Assert.Contains("PrimaryActionCommand=\"{Binding ToggleFileSearchCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"{Binding Display.FileSearchButtonDescription}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TargetType=\"controls:ActionClusterView\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Property=\"PrimaryActionIconData\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding ShowFileSortActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsSecondaryActionVisible=\"{Binding Display.IsFileSortButtonVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionCommand=\"{Binding ShowFileViewActionsCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsTertiaryActionVisible=\"{Binding Display.IsFileViewButtonVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:InitialsButton Text=\"{Binding Display.ProfileInitials}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Search}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Sort}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.ViewTiles}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_action_rows_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

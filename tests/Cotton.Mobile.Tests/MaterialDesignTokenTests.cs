@@ -45,6 +45,7 @@ namespace Cotton.Mobile.Tests
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
+        private const string SettingsActionHeaderCardViewPath = "src/Cotton.Mobile/Controls/SettingsActionHeaderCardView.cs";
         private const string SettingsSectionHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSectionHeaderView.cs";
         private const string SettingsInfoItemViewPath = "src/Cotton.Mobile/Controls/SettingsInfoItemView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
@@ -511,15 +512,21 @@ namespace Cotton.Mobile.Tests
         public void Capture_destination_current_folder_actions_use_reusable_material_control()
         {
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string settingsActionHeaderCardView = LoadText(SettingsActionHeaderCardViewPath);
 
-            Assert.Equal(1, CountOccurrences(destinationPickerPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
-            Assert.Contains("ClusterStyleResourceKey=\"M3InlineActionCluster\"", destinationPickerPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:SettingsSectionHeaderView.TrailingContent>", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsActionHeaderCardView LeadingIconData=\"{x:Static controls:IconPathData.Folder}\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("public class SettingsActionHeaderCardView", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("new SettingsSectionHeaderView", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("new ActionClusterView", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3InlineActionCluster\"", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding UpCommand}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Go to parent folder\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding ChooseCommand}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionSemanticDescription=\"Choose current folder\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsSectionHeaderView LeadingIconData", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsSectionHeaderView.TrailingContent>", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ColumnDefinitions=\"Auto,*,Auto,Auto\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", destinationPickerPage, StringComparison.Ordinal);
@@ -1344,6 +1351,7 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string contentCardView = LoadText(ContentCardViewPath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
+            string settingsActionHeaderCardView = LoadText(SettingsActionHeaderCardViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
 
@@ -1352,7 +1360,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_card.Content = BodyContent", contentCardView, StringComparison.Ordinal);
             Assert.Equal(1, CountOccurrences(recentFilesPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
-            Assert.Equal(2, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
+            Assert.Equal(1, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(diagnosticsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(mainPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(pdfViewerPage, "<controls:ContentCardView"));
@@ -1360,6 +1368,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
             Assert.DoesNotContain("<controls:ContentCardView", trashPage, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3AuthPanel\"", mainPage, StringComparison.Ordinal);

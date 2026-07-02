@@ -20,7 +20,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Primary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty TrackOffColorProperty = BindableProperty.Create(
             nameof(TrackOffColor),
@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkPrimaryPressed"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3AccentPressed"));
 
         public static readonly BindableProperty TrackOffPressedColorProperty = BindableProperty.Create(
             nameof(TrackOffPressedColor),
@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Primary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty TrackOffBorderColorProperty = BindableProperty.Create(
             nameof(TrackOffBorderColor),
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnPrimary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnAccent"));
 
         public static readonly BindableProperty ThumbOffColorProperty = BindableProperty.Create(
             nameof(ThumbOffColor),

@@ -4,9 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
     <Color x:Key="M3Accent">#C6FF00</Color>
+    <Color x:Key="M3AccentPressed">#B2E600</Color>
     <Color x:Key="M3OnAccent">#151900</Color>
-    <Color x:Key="M3Primary">#C6FF00</Color>
-    <Color x:Key="M3OnPrimary">#151900</Color>
     <Color x:Key="M3DocumentSurface">#FFFFFF</Color>
     <Color x:Key="M3Transparent">Transparent</Color>
     <Color x:Key="M3Shadow">#000000</Color>
@@ -68,6 +67,5 @@
     <Color x:Key="M3DarkScrim">#99000000</Color>
 
     <SolidColorBrush x:Key="M3AccentBrush" Color="{StaticResource M3Accent}" />
-    <SolidColorBrush x:Key="M3PrimaryBrush" Color="{StaticResource M3Primary}" />
     <SolidColorBrush x:Key="M3ShadowBrush" Color="{StaticResource M3Shadow}" />
 </ResourceDictionary>

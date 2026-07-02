@@ -20,7 +20,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnPrimary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3OnAccent"));
 
         public static readonly BindableProperty DisabledTextColorProperty = BindableProperty.Create(
             nameof(DisabledTextColor),
@@ -34,14 +34,14 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Primary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Primary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3AccentPressed"));
 
         public static readonly BindableProperty DisabledButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(DisabledButtonBackgroundColor),
@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Primary"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Accent"));
 
         public static readonly BindableProperty DisabledBorderColorProperty = BindableProperty.Create(
             nameof(DisabledBorderColor),

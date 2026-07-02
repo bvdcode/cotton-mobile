@@ -449,10 +449,9 @@ require_signed_out_state() {
   local xml_file="$1"
   local state_name="$2"
 
-  require_xml_any_text "$xml_file" "$state_name did not show the signed-out screen." \
-    "Sign in to your Cotton Cloud" \
-    "Server URL"
+  require_xml_text "$xml_file" "Cotton Cloud" "$state_name did not show the signed-out screen."
   require_xml_text "$xml_file" "Connect" "$state_name did not expose Connect."
+  require_xml_without_text "$xml_file" "Server URL" "$state_name exposed the legacy server URL label."
 }
 
 build_token_smoke_args() {

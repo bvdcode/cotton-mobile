@@ -964,16 +964,30 @@ namespace Cotton.Mobile.Tests
             string activityFeedPage = LoadText(ActivityFeedPagePath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+            string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string stackedItemsView = LoadText(StackedItemsViewPath);
+            string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string transfersPage = LoadText(TransfersPagePath);
 
-            string combinedPages = activityFeedPage + captureDestinationPickerPage + captureInboxPage + transfersPage;
+            string combinedPages = activityFeedPage
+                + captureDestinationPickerPage
+                + captureInboxPage
+                + notificationSettingsPage
+                + securitySettingsPage
+                + syncSettingsPage
+                + transfersPage;
 
-            Assert.Equal(4, CountOccurrences(combinedPages, "<controls:StackedItemsView IsVisible=\"{Binding IsListVisible}\""));
+            Assert.Equal(8, CountOccurrences(combinedPages, "<controls:StackedItemsView "));
+            Assert.Equal(4, CountOccurrences(combinedPages, "IsVisible=\"{Binding IsListVisible}\""));
             Assert.Contains("ItemsSource=\"{Binding Items}\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("ItemsSource=\"{Binding Items}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("ItemsSource=\"{Binding Items}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("ItemsSource=\"{Binding Folders}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding Roots}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding PermissionLedgerItems}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding AccountSessions}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsSource=\"{Binding RemotePushPreferences}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedItemsView.ItemTemplate>", combinedPages, StringComparison.Ordinal);
             Assert.Contains("public class StackedItemsView", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("using System.Collections;", stackedItemsView, StringComparison.Ordinal);
@@ -985,7 +999,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("BindableLayout.SetItemsSource(_stack, ItemsSource)", stackedItemsView, StringComparison.Ordinal);
             Assert.Contains("BindableLayout.SetItemTemplate(_stack, ItemTemplate)", stackedItemsView, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", combinedPages, StringComparison.Ordinal);
-            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\"\n                                 IsVisible=\"{Binding IsListVisible}\"", combinedPages, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\"", combinedPages, StringComparison.Ordinal);
         }
 
         [Fact]

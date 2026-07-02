@@ -58,9 +58,8 @@
                                                     StatusText="{Binding PermissionLedgerStatusText}"
                                                     DetailText="{Binding PermissionLedgerDetailText}" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                     BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
-                    <BindableLayout.ItemTemplate>
+                <controls:StackedItemsView ItemsSource="{Binding PermissionLedgerItems}">
+                    <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
                             <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Check}"
                                                            AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
@@ -71,8 +70,8 @@
                                                            PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
                                                            TrailingText="{Binding StatusText}" />
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                    </controls:StackedItemsView.ItemTemplate>
+                </controls:StackedItemsView>
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
@@ -100,10 +99,9 @@
                                                     PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
                                                     IsTapEnabled="False" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                     IsVisible="{Binding IsAccountSessionsListVisible}"
-                                     BindableLayout.ItemsSource="{Binding AccountSessions}">
-                    <BindableLayout.ItemTemplate>
+                <controls:StackedItemsView IsVisible="{Binding IsAccountSessionsListVisible}"
+                                           ItemsSource="{Binding AccountSessions}">
+                    <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonAccountSessionListItem">
                             <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Device}"
                                                            LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
@@ -113,8 +111,8 @@
                                                            TertiaryDetailText="{Binding DurationText}"
                                                            TrailingText="{Binding BadgeText}" />
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                    </controls:StackedItemsView.ItemTemplate>
+                </controls:StackedItemsView>
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>

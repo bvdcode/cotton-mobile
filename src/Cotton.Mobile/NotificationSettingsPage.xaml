@@ -69,10 +69,9 @@
                                           ActionCommand="{Binding LoadCommand}"
                                           ActionSemanticDescription="Retry server push" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                     IsVisible="{Binding HasRemotePushPreferences}"
-                                     BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
-                    <BindableLayout.ItemTemplate>
+                <controls:StackedItemsView IsVisible="{Binding HasRemotePushPreferences}"
+                                           ItemsSource="{Binding RemotePushPreferences}">
+                    <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
                             <controls:SettingsToggleItemView Text="{Binding Title}"
                                                              SupportingText="{Binding DetailText}"
@@ -81,8 +80,8 @@
                                                              IsEnabled="{Binding CanToggle}"
                                                              IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
                         </DataTemplate>
-                    </BindableLayout.ItemTemplate>
-                </VerticalStackLayout>
+                    </controls:StackedItemsView.ItemTemplate>
+                </controls:StackedItemsView>
             </controls:SettingsCardView>
         </controls:ScreenScrollBodyView>
     </controls:ScreenShellView>

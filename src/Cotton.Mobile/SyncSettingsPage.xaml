@@ -38,9 +38,8 @@
                                      ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                      ActionSemanticDescription="Choose sync folder" />
 
-            <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                 BindableLayout.ItemsSource="{Binding Roots}">
-                <BindableLayout.ItemTemplate>
+            <controls:StackedItemsView ItemsSource="{Binding Roots}">
+                <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <controls:ContentCardView>
                             <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}">
@@ -83,8 +82,8 @@
                             </VerticalStackLayout>
                         </controls:ContentCardView>
                     </DataTemplate>
-                </BindableLayout.ItemTemplate>
-            </VerticalStackLayout>
+                </controls:StackedItemsView.ItemTemplate>
+            </controls:StackedItemsView>
         </controls:ScreenScrollBodyView>
     </controls:ScreenShellView>
 </ContentPage>

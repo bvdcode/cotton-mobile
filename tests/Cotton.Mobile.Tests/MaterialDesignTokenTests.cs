@@ -666,6 +666,11 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
             string fileBrowserTopBarView = LoadText(FileBrowserTopBarViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> actionsContainerSetters =
+                GetStyleSetters(styles, "M3FileBrowserActionsContainer");
+            IReadOnlyDictionary<string, string> actionClusterSetters =
+                GetStyleSetters(styles, "M3FileBrowserActionCluster");
 
             Assert.Equal(1, CountOccurrences(mainPage, "<controls:FileBrowserTopBarView"));
             Assert.Contains("Title=\"{Binding Display.FilesTitle}\"", mainPage, StringComparison.Ordinal);
@@ -680,10 +685,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ProfileInitials=\"{Binding Display.ProfileInitials}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class FileBrowserTopBarView", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileBrowserTopBar\"", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionsContainerStyleResourceKey = \"M3FileBrowserActionsContainer\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3FileBrowserActionCluster\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("new ActionClusterView", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("new InitialsButton", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("IsSearchActive ? IconPathData.Close : IconPathData.Search", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionsContainer.SetDynamicResource(StyleProperty, actionsContainerStyleResourceKey)", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
+            Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\"", mainPage, StringComparison.Ordinal);

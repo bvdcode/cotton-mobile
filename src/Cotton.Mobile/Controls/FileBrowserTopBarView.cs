@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Controls
 {
     public class FileBrowserTopBarView : ContentView
     {
+        private const string DefaultActionsContainerStyleResourceKey = "M3FileBrowserActionsContainer";
         private const string DefaultActionClusterStyleResourceKey = "M3FileBrowserActionCluster";
         private const string DefaultActionIconButtonStyleResourceKey = "M3FileBrowserTopBarIconButton";
         private const string DefaultDetailTextStyleResourceKey = "M3CardMetaLine";
@@ -182,6 +183,13 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(FileBrowserTopBarView),
             DefaultActionClusterStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ActionsContainerStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ActionsContainerStyleResourceKey),
+            typeof(string),
+            typeof(FileBrowserTopBarView),
+            DefaultActionsContainerStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
@@ -403,6 +411,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ActionClusterStyleResourceKeyProperty, value);
         }
 
+        public string ActionsContainerStyleResourceKey
+        {
+            get => (string)GetValue(ActionsContainerStyleResourceKeyProperty);
+            set => SetValue(ActionsContainerStyleResourceKeyProperty, value);
+        }
+
         public string ActionIconButtonStyleResourceKey
         {
             get => (string)GetValue(ActionIconButtonStyleResourceKeyProperty);
@@ -426,6 +440,8 @@ namespace Cotton.Mobile.Controls
                 ResolveStyleResourceKey(DetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string actionClusterStyleResourceKey =
                 ResolveStyleResourceKey(ActionClusterStyleResourceKey, DefaultActionClusterStyleResourceKey);
+            string actionsContainerStyleResourceKey =
+                ResolveStyleResourceKey(ActionsContainerStyleResourceKey, DefaultActionsContainerStyleResourceKey);
             string actionIconButtonStyleResourceKey =
                 ResolveStyleResourceKey(ActionIconButtonStyleResourceKey, DefaultActionIconButtonStyleResourceKey);
 
@@ -434,7 +450,7 @@ namespace Cotton.Mobile.Controls
             _titleText.SetDynamicResource(StyleProperty, titleTextStyleResourceKey);
             _pathText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
             _statusText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
-            _actionsContainer.SetDynamicResource(StyleProperty, actionClusterStyleResourceKey);
+            _actionsContainer.SetDynamicResource(StyleProperty, actionsContainerStyleResourceKey);
             _upButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
 
             _upButton.Command = NavigateUpCommand;

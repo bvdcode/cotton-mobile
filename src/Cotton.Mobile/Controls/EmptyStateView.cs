@@ -2,7 +2,6 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
-using Cotton.Mobile.Behaviors;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -131,8 +130,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconButton _actionIconOnlyButton;
         private readonly Label _actionLabel;
         private readonly Grid _actionRow;
-        private readonly LongPressBehavior _actionTapBehavior;
-        private readonly Grid _actionTouchSurface;
+        private readonly TouchSurfaceView _actionTouchSurface;
         private readonly Border _card;
         private readonly FilledButton _filledActionButton;
         private readonly IconView _icon;
@@ -162,11 +160,7 @@ namespace Cotton.Mobile.Controls
             _actionLabel = new Label();
             _actionLabel.SetDynamicResource(StyleProperty, "M3ActionListItemLabel");
 
-            _actionTapBehavior = new LongPressBehavior();
-
-            _actionTouchSurface = new Grid();
-            _actionTouchSurface.SetDynamicResource(StyleProperty, "M3ListItemTouchSurface");
-            _actionTouchSurface.Behaviors.Add(_actionTapBehavior);
+            _actionTouchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_actionTouchSurface, 2);
 
             _actionButton = new IconButton();
@@ -382,7 +376,8 @@ namespace Cotton.Mobile.Controls
             _filledActionButton.Command = actionCommand;
             _filledActionButton.IsEnabled = IsActionEnabled;
             SemanticProperties.SetDescription(_filledActionButton, actionSemanticDescription);
-            _actionTapBehavior.TapCommand = actionCommand;
+            _actionTouchSurface.TapCommand = IsActionEnabled ? actionCommand : null;
+            _actionTouchSurface.IsVisible = isActionTextVisible && IsActionEnabled && actionCommand is not null;
             _actionRow.IsEnabled = IsActionEnabled;
 
             _actionRow.IsVisible = isActionTextVisible;

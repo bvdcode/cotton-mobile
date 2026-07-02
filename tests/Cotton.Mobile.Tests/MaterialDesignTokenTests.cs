@@ -438,6 +438,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("private readonly TouchSurfaceView _actionTouchSurface;", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("_actionTouchSurface = new TouchSurfaceView();", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("_actionTouchSurface.TapCommand = IsActionEnabled ? actionCommand : null;", emptyStateView, StringComparison.Ordinal);
+            Assert.DoesNotContain("LongPressBehavior", emptyStateView, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3ListItemTouchSurface", emptyStateView, StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}",
                 emptyIconFrameSetters["BackgroundColor"]);

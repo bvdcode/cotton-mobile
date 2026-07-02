@@ -2090,6 +2090,7 @@ namespace Cotton.Mobile.Tests
         {
             string storagePage = LoadText(StoragePagePath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(4, CountOccurrences(storagePage, "<controls:SettingsSectionHeaderView"));
             Assert.Contains("Title=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
@@ -2108,11 +2109,27 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultLeadingIconFrameStyleResourceKey = \"M3CardUtilityThumbnailFrame\"", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains(
+                "ProgressOpacityAnimationName = \"M3SettingsSectionProgressOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnProgressVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains(
+                "MaterialResources.Get<int>(\"M3MotionStatusDuration\")",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains("CompleteProgressVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("Grid.RowSpan=\"2\"\n                                        IconData=\"{x:Static controls:IconPathData.Cloud}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_progress.IsVisible = IsProgressVisible", settingsSectionHeaderView, StringComparison.Ordinal);
         }
 
         [Fact]

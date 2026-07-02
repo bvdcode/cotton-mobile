@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTrailingChipStyleResourceKey = "M3NeutralChip";
         private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
         private const string PrimaryDetailTextOpacityAnimationName = "M3SettingsSectionPrimaryDetailOpacity";
+        private const string ProgressOpacityAnimationName = "M3SettingsSectionProgressOpacity";
         private const string SecondaryDetailTextOpacityAnimationName = "M3SettingsSectionSecondaryDetailOpacity";
         private const string TertiaryDetailTextOpacityAnimationName = "M3SettingsSectionTertiaryDetailOpacity";
         private const string QuaternaryDetailTextOpacityAnimationName = "M3SettingsSectionQuaternaryDetailOpacity";
@@ -70,7 +71,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(SettingsSectionHeaderView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnProgressVisibilityPropertyChanged);
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
@@ -201,6 +202,7 @@ namespace Cotton.Mobile.Controls
         private readonly ChipView _trailingChip;
         private readonly ContentView _trailingContentHost;
         private bool _hasAppliedPrimaryDetailTextVisibility;
+        private bool _hasAppliedProgressVisibility;
         private bool _hasAppliedSecondaryDetailTextVisibility;
         private bool _hasAppliedTertiaryDetailTextVisibility;
         private bool _hasAppliedQuaternaryDetailTextVisibility;
@@ -266,6 +268,7 @@ namespace Cotton.Mobile.Controls
             Content = _grid;
             UpdateVisualState(
                 animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: false);
@@ -420,6 +423,7 @@ namespace Cotton.Mobile.Controls
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
             view.UpdateVisualState(
                 animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: false);
@@ -433,6 +437,21 @@ namespace Cotton.Mobile.Controls
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
             view.UpdateVisualState(
                 animatePrimaryDetailTextVisibility: true,
+                animateProgressVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false);
+        }
+
+        private static void OnProgressVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: true,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: false);
@@ -446,6 +465,7 @@ namespace Cotton.Mobile.Controls
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
             view.UpdateVisualState(
                 animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: true,
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: false);
@@ -459,6 +479,7 @@ namespace Cotton.Mobile.Controls
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
             view.UpdateVisualState(
                 animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: true,
                 animateQuaternaryDetailTextVisibility: false);
@@ -472,6 +493,7 @@ namespace Cotton.Mobile.Controls
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
             view.UpdateVisualState(
                 animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: true);
@@ -479,6 +501,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(
             bool animatePrimaryDetailTextVisibility,
+            bool animateProgressVisibility,
             bool animateSecondaryDetailTextVisibility,
             bool animateTertiaryDetailTextVisibility,
             bool animateQuaternaryDetailTextVisibility)
@@ -558,7 +581,7 @@ namespace Cotton.Mobile.Controls
                 QuaternaryDetailTextOpacityAnimationName,
                 CompleteQuaternaryDetailTextVisibility);
             _progress.Progress = Progress;
-            _progress.IsVisible = IsProgressVisible;
+            UpdateProgressVisibility(animateProgressVisibility);
             _touchSurface.TapCommand = IsTapEnabled ? tapCommand : null;
             _touchSurface.TapCommandParameter = TapCommandParameter;
             _touchSurface.IsVisible = IsTapEnabled && tapCommand is not null;
@@ -618,6 +641,42 @@ namespace Cotton.Mobile.Controls
                 opacity => detailTextLabel.Opacity = opacity,
                 completeVisibility);
             hasAppliedDetailTextVisibility = true;
+        }
+
+        private void UpdateProgressVisibility(bool animateProgressVisibility)
+        {
+            bool shouldAnimate = animateProgressVisibility && _hasAppliedProgressVisibility;
+            double targetOpacity = IsProgressVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (IsProgressVisible)
+            {
+                _progress.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _progress,
+                _progress.Opacity,
+                targetOpacity,
+                duration,
+                ProgressOpacityAnimationName,
+                shouldAnimate,
+                opacity => _progress.Opacity = opacity,
+                CompleteProgressVisibility);
+            _hasAppliedProgressVisibility = true;
+        }
+
+        private void CompleteProgressVisibility()
+        {
+            if (IsProgressVisible)
+            {
+                _progress.IsVisible = true;
+                return;
+            }
+
+            _progress.IsVisible = false;
         }
 
         private void CompletePrimaryDetailTextVisibility()

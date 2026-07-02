@@ -56,6 +56,7 @@ namespace Cotton.Mobile.Tests
         private const string MainPageRootViewPath = "src/Cotton.Mobile/Controls/MainPageRootView.cs";
         private const string FileListSkeletonViewPath = "src/Cotton.Mobile/Controls/FileListSkeletonView.cs";
         private const string MetadataListSkeletonViewPath = "src/Cotton.Mobile/Controls/MetadataListSkeletonView.cs";
+        private const string FileEntryTextViewPath = "src/Cotton.Mobile/Controls/FileEntryTextView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileListEntryRowViewPath = "src/Cotton.Mobile/Controls/FileListEntryRowView.cs";
         private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
@@ -1602,6 +1603,8 @@ namespace Cotton.Mobile.Tests
             string metadataCardBodyView = LoadText(MetadataCardBodyViewPath);
             string metadataCardView = LoadText(MetadataCardViewPath);
             string metadataCardHeaderView = LoadText(MetadataCardHeaderViewPath);
+            string fileEntryTextView = LoadText(FileEntryTextViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string styles = LoadText(StylesResourcePath);
 
             Assert.Contains("<controls:MetadataCardView LeadingIconData=\"{x:Static controls:IconPathData.Activity}\"", activityFeedPage, StringComparison.Ordinal);
@@ -1637,6 +1640,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ChipView", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DetailOpacityAnimationName = \"M3FileEntryDetailOpacity\"", fileEntryTextView, StringComparison.Ordinal);
+            Assert.Contains("OnDetailVisiblePropertyChanged", fileEntryTextView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileEntryTextView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileEntryTextView, StringComparison.Ordinal);
+            Assert.Contains("CompleteDetailVisibility", fileEntryTextView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_detailLabel.IsVisible = IsDetailVisible", fileEntryTextView, StringComparison.Ordinal);
             Assert.Contains("x:Key=\"M3MetadataCardBodyStack\"", styles, StringComparison.Ordinal);
             Assert.Contains("public class MetadataCardBodyView", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3MetadataCardBodyStack\"", metadataCardBodyView, StringComparison.Ordinal);

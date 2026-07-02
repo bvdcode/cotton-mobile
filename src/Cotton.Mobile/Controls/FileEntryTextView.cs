@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultDetailStyleResourceKey = "M3CardSupportingLine";
         private const string DefaultStackStyleResourceKey = "M3FileListTextStack";
         private const string DefaultTitleStyleResourceKey = "M3CardTitle";
+        private const string DetailOpacityAnimationName = "M3FileEntryDetailOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -28,7 +29,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileEntryTextView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnDetailVisiblePropertyChanged);
 
         public static readonly BindableProperty StackStyleResourceKeyProperty = BindableProperty.Create(
             nameof(StackStyleResourceKey),
@@ -54,6 +55,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _detailLabel;
         private readonly VerticalStackLayout _stack;
         private readonly Label _titleLabel;
+        private bool _hasAppliedDetailVisibility;
 
         public FileEntryTextView()
         {
@@ -71,7 +73,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _stack;
-            UpdateVisualState();
+            UpdateVisualState(animateDetailVisibility: false);
         }
 
         public string Title
@@ -113,10 +115,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileEntryTextView view = (FileEntryTextView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateDetailVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnDetailVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileEntryTextView view = (FileEntryTextView)bindable;
+            view.UpdateVisualState(animateDetailVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateDetailVisibility)
         {
             string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
                 ? DefaultStackStyleResourceKey
@@ -134,7 +142,44 @@ namespace Cotton.Mobile.Controls
 
             _titleLabel.Text = Title ?? string.Empty;
             _detailLabel.Text = Detail ?? string.Empty;
-            _detailLabel.IsVisible = IsDetailVisible;
+            UpdateDetailVisibility(animateDetailVisibility);
+        }
+
+        private void UpdateDetailVisibility(bool animateDetailVisibility)
+        {
+            bool isDetailVisible = IsDetailVisible;
+            bool shouldAnimate = animateDetailVisibility && _hasAppliedDetailVisibility;
+            double targetOpacity = isDetailVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailVisible)
+            {
+                _detailLabel.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _detailLabel,
+                _detailLabel.Opacity,
+                targetOpacity,
+                duration,
+                DetailOpacityAnimationName,
+                shouldAnimate,
+                opacity => _detailLabel.Opacity = opacity,
+                CompleteDetailVisibility);
+            _hasAppliedDetailVisibility = true;
+        }
+
+        private void CompleteDetailVisibility()
+        {
+            if (IsDetailVisible)
+            {
+                _detailLabel.IsVisible = true;
+                return;
+            }
+
+            _detailLabel.IsVisible = false;
         }
     }
 }

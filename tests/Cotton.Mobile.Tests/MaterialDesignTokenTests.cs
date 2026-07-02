@@ -349,7 +349,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SemanticDescription=\"Load more activity\"", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", activityFeedPage, StringComparison.Ordinal);
 
-            Assert.Contains("<controls:ActionListItemView Grid.Row=\"2\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ActionListItemView Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding MediaAccessActionCommand}\"", backupSetupPage, StringComparison.Ordinal);
 
@@ -431,13 +431,15 @@ namespace Cotton.Mobile.Tests
         {
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
 
-            Assert.Equal(1, CountOccurrences(destinationPickerPage, "<controls:ActionClusterView Grid.Column=\"2\""));
+            Assert.Equal(1, CountOccurrences(destinationPickerPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
             Assert.Contains("ClusterStyleResourceKey=\"M3InlineActionCluster\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsSectionHeaderView.TrailingContent>", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding UpCommand}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Go to parent folder\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding ChooseCommand}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionSemanticDescription=\"Choose current folder\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ColumnDefinitions=\"Auto,*,Auto,Auto\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"3\"", destinationPickerPage, StringComparison.Ordinal);
@@ -449,15 +451,23 @@ namespace Cotton.Mobile.Tests
         public void Backup_setup_card_actions_use_reusable_material_control()
         {
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
 
-            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:ActionClusterView Grid.Column=\"2\""));
+            Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView LeadingIconData"));
             Assert.Equal(2, CountOccurrences(backupSetupPage, "ClusterStyleResourceKey=\"M3InlineActionCluster\""));
+            Assert.Equal(3, CountOccurrences(backupSetupPage, "<controls:SettingsSectionHeaderView.TrailingContent>\n"));
+            Assert.Contains("TrailingContentProperty", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("QuaternaryDetailTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("_trailingContentHost.Content = TrailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:TouchSurfaceView", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto,Auto\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
@@ -598,6 +608,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
 
             Assert.Equal(2, CountOccurrences(mainPage, "<controls:TouchSurfaceView"));
             Assert.Contains("Command=\"{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}\"", mainPage, StringComparison.Ordinal);
@@ -607,7 +618,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(2, CountOccurrences(trashPage, "<controls:TouchSurfaceView"));
             Assert.Contains("TapCommand=\"{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}\"", trashPage, StringComparison.Ordinal);
 
-            Assert.Equal(2, CountOccurrences(backupSetupPage, "<controls:TouchSurfaceView"));
+            Assert.DoesNotContain("<controls:TouchSurfaceView", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("new TouchSurfaceView", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("TapCommandProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
 
@@ -615,7 +628,6 @@ namespace Cotton.Mobile.Tests
             [
                 mainPage,
                 trashPage,
-                backupSetupPage,
             ];
 
             foreach (string page in pages)

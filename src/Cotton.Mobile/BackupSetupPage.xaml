@@ -25,107 +25,58 @@
                                        IsVisible="{Binding IsStatusVisible}" />
 
             <controls:SettingsCardView>
-                <Grid RowDefinitions="Auto,Auto"
-                      ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame Grid.RowSpan="2"
-                                        IconData="{x:Static controls:IconPathData.Folder}"
-                                        Style="{StaticResource M3CardFolderThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="Destination"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding DestinationText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Grid.Row="1"
-                                         Grid.Column="1"
-                                         Grid.ColumnSpan="2"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="{Binding PolicySummaryText}"
-                               Style="{StaticResource M3CardSupportingLine}" />
-
-                        <Label Text="{Binding DestinationStorageEstimateTitle}"
-                               Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                        <Label Text="{Binding DestinationStorageEstimateText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <controls:TouchSurfaceView Grid.RowSpan="2"
-                                               Grid.ColumnSpan="3"
-                                               TapCommand="{Binding ChooseDestinationCommand}" />
-
-                    <controls:ActionClusterView Grid.Column="2"
-                                                ClusterStyleResourceKey="M3InlineActionCluster"
-                                                PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
-                                                PrimaryActionCommand="{Binding ChooseDestinationCommand}"
-                                                PrimaryActionSemanticDescription="Choose backup destination" />
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardFolderThumbnailFrame"
+                                                    Title="Destination"
+                                                    PrimaryDetailText="{Binding DestinationText}"
+                                                    SecondaryDetailText="{Binding PolicySummaryText}"
+                                                    SecondaryDetailTextStyleResourceKey="M3CardSupportingLine"
+                                                    TertiaryDetailText="{Binding DestinationStorageEstimateTitle}"
+                                                    TertiaryDetailTextStyleResourceKey="M3CardSupportingStrongLine"
+                                                    QuaternaryDetailText="{Binding DestinationStorageEstimateText}"
+                                                    TapCommand="{Binding ChooseDestinationCommand}">
+                    <controls:SettingsSectionHeaderView.TrailingContent>
+                        <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
+                                                    PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
+                                                    PrimaryActionCommand="{Binding ChooseDestinationCommand}"
+                                                    PrimaryActionSemanticDescription="Choose backup destination" />
+                    </controls:SettingsSectionHeaderView.TrailingContent>
+                </controls:SettingsSectionHeaderView>
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <Grid RowDefinitions="Auto,Auto,Auto"
-                      ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame Grid.RowSpan="2"
-                                        IconData="{x:Static controls:IconPathData.Image}"
-                                        Style="{StaticResource M3CardCaptureThumbnailFrame}" />
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Image}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
+                                                    Title="{Binding MediaAccessTitle}"
+                                                    PrimaryDetailText="{Binding MediaAccessDetailText}">
+                    <controls:SettingsSectionHeaderView.TrailingContent>
+                        <controls:ChipView Text="{Binding MediaAccessStatusText}" />
+                    </controls:SettingsSectionHeaderView.TrailingContent>
+                </controls:SettingsSectionHeaderView>
 
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="{Binding MediaAccessTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding MediaAccessDetailText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <controls:ChipView Grid.Column="2"
-                                       Text="{Binding MediaAccessStatusText}" />
-
-                    <controls:ActionListItemView Grid.Row="2"
-                                                 Grid.Column="1"
-                                                 Grid.ColumnSpan="2"
-                                                 Text="{Binding MediaAccessActionText}"
-                                                 ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
-                                                 Command="{Binding MediaAccessActionCommand}"
-                                                 IsVisible="{Binding IsMediaAccessActionVisible}"
-                                                 ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
-                                                 SemanticDescription="{Binding MediaAccessActionText}" />
-                </Grid>
+                <controls:ActionListItemView Text="{Binding MediaAccessActionText}"
+                                             ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                             Command="{Binding MediaAccessActionCommand}"
+                                             IsVisible="{Binding IsMediaAccessActionVisible}"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             SemanticDescription="{Binding MediaAccessActionText}" />
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
-                                        Style="{StaticResource M3CardActivityThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="{Binding HealthTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding HealthCountsText}"
-                               Style="{StaticResource M3CardSupportingStrongBlock}" />
-
-                        <Label Text="{Binding HealthStatusText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <controls:TouchSurfaceView Grid.ColumnSpan="3"
-                                               TapCommand="{Binding QueueNowCommand}" />
-
-                    <controls:ActionClusterView Grid.Column="2"
-                                                ClusterStyleResourceKey="M3InlineActionCluster"
-                                                PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
-                                                PrimaryActionCommand="{Binding QueueNowCommand}"
-                                                PrimaryActionSemanticDescription="Queue camera backup now" />
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
+                                                    Title="{Binding HealthTitle}"
+                                                    PrimaryDetailText="{Binding HealthCountsText}"
+                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingStrongBlock"
+                                                    SecondaryDetailText="{Binding HealthStatusText}"
+                                                    TapCommand="{Binding QueueNowCommand}">
+                    <controls:SettingsSectionHeaderView.TrailingContent>
+                        <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
+                                                    PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                    PrimaryActionCommand="{Binding QueueNowCommand}"
+                                                    PrimaryActionSemanticDescription="Queue camera backup now" />
+                    </controls:SettingsSectionHeaderView.TrailingContent>
+                </controls:SettingsSectionHeaderView>
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>

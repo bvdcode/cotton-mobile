@@ -26,30 +26,22 @@
                                        IsVisible="{Binding IsStatusVisible}" />
 
             <controls:ContentCardView>
-                <Grid ColumnDefinitions="Auto,*,Auto"
-                      Style="{StaticResource M3SettingsListItemGrid}">
-                    <controls:IconFrame IconData="{x:Static controls:IconPathData.Folder}"
-                                        Style="{StaticResource M3FolderThumbnailFrame}" />
-
-                    <VerticalStackLayout Grid.Column="1"
-                                         Style="{StaticResource M3CardTextStack}">
-                        <Label Text="Current folder"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Text="{Binding SummaryText}"
-                               Style="{StaticResource M3CardSupportingLine}" />
-                    </VerticalStackLayout>
-
-                    <controls:ActionClusterView Grid.Column="2"
-                                                ClusterStyleResourceKey="M3InlineActionCluster"
-                                                PrimaryActionIconData="{x:Static controls:IconPathData.ArrowUp}"
-                                                PrimaryActionCommand="{Binding UpCommand}"
-                                                PrimaryActionSemanticDescription="Go to parent folder"
-                                                SecondaryActionIconData="{x:Static controls:IconPathData.Check}"
-                                                SecondaryActionCommand="{Binding ChooseCommand}"
-                                                SecondaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
-                                                SecondaryActionSemanticDescription="Choose current folder" />
-                </Grid>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                    LeadingIconFrameStyleResourceKey="M3FolderThumbnailFrame"
+                                                    Title="Current folder"
+                                                    PrimaryDetailText="{Binding SummaryText}"
+                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingLine">
+                    <controls:SettingsSectionHeaderView.TrailingContent>
+                        <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
+                                                    PrimaryActionIconData="{x:Static controls:IconPathData.ArrowUp}"
+                                                    PrimaryActionCommand="{Binding UpCommand}"
+                                                    PrimaryActionSemanticDescription="Go to parent folder"
+                                                    SecondaryActionIconData="{x:Static controls:IconPathData.Check}"
+                                                    SecondaryActionCommand="{Binding ChooseCommand}"
+                                                    SecondaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                                    SecondaryActionSemanticDescription="Choose current folder" />
+                    </controls:SettingsSectionHeaderView.TrailingContent>
+                </controls:SettingsSectionHeaderView>
             </controls:ContentCardView>
 
             <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"

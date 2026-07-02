@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -43,6 +44,13 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty QuaternaryDetailTextProperty = BindableProperty.Create(
+            nameof(QuaternaryDetailText),
+            typeof(string),
+            typeof(SettingsSectionHeaderView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
             nameof(Progress),
             typeof(double),
@@ -62,6 +70,31 @@ namespace Cotton.Mobile.Controls
             typeof(Geometry),
             typeof(SettingsSectionHeaderView),
             default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TrailingContentProperty = BindableProperty.Create(
+            nameof(TrailingContent),
+            typeof(View),
+            typeof(SettingsSectionHeaderView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TapCommandProperty = BindableProperty.Create(
+            nameof(TapCommand),
+            typeof(ICommand),
+            typeof(SettingsSectionHeaderView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TapCommandParameterProperty = BindableProperty.Create(
+            nameof(TapCommandParameter),
+            typeof(object),
+            typeof(SettingsSectionHeaderView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsTapEnabledProperty = BindableProperty.Create(
+            nameof(IsTapEnabled),
+            typeof(bool),
+            typeof(SettingsSectionHeaderView),
+            true,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
@@ -113,7 +146,15 @@ namespace Cotton.Mobile.Controls
             DefaultDetailTextStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty QuaternaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(QuaternaryDetailTextStyleResourceKey),
+            typeof(string),
+            typeof(SettingsSectionHeaderView),
+            DefaultDetailTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
         private readonly Label _primaryDetailText;
+        private readonly Label _quaternaryDetailText;
         private readonly Grid _grid;
         private readonly IconFrame _leadingIcon;
         private readonly LinearProgressView _progress;
@@ -121,17 +162,24 @@ namespace Cotton.Mobile.Controls
         private readonly Label _tertiaryDetailText;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
+        private readonly TouchSurfaceView _touchSurface;
+        private readonly ContentView _trailingContentHost;
 
         public SettingsSectionHeaderView()
         {
-            InputTransparent = true;
-
             _leadingIcon = new IconFrame();
             _title = new Label();
             _primaryDetailText = new Label();
             _secondaryDetailText = new Label();
             _tertiaryDetailText = new Label();
+            _quaternaryDetailText = new Label();
             _progress = new LinearProgressView();
+            _touchSurface = new TouchSurfaceView();
+            _trailingContentHost = new ContentView
+            {
+                HorizontalOptions = LayoutOptions.End,
+                VerticalOptions = LayoutOptions.Center,
+            };
             _textStack = new VerticalStackLayout
             {
                 Children =
@@ -140,12 +188,16 @@ namespace Cotton.Mobile.Controls
                     _primaryDetailText,
                     _secondaryDetailText,
                     _tertiaryDetailText,
+                    _quaternaryDetailText,
                 },
             };
 
             Grid.SetColumn(_textStack, 1);
             Grid.SetRow(_progress, 1);
             Grid.SetColumn(_progress, 1);
+            Grid.SetColumn(_trailingContentHost, 2);
+            Grid.SetRowSpan(_touchSurface, 2);
+            Grid.SetColumnSpan(_touchSurface, 3);
 
             _grid = new Grid
             {
@@ -158,12 +210,15 @@ namespace Cotton.Mobile.Controls
                 {
                     new ColumnDefinition { Width = GridLength.Auto },
                     new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto },
                 },
                 Children =
                 {
                     _leadingIcon,
                     _textStack,
                     _progress,
+                    _touchSurface,
+                    _trailingContentHost,
                 },
             };
 
@@ -195,6 +250,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TertiaryDetailTextProperty, value);
         }
 
+        public string QuaternaryDetailText
+        {
+            get => (string)GetValue(QuaternaryDetailTextProperty);
+            set => SetValue(QuaternaryDetailTextProperty, value);
+        }
+
         public double Progress
         {
             get => (double)GetValue(ProgressProperty);
@@ -211,6 +272,30 @@ namespace Cotton.Mobile.Controls
         {
             get => (Geometry?)GetValue(LeadingIconDataProperty);
             set => SetValue(LeadingIconDataProperty, value);
+        }
+
+        public View? TrailingContent
+        {
+            get => (View?)GetValue(TrailingContentProperty);
+            set => SetValue(TrailingContentProperty, value);
+        }
+
+        public ICommand? TapCommand
+        {
+            get => (ICommand?)GetValue(TapCommandProperty);
+            set => SetValue(TapCommandProperty, value);
+        }
+
+        public object? TapCommandParameter
+        {
+            get => GetValue(TapCommandParameterProperty);
+            set => SetValue(TapCommandParameterProperty, value);
+        }
+
+        public bool IsTapEnabled
+        {
+            get => (bool)GetValue(IsTapEnabledProperty);
+            set => SetValue(IsTapEnabledProperty, value);
         }
 
         public string GridStyleResourceKey
@@ -255,6 +340,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TertiaryDetailTextStyleResourceKeyProperty, value);
         }
 
+        public string QuaternaryDetailTextStyleResourceKey
+        {
+            get => (string)GetValue(QuaternaryDetailTextStyleResourceKeyProperty);
+            set => SetValue(QuaternaryDetailTextStyleResourceKeyProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
@@ -267,6 +358,7 @@ namespace Cotton.Mobile.Controls
             string primaryDetailText = PrimaryDetailText ?? string.Empty;
             string secondaryDetailText = SecondaryDetailText ?? string.Empty;
             string tertiaryDetailText = TertiaryDetailText ?? string.Empty;
+            string quaternaryDetailText = QuaternaryDetailText ?? string.Empty;
             string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string leadingIconFrameStyleResourceKey =
                 ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
@@ -280,7 +372,11 @@ namespace Cotton.Mobile.Controls
                 ResolveStyleResourceKey(SecondaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string tertiaryDetailTextStyleResourceKey =
                 ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+            string quaternaryDetailTextStyleResourceKey =
+                ResolveStyleResourceKey(QuaternaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             bool isLeadingIconVisible = LeadingIconData is not null;
+            bool isTrailingContentVisible = TrailingContent is not null;
+            ICommand? tapCommand = TapCommand;
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
@@ -298,17 +394,34 @@ namespace Cotton.Mobile.Controls
             _tertiaryDetailText.SetDynamicResource(StyleProperty, tertiaryDetailTextStyleResourceKey);
             _tertiaryDetailText.Text = tertiaryDetailText;
             _tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText);
+            _quaternaryDetailText.SetDynamicResource(StyleProperty, quaternaryDetailTextStyleResourceKey);
+            _quaternaryDetailText.Text = quaternaryDetailText;
+            _quaternaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(quaternaryDetailText);
             _progress.Progress = Progress;
             _progress.IsVisible = IsProgressVisible;
+            _touchSurface.TapCommand = IsTapEnabled ? tapCommand : null;
+            _touchSurface.TapCommandParameter = TapCommandParameter;
+            _touchSurface.IsVisible = IsTapEnabled && tapCommand is not null;
+            if (_trailingContentHost.Content != TrailingContent)
+            {
+                _trailingContentHost.Content = TrailingContent;
+            }
+
+            _trailingContentHost.IsVisible = isTrailingContentVisible;
 
             Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_textStack, isLeadingIconVisible ? 1 : 2);
+            Grid.SetColumnSpan(_textStack, ResolveContentColumnSpan(isLeadingIconVisible, isTrailingContentVisible));
             Grid.SetColumn(_progress, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_progress, isLeadingIconVisible ? 1 : 2);
+            Grid.SetColumnSpan(_progress, ResolveContentColumnSpan(isLeadingIconVisible, isTrailingContentVisible));
 
             SemanticProperties.SetDescription(
                 this,
-                CreateSemanticDescription(title, primaryDetailText, secondaryDetailText, tertiaryDetailText));
+                CreateSemanticDescription(
+                    title,
+                    primaryDetailText,
+                    secondaryDetailText,
+                    tertiaryDetailText,
+                    quaternaryDetailText));
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
@@ -316,13 +429,31 @@ namespace Cotton.Mobile.Controls
             return string.IsNullOrWhiteSpace(resourceKey) ? defaultResourceKey : resourceKey;
         }
 
+        private static int ResolveContentColumnSpan(bool isLeadingIconVisible, bool isTrailingContentVisible)
+        {
+            if (isLeadingIconVisible)
+            {
+                return isTrailingContentVisible ? 1 : 2;
+            }
+
+            return isTrailingContentVisible ? 2 : 3;
+        }
+
         private static string CreateSemanticDescription(
             string title,
             string primaryDetailText,
             string secondaryDetailText,
-            string tertiaryDetailText)
+            string tertiaryDetailText,
+            string quaternaryDetailText)
         {
-            List<string> parts = [title, primaryDetailText, secondaryDetailText, tertiaryDetailText];
+            List<string> parts =
+            [
+                title,
+                primaryDetailText,
+                secondaryDetailText,
+                tertiaryDetailText,
+                quaternaryDetailText,
+            ];
             return string.Join(". ", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
         }
     }

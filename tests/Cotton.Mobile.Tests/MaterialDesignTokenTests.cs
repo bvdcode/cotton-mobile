@@ -819,8 +819,17 @@ namespace Cotton.Mobile.Tests
         public void Sync_root_actions_use_reusable_material_control()
         {
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string settingsInfoItemView = LoadText(SettingsInfoItemViewPath);
 
-            Assert.Contains("<controls:ActionClusterView Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsInfoItemView LeadingIconData=\"{x:Static controls:IconPathData.Folder}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("AttentionLeadingIconData=\"{x:Static controls:IconPathData.Error}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsAttentionState=\"{Binding IsAttentionVisible}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardSyncThumbnailFrame\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TitleTextStyleResourceKey=\"M3CardTitle\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding PathText}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryDetailText=\"{Binding DetailText}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding StatusText}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ActionClusterView ClusterStyleResourceKey=\"M3PanelActionCluster\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ClusterStyleResourceKey=\"M3PanelActionCluster\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsPrimaryActionVisible=\"{Binding CanRunNow}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -831,6 +840,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("QuaternaryActionCommand=\"{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("QuaternaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsQuaternaryActionVisible=\"{Binding CanStopSync}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("public class SettingsInfoItemView", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("AttentionLeadingIconDataProperty", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("AttentionTrailingTextStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconFrame Grid.RowSpan", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TargetType=\"controls:IconFrame\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Grid.Column=\"2\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TargetType=\"Label\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ActionClusterView Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<HorizontalStackLayout Grid.Row=\"3\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding RunNowActionText}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding StopSyncActionText}\"", syncSettingsPage, StringComparison.Ordinal);

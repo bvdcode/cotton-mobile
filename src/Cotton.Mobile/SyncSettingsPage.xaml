@@ -44,57 +44,18 @@
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <controls:ContentCardView>
-                            <Grid ColumnDefinitions="Auto,*,Auto"
-                                  RowDefinitions="Auto,Auto,Auto,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}">
-                                <controls:IconFrame Grid.RowSpan="4"
-                                                    IconData="{x:Static controls:IconPathData.Folder}"
-                                                    Style="{StaticResource M3CardSyncThumbnailFrame}">
-                                    <controls:IconFrame.Triggers>
-                                        <DataTrigger TargetType="controls:IconFrame"
-                                                     Binding="{Binding IsAttentionVisible}"
-                                                     Value="True">
-                                            <Setter Property="IconData"
-                                                    Value="{x:Static controls:IconPathData.Error}" />
-                                            <Setter Property="Style"
-                                                    Value="{StaticResource M3CardErrorThumbnailFrame}" />
-                                        </DataTrigger>
-                                    </controls:IconFrame.Triggers>
-                                </controls:IconFrame>
+                            <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}">
+                                <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                               AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
+                                                               IsAttentionState="{Binding IsAttentionVisible}"
+                                                               LeadingIconFrameStyleResourceKey="M3CardSyncThumbnailFrame"
+                                                               Title="{Binding Title}"
+                                                               TitleTextStyleResourceKey="M3CardTitle"
+                                                               PrimaryDetailText="{Binding PathText}"
+                                                               SecondaryDetailText="{Binding DetailText}"
+                                                               TrailingText="{Binding StatusText}" />
 
-                                <Label Grid.Column="1"
-                                       Text="{Binding Title}"
-                                       Style="{StaticResource M3CardTitle}" />
-
-                                <Label Grid.Column="2"
-                                       Text="{Binding StatusText}"
-                                       Style="{StaticResource M3CardSupportingLine}">
-                                    <Label.Triggers>
-                                        <DataTrigger TargetType="Label"
-                                                     Binding="{Binding IsAttentionVisible}"
-                                                     Value="True">
-                                            <Setter Property="Style"
-                                                    Value="{StaticResource M3ErrorSupportingLine}" />
-                                        </DataTrigger>
-                                    </Label.Triggers>
-                                </Label>
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding PathText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Grid.Row="2"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <controls:ActionClusterView Grid.Row="3"
-                                                            Grid.Column="1"
-                                                            Grid.ColumnSpan="2"
-                                                            ClusterStyleResourceKey="M3PanelActionCluster"
+                                <controls:ActionClusterView ClusterStyleResourceKey="M3PanelActionCluster"
                                                             PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
                                                             PrimaryActionCommand="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}"
                                                             PrimaryActionCommandParameter="{Binding .}"
@@ -120,7 +81,7 @@
                                                             QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
                                                             IsQuaternaryActionEnabled="{Binding CanStopSync}"
                                                             IsQuaternaryActionVisible="{Binding CanStopSync}" />
-                            </Grid>
+                            </VerticalStackLayout>
                         </controls:ContentCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>

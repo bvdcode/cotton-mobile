@@ -16,6 +16,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultMetricTextStyleResourceKey = "M3CardSupportingStrongLine";
         private const string DefaultTitleTextStyleResourceKey = "M3CardSupportingStrongLine";
         private const string PrimaryMetricTextOpacityAnimationName = "M3StorageBucketPrimaryMetricOpacity";
+        private const string ProgressOpacityAnimationName = "M3StorageBucketProgressOpacity";
         private const string SecondaryMetricTextOpacityAnimationName = "M3StorageBucketSecondaryMetricOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
@@ -58,7 +59,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(StorageBucketItemView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnProgressVisibilityPropertyChanged);
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
@@ -110,6 +111,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _secondaryMetricText;
         private readonly Label _title;
         private bool _hasAppliedPrimaryMetricTextVisibility;
+        private bool _hasAppliedProgressVisibility;
         private bool _hasAppliedSecondaryMetricTextVisibility;
 
         public StorageBucketItemView()
@@ -162,6 +164,7 @@ namespace Cotton.Mobile.Controls
             Content = _grid;
             UpdateVisualState(
                 animatePrimaryMetricTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryMetricTextVisibility: false);
         }
 
@@ -242,6 +245,7 @@ namespace Cotton.Mobile.Controls
             StorageBucketItemView view = (StorageBucketItemView)bindable;
             view.UpdateVisualState(
                 animatePrimaryMetricTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryMetricTextVisibility: false);
         }
 
@@ -253,6 +257,19 @@ namespace Cotton.Mobile.Controls
             StorageBucketItemView view = (StorageBucketItemView)bindable;
             view.UpdateVisualState(
                 animatePrimaryMetricTextVisibility: true,
+                animateProgressVisibility: false,
+                animateSecondaryMetricTextVisibility: false);
+        }
+
+        private static void OnProgressVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            StorageBucketItemView view = (StorageBucketItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryMetricTextVisibility: false,
+                animateProgressVisibility: true,
                 animateSecondaryMetricTextVisibility: false);
         }
 
@@ -264,11 +281,13 @@ namespace Cotton.Mobile.Controls
             StorageBucketItemView view = (StorageBucketItemView)bindable;
             view.UpdateVisualState(
                 animatePrimaryMetricTextVisibility: false,
+                animateProgressVisibility: false,
                 animateSecondaryMetricTextVisibility: true);
         }
 
         private void UpdateVisualState(
             bool animatePrimaryMetricTextVisibility,
+            bool animateProgressVisibility,
             bool animateSecondaryMetricTextVisibility)
         {
             string title = Title ?? string.Empty;
@@ -311,7 +330,7 @@ namespace Cotton.Mobile.Controls
                 SecondaryMetricTextOpacityAnimationName,
                 CompleteSecondaryMetricTextVisibility);
             _progress.Progress = Progress;
-            _progress.IsVisible = IsProgressVisible;
+            UpdateProgressVisibility(animateProgressVisibility);
             SemanticProperties.SetDescription(
                 this,
                 CreateSemanticDescription(title, primaryMetricText, detailText, secondaryMetricText));
@@ -347,6 +366,42 @@ namespace Cotton.Mobile.Controls
                 opacity => metricTextLabel.Opacity = opacity,
                 completeVisibility);
             hasAppliedMetricTextVisibility = true;
+        }
+
+        private void UpdateProgressVisibility(bool animateProgressVisibility)
+        {
+            bool shouldAnimate = animateProgressVisibility && _hasAppliedProgressVisibility;
+            double targetOpacity = IsProgressVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (IsProgressVisible)
+            {
+                _progress.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _progress,
+                _progress.Opacity,
+                targetOpacity,
+                duration,
+                ProgressOpacityAnimationName,
+                shouldAnimate,
+                opacity => _progress.Opacity = opacity,
+                CompleteProgressVisibility);
+            _hasAppliedProgressVisibility = true;
+        }
+
+        private void CompleteProgressVisibility()
+        {
+            if (IsProgressVisible)
+            {
+                _progress.IsVisible = true;
+                return;
+            }
+
+            _progress.IsVisible = false;
         }
 
         private void CompletePrimaryMetricTextVisibility()

@@ -2040,11 +2040,19 @@ namespace Cotton.Mobile.Tests
                 storageBucketItemView,
                 StringComparison.Ordinal);
             Assert.Contains(
+                "ProgressOpacityAnimationName = \"M3StorageBucketProgressOpacity\"",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 "SecondaryMetricTextOpacityAnimationName = \"M3StorageBucketSecondaryMetricOpacity\"",
                 storageBucketItemView,
                 StringComparison.Ordinal);
             Assert.Contains(
                 "OnPrimaryMetricTextVisibilityPropertyChanged",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnProgressVisibilityPropertyChanged",
                 storageBucketItemView,
                 StringComparison.Ordinal);
             Assert.Contains(
@@ -2057,6 +2065,7 @@ namespace Cotton.Mobile.Tests
                 storageBucketItemView,
                 StringComparison.Ordinal);
             Assert.Contains("CompletePrimaryMetricTextVisibility", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteProgressVisibility", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteSecondaryMetricTextVisibility", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("x:DataType=\"services:CottonOnDeviceStorageBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
@@ -2065,6 +2074,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Style=\"{StaticResource M3CardFileThumbnailFrame}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsItemListStack}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_progress.IsVisible = IsProgressVisible", storageBucketItemView, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "_primaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(primaryMetricText)",
                 storageBucketItemView,

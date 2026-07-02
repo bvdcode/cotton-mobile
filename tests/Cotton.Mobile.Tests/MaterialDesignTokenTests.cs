@@ -1279,14 +1279,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("LoadingIndicatorOpacityAnimationName = \"M3FileThumbnailLoadingOpacity\"", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkOpacityAnimationName = \"M3FileSelectionMarkOpacity\"", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkScaleAnimationName = \"M3FileSelectionMarkScale\"", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("OnLoadingPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("OnSelectedPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("M3MotionSelectionHiddenScale", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("<x:Double x:Key=\"M3MotionSelectionHiddenScale\">0.82</x:Double>", interaction, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionSelectionDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_loadingIndicator.IsVisible = IsLoading", fileThumbnailView, StringComparison.Ordinal);
             Assert.DoesNotContain("_selectionMark.IsVisible = IsSelected", fileThumbnailView, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:FileThumbnailView", trashPage, StringComparison.Ordinal);

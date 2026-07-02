@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultBadgeStyleResourceKey = "M3FileTileOverlayChip";
         private const string DefaultSelectionMarkStyleResourceKey = "M3FileListSelectionMark";
         private const string DefaultSurfaceStyleResourceKey = "M3FileListThumbnailSurface";
+        private const string LoadingIndicatorOpacityAnimationName = "M3FileThumbnailLoadingOpacity";
         private const string SelectionMarkOpacityAnimationName = "M3FileSelectionMarkOpacity";
         private const string SelectionMarkScaleAnimationName = "M3FileSelectionMarkScale";
 
@@ -38,7 +39,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileThumbnailView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnLoadingPropertyChanged);
 
         public static readonly BindableProperty PlaceholderTextProperty = BindableProperty.Create(
             nameof(PlaceholderText),
@@ -118,6 +119,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _selectionMark;
         private readonly IconView _selectionMarkIcon;
         private readonly Border _surface;
+        private bool _hasAppliedLoadingState;
         private bool _hasAppliedSelectionState;
 
         public FileThumbnailView()
@@ -134,7 +136,11 @@ namespace Cotton.Mobile.Controls
                 IconData = IconPathData.Folder,
             };
 
-            _loadingIndicator = new ActivityIndicator();
+            _loadingIndicator = new ActivityIndicator
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
 
             _placeholder = new Label();
 
@@ -276,7 +282,18 @@ namespace Cotton.Mobile.Controls
             view.UpdateVisualState(animateSelection: true);
         }
 
+        private static void OnLoadingPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileThumbnailView view = (FileThumbnailView)bindable;
+            view.UpdateVisualState(animateLoading: true, animateSelection: false);
+        }
+
         private void UpdateVisualState(bool animateSelection)
+        {
+            UpdateVisualState(animateLoading: false, animateSelection);
+        }
+
+        private void UpdateVisualState(bool animateLoading, bool animateSelection)
         {
             string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
                 ? DefaultSurfaceStyleResourceKey
@@ -300,8 +317,7 @@ namespace Cotton.Mobile.Controls
             _image.Source = ThumbnailSource;
             _image.IsVisible = IsPreviewImageVisible;
             _folderIcon.IsVisible = IsFolderThumbnailVisible;
-            _loadingIndicator.IsRunning = IsLoading;
-            _loadingIndicator.IsVisible = IsLoading;
+            UpdateLoadingState(animateLoading);
             _placeholder.Text = PlaceholderText ?? string.Empty;
             _placeholder.IsVisible = IsPlaceholderTextVisible;
             _selectionMark.IsVisible = true;
@@ -318,6 +334,46 @@ namespace Cotton.Mobile.Controls
             }
 
             _folderIcon.ClearValue(IconView.IconSizeProperty);
+        }
+
+        private void UpdateLoadingState(bool animateLoading)
+        {
+            bool isLoading = IsLoading;
+            bool shouldAnimate = animateLoading && _hasAppliedLoadingState;
+            double targetOpacity = isLoading
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isLoading)
+            {
+                _loadingIndicator.IsVisible = true;
+                _loadingIndicator.IsRunning = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _loadingIndicator,
+                _loadingIndicator.Opacity,
+                targetOpacity,
+                duration,
+                LoadingIndicatorOpacityAnimationName,
+                shouldAnimate,
+                opacity => _loadingIndicator.Opacity = opacity,
+                CompleteLoadingState);
+            _hasAppliedLoadingState = true;
+        }
+
+        private void CompleteLoadingState()
+        {
+            if (IsLoading)
+            {
+                _loadingIndicator.IsVisible = true;
+                _loadingIndicator.IsRunning = true;
+                return;
+            }
+
+            _loadingIndicator.IsRunning = false;
+            _loadingIndicator.IsVisible = false;
         }
 
         private void UpdateSelectionState(bool animateSelection)

@@ -33,13 +33,8 @@
                                              ItemsLayout="{StaticResource M3PdfPreviewItemsLayout}">
                 <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:PdfPreviewPageSnapshot">
-                        <Grid Style="{StaticResource M3PdfPageContainerGrid}">
-                            <controls:ContentCardView CardStyleResourceKey="M3PdfPageSurface">
-                                <Image Source="{Binding ImageSource}"
-                                       HeightRequest="{Binding DisplayHeight}"
-                                       Style="{StaticResource M3PdfPageImage}" />
-                            </controls:ContentCardView>
-                        </Grid>
+                        <controls:PdfPreviewPageView ImageSource="{Binding ImageSource}"
+                                                     DisplayHeight="{Binding DisplayHeight}" />
                     </DataTemplate>
                 </controls:MaterialCollectionView.ItemTemplate>
             </controls:MaterialCollectionView>

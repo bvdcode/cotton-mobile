@@ -25,6 +25,7 @@ namespace Cotton.Mobile.Tests
         private const string ImageViewerPagePath = "src/Cotton.Mobile/ImageViewerPage.xaml";
         private const string MediaViewerPagePath = "src/Cotton.Mobile/MediaViewerPage.xaml";
         private const string PdfViewerPagePath = "src/Cotton.Mobile/PdfViewerPage.xaml";
+        private const string PdfPreviewPageViewPath = "src/Cotton.Mobile/Controls/PdfPreviewPageView.cs";
         private const string DiagnosticsPagePath = "src/Cotton.Mobile/DiagnosticsPage.xaml";
         private const string SyncSettingsPagePath = "src/Cotton.Mobile/SyncSettingsPage.xaml";
         private const string NotificationSettingsPagePath = "src/Cotton.Mobile/NotificationSettingsPage.xaml";
@@ -1423,6 +1424,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Pdf_preview_pages_use_reusable_material_control()
+        {
+            string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string pdfPreviewPageView = LoadText(PdfPreviewPageViewPath);
+
+            Assert.Contains("<controls:PdfPreviewPageView ImageSource=\"{Binding ImageSource}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DisplayHeight=\"{Binding DisplayHeight}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("public class PdfPreviewPageView", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("DefaultContainerStyleResourceKey = \"M3PdfPageContainerGrid\"", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3PdfPageSurface\"", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("DefaultImageStyleResourceKey = \"M3PdfPageImage\"", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("new Image()", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("_container.SetDynamicResource(StyleProperty, containerStyleResourceKey)", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("_card.CardStyleResourceKey = cardStyleResourceKey", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("_image.SetDynamicResource(StyleProperty, imageStyleResourceKey)", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.Contains("_image.HeightRequest = DisplayHeight", pdfPreviewPageView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Style=\"{StaticResource M3PdfPageContainerGrid}\">", pdfViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Image Source=\"{Binding ImageSource}\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3PdfPageImage}\"", pdfViewerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Dark_viewer_status_overlays_use_reusable_material_control()
         {
             string imageViewerPage = LoadText(ImageViewerPagePath);
@@ -1650,6 +1674,7 @@ namespace Cotton.Mobile.Tests
             string diagnosticsPage = LoadText(DiagnosticsPagePath);
             string mainPage = LoadText(MainPagePath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string pdfPreviewPageView = LoadText(PdfPreviewPageViewPath);
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string textViewerPage = LoadText(TextViewerPagePath);
             string trashPage = LoadText(TrashPagePath);
@@ -1667,18 +1692,19 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(captureDestinationPickerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(diagnosticsPage, "<controls:ContentCardView"));
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:ContentCardView"));
-            Assert.Equal(1, CountOccurrences(pdfViewerPage, "<controls:ContentCardView"));
+            Assert.Equal(0, CountOccurrences(pdfViewerPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(syncSettingsPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(textViewerPage, "<controls:ContentCardView"));
             Assert.DoesNotContain("<controls:ContentCardView", trashPage, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("new ContentCardView", pdfPreviewPageView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3AuthPanel\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3FileTileCard\"", fileTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("CardStyleResourceKey=\"M3PdfPageSurface\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3PdfPageSurface\"", pdfPreviewPageView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3SelectableContentCard\"", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3SelectableTrashTileCard\"", trashTileEntryCardView, StringComparison.Ordinal);

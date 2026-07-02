@@ -42,12 +42,11 @@
                                               IsVisible="{Binding IsStatusVisible}"
                                               StatusStyleResourceKey="M3ViewerOverlayStatusWithTrailingAction" />
 
-            <controls:IconButton x:Name="ResetButton"
-                                 IconData="{x:Static controls:IconPathData.Reset}"
-                                 Style="{StaticResource M3ViewerOverlayActionIconButton}"
-                                 Command="{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}"
-                                 IsVisible="False"
-                                 SemanticProperties.Description="Reset image" />
+            <controls:ViewerOverlayActionButtonView x:Name="ResetButton"
+                                                    IconData="{x:Static controls:IconPathData.Reset}"
+                                                    Command="{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}"
+                                                    IsVisible="False"
+                                                    SemanticDescription="Reset image" />
         </Grid>
     </Grid>
 </ContentPage>

@@ -230,7 +230,6 @@ namespace Cotton.Mobile.Tests
             string colors = LoadText(ColorsResourcePath);
 
             Assert.Contains("<Color x:Key=\"M3Accent\">#C6FF00</Color>", colors, StringComparison.Ordinal);
-            Assert.Contains("<Color x:Key=\"M3AccentPressed\">#B2E600</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimary\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimaryPressed\">#405100</Color>", colors, StringComparison.Ordinal);
@@ -238,6 +237,9 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Color x:Key=\"M3Primary\">", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3OnPrimary\">", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("M3PrimaryBrush", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AccentPressed", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3OnAccent", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AccentBrush", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
         }
 

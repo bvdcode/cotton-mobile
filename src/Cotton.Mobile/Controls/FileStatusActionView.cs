@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -8,6 +9,8 @@ namespace Cotton.Mobile.Controls
 {
     public class FileStatusActionView : ContentView
     {
+        private const string DetailsOpacityAnimationName = "M3FileStatusDetailsOpacity";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -20,7 +23,7 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(FileStatusActionView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnDetailsVisibilityPropertyChanged);
 
         public static readonly BindableProperty AccessibilityTextProperty = BindableProperty.Create(
             nameof(AccessibilityText),
@@ -65,10 +68,12 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _container;
         private readonly Label _details;
+        private readonly ColumnDefinition _detailsColumn;
         private readonly Grid _grid;
         private readonly IconView _icon;
         private readonly Label _text;
         private readonly TouchSurfaceView _touchSurface;
+        private bool _hasAppliedDetailsVisibility;
 
         public FileStatusActionView()
         {
@@ -83,6 +88,11 @@ namespace Cotton.Mobile.Controls
             _touchSurface = new TouchSurfaceView();
             Grid.SetColumnSpan(_touchSurface, 3);
 
+            _detailsColumn = new ColumnDefinition
+            {
+                Width = GridLength.Star,
+            };
+
             _grid = new Grid
             {
                 ColumnDefinitions =
@@ -95,10 +105,7 @@ namespace Cotton.Mobile.Controls
                     {
                         Width = GridLength.Star,
                     },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Star,
-                    },
+                    _detailsColumn,
                 },
                 Children =
                 {
@@ -115,7 +122,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(animateDetailsVisibility: false);
         }
 
         public string Text
@@ -169,10 +176,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileStatusActionView view = (FileStatusActionView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateDetailsVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnDetailsVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileStatusActionView view = (FileStatusActionView)bindable;
+            view.UpdateVisualState(animateDetailsVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateDetailsVisibility)
         {
             string text = Text ?? string.Empty;
             string details = Details ?? string.Empty;
@@ -193,9 +206,58 @@ namespace Cotton.Mobile.Controls
                 : IconData;
             _text.Text = text;
             _details.Text = details;
+            UpdateDetailsVisibility(details, animateDetailsVisibility);
             _touchSurface.TapCommand = IsActionEnabled ? command : null;
             _touchSurface.IsVisible = IsActionEnabled && command is not null;
             SemanticProperties.SetDescription(_container, accessibilityText);
+        }
+
+        private void UpdateDetailsVisibility(string details, bool animateDetailsVisibility)
+        {
+            bool isDetailsVisible = IsDetailsVisible(details);
+            bool shouldAnimate = animateDetailsVisibility && _hasAppliedDetailsVisibility;
+            double targetOpacity = isDetailsVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isDetailsVisible)
+            {
+                _details.IsVisible = true;
+                _detailsColumn.Width = GridLength.Star;
+                Grid.SetColumnSpan(_text, 1);
+            }
+
+            MaterialMotion.UpdateDouble(
+                _details,
+                _details.Opacity,
+                targetOpacity,
+                duration,
+                DetailsOpacityAnimationName,
+                shouldAnimate,
+                opacity => _details.Opacity = opacity,
+                CompleteDetailsVisibility);
+            _hasAppliedDetailsVisibility = true;
+        }
+
+        private void CompleteDetailsVisibility()
+        {
+            if (IsDetailsVisible(Details ?? string.Empty))
+            {
+                _details.IsVisible = true;
+                _detailsColumn.Width = GridLength.Star;
+                Grid.SetColumnSpan(_text, 1);
+                return;
+            }
+
+            _details.IsVisible = false;
+            _detailsColumn.Width = new GridLength(0);
+            Grid.SetColumnSpan(_text, 2);
+        }
+
+        private bool IsDetailsVisible(string details)
+        {
+            return !string.IsNullOrWhiteSpace(details);
         }
 
         private string CreateAccessibilityText(string text, string details)

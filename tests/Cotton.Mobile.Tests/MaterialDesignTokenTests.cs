@@ -1202,13 +1202,23 @@ namespace Cotton.Mobile.Tests
         public void File_status_action_rows_use_reusable_material_control()
         {
             string fileStatusActionView = LoadText(FileStatusActionViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string mainPage = LoadText(MainPagePath);
 
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface = new TouchSurfaceView();", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? command : null;", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DetailsOpacityAnimationName = \"M3FileStatusDetailsOpacity\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("OnDetailsVisibilityPropertyChanged", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("CompleteDetailsVisibility", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_detailsColumn.Width = new GridLength(0)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("Grid.SetColumnSpan(_text, 2)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("LongPressBehavior", fileStatusActionView, StringComparison.Ordinal);
             Assert.DoesNotContain("M3ListItemTouchSurface", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_details.IsVisible = !string.IsNullOrWhiteSpace", fileStatusActionView, StringComparison.Ordinal);
 
             Assert.Equal(3, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
             Assert.Contains("Command=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);

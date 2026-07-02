@@ -64,6 +64,7 @@ namespace Cotton.Mobile.Tests
         private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
+        private const string ViewerPlayOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerPlayOverlayView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -1180,15 +1181,27 @@ namespace Cotton.Mobile.Tests
         {
             string imageViewerPage = LoadText(ImageViewerPagePath);
             string mediaViewerPage = LoadText(MediaViewerPagePath);
+            string viewerPlayOverlayView = LoadText(ViewerPlayOverlayViewPath);
             string viewerStatusOverlayView = LoadText(ViewerStatusOverlayViewPath);
 
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ViewerPlayOverlayView x:Name=\"StartOverlay\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("Command=\"{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("SemanticDescription=\"Play media\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3ViewerOverlayStatus\"", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.Contains("_status.SetDynamicResource(StyleProperty, statusStyleResourceKey)", viewerStatusOverlayView, StringComparison.Ordinal);
+            Assert.Contains("public class ViewerPlayOverlayView", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("DefaultContainerStyleResourceKey = \"M3ViewerCenteredOverlay\"", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3ViewerCenteredPlayIconButton\"", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("IconData = IconPathData.Play", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("_playButton.Command = Command", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout x:Name=\"StartOverlay\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Play}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3ViewerCenteredPlayIconButton}\"", mediaViewerPage, StringComparison.Ordinal);
         }
 
         [Fact]

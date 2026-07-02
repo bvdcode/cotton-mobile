@@ -32,13 +32,9 @@
                                       ShouldShowPlaybackControls="True"
                                       Style="{StaticResource M3ViewerMediaElement}" />
 
-                <VerticalStackLayout x:Name="StartOverlay"
-                                     Style="{StaticResource M3ViewerCenteredOverlay}">
-                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                         Style="{StaticResource M3ViewerCenteredPlayIconButton}"
-                                         Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
-                                         SemanticProperties.Description="Play media" />
-                </VerticalStackLayout>
+                <controls:ViewerPlayOverlayView x:Name="StartOverlay"
+                                                Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
+                                                SemanticDescription="Play media" />
 
             </Grid>
 

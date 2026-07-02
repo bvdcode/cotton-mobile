@@ -1183,8 +1183,14 @@ namespace Cotton.Mobile.Tests
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            XDocument type = LoadResourceDictionary(TypeResourcePath);
+            IReadOnlyDictionary<string, string> thumbnailPlaceholderSetters =
+                GetStyleSetters(type, "M3ThumbnailPlaceholder");
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileThumbnailView"));
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}",
+                thumbnailPlaceholderSetters["TextColor"]);
             Assert.Contains("SurfaceStyleResourceKey = \"M3FilePreviewSurface\"", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkStyleResourceKey = \"M3FileTileSelectionMark\"", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);

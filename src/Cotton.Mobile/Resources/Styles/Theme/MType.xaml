@@ -255,7 +255,7 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3ThumbnailPlaceholder">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3Accent}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />

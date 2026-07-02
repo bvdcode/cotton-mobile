@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTitleStyleResourceKey = "M3CardTitle";
         private const string DefaultTrailingChipStyleResourceKey = "M3NeutralChip";
         private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
+        private const string TrailingChipOpacityAnimationName = "M3MetadataCardTrailingChipOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -41,7 +42,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(MetadataCardHeaderView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTrailingChipVisibilityPropertyChanged);
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
@@ -103,6 +104,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconFrame _leadingIcon;
         private readonly FileEntryTextView _textBlock;
         private readonly ChipView _trailingChip;
+        private bool _hasAppliedTrailingChipVisibility;
 
         public MetadataCardHeaderView()
         {
@@ -132,7 +134,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _grid;
-            UpdateVisualState();
+            UpdateVisualState(animateTrailingChipVisibility: false);
         }
 
         public string Title
@@ -210,10 +212,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             MetadataCardHeaderView view = (MetadataCardHeaderView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateTrailingChipVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnTrailingChipVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            MetadataCardHeaderView view = (MetadataCardHeaderView)bindable;
+            view.UpdateVisualState(animateTrailingChipVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateTrailingChipVisibility)
         {
             string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
                 ? DefaultGridStyleResourceKey
@@ -246,9 +254,46 @@ namespace Cotton.Mobile.Controls
             _textBlock.TitleStyleResourceKey = titleStyleResourceKey;
             _textBlock.DetailStyleResourceKey = supportingTextStyleResourceKey;
             _trailingChip.Text = TrailingText ?? string.Empty;
-            _trailingChip.IsVisible = IsTrailingTextVisible;
             _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
             _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
+            UpdateTrailingChipVisibility(animateTrailingChipVisibility);
+        }
+
+        private void UpdateTrailingChipVisibility(bool animateTrailingChipVisibility)
+        {
+            bool isTrailingChipVisible = IsTrailingTextVisible;
+            bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
+            double targetOpacity = isTrailingChipVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isTrailingChipVisible)
+            {
+                _trailingChip.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _trailingChip,
+                _trailingChip.Opacity,
+                targetOpacity,
+                duration,
+                TrailingChipOpacityAnimationName,
+                shouldAnimate,
+                opacity => _trailingChip.Opacity = opacity,
+                CompleteTrailingChipVisibility);
+            _hasAppliedTrailingChipVisibility = true;
+        }
+
+        private void CompleteTrailingChipVisibility()
+        {
+            if (IsTrailingTextVisible)
+            {
+                _trailingChip.IsVisible = true;
+                return;
+            }
+
+            _trailingChip.IsVisible = false;
         }
     }
 }

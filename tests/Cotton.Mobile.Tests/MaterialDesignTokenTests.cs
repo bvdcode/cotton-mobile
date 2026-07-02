@@ -1640,6 +1640,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ChipView", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("TrailingChipOpacityAnimationName = \"M3MetadataCardTrailingChipOpacity\"", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnTrailingChipVisibilityPropertyChanged", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTrailingChipVisibility", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_trailingChip.IsVisible = IsTrailingTextVisible", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DetailOpacityAnimationName = \"M3FileEntryDetailOpacity\"", fileEntryTextView, StringComparison.Ordinal);
             Assert.Contains("OnDetailVisiblePropertyChanged", fileEntryTextView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileEntryTextView, StringComparison.Ordinal);

@@ -1832,6 +1832,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultStackStyleResourceKey = \"M3MetadataCardBodyStack\"", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Contains("DefaultInlineGridStyleResourceKey = \"M3InlineMetadataGrid\"", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("ProgressOpacityAnimationName = \"M3MetadataCardProgressOpacity\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("InlineMetadataOpacityAnimationName = \"M3MetadataCardInlineMetadataOpacity\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("PrimaryTextOpacityAnimationName = \"M3MetadataCardPrimaryTextOpacity\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("SecondaryTextOpacityAnimationName = \"M3MetadataCardSecondaryTextOpacity\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("ErrorTextOpacityAnimationName = \"M3MetadataCardErrorTextOpacity\"", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("CompleteElementVisibility", metadataCardBodyView, StringComparison.Ordinal);
             Assert.Equal(4, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "<controls:MetadataCardView"));
             Assert.Equal(4, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "<controls:MetadataCardBodyView"));
             Assert.Contains("PrimaryText=\"{Binding ContentText}\"", activityFeedPage, StringComparison.Ordinal);
@@ -1860,6 +1868,12 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("Style=\"{StaticResource M3InlineMetadataGrid}\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", page, StringComparison.Ordinal);
             }
+
+            Assert.DoesNotContain("_progress.IsVisible = IsProgressVisible", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_inlineGrid.IsVisible = IsInlineMetadataVisible", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_primaryText.IsVisible = IsPrimaryTextVisible", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_secondaryText.IsVisible = IsSecondaryTextVisible", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_errorText.IsVisible = IsErrorTextVisible", metadataCardBodyView, StringComparison.Ordinal);
         }
 
         [Fact]

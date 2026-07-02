@@ -12,6 +12,11 @@ namespace Cotton.Mobile.Controls
         private const string DefaultSecondaryTextStyleResourceKey = "M3CardMetaLine";
         private const string DefaultStackStyleResourceKey = "M3MetadataCardBodyStack";
         private const string DefaultTrailingInlineTextStyleResourceKey = "M3CardSupportingLine";
+        private const string ErrorTextOpacityAnimationName = "M3MetadataCardErrorTextOpacity";
+        private const string InlineMetadataOpacityAnimationName = "M3MetadataCardInlineMetadataOpacity";
+        private const string PrimaryTextOpacityAnimationName = "M3MetadataCardPrimaryTextOpacity";
+        private const string ProgressOpacityAnimationName = "M3MetadataCardProgressOpacity";
+        private const string SecondaryTextOpacityAnimationName = "M3MetadataCardSecondaryTextOpacity";
 
         public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
             nameof(Progress),
@@ -147,6 +152,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _secondaryText;
         private readonly VerticalStackLayout _stack;
         private readonly Label _trailingInlineText;
+        private bool _hasAppliedVisibilityState;
 
         public MetadataCardBodyView()
         {
@@ -306,6 +312,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            bool shouldAnimateVisibility = _hasAppliedVisibilityState;
             string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
                 ? DefaultStackStyleResourceKey
                 : StackStyleResourceKey;
@@ -332,6 +339,11 @@ namespace Cotton.Mobile.Controls
             string primaryText = PrimaryText ?? string.Empty;
             string secondaryText = SecondaryText ?? string.Empty;
             string errorText = ErrorText ?? string.Empty;
+            bool isInlineMetadataVisible = IsInlineMetadataVisible
+                && (!string.IsNullOrWhiteSpace(leadingInlineText) || !string.IsNullOrWhiteSpace(trailingInlineText));
+            bool isPrimaryTextVisible = IsPrimaryTextVisible && !string.IsNullOrWhiteSpace(primaryText);
+            bool isSecondaryTextVisible = IsSecondaryTextVisible && !string.IsNullOrWhiteSpace(secondaryText);
+            bool isErrorTextVisible = IsErrorTextVisible && !string.IsNullOrWhiteSpace(errorText);
 
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);
             _inlineGrid.SetDynamicResource(StyleProperty, inlineGridStyleResourceKey);
@@ -342,18 +354,64 @@ namespace Cotton.Mobile.Controls
             _errorText.SetDynamicResource(StyleProperty, errorTextStyleResourceKey);
 
             _progress.Progress = Progress;
-            _progress.IsVisible = IsProgressVisible;
-            _inlineGrid.IsVisible = IsInlineMetadataVisible
-                && (!string.IsNullOrWhiteSpace(leadingInlineText) || !string.IsNullOrWhiteSpace(trailingInlineText));
-            _primaryText.IsVisible = IsPrimaryTextVisible && !string.IsNullOrWhiteSpace(primaryText);
-            _secondaryText.IsVisible = IsSecondaryTextVisible && !string.IsNullOrWhiteSpace(secondaryText);
-            _errorText.IsVisible = IsErrorTextVisible && !string.IsNullOrWhiteSpace(errorText);
+            UpdateElementVisibility(_progress, IsProgressVisible, ProgressOpacityAnimationName, shouldAnimateVisibility);
+            UpdateElementVisibility(
+                _inlineGrid,
+                isInlineMetadataVisible,
+                InlineMetadataOpacityAnimationName,
+                shouldAnimateVisibility);
+            UpdateElementVisibility(_primaryText, isPrimaryTextVisible, PrimaryTextOpacityAnimationName, shouldAnimateVisibility);
+            UpdateElementVisibility(
+                _secondaryText,
+                isSecondaryTextVisible,
+                SecondaryTextOpacityAnimationName,
+                shouldAnimateVisibility);
+            UpdateElementVisibility(_errorText, isErrorTextVisible, ErrorTextOpacityAnimationName, shouldAnimateVisibility);
 
             _leadingInlineText.Text = leadingInlineText;
             _trailingInlineText.Text = trailingInlineText;
             _primaryText.Text = primaryText;
             _secondaryText.Text = secondaryText;
             _errorText.Text = errorText;
+            _hasAppliedVisibilityState = true;
+        }
+
+        private static void UpdateElementVisibility(
+            VisualElement element,
+            bool isElementVisible,
+            string opacityAnimationName,
+            bool animateVisibility)
+        {
+            double targetOpacity = isElementVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                element,
+                element.Opacity,
+                targetOpacity,
+                duration,
+                opacityAnimationName,
+                animateVisibility,
+                opacity => element.Opacity = opacity,
+                () => CompleteElementVisibility(element, isElementVisible));
+        }
+
+        private static void CompleteElementVisibility(VisualElement element, bool isElementVisible)
+        {
+            if (isElementVisible)
+            {
+                element.IsVisible = true;
+                return;
+            }
+
+            element.IsVisible = false;
         }
     }
 }

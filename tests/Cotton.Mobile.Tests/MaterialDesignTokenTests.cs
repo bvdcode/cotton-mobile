@@ -2201,6 +2201,55 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsVisible=\"{Binding IsNeutralStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
         }
 
+        [Fact]
+        public void Page_and_control_xaml_avoid_raw_material_layout_hotspots()
+        {
+            string[] disallowedPatterns =
+            [
+                "Style=\"{StaticResource M3",
+                "<Grid",
+                "<VerticalStackLayout",
+                "<HorizontalStackLayout",
+                "<ScrollView",
+                "<CollectionView",
+                "<RefreshView",
+                "<Image",
+                "<Label",
+                "<Border",
+                "<ProgressBar",
+                "<toolkit:MediaElement",
+                "<FlexLayout",
+            ];
+
+            string repositoryRoot = FindRepositoryRoot(StylesResourcePath);
+            string mobileRoot = Path.Combine(repositoryRoot, "src", "Cotton.Mobile");
+            string resourcesSegment = $"{Path.DirectorySeparatorChar}Resources{Path.DirectorySeparatorChar}";
+            string binSegment = $"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}";
+            string objSegment = $"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}";
+            string[] xamlFiles = Directory.GetFiles(mobileRoot, "*.xaml", SearchOption.AllDirectories)
+                .Where(path =>
+                    !path.Contains(resourcesSegment, StringComparison.Ordinal)
+                    && !path.Contains(binSegment, StringComparison.Ordinal)
+                    && !path.Contains(objSegment, StringComparison.Ordinal))
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+
+            Assert.NotEmpty(xamlFiles);
+
+            foreach (string path in xamlFiles)
+            {
+                string relativePath = Path.GetRelativePath(repositoryRoot, path);
+                string content = File.ReadAllText(path);
+
+                foreach (string disallowedPattern in disallowedPatterns)
+                {
+                    Assert.False(
+                        content.Contains(disallowedPattern, StringComparison.Ordinal),
+                        $"{relativePath} contains {disallowedPattern}.");
+                }
+            }
+        }
+
         private static XDocument LoadResourceDictionary(string relativePath)
         {
             string repositoryRoot = FindRepositoryRoot(relativePath);

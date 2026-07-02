@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionListItemView : ContentView
     {
+        private const string SupportingTextOpacityAnimationName = "M3ActionListSupportingTextOpacity";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -21,14 +23,14 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(ActionListItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsSupportingTextVisibleProperty = BindableProperty.Create(
             nameof(IsSupportingTextVisible),
             typeof(bool),
             typeof(ActionListItemView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
             nameof(TrailingText),
@@ -182,6 +184,7 @@ namespace Cotton.Mobile.Controls
         private readonly TouchSurfaceView _touchSurface;
         private readonly Border _trailingChip;
         private readonly Label _trailingText;
+        private bool _hasAppliedSupportingTextVisibility;
 
         public ActionListItemView()
         {
@@ -245,7 +248,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _container;
-            UpdateVisualState();
+            UpdateVisualState(animateSupportingTextVisibility: false);
         }
 
         public string Text
@@ -395,10 +398,19 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateVisualState();
+            actionListItemView.UpdateVisualState(animateSupportingTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnSupportingTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            ActionListItemView actionListItemView = (ActionListItemView)bindable;
+            actionListItemView.UpdateVisualState(animateSupportingTextVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateSupportingTextVisibility)
         {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
@@ -455,7 +467,7 @@ namespace Cotton.Mobile.Controls
             _leadingIcon.IsVisible = isLeadingIconVisible;
             _text.Text = text;
             _supportingText.Text = supportingText;
-            _supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+            UpdateSupportingTextVisibility(supportingText, animateSupportingTextVisibility);
             Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
             Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(isLeadingIconVisible, isTrailingTextVisible));
 
@@ -472,6 +484,48 @@ namespace Cotton.Mobile.Controls
             _touchSurface.TapCommandParameter = rowTapCommandParameter;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && rowTapCommand is not null;
             SemanticProperties.SetDescription(_container, semanticDescription);
+        }
+
+        private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
+        {
+            bool isSupportingTextVisible = IsSupportingTextActuallyVisible(supportingText);
+            bool shouldAnimate = animateSupportingTextVisibility && _hasAppliedSupportingTextVisibility;
+            double targetOpacity = isSupportingTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isSupportingTextVisible)
+            {
+                _supportingText.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _supportingText,
+                _supportingText.Opacity,
+                targetOpacity,
+                duration,
+                SupportingTextOpacityAnimationName,
+                shouldAnimate,
+                opacity => _supportingText.Opacity = opacity,
+                CompleteSupportingTextVisibility);
+            _hasAppliedSupportingTextVisibility = true;
+        }
+
+        private void CompleteSupportingTextVisibility()
+        {
+            if (IsSupportingTextActuallyVisible(SupportingText ?? string.Empty))
+            {
+                _supportingText.IsVisible = true;
+                return;
+            }
+
+            _supportingText.IsVisible = false;
+        }
+
+        private bool IsSupportingTextActuallyVisible(string supportingText)
+        {
+            return IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
         }
 
         private int ResolveTextColumnSpan(bool isLeadingIconVisible, bool isTrailingTextVisible)

@@ -800,10 +800,18 @@ namespace Cotton.Mobile.Tests
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string storagePage = LoadText(StoragePagePath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface = new TouchSurfaceView();", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? rowTapCommand : null;", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("SupportingTextOpacityAnimationName = \"M3ActionListSupportingTextOpacity\"", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("OnSupportingTextVisibilityPropertyChanged", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSupportingTextVisibility", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_supportingText.IsVisible = IsSupportingTextVisible", actionListItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("LongPressBehavior", actionListItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("M3ListItemTouchSurface", actionListItemView, StringComparison.Ordinal);
 

@@ -117,33 +117,15 @@
                             <Grid RowDefinitions="Auto,Auto"
                                   ColumnDefinitions="Auto,*,Auto"
                                   Style="{StaticResource M3MetadataCardGrid}">
-                                <Border Grid.RowSpan="2"
-                                        Style="{StaticResource M3MetadataFileThumbnailSurface}">
-                                    <Grid>
-                                        <Image Source="{Binding Thumbnail.Source}"
-                                               Aspect="AspectFill"
-                                               IsVisible="{Binding IsPreviewImageVisible}" />
-
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                           Style="{StaticResource M3FolderThumbnailIcon}" />
-
-                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
-                                                           IsVisible="{Binding Thumbnail.IsLoading}"
-                                                           Style="{StaticResource M3ThumbnailActivityIndicator}" />
-
-                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
-                                               IsVisible="{Binding IsPlaceholderTextVisible}"
-                                               Style="{StaticResource M3DynamicThumbnailPlaceholder}" />
-                                    </Grid>
-                                </Border>
-
-                                <Border Grid.Column="0"
-                                        IsVisible="{Binding IsSelected}"
-                                        Style="{StaticResource M3FileListSelectionMark}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
-                                                       Style="{StaticResource M3FileSelectionCheckIcon}" />
-                                </Border>
+                                <controls:FileThumbnailView Grid.RowSpan="2"
+                                                            SurfaceStyleResourceKey="M3MetadataFileThumbnailSurface"
+                                                            ThumbnailSource="{Binding Thumbnail.Source}"
+                                                            IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                            IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                            IsLoading="{Binding Thumbnail.IsLoading}"
+                                                            PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                            IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                            IsSelected="{Binding IsSelected}" />
 
                                 <VerticalStackLayout Grid.Column="1"
                                                      Style="{StaticResource M3CardTextStack}">
@@ -201,37 +183,17 @@
                         <Border Style="{StaticResource M3SelectableTrashTileCard}">
                             <Grid RowDefinitions="Auto,Auto,Auto"
                                   Style="{StaticResource M3FileTileContentGrid}">
-                                <Border Style="{StaticResource M3TrashTilePreviewSurface}">
-                                    <Grid>
-                                        <Image Source="{Binding Thumbnail.Source}"
-                                               Aspect="AspectFill"
-                                               IsVisible="{Binding IsPreviewImageVisible}" />
-
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Folder}"
-                                                           IsVisible="{Binding IsFolderThumbnailVisible}"
-                                                           Style="{StaticResource M3FolderThumbnailIcon}" />
-
-                                        <ActivityIndicator IsRunning="{Binding Thumbnail.IsLoading}"
-                                                           IsVisible="{Binding Thumbnail.IsLoading}"
-                                                           Style="{StaticResource M3ThumbnailActivityIndicator}" />
-
-                                        <Label Text="{Binding Thumbnail.PlaceholderText}"
-                                               IsVisible="{Binding IsPlaceholderTextVisible}"
-                                               Style="{StaticResource M3DynamicThumbnailPlaceholder}" />
-
-                                        <Border Style="{StaticResource M3FileTileOverlayChip}">
-                                            <Label Text="{Binding BadgeText}"
-                                                   Style="{StaticResource M3ChipLabel}" />
-                                        </Border>
-                                    </Grid>
-                                </Border>
-
-                                <Border Grid.Row="0"
-                                        IsVisible="{Binding IsSelected}"
-                                        Style="{StaticResource M3FileTileSelectionMark}">
-                                    <controls:IconView IconData="{x:Static controls:IconPathData.Check}"
-                                                       Style="{StaticResource M3FileSelectionCheckIcon}" />
-                                </Border>
+                                <controls:FileThumbnailView SurfaceStyleResourceKey="M3TrashTilePreviewSurface"
+                                                            SelectionMarkStyleResourceKey="M3FileTileSelectionMark"
+                                                            ThumbnailSource="{Binding Thumbnail.Source}"
+                                                            IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                            IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                            IsLoading="{Binding Thumbnail.IsLoading}"
+                                                            PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                            IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                            IsSelected="{Binding IsSelected}"
+                                                            BadgeText="{Binding BadgeText}"
+                                                            IsBadgeVisible="True" />
 
                                 <VerticalStackLayout Grid.Row="1"
                                                      Style="{StaticResource M3FileTileTextStack}">

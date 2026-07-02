@@ -317,6 +317,38 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_entry_thumbnails_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:FileThumbnailView"));
+            Assert.Contains("SurfaceStyleResourceKey=\"M3FilePreviewSurface\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("SelectionMarkStyleResourceKey=\"M3FileTileSelectionMark\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);
+
+            Assert.Equal(2, CountOccurrences(trashPage, "<controls:FileThumbnailView"));
+            Assert.Contains("SurfaceStyleResourceKey=\"M3MetadataFileThumbnailSurface\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("SurfaceStyleResourceKey=\"M3TrashTilePreviewSurface\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("BadgeText=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsBadgeVisible=\"True\"", trashPage, StringComparison.Ordinal);
+
+            string[] pages =
+            [
+                mainPage,
+                trashPage,
+            ];
+
+            foreach (string page in pages)
+            {
+                Assert.DoesNotContain("<Image Source=\"{Binding Thumbnail.Source}\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3ThumbnailActivityIndicator", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3DynamicThumbnailPlaceholder", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3FileSelectionCheckIcon", page, StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

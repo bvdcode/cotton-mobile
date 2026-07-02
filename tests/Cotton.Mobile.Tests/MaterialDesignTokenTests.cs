@@ -2209,14 +2209,21 @@ namespace Cotton.Mobile.Tests
                 "TertiaryDetailTextOpacityAnimationName = \"M3SettingsInfoTertiaryDetailOpacity\"",
                 settingsInfoItemView,
                 StringComparison.Ordinal);
+            Assert.Contains(
+                "TrailingChipOpacityAnimationName = \"M3SettingsInfoTrailingChipOpacity\"",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
             Assert.Contains("OnPrimaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnSecondaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("OnTertiaryDetailTextVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("OnTrailingChipVisibilityPropertyChanged", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompletePrimaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTrailingChipVisibility", settingsInfoItemView, StringComparison.Ordinal);
+            Assert.Contains("ResolveTrailingChipLayoutVisibility", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconFrame Grid.RowSpan", securitySettingsPage, StringComparison.Ordinal);
@@ -2236,6 +2243,10 @@ namespace Cotton.Mobile.Tests
                 StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "_tertiaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(tertiaryDetailText)",
+                settingsInfoItemView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_trailingChip.IsVisible = isTrailingTextVisible",
                 settingsInfoItemView,
                 StringComparison.Ordinal);
         }

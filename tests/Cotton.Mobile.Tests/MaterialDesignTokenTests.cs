@@ -167,6 +167,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_icon_primitives_animate_color_state()
+        {
+            string iconView = LoadText(Path.Combine(ControlsDirectoryPath, "IconView.cs"));
+            string iconFrame = LoadText(Path.Combine(ControlsDirectoryPath, "IconFrame.cs"));
+            string interaction = LoadText(InteractionResourcePath);
+
+            Assert.Contains("IconColorAnimationName = \"M3IconViewColor\"", iconView, StringComparison.Ordinal);
+            Assert.Contains("FrameBackgroundAnimationName = \"M3IconFrameBackground\"", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("BorderColorAnimationName = \"M3IconFrameBorderColor\"", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", iconView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("ResolveCurrentIconColor", iconView, StringComparison.Ordinal);
+            Assert.Contains("ResolveCurrentBorderColor", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", iconView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", iconFrame, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_path.Fill = new SolidColorBrush(IconColor);", iconView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_container.BackgroundColor = FrameBackgroundColor;", iconFrame, StringComparison.Ordinal);
+            Assert.DoesNotContain("_container.Stroke = new SolidColorBrush(BorderColor);", iconFrame, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Material_progress_styles_use_quiet_tonal_role()
         {
             XDocument styles = LoadResourceDictionary(StylesResourcePath);

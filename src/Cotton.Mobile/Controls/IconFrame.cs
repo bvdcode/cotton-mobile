@@ -7,6 +7,9 @@ namespace Cotton.Mobile.Controls
 {
     public class IconFrame : ContentView
     {
+        private const string BorderColorAnimationName = "M3IconFrameBorderColor";
+        private const string FrameBackgroundAnimationName = "M3IconFrameBackground";
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -65,6 +68,7 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _container;
         private readonly IconView _icon;
+        private bool _hasAppliedVisualState;
 
         public IconFrame()
         {
@@ -153,13 +157,36 @@ namespace Cotton.Mobile.Controls
             {
                 CornerRadius = new CornerRadius(FrameCornerRadius),
             };
-            _container.BackgroundColor = FrameBackgroundColor;
-            _container.Stroke = new SolidColorBrush(BorderColor);
+            MaterialMotion.UpdateBackgroundColor(
+                _container,
+                FrameBackgroundColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                FrameBackgroundAnimationName,
+                _hasAppliedVisualState);
+            MaterialMotion.UpdateColor(
+                _container,
+                ResolveCurrentBorderColor(),
+                BorderColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                BorderColorAnimationName,
+                _hasAppliedVisualState,
+                color => _container.Stroke = new SolidColorBrush(color));
             _container.StrokeThickness = BorderWidth;
 
             _icon.IconData = IconData;
             _icon.IconColor = IconColor;
             _icon.IconSize = IconSize;
+            _hasAppliedVisualState = true;
+        }
+
+        private Color ResolveCurrentBorderColor()
+        {
+            if (_container.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return BorderColor;
         }
     }
 }

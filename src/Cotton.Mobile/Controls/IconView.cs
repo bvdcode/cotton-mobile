@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
 {
     public class IconView : ContentView
     {
+        private const string IconColorAnimationName = "M3IconViewColor";
+
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
             typeof(Geometry),
@@ -30,6 +32,7 @@ namespace Cotton.Mobile.Controls
             defaultValueCreator: _ => MaterialResources.Get<double>("M3FileInlineIconSize"));
 
         private readonly MauiPath _path;
+        private bool _hasAppliedVisualState;
 
         public IconView()
         {
@@ -81,7 +84,25 @@ namespace Cotton.Mobile.Controls
             _path.WidthRequest = IconSize;
             _path.HeightRequest = IconSize;
             _path.Data = IconData;
-            _path.Fill = new SolidColorBrush(IconColor);
+            MaterialMotion.UpdateColor(
+                _path,
+                ResolveCurrentIconColor(),
+                IconColor,
+                MaterialResources.Get<int>("M3MotionStatusDuration"),
+                IconColorAnimationName,
+                _hasAppliedVisualState,
+                color => _path.Fill = new SolidColorBrush(color));
+            _hasAppliedVisualState = true;
+        }
+
+        private Color ResolveCurrentIconColor()
+        {
+            if (_path.Fill is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return IconColor;
         }
     }
 }

@@ -26,6 +26,7 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -388,12 +389,12 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
+            string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
 
-            Assert.Equal(2, CountOccurrences(mainPage, "<controls:ChipView"));
-            Assert.Contains("Text=\"{Binding LocalCopyStatus}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("Text=\"{Binding OfflineAttentionStatus}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3AccentOutlineChip\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AccentOutlineChip}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 
@@ -404,6 +405,29 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
             Assert.Contains("Text=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", backupSetupPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Main_file_tile_metadata_uses_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+
+            Assert.Contains("<controls:FileTileMetadataView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Detail=\"{Binding Details}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("LocalCopyStatus=\"{Binding LocalCopyStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsLocalCopyVisible=\"{Binding HasLocalCopy}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("OfflineAttentionStatus=\"{Binding OfflineAttentionStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsOfflineAttentionVisible=\"{Binding IsOfflineAttentionVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3FileTileTextStack\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultMetadataGridStyleResourceKey = \"M3FileTileMetadataGrid\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardSupportingStrongLine\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardMetaLine\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileTileTextStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileTileMetadataGrid}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -343,29 +343,13 @@
                                                                                 IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
                                                                                 IsSelected="{Binding IsSelected}" />
 
-                                                    <VerticalStackLayout Grid.Row="1"
-                                                                         Style="{StaticResource M3FileTileTextStack}">
-                                                        <Label Text="{Binding Name}"
-                                                               Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                                        <Grid ColumnDefinitions="*,Auto,Auto"
-                                                              Style="{StaticResource M3FileTileMetadataGrid}">
-                                                            <Label Text="{Binding Details}"
-                                                                   Style="{StaticResource M3CardMetaLine}" />
-
-                                                            <controls:ChipView Grid.Column="1"
-                                                                               Text="{Binding LocalCopyStatus}"
-                                                                               IsVisible="{Binding HasLocalCopy}"
-                                                                               ChipStyleResourceKey="M3AccentOutlineChip"
-                                                                               LabelStyleResourceKey="M3AccentOutlineChipLabel" />
-
-                                                            <controls:ChipView Grid.Column="2"
-                                                                               Text="{Binding OfflineAttentionStatus}"
-                                                                               IsVisible="{Binding IsOfflineAttentionVisible}"
-                                                                               ChipStyleResourceKey="M3FileAttentionChip"
-                                                                               LabelStyleResourceKey="M3ErrorChipLabel" />
-                                                        </Grid>
-                                                    </VerticalStackLayout>
+                                                    <controls:FileTileMetadataView Grid.Row="1"
+                                                                                   Title="{Binding Name}"
+                                                                                   Detail="{Binding Details}"
+                                                                                   LocalCopyStatus="{Binding LocalCopyStatus}"
+                                                                                   IsLocalCopyVisible="{Binding HasLocalCopy}"
+                                                                                   OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
+                                                                                   IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}" />
 
                                                     <controls:TouchSurfaceView Grid.RowSpan="2"
                                                                                Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"

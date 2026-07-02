@@ -21,17 +21,15 @@
 
         <controls:DarkViewerSurfaceView Grid.Row="1"
                                         x:Name="ImageSurface">
-            <Image x:Name="PreviewImage"
-                   Source="{Binding ImageSource}"
-                   Aspect="AspectFit"
-                   Style="{StaticResource M3ViewerImage}">
-                <Image.GestureRecognizers>
+            <controls:ViewerImageView x:Name="PreviewImage"
+                                      Source="{Binding ImageSource}">
+                <controls:ViewerImageView.GestureRecognizers>
                     <PinchGestureRecognizer PinchUpdated="OnImagePinchUpdated" />
                     <PanGestureRecognizer PanUpdated="OnImagePanUpdated" />
                     <TapGestureRecognizer NumberOfTapsRequired="2"
                                           Tapped="OnImageDoubleTapped" />
-                </Image.GestureRecognizers>
-            </Image>
+                </controls:ViewerImageView.GestureRecognizers>
+            </controls:ViewerImageView>
 
             <controls:ViewerStatusOverlayView Text="{Binding Status}"
                                               IsVisible="{Binding IsStatusVisible}"

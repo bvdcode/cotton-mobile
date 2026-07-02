@@ -20,9 +20,7 @@
                             SecondaryCommand="{Binding OpenExternallyCommand}"
                             SecondaryDescription="Open PDF" />
 
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
-              Style="{StaticResource M3DocumentViewerSurface}">
+        <controls:DocumentViewerBodyView Grid.Row="1">
             <controls:ViewerInfoHeaderView Details="{Binding Details}"
                                            Status="{Binding Status}"
                                            IsStatusVisible="{Binding IsStatusVisible}"
@@ -55,6 +53,6 @@
                                          CardStyleResourceKey="M3CenteredPdfEmptyStateCard"
                                          IconFrameStyleResourceKey="M3PdfEmptyStateIconFrame" />
             </Grid>
-        </Grid>
+        </controls:DocumentViewerBodyView>
     </Grid>
 </ContentPage>

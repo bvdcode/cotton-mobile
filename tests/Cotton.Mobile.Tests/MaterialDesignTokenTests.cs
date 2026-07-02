@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Tests
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string DiagnosticsItemViewPath = "src/Cotton.Mobile/Controls/DiagnosticsItemView.cs";
         private const string TextDocumentContentViewPath = "src/Cotton.Mobile/Controls/TextDocumentContentView.cs";
+        private const string DocumentViewerBodyViewPath = "src/Cotton.Mobile/Controls/DocumentViewerBodyView.cs";
         private const string TrashEntryCardViewBasePath = "src/Cotton.Mobile/Controls/TrashEntryCardViewBase.cs";
         private const string TrashListEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashListEntryCardView.cs";
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
@@ -1148,8 +1149,12 @@ namespace Cotton.Mobile.Tests
         {
             string textViewerPage = LoadText(TextViewerPagePath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
+            string documentViewerBodyView = LoadText(DocumentViewerBodyViewPath);
             string viewerInfoHeaderView = LoadText(ViewerInfoHeaderViewPath);
 
+            Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("GridStyleResourceKey=\"M3TextViewerContentGrid\"", textViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\">", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerInfoHeaderView Details=\"{Binding Details}\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("Status=\"{Binding Status}\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", textViewerPage, StringComparison.Ordinal);
@@ -1160,6 +1165,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultStackStyleResourceKey = \"M3ScreenHeaderTextStack\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailsStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", viewerInfoHeaderView, StringComparison.Ordinal);
+            Assert.Contains("public class DocumentViewerBodyView", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3DocumentViewerSurface\"", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _grid.Children", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", documentViewerBodyView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,*\"", textViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,*\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3ScreenHeaderTextStack}\">", textViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3PdfHeaderStack}\">", pdfViewerPage, StringComparison.Ordinal);
         }

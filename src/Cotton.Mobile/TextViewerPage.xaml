@@ -17,9 +17,8 @@
                                   SecondaryCommand="{Binding MoreCommand}"
                                   SecondaryDescription="More text actions" />
 
-        <Grid Grid.Row="1"
-              RowDefinitions="Auto,*"
-              Style="{StaticResource M3TextViewerContentGrid}">
+        <controls:DocumentViewerBodyView Grid.Row="1"
+                                         GridStyleResourceKey="M3TextViewerContentGrid">
             <controls:ViewerInfoHeaderView Details="{Binding Details}"
                                            Status="{Binding Status}"
                                            IsStatusVisible="{Binding IsStatusVisible}" />
@@ -28,6 +27,6 @@
                                       CardStyleResourceKey="M3TextViewerSurface">
                 <controls:TextDocumentContentView Text="{Binding Content}" />
             </controls:ContentCardView>
-        </Grid>
+        </controls:DocumentViewerBodyView>
     </Grid>
 </ContentPage>

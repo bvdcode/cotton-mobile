@@ -9,58 +9,56 @@
     <Grid x:Name="RootLayout"
           RowDefinitions="*,Auto,Auto"
           Style="{StaticResource M3MainPageRootGrid}">
-        <ScrollView Grid.Row="0"
-                    IsVisible="{Binding Display.IsBrandHeaderVisible}">
-            <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
-                <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
-                                     Style="{StaticResource M3AuthShellStack}">
-                    <controls:BrandHeaderView Source="cotton_brand_mark.svg"
-                                              Title="Cotton Cloud"
-                                              SemanticDescription="Cotton Cloud" />
-                </VerticalStackLayout>
-
-                <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
-                                            IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                            Text="{Binding Display.LoadingMessage}"
-                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
-
-                <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
-                                              InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                              Status="{Binding Display.Status}"
-                                              IsStatusVisible="{Binding Display.IsStatusVisible}"
-                                              IsInputEnabled="{Binding Display.IsInputEnabled}"
-                                              ConnectCommand="{Binding ConnectCommand}" />
-
-                <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                                            IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                            Text="Waiting for browser approval"
-                                            DetailText="{Binding Display.AuthorizationProgressMessage}"
-                                            ActionIconData="{x:Static controls:IconPathData.Close}"
-                                            ActionCommand="{Binding CancelAuthorizationCommand}"
-                                            IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                            IsActionVisible="True"
-                                            ActionSemanticDescription="Cancel browser approval"
-                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
-                                            TextStyleResourceKey="M3CardSupportingStrong" />
-
-                <HorizontalStackLayout IsVisible="{Binding Display.IsLegalFooterVisible}"
-                                       Style="{StaticResource M3LegalFooterBar}">
-                    <controls:TextAction Text="Privacy"
-                                         Command="{Binding PrivacyPolicyCommand}" />
-                </HorizontalStackLayout>
+        <controls:ScreenScrollBodyView Grid.Row="0"
+                                       IsVisible="{Binding Display.IsBrandHeaderVisible}"
+                                       StackStyleResourceKey="M3MainContentStack">
+            <VerticalStackLayout IsVisible="{Binding Display.IsBrandHeaderVisible}"
+                                 Style="{StaticResource M3AuthShellStack}">
+                <controls:BrandHeaderView Source="cotton_brand_mark.svg"
+                                          Title="Cotton Cloud"
+                                          SemanticDescription="Cotton Cloud" />
             </VerticalStackLayout>
-        </ScrollView>
+
+            <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
+                                        IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                        Text="{Binding Display.LoadingMessage}"
+                                        ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
+
+            <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
+                                          InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                          Status="{Binding Display.Status}"
+                                          IsStatusVisible="{Binding Display.IsStatusVisible}"
+                                          IsInputEnabled="{Binding Display.IsInputEnabled}"
+                                          ConnectCommand="{Binding ConnectCommand}" />
+
+            <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                                        IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                        Text="Waiting for browser approval"
+                                        DetailText="{Binding Display.AuthorizationProgressMessage}"
+                                        ActionIconData="{x:Static controls:IconPathData.Close}"
+                                        ActionCommand="{Binding CancelAuthorizationCommand}"
+                                        IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                        IsActionVisible="True"
+                                        ActionSemanticDescription="Cancel browser approval"
+                                        ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
+                                        TextStyleResourceKey="M3CardSupportingStrong" />
+
+            <HorizontalStackLayout IsVisible="{Binding Display.IsLegalFooterVisible}"
+                                   Style="{StaticResource M3LegalFooterBar}">
+                <controls:TextAction Text="Privacy"
+                                     Command="{Binding PrivacyPolicyCommand}" />
+            </HorizontalStackLayout>
+        </controls:ScreenScrollBodyView>
 
         <RefreshView Grid.Row="0"
                      IsVisible="{Binding Display.IsProfileVisible}"
                      Command="{Binding RefreshFilesCommand}"
                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
-        <ScrollView>
-            <VerticalStackLayout Style="{StaticResource M3MainContentStack}">
+            <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
                 <VerticalStackLayout IsVisible="{Binding Display.IsProfileVisible}"
                                      Style="{StaticResource M3FileBrowserProfileStack}">
-                        <VerticalStackLayout x:Name="FileBrowserContent"
-                                             Style="{StaticResource M3FileBrowserContentStack}">
+                    <VerticalStackLayout x:Name="FileBrowserContent"
+                                         Style="{StaticResource M3FileBrowserContentStack}">
                             <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
                                                             PathText="{Binding Display.FilesPath}"
                                                             IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
@@ -221,10 +219,9 @@
                                     </DataTemplate>
                                 </controls:WrappedItemsView.ItemTemplate>
                             </controls:WrappedItemsView>
-                        </VerticalStackLayout>
+                    </VerticalStackLayout>
                 </VerticalStackLayout>
-            </VerticalStackLayout>
-        </ScrollView>
+            </controls:ScreenScrollBodyView>
         </RefreshView>
 
         <controls:FloatingActionButtonView Grid.Row="1"

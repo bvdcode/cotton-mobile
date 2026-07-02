@@ -1857,6 +1857,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Main_screen_scroll_bodies_use_reusable_material_shell()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string screenScrollBodyView = LoadText(ScreenScrollBodyViewPath);
+
+            Assert.Contains("public class ScreenScrollBodyView", screenScrollBodyView, StringComparison.Ordinal);
+            Assert.Contains("StackStyleResourceKeyProperty", screenScrollBodyView, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:ScreenScrollBodyView"));
+            Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(mainPage, "StackStyleResourceKey=\"M3MainContentStack\""));
+            Assert.DoesNotContain("<ScrollView", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3MainContentStack}\">", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

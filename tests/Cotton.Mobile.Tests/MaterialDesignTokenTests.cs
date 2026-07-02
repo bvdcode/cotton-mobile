@@ -1034,7 +1034,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultRefreshStyleResourceKey = \"M3MaterialRefreshView\"", materialRefreshView, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, DefaultRefreshStyleResourceKey)", materialRefreshView, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"RefreshView\" x:Key=\"M3RefreshViewBase\">", styles, StringComparison.Ordinal);
-            Assert.Contains("<Setter Property=\"RefreshColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}\" />", styles, StringComparison.Ordinal);
+            Assert.Contains("<Setter Property=\"RefreshColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}\" />", styles, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"RefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"controls:MaterialRefreshView\" x:Key=\"M3MaterialRefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("<RefreshView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);

@@ -24,176 +24,165 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding AppLockTitle}"
-                                                        StatusText="{Binding AppLockStatusText}"
-                                                        DetailText="{Binding AppLockDetailText}" />
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="{Binding AppLockTitle}"
+                                                    StatusText="{Binding AppLockStatusText}"
+                                                    DetailText="{Binding AppLockDetailText}" />
 
-                    <controls:ToggleSwitch IsEnabled="{Binding CanToggleAppLock}"
-                                           IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
+                <controls:ToggleSwitch IsEnabled="{Binding CanToggleAppLock}"
+                                       IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
+            </controls:SettingsCardView>
+
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="{Binding DeviceUnlockTitle}"
+                                                    StatusText="{Binding DeviceUnlockStatusText}"
+                                                    DetailText="{Binding DeviceUnlockDetailText}" />
+
+                <controls:ActionListItemView Text="{Binding DeviceUnlockActionText}"
+                                             LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Check}"
+                                             Command="{Binding VerifyDeviceUnlockCommand}"
+                                             IsActionEnabled="{Binding CanVerifyDeviceUnlock}"
+                                             IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             SemanticDescription="{Binding DeviceUnlockActionText}" />
+            </controls:SettingsCardView>
+
+            <controls:SettingsCardView IsVisible="{Binding IsPermissionLedgerVisible}">
+                <controls:SettingsSummaryHeaderView Title="{Binding PermissionLedgerTitle}"
+                                                    StatusText="{Binding PermissionLedgerStatusText}"
+                                                    DetailText="{Binding PermissionLedgerDetailText}" />
+
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
+                                     BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  RowDefinitions="Auto,Auto"
+                                  Style="{StaticResource M3SettingsListItemGrid}">
+                                <controls:IconFrame Grid.RowSpan="2"
+                                                    IconData="{x:Static controls:IconPathData.Check}"
+                                                    Style="{StaticResource M3CardSecurityThumbnailFrame}">
+                                    <controls:IconFrame.Triggers>
+                                        <DataTrigger TargetType="controls:IconFrame"
+                                                     Binding="{Binding NeedsAttention}"
+                                                     Value="True">
+                                            <Setter Property="IconData"
+                                                    Value="{x:Static controls:IconPathData.Error}" />
+                                            <Setter Property="Style"
+                                                    Value="{StaticResource M3CardErrorThumbnailFrame}" />
+                                        </DataTrigger>
+                                    </controls:IconFrame.Triggers>
+                                </controls:IconFrame>
+
+                                <Label Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                                <controls:ChipView Grid.Column="2"
+                                                   Text="{Binding StatusText}"
+                                                   ChipStyleResourceKey="M3TrailingChip">
+                                    <controls:ChipView.Triggers>
+                                        <DataTrigger TargetType="controls:ChipView"
+                                                     Binding="{Binding NeedsAttention}"
+                                                     Value="True">
+                                            <Setter Property="LabelStyleResourceKey"
+                                                    Value="M3ErrorChipLabel" />
+                                        </DataTrigger>
+                                    </controls:ChipView.Triggers>
+                                </controls:ChipView>
+
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding DetailText}"
+                                       Style="{StaticResource M3CardSupportingBlock}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding DeviceUnlockTitle}"
-                                                        StatusText="{Binding DeviceUnlockStatusText}"
-                                                        DetailText="{Binding DeviceUnlockDetailText}" />
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="{Binding AccountSessionsTitle}"
+                                                    StatusText="{Binding AccountSessionsStatusText}"
+                                                    DetailText="{Binding AccountSessionsDetailText}" />
 
-                    <controls:ActionListItemView Text="{Binding DeviceUnlockActionText}"
-                                                 LeadingIconData="{x:Static controls:IconPathData.Device}"
-                                                 IsLeadingIconVisible="True"
-                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
-                                                 ActionIconData="{x:Static controls:IconPathData.Check}"
-                                                 Command="{Binding VerifyDeviceUnlockCommand}"
-                                                 IsActionEnabled="{Binding CanVerifyDeviceUnlock}"
-                                                 IsVisible="{Binding IsDeviceUnlockActionVisible}"
-                                                 ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
-                                                 GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 SemanticDescription="{Binding DeviceUnlockActionText}" />
+                <controls:ActionListItemView Text="{Binding RevokeCurrentSessionActionText}"
+                                             LeadingIconData="{x:Static controls:IconPathData.Device}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Delete}"
+                                             Command="{Binding RevokeCurrentSessionCommand}"
+                                             IsActionEnabled="{Binding CanRevokeCurrentSession}"
+                                             IsVisible="{Binding IsRevokeCurrentSessionVisible}"
+                                             ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
+
+                <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
+                                     IsVisible="{Binding IsAccountSessionsEmptyVisible}">
+                    <Label Text="{Binding AccountSessionsEmptyTitle}"
+                           Style="{StaticResource M3CardSupportingStrongLine}" />
+
+                    <Label Text="{Binding AccountSessionsEmptyDetails}"
+                           Style="{StaticResource M3CardSupportingBlock}" />
                 </VerticalStackLayout>
-            </Border>
 
-            <Border Style="{StaticResource M3ContentCard}"
-                    IsVisible="{Binding IsPermissionLedgerVisible}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding PermissionLedgerTitle}"
-                                                        StatusText="{Binding PermissionLedgerStatusText}"
-                                                        DetailText="{Binding PermissionLedgerDetailText}" />
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
+                                     IsVisible="{Binding IsAccountSessionsListVisible}"
+                                     BindableLayout.ItemsSource="{Binding AccountSessions}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="services:CottonAccountSessionListItem">
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  RowDefinitions="Auto,Auto,Auto,Auto"
+                                  Style="{StaticResource M3SettingsListItemGrid}">
+                                <controls:IconFrame Grid.RowSpan="4"
+                                                    IconData="{x:Static controls:IconPathData.Device}"
+                                                    Style="{StaticResource M3CardSecurityThumbnailFrame}" />
 
-                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                         BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="services:CottonPermissionLedgerItem">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      RowDefinitions="Auto,Auto"
-                                      Style="{StaticResource M3SettingsListItemGrid}">
-                                    <controls:IconFrame Grid.RowSpan="2"
-                                                        IconData="{x:Static controls:IconPathData.Check}"
-                                                        Style="{StaticResource M3CardSecurityThumbnailFrame}">
-                                        <controls:IconFrame.Triggers>
-                                            <DataTrigger TargetType="controls:IconFrame"
-                                                         Binding="{Binding NeedsAttention}"
-                                                         Value="True">
-                                                <Setter Property="IconData"
-                                                        Value="{x:Static controls:IconPathData.Error}" />
-                                                <Setter Property="Style"
-                                                        Value="{StaticResource M3CardErrorThumbnailFrame}" />
-                                            </DataTrigger>
-                                        </controls:IconFrame.Triggers>
-                                    </controls:IconFrame>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Title}"
+                                       Style="{StaticResource M3CardSupportingStrongLine}" />
 
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
+                                <controls:ChipView Grid.Column="2"
+                                                   Text="{Binding BadgeText}"
+                                                   ChipStyleResourceKey="M3TrailingChip" />
 
-                                    <controls:ChipView Grid.Column="2"
-                                                       Text="{Binding StatusText}"
-                                                       ChipStyleResourceKey="M3TrailingChip">
-                                        <controls:ChipView.Triggers>
-                                            <DataTrigger TargetType="controls:ChipView"
-                                                         Binding="{Binding NeedsAttention}"
-                                                         Value="True">
-                                                <Setter Property="LabelStyleResourceKey"
-                                                        Value="M3ErrorChipLabel" />
-                                            </DataTrigger>
-                                        </controls:ChipView.Triggers>
-                                    </controls:ChipView>
+                                <Label Grid.Row="1"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding DetailText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
 
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingBlock}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
+                                <Label Grid.Row="2"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding AccessText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+
+                                <Label Grid.Row="3"
+                                       Grid.Column="1"
+                                       Grid.ColumnSpan="2"
+                                       Text="{Binding DurationText}"
+                                       Style="{StaticResource M3CardSupportingLine}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding AccountSessionsTitle}"
-                                                        StatusText="{Binding AccountSessionsStatusText}"
-                                                        DetailText="{Binding AccountSessionsDetailText}" />
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="{Binding LogoutCacheCleanupTitle}"
+                                                    StatusText="{Binding LogoutCacheCleanupStatusText}"
+                                                    DetailText="{Binding LogoutCacheCleanupDetailText}" />
 
-                    <controls:ActionListItemView Text="{Binding RevokeCurrentSessionActionText}"
-                                                 LeadingIconData="{x:Static controls:IconPathData.Device}"
-                                                 IsLeadingIconVisible="True"
-                                                 LeadingIconFrameStyleResourceKey="M3CardSecurityThumbnailFrame"
-                                                 ActionIconData="{x:Static controls:IconPathData.Delete}"
-                                                 Command="{Binding RevokeCurrentSessionCommand}"
-                                                 IsActionEnabled="{Binding CanRevokeCurrentSession}"
-                                                 IsVisible="{Binding IsRevokeCurrentSessionVisible}"
-                                                 ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
-                                                 GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
-
-                    <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
-                                         IsVisible="{Binding IsAccountSessionsEmptyVisible}">
-                        <Label Text="{Binding AccountSessionsEmptyTitle}"
-                               Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                        <Label Text="{Binding AccountSessionsEmptyDetails}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </VerticalStackLayout>
-
-                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                         IsVisible="{Binding IsAccountSessionsListVisible}"
-                                         BindableLayout.ItemsSource="{Binding AccountSessions}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="services:CottonAccountSessionListItem">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
-                                      RowDefinitions="Auto,Auto,Auto,Auto"
-                                      Style="{StaticResource M3SettingsListItemGrid}">
-                                    <controls:IconFrame Grid.RowSpan="4"
-                                                        IconData="{x:Static controls:IconPathData.Device}"
-                                                        Style="{StaticResource M3CardSecurityThumbnailFrame}" />
-
-                                    <Label Grid.Column="1"
-                                           Text="{Binding Title}"
-                                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                    <controls:ChipView Grid.Column="2"
-                                                       Text="{Binding BadgeText}"
-                                                       ChipStyleResourceKey="M3TrailingChip" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding DetailText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-
-                                    <Label Grid.Row="2"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding AccessText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-
-                                    <Label Grid.Row="3"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding DurationText}"
-                                           Style="{StaticResource M3CardSupportingLine}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
-
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding LogoutCacheCleanupTitle}"
-                                                        StatusText="{Binding LogoutCacheCleanupStatusText}"
-                                                        DetailText="{Binding LogoutCacheCleanupDetailText}" />
-
-                    <controls:ToggleSwitch IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
-                                           IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
-                </VerticalStackLayout>
-            </Border>
+                <controls:ToggleSwitch IsEnabled="{Binding CanToggleLogoutCacheCleanup}"
+                                       IsToggled="{Binding IsLogoutCacheCleanupEnabled, Mode=TwoWay}" />
+            </controls:SettingsCardView>
         </VerticalStackLayout>
         </ScrollView>
     </Grid>

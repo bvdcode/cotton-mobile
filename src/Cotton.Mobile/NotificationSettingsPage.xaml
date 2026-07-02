@@ -32,82 +32,78 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsNeutralStatusVisible}" />
 
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="{Binding PermissionTitle}"
-                                                        StatusText="{Binding PermissionStatusText}"
-                                                        DetailText="{Binding PermissionDetailText}"
-                                                        StatusStyleResourceKey="M3CardTitle" />
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="{Binding PermissionTitle}"
+                                                    StatusText="{Binding PermissionStatusText}"
+                                                    DetailText="{Binding PermissionDetailText}"
+                                                    StatusStyleResourceKey="M3CardTitle" />
 
-                    <controls:ActionListItemView Text="{Binding PermissionActionText}"
-                                                 LeadingIconData="{x:Static controls:IconPathData.Activity}"
-                                                 IsLeadingIconVisible="True"
-                                                 LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
-                                                 ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
-                                                 Command="{Binding PermissionActionCommand}"
-                                                 IsVisible="{Binding IsPermissionActionVisible}"
+                <controls:ActionListItemView Text="{Binding PermissionActionText}"
+                                             LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                             Command="{Binding PermissionActionCommand}"
+                                             IsVisible="{Binding IsPermissionActionVisible}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             SemanticDescription="{Binding PermissionActionText}" />
+            </controls:SettingsCardView>
+
+            <controls:SettingsCardView>
+                <controls:SettingsSummaryHeaderView Title="Server push"
+                                                    StatusText="{Binding RemotePushStatusText}"
+                                                    IsStatusVisible="{Binding IsRemotePushStatusVisible}"
+                                                    IsDetailVisible="False" />
+
+                <Grid IsVisible="{Binding IsRemotePushUnavailable}"
+                      ColumnDefinitions="Auto,*"
+                      RowDefinitions="Auto,Auto,Auto"
+                      Style="{StaticResource M3SettingsSummaryGrid}">
+                    <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
+                                       Style="{StaticResource M3AttentionStatusIconTop}" />
+
+                    <Label Grid.Column="1"
+                           Text="{Binding RemotePushUnavailableTitle}"
+                           Style="{StaticResource M3CardTitle}" />
+
+                    <Label Grid.Row="1"
+                           Grid.ColumnSpan="2"
+                           Text="{Binding RemotePushUnavailableDetail}"
+                           Style="{StaticResource M3CardSupportingBlock}" />
+
+                    <controls:ActionListItemView Grid.Row="2"
+                                                 Grid.ColumnSpan="2"
+                                                 Text="Retry server push"
+                                                 ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                                 Command="{Binding LoadCommand}"
                                                  GridStyleResourceKey="M3SettingsListItemGrid"
-                                                 ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
-                                                 SemanticDescription="{Binding PermissionActionText}" />
+                                                 SemanticDescription="Retry server push" />
+                </Grid>
+
+                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
+                                     IsVisible="{Binding HasRemotePushPreferences}"
+                                     BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
+                            <Grid ColumnDefinitions="*,Auto"
+                                  Style="{StaticResource M3SettingsSummaryGrid}">
+                                <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
+                                    <Label Text="{Binding Title}"
+                                           Style="{StaticResource M3LabelLargeLine}" />
+
+                                    <Label Text="{Binding DetailText}"
+                                           Style="{StaticResource M3CardSupportingBlock}" />
+                                </VerticalStackLayout>
+
+                                <controls:ToggleSwitch Grid.Column="1"
+                                                       IsEnabled="{Binding CanToggle}"
+                                                       IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
+                            </Grid>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
-            </Border>
-
-            <Border Style="{StaticResource M3ContentCard}">
-                <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <controls:SettingsSummaryHeaderView Title="Server push"
-                                                        StatusText="{Binding RemotePushStatusText}"
-                                                        IsStatusVisible="{Binding IsRemotePushStatusVisible}"
-                                                        IsDetailVisible="False" />
-
-                    <Grid IsVisible="{Binding IsRemotePushUnavailable}"
-                          ColumnDefinitions="Auto,*"
-                          RowDefinitions="Auto,Auto,Auto"
-                          Style="{StaticResource M3SettingsSummaryGrid}">
-                        <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                           Style="{StaticResource M3AttentionStatusIconTop}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding RemotePushUnavailableTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Grid.Row="1"
-                               Grid.ColumnSpan="2"
-                               Text="{Binding RemotePushUnavailableDetail}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-
-                        <controls:ActionListItemView Grid.Row="2"
-                                                     Grid.ColumnSpan="2"
-                                                     Text="Retry server push"
-                                                     ActionIconData="{x:Static controls:IconPathData.Refresh}"
-                                                     Command="{Binding LoadCommand}"
-                                                     GridStyleResourceKey="M3SettingsListItemGrid"
-                                                     SemanticDescription="Retry server push" />
-                    </Grid>
-
-                    <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
-                                         IsVisible="{Binding HasRemotePushPreferences}"
-                                         BindableLayout.ItemsSource="{Binding RemotePushPreferences}">
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">
-                                <Grid ColumnDefinitions="*,Auto"
-                                      Style="{StaticResource M3SettingsSummaryGrid}">
-                                    <VerticalStackLayout Style="{StaticResource M3CardTextStack}">
-                                        <Label Text="{Binding Title}"
-                                               Style="{StaticResource M3LabelLargeLine}" />
-
-                                        <Label Text="{Binding DetailText}"
-                                               Style="{StaticResource M3CardSupportingBlock}" />
-                                    </VerticalStackLayout>
-
-                                    <controls:ToggleSwitch Grid.Column="1"
-                                                           IsEnabled="{Binding CanToggle}"
-                                                           IsToggled="{Binding IsEnabled, Mode=TwoWay}" />
-                                </Grid>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-                </VerticalStackLayout>
-            </Border>
+            </controls:SettingsCardView>
         </VerticalStackLayout>
         </ScrollView>
     </Grid>

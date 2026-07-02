@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Tests
         private const string FileTileMetadataViewPath = "src/Cotton.Mobile/Controls/FileTileMetadataView.cs";
         private const string MetadataCardViewPath = "src/Cotton.Mobile/Controls/MetadataCardView.cs";
         private const string MetadataCardHeaderViewPath = "src/Cotton.Mobile/Controls/MetadataCardHeaderView.cs";
+        private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
@@ -609,6 +610,26 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Label Text=\"{Binding PermissionLedgerTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding LogoutCacheCleanupTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Settings_cards_use_reusable_material_shell()
+        {
+            string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
+            string securitySettingsPage = LoadText(SecuritySettingsPagePath);
+            string settingsCardView = LoadText(SettingsCardViewPath);
+
+            Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:SettingsCardView"));
+            Assert.Equal(5, CountOccurrences(securitySettingsPage, "<controls:SettingsCardView"));
+            Assert.Contains("Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _stack.Children", settingsCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

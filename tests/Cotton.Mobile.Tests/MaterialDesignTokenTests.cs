@@ -430,6 +430,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Auth_shell_spacing_keeps_signed_out_screen_compact()
+        {
+            string spacing = LoadText(SpacingResourcePath);
+            string styles = LoadText(StylesResourcePath);
+
+            Assert.Contains("<Thickness x:Key=\"M3AuthShellMargin\">0,56,0,0</Thickness>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<Setter Property=\"Margin\" Value=\"{StaticResource M3AuthShellMargin}\" />", styles, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Thickness x:Key=\"M3AuthShellMargin\">0,88,0,0</Thickness>", spacing, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Auth_sign_in_panel_uses_reusable_material_control()
         {
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);

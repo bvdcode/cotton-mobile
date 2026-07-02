@@ -1155,6 +1155,7 @@ namespace Cotton.Mobile.Tests
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string selectionOverlayView = LoadText(SelectionOverlayViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:SelectionOverlayView"));
             Assert.Contains("new SelectionOverlayView", fileListEntryRowView, StringComparison.Ordinal);
@@ -1164,7 +1165,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OverlayStyleResourceKey = \"M3FileSelectionRowOverlay\"", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("DefaultOverlayStyleResourceKey = \"M3FileSelectionOverlay\"", selectionOverlayView, StringComparison.Ordinal);
             Assert.Contains("InputTransparent = true", selectionOverlayView, StringComparison.Ordinal);
-            Assert.Contains("_overlay.IsVisible = IsSelected", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("SelectionOverlayOpacityAnimationName = \"M3FileSelectionOverlayOpacity\"", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("OnSelectedPropertyChanged", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("M3MotionVisibleOpacity", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("M3MotionHiddenOpacity", selectionOverlayView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionSelectionDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_overlay.IsVisible = IsSelected", selectionOverlayView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.ColumnSpan=\"3\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.RowSpan=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileSelectionRowOverlay}\"", mainPage, StringComparison.Ordinal);
@@ -1227,8 +1235,10 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
+            string fileThumbnailView = LoadText(Path.Combine(ControlsDirectoryPath, "FileThumbnailView.cs"));
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             XDocument type = LoadResourceDictionary(TypeResourcePath);
             IReadOnlyDictionary<string, string> folderThumbnailIconSetters =
@@ -1253,6 +1263,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("SelectionMarkOpacityAnimationName = \"M3FileSelectionMarkOpacity\"", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("SelectionMarkScaleAnimationName = \"M3FileSelectionMarkScale\"", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("OnSelectedPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("M3MotionSelectionHiddenScale", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("<x:Double x:Key=\"M3MotionSelectionHiddenScale\">0.82</x:Double>", interaction, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionSelectionDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_selectionMark.IsVisible = IsSelected", fileThumbnailView, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:FileThumbnailView", trashPage, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", trashListEntryCardView, StringComparison.Ordinal);

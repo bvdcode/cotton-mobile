@@ -41,6 +41,16 @@ namespace Cotton.Mobile.Controls
             applyColor(targetColor);
         }
 
+        public static void SetDouble(
+            VisualElement element,
+            double targetValue,
+            string animationName,
+            Action<double> applyValue)
+        {
+            element.AbortAnimation(animationName);
+            applyValue(targetValue);
+        }
+
         public static void AnimateBackgroundColor(
             VisualElement element,
             Color targetColor,
@@ -97,6 +107,30 @@ namespace Cotton.Mobile.Controls
             animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
         }
 
+        public static void AnimateDouble(
+            VisualElement element,
+            double startValue,
+            double targetValue,
+            int duration,
+            string animationName,
+            Action<double> applyValue)
+        {
+            if (duration <= 0 || Math.Abs(startValue - targetValue) <= ColorTolerance)
+            {
+                SetDouble(element, targetValue, animationName, applyValue);
+                return;
+            }
+
+            element.AbortAnimation(animationName);
+
+            Animation animation = new(
+                progress => applyValue(InterpolateDouble(startValue, targetValue, progress)),
+                0d,
+                1d,
+                Easing.CubicOut);
+            animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
+        }
+
         public static void UpdateColor(
             VisualElement element,
             Color startColor,
@@ -115,6 +149,24 @@ namespace Cotton.Mobile.Controls
             SetColor(element, targetColor, animationName, applyColor);
         }
 
+        public static void UpdateDouble(
+            VisualElement element,
+            double startValue,
+            double targetValue,
+            int duration,
+            string animationName,
+            bool animate,
+            Action<double> applyValue)
+        {
+            if (animate)
+            {
+                AnimateDouble(element, startValue, targetValue, duration, animationName, applyValue);
+                return;
+            }
+
+            SetDouble(element, targetValue, animationName, applyValue);
+        }
+
         private static Color Interpolate(Color startColor, Color targetColor, double progress)
         {
             float red = InterpolateChannel(startColor.Red, targetColor.Red, progress);
@@ -123,6 +175,11 @@ namespace Cotton.Mobile.Controls
             float alpha = InterpolateChannel(startColor.Alpha, targetColor.Alpha, progress);
 
             return new Color(red, green, blue, alpha);
+        }
+
+        private static double InterpolateDouble(double startValue, double targetValue, double progress)
+        {
+            return startValue + ((targetValue - startValue) * progress);
         }
 
         private static float InterpolateChannel(float startValue, float targetValue, double progress)

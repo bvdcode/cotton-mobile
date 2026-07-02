@@ -6,13 +6,14 @@ namespace Cotton.Mobile.Controls
     public class SelectionOverlayView : ContentView
     {
         private const string DefaultOverlayStyleResourceKey = "M3FileSelectionOverlay";
+        private const string SelectionOverlayOpacityAnimationName = "M3FileSelectionOverlayOpacity";
 
         public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(
             nameof(IsSelected),
             typeof(bool),
             typeof(SelectionOverlayView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSelectedPropertyChanged);
 
         public static readonly BindableProperty OverlayStyleResourceKeyProperty = BindableProperty.Create(
             nameof(OverlayStyleResourceKey),
@@ -22,6 +23,7 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Border _overlay;
+        private bool _hasAppliedSelectionState;
 
         public SelectionOverlayView()
         {
@@ -29,7 +31,7 @@ namespace Cotton.Mobile.Controls
 
             InputTransparent = true;
             Content = _overlay;
-            UpdateVisualState();
+            UpdateVisualState(animateSelection: false);
         }
 
         public bool IsSelected
@@ -47,18 +49,43 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SelectionOverlayView view = (SelectionOverlayView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateSelection: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SelectionOverlayView view = (SelectionOverlayView)bindable;
+            view.UpdateVisualState(animateSelection: true);
+        }
+
+        private void UpdateVisualState(bool animateSelection)
         {
             string overlayStyleResourceKey = string.IsNullOrWhiteSpace(OverlayStyleResourceKey)
                 ? DefaultOverlayStyleResourceKey
                 : OverlayStyleResourceKey;
 
             _overlay.SetDynamicResource(StyleProperty, overlayStyleResourceKey);
-            _overlay.IsVisible = IsSelected;
-            IsVisible = IsSelected;
+            _overlay.IsVisible = true;
+            IsVisible = true;
+            UpdateSelectionState(animateSelection);
+        }
+
+        private void UpdateSelectionState(bool animateSelection)
+        {
+            double targetOpacity = IsSelected
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            bool shouldAnimate = animateSelection && _hasAppliedSelectionState;
+
+            MaterialMotion.UpdateDouble(
+                _overlay,
+                _overlay.Opacity,
+                targetOpacity,
+                MaterialResources.Get<int>("M3MotionSelectionDuration"),
+                SelectionOverlayOpacityAnimationName,
+                shouldAnimate,
+                opacity => _overlay.Opacity = opacity);
+            _hasAppliedSelectionState = true;
         }
     }
 }

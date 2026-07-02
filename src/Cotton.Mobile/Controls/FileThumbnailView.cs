@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultBadgeStyleResourceKey = "M3FileTileOverlayChip";
         private const string DefaultSelectionMarkStyleResourceKey = "M3FileListSelectionMark";
         private const string DefaultSurfaceStyleResourceKey = "M3FileListThumbnailSurface";
+        private const string SelectionMarkOpacityAnimationName = "M3FileSelectionMarkOpacity";
+        private const string SelectionMarkScaleAnimationName = "M3FileSelectionMarkScale";
 
         public static readonly BindableProperty ThumbnailSourceProperty = BindableProperty.Create(
             nameof(ThumbnailSource),
@@ -57,7 +59,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileThumbnailView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSelectedPropertyChanged);
 
         public static readonly BindableProperty FolderIconSizeProperty = BindableProperty.Create(
             nameof(FolderIconSize),
@@ -116,6 +118,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _selectionMark;
         private readonly IconView _selectionMarkIcon;
         private readonly Border _surface;
+        private bool _hasAppliedSelectionState;
 
         public FileThumbnailView()
         {
@@ -174,7 +177,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = root;
-            UpdateVisualState();
+            UpdateVisualState(animateSelection: false);
         }
 
         public ImageSource? ThumbnailSource
@@ -264,10 +267,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileThumbnailView view = (FileThumbnailView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateSelection: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileThumbnailView view = (FileThumbnailView)bindable;
+            view.UpdateVisualState(animateSelection: true);
+        }
+
+        private void UpdateVisualState(bool animateSelection)
         {
             string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
                 ? DefaultSurfaceStyleResourceKey
@@ -295,7 +304,8 @@ namespace Cotton.Mobile.Controls
             _loadingIndicator.IsVisible = IsLoading;
             _placeholder.Text = PlaceholderText ?? string.Empty;
             _placeholder.IsVisible = IsPlaceholderTextVisible;
-            _selectionMark.IsVisible = IsSelected;
+            _selectionMark.IsVisible = true;
+            UpdateSelectionState(animateSelection);
             _badge.Text = BadgeText ?? string.Empty;
             _badge.ChipStyleResourceKey = badgeStyleResourceKey;
             _badge.LabelStyleResourceKey = badgeLabelStyleResourceKey;
@@ -308,6 +318,36 @@ namespace Cotton.Mobile.Controls
             }
 
             _folderIcon.ClearValue(IconView.IconSizeProperty);
+        }
+
+        private void UpdateSelectionState(bool animateSelection)
+        {
+            double targetOpacity = IsSelected
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            double targetScale = IsSelected
+                ? MaterialMotion.Value("M3InteractionRestScale")
+                : MaterialMotion.Value("M3MotionSelectionHiddenScale");
+            bool shouldAnimate = animateSelection && _hasAppliedSelectionState;
+            int duration = MaterialResources.Get<int>("M3MotionSelectionDuration");
+
+            MaterialMotion.UpdateDouble(
+                _selectionMark,
+                _selectionMark.Opacity,
+                targetOpacity,
+                duration,
+                SelectionMarkOpacityAnimationName,
+                shouldAnimate,
+                opacity => _selectionMark.Opacity = opacity);
+            MaterialMotion.UpdateDouble(
+                _selectionMark,
+                _selectionMark.Scale,
+                targetScale,
+                duration,
+                SelectionMarkScaleAnimationName,
+                shouldAnimate,
+                scale => _selectionMark.Scale = scale);
+            _hasAppliedSelectionState = true;
         }
     }
 }

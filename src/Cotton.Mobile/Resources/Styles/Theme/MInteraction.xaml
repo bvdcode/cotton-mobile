@@ -16,11 +16,13 @@
     <x:Double x:Key="M3MotionActionSheetInitialOffset">72</x:Double>
     <x:Double x:Key="M3MotionDialogInitialScale">0.96</x:Double>
     <x:Double x:Key="M3MotionDialogExitScale">0.98</x:Double>
+    <x:Double x:Key="M3MotionSelectionHiddenScale">0.82</x:Double>
     <x:Double x:Key="M3SkeletonIdleOpacity">0.56</x:Double>
     <x:Double x:Key="M3SkeletonPulseOpacity">0.94</x:Double>
     <x:Int32 x:Key="M3MotionPressInDuration">72</x:Int32>
     <x:Int32 x:Key="M3MotionPressOutDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionFocusDuration">120</x:Int32>
+    <x:Int32 x:Key="M3MotionSelectionDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionModalEnterDuration">180</x:Int32>
     <x:Int32 x:Key="M3MotionModalExitDuration">120</x:Int32>
     <x:Int32 x:Key="M3MotionSkeletonEnterDuration">160</x:Int32>

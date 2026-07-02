@@ -320,7 +320,7 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="Border" x:Key="M3AccentOutlineChip">
+    <Style TargetType="Border" x:Key="M3LocalCopyChip">
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>

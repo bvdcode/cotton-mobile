@@ -2087,24 +2087,27 @@ namespace Cotton.Mobile.Tests
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             XDocument type = LoadResourceDictionary(TypeResourcePath);
-            IReadOnlyDictionary<string, string> accentOutlineChipSetters =
-                GetStyleSetters(styles, "M3AccentOutlineChip");
-            IReadOnlyDictionary<string, string> accentOutlineChipLabelSetters =
-                GetStyleSetters(type, "M3AccentOutlineChipLabel");
+            IReadOnlyDictionary<string, string> localCopyChipSetters =
+                GetStyleSetters(styles, "M3LocalCopyChip");
+            IReadOnlyDictionary<string, string> localCopyChipLabelSetters =
+                GetStyleSetters(type, "M3LocalCopyChipLabel");
 
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
-            Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3AccentOutlineChip\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3LocalCopyChip\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLocalChipLabelStyleResourceKey = \"M3LocalCopyChipLabel\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
-                accentOutlineChipSetters["Stroke"]);
+                localCopyChipSetters["Stroke"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3Accent}}",
-                accentOutlineChipLabelSetters["TextColor"]);
-            Assert.DoesNotContain("Style=\"{StaticResource M3AccentOutlineChip}\"", mainPage, StringComparison.Ordinal);
+                localCopyChipLabelSetters["TextColor"]);
+            Assert.DoesNotContain("M3AccentChipLabel", type.ToString(), StringComparison.Ordinal);
+            Assert.DoesNotContain("M3AccentOutlineChip", styles.ToString() + type.ToString() + fileTileMetadataView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3LocalCopyChip}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:ChipView", trashPage, StringComparison.Ordinal);
@@ -2201,7 +2204,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<RowDefinition Height=\"{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileTextStack}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileMetadataGrid}\"", mainPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ChipStyleResourceKey=\"M3LocalCopyChip\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("_localCopyChip.IsVisible = IsLocalCopyVisible", fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("_offlineAttentionChip.IsVisible = IsOfflineAttentionVisible", fileTileMetadataView, StringComparison.Ordinal);

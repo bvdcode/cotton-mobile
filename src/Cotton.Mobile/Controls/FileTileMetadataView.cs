@@ -8,8 +8,8 @@ namespace Cotton.Mobile.Controls
     public class FileTileMetadataView : ContentView
     {
         private const string DefaultDetailStyleResourceKey = "M3CardMetaLine";
-        private const string DefaultLocalChipLabelStyleResourceKey = "M3AccentOutlineChipLabel";
-        private const string DefaultLocalChipStyleResourceKey = "M3AccentOutlineChip";
+        private const string DefaultLocalChipLabelStyleResourceKey = "M3LocalCopyChipLabel";
+        private const string DefaultLocalChipStyleResourceKey = "M3LocalCopyChip";
         private const string DefaultMetadataGridStyleResourceKey = "M3FileTileMetadataGrid";
         private const string DefaultOfflineChipLabelStyleResourceKey = "M3ErrorChipLabel";
         private const string DefaultOfflineChipStyleResourceKey = "M3FileAttentionChip";

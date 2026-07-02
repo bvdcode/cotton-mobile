@@ -186,42 +186,22 @@
                                                  BindableLayout.ItemsSource="{Binding Display.FileEntries}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate>
-                                        <Grid Style="{StaticResource M3FileListRowGrid}">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="{StaticResource M3FileListThumbnailColumnWidth}" />
-                                                <ColumnDefinition Width="*" />
-                                                <ColumnDefinition Width="{StaticResource M3FileActionSize}" />
-                                            </Grid.ColumnDefinitions>
-
-                                            <controls:SelectionOverlayView Grid.ColumnSpan="3"
-                                                                           IsSelected="{Binding IsSelected}"
-                                                                           OverlayStyleResourceKey="M3FileSelectionRowOverlay" />
-
-                                            <controls:FileThumbnailView ThumbnailSource="{Binding Thumbnail.Source}"
-                                                                        IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                                        IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                                        IsLoading="{Binding Thumbnail.IsLoading}"
-                                                                        PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                                        IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                                        IsSelected="{Binding IsSelected}" />
-
-                                            <controls:FileListMetadataView Grid.Column="1"
-                                                                           Title="{Binding Name}"
-                                                                           Detail="{Binding DisplayDetails}" />
-
-                                            <controls:TouchSurfaceView Grid.ColumnSpan="2"
-                                                                       Command="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                        <controls:FileListEntryRowView Title="{Binding Name}"
+                                                                       Detail="{Binding DisplayDetails}"
+                                                                       ThumbnailSource="{Binding Thumbnail.Source}"
+                                                                       IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                                       IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                                       IsLoading="{Binding Thumbnail.IsLoading}"
+                                                                       PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                                       IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                                       IsSelected="{Binding IsSelected}"
+                                                                       BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                       ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                       EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
                                                                        CommandParameter="{Binding .}"
-                                                                       TapCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                       TapCommandParameter="{Binding .}" />
-
-                                            <controls:FileEntryActionButtonView Grid.Column="2"
-                                                                                Command="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                                CommandParameter="{Binding .}"
-                                                                                IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                                IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                                SemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
-                                        </Grid>
+                                                                       IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                       IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                       ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>

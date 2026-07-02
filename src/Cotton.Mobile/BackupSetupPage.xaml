@@ -24,7 +24,7 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsVisible="{Binding IsStatusVisible}" />
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
@@ -65,9 +65,9 @@
                                          Style="{StaticResource M3FileChromeIconButton}"
                                          SemanticProperties.Description="Choose backup destination" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
@@ -97,9 +97,9 @@
                                                  ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                  SemanticDescription="{Binding MediaAccessActionText}" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsListItemGrid}">
                     <controls:IconFrame IconData="{x:Static controls:IconPathData.Activity}"
@@ -126,9 +126,9 @@
                                          Style="{StaticResource M3FileChromeIconButton}"
                                          SemanticProperties.Description="Queue camera backup now" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid RowDefinitions="Auto,Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsToggleGroupGrid}">
@@ -177,9 +177,9 @@
                                            Grid.Column="2"
                                            IsToggled="{Binding ChargingOnly, Mode=TwoWay}" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
 
-            <Border Style="{StaticResource M3ContentCard}">
+            <controls:SettingsCardView>
                 <Grid RowDefinitions="Auto,Auto"
                       ColumnDefinitions="Auto,*,Auto"
                       Style="{StaticResource M3SettingsToggleGroupGrid}">
@@ -213,7 +213,7 @@
                                            Grid.Column="2"
                                            IsToggled="{Binding AllowCellular, Mode=TwoWay}" />
                 </Grid>
-            </Border>
+            </controls:SettingsCardView>
         </VerticalStackLayout>
         </ScrollView>
     </Grid>

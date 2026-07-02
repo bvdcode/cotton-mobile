@@ -619,20 +619,25 @@ namespace Cotton.Mobile.Tests
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsCardView = LoadText(SettingsCardViewPath);
             string storagePage = LoadText(StoragePagePath);
+            string backupSetupPage = LoadText(BackupSetupPagePath);
 
             Assert.Equal(2, CountOccurrences(notificationSettingsPage, "<controls:SettingsCardView"));
             Assert.Equal(5, CountOccurrences(securitySettingsPage, "<controls:SettingsCardView"));
             Assert.Equal(4, CountOccurrences(storagePage, "<controls:SettingsCardView"));
+            Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsCardView"));
             Assert.Contains("Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", settingsCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", settingsCardView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _stack.Children", settingsCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", securitySettingsPage, StringComparison.Ordinal);
         }

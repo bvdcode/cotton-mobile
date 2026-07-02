@@ -44,14 +44,14 @@
                 </CollectionView.ItemTemplate>
             </CollectionView>
 
-            <Grid Grid.Row="1"
-                  IsVisible="{Binding IsEmptyVisible}"
-                  Style="{StaticResource M3PdfEmptyStateLayer}">
+            <controls:LayeredContentView Grid.Row="1"
+                                         IsVisible="{Binding IsEmptyVisible}"
+                                         GridStyleResourceKey="M3PdfEmptyStateLayer">
                 <controls:EmptyStateView IconData="{x:Static controls:IconPathData.File}"
                                          Title="{Binding EmptyText}"
                                          CardStyleResourceKey="M3CenteredPdfEmptyStateCard"
                                          IconFrameStyleResourceKey="M3PdfEmptyStateIconFrame" />
-            </Grid>
+            </controls:LayeredContentView>
         </controls:DocumentViewerBodyView>
     </controls:ScreenShellView>
 </ContentPage>

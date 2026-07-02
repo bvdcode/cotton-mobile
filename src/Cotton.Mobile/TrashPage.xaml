@@ -82,7 +82,7 @@
                                    TertiaryActionCommand="{Binding CancelSelectionCommand}"
                                    TertiaryActionSemanticDescription="Cancel selection" />
 
-        <Grid Grid.Row="4">
+        <controls:LayeredContentView Grid.Row="4">
             <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Delete}"
                                      Title="{Binding EmptyMessage}"
@@ -139,7 +139,7 @@
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>
-        </Grid>
+        </controls:LayeredContentView>
         </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

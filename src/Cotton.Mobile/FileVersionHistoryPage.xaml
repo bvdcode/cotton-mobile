@@ -27,7 +27,7 @@
                                    Text="{Binding Status}"
                                    IsVisible="{Binding IsStatusVisible}" />
 
-            <Grid Grid.Row="2">
+            <controls:LayeredContentView Grid.Row="2">
                 <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}"
                                                    Style="{StaticResource M3MetadataListSkeletonView}" />
 
@@ -53,7 +53,7 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-            </Grid>
+            </controls:LayeredContentView>
         </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

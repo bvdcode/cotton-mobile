@@ -23,6 +23,7 @@ namespace Cotton.Mobile.Controls
         private const string SecondaryDetailTextOpacityAnimationName = "M3SettingsSectionSecondaryDetailOpacity";
         private const string TertiaryDetailTextOpacityAnimationName = "M3SettingsSectionTertiaryDetailOpacity";
         private const string QuaternaryDetailTextOpacityAnimationName = "M3SettingsSectionQuaternaryDetailOpacity";
+        private const string TrailingContentOpacityAnimationName = "M3SettingsSectionTrailingContentOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -84,21 +85,21 @@ namespace Cotton.Mobile.Controls
             nameof(TrailingContent),
             typeof(View),
             typeof(SettingsSectionHeaderView),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
 
         public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
             nameof(TrailingText),
             typeof(string),
             typeof(SettingsSectionHeaderView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
             nameof(IsTrailingTextVisible),
             typeof(bool),
             typeof(SettingsSectionHeaderView),
             false,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
 
         public static readonly BindableProperty TapCommandProperty = BindableProperty.Create(
             nameof(TapCommand),
@@ -206,6 +207,7 @@ namespace Cotton.Mobile.Controls
         private bool _hasAppliedSecondaryDetailTextVisibility;
         private bool _hasAppliedTertiaryDetailTextVisibility;
         private bool _hasAppliedQuaternaryDetailTextVisibility;
+        private bool _hasAppliedTrailingContentVisibility;
 
         public SettingsSectionHeaderView()
         {
@@ -271,7 +273,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         public string Title
@@ -426,7 +429,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         private static void OnPrimaryDetailTextVisibilityPropertyChanged(
@@ -440,7 +444,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         private static void OnProgressVisibilityPropertyChanged(
@@ -454,7 +459,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: true,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         private static void OnSecondaryDetailTextVisibilityPropertyChanged(
@@ -468,7 +474,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: true,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         private static void OnTertiaryDetailTextVisibilityPropertyChanged(
@@ -482,7 +489,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: true,
-                animateQuaternaryDetailTextVisibility: false);
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: false);
         }
 
         private static void OnQuaternaryDetailTextVisibilityPropertyChanged(
@@ -496,7 +504,23 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryDetailTextVisibility: false,
                 animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: true);
+                animateQuaternaryDetailTextVisibility: true,
+                animateTrailingContentVisibility: false);
+        }
+
+        private static void OnTrailingContentVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryDetailTextVisibility: false,
+                animateProgressVisibility: false,
+                animateSecondaryDetailTextVisibility: false,
+                animateTertiaryDetailTextVisibility: false,
+                animateQuaternaryDetailTextVisibility: false,
+                animateTrailingContentVisibility: true);
         }
 
         private void UpdateVisualState(
@@ -504,7 +528,8 @@ namespace Cotton.Mobile.Controls
             bool animateProgressVisibility,
             bool animateSecondaryDetailTextVisibility,
             bool animateTertiaryDetailTextVisibility,
-            bool animateQuaternaryDetailTextVisibility)
+            bool animateQuaternaryDetailTextVisibility,
+            bool animateTrailingContentVisibility)
         {
             string title = Title ?? string.Empty;
             string primaryDetailText = PrimaryDetailText ?? string.Empty;
@@ -532,9 +557,11 @@ namespace Cotton.Mobile.Controls
             string trailingTextStyleResourceKey =
                 ResolveStyleResourceKey(TrailingTextStyleResourceKey, DefaultTrailingTextStyleResourceKey);
             bool isLeadingIconVisible = LeadingIconData is not null;
-            bool isTrailingTextVisible = IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
-            View? trailingContent = TrailingContent ?? (isTrailingTextVisible ? _trailingChip : null);
+            View? trailingContent = ResolveTrailingContent(trailingText);
             bool isTrailingContentVisible = trailingContent is not null;
+            bool hasTrailingContentLayout = ResolveTrailingContentLayoutVisibility(
+                isTrailingContentVisible,
+                animateTrailingContentVisibility);
             ICommand? tapCommand = TapCommand;
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
@@ -589,17 +616,17 @@ namespace Cotton.Mobile.Controls
             _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
             _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
 
-            if (_trailingContentHost.Content != trailingContent)
+            if (isTrailingContentVisible && _trailingContentHost.Content != trailingContent)
             {
                 _trailingContentHost.Content = trailingContent;
             }
 
-            _trailingContentHost.IsVisible = isTrailingContentVisible;
+            UpdateTrailingContentVisibility(isTrailingContentVisible, animateTrailingContentVisibility);
 
             Grid.SetColumn(_textStack, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_textStack, ResolveContentColumnSpan(isLeadingIconVisible, isTrailingContentVisible));
+            Grid.SetColumnSpan(_textStack, ResolveContentColumnSpan(isLeadingIconVisible, hasTrailingContentLayout));
             Grid.SetColumn(_progress, isLeadingIconVisible ? 1 : 0);
-            Grid.SetColumnSpan(_progress, ResolveContentColumnSpan(isLeadingIconVisible, isTrailingContentVisible));
+            Grid.SetColumnSpan(_progress, ResolveContentColumnSpan(isLeadingIconVisible, hasTrailingContentLayout));
 
             SemanticProperties.SetDescription(
                 this,
@@ -668,6 +695,33 @@ namespace Cotton.Mobile.Controls
             _hasAppliedProgressVisibility = true;
         }
 
+        private void UpdateTrailingContentVisibility(
+            bool isTrailingContentVisible,
+            bool animateTrailingContentVisibility)
+        {
+            bool shouldAnimate = animateTrailingContentVisibility && _hasAppliedTrailingContentVisibility;
+            double targetOpacity = isTrailingContentVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isTrailingContentVisible)
+            {
+                _trailingContentHost.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _trailingContentHost,
+                _trailingContentHost.Opacity,
+                targetOpacity,
+                duration,
+                TrailingContentOpacityAnimationName,
+                shouldAnimate,
+                opacity => _trailingContentHost.Opacity = opacity,
+                CompleteTrailingContentVisibility);
+            _hasAppliedTrailingContentVisibility = true;
+        }
+
         private void CompleteProgressVisibility()
         {
             if (IsProgressVisible)
@@ -677,6 +731,24 @@ namespace Cotton.Mobile.Controls
             }
 
             _progress.IsVisible = false;
+        }
+
+        private void CompleteTrailingContentVisibility()
+        {
+            View? trailingContent = ResolveTrailingContent(TrailingText ?? string.Empty);
+            if (trailingContent is not null)
+            {
+                if (_trailingContentHost.Content != trailingContent)
+                {
+                    _trailingContentHost.Content = trailingContent;
+                }
+
+                _trailingContentHost.IsVisible = true;
+                return;
+            }
+
+            _trailingContentHost.Content = null;
+            _trailingContentHost.IsVisible = false;
         }
 
         private void CompletePrimaryDetailTextVisibility()
@@ -726,6 +798,30 @@ namespace Cotton.Mobile.Controls
         private static bool IsDetailTextActuallyVisible(string detailText)
         {
             return !string.IsNullOrWhiteSpace(detailText);
+        }
+
+        private View? ResolveTrailingContent(string trailingText)
+        {
+            if (TrailingContent is not null)
+            {
+                return TrailingContent;
+            }
+
+            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText) ? _trailingChip : null;
+        }
+
+        private bool ResolveTrailingContentLayoutVisibility(
+            bool isTrailingContentVisible,
+            bool animateTrailingContentVisibility)
+        {
+            if (isTrailingContentVisible)
+            {
+                return true;
+            }
+
+            return animateTrailingContentVisibility
+                && _hasAppliedTrailingContentVisibility
+                && _trailingContentHost.IsVisible;
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

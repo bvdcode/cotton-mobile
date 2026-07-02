@@ -1069,7 +1069,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TrailingContentProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", settingsSectionHeaderView, StringComparison.Ordinal);
-            Assert.Contains("trailingContent = TrailingContent ?? (isTrailingTextVisible ? _trailingChip : null)", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("trailingContent = ResolveTrailingContent(trailingText)", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("QuaternaryDetailTextProperty", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("_trailingContentHost.Content = trailingContent", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains(
@@ -1089,6 +1089,10 @@ namespace Cotton.Mobile.Tests
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
             Assert.Contains(
+                "TrailingContentOpacityAnimationName = \"M3SettingsSectionTrailingContentOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 "OnPrimaryDetailTextVisibilityPropertyChanged",
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
@@ -1104,6 +1108,10 @@ namespace Cotton.Mobile.Tests
                 "OnQuaternaryDetailTextVisibilityPropertyChanged",
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
+            Assert.Contains(
+                "OnTrailingContentVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains(
                 "MaterialResources.Get<int>(\"M3MotionStatusDuration\")",
@@ -1113,7 +1121,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteQuaternaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTrailingContentVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("ResolveTrailingContentLayoutVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_trailingContentHost.IsVisible = isTrailingContentVisible", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", backupSetupPage, StringComparison.Ordinal);

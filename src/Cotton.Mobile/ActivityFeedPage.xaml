@@ -15,8 +15,7 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh activity" />
 
-        <ScrollView Grid.Row="1">
-        <VerticalStackLayout Style="{StaticResource M3ScreenContentStack}">
+        <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Activity"
                                        SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
@@ -60,7 +59,6 @@
                                              ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                              SemanticDescription="Load more activity" />
             </controls:ContentCardView>
-        </VerticalStackLayout>
-        </ScrollView>
+        </controls:ScreenScrollBodyView>
     </Grid>
 </ContentPage>

@@ -176,6 +176,9 @@ jobs:
       - name: Test Android Play media permissions
         run: scripts/ci/test-android-play-media-permissions.sh
 
+      - name: Test Google Play listing screenshots
+        run: scripts/ci/test-google-play-listing-screenshots.sh
+
       - name: Test Android Firebase config validation
         run: scripts/ci/test-android-firebase-config.sh
 

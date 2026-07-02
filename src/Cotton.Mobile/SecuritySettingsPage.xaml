@@ -82,21 +82,9 @@
             <Border Style="{StaticResource M3ContentCard}"
                     IsVisible="{Binding IsPermissionLedgerVisible}">
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Grid ColumnDefinitions="*,Auto"
-                          RowDefinitions="Auto,Auto"
-                          Style="{StaticResource M3SettingsSummaryGrid}">
-                        <Label Text="{Binding PermissionLedgerTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding PermissionLedgerStatusText}"
-                               Style="{StaticResource M3CardSupportingLine}" />
-
-                        <Label Grid.Row="1"
-                               Grid.ColumnSpan="2"
-                               Text="{Binding PermissionLedgerDetailText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </Grid>
+                    <controls:SettingsSummaryHeaderView Title="{Binding PermissionLedgerTitle}"
+                                                        StatusText="{Binding PermissionLedgerStatusText}"
+                                                        DetailText="{Binding PermissionLedgerDetailText}" />
 
                     <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                          BindableLayout.ItemsSource="{Binding PermissionLedgerItems}">
@@ -151,21 +139,9 @@
 
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Grid ColumnDefinitions="*,Auto"
-                          RowDefinitions="Auto,Auto"
-                          Style="{StaticResource M3SettingsSummaryGrid}">
-                        <Label Text="{Binding AccountSessionsTitle}"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding AccountSessionsStatusText}"
-                               Style="{StaticResource M3CardSupportingLine}" />
-
-                        <Label Grid.Row="1"
-                               Grid.ColumnSpan="2"
-                               Text="{Binding AccountSessionsDetailText}"
-                               Style="{StaticResource M3CardSupportingBlock}" />
-                    </Grid>
+                    <controls:SettingsSummaryHeaderView Title="{Binding AccountSessionsTitle}"
+                                                        StatusText="{Binding AccountSessionsStatusText}"
+                                                        DetailText="{Binding AccountSessionsDetailText}" />
 
                     <controls:ActionListItemView Text="{Binding RevokeCurrentSessionActionText}"
                                                  LeadingIconData="{x:Static controls:IconPathData.Device}"

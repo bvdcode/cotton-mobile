@@ -65,16 +65,10 @@
 
             <Border Style="{StaticResource M3ContentCard}">
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                    <Grid ColumnDefinitions="*,Auto"
-                          Style="{StaticResource M3SettingsSummaryGrid}">
-                        <Label Text="Server push"
-                               Style="{StaticResource M3CardTitle}" />
-
-                        <Label Grid.Column="1"
-                               Text="{Binding RemotePushStatusText}"
-                               IsVisible="{Binding IsRemotePushStatusVisible}"
-                               Style="{StaticResource M3CardSupportingLine}" />
-                    </Grid>
+                    <controls:SettingsSummaryHeaderView Title="Server push"
+                                                        StatusText="{Binding RemotePushStatusText}"
+                                                        IsStatusVisible="{Binding IsRemotePushStatusVisible}"
+                                                        IsDetailVisible="False" />
 
                     <Grid IsVisible="{Binding IsRemotePushUnavailable}"
                           ColumnDefinitions="Auto,*"

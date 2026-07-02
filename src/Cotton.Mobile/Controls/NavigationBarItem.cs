@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(NavigationBarItem),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurfaceVariant", "M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -39,7 +39,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(NavigationBarItem),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurfaceVariant", "M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty FillColorProperty = BindableProperty.Create(
             nameof(FillColor),
@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(NavigationBarItem),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHigh", "M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),

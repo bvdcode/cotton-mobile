@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(IconButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurface", "M3DarkOnSurface"));
 
         public static readonly BindableProperty ButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(ButtonBackgroundColor),
@@ -37,7 +37,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(IconButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHigh", "M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty BorderColorProperty = BindableProperty.Create(
             nameof(BorderColor),

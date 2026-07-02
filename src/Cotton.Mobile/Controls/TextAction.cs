@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(TextAction),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurfaceVariant", "M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty TextFontSizeProperty = BindableProperty.Create(
             nameof(TextFontSize),
@@ -51,7 +51,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(TextAction),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHigh", "M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),

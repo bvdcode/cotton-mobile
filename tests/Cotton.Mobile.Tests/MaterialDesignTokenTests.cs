@@ -454,26 +454,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Material_controls_with_dark_color_defaults_have_theme_aware_implicit_styles()
+        public void Material_control_color_defaults_are_theme_aware()
         {
-            XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, IReadOnlyCollection<string>> darkDefaultProperties = GetControlDarkDefaultProperties();
 
-            Assert.NotEmpty(darkDefaultProperties);
-
-            foreach (KeyValuePair<string, IReadOnlyCollection<string>> control in darkDefaultProperties.OrderBy(item => item.Key, StringComparer.Ordinal))
-            {
-                string targetType = $"controls:{control.Key}";
-                IReadOnlyDictionary<string, string> setters = GetImplicitStyleSetters(styles, targetType);
-
-                foreach (string propertyName in control.Value.OrderBy(item => item, StringComparer.Ordinal))
-                {
-                    Assert.True(
-                        setters.TryGetValue(propertyName, out string? setterValue),
-                        $"{targetType}.{propertyName} must be set by the implicit Material style.");
-                    Assert.StartsWith("{AppThemeBinding", setterValue, StringComparison.Ordinal);
-                }
-            }
+            Assert.True(
+                darkDefaultProperties.Count == 0,
+                string.Join(
+                    Environment.NewLine,
+                    darkDefaultProperties
+                        .OrderBy(item => item.Key, StringComparer.Ordinal)
+                        .Select(item => $"{item.Key}: {string.Join(", ", item.Value.OrderBy(value => value, StringComparer.Ordinal))}")));
         }
 
         [Fact]

@@ -33,7 +33,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHighest"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHighest", "M3DarkSurfaceContainerHighest"));
 
         public static readonly BindableProperty TrackOnPressedColorProperty = BindableProperty.Create(
             nameof(TrackOnPressedColor),
@@ -47,14 +47,14 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHigh", "M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty TrackDisabledColorProperty = BindableProperty.Create(
             nameof(TrackDisabledColor),
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainer"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainer", "M3DarkSurfaceContainer"));
 
         public static readonly BindableProperty TrackOnBorderColorProperty = BindableProperty.Create(
             nameof(TrackOnBorderColor),
@@ -68,7 +68,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOutlineVariant", "M3DarkOutlineVariant"));
 
         public static readonly BindableProperty TrackDisabledBorderColorProperty = BindableProperty.Create(
             nameof(TrackDisabledBorderColor),
@@ -89,14 +89,14 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerLowest", "M3DarkOnSurface"));
 
         public static readonly BindableProperty ThumbDisabledColorProperty = BindableProperty.Create(
             nameof(ThumbDisabledColor),
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOutlineVariant", "M3DarkOutlineVariant"));
 
         public static readonly BindableProperty TrackWidthProperty = BindableProperty.Create(
             nameof(TrackWidth),

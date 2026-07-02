@@ -41,49 +41,49 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurface"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurface", "M3DarkOnSurface"));
 
         public static readonly BindableProperty IconColorProperty = BindableProperty.Create(
             nameof(IconColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOnSurfaceVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnSurfaceVariant", "M3DarkOnSurfaceVariant"));
 
         public static readonly BindableProperty SelectedIconColorProperty = BindableProperty.Create(
             nameof(SelectedIconColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkPrimary"));
 
         public static readonly BindableProperty RowBackgroundColorProperty = BindableProperty.Create(
             nameof(RowBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerLow"));
+            defaultValueCreator: _ => MaterialResources.Get<Color>("M3Transparent"));
 
         public static readonly BindableProperty PressedRowBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedRowBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainerHigh"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainerHigh", "M3DarkSurfaceContainerHigh"));
 
         public static readonly BindableProperty IconFrameBackgroundColorProperty = BindableProperty.Create(
             nameof(IconFrameBackgroundColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkSurfaceContainer"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightSurfaceContainer", "M3DarkSurfaceContainer"));
 
         public static readonly BindableProperty IconFrameBorderColorProperty = BindableProperty.Create(
             nameof(IconFrameBorderColor),
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.Get<Color>("M3DarkOutlineVariant"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOutlineVariant", "M3DarkOutlineVariant"));
 
         public static readonly BindableProperty RowCornerRadiusProperty = BindableProperty.Create(
             nameof(RowCornerRadius),

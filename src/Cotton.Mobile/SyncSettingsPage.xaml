@@ -25,7 +25,7 @@
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
-                                       IsVisible="{Binding IsStatusVisible}" />
+                                       IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:EmptyStateView IsVisible="{Binding IsEmptyVisible}"
                                      IconData="{x:Static controls:IconPathData.Folder}"

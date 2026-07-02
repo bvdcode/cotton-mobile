@@ -623,6 +623,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_status.IsStatusVisible = IsStatusVisible", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Text = \"Connect\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
@@ -695,10 +696,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKey = DefaultStatusTextStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenStatusView Text=\"{Binding Display.ProfileStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsProfileStatusVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKey=\"M3BodyMedium\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisibleProperty", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3ScreenStatusOpacity\"", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKeyProperty", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStyleResourceKey = \"M3ScreenStatus\"", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("_label.SetDynamicResource(StyleProperty, textStyleResourceKey)", screenStatusView, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding Display.IsProfileStatusVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding Display.ProfileStatus}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthStatus}\"", mainPage, StringComparison.Ordinal);
@@ -1384,6 +1393,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public static void UpdateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("public static void AnimateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("Animation animation = new(", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("element.Handler is not null", materialMotion, StringComparison.Ordinal);
             Assert.Contains("Easing.CubicOut", materialMotion, StringComparison.Ordinal);
             Assert.Contains("public static Color GetThemeColor(", materialResources, StringComparison.Ordinal);
             Assert.DoesNotContain("VisualElement.BackgroundColorProperty", longPressBehavior, StringComparison.Ordinal);
@@ -2671,7 +2681,8 @@ namespace Cotton.Mobile.Tests
 
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
 
-            Assert.Contains("IsVisible=\"{Binding IsNeutralStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsNeutralStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsNeutralStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

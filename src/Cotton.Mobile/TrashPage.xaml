@@ -63,7 +63,7 @@
 
         <controls:ScreenStatusView Grid.Row="2"
                                    Text="{Binding Status}"
-                                   IsVisible="{Binding IsStatusVisible}" />
+                                   IsStatusVisible="{Binding IsStatusVisible}" />
 
         <controls:SelectionBarView Grid.Row="3"
                                    IsVisible="{Binding IsSelectionBarVisible}"

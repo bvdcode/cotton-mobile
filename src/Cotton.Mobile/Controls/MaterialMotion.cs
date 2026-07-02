@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Controls
             string animationName,
             Action<Color> applyColor)
         {
-            if (duration <= 0 || AreClose(startColor, targetColor))
+            if (!CanAnimate(element) || duration <= 0 || AreClose(startColor, targetColor))
             {
                 SetColor(element, targetColor, animationName, applyColor);
                 return;
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Controls
             Action<double> applyValue,
             Action? finished)
         {
-            if (duration <= 0 || Math.Abs(startValue - targetValue) <= ColorTolerance)
+            if (!CanAnimate(element) || duration <= 0 || Math.Abs(startValue - targetValue) <= ColorTolerance)
             {
                 SetDouble(element, targetValue, animationName, applyValue);
                 finished?.Invoke();
@@ -231,6 +231,11 @@ namespace Cotton.Mobile.Controls
                 && Math.Abs(firstColor.Green - secondColor.Green) <= ColorTolerance
                 && Math.Abs(firstColor.Blue - secondColor.Blue) <= ColorTolerance
                 && Math.Abs(firstColor.Alpha - secondColor.Alpha) <= ColorTolerance;
+        }
+
+        private static bool CanAnimate(VisualElement element)
+        {
+            return element.Handler is not null;
         }
     }
 }

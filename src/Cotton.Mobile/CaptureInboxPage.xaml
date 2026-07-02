@@ -22,7 +22,7 @@
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
-                                       IsVisible="{Binding IsStatusVisible}" />
+                                       IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
                                         IsVisible="{Binding IsActionBarVisible}"

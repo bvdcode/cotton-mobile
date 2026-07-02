@@ -22,7 +22,7 @@
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
-                                       IsVisible="{Binding IsStatusVisible}" />
+                                       IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:StackedItemsView ItemsSource="{Binding Sections}"
                                        StackStyleResourceKey="M3DiagnosticsSectionListStack">

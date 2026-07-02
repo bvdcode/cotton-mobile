@@ -76,7 +76,7 @@
                                                             IsAccountEnabled="{Binding Display.IsAccountActionEnabled}" />
 
                             <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
-                                                       IsVisible="{Binding Display.IsProfileStatusVisible}"
+                                                       IsStatusVisible="{Binding Display.IsProfileStatusVisible}"
                                                        TextStyleResourceKey="M3BodyMedium" />
 
                             <controls:FileStatusActionView IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"

@@ -21,7 +21,7 @@
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
-                                       IsVisible="{Binding IsStatusVisible}" />
+                                       IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:SettingsCardView>
                 <controls:SettingsToggleItemView Text="{Binding AppLockTitle}"

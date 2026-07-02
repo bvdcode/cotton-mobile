@@ -29,7 +29,7 @@
                                           ActionSemanticDescription="Retry notifications" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
-                                       IsVisible="{Binding IsNeutralStatusVisible}" />
+                                       IsStatusVisible="{Binding IsNeutralStatusVisible}" />
 
             <controls:SettingsCardView>
                 <controls:SettingsSummaryHeaderView Title="{Binding PermissionTitle}"

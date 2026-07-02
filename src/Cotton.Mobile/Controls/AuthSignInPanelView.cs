@@ -140,7 +140,7 @@ namespace Cotton.Mobile.Controls
             _urlField.ReturnCommand = ConnectCommand;
 
             _status.Text = Status ?? string.Empty;
-            _status.IsVisible = IsStatusVisible;
+            _status.IsStatusVisible = IsStatusVisible;
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;

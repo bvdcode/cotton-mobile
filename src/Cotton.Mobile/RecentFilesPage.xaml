@@ -25,7 +25,7 @@
 
         <controls:ScreenStatusView Grid.Row="1"
                                    Text="{Binding Status}"
-                                   IsVisible="{Binding IsStatusVisible}" />
+                                   IsStatusVisible="{Binding IsStatusVisible}" />
 
         <controls:MetadataListSkeletonView Grid.Row="2"
                                            IsVisible="{Binding IsLoadingPlaceholderVisible}"

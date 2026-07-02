@@ -1474,7 +1474,7 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
-        <Setter Property="RowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="RowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3Transparent}, Dark={StaticResource M3Transparent}}" />
         <Setter Property="PressedRowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="IconFrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
         <Setter Property="IconFrameBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />

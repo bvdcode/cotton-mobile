@@ -424,6 +424,25 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Capture_destination_current_folder_actions_use_reusable_material_control()
+        {
+            string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+
+            Assert.Equal(1, CountOccurrences(destinationPickerPage, "<controls:ActionClusterView Grid.Column=\"2\""));
+            Assert.Contains("ClusterStyleResourceKey=\"M3InlineActionCluster\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionCommand=\"{Binding UpCommand}\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryActionSemanticDescription=\"Go to parent folder\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionCommand=\"{Binding ChooseCommand}\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionSemanticDescription=\"Choose current folder\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ColumnDefinitions=\"Auto,*,Auto,Auto\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Column=\"2\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:IconButton Grid.Column=\"3\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Go to parent folder\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SemanticProperties.Description=\"Choose current folder\"", destinationPickerPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_action_rows_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

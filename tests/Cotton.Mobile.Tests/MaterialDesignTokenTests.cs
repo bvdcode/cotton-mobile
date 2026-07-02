@@ -2188,6 +2188,7 @@ namespace Cotton.Mobile.Tests
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsSummaryHeaderView = LoadText(SettingsSummaryHeaderViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding PermissionStatusText}\"", notificationSettingsPage, StringComparison.Ordinal);
@@ -2211,6 +2212,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3CardSupportingLine\"", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingBlock\"", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3SettingsSummaryStatusOpacity\"", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("DetailOpacityAnimationName = \"M3SettingsSummaryDetailOpacity\"", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("OnDetailVisiblePropertyChanged", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteDetailVisibility", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_statusLabel.IsVisible = IsStatusVisible", settingsSummaryHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_detailLabel.IsVisible = IsDetailVisible", settingsSummaryHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:SettingsSummaryHeaderView Title=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);

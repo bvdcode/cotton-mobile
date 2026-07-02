@@ -434,10 +434,17 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Metadata_card_headers_use_reusable_material_control()
         {
+            string activityFeedPage = LoadText(ActivityFeedPagePath);
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string transfersPage = LoadText(TransfersPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
             string metadataCardHeaderView = LoadText(MetadataCardHeaderViewPath);
+
+            Assert.Contains("<controls:MetadataCardHeaderView Grid.ColumnSpan=\"3\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding Title}\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding DetailText}\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("TrailingText=\"{Binding BadgeText}\"", activityFeedPage, StringComparison.Ordinal);
 
             Assert.Contains("<controls:MetadataCardHeaderView Grid.ColumnSpan=\"3\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardFileThumbnailFrame\"", fileVersionHistoryPage, StringComparison.Ordinal);
@@ -461,10 +468,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ChipView", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", metadataCardHeaderView, StringComparison.Ordinal);
-            Assert.Equal(3, CountOccurrences(fileVersionHistoryPage + transfersPage + captureInboxPage, "Width=\"{StaticResource M3FileThumbnailSize}\""));
+            Assert.Equal(4, CountOccurrences(activityFeedPage + fileVersionHistoryPage + transfersPage + captureInboxPage, "Width=\"{StaticResource M3FileThumbnailSize}\""));
 
             string[] metadataCardPages =
             [
+                activityFeedPage,
                 fileVersionHistoryPage,
                 transfersPage,
                 captureInboxPage,

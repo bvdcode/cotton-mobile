@@ -20,7 +20,10 @@ namespace Cotton.Mobile
     [IntentFilter(new[] { Intent.ActionSendMultiple }, Categories = new[] { Intent.CategoryDefault }, DataMimeType = "*/*")]
     public class MainActivity : MauiAppCompatActivity
     {
+        private const long FirstSystemBarReapplyDelayMilliseconds = 250;
         private const string ShareIntentLogTag = "CottonShare";
+        private const long SecondSystemBarReapplyDelayMilliseconds = 1000;
+        private const long ThirdSystemBarReapplyDelayMilliseconds = 2500;
         private const string NotificationIntentLogTag = "CottonNotification";
         private Android.Views.View? _statusBarScrim;
 
@@ -209,7 +212,16 @@ namespace Cotton.Mobile
         private void RequestApplySystemBars()
         {
             ApplySystemBars();
-            Window?.DecorView.Post(ApplySystemBars);
+            Android.Views.View? decorView = Window?.DecorView;
+            if (decorView is null)
+            {
+                return;
+            }
+
+            decorView.Post(ApplySystemBars);
+            decorView.PostDelayed(ApplySystemBars, FirstSystemBarReapplyDelayMilliseconds);
+            decorView.PostDelayed(ApplySystemBars, SecondSystemBarReapplyDelayMilliseconds);
+            decorView.PostDelayed(ApplySystemBars, ThirdSystemBarReapplyDelayMilliseconds);
         }
 
         private void ApplySystemBars()

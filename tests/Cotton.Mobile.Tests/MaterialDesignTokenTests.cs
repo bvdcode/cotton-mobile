@@ -186,6 +186,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Window.SetStatusBarColor(statusBarColor);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("ApplyStatusBarScrim(statusBarColor);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Window.SetNavigationBarColor(navigationBarColor);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("FirstSystemBarReapplyDelayMilliseconds = 250", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("SecondSystemBarReapplyDelayMilliseconds = 1000", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ThirdSystemBarReapplyDelayMilliseconds = 2500", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("decorView.PostDelayed(ApplySystemBars, FirstSystemBarReapplyDelayMilliseconds);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("decorView.PostDelayed(ApplySystemBars, SecondSystemBarReapplyDelayMilliseconds);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("decorView.PostDelayed(ApplySystemBars, ThirdSystemBarReapplyDelayMilliseconds);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("new FrameLayout.LayoutParams(", mainActivity, StringComparison.Ordinal);
             Assert.Contains("GravityFlags.Top", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Resources.GetIdentifier(\"status_bar_height\", \"dimen\", \"android\")", mainActivity, StringComparison.Ordinal);

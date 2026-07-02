@@ -104,32 +104,12 @@
                                      BindableLayout.ItemsSource="{Binding OnDeviceBuckets}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
-                            <Grid RowDefinitions="Auto,Auto"
-                                  ColumnDefinitions="Auto,*,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}"
-                                  IsVisible="{Binding IsVisible}">
-                                <controls:IconFrame Grid.RowSpan="2"
-                                                    IconData="{x:Static controls:IconPathData.File}"
-                                                    Style="{StaticResource M3CardFileThumbnailFrame}" />
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding Title}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <Label Grid.Column="2"
-                                       Text="{Binding SizeText}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="2"
-                                       Text="{Binding CountText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-                            </Grid>
+                            <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
+                                                            LeadingIconData="{x:Static controls:IconPathData.File}"
+                                                            Title="{Binding Title}"
+                                                            PrimaryMetricText="{Binding SizeText}"
+                                                            DetailText="{Binding DetailText}"
+                                                            SecondaryMetricText="{Binding CountText}" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>
@@ -158,37 +138,14 @@
                                      BindableLayout.ItemsSource="{Binding StorageBudgetBuckets}">
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
-                            <Grid RowDefinitions="Auto,Auto,Auto"
-                                  ColumnDefinitions="Auto,*,Auto"
-                                  Style="{StaticResource M3SettingsListItemGrid}"
-                                  IsVisible="{Binding IsVisible}">
-                                <controls:IconFrame Grid.RowSpan="3"
-                                                    IconData="{x:Static controls:IconPathData.File}"
-                                                    Style="{StaticResource M3CardFileThumbnailFrame}" />
-
-                                <Label Grid.Column="1"
-                                       Text="{Binding Title}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <Label Grid.Column="2"
-                                       Text="{Binding UsageText}"
-                                       Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="1"
-                                       Text="{Binding DetailText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <Label Grid.Row="1"
-                                       Grid.Column="2"
-                                       Text="{Binding StatusText}"
-                                       Style="{StaticResource M3CardSupportingLine}" />
-
-                                <controls:LinearProgressView Grid.Row="2"
-                                                             Grid.Column="1"
-                                                             Grid.ColumnSpan="2"
-                                                             Progress="{Binding UsageFraction}" />
-                            </Grid>
+                            <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
+                                                            LeadingIconData="{x:Static controls:IconPathData.File}"
+                                                            Title="{Binding Title}"
+                                                            PrimaryMetricText="{Binding UsageText}"
+                                                            DetailText="{Binding DetailText}"
+                                                            SecondaryMetricText="{Binding StatusText}"
+                                                            Progress="{Binding UsageFraction}"
+                                                            IsProgressVisible="True" />
                         </DataTemplate>
                     </BindableLayout.ItemTemplate>
                 </VerticalStackLayout>

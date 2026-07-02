@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
+        private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
@@ -820,22 +821,47 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Storage_bucket_rows_use_reusable_material_control()
+        {
+            string storagePage = LoadText(StoragePagePath);
+            string storageBucketItemView = LoadText(StorageBucketItemViewPath);
+
+            Assert.Equal(2, CountOccurrences(storagePage, "<controls:StorageBucketItemView"));
+            Assert.Contains("PrimaryMetricText=\"{Binding SizeText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryMetricText=\"{Binding CountText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryMetricText=\"{Binding UsageText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryMetricText=\"{Binding StatusText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Progress=\"{Binding UsageFraction}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("IsProgressVisible=\"True\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("public class StorageBucketItemView", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLeadingIconFrameStyleResourceKey = \"M3CardFileThumbnailFrame\"", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", storageBucketItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("x:DataType=\"services:CottonOnDeviceStorageBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("x:DataType=\"services:CottonStorageBudgetBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:LinearProgressView Grid.Row=\"2\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3CardFileThumbnailFrame}\"", storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Linear_progress_indicators_use_reusable_material_control()
         {
             string transfersPage = LoadText(TransfersPagePath);
             string storagePage = LoadText(StoragePagePath);
             string linearProgressView = LoadText(LinearProgressViewPath);
             string metadataCardBodyView = LoadText(MetadataCardBodyViewPath);
+            string storageBucketItemView = LoadText(StorageBucketItemViewPath);
 
             Assert.DoesNotContain("<controls:LinearProgressView", transfersPage, StringComparison.Ordinal);
             Assert.Contains("<controls:MetadataCardBodyView Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding ProgressFraction}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("IsProgressVisible=\"{Binding IsProgressVisible}\"", transfersPage, StringComparison.Ordinal);
-            Assert.Equal(2, CountOccurrences(storagePage, "<controls:LinearProgressView"));
+            Assert.Equal(1, CountOccurrences(storagePage, "<controls:LinearProgressView"));
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("IsVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding UsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", metadataCardBodyView, StringComparison.Ordinal);
+            Assert.Contains("new LinearProgressView", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultProgressStyleResourceKey = \"M3LinearProgressBar\"", linearProgressView, StringComparison.Ordinal);
             Assert.DoesNotContain("<ProgressBar", transfersPage + storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LinearProgressBar}\"", transfersPage + storagePage, StringComparison.Ordinal);

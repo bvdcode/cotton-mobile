@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Tests
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
+        private const string MaterialActionSheetPagePath = "src/Cotton.Mobile/Controls/MaterialActionSheetPage.cs";
         private const string AppLockGatePagePath = "src/Cotton.Mobile/AppLockGatePage.xaml";
         private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
@@ -262,6 +263,31 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Entry", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", trashPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Modal_pages_use_dynamic_material_style_resources()
+        {
+            string materialDialogPage = LoadText(MaterialDialogPagePath);
+            string materialActionSheetPage = LoadText(MaterialActionSheetPagePath);
+            string combinedModalPages = materialDialogPage + materialActionSheetPage;
+
+            Assert.DoesNotContain("Style = MaterialResources.Get<Style>", combinedModalPages, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ModalPage\")", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ModalPage\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new BoxView(), \"M3ModalScrim\")", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new BoxView(), \"M3ModalScrim\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new VerticalStackLayout(), \"M3DialogStack\")", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new Border(), \"M3DialogSurface\")", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new HorizontalStackLayout(), \"M3DialogButtonRow\")", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new TextAction", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new FilledButton", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new VerticalStackLayout(), \"M3ActionSheetStack\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new Border(), \"M3ActionSheetSurface\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new Border(), \"M3ActionSheetHandle\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new ActionSheetItemView", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("ApplyStyle(new BoxView(), \"M3ActionSheetDivider\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("M3ActionSheetDestructiveItem", materialActionSheetPage, StringComparison.Ordinal);
         }
 
         [Fact]

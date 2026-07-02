@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Controls
 
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
-            Style = MaterialResources.Get<Style>("M3ModalPage");
+            SetDynamicResource(StyleProperty, "M3ModalPage");
             _scrim = CreateScrim();
             _sheet = CreateSheetSurface();
             PrepareInitialMotionState();
@@ -71,10 +71,7 @@ namespace Cotton.Mobile.Controls
             root.Add(_scrim, 0, 0);
             Grid.SetRowSpan(_scrim, 2);
 
-            VerticalStackLayout stack = new()
-            {
-                Style = MaterialResources.Get<Style>("M3ActionSheetStack"),
-            };
+            VerticalStackLayout stack = ApplyStyle(new VerticalStackLayout(), "M3ActionSheetStack");
 
             stack.Add(CreateHandle());
             stack.Add(CreateTitle(title));
@@ -100,10 +97,7 @@ namespace Cotton.Mobile.Controls
 
         private BoxView CreateScrim()
         {
-            BoxView scrim = new()
-            {
-                Style = MaterialResources.Get<Style>("M3ModalScrim"),
-            };
+            BoxView scrim = ApplyStyle(new BoxView(), "M3ModalScrim");
             scrim.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = CreateDismissCommand(null),
@@ -113,27 +107,20 @@ namespace Cotton.Mobile.Controls
 
         private Border CreateSheetSurface()
         {
-            return new Border
-            {
-                Style = MaterialResources.Get<Style>("M3ActionSheetSurface"),
-            };
+            return ApplyStyle(new Border(), "M3ActionSheetSurface");
         }
 
         private Border CreateHandle()
         {
-            return new Border
-            {
-                Style = MaterialResources.Get<Style>("M3ActionSheetHandle"),
-            };
+            return ApplyStyle(new Border(), "M3ActionSheetHandle");
         }
 
         private Label CreateTitle(string title)
         {
-            Label label = new()
+            Label label = ApplyStyle(new Label
             {
                 Text = title,
-                Style = MaterialResources.Get<Style>("M3ActionSheetTitle"),
-            };
+            }, "M3ActionSheetTitle");
             return label;
         }
 
@@ -144,17 +131,16 @@ namespace Cotton.Mobile.Controls
             bool isCancel)
         {
             bool isSelected = CottonActionSheetCurrentLabel.TryCreateDisplayLabel(actionLabel, out string displayLabel);
-            ActionSheetItemView row = new()
+            string styleResourceKey = isDestructive
+                ? "M3ActionSheetDestructiveItem"
+                : "M3ActionSheetItem";
+            ActionSheetItemView row = ApplyStyle(new ActionSheetItemView
             {
                 Text = displayLabel,
                 IconData = ResolveIconData(displayLabel, isDestructive, isCancel),
                 IsSelected = isSelected,
                 Command = CreateDismissCommand(result),
-                Style = MaterialResources.Get<Style>(
-                    isDestructive
-                        ? "M3ActionSheetDestructiveItem"
-                        : "M3ActionSheetItem"),
-            };
+            }, styleResourceKey);
 
             SemanticProperties.SetDescription(row, displayLabel);
             return row;
@@ -162,10 +148,14 @@ namespace Cotton.Mobile.Controls
 
         private BoxView CreateDivider()
         {
-            return new BoxView
-            {
-                Style = MaterialResources.Get<Style>("M3ActionSheetDivider"),
-            };
+            return ApplyStyle(new BoxView(), "M3ActionSheetDivider");
+        }
+
+        private static T ApplyStyle<T>(T view, string styleResourceKey)
+            where T : VisualElement
+        {
+            view.SetDynamicResource(StyleProperty, styleResourceKey);
+            return view;
         }
 
         private ICommand CreateDismissCommand(string? result)

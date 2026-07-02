@@ -29,7 +29,7 @@ namespace Cotton.Mobile.Controls
 
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
-            Style = MaterialResources.Get<Style>("M3ModalPage");
+            SetDynamicResource(StyleProperty, "M3ModalPage");
             _scrim = CreateScrim();
             _dialog = CreateDialogSurface();
             PrepareInitialMotionState();
@@ -101,10 +101,7 @@ namespace Cotton.Mobile.Controls
 
             root.Add(_scrim, 0, 0);
 
-            VerticalStackLayout stack = new()
-            {
-                Style = MaterialResources.Get<Style>("M3DialogStack"),
-            };
+            VerticalStackLayout stack = ApplyStyle(new VerticalStackLayout(), "M3DialogStack");
             stack.Add(CreateTitle(title));
 
             if (ShouldShowMessage(message, isPrompt: _promptEntry is not null))
@@ -125,10 +122,7 @@ namespace Cotton.Mobile.Controls
 
         private BoxView CreateScrim()
         {
-            BoxView scrim = new()
-            {
-                Style = MaterialResources.Get<Style>("M3ModalScrim"),
-            };
+            BoxView scrim = ApplyStyle(new BoxView(), "M3ModalScrim");
             scrim.GestureRecognizers.Add(new TapGestureRecognizer
             {
                 Command = CreateDismissCommand((string?)null),
@@ -138,28 +132,23 @@ namespace Cotton.Mobile.Controls
 
         private Border CreateDialogSurface()
         {
-            return new Border
-            {
-                Style = MaterialResources.Get<Style>("M3DialogSurface"),
-            };
+            return ApplyStyle(new Border(), "M3DialogSurface");
         }
 
         private static Label CreateTitle(string title)
         {
-            return new Label
+            return ApplyStyle(new Label
             {
                 Text = title,
-                Style = MaterialResources.Get<Style>("M3DialogTitle"),
-            };
+            }, "M3DialogTitle");
         }
 
         private static Label CreateMessage(string message)
         {
-            return new Label
+            return ApplyStyle(new Label
             {
                 Text = message,
-                Style = MaterialResources.Get<Style>("M3DialogMessage"),
-            };
+            }, "M3DialogMessage");
         }
 
         private OutlinedInputField CreatePromptEntry(string message, string initialValue, int maxLength)
@@ -184,10 +173,7 @@ namespace Cotton.Mobile.Controls
 
         private HorizontalStackLayout CreateButtonRow(string primaryAction, string? secondaryAction)
         {
-            HorizontalStackLayout row = new()
-            {
-                Style = MaterialResources.Get<Style>("M3DialogButtonRow"),
-            };
+            HorizontalStackLayout row = ApplyStyle(new HorizontalStackLayout(), "M3DialogButtonRow");
 
             if (!string.IsNullOrWhiteSpace(secondaryAction))
             {
@@ -200,22 +186,27 @@ namespace Cotton.Mobile.Controls
 
         private TextAction CreateSecondaryButton(string text)
         {
-            return new TextAction
+            return ApplyStyle(new TextAction
             {
                 Text = text,
                 Command = CreateDismissCommand((string?)null),
-                Style = MaterialResources.Get<Style>("M3DialogTextAction"),
-            };
+            }, "M3DialogTextAction");
         }
 
         private FilledButton CreatePrimaryButton(string text)
         {
-            return new FilledButton
+            return ApplyStyle(new FilledButton
             {
                 Text = text,
                 Command = CreateDismissCommand(CreatePrimaryResult),
-                Style = MaterialResources.Get<Style>("M3DialogFilledButton"),
-            };
+            }, "M3DialogFilledButton");
+        }
+
+        private static T ApplyStyle<T>(T view, string styleResourceKey)
+            where T : VisualElement
+        {
+            view.SetDynamicResource(StyleProperty, styleResourceKey);
+            return view;
         }
 
         private ICommand CreateDismissCommand(string? result)

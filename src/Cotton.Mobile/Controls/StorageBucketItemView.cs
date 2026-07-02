@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Maui.Controls.Shapes;
@@ -14,6 +15,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardFileThumbnailFrame";
         private const string DefaultMetricTextStyleResourceKey = "M3CardSupportingStrongLine";
         private const string DefaultTitleTextStyleResourceKey = "M3CardSupportingStrongLine";
+        private const string PrimaryMetricTextOpacityAnimationName = "M3StorageBucketPrimaryMetricOpacity";
+        private const string SecondaryMetricTextOpacityAnimationName = "M3StorageBucketSecondaryMetricOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -34,14 +37,14 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(StorageBucketItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnPrimaryMetricTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty SecondaryMetricTextProperty = BindableProperty.Create(
             nameof(SecondaryMetricText),
             typeof(string),
             typeof(StorageBucketItemView),
             string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnSecondaryMetricTextVisibilityPropertyChanged);
 
         public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
             nameof(Progress),
@@ -106,6 +109,8 @@ namespace Cotton.Mobile.Controls
         private readonly Label _primaryMetricText;
         private readonly Label _secondaryMetricText;
         private readonly Label _title;
+        private bool _hasAppliedPrimaryMetricTextVisibility;
+        private bool _hasAppliedSecondaryMetricTextVisibility;
 
         public StorageBucketItemView()
         {
@@ -155,7 +160,9 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _grid;
-            UpdateVisualState();
+            UpdateVisualState(
+                animatePrimaryMetricTextVisibility: false,
+                animateSecondaryMetricTextVisibility: false);
         }
 
         public string Title
@@ -233,10 +240,36 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             StorageBucketItemView view = (StorageBucketItemView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(
+                animatePrimaryMetricTextVisibility: false,
+                animateSecondaryMetricTextVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnPrimaryMetricTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            StorageBucketItemView view = (StorageBucketItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryMetricTextVisibility: true,
+                animateSecondaryMetricTextVisibility: false);
+        }
+
+        private static void OnSecondaryMetricTextVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            StorageBucketItemView view = (StorageBucketItemView)bindable;
+            view.UpdateVisualState(
+                animatePrimaryMetricTextVisibility: false,
+                animateSecondaryMetricTextVisibility: true);
+        }
+
+        private void UpdateVisualState(
+            bool animatePrimaryMetricTextVisibility,
+            bool animateSecondaryMetricTextVisibility)
         {
             string title = Title ?? string.Empty;
             string detailText = DetailText ?? string.Empty;
@@ -259,17 +292,88 @@ namespace Cotton.Mobile.Controls
             _title.Text = title;
             _primaryMetricText.SetDynamicResource(StyleProperty, metricTextStyleResourceKey);
             _primaryMetricText.Text = primaryMetricText;
-            _primaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(primaryMetricText);
+            UpdateMetricTextVisibility(
+                _primaryMetricText,
+                primaryMetricText,
+                animatePrimaryMetricTextVisibility,
+                ref _hasAppliedPrimaryMetricTextVisibility,
+                PrimaryMetricTextOpacityAnimationName,
+                CompletePrimaryMetricTextVisibility);
             _detailText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
             _detailText.Text = detailText;
             _secondaryMetricText.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
             _secondaryMetricText.Text = secondaryMetricText;
-            _secondaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(secondaryMetricText);
+            UpdateMetricTextVisibility(
+                _secondaryMetricText,
+                secondaryMetricText,
+                animateSecondaryMetricTextVisibility,
+                ref _hasAppliedSecondaryMetricTextVisibility,
+                SecondaryMetricTextOpacityAnimationName,
+                CompleteSecondaryMetricTextVisibility);
             _progress.Progress = Progress;
             _progress.IsVisible = IsProgressVisible;
             SemanticProperties.SetDescription(
                 this,
                 CreateSemanticDescription(title, primaryMetricText, detailText, secondaryMetricText));
+        }
+
+        private void UpdateMetricTextVisibility(
+            Label metricTextLabel,
+            string metricText,
+            bool animateMetricTextVisibility,
+            ref bool hasAppliedMetricTextVisibility,
+            string animationName,
+            Action completeVisibility)
+        {
+            bool isMetricTextVisible = IsMetricTextActuallyVisible(metricText);
+            bool shouldAnimate = animateMetricTextVisibility && hasAppliedMetricTextVisibility;
+            double targetOpacity = isMetricTextVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isMetricTextVisible)
+            {
+                metricTextLabel.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                metricTextLabel,
+                metricTextLabel.Opacity,
+                targetOpacity,
+                duration,
+                animationName,
+                shouldAnimate,
+                opacity => metricTextLabel.Opacity = opacity,
+                completeVisibility);
+            hasAppliedMetricTextVisibility = true;
+        }
+
+        private void CompletePrimaryMetricTextVisibility()
+        {
+            if (IsMetricTextActuallyVisible(PrimaryMetricText ?? string.Empty))
+            {
+                _primaryMetricText.IsVisible = true;
+                return;
+            }
+
+            _primaryMetricText.IsVisible = false;
+        }
+
+        private void CompleteSecondaryMetricTextVisibility()
+        {
+            if (IsMetricTextActuallyVisible(SecondaryMetricText ?? string.Empty))
+            {
+                _secondaryMetricText.IsVisible = true;
+                return;
+            }
+
+            _secondaryMetricText.IsVisible = false;
+        }
+
+        private static bool IsMetricTextActuallyVisible(string metricText)
+        {
+            return !string.IsNullOrWhiteSpace(metricText);
         }
 
         private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)

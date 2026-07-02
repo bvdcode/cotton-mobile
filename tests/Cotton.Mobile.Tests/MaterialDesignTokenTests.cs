@@ -1897,6 +1897,7 @@ namespace Cotton.Mobile.Tests
         {
             string storagePage = LoadText(StoragePagePath);
             string storageBucketItemView = LoadText(StorageBucketItemViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(2, CountOccurrences(storagePage, "<controls:StackedItemsView ItemsSource=\"{Binding "));
             Assert.Equal(2, CountOccurrences(storagePage, "StackStyleResourceKey=\"M3SettingsItemListStack\""));
@@ -1913,12 +1914,44 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultLeadingIconFrameStyleResourceKey = \"M3CardFileThumbnailFrame\"", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("new LinearProgressView", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains(
+                "PrimaryMetricTextOpacityAnimationName = \"M3StorageBucketPrimaryMetricOpacity\"",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "SecondaryMetricTextOpacityAnimationName = \"M3StorageBucketSecondaryMetricOpacity\"",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnPrimaryMetricTextVisibilityPropertyChanged",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "OnSecondaryMetricTextVisibilityPropertyChanged",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains(
+                "MaterialResources.Get<int>(\"M3MotionStatusDuration\")",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.Contains("CompletePrimaryMetricTextVisibility", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteSecondaryMetricTextVisibility", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("x:DataType=\"services:CottonOnDeviceStorageBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("x:DataType=\"services:CottonStorageBudgetBucketSnapshot\">\n                            <Grid", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:LinearProgressView Grid.Row=\"2\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3CardFileThumbnailFrame}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsItemListStack}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_primaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(primaryMetricText)",
+                storageBucketItemView,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "_secondaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(secondaryMetricText)",
+                storageBucketItemView,
+                StringComparison.Ordinal);
         }
 
         [Fact]

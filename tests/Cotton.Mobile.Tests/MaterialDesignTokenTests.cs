@@ -1740,6 +1740,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Icon_button_animates_chrome_state_without_snap_assignments()
+        {
+            string iconButton = LoadText(Path.Combine(ControlsDirectoryPath, "IconButton.cs"));
+
+            Assert.Contains("BackgroundAnimationName = \"M3IconButtonBackground\"", iconButton, StringComparison.Ordinal);
+            Assert.Contains("BorderColorAnimationName = \"M3IconButtonBorderColor\"", iconButton, StringComparison.Ordinal);
+            Assert.Contains("OpacityAnimationName = \"M3IconButtonOpacity\"", iconButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", iconButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", iconButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", iconButton, StringComparison.Ordinal);
+            Assert.Contains("bool shouldAnimate = animateState && _hasAppliedVisualState", iconButton, StringComparison.Ordinal);
+            Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", iconButton, StringComparison.Ordinal);
+            Assert.Contains("ResolveCurrentBorderColor()", iconButton, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(ButtonOpacity);",
+                iconButton,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                $"{Environment.NewLine}            _container.Stroke = new SolidColorBrush(BorderColor);",
+                iconButton,
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_status_chips_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

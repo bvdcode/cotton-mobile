@@ -8,6 +8,8 @@ namespace Cotton.Mobile.Controls
     public class IconButton : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3IconButtonBackground";
+        private const string BorderColorAnimationName = "M3IconButtonBorderColor";
+        private const string OpacityAnimationName = "M3IconButtonOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -81,6 +83,7 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _container;
         private readonly IconView _icon;
+        private bool _hasAppliedVisualState;
 
         public IconButton()
         {
@@ -163,7 +166,7 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState(false);
+                UpdateVisualState(true);
             }
         }
 
@@ -180,21 +183,32 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState(false);
+            UpdateVisualState(true);
         }
 
-        private void UpdateVisualState(bool animateBackground)
+        private void UpdateVisualState(bool animateState)
         {
             if (_container is null || _icon is null)
             {
                 return;
             }
 
+            double targetOpacity = ResolvePressableOpacity(ButtonOpacity);
+            int duration = IsPressed ? PressInDuration : PressOutDuration;
+            bool shouldAnimate = animateState && _hasAppliedVisualState;
+
             WidthRequest = ButtonSize;
             HeightRequest = ButtonSize;
             MinimumWidthRequest = ButtonSize;
             MinimumHeightRequest = ButtonSize;
-            Opacity = ResolvePressableOpacity(ButtonOpacity);
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                OpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity);
 
             _container.WidthRequest = ButtonSize;
             _container.HeightRequest = ButtonSize;
@@ -205,15 +219,33 @@ namespace Cotton.Mobile.Controls
             MaterialMotion.UpdateBackgroundColor(
                 _container,
                 IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor,
-                IsPressed ? PressInDuration : PressOutDuration,
+                duration,
                 BackgroundAnimationName,
-                animateBackground);
-            _container.Stroke = new SolidColorBrush(BorderColor);
+                shouldAnimate);
+            MaterialMotion.UpdateColor(
+                _container,
+                ResolveCurrentBorderColor(),
+                BorderColor,
+                duration,
+                BorderColorAnimationName,
+                shouldAnimate,
+                color => _container.Stroke = new SolidColorBrush(color));
             _container.StrokeThickness = BorderWidth;
 
             _icon.IconData = IconData;
             _icon.IconColor = IconColor;
             _icon.IconSize = IconSize;
+            _hasAppliedVisualState = true;
+        }
+
+        private Color ResolveCurrentBorderColor()
+        {
+            if (_container.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return BorderColor;
         }
     }
 }

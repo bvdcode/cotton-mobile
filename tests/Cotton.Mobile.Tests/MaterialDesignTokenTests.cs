@@ -449,12 +449,16 @@ namespace Cotton.Mobile.Tests
 
             XElement authTitleStyle = GetStyleByKey(styles, "M3AuthTitle");
             IReadOnlyDictionary<string, string> authTitleSetters = GetStyleSetters(styles, "M3AuthTitle");
+            IReadOnlyDictionary<string, string> authPanelSetters = GetStyleSetters(styles, "M3AuthPanel");
 
             Assert.Equal("{StaticResource M3TitleLarge}", (string?)authTitleStyle.Attribute("BasedOn"));
             Assert.Equal("Bold", authTitleSetters["FontAttributes"]);
             Assert.Equal("1", authTitleSetters["MaxLines"]);
             Assert.Equal("TailTruncation", authTitleSetters["LineBreakMode"]);
             Assert.Equal("Center", authTitleSetters["VerticalOptions"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
+                authPanelSetters["BackgroundColor"]);
             Assert.Contains("<Thickness x:Key=\"M3AuthPanelPadding\">20</Thickness>", spacing, StringComparison.Ordinal);
             Assert.DoesNotContain("<Thickness x:Key=\"M3AuthPanelPadding\">16</Thickness>", spacing, StringComparison.Ordinal);
         }

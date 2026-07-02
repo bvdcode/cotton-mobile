@@ -393,7 +393,7 @@
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FolderThumbnailIcon">
-        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
@@ -410,7 +410,7 @@
     </Style>
 
     <Style TargetType="controls:IconFrame" x:Key="M3FolderThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}">
-        <Setter Property="IconColor" Value="{StaticResource M3Accent}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 

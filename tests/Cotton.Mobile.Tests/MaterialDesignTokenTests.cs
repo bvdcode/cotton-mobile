@@ -1183,11 +1183,22 @@ namespace Cotton.Mobile.Tests
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
             XDocument type = LoadResourceDictionary(TypeResourcePath);
+            IReadOnlyDictionary<string, string> folderThumbnailIconSetters =
+                GetStyleSetters(styles, "M3FolderThumbnailIcon");
+            IReadOnlyDictionary<string, string> folderThumbnailFrameSetters =
+                GetStyleSetters(styles, "M3FolderThumbnailFrame");
             IReadOnlyDictionary<string, string> thumbnailPlaceholderSetters =
                 GetStyleSetters(type, "M3ThumbnailPlaceholder");
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileThumbnailView"));
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                folderThumbnailIconSetters["IconColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                folderThumbnailFrameSetters["IconColor"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}",
                 thumbnailPlaceholderSetters["TextColor"]);

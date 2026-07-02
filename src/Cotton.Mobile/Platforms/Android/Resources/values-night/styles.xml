@@ -8,9 +8,9 @@
         <item name="android:textSelectHandle">@drawable/cotton_text_select_handle</item>
         <item name="android:textSelectHandleLeft">@drawable/cotton_text_select_handle</item>
         <item name="android:textSelectHandleRight">@drawable/cotton_text_select_handle</item>
-        <item name="android:statusBarColor">@color/cotton_status_bar</item>
-        <item name="android:navigationBarColor">@color/cotton_surface</item>
-        <item name="android:navigationBarDividerColor">@color/cotton_surface</item>
+        <item name="android:statusBarColor">@color/cotton_system_bar_background</item>
+        <item name="android:navigationBarColor">@color/cotton_system_bar_background</item>
+        <item name="android:navigationBarDividerColor">@color/cotton_system_bar_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar">false</item>
         <item name="android:enforceStatusBarContrast">false</item>

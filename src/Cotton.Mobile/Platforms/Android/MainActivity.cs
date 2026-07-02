@@ -245,18 +245,17 @@ namespace Cotton.Mobile
             }
 
 #pragma warning disable CA1416, CA1422
-            Android.Graphics.Color statusBarColor = Resources.GetColor(Resource.Color.cotton_status_bar, Theme);
-            Android.Graphics.Color navigationBarColor = Resources.GetColor(Resource.Color.cotton_surface, Theme);
+            Android.Graphics.Color systemBarColor = Resources.GetColor(Resource.Color.cotton_system_bar_background, Theme);
             Android.Views.View decorView = Window.DecorView;
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
             Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
-            Window.SetStatusBarColor(statusBarColor);
-            Window.SetNavigationBarColor(navigationBarColor);
-            ApplyStatusBarScrim(statusBarColor);
+            Window.SetStatusBarColor(systemBarColor);
+            Window.SetNavigationBarColor(systemBarColor);
+            ApplyStatusBarScrim(systemBarColor);
             if (Build.VERSION.SdkInt >= BuildVersionCodes.P)
             {
-                Window.NavigationBarDividerColor = navigationBarColor;
+                Window.NavigationBarDividerColor = systemBarColor;
             }
 
             bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;

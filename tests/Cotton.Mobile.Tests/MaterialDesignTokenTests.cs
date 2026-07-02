@@ -38,6 +38,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsCardViewPath = "src/Cotton.Mobile/Controls/SettingsCardView.cs";
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
+        private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
@@ -378,6 +379,25 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Border Grid.RowSpan=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileSelectionRowOverlay}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileSelectionOverlay}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Bottom_navigation_uses_reusable_material_shell()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string navigationBarView = LoadText(NavigationBarViewPath);
+
+            Assert.Contains("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(4, CountOccurrences(mainPage, "<controls:NavigationBarItem"));
+            Assert.Contains("DefaultColumnCount = 4", navigationBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3NavigationBarGrid\"", navigationBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3NavigationBarSurface\"", navigationBarView, StringComparison.Ordinal);
+            Assert.Contains("public IList<IView> Items => _grid.Children", navigationBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarSurface}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarGrid}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ColumnDefinitions=\"*,*,*,*\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

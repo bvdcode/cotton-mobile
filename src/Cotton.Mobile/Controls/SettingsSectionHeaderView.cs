@@ -564,25 +564,26 @@ namespace Cotton.Mobile.Controls
             string tertiaryDetailText = TertiaryDetailText ?? string.Empty;
             string quaternaryDetailText = QuaternaryDetailText ?? string.Empty;
             string trailingText = TrailingText ?? string.Empty;
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string leadingIconFrameStyleResourceKey =
-                ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
             string textStackStyleResourceKey =
-                ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
             string titleTextStyleResourceKey =
-                ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleStyleResourceKey);
             string primaryDetailTextStyleResourceKey =
-                ResolveStyleResourceKey(PrimaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(PrimaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string secondaryDetailTextStyleResourceKey =
-                ResolveStyleResourceKey(SecondaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(SecondaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string tertiaryDetailTextStyleResourceKey =
-                ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string quaternaryDetailTextStyleResourceKey =
-                ResolveStyleResourceKey(QuaternaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(QuaternaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string trailingChipStyleResourceKey =
-                ResolveStyleResourceKey(TrailingChipStyleResourceKey, DefaultTrailingChipStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TrailingChipStyleResourceKey, DefaultTrailingChipStyleResourceKey);
             string trailingTextStyleResourceKey =
-                ResolveStyleResourceKey(TrailingTextStyleResourceKey, DefaultTrailingTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TrailingTextStyleResourceKey, DefaultTrailingTextStyleResourceKey);
             bool isLeadingIconVisible = LeadingIconData is not null;
             bool isLeadingIconLayoutVisible = ResolveLeadingIconLayoutVisibility(
                 isLeadingIconVisible,
@@ -916,11 +917,6 @@ namespace Cotton.Mobile.Controls
             return animateTrailingContentVisibility
                 && _hasAppliedTrailingContentVisibility
                 && _trailingContentHost.IsVisible;
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey) ? defaultResourceKey : resourceKey;
         }
 
         private static int ResolveContentColumnSpan(bool isLeadingIconVisible, bool isTrailingContentVisible)

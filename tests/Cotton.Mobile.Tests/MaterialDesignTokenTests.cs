@@ -1958,6 +1958,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_style_key_resolution_is_centralized()
+        {
+            string materialResources = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialResources.cs"));
+            string repositoryRoot = FindRepositoryRoot(StylesResourcePath);
+            string controlsPath = Path.Combine(repositoryRoot, ControlsDirectoryPath);
+
+            Assert.Contains("public static string ResolveStyleResourceKey(", materialResources, StringComparison.Ordinal);
+            Assert.Contains("string.IsNullOrWhiteSpace(resourceKey)", materialResources, StringComparison.Ordinal);
+
+            foreach (string filePath in Directory.EnumerateFiles(controlsPath, "*.cs"))
+            {
+                string fileName = Path.GetFileName(filePath);
+                string control = File.ReadAllText(filePath);
+
+                if (string.Equals(fileName, "MaterialResources.cs", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                Assert.DoesNotContain("private static string ResolveStyleResourceKey", control, StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void Pressable_chrome_controls_animate_pressed_backgrounds()
         {
             string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));

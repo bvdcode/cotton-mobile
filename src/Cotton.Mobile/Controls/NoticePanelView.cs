@@ -407,18 +407,25 @@ namespace Cotton.Mobile.Controls
                 ? actionText
                 : ActionSemanticDescription;
             ICommand? actionCommand = ActionCommand;
-            string panelStyleResourceKey = ResolveStyleResourceKey(PanelStyleResourceKey, DefaultPanelStyleResourceKey);
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string panelStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(PanelStyleResourceKey, DefaultPanelStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string actionGridStyleResourceKey =
-                ResolveStyleResourceKey(ActionGridStyleResourceKey, DefaultActionGridStyleResourceKey);
-            string actionIconButtonStyleResourceKey = ResolveStyleResourceKey(
+                MaterialResources.ResolveStyleResourceKey(ActionGridStyleResourceKey, DefaultActionGridStyleResourceKey);
+            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 ActionIconButtonStyleResourceKey,
                 DefaultActionIconButtonStyleResourceKey);
-            string iconFrameStyleResourceKey = ResolveStyleResourceKey(IconFrameStyleResourceKey, DefaultIconFrameStyleResourceKey);
-            string iconStyleResourceKey = ResolveStyleResourceKey(IconStyleResourceKey, DefaultIconStyleResourceKey);
-            string textStackStyleResourceKey = ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
-            string titleStyleResourceKey = ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
-            string messageStyleResourceKey = ResolveStyleResourceKey(MessageStyleResourceKey, DefaultMessageStyleResourceKey);
+            string iconFrameStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(IconFrameStyleResourceKey, DefaultIconFrameStyleResourceKey);
+            string iconStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(IconStyleResourceKey, DefaultIconStyleResourceKey);
+            string textStackStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
+            string titleStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
+            string messageStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(MessageStyleResourceKey, DefaultMessageStyleResourceKey);
             bool isTitleVisible = !string.IsNullOrWhiteSpace(title);
             bool isMessageVisible = !string.IsNullOrWhiteSpace(message);
             bool isActionVisible = IsActionVisible && !string.IsNullOrWhiteSpace(actionText) && actionCommand is not null;
@@ -482,13 +489,6 @@ namespace Cotton.Mobile.Controls
         private static bool IsTextVisible(object value)
         {
             return value is string text && !string.IsNullOrWhiteSpace(text);
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
 
         private static string BuildSemanticDescription(string title, string message)

@@ -82,20 +82,15 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string frameStyleResourceKey = ResolveStyleResourceKey(FrameStyleResourceKey, DefaultFrameStyleResourceKey);
-            string imageStyleResourceKey = ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
+            string frameStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(FrameStyleResourceKey, DefaultFrameStyleResourceKey);
+            string imageStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
 
             _frame.SetDynamicResource(StyleProperty, frameStyleResourceKey);
             _image.SetDynamicResource(StyleProperty, imageStyleResourceKey);
             _image.Source = Source;
             SemanticProperties.SetDescription(this, SemanticDescription ?? string.Empty);
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
     }
 }

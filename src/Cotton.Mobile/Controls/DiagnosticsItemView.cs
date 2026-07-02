@@ -126,11 +126,12 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string labelTextStyleResourceKey =
-                ResolveStyleResourceKey(LabelTextStyleResourceKey, DefaultLabelTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(LabelTextStyleResourceKey, DefaultLabelTextStyleResourceKey);
             string valueTextStyleResourceKey =
-                ResolveStyleResourceKey(ValueTextStyleResourceKey, DefaultValueTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(ValueTextStyleResourceKey, DefaultValueTextStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _grid.ColumnDefinitions[0].Width = new GridLength(LabelColumnWidth);
@@ -138,13 +139,6 @@ namespace Cotton.Mobile.Controls
             _value.SetDynamicResource(StyleProperty, valueTextStyleResourceKey);
             _label.Text = LabelText ?? string.Empty;
             _value.Text = ValueText ?? string.Empty;
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
     }
 }

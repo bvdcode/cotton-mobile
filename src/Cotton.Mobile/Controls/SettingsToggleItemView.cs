@@ -398,21 +398,24 @@ namespace Cotton.Mobile.Controls
             string toggleSemanticDescription = string.IsNullOrWhiteSpace(ToggleSemanticDescription)
                 ? semanticDescription
                 : ToggleSemanticDescription;
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
-            string textStyleResourceKey = ResolveStyleResourceKey(TextStyleResourceKey, DefaultTextStyleResourceKey);
-            string supportingTextStyleResourceKey = ResolveStyleResourceKey(
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string textStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(TextStyleResourceKey, DefaultTextStyleResourceKey);
+            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 SupportingTextStyleResourceKey,
                 DefaultSupportingTextStyleResourceKey);
-            string detailTextStyleResourceKey = ResolveStyleResourceKey(
+            string detailTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 DetailTextStyleResourceKey,
                 DefaultDetailTextStyleResourceKey);
-            string textStackStyleResourceKey = ResolveStyleResourceKey(
+            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 TextStackStyleResourceKey,
                 DefaultTextStackStyleResourceKey);
-            string leadingIconFrameStyleResourceKey = ResolveStyleResourceKey(
+            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 LeadingIconFrameStyleResourceKey,
                 DefaultLeadingIconFrameStyleResourceKey);
-            string switchStyleResourceKey = ResolveStyleResourceKey(SwitchStyleResourceKey, DefaultSwitchStyleResourceKey);
+            string switchStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(SwitchStyleResourceKey, DefaultSwitchStyleResourceKey);
             bool isLeadingIconVisible = IsLeadingIconVisible && LeadingIconData is not null;
             bool hasLeadingIconLayout = ResolveLeadingIconLayoutVisibility(
                 isLeadingIconVisible,
@@ -585,13 +588,6 @@ namespace Cotton.Mobile.Controls
             }
 
             return animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility && _leadingIcon.IsVisible;
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
 
         private static string CreateSemanticDescription(string text, string supportingText, string detailText)

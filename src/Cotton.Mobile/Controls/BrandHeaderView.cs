@@ -139,11 +139,14 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
-            string titleStyleResourceKey = ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string titleStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
             string markFrameStyleResourceKey =
-                ResolveStyleResourceKey(MarkFrameStyleResourceKey, DefaultMarkFrameStyleResourceKey);
-            string imageStyleResourceKey = ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(MarkFrameStyleResourceKey, DefaultMarkFrameStyleResourceKey);
+            string imageStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
             string title = Title ?? string.Empty;
             string semanticDescription = string.IsNullOrWhiteSpace(SemanticDescription)
                 ? title
@@ -158,13 +161,6 @@ namespace Cotton.Mobile.Controls
             _brandMark.SemanticDescription = semanticDescription;
             _brandMark.FrameStyleResourceKey = markFrameStyleResourceKey;
             _brandMark.ImageStyleResourceKey = imageStyleResourceKey;
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
     }
 }

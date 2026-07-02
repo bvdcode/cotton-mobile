@@ -488,19 +488,20 @@ namespace Cotton.Mobile.Controls
             bool animatePathTextVisibility,
             bool animateStatusTextVisibility)
         {
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string titleStackStyleResourceKey =
-                ResolveStyleResourceKey(TitleStackStyleResourceKey, DefaultTitleStackStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TitleStackStyleResourceKey, DefaultTitleStackStyleResourceKey);
             string titleTextStyleResourceKey =
-                ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleTextStyleResourceKey);
             string detailTextStyleResourceKey =
-                ResolveStyleResourceKey(DetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(DetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
             string actionClusterStyleResourceKey =
-                ResolveStyleResourceKey(ActionClusterStyleResourceKey, DefaultActionClusterStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(ActionClusterStyleResourceKey, DefaultActionClusterStyleResourceKey);
             string actionsContainerStyleResourceKey =
-                ResolveStyleResourceKey(ActionsContainerStyleResourceKey, DefaultActionsContainerStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(ActionsContainerStyleResourceKey, DefaultActionsContainerStyleResourceKey);
             string actionIconButtonStyleResourceKey =
-                ResolveStyleResourceKey(ActionIconButtonStyleResourceKey, DefaultActionIconButtonStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(ActionIconButtonStyleResourceKey, DefaultActionIconButtonStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _titleStack.SetDynamicResource(StyleProperty, titleStackStyleResourceKey);
@@ -652,13 +653,6 @@ namespace Cotton.Mobile.Controls
         private bool IsStatusTextActuallyVisible()
         {
             return IsStatusTextVisible && !string.IsNullOrWhiteSpace(StatusText);
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
     }
 }

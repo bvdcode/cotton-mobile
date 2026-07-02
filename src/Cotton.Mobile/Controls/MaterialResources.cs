@@ -36,5 +36,12 @@ namespace Cotton.Mobile.Controls
 
             return Get<Color>(resourceKey);
         }
+
+        public static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
+        {
+            return string.IsNullOrWhiteSpace(resourceKey)
+                ? defaultResourceKey
+                : resourceKey;
+        }
     }
 }

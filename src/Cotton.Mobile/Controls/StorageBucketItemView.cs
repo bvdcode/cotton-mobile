@@ -294,15 +294,16 @@ namespace Cotton.Mobile.Controls
             string detailText = DetailText ?? string.Empty;
             string primaryMetricText = PrimaryMetricText ?? string.Empty;
             string secondaryMetricText = SecondaryMetricText ?? string.Empty;
-            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string gridStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
             string leadingIconFrameStyleResourceKey =
-                ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
             string titleTextStyleResourceKey =
-                ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleTextStyleResourceKey);
             string metricTextStyleResourceKey =
-                ResolveStyleResourceKey(MetricTextStyleResourceKey, DefaultMetricTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(MetricTextStyleResourceKey, DefaultMetricTextStyleResourceKey);
             string detailTextStyleResourceKey =
-                ResolveStyleResourceKey(DetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
+                MaterialResources.ResolveStyleResourceKey(DetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
@@ -429,11 +430,6 @@ namespace Cotton.Mobile.Controls
         private static bool IsMetricTextActuallyVisible(string metricText)
         {
             return !string.IsNullOrWhiteSpace(metricText);
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey) ? defaultResourceKey : resourceKey;
         }
 
         private static string CreateSemanticDescription(

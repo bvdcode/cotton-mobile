@@ -105,22 +105,18 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            string containerStyleResourceKey = ResolveStyleResourceKey(ContainerStyleResourceKey, DefaultContainerStyleResourceKey);
-            string cardStyleResourceKey = ResolveStyleResourceKey(CardStyleResourceKey, DefaultCardStyleResourceKey);
-            string imageStyleResourceKey = ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
+            string containerStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(ContainerStyleResourceKey, DefaultContainerStyleResourceKey);
+            string cardStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(CardStyleResourceKey, DefaultCardStyleResourceKey);
+            string imageStyleResourceKey =
+                MaterialResources.ResolveStyleResourceKey(ImageStyleResourceKey, DefaultImageStyleResourceKey);
 
             _container.SetDynamicResource(StyleProperty, containerStyleResourceKey);
             _card.CardStyleResourceKey = cardStyleResourceKey;
             _image.SetDynamicResource(StyleProperty, imageStyleResourceKey);
             _image.Source = ImageSource;
             _image.HeightRequest = DisplayHeight;
-        }
-
-        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
-        {
-            return string.IsNullOrWhiteSpace(resourceKey)
-                ? defaultResourceKey
-                : resourceKey;
         }
     }
 }

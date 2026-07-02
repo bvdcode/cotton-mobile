@@ -7,6 +7,11 @@ namespace Cotton.Mobile.Behaviors
 {
     public class FocusedInputChromeBehavior : Behavior<Entry>
     {
+        private const string FieldBackgroundAnimationName = "M3InputFieldBackground";
+        private const string FieldStrokeAnimationName = "M3InputFieldStroke";
+        private const string IconFrameBackgroundAnimationName = "M3InputIconFrameBackground";
+        private const string IconFrameStrokeAnimationName = "M3InputIconFrameStroke";
+        private const string IconColorAnimationName = "M3InputIconColor";
         public static readonly BindableProperty FieldProperty = BindableProperty.Create(
             nameof(Field),
             typeof(Border),
@@ -31,12 +36,21 @@ namespace Cotton.Mobile.Behaviors
         private const string LightPrimaryResourceKey = "M3LightPrimary";
         private const string LightPrimaryContainerResourceKey = "M3LightPrimaryContainer";
         private const string LightOnPrimaryContainerResourceKey = "M3LightOnPrimaryContainer";
+        private const string LightOutlineVariantResourceKey = "M3LightOutlineVariant";
+        private const string LightSurfaceContainerHighResourceKey = "M3LightSurfaceContainerHigh";
+        private const string LightSurfaceContainerLowestResourceKey = "M3LightSurfaceContainerLowest";
+        private const string LightOnSurfaceVariantResourceKey = "M3LightOnSurfaceVariant";
         private const string DarkPrimaryResourceKey = "M3DarkPrimary";
         private const string DarkPrimaryContainerResourceKey = "M3DarkPrimaryContainer";
         private const string DarkOnPrimaryContainerResourceKey = "M3DarkOnPrimaryContainer";
+        private const string DarkOutlineVariantResourceKey = "M3DarkOutlineVariant";
+        private const string DarkSurfaceContainerResourceKey = "M3DarkSurfaceContainer";
+        private const string DarkSurfaceContainerHighResourceKey = "M3DarkSurfaceContainerHigh";
+        private const string DarkOnSurfaceVariantResourceKey = "M3DarkOnSurfaceVariant";
+        private const string TransparentResourceKey = "M3Transparent";
         private const string FocusStrokeResourceKey = "M3StrokeFocus";
-        private const string FocusedLightFieldBackgroundResourceKey = "M3LightSurfaceContainerLowest";
-        private const string FocusedDarkFieldBackgroundResourceKey = "M3DarkSurfaceContainerHigh";
+        private const string FocusMotionDurationResourceKey = "M3MotionFocusDuration";
+        private const string RestStrokeResourceKey = "M3StrokeThin";
 
         private Entry? _entry;
 
@@ -68,7 +82,7 @@ namespace Cotton.Mobile.Behaviors
 
             Application application = GetApplication();
             application.RequestedThemeChanged += OnRequestedThemeChanged;
-            ApplyCurrentState();
+            ApplyCurrentState(false);
         }
 
         protected override void OnDetachingFrom(Entry bindable)
@@ -87,27 +101,32 @@ namespace Cotton.Mobile.Behaviors
         private static void OnVisualTargetChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FocusedInputChromeBehavior behavior = (FocusedInputChromeBehavior)bindable;
-            behavior.ApplyCurrentState();
+            behavior.ApplyCurrentState(false);
         }
 
         private void OnFocusChanged(object? sender, FocusEventArgs e)
         {
-            ApplyCurrentState();
+            ApplyCurrentState(true);
         }
 
         private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)
         {
-            ApplyCurrentState();
+            ApplyCurrentState(false);
         }
 
-        private void ApplyCurrentState()
+        private void ApplyCurrentState(bool animate)
         {
             if (_entry is null || !_entry.IsFocused)
             {
-                ClearFocusedState();
+                ApplyRestingState(animate);
                 return;
             }
 
+            ApplyFocusedState(animate);
+        }
+
+        private void ApplyFocusedState(bool animate)
+        {
             Color primaryColor = GetRequiredColor(GetPrimaryResourceKey());
             Color primaryContainerColor = GetRequiredColor(GetPrimaryContainerResourceKey());
             Color onPrimaryContainerColor = GetRequiredColor(GetOnPrimaryContainerResourceKey());
@@ -116,20 +135,48 @@ namespace Cotton.Mobile.Behaviors
 
             if (Field is not null)
             {
-                Field.Stroke = new SolidColorBrush(primaryColor);
+                AnimateBorderStroke(Field, primaryColor, FieldStrokeAnimationName, animate);
                 Field.StrokeThickness = focusStroke;
-                Field.BackgroundColor = fieldBackgroundColor;
+                AnimateBackground(Field, fieldBackgroundColor, FieldBackgroundAnimationName, animate);
             }
 
             if (LeadingIconFrame is not null)
             {
-                LeadingIconFrame.Stroke = new SolidColorBrush(primaryColor);
-                LeadingIconFrame.BackgroundColor = primaryContainerColor;
+                AnimateBorderStroke(LeadingIconFrame, primaryColor, IconFrameStrokeAnimationName, animate);
+                AnimateBackground(LeadingIconFrame, primaryContainerColor, IconFrameBackgroundAnimationName, animate);
             }
 
             if (LeadingIcon is not null)
             {
-                LeadingIcon.IconColor = onPrimaryContainerColor;
+                AnimateIconColor(LeadingIcon, onPrimaryContainerColor, animate);
+            }
+        }
+
+        private void ApplyRestingState(bool animate)
+        {
+            Color fieldStrokeColor = GetRequiredColor(GetOutlineVariantResourceKey());
+            Color fieldBackgroundColor = GetRequiredColor(GetRestingFieldBackgroundResourceKey());
+            Color iconFrameStrokeColor = GetRequiredColor(TransparentResourceKey);
+            Color iconFrameBackgroundColor = GetRequiredColor(GetSurfaceContainerHighResourceKey());
+            Color iconColor = GetRequiredColor(GetOnSurfaceVariantResourceKey());
+            double restStroke = GetRequiredDouble(RestStrokeResourceKey);
+
+            if (Field is not null)
+            {
+                AnimateBorderStroke(Field, fieldStrokeColor, FieldStrokeAnimationName, animate);
+                Field.StrokeThickness = restStroke;
+                AnimateBackground(Field, fieldBackgroundColor, FieldBackgroundAnimationName, animate);
+            }
+
+            if (LeadingIconFrame is not null)
+            {
+                AnimateBorderStroke(LeadingIconFrame, iconFrameStrokeColor, IconFrameStrokeAnimationName, animate);
+                AnimateBackground(LeadingIconFrame, iconFrameBackgroundColor, IconFrameBackgroundAnimationName, animate);
+            }
+
+            if (LeadingIcon is not null)
+            {
+                AnimateIconColor(LeadingIcon, iconColor, animate);
             }
         }
 
@@ -150,10 +197,54 @@ namespace Cotton.Mobile.Behaviors
             Application application = GetApplication();
             if (application.RequestedTheme == AppTheme.Light)
             {
-                return FocusedLightFieldBackgroundResourceKey;
+                return LightSurfaceContainerLowestResourceKey;
             }
 
-            return FocusedDarkFieldBackgroundResourceKey;
+            return DarkSurfaceContainerHighResourceKey;
+        }
+
+        private static string GetRestingFieldBackgroundResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightSurfaceContainerLowestResourceKey;
+            }
+
+            return DarkSurfaceContainerResourceKey;
+        }
+
+        private static string GetSurfaceContainerHighResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightSurfaceContainerHighResourceKey;
+            }
+
+            return DarkSurfaceContainerHighResourceKey;
+        }
+
+        private static string GetOutlineVariantResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightOutlineVariantResourceKey;
+            }
+
+            return DarkOutlineVariantResourceKey;
+        }
+
+        private static string GetOnSurfaceVariantResourceKey()
+        {
+            Application application = GetApplication();
+            if (application.RequestedTheme == AppTheme.Light)
+            {
+                return LightOnSurfaceVariantResourceKey;
+            }
+
+            return DarkOnSurfaceVariantResourceKey;
         }
 
         private static string GetPrimaryResourceKey()
@@ -226,6 +317,75 @@ namespace Cotton.Mobile.Behaviors
         {
             return Application.Current
                 ?? throw new InvalidOperationException("The current application was not found.");
+        }
+
+        private static void AnimateBackground(
+            Border border,
+            Color targetColor,
+            string animationName,
+            bool animate)
+        {
+            MaterialMotion.UpdateBackgroundColor(
+                border,
+                targetColor,
+                GetMotionDuration(animate),
+                animationName,
+                animate);
+        }
+
+        private static void AnimateBorderStroke(
+            Border border,
+            Color targetColor,
+            string animationName,
+            bool animate)
+        {
+            Color startColor = GetCurrentStrokeColor(border, targetColor);
+            MaterialMotion.UpdateColor(
+                border,
+                startColor,
+                targetColor,
+                GetMotionDuration(animate),
+                animationName,
+                animate,
+                color => border.Stroke = new SolidColorBrush(color));
+        }
+
+        private static void AnimateIconColor(IconView icon, Color targetColor, bool animate)
+        {
+            MaterialMotion.UpdateColor(
+                icon,
+                icon.IconColor,
+                targetColor,
+                GetMotionDuration(animate),
+                IconColorAnimationName,
+                animate,
+                color => icon.IconColor = color);
+        }
+
+        private static int GetMotionDuration(bool animate)
+        {
+            return animate ? GetRequiredInt(FocusMotionDurationResourceKey) : 0;
+        }
+
+        private static Color GetCurrentStrokeColor(Border border, Color fallbackColor)
+        {
+            if (border.Stroke is SolidColorBrush brush)
+            {
+                return brush.Color;
+            }
+
+            return fallbackColor;
+        }
+
+        private static int GetRequiredInt(string key)
+        {
+            object resource = GetRequiredResource(key);
+            if (resource is int value)
+            {
+                return value;
+            }
+
+            throw new InvalidOperationException($"Resource '{key}' must be an Int32.");
         }
     }
 }

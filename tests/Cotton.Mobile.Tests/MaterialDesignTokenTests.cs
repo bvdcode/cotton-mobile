@@ -46,6 +46,7 @@ namespace Cotton.Mobile.Tests
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private const string AuthLegalFooterViewPath = "src/Cotton.Mobile/Controls/AuthLegalFooterView.cs";
         private const string AuthSignInPanelViewPath = "src/Cotton.Mobile/Controls/AuthSignInPanelView.cs";
+        private const string FocusedInputChromeBehaviorPath = "src/Cotton.Mobile/Behaviors/FocusedInputChromeBehavior.cs";
         private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string LongPressBehaviorPath = "src/Cotton.Mobile/Behaviors/LongPressBehavior.cs";
@@ -388,14 +389,29 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
             string materialDialogPage = LoadText(MaterialDialogPagePath);
+            string focusedInputChromeBehavior = LoadText(FocusedInputChromeBehaviorPath);
+            string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
 
             Assert.Contains("<controls:OutlinedInputField", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:OutlinedInputField", trashPage, StringComparison.Ordinal);
             Assert.Contains("OutlinedInputField", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateBackgroundColor(", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateColor(", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("ApplyCurrentState(true)", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("ApplyRestingState(animate)", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("FieldBackgroundAnimationName = \"M3InputFieldBackground\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("IconFrameBackgroundAnimationName = \"M3InputIconFrameBackground\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("IconColorAnimationName = \"M3InputIconColor\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("FocusMotionDurationResourceKey = \"M3MotionFocusDuration\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("public static void UpdateColor(", materialMotion, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionFocusDuration\">120</x:Int32>", LoadText(InteractionResourcePath), StringComparison.Ordinal);
             Assert.DoesNotContain("<Entry", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Entry", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Field.BackgroundColor =", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.DoesNotContain("LeadingIconFrame.BackgroundColor =", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.DoesNotContain("LeadingIcon.IconColor =", focusedInputChromeBehavior, StringComparison.Ordinal);
         }
 
         [Fact]

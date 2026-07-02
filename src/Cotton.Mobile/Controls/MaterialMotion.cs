@@ -31,6 +31,16 @@ namespace Cotton.Mobile.Controls
             element.BackgroundColor = targetColor;
         }
 
+        public static void SetColor(
+            VisualElement element,
+            Color targetColor,
+            string animationName,
+            Action<Color> applyColor)
+        {
+            element.AbortAnimation(animationName);
+            applyColor(targetColor);
+        }
+
         public static void AnimateBackgroundColor(
             VisualElement element,
             Color targetColor,
@@ -38,20 +48,13 @@ namespace Cotton.Mobile.Controls
             string animationName)
         {
             Color startColor = element.BackgroundColor ?? MaterialResources.Get<Color>("M3Transparent");
-            if (duration <= 0 || AreClose(startColor, targetColor))
-            {
-                SetBackgroundColor(element, targetColor, animationName);
-                return;
-            }
-
-            element.AbortAnimation(animationName);
-
-            Animation animation = new(
-                progress => element.BackgroundColor = Interpolate(startColor, targetColor, progress),
-                0d,
-                1d,
-                Easing.CubicOut);
-            animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
+            AnimateColor(
+                element,
+                startColor,
+                targetColor,
+                duration,
+                animationName,
+                color => element.BackgroundColor = color);
         }
 
         public static void UpdateBackgroundColor(
@@ -68,6 +71,48 @@ namespace Cotton.Mobile.Controls
             }
 
             SetBackgroundColor(element, targetColor, animationName);
+        }
+
+        public static void AnimateColor(
+            VisualElement element,
+            Color startColor,
+            Color targetColor,
+            int duration,
+            string animationName,
+            Action<Color> applyColor)
+        {
+            if (duration <= 0 || AreClose(startColor, targetColor))
+            {
+                SetColor(element, targetColor, animationName, applyColor);
+                return;
+            }
+
+            element.AbortAnimation(animationName);
+
+            Animation animation = new(
+                progress => applyColor(Interpolate(startColor, targetColor, progress)),
+                0d,
+                1d,
+                Easing.CubicOut);
+            animation.Commit(element, animationName, rate: FrameRate, length: Duration(duration));
+        }
+
+        public static void UpdateColor(
+            VisualElement element,
+            Color startColor,
+            Color targetColor,
+            int duration,
+            string animationName,
+            bool animate,
+            Action<Color> applyColor)
+        {
+            if (animate)
+            {
+                AnimateColor(element, startColor, targetColor, duration, animationName, applyColor);
+                return;
+            }
+
+            SetColor(element, targetColor, animationName, applyColor);
         }
 
         private static Color Interpolate(Color startColor, Color targetColor, double progress)

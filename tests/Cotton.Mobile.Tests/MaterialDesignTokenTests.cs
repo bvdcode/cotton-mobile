@@ -2461,6 +2461,7 @@ namespace Cotton.Mobile.Tests
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileListMetadataView"));
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
@@ -2481,6 +2482,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileListMetadataGrid\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardTitle\"", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardSupportingLine\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("TrailingChipOpacityAnimationName = \"M3FileListTrailingChipOpacity\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("OnTrailingChipVisibilityPropertyChanged", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("CompleteTrailingChipVisibility", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_trailingChip.IsVisible = IsTrailingTextVisible", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3FileTileTextStack\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3CardTextStack}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileTextStack}\"", trashPage, StringComparison.Ordinal);

@@ -979,6 +979,10 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
+    <Style TargetType="VerticalStackLayout" x:Key="M3MetadataCardBodyStack">
+        <Setter Property="Spacing" Value="{StaticResource Space8}" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3SettingsSectionStack">
         <Setter Property="Spacing" Value="{StaticResource Space12}" />
     </Style>

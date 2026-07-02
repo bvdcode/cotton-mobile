@@ -44,35 +44,19 @@
                                 ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                     <CollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">
-                            <Border Style="{StaticResource M3ContentCard}">
-                                <Grid RowDefinitions="Auto,Auto,Auto"
-                                      Style="{StaticResource M3MetadataCardGrid}">
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="{StaticResource M3FileThumbnailSize}" />
-                                        <ColumnDefinition Width="*" />
-                                        <ColumnDefinition Width="Auto" />
-                                    </Grid.ColumnDefinitions>
-
-                                    <controls:MetadataCardHeaderView Grid.ColumnSpan="3"
-                                                                     LeadingIconData="{x:Static controls:IconPathData.File}"
-                                                                     LeadingIconFrameStyleResourceKey="M3CardFileThumbnailFrame"
-                                                                     Title="{Binding VersionText}"
-                                                                     SupportingText="{Binding Name}"
-                                                                     TrailingText="{Binding KindText}" />
-
-                                    <Label Grid.Row="1"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding DetailText}"
+                            <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.File}"
+                                                       LeadingIconFrameStyleResourceKey="M3CardFileThumbnailFrame"
+                                                       Title="{Binding VersionText}"
+                                                       SupportingText="{Binding Name}"
+                                                       TrailingText="{Binding KindText}">
+                                <VerticalStackLayout Style="{StaticResource M3MetadataCardBodyStack}">
+                                    <Label Text="{Binding DetailText}"
                                            Style="{StaticResource M3CardSupportingWrap}" />
 
-                                    <Label Grid.Row="2"
-                                           Grid.Column="1"
-                                           Grid.ColumnSpan="2"
-                                           Text="{Binding ContentTypeText}"
+                                    <Label Text="{Binding ContentTypeText}"
                                            Style="{StaticResource M3CardMetaLine}" />
-                                </Grid>
-                            </Border>
+                                </VerticalStackLayout>
+                            </controls:MetadataCardView>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>

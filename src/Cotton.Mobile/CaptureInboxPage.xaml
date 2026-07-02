@@ -59,26 +59,13 @@
                                  BindableLayout.ItemsSource="{Binding Items}">
                 <BindableLayout.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonCaptureInboxListItem">
-                        <Border Style="{StaticResource M3ContentCard}">
-                            <Grid RowDefinitions="Auto,Auto,Auto,Auto"
-                                  Style="{StaticResource M3MetadataCardGrid}">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="{StaticResource M3FileThumbnailSize}" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <controls:MetadataCardHeaderView Grid.ColumnSpan="3"
-                                                                 LeadingIconData="{x:Static controls:IconPathData.Transfer}"
-                                                                 LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
-                                                                 Title="{Binding DisplayName}"
-                                                                 SupportingText="{Binding DetailText}"
-                                                                 TrailingText="{Binding StatusText}" />
-
-                                <Grid Grid.Row="1"
-                                      Grid.Column="1"
-                                      Grid.ColumnSpan="2"
-                                      ColumnDefinitions="Auto,*"
+                        <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
+                                                   LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
+                                                   Title="{Binding DisplayName}"
+                                                   SupportingText="{Binding DetailText}"
+                                                   TrailingText="{Binding StatusText}">
+                            <VerticalStackLayout Style="{StaticResource M3MetadataCardBodyStack}">
+                                <Grid ColumnDefinitions="Auto,*"
                                       Style="{StaticResource M3InlineMetadataGrid}">
                                     <Label Text="{Binding KindText}"
                                            Style="{StaticResource M3CardSupportingStrongLine}" />
@@ -88,21 +75,15 @@
                                            Style="{StaticResource M3CardSupportingLine}" />
                                 </Grid>
 
-                                <Label Grid.Row="2"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding DestinationText}"
+                                <Label Text="{Binding DestinationText}"
                                        IsVisible="{Binding IsDestinationVisible}"
                                        Style="{StaticResource M3CardSupportingStrongWrap}" />
 
-                                <Label Grid.Row="3"
-                                       Grid.Column="1"
-                                       Grid.ColumnSpan="2"
-                                       Text="{Binding FailureMessage}"
+                                <Label Text="{Binding FailureMessage}"
                                        IsVisible="{Binding IsFailureVisible}"
                                        Style="{StaticResource M3ErrorSupportingWrap}" />
-                            </Grid>
-                        </Border>
+                            </VerticalStackLayout>
+                        </controls:MetadataCardView>
                     </DataTemplate>
                 </BindableLayout.ItemTemplate>
             </VerticalStackLayout>

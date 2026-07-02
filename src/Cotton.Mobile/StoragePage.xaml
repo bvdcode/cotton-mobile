@@ -39,8 +39,8 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <Label Text="Free up storage"
-                       Style="{StaticResource M3CardTitle}" />
+                <controls:SettingsSectionHeaderView Title="Free up storage"
+                                                    IsTapEnabled="False" />
 
                 <controls:ActionListItemView Text="Free space"
                                              SupportingText="Remove evictable local copies while keeping offline files."

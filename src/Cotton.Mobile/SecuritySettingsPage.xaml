@@ -93,14 +93,13 @@
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
 
-                <VerticalStackLayout Style="{StaticResource M3SettingsDenseStack}"
-                                     IsVisible="{Binding IsAccountSessionsEmptyVisible}">
-                    <Label Text="{Binding AccountSessionsEmptyTitle}"
-                           Style="{StaticResource M3CardSupportingStrongLine}" />
-
-                    <Label Text="{Binding AccountSessionsEmptyDetails}"
-                           Style="{StaticResource M3CardSupportingBlock}" />
-                </VerticalStackLayout>
+                <controls:SettingsSectionHeaderView IsVisible="{Binding IsAccountSessionsEmptyVisible}"
+                                                    Title="{Binding AccountSessionsEmptyTitle}"
+                                                    PrimaryDetailText="{Binding AccountSessionsEmptyDetails}"
+                                                    TextStackStyleResourceKey="M3SettingsDenseStack"
+                                                    TitleTextStyleResourceKey="M3CardSupportingStrongLine"
+                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
+                                                    IsTapEnabled="False" />
 
                 <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}"
                                      IsVisible="{Binding IsAccountSessionsListVisible}"

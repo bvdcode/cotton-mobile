@@ -979,13 +979,14 @@ namespace Cotton.Mobile.Tests
             string storagePage = LoadText(StoragePagePath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
 
-            Assert.Equal(3, CountOccurrences(storagePage, "<controls:SettingsSectionHeaderView"));
+            Assert.Equal(4, CountOccurrences(storagePage, "<controls:SettingsSectionHeaderView"));
             Assert.Contains("Title=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailText=\"{Binding CloudQuotaSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingStrongLine\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("SecondaryDetailText=\"{Binding CloudQuotaDetailText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("IsProgressVisible=\"{Binding IsCloudQuotaProgressVisible}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Title=\"Files on this device\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailText=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Title=\"Temporary files\"", storagePage, StringComparison.Ordinal);
@@ -997,6 +998,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new LinearProgressView", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("Grid.RowSpan=\"2\"\n                                        IconData=\"{x:Static controls:IconPathData.Cloud}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
         }
@@ -1102,6 +1104,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryDetailText=\"{Binding AccessText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryDetailText=\"{Binding DurationText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsSectionHeaderView IsVisible=\"{Binding IsAccountSessionsEmptyVisible}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding AccountSessionsEmptyTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailText=\"{Binding AccountSessionsEmptyDetails}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TextStackStyleResourceKey=\"M3SettingsDenseStack\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("TitleTextStyleResourceKey=\"M3CardSupportingStrongLine\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("public class SettingsInfoItemView", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("IsAttentionStateProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("AttentionLeadingIconFrameStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
@@ -1113,6 +1121,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("TargetType=\"controls:ChipView\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Grid.Column=\"1\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Grid.Row=\"1\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyTitle}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyDetails}\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1169,7 +1179,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(5, CountOccurrences(backupSetupPage, "<controls:SettingsCardView"));
             Assert.Contains("Title=\"{Binding PermissionTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding AppLockTitle}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Text=\"Free up storage\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"Free up storage\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Progress=\"{Binding CloudQuotaUsageFraction}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);

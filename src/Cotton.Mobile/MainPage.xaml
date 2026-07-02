@@ -177,25 +177,10 @@
                                                            AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"
                                                            IconData="{x:Static controls:IconPathData.Download}" />
 
-                            <Border IsVisible="{Binding Display.IsFilesNoticeVisible}"
-                                    Style="{StaticResource M3FileNoticePanel}">
-                                <Grid ColumnDefinitions="Auto,*"
-                                      Style="{StaticResource M3FileNoticeGrid}">
-                                    <Border Style="{StaticResource M3FileNoticeIconFrame}">
-                                        <controls:IconView IconData="{x:Static controls:IconPathData.Error}"
-                                                           Style="{StaticResource M3FileNoticeIcon}" />
-                                    </Border>
-
-                                    <VerticalStackLayout Grid.Column="1"
-                                                         Style="{StaticResource M3FileNoticeTextStack}">
-                                        <Label Text="{Binding Display.FilesNoticeTitle}"
-                                               Style="{StaticResource M3CardSupportingStrong}" />
-
-                                        <Label Text="{Binding Display.FilesNoticeMessage}"
-                                               Style="{StaticResource M3CardSupportingWrap}" />
-                                    </VerticalStackLayout>
-                                </Grid>
-                            </Border>
+                            <controls:NoticePanelView IsVisible="{Binding Display.IsFilesNoticeVisible}"
+                                                      IconData="{x:Static controls:IconPathData.Error}"
+                                                      Title="{Binding Display.FilesNoticeTitle}"
+                                                      Message="{Binding Display.FilesNoticeMessage}" />
 
                             <controls:OutlinedInputField x:Name="FileSearchField"
                                                          Text="{Binding Display.FileSearchText, Mode=TwoWay}"

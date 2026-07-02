@@ -39,6 +39,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsSummaryHeaderViewPath = "src/Cotton.Mobile/Controls/SettingsSummaryHeaderView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
+        private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string ViewerInfoHeaderViewPath = "src/Cotton.Mobile/Controls/ViewerInfoHeaderView.cs";
@@ -277,6 +278,27 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("GridStyleResourceKey=\"M3ActionListItemGrid\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AttentionStatusPanel", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry notifications\"", notificationSettingsPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void File_notice_panels_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string noticePanelView = LoadText(NoticePanelViewPath);
+
+            Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IconData=\"{x:Static controls:IconPathData.Error}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Title=\"{Binding Display.FilesNoticeTitle}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Message=\"{Binding Display.FilesNoticeMessage}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultPanelStyleResourceKey = \"M3FileNoticePanel\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileNoticeGrid\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconFrameStyleResourceKey = \"M3FileNoticeIconFrame\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStackStyleResourceKey = \"M3FileNoticeTextStack\"", noticePanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileNoticePanel", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileNoticeGrid", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileNoticeIconFrame", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileNoticeTextStack", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

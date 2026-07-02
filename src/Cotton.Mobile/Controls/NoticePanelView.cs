@@ -1,0 +1,261 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
+
+using Microsoft.Maui.Controls.Shapes;
+
+namespace Cotton.Mobile.Controls
+{
+    public class NoticePanelView : ContentView
+    {
+        private const string DefaultGridStyleResourceKey = "M3FileNoticeGrid";
+        private const string DefaultIconFrameStyleResourceKey = "M3FileNoticeIconFrame";
+        private const string DefaultIconStyleResourceKey = "M3FileNoticeIcon";
+        private const string DefaultMessageStyleResourceKey = "M3CardSupportingWrap";
+        private const string DefaultPanelStyleResourceKey = "M3FileNoticePanel";
+        private const string DefaultTextStackStyleResourceKey = "M3FileNoticeTextStack";
+        private const string DefaultTitleStyleResourceKey = "M3CardSupportingStrong";
+
+        public static readonly BindableProperty TitleProperty = BindableProperty.Create(
+            nameof(Title),
+            typeof(string),
+            typeof(NoticePanelView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty MessageProperty = BindableProperty.Create(
+            nameof(Message),
+            typeof(string),
+            typeof(NoticePanelView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
+            nameof(IconData),
+            typeof(Geometry),
+            typeof(NoticePanelView),
+            default(Geometry),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty PanelStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(PanelStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultPanelStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(GridStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultGridStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconFrameStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(IconFrameStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultIconFrameStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(IconStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultIconStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStackStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultTextStackStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TitleStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TitleStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultTitleStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty MessageStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(MessageStyleResourceKey),
+            typeof(string),
+            typeof(NoticePanelView),
+            DefaultMessageStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        private readonly Grid _grid;
+        private readonly IconView _icon;
+        private readonly Border _iconFrame;
+        private readonly Label _message;
+        private readonly Border _panel;
+        private readonly VerticalStackLayout _textStack;
+        private readonly Label _title;
+
+        public NoticePanelView()
+        {
+            _icon = new IconView();
+            _iconFrame = new Border
+            {
+                Content = _icon,
+            };
+
+            _title = new Label();
+            _message = new Label();
+            _textStack = new VerticalStackLayout
+            {
+                Children =
+                {
+                    _title,
+                    _message,
+                },
+            };
+            Grid.SetColumn(_textStack, 1);
+
+            _grid = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition
+                    {
+                        Width = GridLength.Auto,
+                    },
+                    new ColumnDefinition
+                    {
+                        Width = GridLength.Star,
+                    },
+                },
+                Children =
+                {
+                    _iconFrame,
+                    _textStack,
+                },
+            };
+
+            _panel = new Border
+            {
+                Content = _grid,
+            };
+
+            Content = _panel;
+            UpdateVisualState();
+        }
+
+        public string Title
+        {
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
+        }
+
+        public string Message
+        {
+            get => (string)GetValue(MessageProperty);
+            set => SetValue(MessageProperty, value);
+        }
+
+        public Geometry? IconData
+        {
+            get => (Geometry?)GetValue(IconDataProperty);
+            set => SetValue(IconDataProperty, value);
+        }
+
+        public string PanelStyleResourceKey
+        {
+            get => (string)GetValue(PanelStyleResourceKeyProperty);
+            set => SetValue(PanelStyleResourceKeyProperty, value);
+        }
+
+        public string GridStyleResourceKey
+        {
+            get => (string)GetValue(GridStyleResourceKeyProperty);
+            set => SetValue(GridStyleResourceKeyProperty, value);
+        }
+
+        public string IconFrameStyleResourceKey
+        {
+            get => (string)GetValue(IconFrameStyleResourceKeyProperty);
+            set => SetValue(IconFrameStyleResourceKeyProperty, value);
+        }
+
+        public string IconStyleResourceKey
+        {
+            get => (string)GetValue(IconStyleResourceKeyProperty);
+            set => SetValue(IconStyleResourceKeyProperty, value);
+        }
+
+        public string TextStackStyleResourceKey
+        {
+            get => (string)GetValue(TextStackStyleResourceKeyProperty);
+            set => SetValue(TextStackStyleResourceKeyProperty, value);
+        }
+
+        public string TitleStyleResourceKey
+        {
+            get => (string)GetValue(TitleStyleResourceKeyProperty);
+            set => SetValue(TitleStyleResourceKeyProperty, value);
+        }
+
+        public string MessageStyleResourceKey
+        {
+            get => (string)GetValue(MessageStyleResourceKeyProperty);
+            set => SetValue(MessageStyleResourceKeyProperty, value);
+        }
+
+        private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdateVisualState();
+        }
+
+        private void UpdateVisualState()
+        {
+            string title = Title ?? string.Empty;
+            string message = Message ?? string.Empty;
+            string panelStyleResourceKey = ResolveStyleResourceKey(PanelStyleResourceKey, DefaultPanelStyleResourceKey);
+            string gridStyleResourceKey = ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
+            string iconFrameStyleResourceKey = ResolveStyleResourceKey(IconFrameStyleResourceKey, DefaultIconFrameStyleResourceKey);
+            string iconStyleResourceKey = ResolveStyleResourceKey(IconStyleResourceKey, DefaultIconStyleResourceKey);
+            string textStackStyleResourceKey = ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
+            string titleStyleResourceKey = ResolveStyleResourceKey(TitleStyleResourceKey, DefaultTitleStyleResourceKey);
+            string messageStyleResourceKey = ResolveStyleResourceKey(MessageStyleResourceKey, DefaultMessageStyleResourceKey);
+
+            _panel.SetDynamicResource(StyleProperty, panelStyleResourceKey);
+            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
+            _iconFrame.SetDynamicResource(StyleProperty, iconFrameStyleResourceKey);
+            _icon.SetDynamicResource(StyleProperty, iconStyleResourceKey);
+            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
+            _title.SetDynamicResource(StyleProperty, titleStyleResourceKey);
+            _message.SetDynamicResource(StyleProperty, messageStyleResourceKey);
+
+            _icon.IconData = IconData;
+            _title.Text = title;
+            _title.IsVisible = !string.IsNullOrWhiteSpace(title);
+            _message.Text = message;
+            _message.IsVisible = !string.IsNullOrWhiteSpace(message);
+            SemanticProperties.SetDescription(this, BuildSemanticDescription(title, message));
+        }
+
+        private static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
+        {
+            return string.IsNullOrWhiteSpace(resourceKey)
+                ? defaultResourceKey
+                : resourceKey;
+        }
+
+        private static string BuildSemanticDescription(string title, string message)
+        {
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return message;
+            }
+
+            if (string.IsNullOrWhiteSpace(message))
+            {
+                return title;
+            }
+
+            return $"{title} {message}";
+        }
+    }
+}

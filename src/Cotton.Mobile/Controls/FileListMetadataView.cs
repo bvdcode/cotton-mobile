@@ -185,21 +185,21 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateTrailingChipVisibility)
         {
-            string gridStyleResourceKey = string.IsNullOrWhiteSpace(GridStyleResourceKey)
-                ? DefaultGridStyleResourceKey
-                : GridStyleResourceKey;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? DefaultTitleStyleResourceKey
-                : TitleStyleResourceKey;
-            string detailStyleResourceKey = string.IsNullOrWhiteSpace(DetailStyleResourceKey)
-                ? DefaultDetailStyleResourceKey
-                : DetailStyleResourceKey;
-            string trailingChipStyleResourceKey = string.IsNullOrWhiteSpace(TrailingChipStyleResourceKey)
-                ? DefaultTrailingChipStyleResourceKey
-                : TrailingChipStyleResourceKey;
-            string trailingTextStyleResourceKey = string.IsNullOrWhiteSpace(TrailingTextStyleResourceKey)
-                ? DefaultTrailingTextStyleResourceKey
-                : TrailingTextStyleResourceKey;
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailStyleResourceKey,
+                DefaultDetailStyleResourceKey);
+            string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingChipStyleResourceKey,
+                DefaultTrailingChipStyleResourceKey);
+            string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TrailingTextStyleResourceKey,
+                DefaultTrailingTextStyleResourceKey);
             string trailingText = TrailingText ?? string.Empty;
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);

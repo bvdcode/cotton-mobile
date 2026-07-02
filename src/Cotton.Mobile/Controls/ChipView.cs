@@ -81,12 +81,12 @@ namespace Cotton.Mobile.Controls
         private void UpdateVisualState(bool animateTextVisibility)
         {
             string text = Text ?? string.Empty;
-            string chipStyleResourceKey = string.IsNullOrWhiteSpace(ChipStyleResourceKey)
-                ? DefaultChipStyleResourceKey
-                : ChipStyleResourceKey;
-            string labelStyleResourceKey = string.IsNullOrWhiteSpace(LabelStyleResourceKey)
-                ? DefaultLabelStyleResourceKey
-                : LabelStyleResourceKey;
+            string chipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                ChipStyleResourceKey,
+                DefaultChipStyleResourceKey);
+            string labelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LabelStyleResourceKey,
+                DefaultLabelStyleResourceKey);
 
             _chip.SetDynamicResource(StyleProperty, chipStyleResourceKey);
             _label.SetDynamicResource(StyleProperty, labelStyleResourceKey);

@@ -124,9 +124,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateActionVisibility)
         {
-            string iconButtonStyleResourceKey = string.IsNullOrWhiteSpace(IconButtonStyleResourceKey)
-                ? DefaultIconButtonStyleResourceKey
-                : IconButtonStyleResourceKey;
+            string iconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                IconButtonStyleResourceKey,
+                DefaultIconButtonStyleResourceKey);
 
             _actionButton.SetDynamicResource(StyleProperty, iconButtonStyleResourceKey);
             _actionButton.IconData = IconData ?? IconPathData.MoreVertical;

@@ -392,18 +392,18 @@ namespace Cotton.Mobile.Controls
             bool animateBadgeVisibility,
             bool animateSelection)
         {
-            string surfaceStyleResourceKey = string.IsNullOrWhiteSpace(SurfaceStyleResourceKey)
-                ? DefaultSurfaceStyleResourceKey
-                : SurfaceStyleResourceKey;
-            string selectionMarkStyleResourceKey = string.IsNullOrWhiteSpace(SelectionMarkStyleResourceKey)
-                ? DefaultSelectionMarkStyleResourceKey
-                : SelectionMarkStyleResourceKey;
-            string badgeStyleResourceKey = string.IsNullOrWhiteSpace(BadgeStyleResourceKey)
-                ? DefaultBadgeStyleResourceKey
-                : BadgeStyleResourceKey;
-            string badgeLabelStyleResourceKey = string.IsNullOrWhiteSpace(BadgeLabelStyleResourceKey)
-                ? DefaultBadgeLabelStyleResourceKey
-                : BadgeLabelStyleResourceKey;
+            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SurfaceStyleResourceKey,
+                DefaultSurfaceStyleResourceKey);
+            string selectionMarkStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                SelectionMarkStyleResourceKey,
+                DefaultSelectionMarkStyleResourceKey);
+            string badgeStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                BadgeStyleResourceKey,
+                DefaultBadgeStyleResourceKey);
+            string badgeLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                BadgeLabelStyleResourceKey,
+                DefaultBadgeLabelStyleResourceKey);
 
             _surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
             _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");

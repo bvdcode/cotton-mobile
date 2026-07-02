@@ -274,30 +274,30 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateLocalCopyChipVisibility, bool animateOfflineAttentionChipVisibility)
         {
-            string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
-                ? DefaultStackStyleResourceKey
-                : StackStyleResourceKey;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? DefaultTitleStyleResourceKey
-                : TitleStyleResourceKey;
-            string metadataGridStyleResourceKey = string.IsNullOrWhiteSpace(MetadataGridStyleResourceKey)
-                ? DefaultMetadataGridStyleResourceKey
-                : MetadataGridStyleResourceKey;
-            string detailStyleResourceKey = string.IsNullOrWhiteSpace(DetailStyleResourceKey)
-                ? DefaultDetailStyleResourceKey
-                : DetailStyleResourceKey;
-            string localChipStyleResourceKey = string.IsNullOrWhiteSpace(LocalChipStyleResourceKey)
-                ? DefaultLocalChipStyleResourceKey
-                : LocalChipStyleResourceKey;
-            string localChipLabelStyleResourceKey = string.IsNullOrWhiteSpace(LocalChipLabelStyleResourceKey)
-                ? DefaultLocalChipLabelStyleResourceKey
-                : LocalChipLabelStyleResourceKey;
-            string offlineChipStyleResourceKey = string.IsNullOrWhiteSpace(OfflineChipStyleResourceKey)
-                ? DefaultOfflineChipStyleResourceKey
-                : OfflineChipStyleResourceKey;
-            string offlineChipLabelStyleResourceKey = string.IsNullOrWhiteSpace(OfflineChipLabelStyleResourceKey)
-                ? DefaultOfflineChipLabelStyleResourceKey
-                : OfflineChipLabelStyleResourceKey;
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StackStyleResourceKey,
+                DefaultStackStyleResourceKey);
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string metadataGridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                MetadataGridStyleResourceKey,
+                DefaultMetadataGridStyleResourceKey);
+            string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailStyleResourceKey,
+                DefaultDetailStyleResourceKey);
+            string localChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LocalChipStyleResourceKey,
+                DefaultLocalChipStyleResourceKey);
+            string localChipLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                LocalChipLabelStyleResourceKey,
+                DefaultLocalChipLabelStyleResourceKey);
+            string offlineChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                OfflineChipStyleResourceKey,
+                DefaultOfflineChipStyleResourceKey);
+            string offlineChipLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                OfflineChipLabelStyleResourceKey,
+                DefaultOfflineChipLabelStyleResourceKey);
 
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);

@@ -126,15 +126,15 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateDetailVisibility)
         {
-            string stackStyleResourceKey = string.IsNullOrWhiteSpace(StackStyleResourceKey)
-                ? DefaultStackStyleResourceKey
-                : StackStyleResourceKey;
-            string titleStyleResourceKey = string.IsNullOrWhiteSpace(TitleStyleResourceKey)
-                ? DefaultTitleStyleResourceKey
-                : TitleStyleResourceKey;
-            string detailStyleResourceKey = string.IsNullOrWhiteSpace(DetailStyleResourceKey)
-                ? DefaultDetailStyleResourceKey
-                : DetailStyleResourceKey;
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                StackStyleResourceKey,
+                DefaultStackStyleResourceKey);
+            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                TitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailStyleResourceKey,
+                DefaultDetailStyleResourceKey);
 
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);

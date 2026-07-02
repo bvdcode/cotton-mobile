@@ -60,9 +60,9 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateSelection)
         {
-            string overlayStyleResourceKey = string.IsNullOrWhiteSpace(OverlayStyleResourceKey)
-                ? DefaultOverlayStyleResourceKey
-                : OverlayStyleResourceKey;
+            string overlayStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                OverlayStyleResourceKey,
+                DefaultOverlayStyleResourceKey);
 
             _overlay.SetDynamicResource(StyleProperty, overlayStyleResourceKey);
             _overlay.IsVisible = true;

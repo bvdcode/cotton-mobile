@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
 {
     public class SelectionBarView : ContentView
     {
+        private const string DefaultActionClusterStyleResourceKey = "M3SelectionBarActionCluster";
         private const string DefaultIconButtonStyleResourceKey = "M3FileChromeIconButton";
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(
@@ -129,9 +130,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _container;
         private readonly Label _detailLabel;
         private readonly Grid _grid;
-        private readonly IconButton _primaryActionButton;
-        private readonly IconButton _secondaryActionButton;
-        private readonly IconButton _tertiaryActionButton;
+        private readonly ActionClusterView _actions;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _titleLabel;
 
@@ -149,14 +148,11 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            _primaryActionButton = new IconButton();
-            Grid.SetColumn(_primaryActionButton, 1);
-
-            _secondaryActionButton = new IconButton();
-            Grid.SetColumn(_secondaryActionButton, 2);
-
-            _tertiaryActionButton = new IconButton();
-            Grid.SetColumn(_tertiaryActionButton, 3);
+            _actions = new ActionClusterView
+            {
+                ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey,
+            };
+            Grid.SetColumn(_actions, 1);
 
             _grid = new Grid
             {
@@ -170,21 +166,11 @@ namespace Cotton.Mobile.Controls
                     {
                         Width = GridLength.Auto,
                     },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
                 },
                 Children =
                 {
                     _textStack,
-                    _primaryActionButton,
-                    _secondaryActionButton,
-                    _tertiaryActionButton,
+                    _actions,
                 },
             };
 
@@ -316,47 +302,36 @@ namespace Cotton.Mobile.Controls
             _titleLabel.Text = TitleText ?? string.Empty;
             _detailLabel.Text = DetailText ?? string.Empty;
 
-            UpdateActionButton(
-                _primaryActionButton,
-                PrimaryActionIconData,
-                PrimaryActionCommand,
-                PrimaryActionIsEnabled,
-                PrimaryActionSemanticDescription ?? string.Empty,
-                PrimaryActionIconButtonStyleResourceKey);
-            UpdateActionButton(
-                _secondaryActionButton,
-                SecondaryActionIconData,
-                SecondaryActionCommand,
-                SecondaryActionIsEnabled,
-                SecondaryActionSemanticDescription ?? string.Empty,
-                SecondaryActionIconButtonStyleResourceKey);
-            UpdateActionButton(
-                _tertiaryActionButton,
-                TertiaryActionIconData,
-                TertiaryActionCommand,
-                TertiaryActionIsEnabled,
-                TertiaryActionSemanticDescription ?? string.Empty,
-                TertiaryActionIconButtonStyleResourceKey);
+            _actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey;
+            _actions.PrimaryActionIconData = PrimaryActionIconData;
+            _actions.PrimaryActionCommand = PrimaryActionCommand;
+            _actions.PrimaryActionIconButtonStyleResourceKey =
+                ResolveIconButtonStyleResourceKey(PrimaryActionIconButtonStyleResourceKey);
+            _actions.PrimaryActionSemanticDescription = PrimaryActionSemanticDescription ?? string.Empty;
+            _actions.IsPrimaryActionEnabled = PrimaryActionIsEnabled;
+            _actions.IsPrimaryActionVisible = true;
+            _actions.SecondaryActionIconData = SecondaryActionIconData;
+            _actions.SecondaryActionCommand = SecondaryActionCommand;
+            _actions.SecondaryActionIconButtonStyleResourceKey =
+                ResolveIconButtonStyleResourceKey(SecondaryActionIconButtonStyleResourceKey);
+            _actions.SecondaryActionSemanticDescription = SecondaryActionSemanticDescription ?? string.Empty;
+            _actions.IsSecondaryActionEnabled = SecondaryActionIsEnabled;
+            _actions.IsSecondaryActionVisible = true;
+            _actions.TertiaryActionIconData = TertiaryActionIconData;
+            _actions.TertiaryActionCommand = TertiaryActionCommand;
+            _actions.TertiaryActionIconButtonStyleResourceKey =
+                ResolveIconButtonStyleResourceKey(TertiaryActionIconButtonStyleResourceKey);
+            _actions.TertiaryActionSemanticDescription = TertiaryActionSemanticDescription ?? string.Empty;
+            _actions.IsTertiaryActionEnabled = TertiaryActionIsEnabled;
+            _actions.IsTertiaryActionVisible = true;
+            _actions.IsQuaternaryActionVisible = false;
         }
 
-        private static void UpdateActionButton(
-            IconButton actionButton,
-            Geometry? iconData,
-            ICommand? command,
-            bool isEnabled,
-            string semanticDescription,
-            string iconButtonStyleResourceKey)
+        private static string ResolveIconButtonStyleResourceKey(string iconButtonStyleResourceKey)
         {
-            string styleResourceKey = string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
+            return string.IsNullOrWhiteSpace(iconButtonStyleResourceKey)
                 ? DefaultIconButtonStyleResourceKey
                 : iconButtonStyleResourceKey;
-
-            actionButton.SetDynamicResource(StyleProperty, styleResourceKey);
-            actionButton.IconData = iconData;
-            actionButton.Command = command;
-            actionButton.IsEnabled = isEnabled;
-            actionButton.IsVisible = iconData is not null && command is not null;
-            SemanticProperties.SetDescription(actionButton, semanticDescription);
         }
     }
 }

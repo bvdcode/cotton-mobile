@@ -649,6 +649,8 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="HorizontalStackLayout" x:Key="M3SelectionBarActionCluster" BasedOn="{StaticResource M3RowActionCluster}" />
+
     <Style TargetType="HorizontalStackLayout" x:Key="M3PanelActionCluster" BasedOn="{StaticResource M3RowActionCluster}">
         <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
     </Style>

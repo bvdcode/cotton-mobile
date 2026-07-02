@@ -100,6 +100,7 @@ namespace Cotton.Mobile.Tests
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
+        private const string SelectionBarViewPath = "src/Cotton.Mobile/Controls/SelectionBarView.cs";
         private const string SelectionOverlayViewPath = "src/Cotton.Mobile/Controls/SelectionOverlayView.cs";
         private const string TopAppBarPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml";
         private const string TopAppBarCodeBehindPath = "src/Cotton.Mobile/Controls/TopAppBar.xaml.cs";
@@ -1113,6 +1114,8 @@ namespace Cotton.Mobile.Tests
         {
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
+            string selectionBarView = LoadText(SelectionBarViewPath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
             Assert.Contains("<controls:SelectionBarView IsVisible=\"{Binding Display.IsFileSelectionBarVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ShowFileSelectionActionsCommand}\"", mainPage, StringComparison.Ordinal);
@@ -1125,6 +1128,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding CancelSelectionCommand}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SelectionBar", trashPage, StringComparison.Ordinal);
+
+            Assert.Contains("private readonly ActionClusterView _actions;", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3SelectionBarActionCluster\"", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("_actions.PrimaryActionCommand = PrimaryActionCommand", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("_actions.SecondaryActionCommand = SecondaryActionCommand", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("_actions.TertiaryActionCommand = TertiaryActionCommand", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("_actions.IsQuaternaryActionVisible = false", selectionBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("private readonly IconButton _primaryActionButton;", selectionBarView, StringComparison.Ordinal);
+            Assert.DoesNotContain("private static void UpdateActionButton(", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains(
+                "x:Key=\"M3SelectionBarActionCluster\" BasedOn=\"{StaticResource M3RowActionCluster}\"",
+                styles.ToString(SaveOptions.DisableFormatting),
+                StringComparison.Ordinal);
         }
 
         [Fact]

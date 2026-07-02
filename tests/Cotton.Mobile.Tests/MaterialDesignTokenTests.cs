@@ -1621,6 +1621,20 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_touchSurface = new TouchSurfaceView();", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? command : null;", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("DetailsOpacityAnimationName = \"M3FileStatusDetailsOpacity\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultPanelStyleResourceKey = \"M3FileStatusPanel\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultErrorPanelStyleResourceKey = \"M3FileErrorStatusPanel\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileStatusGrid\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconStyleResourceKey = \"M3FileStatusIcon\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultErrorIconStyleResourceKey = \"M3FileErrorStatusIcon\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStyleResourceKey = \"M3FileStatusPrimaryText\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultErrorTextStyleResourceKey = \"M3FileErrorStatusPrimaryText\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("DefaultDetailsStyleResourceKey = \"M3FileStatusMetaText\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Equal(5, CountOccurrences(fileStatusActionView, "MaterialResources.ResolveStyleResourceKey("));
+            Assert.Contains("_container.SetDynamicResource(StyleProperty, panelStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_icon.SetDynamicResource(StyleProperty, iconStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_text.SetDynamicResource(StyleProperty, textStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("_details.SetDynamicResource(StyleProperty, detailsStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("OnDetailsVisibilityPropertyChanged", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileStatusActionView, StringComparison.Ordinal);
@@ -1630,6 +1644,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("LongPressBehavior", fileStatusActionView, StringComparison.Ordinal);
             Assert.DoesNotContain("M3ListItemTouchSurface", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_container.SetDynamicResource(StyleProperty, isError ? \"M3FileErrorStatusPanel\" : \"M3FileStatusPanel\")", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_grid.SetDynamicResource(StyleProperty, \"M3FileStatusGrid\")", fileStatusActionView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_details.SetDynamicResource(StyleProperty, \"M3FileStatusMetaText\")", fileStatusActionView, StringComparison.Ordinal);
             Assert.DoesNotContain("_details.IsVisible = !string.IsNullOrWhiteSpace", fileStatusActionView, StringComparison.Ordinal);
 
             Assert.Equal(3, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
@@ -2029,6 +2046,7 @@ namespace Cotton.Mobile.Tests
             [
                 ("AuthLegalFooterView.cs", 1),
                 ("CenteredGateView.cs", 1),
+                ("FileStatusActionView.cs", 5),
                 ("SelectionBarView.cs", 1),
                 ("SettingsSummaryHeaderView.cs", 4),
                 ("TouchSurfaceView.cs", 1),

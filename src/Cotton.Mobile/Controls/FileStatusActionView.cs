@@ -10,6 +10,14 @@ namespace Cotton.Mobile.Controls
     public class FileStatusActionView : ContentView
     {
         private const string DetailsOpacityAnimationName = "M3FileStatusDetailsOpacity";
+        private const string DefaultPanelStyleResourceKey = "M3FileStatusPanel";
+        private const string DefaultErrorPanelStyleResourceKey = "M3FileErrorStatusPanel";
+        private const string DefaultGridStyleResourceKey = "M3FileStatusGrid";
+        private const string DefaultIconStyleResourceKey = "M3FileStatusIcon";
+        private const string DefaultErrorIconStyleResourceKey = "M3FileErrorStatusIcon";
+        private const string DefaultTextStyleResourceKey = "M3FileStatusPrimaryText";
+        private const string DefaultErrorTextStyleResourceKey = "M3FileErrorStatusPrimaryText";
+        private const string DefaultDetailsStyleResourceKey = "M3FileStatusMetaText";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -64,6 +72,62 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileStatusActionView),
             true,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty PanelStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(PanelStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultPanelStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ErrorPanelStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ErrorPanelStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultErrorPanelStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(GridStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultGridStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IconStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(IconStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultIconStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ErrorIconStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ErrorIconStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultErrorIconStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(TextStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty ErrorTextStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(ErrorTextStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultErrorTextStyleResourceKey,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty DetailsStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(DetailsStyleResourceKey),
+            typeof(string),
+            typeof(FileStatusActionView),
+            DefaultDetailsStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Border _container;
@@ -173,6 +237,54 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsActionEnabledProperty, value);
         }
 
+        public string PanelStyleResourceKey
+        {
+            get => (string)GetValue(PanelStyleResourceKeyProperty);
+            set => SetValue(PanelStyleResourceKeyProperty, value);
+        }
+
+        public string ErrorPanelStyleResourceKey
+        {
+            get => (string)GetValue(ErrorPanelStyleResourceKeyProperty);
+            set => SetValue(ErrorPanelStyleResourceKeyProperty, value);
+        }
+
+        public string GridStyleResourceKey
+        {
+            get => (string)GetValue(GridStyleResourceKeyProperty);
+            set => SetValue(GridStyleResourceKeyProperty, value);
+        }
+
+        public string IconStyleResourceKey
+        {
+            get => (string)GetValue(IconStyleResourceKeyProperty);
+            set => SetValue(IconStyleResourceKeyProperty, value);
+        }
+
+        public string ErrorIconStyleResourceKey
+        {
+            get => (string)GetValue(ErrorIconStyleResourceKeyProperty);
+            set => SetValue(ErrorIconStyleResourceKeyProperty, value);
+        }
+
+        public string TextStyleResourceKey
+        {
+            get => (string)GetValue(TextStyleResourceKeyProperty);
+            set => SetValue(TextStyleResourceKeyProperty, value);
+        }
+
+        public string ErrorTextStyleResourceKey
+        {
+            get => (string)GetValue(ErrorTextStyleResourceKeyProperty);
+            set => SetValue(ErrorTextStyleResourceKeyProperty, value);
+        }
+
+        public string DetailsStyleResourceKey
+        {
+            get => (string)GetValue(DetailsStyleResourceKeyProperty);
+            set => SetValue(DetailsStyleResourceKeyProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileStatusActionView view = (FileStatusActionView)bindable;
@@ -194,12 +306,27 @@ namespace Cotton.Mobile.Controls
                 : AccessibilityText;
             ICommand? command = Command;
             bool isError = IsError;
+            string panelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                isError ? ErrorPanelStyleResourceKey : PanelStyleResourceKey,
+                isError ? DefaultErrorPanelStyleResourceKey : DefaultPanelStyleResourceKey);
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                GridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string iconStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                isError ? ErrorIconStyleResourceKey : IconStyleResourceKey,
+                isError ? DefaultErrorIconStyleResourceKey : DefaultIconStyleResourceKey);
+            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                isError ? ErrorTextStyleResourceKey : TextStyleResourceKey,
+                isError ? DefaultErrorTextStyleResourceKey : DefaultTextStyleResourceKey);
+            string detailsStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                DetailsStyleResourceKey,
+                DefaultDetailsStyleResourceKey);
 
-            _container.SetDynamicResource(StyleProperty, isError ? "M3FileErrorStatusPanel" : "M3FileStatusPanel");
-            _grid.SetDynamicResource(StyleProperty, "M3FileStatusGrid");
-            _icon.SetDynamicResource(StyleProperty, isError ? "M3FileErrorStatusIcon" : "M3FileStatusIcon");
-            _text.SetDynamicResource(StyleProperty, isError ? "M3FileErrorStatusPrimaryText" : "M3FileStatusPrimaryText");
-            _details.SetDynamicResource(StyleProperty, "M3FileStatusMetaText");
+            _container.SetDynamicResource(StyleProperty, panelStyleResourceKey);
+            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
+            _icon.SetDynamicResource(StyleProperty, iconStyleResourceKey);
+            _text.SetDynamicResource(StyleProperty, textStyleResourceKey);
+            _details.SetDynamicResource(StyleProperty, detailsStyleResourceKey);
 
             _icon.IconData = isError && ErrorIconData is not null
                 ? ErrorIconData

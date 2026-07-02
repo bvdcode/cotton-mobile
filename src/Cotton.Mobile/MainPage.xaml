@@ -37,9 +37,9 @@
                                                      ReturnCommand="{Binding ConnectCommand}"
                                                      SemanticHint="Cotton Cloud server URL" />
 
-                        <Label Text="{Binding Display.Status}"
-                               IsVisible="{Binding Display.IsStatusVisible}"
-                               Style="{StaticResource M3AuthStatus}" />
+                        <controls:ScreenStatusView Text="{Binding Display.Status}"
+                                                   IsVisible="{Binding Display.IsStatusVisible}"
+                                                   TextStyleResourceKey="M3AuthStatus" />
 
                         <controls:FilledButton Text="Connect"
                                                Command="{Binding ConnectCommand}"
@@ -99,9 +99,9 @@
                                                             AccountCommand="{Binding AccountCommand}"
                                                             IsAccountEnabled="{Binding Display.IsAccountActionEnabled}" />
 
-                            <Label Text="{Binding Display.ProfileStatus}"
-                                   IsVisible="{Binding Display.IsProfileStatusVisible}"
-                                   Style="{StaticResource M3BodyMedium}" />
+                            <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
+                                                       IsVisible="{Binding Display.IsProfileStatusVisible}"
+                                                       TextStyleResourceKey="M3BodyMedium" />
 
                             <controls:FileStatusActionView IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
                                                            Text="{Binding Display.TransferActivityIndicator.Text}"

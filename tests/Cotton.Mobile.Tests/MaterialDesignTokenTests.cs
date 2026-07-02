@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Tests
         private const string TrashListEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashListEntryCardView.cs";
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
+        private const string ScreenStatusViewPath = "src/Cotton.Mobile/Controls/ScreenStatusView.cs";
         private const string NavigationBarViewPath = "src/Cotton.Mobile/Controls/NavigationBarView.cs";
         private const string NoticePanelViewPath = "src/Cotton.Mobile/Controls/NoticePanelView.cs";
         private const string LinearProgressViewPath = "src/Cotton.Mobile/Controls/LinearProgressView.cs";
@@ -326,6 +327,25 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LoadingActivityIndicator", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingIndicatorFrame", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3LoadingActivityIndicator", appLockGatePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Main_screen_status_text_uses_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string screenStatusView = LoadText(ScreenStatusViewPath);
+
+            Assert.Contains("<controls:ScreenStatusView Text=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TextStyleResourceKey=\"M3AuthStatus\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenStatusView Text=\"{Binding Display.ProfileStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TextStyleResourceKey=\"M3BodyMedium\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("TextStyleResourceKeyProperty", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStyleResourceKey = \"M3ScreenStatus\"", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("_label.SetDynamicResource(StyleProperty, textStyleResourceKey)", screenStatusView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Display.ProfileStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AuthStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3BodyMedium}\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

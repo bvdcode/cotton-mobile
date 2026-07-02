@@ -75,6 +75,7 @@ namespace Cotton.Mobile.Tests
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private const string ViewerPlayOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerPlayOverlayView.cs";
         private const string ViewerOverlayActionButtonViewPath = "src/Cotton.Mobile/Controls/ViewerOverlayActionButtonView.cs";
+        private const string WrappedItemsViewPath = "src/Cotton.Mobile/Controls/WrappedItemsView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -651,7 +652,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileListThumbnailColumnWidth}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileActionSize}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3FileListStack}\"", mainPage, StringComparison.Ordinal);
-            Assert.Equal(1, CountOccurrences(mainPage, "BindableLayout.ItemsSource=\"{Binding Display.FileEntries}\""));
+            Assert.DoesNotContain("BindableLayout.ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -858,7 +859,11 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
+            string wrappedItemsView = LoadText(WrappedItemsViewPath);
 
+            Assert.Contains("<controls:WrappedItemsView IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("LayoutStyleResourceKey=\"M3FileTileWrapLayout\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:WrappedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileTileEntryCardView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding Details}\"", mainPage, StringComparison.Ordinal);
@@ -876,6 +881,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultMetadataGridStyleResourceKey = \"M3FileTileMetadataGrid\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardSupportingStrongLine\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardMetaLine\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("public class WrappedItemsView", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLayoutStyleResourceKey = \"M3FileTileWrapLayout\"", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("new FlexLayout()", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("BindableLayout.SetItemsSource(_layout, ItemsSource)", wrappedItemsView, StringComparison.Ordinal);
+            Assert.Contains("BindableLayout.SetItemTemplate(_layout, ItemTemplate)", wrappedItemsView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<FlexLayout IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("BindableLayout.ItemsSource", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileSlotGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileContentGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<RowDefinition Height=\"{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}\"", mainPage, StringComparison.Ordinal);

@@ -1094,6 +1094,10 @@ namespace Cotton.Mobile.Tests
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
             Assert.Contains(
+                "LeadingIconOpacityAnimationName = \"M3SettingsSectionLeadingIconOpacity\"",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 "TrailingContentOpacityAnimationName = \"M3SettingsSectionTrailingContentOpacity\"",
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
@@ -1114,6 +1118,10 @@ namespace Cotton.Mobile.Tests
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
             Assert.Contains(
+                "OnLeadingIconVisibilityPropertyChanged",
+                settingsSectionHeaderView,
+                StringComparison.Ordinal);
+            Assert.Contains(
                 "OnTrailingContentVisibilityPropertyChanged",
                 settingsSectionHeaderView,
                 StringComparison.Ordinal);
@@ -1126,9 +1134,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteSecondaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteTertiaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteQuaternaryDetailTextVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("CompleteLeadingIconVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteTrailingContentVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
+            Assert.Contains("ResolveLeadingIconLayoutVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("ResolveTrailingContentLayoutVisibility", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.DoesNotContain("_leadingIcon.IsVisible = isLeadingIconVisible", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.DoesNotContain("_trailingContentHost.IsVisible = isTrailingContentVisible", settingsSectionHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);

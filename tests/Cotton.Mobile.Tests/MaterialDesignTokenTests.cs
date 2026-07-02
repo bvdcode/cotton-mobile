@@ -2009,6 +2009,7 @@ namespace Cotton.Mobile.Tests
             string trashEntryCardViewBase = LoadText(TrashEntryCardViewBasePath);
             string trashListEntryCardView = LoadText(TrashListEntryCardViewPath);
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(1, CountOccurrences(trashPage, "<controls:TrashListEntryCardView"));
             Assert.Equal(1, CountOccurrences(trashPage, "<controls:TrashTileEntryCardView"));
@@ -2023,12 +2024,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("actionCluster.SecondaryActionIconData = IconPathData.Reset", trashEntryCardViewBase, StringComparison.Ordinal);
             Assert.Contains("actionCluster.SecondaryActionCommand = RestoreCommand", trashEntryCardViewBase, StringComparison.Ordinal);
             Assert.Contains("actionCluster.SecondaryActionSemanticDescription = $\"Restore {title}\"", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("EntryActionsOpacityAnimationName = \"M3TrashEntryActionsOpacity\"", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("UpdateEntryActionsVisibility", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("CompleteEntryActionsVisibility", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", trashEntryCardViewBase, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("M3RowActionCluster", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView Grid.Row=\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Delete}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton IconData=\"{x:Static controls:IconPathData.Reset}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,Auto,Auto\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("actionCluster.IsVisible = IsEntryActionsVisible", trashEntryCardViewBase, StringComparison.Ordinal);
         }
 
         [Fact]

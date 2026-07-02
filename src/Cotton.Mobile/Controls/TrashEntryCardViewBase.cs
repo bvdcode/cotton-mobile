@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Controls
 {
     public abstract class TrashEntryCardViewBase : ContentView
     {
+        private const string EntryActionsOpacityAnimationName = "M3TrashEntryActionsOpacity";
+
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
             typeof(string),
@@ -198,6 +200,8 @@ namespace Cotton.Mobile.Controls
             set => SetValue(RestoreCommandProperty, value);
         }
 
+        private bool _hasAppliedEntryActionsVisibility;
+
         protected abstract void UpdateVisualState();
 
         protected void UpdateThumbnail(FileThumbnailView thumbnail)
@@ -221,7 +225,7 @@ namespace Cotton.Mobile.Controls
         {
             string title = string.IsNullOrWhiteSpace(Title) ? "item" : Title;
 
-            actionCluster.IsVisible = IsEntryActionsVisible;
+            UpdateEntryActionsVisibility(actionCluster);
             actionCluster.PrimaryActionIconData = IconPathData.Delete;
             actionCluster.PrimaryActionCommand = DeleteForeverCommand;
             actionCluster.PrimaryActionCommandParameter = CommandParameter;
@@ -231,6 +235,43 @@ namespace Cotton.Mobile.Controls
             actionCluster.SecondaryActionCommand = RestoreCommand;
             actionCluster.SecondaryActionCommandParameter = CommandParameter;
             actionCluster.SecondaryActionSemanticDescription = $"Restore {title}";
+        }
+
+        private void UpdateEntryActionsVisibility(ActionClusterView actionCluster)
+        {
+            bool isEntryActionsVisible = IsEntryActionsVisible;
+            bool shouldAnimate = _hasAppliedEntryActionsVisibility;
+            double targetOpacity = isEntryActionsVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isEntryActionsVisible)
+            {
+                actionCluster.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                actionCluster,
+                actionCluster.Opacity,
+                targetOpacity,
+                duration,
+                EntryActionsOpacityAnimationName,
+                shouldAnimate,
+                opacity => actionCluster.Opacity = opacity,
+                () => CompleteEntryActionsVisibility(actionCluster));
+            _hasAppliedEntryActionsVisibility = true;
+        }
+
+        private void CompleteEntryActionsVisibility(ActionClusterView actionCluster)
+        {
+            if (IsEntryActionsVisible)
+            {
+                actionCluster.IsVisible = true;
+                return;
+            }
+
+            actionCluster.IsVisible = false;
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)

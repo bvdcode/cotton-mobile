@@ -50,6 +50,7 @@ namespace Cotton.Mobile.Tests
         private const string BrandHeaderViewPath = "src/Cotton.Mobile/Controls/BrandHeaderView.cs";
         private const string BrandMarkViewPath = "src/Cotton.Mobile/Controls/BrandMarkView.cs";
         private const string LongPressBehaviorPath = "src/Cotton.Mobile/Behaviors/LongPressBehavior.cs";
+        private const string TouchSurfaceViewPath = "src/Cotton.Mobile/Controls/TouchSurfaceView.cs";
         private const string CenteredGateViewPath = "src/Cotton.Mobile/Controls/CenteredGateView.cs";
         private const string EmptyStateViewPath = "src/Cotton.Mobile/Controls/EmptyStateView.cs";
         private const string ActionListItemViewPath = "src/Cotton.Mobile/Controls/ActionListItemView.cs";
@@ -1209,6 +1210,36 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SupportingText=\"Remove evictable local copies while keeping offline files.\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Touch_surfaces_use_rounded_material_state_layer()
+        {
+            XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
+            string styles = LoadText(StylesResourcePath);
+            string touchSurfaceView = LoadText(TouchSurfaceViewPath);
+            IReadOnlyDictionary<string, string> touchSurfaceSetters = GetStyleSetters(
+                stylesDocument,
+                "M3ListItemTouchSurface");
+
+            Assert.Contains("public class TouchSurfaceView : Border", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("_longPressBehavior = new LongPressBehavior();", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ListItemTouchSurface\")", touchSurfaceView, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:TouchSurfaceView\" x:Key=\"M3ListItemTouchSurface\">", styles, StringComparison.Ordinal);
+            Assert.Contains(
+                "MaterialResources.GetThemeColor(\n                        \"M3LightPressedStateLayer\",\n                        \"M3DarkPressedStateLayer\")",
+                LoadText(LongPressBehaviorPath),
+                StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3Transparent}", touchSurfaceSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3Transparent}", touchSurfaceSetters["Stroke"]);
+            Assert.Equal("{StaticResource M3StrokeNone}", touchSurfaceSetters["StrokeThickness"]);
+            Assert.Equal("Fill", touchSurfaceSetters["HorizontalOptions"]);
+            Assert.Equal("Fill", touchSurfaceSetters["VerticalOptions"]);
+            Assert.Contains(
+                "<RoundRectangle CornerRadius=\"{StaticResource M3DefaultBorderCornerRadius}\" />",
+                styles,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain("<Style TargetType=\"Grid\" x:Key=\"M3ListItemTouchSurface\">", styles, StringComparison.Ordinal);
         }
 
         [Fact]

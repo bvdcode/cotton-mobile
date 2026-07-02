@@ -6,7 +6,7 @@ using Cotton.Mobile.Behaviors;
 
 namespace Cotton.Mobile.Controls
 {
-    public class TouchSurfaceView : Grid
+    public class TouchSurfaceView : Border
     {
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),

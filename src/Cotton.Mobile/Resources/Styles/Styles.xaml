@@ -771,8 +771,17 @@
         <Setter Property="VerticalOptions" Value="Fill" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3ListItemTouchSurface">
+    <Style TargetType="controls:TouchSurfaceView" x:Key="M3ListItemTouchSurface">
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3DefaultBorderCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileTileCard" BasedOn="{StaticResource M3SurfaceCard}">

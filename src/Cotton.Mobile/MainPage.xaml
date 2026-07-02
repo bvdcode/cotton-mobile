@@ -45,10 +45,10 @@
                                           PrivacyCommand="{Binding PrivacyPolicyCommand}" />
         </controls:ScreenScrollBodyView>
 
-        <RefreshView Grid.Row="0"
-                     IsVisible="{Binding Display.IsProfileVisible}"
-                     Command="{Binding RefreshFilesCommand}"
-                     IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
+        <controls:MaterialRefreshView Grid.Row="0"
+                                      IsVisible="{Binding Display.IsProfileVisible}"
+                                      Command="{Binding RefreshFilesCommand}"
+                                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
             <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
                 <controls:StackedContentView IsVisible="{Binding Display.IsProfileVisible}"
                                              StackStyleResourceKey="M3FileBrowserProfileStack">
@@ -216,7 +216,7 @@
                     </controls:StackedContentView>
                 </controls:StackedContentView>
             </controls:ScreenScrollBodyView>
-        </RefreshView>
+        </controls:MaterialRefreshView>
 
         <controls:FloatingActionButtonView Grid.Row="1"
                                            IconData="{x:Static controls:IconPathData.Plus}"

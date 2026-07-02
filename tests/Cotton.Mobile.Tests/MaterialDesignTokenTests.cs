@@ -74,6 +74,7 @@ namespace Cotton.Mobile.Tests
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
         private const string LoadingStatusViewPath = "src/Cotton.Mobile/Controls/LoadingStatusView.cs";
         private const string LayeredContentViewPath = "src/Cotton.Mobile/Controls/LayeredContentView.cs";
+        private const string MaterialRefreshViewPath = "src/Cotton.Mobile/Controls/MaterialRefreshView.cs";
         private const string ScreenContentGridViewPath = "src/Cotton.Mobile/Controls/ScreenContentGridView.cs";
         private const string ScreenShellViewPath = "src/Cotton.Mobile/Controls/ScreenShellView.cs";
         private const string ScreenScrollBodyViewPath = "src/Cotton.Mobile/Controls/ScreenScrollBodyView.cs";
@@ -723,6 +724,27 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid x:Name=\"RootLayout\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("RowDefinitions=\"*,Auto,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3MainPageRootGrid}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Main_file_browser_refresh_uses_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string materialRefreshView = LoadText(MaterialRefreshViewPath);
+            string styles = LoadText(StylesResourcePath);
+
+            Assert.Contains("<controls:MaterialRefreshView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Command=\"{Binding RefreshFilesCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsRefreshing=\"{Binding Display.IsFilesRefreshing, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class MaterialRefreshView : RefreshView", materialRefreshView, StringComparison.Ordinal);
+            Assert.Contains("[ContentProperty(nameof(Content))]", materialRefreshView, StringComparison.Ordinal);
+            Assert.Contains("DefaultRefreshStyleResourceKey = \"M3MaterialRefreshView\"", materialRefreshView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultRefreshStyleResourceKey)", materialRefreshView, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"RefreshView\" x:Key=\"M3RefreshViewBase\">", styles, StringComparison.Ordinal);
+            Assert.Contains("<Setter Property=\"RefreshColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}\" />", styles, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"RefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:MaterialRefreshView\" x:Key=\"M3MaterialRefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
+            Assert.DoesNotContain("<RefreshView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
         }
 
         [Fact]

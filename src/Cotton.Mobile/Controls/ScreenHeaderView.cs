@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Controls
 {
     public class ScreenHeaderView : ContentView
     {
+        private const string ActionContentOpacityAnimationName = "M3ScreenHeaderActionContentOpacity";
         private const string BusyFrameOpacityAnimationName = "M3ScreenHeaderBusyFrameOpacity";
         private const string DetailTextOpacityAnimationName = "M3ScreenHeaderDetailTextOpacity";
         private const string SupportingTextOpacityAnimationName = "M3ScreenHeaderSupportingTextOpacity";
@@ -86,7 +87,7 @@ namespace Cotton.Mobile.Controls
             typeof(View),
             typeof(ScreenHeaderView),
             default(View),
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionContentVisibilityPropertyChanged);
 
         private readonly HorizontalStackLayout _actionCluster;
         private readonly ContentView _actionContentHost;
@@ -96,6 +97,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _detailText;
         private readonly Label _supportingText;
         private readonly Label _title;
+        private bool _hasAppliedActionContentVisibility;
         private bool _hasAppliedBusyState;
         private bool _hasAppliedDetailTextVisibility;
         private bool _hasAppliedSupportingTextVisibility;
@@ -167,6 +169,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _container;
             UpdateVisualState(
+                animateActionContentVisibility: false,
                 animateBusy: false,
                 animateSupportingTextVisibility: false,
                 animateDetailTextVisibility: false);
@@ -242,6 +245,20 @@ namespace Cotton.Mobile.Controls
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
             screenHeaderView.UpdateVisualState(
+                animateActionContentVisibility: false,
+                animateBusy: false,
+                animateSupportingTextVisibility: false,
+                animateDetailTextVisibility: false);
+        }
+
+        private static void OnActionContentVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
+            screenHeaderView.UpdateVisualState(
+                animateActionContentVisibility: true,
                 animateBusy: false,
                 animateSupportingTextVisibility: false,
                 animateDetailTextVisibility: false);
@@ -251,6 +268,7 @@ namespace Cotton.Mobile.Controls
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
             screenHeaderView.UpdateVisualState(
+                animateActionContentVisibility: false,
                 animateBusy: true,
                 animateSupportingTextVisibility: false,
                 animateDetailTextVisibility: false);
@@ -263,6 +281,7 @@ namespace Cotton.Mobile.Controls
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
             screenHeaderView.UpdateVisualState(
+                animateActionContentVisibility: false,
                 animateBusy: false,
                 animateSupportingTextVisibility: true,
                 animateDetailTextVisibility: false);
@@ -275,12 +294,14 @@ namespace Cotton.Mobile.Controls
         {
             ScreenHeaderView screenHeaderView = (ScreenHeaderView)bindable;
             screenHeaderView.UpdateVisualState(
+                animateActionContentVisibility: false,
                 animateBusy: false,
                 animateSupportingTextVisibility: false,
                 animateDetailTextVisibility: true);
         }
 
         private void UpdateVisualState(
+            bool animateActionContentVisibility,
             bool animateBusy,
             bool animateSupportingTextVisibility,
             bool animateDetailTextVisibility)
@@ -308,22 +329,34 @@ namespace Cotton.Mobile.Controls
             UpdateDetailTextVisibility(detailText, animateDetailTextVisibility);
 
             View? actionContent = ActionContent;
-            if (_actionContentHost.Content != actionContent)
+            bool hasActionContent = actionContent is not null;
+            bool hasActionContentLayout = ResolveActionContentLayoutVisibility(hasActionContent, animateActionContentVisibility);
+            if (hasActionContent && _actionContentHost.Content != actionContent)
             {
                 _actionContentHost.Content = actionContent;
             }
 
-            bool hasActionContent = actionContent is not null;
-            _actionContentHost.IsVisible = hasActionContent;
-            UpdateBusyState(hasActionContent, animateBusy);
+            UpdateActionContentVisibility(hasActionContent, animateActionContentVisibility);
+            UpdateBusyState(hasActionContentLayout, animateBusy);
 
             string description = CreateDescription(title, supportingText, detailText);
             SemanticProperties.SetDescription(_container, description);
         }
 
+        private void UpdateActionContentVisibility(bool hasActionContent, bool animateActionContentVisibility)
+        {
+            UpdateElementVisibility(
+                _actionContentHost,
+                hasActionContent,
+                animateActionContentVisibility,
+                ref _hasAppliedActionContentVisibility,
+                ActionContentOpacityAnimationName,
+                CompleteActionContentVisibility);
+        }
+
         private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
         {
-            UpdateTextVisibility(
+            UpdateElementVisibility(
                 _supportingText,
                 IsSupportingTextActuallyVisible(supportingText),
                 animateSupportingTextVisibility,
@@ -334,7 +367,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateDetailTextVisibility(string detailText, bool animateDetailTextVisibility)
         {
-            UpdateTextVisibility(
+            UpdateElementVisibility(
                 _detailText,
                 IsDetailTextActuallyVisible(detailText),
                 animateDetailTextVisibility,
@@ -343,35 +376,55 @@ namespace Cotton.Mobile.Controls
                 CompleteDetailTextVisibility);
         }
 
-        private void UpdateTextVisibility(
-            Label textLabel,
-            bool isTextVisible,
-            bool animateTextVisibility,
-            ref bool hasAppliedTextVisibility,
+        private void UpdateElementVisibility(
+            VisualElement element,
+            bool isElementVisible,
+            bool animateVisibility,
+            ref bool hasAppliedVisibility,
             string animationName,
             Action completeVisibility)
         {
-            bool shouldAnimate = animateTextVisibility && hasAppliedTextVisibility;
-            double targetOpacity = isTextVisible
+            bool shouldAnimate = animateVisibility && hasAppliedVisibility;
+            double targetOpacity = isElementVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
                 : MaterialMotion.Value("M3MotionHiddenOpacity");
             int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
 
-            if (isTextVisible)
+            if (isElementVisible)
             {
-                textLabel.IsVisible = true;
+                element.IsVisible = true;
             }
 
             MaterialMotion.UpdateDouble(
-                textLabel,
-                textLabel.Opacity,
+                element,
+                element.Opacity,
                 targetOpacity,
                 duration,
                 animationName,
                 shouldAnimate,
-                opacity => textLabel.Opacity = opacity,
+                opacity => element.Opacity = opacity,
                 completeVisibility);
-            hasAppliedTextVisibility = true;
+            hasAppliedVisibility = true;
+        }
+
+        private void CompleteActionContentVisibility()
+        {
+            View? actionContent = ActionContent;
+            if (actionContent is not null)
+            {
+                if (_actionContentHost.Content != actionContent)
+                {
+                    _actionContentHost.Content = actionContent;
+                }
+
+                _actionContentHost.IsVisible = true;
+                _actionCluster.IsVisible = true;
+                return;
+            }
+
+            _actionContentHost.Content = null;
+            _actionContentHost.IsVisible = false;
+            _actionCluster.IsVisible = IsBusy || _busyIndicatorFrame.IsVisible;
         }
 
         private void CompleteSupportingTextVisibility()
@@ -470,6 +523,18 @@ namespace Cotton.Mobile.Controls
         private bool IsDetailTextActuallyVisible(string detailText)
         {
             return IsDetailTextVisible && !string.IsNullOrWhiteSpace(detailText);
+        }
+
+        private bool ResolveActionContentLayoutVisibility(
+            bool hasActionContent,
+            bool animateActionContentVisibility)
+        {
+            if (hasActionContent)
+            {
+                return true;
+            }
+
+            return animateActionContentVisibility && _hasAppliedActionContentVisibility && _actionContentHost.IsVisible;
         }
     }
 }

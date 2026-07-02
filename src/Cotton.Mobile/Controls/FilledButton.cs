@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Controls
     public class FilledButton : CommandPressableContentView
     {
         private const string BackgroundAnimationName = "M3FilledButtonBackground";
+        private const string BorderColorAnimationName = "M3FilledButtonBorderColor";
+        private const string OpacityAnimationName = "M3FilledButtonOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -103,6 +105,7 @@ namespace Cotton.Mobile.Controls
 
         private readonly Border _container;
         private readonly Label _label;
+        private bool _hasAppliedVisualState;
 
         public FilledButton()
         {
@@ -211,7 +214,7 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState(false);
+                UpdateVisualState(true);
             }
         }
 
@@ -228,10 +231,10 @@ namespace Cotton.Mobile.Controls
 
         protected override void OnCommandStateChanged()
         {
-            UpdateVisualState(false);
+            UpdateVisualState(true);
         }
 
-        private void UpdateVisualState(bool animateBackground)
+        private void UpdateVisualState(bool animateState)
         {
             if (_container is null || _label is null)
             {
@@ -239,7 +242,17 @@ namespace Cotton.Mobile.Controls
             }
 
             bool canPress = CanHandlePress();
-            Opacity = ResolvePressableOpacity(1);
+            double targetOpacity = ResolvePressableOpacity(1);
+            int duration = IsPressed ? PressInDuration : PressOutDuration;
+            bool shouldAnimate = animateState && _hasAppliedVisualState;
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                OpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity);
 
             _container.Padding = ContentPadding;
             _container.MinimumHeightRequest = MinimumHeightRequest;
@@ -248,19 +261,27 @@ namespace Cotton.Mobile.Controls
             {
                 CornerRadius = new CornerRadius(ButtonCornerRadius),
             };
-            _container.Stroke = new SolidColorBrush(canPress ? BorderColor : DisabledBorderColor);
+            MaterialMotion.UpdateColor(
+                _container,
+                ResolveCurrentBorderColor(),
+                ResolveBorderColor(canPress),
+                duration,
+                BorderColorAnimationName,
+                shouldAnimate,
+                color => _container.Stroke = new SolidColorBrush(color));
             _container.StrokeThickness = BorderWidth;
             MaterialMotion.UpdateBackgroundColor(
                 _container,
                 ResolveBackgroundColor(canPress),
-                IsPressed ? PressInDuration : PressOutDuration,
+                duration,
                 BackgroundAnimationName,
-                animateBackground);
+                shouldAnimate);
 
             _label.Text = Text;
             _label.TextColor = canPress ? TextColor : DisabledTextColor;
             _label.FontSize = TextFontSize;
             _label.FontAttributes = FontAttributes;
+            _hasAppliedVisualState = true;
         }
 
         private Color ResolveBackgroundColor(bool canPress)
@@ -271,6 +292,21 @@ namespace Cotton.Mobile.Controls
             }
 
             return IsPressed ? PressedButtonBackgroundColor : ButtonBackgroundColor;
+        }
+
+        private Color ResolveBorderColor(bool canPress)
+        {
+            return canPress ? BorderColor : DisabledBorderColor;
+        }
+
+        private Color ResolveCurrentBorderColor()
+        {
+            if (_container.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return BorderColor;
         }
     }
 }

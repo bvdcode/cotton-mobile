@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Controls
     public class NavigationBarItem : PressableContentView
     {
         private const string BackgroundAnimationName = "M3NavigationBarItemBackground";
+        private const string BorderColorAnimationName = "M3NavigationBarItemBorderColor";
+        private const string OpacityAnimationName = "M3NavigationBarItemOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -131,6 +133,7 @@ namespace Cotton.Mobile.Controls
         private readonly VerticalStackLayout _content;
         private readonly IconView _icon;
         private readonly Label _label;
+        private bool _hasAppliedVisualState;
         private ICommand? _observedCommand;
 
         public NavigationBarItem()
@@ -285,7 +288,7 @@ namespace Cotton.Mobile.Controls
 
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
-                UpdateVisualState(false);
+                UpdateVisualState(true);
             }
         }
 
@@ -302,7 +305,7 @@ namespace Cotton.Mobile.Controls
             ICommand? newCommand = newValue as ICommand;
 
             item.ObserveCommand(oldCommand, newCommand);
-            item.UpdateVisualState(false);
+            item.UpdateVisualState(true);
         }
 
         protected override bool CanHandlePress()
@@ -353,26 +356,43 @@ namespace Cotton.Mobile.Controls
 
         private void OnCommandCanExecuteChanged(object? sender, EventArgs e)
         {
-            UpdateVisualState(false);
+            UpdateVisualState(true);
         }
 
-        private void UpdateVisualState(bool animateBackground)
+        private void UpdateVisualState(bool animateState)
         {
             if (_container is null || _content is null || _icon is null || _label is null)
             {
                 return;
             }
 
-            Opacity = ResolvePressableOpacity(1);
+            double targetOpacity = ResolvePressableOpacity(1);
+            int duration = IsPressed ? PressInDuration : PressOutDuration;
+            bool shouldAnimate = animateState && _hasAppliedVisualState;
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                OpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity);
             MaterialMotion.UpdateBackgroundColor(
                 _container,
                 IsPressed ? PressedFillColor : FillColor,
-                IsPressed ? PressInDuration : PressOutDuration,
+                duration,
                 BackgroundAnimationName,
-                animateBackground);
+                shouldAnimate);
             _container.HeightRequest = ItemHeight;
             _container.Padding = ContentPadding;
-            _container.Stroke = new SolidColorBrush(BorderColor);
+            MaterialMotion.UpdateColor(
+                _container,
+                ResolveCurrentBorderColor(),
+                BorderColor,
+                duration,
+                BorderColorAnimationName,
+                shouldAnimate,
+                color => _container.Stroke = new SolidColorBrush(color));
             _container.StrokeThickness = BorderWidth;
             _container.StrokeShape = new RoundRectangle
             {
@@ -386,6 +406,17 @@ namespace Cotton.Mobile.Controls
             _label.TextColor = TextColor;
             _label.FontSize = TextFontSize;
             _label.FontAttributes = TextFontAttributes;
+            _hasAppliedVisualState = true;
+        }
+
+        private Color ResolveCurrentBorderColor()
+        {
+            if (_container.Stroke is SolidColorBrush solidColorBrush)
+            {
+                return solidColorBrush.Color;
+            }
+
+            return BorderColor;
         }
     }
 }

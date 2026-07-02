@@ -1764,6 +1764,46 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Pressable_chrome_controls_animate_opacity_and_outline_state()
+        {
+            string[] controlPaths =
+            [
+                Path.Combine(ControlsDirectoryPath, "FilledButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"),
+                Path.Combine(ControlsDirectoryPath, "NavigationBarItem.cs"),
+            ];
+
+            foreach (string controlPath in controlPaths)
+            {
+                string control = LoadText(controlPath);
+
+                Assert.Contains("BorderColorAnimationName = \"M3", control, StringComparison.Ordinal);
+                Assert.Contains("OpacityAnimationName = \"M3", control, StringComparison.Ordinal);
+                Assert.Contains("MaterialMotion.UpdateColor(", control, StringComparison.Ordinal);
+                Assert.Contains("MaterialMotion.UpdateDouble(", control, StringComparison.Ordinal);
+                Assert.Contains("bool shouldAnimate = animateState && _hasAppliedVisualState", control, StringComparison.Ordinal);
+                Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", control, StringComparison.Ordinal);
+                Assert.Contains("ResolveCurrentBorderColor()", control, StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(1);",
+                    control,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(ButtonOpacity);",
+                    control,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    "_container.Stroke = new SolidColorBrush(canPress ? BorderColor : DisabledBorderColor);",
+                    control,
+                    StringComparison.Ordinal);
+                Assert.DoesNotContain(
+                    $"{Environment.NewLine}            _container.Stroke = new SolidColorBrush(BorderColor);",
+                    control,
+                    StringComparison.Ordinal);
+            }
+        }
+
+        [Fact]
         public void File_status_chips_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);

@@ -383,6 +383,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void File_status_chips_use_reusable_material_control()
+        {
+            string mainPage = LoadText(MainPagePath);
+            string trashPage = LoadText(TrashPagePath);
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:ChipView"));
+            Assert.Contains("Text=\"{Binding LocalCopyStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ChipStyleResourceKey=\"M3AccentOutlineChip\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding OfflineAttentionStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ChipStyleResourceKey=\"M3FileAttentionChip\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3AccentOutlineChip}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3FileAttentionChip}\"", mainPage, StringComparison.Ordinal);
+
+            Assert.Equal(1, CountOccurrences(trashPage, "<controls:ChipView"));
+            Assert.Contains("Text=\"{Binding BadgeText}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", trashPage, StringComparison.Ordinal);
+
+            Assert.Equal(1, CountOccurrences(backupSetupPage, "<controls:ChipView"));
+            Assert.Contains("Text=\"{Binding MediaAccessStatusText}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", backupSetupPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Secondary_screen_headers_use_reusable_material_control()
         {
             string[] screenPaths =

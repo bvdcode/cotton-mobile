@@ -84,11 +84,8 @@
                                Style="{StaticResource M3CardSupportingBlock}" />
                     </VerticalStackLayout>
 
-                    <Border Grid.Column="2"
-                            Style="{StaticResource M3NeutralChip}">
-                        <Label Text="{Binding MediaAccessStatusText}"
-                               Style="{StaticResource M3ChipLabel}" />
-                    </Border>
+                    <controls:ChipView Grid.Column="2"
+                                       Text="{Binding MediaAccessStatusText}" />
 
                     <controls:ActionListItemView Grid.Row="2"
                                                  Grid.Column="1"

@@ -360,19 +360,17 @@
                                                             <Label Text="{Binding Details}"
                                                                    Style="{StaticResource M3CardMetaLine}" />
 
-                                                            <Border Grid.Column="1"
-                                                                    IsVisible="{Binding HasLocalCopy}"
-                                                                    Style="{StaticResource M3AccentOutlineChip}">
-                                                                <Label Text="{Binding LocalCopyStatus}"
-                                                                       Style="{StaticResource M3AccentOutlineChipLabel}" />
-                                                            </Border>
+                                                            <controls:ChipView Grid.Column="1"
+                                                                               Text="{Binding LocalCopyStatus}"
+                                                                               IsVisible="{Binding HasLocalCopy}"
+                                                                               ChipStyleResourceKey="M3AccentOutlineChip"
+                                                                               LabelStyleResourceKey="M3AccentOutlineChipLabel" />
 
-                                                            <Border Grid.Column="2"
-                                                                    IsVisible="{Binding IsOfflineAttentionVisible}"
-                                                                    Style="{StaticResource M3FileAttentionChip}">
-                                                                <Label Text="{Binding OfflineAttentionStatus}"
-                                                                       Style="{StaticResource M3ErrorChipLabel}" />
-                                                            </Border>
+                                                            <controls:ChipView Grid.Column="2"
+                                                                               Text="{Binding OfflineAttentionStatus}"
+                                                                               IsVisible="{Binding IsOfflineAttentionVisible}"
+                                                                               ChipStyleResourceKey="M3FileAttentionChip"
+                                                                               LabelStyleResourceKey="M3ErrorChipLabel" />
                                                         </Grid>
                                                     </VerticalStackLayout>
 

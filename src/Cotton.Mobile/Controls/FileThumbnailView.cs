@@ -108,8 +108,7 @@ namespace Cotton.Mobile.Controls
             DefaultBadgeLabelStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
-        private readonly Border _badge;
-        private readonly Label _badgeLabel;
+        private readonly ChipView _badge;
         private readonly IconView _folderIcon;
         private readonly Image _image;
         private readonly ActivityIndicator _loadingIndicator;
@@ -136,12 +135,7 @@ namespace Cotton.Mobile.Controls
 
             _placeholder = new Label();
 
-            _badgeLabel = new Label();
-
-            _badge = new Border
-            {
-                Content = _badgeLabel,
-            };
+            _badge = new ChipView();
 
             Grid surfaceContent = new()
             {
@@ -294,9 +288,6 @@ namespace Cotton.Mobile.Controls
             _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
             _selectionMark.SetDynamicResource(StyleProperty, selectionMarkStyleResourceKey);
             _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
-            _badge.SetDynamicResource(StyleProperty, badgeStyleResourceKey);
-            _badgeLabel.SetDynamicResource(StyleProperty, badgeLabelStyleResourceKey);
-
             _image.Source = ThumbnailSource;
             _image.IsVisible = IsPreviewImageVisible;
             _folderIcon.IsVisible = IsFolderThumbnailVisible;
@@ -305,7 +296,9 @@ namespace Cotton.Mobile.Controls
             _placeholder.Text = PlaceholderText ?? string.Empty;
             _placeholder.IsVisible = IsPlaceholderTextVisible;
             _selectionMark.IsVisible = IsSelected;
-            _badgeLabel.Text = BadgeText ?? string.Empty;
+            _badge.Text = BadgeText ?? string.Empty;
+            _badge.ChipStyleResourceKey = badgeStyleResourceKey;
+            _badge.LabelStyleResourceKey = badgeLabelStyleResourceKey;
             _badge.IsVisible = IsBadgeVisible;
 
             if (FolderIconSize > 0)

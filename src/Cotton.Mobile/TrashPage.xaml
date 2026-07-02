@@ -135,11 +135,8 @@
                                            Style="{StaticResource M3CardSupportingLine}" />
                                 </VerticalStackLayout>
 
-                                <Border Grid.Column="2"
-                                        Style="{StaticResource M3NeutralChip}">
-                                    <Label Text="{Binding BadgeText}"
-                                           Style="{StaticResource M3ChipLabel}" />
-                                </Border>
+                                <controls:ChipView Grid.Column="2"
+                                                   Text="{Binding BadgeText}" />
 
                                 <controls:TouchSurfaceView Grid.ColumnSpan="2"
                                                            TapCommand="{Binding BindingContext.ToggleSelectionCommand, Source={x:Reference TrashRoot}}"

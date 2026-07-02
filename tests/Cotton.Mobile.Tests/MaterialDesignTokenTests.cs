@@ -2645,6 +2645,8 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
+            string fileEntryActionButtonView = LoadText(Path.Combine(ControlsDirectoryPath, "FileEntryActionButtonView.cs"));
+            string interaction = LoadText(InteractionResourcePath);
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileEntryActionButtonView"));
             Assert.Equal(2, CountOccurrences(mainPage, "EntryActionsCommand=\"{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}\""));
@@ -2657,8 +2659,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new FileEntryActionButtonView", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_actionButton.Command = EntryActionsCommand", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("_actionButton.Command = EntryActionsCommand", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("ActionButtonOpacityAnimationName = \"M3FileEntryActionButtonOpacity\"", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("OnActionVisibilityPropertyChanged", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("CompleteActionButtonVisibility", fileEntryActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Name, StringFormat='Actions for {0}'}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileActionIconButton}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("_actionButton.IsVisible = IsActionVisible", fileEntryActionButtonView, StringComparison.Ordinal);
         }
 
         [Fact]

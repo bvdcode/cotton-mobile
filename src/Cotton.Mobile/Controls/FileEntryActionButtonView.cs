@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Controls
     public class FileEntryActionButtonView : ContentView
     {
         private const string DefaultIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string ActionButtonOpacityAnimationName = "M3FileEntryActionButtonOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -34,7 +35,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(FileEntryActionButtonView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
@@ -58,12 +59,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
+        private bool _hasAppliedActionVisibility;
 
         public FileEntryActionButtonView()
         {
             _actionButton = new IconButton();
             Content = _actionButton;
-            UpdateVisualState();
+            UpdateVisualState(animateActionVisibility: false);
         }
 
         public Geometry? IconData
@@ -111,10 +113,16 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileEntryActionButtonView view = (FileEntryActionButtonView)bindable;
-            view.UpdateVisualState();
+            view.UpdateVisualState(animateActionVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnActionVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileEntryActionButtonView view = (FileEntryActionButtonView)bindable;
+            view.UpdateVisualState(animateActionVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateActionVisibility)
         {
             string iconButtonStyleResourceKey = string.IsNullOrWhiteSpace(IconButtonStyleResourceKey)
                 ? DefaultIconButtonStyleResourceKey
@@ -125,8 +133,44 @@ namespace Cotton.Mobile.Controls
             _actionButton.Command = Command;
             _actionButton.CommandParameter = CommandParameter;
             _actionButton.IsEnabled = IsActionEnabled;
-            _actionButton.IsVisible = IsActionVisible;
+            UpdateActionButtonVisibility(animateActionVisibility);
             SemanticProperties.SetDescription(_actionButton, SemanticDescription ?? string.Empty);
+        }
+
+        private void UpdateActionButtonVisibility(bool animateActionVisibility)
+        {
+            bool shouldAnimate = animateActionVisibility && _hasAppliedActionVisibility;
+            double targetOpacity = IsActionVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (IsActionVisible)
+            {
+                _actionButton.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _actionButton,
+                _actionButton.Opacity,
+                targetOpacity,
+                duration,
+                ActionButtonOpacityAnimationName,
+                shouldAnimate,
+                opacity => _actionButton.Opacity = opacity,
+                CompleteActionButtonVisibility);
+            _hasAppliedActionVisibility = true;
+        }
+
+        private void CompleteActionButtonVisibility()
+        {
+            if (IsActionVisible)
+            {
+                _actionButton.IsVisible = true;
+                return;
+            }
+
+            _actionButton.IsVisible = false;
         }
     }
 }

@@ -743,14 +743,22 @@ namespace Cotton.Mobile.Tests
         public void Retry_attention_panels_use_reusable_material_control()
         {
             string attentionStatusView = LoadText(AttentionStatusViewPath);
+            string interaction = LoadText(InteractionResourcePath);
             string mainPage = LoadText(MainPagePath);
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
 
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface = new TouchSurfaceView();", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("ActionButtonOpacityAnimationName = \"M3AttentionStatusActionButtonOpacity\"", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("OnActionButtonVisibilityPropertyChanged", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("CompleteActionButtonVisibility", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("LongPressBehavior", attentionStatusView, StringComparison.Ordinal);
             Assert.DoesNotContain("M3ListItemTouchSurface", attentionStatusView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_actionButton.IsVisible = IsActionVisible", attentionStatusView, StringComparison.Ordinal);
 
             Assert.Contains("<controls:AttentionStatusView", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", mainPage, StringComparison.Ordinal);

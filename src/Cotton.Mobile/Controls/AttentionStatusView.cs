@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -8,6 +9,8 @@ namespace Cotton.Mobile.Controls
 {
     public class AttentionStatusView : ContentView
     {
+        private const string ActionButtonOpacityAnimationName = "M3AttentionStatusActionButtonOpacity";
+
         public static readonly BindableProperty MessageProperty = BindableProperty.Create(
             nameof(Message),
             typeof(string),
@@ -40,7 +43,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(AttentionStatusView),
             true,
-            propertyChanged: OnVisualPropertyChanged);
+            propertyChanged: OnActionButtonVisibilityPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
@@ -97,6 +100,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _message;
         private readonly Border _panel;
         private readonly TouchSurfaceView _touchSurface;
+        private bool _hasAppliedActionButtonVisibility;
 
         public AttentionStatusView()
         {
@@ -147,7 +151,7 @@ namespace Cotton.Mobile.Controls
             _panel.SetDynamicResource(StyleProperty, "M3AttentionStatusPanel");
 
             Content = _panel;
-            UpdateVisualState();
+            UpdateVisualState(animateActionButtonVisibility: false);
         }
 
         public string Message
@@ -225,10 +229,19 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             AttentionStatusView attentionStatusView = (AttentionStatusView)bindable;
-            attentionStatusView.UpdateVisualState();
+            attentionStatusView.UpdateVisualState(animateActionButtonVisibility: false);
         }
 
-        private void UpdateVisualState()
+        private static void OnActionButtonVisibilityPropertyChanged(
+            BindableObject bindable,
+            object oldValue,
+            object newValue)
+        {
+            AttentionStatusView attentionStatusView = (AttentionStatusView)bindable;
+            attentionStatusView.UpdateVisualState(animateActionButtonVisibility: true);
+        }
+
+        private void UpdateVisualState(bool animateActionButtonVisibility)
         {
             string message = Message ?? string.Empty;
             string actionSemanticDescription = ActionSemanticDescription ?? string.Empty;
@@ -256,12 +269,48 @@ namespace Cotton.Mobile.Controls
             _actionButton.IconData = ActionIconData;
             _actionButton.Command = actionCommand;
             _actionButton.IsEnabled = IsActionEnabled;
-            _actionButton.IsVisible = IsActionVisible;
+            UpdateActionButtonVisibility(animateActionButtonVisibility);
             SemanticProperties.SetDescription(_actionButton, actionSemanticDescription);
 
             _touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && actionCommand is not null;
             SemanticProperties.SetDescription(_panel, message);
+        }
+
+        private void UpdateActionButtonVisibility(bool animateActionButtonVisibility)
+        {
+            bool shouldAnimate = animateActionButtonVisibility && _hasAppliedActionButtonVisibility;
+            double targetOpacity = IsActionVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (IsActionVisible)
+            {
+                _actionButton.IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                _actionButton,
+                _actionButton.Opacity,
+                targetOpacity,
+                duration,
+                ActionButtonOpacityAnimationName,
+                shouldAnimate,
+                opacity => _actionButton.Opacity = opacity,
+                CompleteActionButtonVisibility);
+            _hasAppliedActionButtonVisibility = true;
+        }
+
+        private void CompleteActionButtonVisibility()
+        {
+            if (IsActionVisible)
+            {
+                _actionButton.IsVisible = true;
+                return;
+            }
+
+            _actionButton.IsVisible = false;
         }
     }
 }

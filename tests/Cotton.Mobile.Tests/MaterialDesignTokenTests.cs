@@ -47,6 +47,7 @@ namespace Cotton.Mobile.Tests
         private const string SettingsInfoItemViewPath = "src/Cotton.Mobile/Controls/SettingsInfoItemView.cs";
         private const string SettingsToggleItemViewPath = "src/Cotton.Mobile/Controls/SettingsToggleItemView.cs";
         private const string StorageBucketItemViewPath = "src/Cotton.Mobile/Controls/StorageBucketItemView.cs";
+        private const string DiagnosticsItemViewPath = "src/Cotton.Mobile/Controls/DiagnosticsItemView.cs";
         private const string TrashEntryCardViewBasePath = "src/Cotton.Mobile/Controls/TrashEntryCardViewBase.cs";
         private const string TrashListEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashListEntryCardView.cs";
         private const string TrashTileEntryCardViewPath = "src/Cotton.Mobile/Controls/TrashTileEntryCardView.cs";
@@ -998,6 +999,27 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Label Text=\"{Binding CloudQuotaTitle}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Text=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Diagnostics_rows_use_reusable_material_control()
+        {
+            string diagnosticsPage = LoadText(DiagnosticsPagePath);
+            string diagnosticsItemView = LoadText(DiagnosticsItemViewPath);
+
+            Assert.Contains("<controls:SettingsSectionHeaderView Title=\"{Binding Title}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("IsTapEnabled=\"False\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:DiagnosticsItemView LabelText=\"{Binding Label}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("ValueText=\"{Binding Value}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("public class DiagnosticsItemView", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3DiagnosticsItemGrid\"", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultLabelTextStyleResourceKey = \"M3CardSupporting\"", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultValueTextStyleResourceKey = \"M3CardSupportingPrimaryBlock\"", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.Contains("M3DiagnosticsLabelColumnWidth", diagnosticsItemView, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Title}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Style=\"{StaticResource M3DiagnosticsItemGrid}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Text=\"{Binding Label}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Label Grid.Column=\"1\"", diagnosticsPage, StringComparison.Ordinal);
         }
 
         [Fact]

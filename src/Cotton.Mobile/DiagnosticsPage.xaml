@@ -31,26 +31,15 @@
                     <DataTemplate x:DataType="viewModels:DiagnosticsSectionViewModel">
                         <controls:ContentCardView>
                             <VerticalStackLayout Style="{StaticResource M3SettingsSectionStack}">
-                                <Label Text="{Binding Title}"
-                                       Style="{StaticResource M3CardTitle}" />
+                                <controls:SettingsSectionHeaderView Title="{Binding Title}"
+                                                                    IsTapEnabled="False" />
 
                                 <VerticalStackLayout Style="{StaticResource M3DiagnosticsItemListStack}"
                                                      BindableLayout.ItemsSource="{Binding Items}">
                                     <BindableLayout.ItemTemplate>
                                         <DataTemplate x:DataType="viewModels:DiagnosticsItemViewModel">
-                                            <Grid Style="{StaticResource M3DiagnosticsItemGrid}">
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="{StaticResource M3DiagnosticsLabelColumnWidth}" />
-                                                    <ColumnDefinition Width="*" />
-                                                </Grid.ColumnDefinitions>
-
-                                                <Label Text="{Binding Label}"
-                                                       Style="{StaticResource M3CardSupporting}" />
-
-                                                <Label Grid.Column="1"
-                                                       Text="{Binding Value}"
-                                                       Style="{StaticResource M3CardSupportingPrimaryBlock}" />
-                                            </Grid>
+                                            <controls:DiagnosticsItemView LabelText="{Binding Label}"
+                                                                          ValueText="{Binding Value}" />
                                         </DataTemplate>
                                     </BindableLayout.ItemTemplate>
                                 </VerticalStackLayout>

@@ -468,6 +468,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Filled_button_typography_lives_in_material_style()
+        {
+            string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> filledButtonSetters =
+                GetStyleSetters(styles, "M3FilledButton");
+
+            Assert.Equal("Bold", filledButtonSetters["FontAttributes"]);
+            Assert.Contains("_label.FontAttributes = FontAttributes", filledButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("FontAttributes.Bold", filledButton, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void File_browser_loading_skeleton_uses_material_geometry_and_motion()
         {
             XDocument spacing = LoadResourceDictionary(SpacingResourcePath);

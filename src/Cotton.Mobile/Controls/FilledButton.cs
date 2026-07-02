@@ -94,7 +94,7 @@ namespace Cotton.Mobile.Controls
             nameof(FontAttributes),
             typeof(FontAttributes),
             typeof(FilledButton),
-            FontAttributes.Bold,
+            FontAttributes.None,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(

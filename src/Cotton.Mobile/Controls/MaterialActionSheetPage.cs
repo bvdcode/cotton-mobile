@@ -10,6 +10,15 @@ namespace Cotton.Mobile.Controls
 {
     public class MaterialActionSheetPage : ContentPage
     {
+        private const string DefaultPageStyleResourceKey = "M3ModalPage";
+
+        public static readonly BindableProperty PageStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(PageStyleResourceKey),
+            typeof(string),
+            typeof(MaterialActionSheetPage),
+            DefaultPageStyleResourceKey,
+            propertyChanged: OnPageStyleResourceKeyChanged);
+
         private readonly TaskCompletionSource<string?> _completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly BoxView _scrim;
         private readonly Border _sheet;
@@ -28,16 +37,37 @@ namespace Cotton.Mobile.Controls
 
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
-            SetDynamicResource(StyleProperty, "M3ModalPage");
+            ApplyPageStyle();
             _scrim = CreateScrim();
             _sheet = CreateSheetSurface();
             PrepareInitialMotionState();
             Content = CreateContent(title, cancel, destruction, buttons);
         }
 
+        public string PageStyleResourceKey
+        {
+            get => (string)GetValue(PageStyleResourceKeyProperty);
+            set => SetValue(PageStyleResourceKeyProperty, value);
+        }
+
         public Task<string?> WaitForResultAsync()
         {
             return _completion.Task;
+        }
+
+        private static void OnPageStyleResourceKeyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            MaterialActionSheetPage page = (MaterialActionSheetPage)bindable;
+            page.ApplyPageStyle();
+        }
+
+        private void ApplyPageStyle()
+        {
+            string pageStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                PageStyleResourceKey,
+                DefaultPageStyleResourceKey);
+
+            SetDynamicResource(StyleProperty, pageStyleResourceKey);
         }
 
         protected override bool OnBackButtonPressed()

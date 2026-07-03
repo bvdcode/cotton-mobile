@@ -8,6 +8,15 @@ namespace Cotton.Mobile.Controls
 {
     public class MaterialDialogPage : ContentPage
     {
+        private const string DefaultPageStyleResourceKey = "M3ModalPage";
+
+        public static readonly BindableProperty PageStyleResourceKeyProperty = BindableProperty.Create(
+            nameof(PageStyleResourceKey),
+            typeof(string),
+            typeof(MaterialDialogPage),
+            DefaultPageStyleResourceKey,
+            propertyChanged: OnPageStyleResourceKeyChanged);
+
         private readonly TaskCompletionSource<string?> _completion =
             new(TaskCreationOptions.RunContinuationsAsynchronously);
         private readonly BoxView _scrim;
@@ -29,7 +38,7 @@ namespace Cotton.Mobile.Controls
 
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
-            SetDynamicResource(StyleProperty, "M3ModalPage");
+            ApplyPageStyle();
             _scrim = CreateScrim();
             _dialog = CreateDialogSurface();
             PrepareInitialMotionState();
@@ -60,9 +69,30 @@ namespace Cotton.Mobile.Controls
             return new MaterialDialogPage(title, message, accept, cancel, initialValue ?? string.Empty, maxLength);
         }
 
+        public string PageStyleResourceKey
+        {
+            get => (string)GetValue(PageStyleResourceKeyProperty);
+            set => SetValue(PageStyleResourceKeyProperty, value);
+        }
+
         public Task<string?> WaitForResultAsync()
         {
             return _completion.Task;
+        }
+
+        private static void OnPageStyleResourceKeyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            MaterialDialogPage page = (MaterialDialogPage)bindable;
+            page.ApplyPageStyle();
+        }
+
+        private void ApplyPageStyle()
+        {
+            string pageStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                PageStyleResourceKey,
+                DefaultPageStyleResourceKey);
+
+            SetDynamicResource(StyleProperty, pageStyleResourceKey);
         }
 
         protected override void OnAppearing()

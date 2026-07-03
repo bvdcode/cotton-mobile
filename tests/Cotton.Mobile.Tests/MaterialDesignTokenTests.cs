@@ -653,8 +653,13 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3ActionSheetItem");
 
             Assert.DoesNotContain("Style = MaterialResources.Get<Style>", combinedModalPages, StringComparison.Ordinal);
-            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ModalPage\")", materialDialogPage, StringComparison.Ordinal);
-            Assert.Contains("SetDynamicResource(StyleProperty, \"M3ModalPage\")", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultPageStyleResourceKey = \"M3ModalPage\"", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("DefaultPageStyleResourceKey = \"M3ModalPage\"", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.ResolveStyleResourceKey(", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.ResolveStyleResourceKey(", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, pageStyleResourceKey)", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, pageStyleResourceKey)", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("SetDynamicResource(StyleProperty, \"M3ModalPage\")", combinedModalPages, StringComparison.Ordinal);
             Assert.Contains("ApplyStyle(new BoxView(), \"M3ModalScrim\")", materialDialogPage, StringComparison.Ordinal);
             Assert.Contains("ApplyStyle(new BoxView(), \"M3ModalScrim\")", materialActionSheetPage, StringComparison.Ordinal);
             Assert.Contains("ApplyStyle(new VerticalStackLayout(), \"M3DialogStack\")", materialDialogPage, StringComparison.Ordinal);
@@ -2057,6 +2062,8 @@ namespace Cotton.Mobile.Tests
                 ("CenteredGateView.cs", 1),
                 ("FileStatusActionView.cs", 5),
                 ("LoadingIndicatorView.cs", 2),
+                ("MaterialActionSheetPage.cs", 1),
+                ("MaterialDialogPage.cs", 1),
                 ("SelectionBarView.cs", 1),
                 ("SettingsSummaryHeaderView.cs", 4),
                 ("TouchSurfaceView.cs", 1),

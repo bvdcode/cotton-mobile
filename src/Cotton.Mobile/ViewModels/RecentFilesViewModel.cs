@@ -210,7 +210,7 @@ namespace Cotton.Mobile.ViewModels
 
             CottonFileBrowserEntry file = CreateFileEntry(item);
             IsBusy = true;
-            Status = $"Opening {file.Name}...";
+            Status = null;
             try
             {
                 CottonFileDownloadResult localOrDownloadedFile = await PrepareFileForOpenAsync(file);
@@ -228,7 +228,7 @@ namespace Cotton.Mobile.ViewModels
                     CottonRecentFileSnapshot.Create(file, CottonRecentFileActionKind.Opened, DateTime.UtcNow));
                 IReadOnlyList<CottonRecentFileSnapshot> recentFiles = await _recentFileStore.LoadAsync(_instanceUri);
                 ShowSnapshot(CottonRecentFileListSnapshot.Create(recentFiles));
-                Status = $"Opened {file.Name}.";
+                Status = null;
             }
             catch (FileOpenUnavailableException exception)
             {

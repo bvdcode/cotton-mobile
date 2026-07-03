@@ -15,31 +15,13 @@ namespace Cotton.Mobile.Tests
                 "src/Cotton.Mobile/ViewModels/TextViewerViewModel.cs",
             ];
 
-            string repositoryRoot = FindRepositoryRoot();
             foreach (string viewModelPath in viewModelPaths)
             {
-                string content = File.ReadAllText(Path.Combine(repositoryRoot, viewModelPath));
+                string content = RepositoryPath.ReadText(viewModelPath);
 
                 Assert.DoesNotContain("\"Opening...\"", content, StringComparison.Ordinal);
                 Assert.DoesNotContain("\"Preparing share...\"", content, StringComparison.Ordinal);
             }
-        }
-
-        private static string FindRepositoryRoot()
-        {
-            DirectoryInfo? current = new(AppContext.BaseDirectory);
-            while (current is not null)
-            {
-                if (File.Exists(Path.Combine(current.FullName, "README.md"))
-                    && Directory.Exists(Path.Combine(current.FullName, "src")))
-                {
-                    return current.FullName;
-                }
-
-                current = current.Parent;
-            }
-
-            throw new InvalidOperationException("Repository root was not found.");
         }
     }
 }

@@ -4347,89 +4347,19 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            CottonFileDownloadResult? localFile = GetReusableLocalDownloadOrClear(instanceUri, file);
+            if (localFile is not null)
+            {
+                await OpenReusableLocalFileAsync(instanceUri, file, localFile);
+                return;
+            }
+
             if (ShowOfflineUnavailableRetryIfNeeded(MainPageFileAction.Open, file, OfflineOpenStatus))
             {
                 return;
             }
 
-            CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
-            bool shouldRunRecoveryRefresh = false;
-
-            try
-            {
-                CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
-                    instanceUri,
-                    file,
-                    "Opening",
-                    () => IsActiveFileAction(fileActionCancellation, instanceUri),
-                    fileActionCancellation.Token);
-                if (_filePreviewService.CanPreview(file, result))
-                {
-                    await _filePreviewService.OpenAsync(file, result, fileActionCancellation.Token);
-                }
-                else
-                {
-                    await _fileInteractionService.OpenAsync(result, fileActionCancellation.Token);
-                }
-
-                fileActionCancellation.Token.ThrowIfCancellationRequested();
-                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
-                {
-                    return;
-                }
-
-                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Opened);
-                _display.ShowFilesSummary();
-                shouldRunRecoveryRefresh = true;
-            }
-            catch (Exception exception)
-                when (IsAuthorizationFailure(exception))
-            {
-                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
-                {
-                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open authorization failure {FileId}.", file.Id);
-                    return;
-                }
-
-                ClearFileActionRetry();
-                await HandleSessionExpiredAsync(exception);
-            }
-            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
-            {
-                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
-                {
-                    _logger.LogDebug("Ignored stale Cotton mobile open cancellation {FileId}.", file.Id);
-                    return;
-                }
-
-                ClearFileActionRetry();
-                if (ShowReusableLocalFileIfAvailable(file))
-                {
-                    _display.ShowFilesSummary();
-                    return;
-                }
-
-                _display.ShowFilesStatus("Open cancelled.");
-            }
-            catch (Exception exception)
-            {
-                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
-                {
-                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open failure {FileId}.", file.Id);
-                    return;
-                }
-
-                ClearLocalFileMarkerIfFileMissing(exception, file);
-                _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
-                ShowFileActionRetry(
-                    MainPageFileAction.Open,
-                    file,
-                    CreateOpenFileActionFailureStatus(file, exception));
-            }
-            finally
-            {
-                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
-            }
+            await OpenRemoteFileAsync(instanceUri, file);
         }
 
         private async Task ShareFileAsync(CottonFileBrowserEntry file)
@@ -5482,6 +5412,114 @@ namespace Cotton.Mobile.ViewModels
             return downloadedFile;
         }
 
+        private async Task OpenRemoteFileAsync(Uri instanceUri, CottonFileBrowserEntry file)
+        {
+            CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
+            bool shouldRunRecoveryRefresh = false;
+
+            try
+            {
+                CottonFileDownloadResult result = await PrepareFileForOpenOrShareAsync(
+                    instanceUri,
+                    file,
+                    "Opening",
+                    () => IsActiveFileAction(fileActionCancellation, instanceUri),
+                    fileActionCancellation.Token);
+                await OpenPreparedFileAsync(file, result, fileActionCancellation.Token);
+                fileActionCancellation.Token.ThrowIfCancellationRequested();
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    return;
+                }
+
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Opened);
+                _display.ShowFilesSummary();
+                shouldRunRecoveryRefresh = true;
+            }
+            catch (Exception exception)
+                when (IsAuthorizationFailure(exception))
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open authorization failure {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                await HandleSessionExpiredAsync(exception);
+            }
+            catch (OperationCanceledException) when (fileActionCancellation.IsCancellationRequested)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug("Ignored stale Cotton mobile open cancellation {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearFileActionRetry();
+                if (ShowReusableLocalFileIfAvailable(file))
+                {
+                    _display.ShowFilesSummary();
+                    return;
+                }
+
+                _display.ShowFilesStatus("Open cancelled.");
+            }
+            catch (Exception exception)
+            {
+                if (!IsActiveFileAction(fileActionCancellation, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile open failure {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearLocalFileMarkerIfFileMissing(exception, file);
+                _logger.LogError(exception, "Failed to open Cotton mobile file {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.Open,
+                    file,
+                    CreateOpenFileActionFailureStatus(file, exception));
+            }
+            finally
+            {
+                EndFileAction(fileActionCancellation, shouldRunRecoveryRefresh);
+            }
+        }
+
+        private async Task OpenReusableLocalFileAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult localFile)
+        {
+            try
+            {
+                ClearFileActionRetry();
+                await OpenPreparedFileAsync(file, localFile, CancellationToken.None);
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    return;
+                }
+
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Opened);
+                _display.ShowFilesSummary();
+            }
+            catch (Exception exception)
+            {
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile local open failure {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearLocalFileMarkerIfFileMissing(exception, file);
+                _logger.LogError(exception, "Failed to open local Cotton mobile file {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.Open,
+                    file,
+                    CreateOpenFileActionFailureStatus(file, exception));
+            }
+        }
+
         private Task RecordRecentFileAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,
@@ -5682,19 +5720,9 @@ namespace Cotton.Mobile.ViewModels
                 return false;
             }
 
-            _display.ShowFileActionLoading($"Opening {file.Name}...");
-
             try
             {
-                if (_filePreviewService.CanPreview(file, downloadedFile))
-                {
-                    await _filePreviewService.OpenAsync(file, downloadedFile, cancellationToken);
-                }
-                else
-                {
-                    await _fileInteractionService.OpenAsync(downloadedFile, cancellationToken);
-                }
-
+                await OpenPreparedFileAsync(file, downloadedFile, cancellationToken);
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!canUseAction())
                 {
@@ -5788,6 +5816,35 @@ namespace Cotton.Mobile.ViewModels
                     CreateFileActionFailureStatus(exception, "Share failed.", OfflineShareStatus));
                 return false;
             }
+        }
+
+        private async Task OpenPreparedFileAsync(
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult preparedFile,
+            CancellationToken cancellationToken)
+        {
+            if (_filePreviewService.CanPreview(file, preparedFile))
+            {
+                await _filePreviewService.OpenAsync(file, preparedFile, cancellationToken);
+                return;
+            }
+
+            await _fileInteractionService.OpenAsync(preparedFile, cancellationToken);
+        }
+
+        private CottonFileDownloadResult? GetReusableLocalDownloadOrClear(
+            Uri instanceUri,
+            CottonFileBrowserEntry file)
+        {
+            CottonFileDownloadResult? localFile = _fileBrowserService.GetReusableLocalDownload(instanceUri, file);
+            if (localFile is null)
+            {
+                _display.ClearFileLocalCopy(file);
+                return null;
+            }
+
+            ShowReusableLocalFileIfAvailable(file);
+            return localFile;
         }
 
         private bool ShowReusableLocalFileIfAvailable(CottonFileBrowserEntry file)

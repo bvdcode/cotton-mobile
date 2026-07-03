@@ -130,7 +130,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task ShareAsync()
         {
             await RunViewerActionAsync(
-                "Preparing share...",
+                null,
                 () => _fileInteractionService.ShareAsync(_file),
                 "Share failed.",
                 "Failed to share PDF viewer file {FilePath}.");
@@ -139,14 +139,14 @@ namespace Cotton.Mobile.ViewModels
         private async Task OpenExternallyAsync()
         {
             await RunViewerActionAsync(
-                "Opening...",
+                null,
                 () => _fileInteractionService.OpenAsync(_file),
                 "Open failed.",
                 "Failed to open PDF viewer file {FilePath}.");
         }
 
         private async Task RunViewerActionAsync(
-            string busyStatus,
+            string? busyStatus,
             Func<Task> actionAsync,
             string failureStatus,
             string failureLogMessage)

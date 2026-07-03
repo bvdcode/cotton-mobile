@@ -120,7 +120,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task ShareAsync()
         {
             await RunViewerActionAsync(
-                "Preparing share...",
+                null,
                 async () =>
                 {
                     await _fileInteractionService.ShareAsync(_file);
@@ -133,7 +133,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task OpenExternallyAsync()
         {
             await RunViewerActionAsync(
-                "Opening...",
+                null,
                 async () =>
                 {
                     await _fileInteractionService.OpenAsync(_file);
@@ -164,7 +164,7 @@ namespace Cotton.Mobile.ViewModels
         }
 
         private async Task RunViewerActionAsync(
-            string busyStatus,
+            string? busyStatus,
             Func<Task> actionAsync,
             string failureStatus,
             string failureLogMessage)

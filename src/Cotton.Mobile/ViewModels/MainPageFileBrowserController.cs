@@ -4371,6 +4371,13 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            CottonFileDownloadResult? localFile = GetReusableLocalDownloadOrClear(instanceUri, file);
+            if (localFile is not null)
+            {
+                await ShareReusableLocalFileAsync(instanceUri, file, localFile);
+                return;
+            }
+
             if (ShowOfflineUnavailableRetryIfNeeded(MainPageFileAction.Share, file, OfflineShareStatus))
             {
                 return;
@@ -5520,6 +5527,40 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
+        private async Task ShareReusableLocalFileAsync(
+            Uri instanceUri,
+            CottonFileBrowserEntry file,
+            CottonFileDownloadResult localFile)
+        {
+            try
+            {
+                ClearFileActionRetry();
+                await _fileInteractionService.ShareAsync(localFile, CancellationToken.None);
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    return;
+                }
+
+                await RecordRecentFileAsync(instanceUri, file, CottonRecentFileActionKind.Shared);
+                _display.ShowFilesSummary();
+            }
+            catch (Exception exception)
+            {
+                if (!Uri.Equals(_instanceUri, instanceUri))
+                {
+                    _logger.LogDebug(exception, "Ignored stale Cotton mobile local share failure {FileId}.", file.Id);
+                    return;
+                }
+
+                ClearLocalFileMarkerIfFileMissing(exception, file);
+                _logger.LogError(exception, "Failed to share local Cotton mobile file {FileId}.", file.Id);
+                ShowFileActionRetry(
+                    MainPageFileAction.Share,
+                    file,
+                    CreateFileActionFailureStatus(exception, "Share failed.", OfflineShareStatus));
+            }
+        }
+
         private Task RecordRecentFileAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,
@@ -5773,8 +5814,6 @@ namespace Cotton.Mobile.ViewModels
             {
                 return false;
             }
-
-            _display.ShowFileActionLoading($"Sharing {file.Name}...");
 
             try
             {

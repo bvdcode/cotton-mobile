@@ -86,18 +86,18 @@ namespace Cotton.Mobile
 
 		private void FileSearchField_PropertyChanged(object? sender, PropertyChangedEventArgs e)
 		{
-			if (!string.Equals(e.PropertyName, nameof(VisualElement.IsVisible), StringComparison.Ordinal))
+			if (!string.Equals(e.PropertyName, nameof(FileSearchField.IsFieldVisible), StringComparison.Ordinal))
 			{
 				return;
 			}
 
-			if (FileSearchField.IsVisible)
+			if (FileSearchField.IsFieldVisible)
 			{
 				Dispatcher.DispatchDelayed(
 					TimeSpan.FromMilliseconds(50),
 					() =>
 					{
-						if (FileSearchField.IsVisible)
+						if (FileSearchField.IsFieldVisible)
 						{
 							FileSearchField.FocusInput();
 						}

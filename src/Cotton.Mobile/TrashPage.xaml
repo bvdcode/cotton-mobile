@@ -54,7 +54,7 @@
 
         <controls:OutlinedInputField Grid.Row="1"
                                      Text="{Binding SearchText, Mode=TwoWay}"
-                                     IsVisible="{Binding IsSearchVisible}"
+                                     IsFieldVisible="{Binding IsSearchVisible}"
                                      Placeholder="Search trash"
                                      IconData="{x:Static controls:IconPathData.Search}"
                                      ReturnType="Search"

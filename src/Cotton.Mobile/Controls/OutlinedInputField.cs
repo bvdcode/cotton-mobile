@@ -9,6 +9,8 @@ namespace Cotton.Mobile.Controls
 {
     public class OutlinedInputField : ContentView
     {
+        private const string FieldVisibilityAnimationName = "M3OutlinedInputFieldVisibility";
+
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -73,10 +75,18 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsFieldVisibleProperty = BindableProperty.Create(
+            nameof(IsFieldVisible),
+            typeof(bool),
+            typeof(OutlinedInputField),
+            true,
+            propertyChanged: OnFieldVisiblePropertyChanged);
+
         private readonly Border _field;
         private readonly Border _iconFrame;
         private readonly IconView _icon;
         private readonly Entry _entry;
+        private bool _hasAppliedFieldVisibility;
 
         public OutlinedInputField()
         {
@@ -119,6 +129,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _field;
             UpdateVisualState();
+            UpdateFieldVisibility(animateFieldVisibility: false);
         }
 
         public string Text
@@ -175,6 +186,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(SemanticHintProperty, value);
         }
 
+        public bool IsFieldVisible
+        {
+            get => (bool)GetValue(IsFieldVisibleProperty);
+            set => SetValue(IsFieldVisibleProperty, value);
+        }
+
         public bool FocusInput()
         {
             return _entry.Focus();
@@ -195,6 +212,12 @@ namespace Cotton.Mobile.Controls
         {
             OutlinedInputField field = (OutlinedInputField)bindable;
             field.UpdateVisualState();
+        }
+
+        private static void OnFieldVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            OutlinedInputField field = (OutlinedInputField)bindable;
+            field.UpdateFieldVisibility(animateFieldVisibility: true);
         }
 
         private void OnEntryTextChanged(object? sender, TextChangedEventArgs e)
@@ -225,6 +248,37 @@ namespace Cotton.Mobile.Controls
             _entry.IsEnabled = IsEnabled;
             _icon.IconData = IconData;
             SemanticProperties.SetHint(_entry, SemanticHint);
+        }
+
+        private void UpdateFieldVisibility(bool animateFieldVisibility)
+        {
+            bool isFieldVisible = IsFieldVisible;
+            bool shouldAnimate = animateFieldVisibility && _hasAppliedFieldVisibility;
+            double targetOpacity = isFieldVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isFieldVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                FieldVisibilityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteFieldVisibility);
+            _hasAppliedFieldVisibility = true;
+        }
+
+        private void CompleteFieldVisibility()
+        {
+            IsVisible = IsFieldVisible;
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)

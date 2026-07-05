@@ -22,6 +22,7 @@ namespace Cotton.Mobile.Tests
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
         private const string MaterialActionSheetPagePath = "src/Cotton.Mobile/Controls/MaterialActionSheetPage.cs";
+        private const string OutlinedInputFieldPath = "src/Cotton.Mobile/Controls/OutlinedInputField.cs";
         private const string AppLockGatePagePath = "src/Cotton.Mobile/AppLockGatePage.xaml";
         private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
@@ -598,6 +599,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string trashPage = LoadText(TrashPagePath);
             string materialDialogPage = LoadText(MaterialDialogPagePath);
+            string outlinedInputField = LoadText(OutlinedInputFieldPath);
             string focusedInputChromeBehavior = LoadText(FocusedInputChromeBehaviorPath);
             string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
@@ -607,6 +609,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:OutlinedInputField", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:OutlinedInputField", trashPage, StringComparison.Ordinal);
             Assert.Contains("OutlinedInputField", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("IsFieldVisible=\"{Binding Display.IsFileSearchVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsFieldVisible=\"{Binding IsSearchVisible}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsFieldVisibleProperty", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("FieldVisibilityAnimationName = \"M3OutlinedInputFieldVisibility\"", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("CompleteFieldVisibility", outlinedInputField, StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
                 outlinedInputSetters["BackgroundColor"]);
@@ -628,6 +636,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<x:Int32 x:Key=\"M3MotionFocusDuration\">120</x:Int32>", LoadText(InteractionResourcePath), StringComparison.Ordinal);
             Assert.DoesNotContain("<Entry", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Entry", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileSearchVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsSearchVisible}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("FocusedInputChromeBehavior", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Field.BackgroundColor =", focusedInputChromeBehavior, StringComparison.Ordinal);

@@ -108,7 +108,7 @@
 
                             <controls:OutlinedInputField x:Name="FileSearchField"
                                                          Text="{Binding Display.FileSearchText, Mode=TwoWay}"
-                                                         IsVisible="{Binding Display.IsFileSearchVisible}"
+                                                         IsFieldVisible="{Binding Display.IsFileSearchVisible}"
                                                          IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                                          Placeholder="Search"
                                                          IconData="{x:Static controls:IconPathData.Search}"

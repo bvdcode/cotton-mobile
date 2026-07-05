@@ -1280,7 +1280,6 @@ namespace Cotton.Mobile.ViewModels
                     fileLoadCancellation.Token);
                 await _folderContentCache.SaveRootAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
-                content = await ApplyLocalFilesAsync(instanceUri, content, fileLoadCancellation.Token);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
                 {
                     return;
@@ -1291,6 +1290,7 @@ namespace Cotton.Mobile.ViewModels
                 _lastFileLoadFailed = false;
                 _lastFileLoadDisplayedCachedContent = false;
                 _display.ShowFiles(content, isRoot: true, canNavigateUp: false, CreatePath(content.FolderName));
+                RefreshLocalFileStateAfterFirstRender(instanceUri);
             }
             catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
             {
@@ -1362,7 +1362,6 @@ namespace Cotton.Mobile.ViewModels
                     fileLoadCancellation.Token);
                 await _folderContentCache.SaveFolderAsync(instanceUri, content, fileLoadCancellation.Token);
                 content = await ApplyThumbnailsAsync(instanceUri, content, fileLoadCancellation.Token);
-                content = await ApplyLocalFilesAsync(instanceUri, content, fileLoadCancellation.Token);
                 if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
                 {
                     return;
@@ -1376,6 +1375,7 @@ namespace Cotton.Mobile.ViewModels
                     isRoot: false,
                     canNavigateUp: true,
                     CreatePath(content.FolderName));
+                RefreshLocalFileStateAfterFirstRender(instanceUri);
             }
             catch (OperationCanceledException) when (fileLoadCancellation.IsCancellationRequested)
             {
@@ -1459,7 +1459,6 @@ namespace Cotton.Mobile.ViewModels
                 instanceUri,
                 cachedSnapshot.Content,
                 fileLoadCancellation.Token);
-            cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             if (!IsActiveFileLoad(fileLoadCancellation, instanceUri))
             {
                 return true;
@@ -1475,6 +1474,7 @@ namespace Cotton.Mobile.ViewModels
                 canNavigateUp: false,
                 CreatePath(cachedContent.FolderName));
             _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
+            RefreshLocalFileStateAfterFirstRender(instanceUri);
             return true;
         }
 
@@ -1507,7 +1507,6 @@ namespace Cotton.Mobile.ViewModels
                 instanceUri,
                 cachedSnapshot.Content,
                 fileLoadCancellation.Token);
-            cachedContent = await ApplyLocalFilesAsync(instanceUri, cachedContent, fileLoadCancellation.Token);
             _currentFolder = new CottonFolderHandle(cachedContent.FolderId, cachedContent.FolderName);
             _lastFileLoadFailed = true;
             _lastFileLoadDisplayedCachedContent = true;
@@ -1517,6 +1516,7 @@ namespace Cotton.Mobile.ViewModels
                 canNavigateUp: true,
                 CreatePath(cachedContent.FolderName));
             _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
+            RefreshLocalFileStateAfterFirstRender(instanceUri);
             return true;
         }
 
@@ -4279,26 +4279,6 @@ namespace Cotton.Mobile.ViewModels
             return new CottonFolderContent(content.FolderId, content.FolderName, entries);
         }
 
-        private async Task<CottonFolderContent> ApplyLocalFilesAsync(
-            Uri instanceUri,
-            CottonFolderContent content,
-            CancellationToken cancellationToken)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(content);
-
-            IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot> pins =
-                await LoadOfflinePinsByIdAsync(instanceUri, cancellationToken);
-            var entries = new List<CottonFileBrowserEntry>(content.Entries.Count);
-            foreach (CottonFileBrowserEntry entry in content.Entries)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                entries.Add(CreateEntryWithLocalState(instanceUri, entry, pins));
-            }
-
-            return new CottonFolderContent(content.FolderId, content.FolderName, entries);
-        }
-
         private async Task<IReadOnlyDictionary<Guid, CottonOfflineFilePinSnapshot>> LoadOfflinePinsByIdAsync(
             Uri instanceUri,
             CancellationToken cancellationToken)
@@ -5931,6 +5911,23 @@ namespace Cotton.Mobile.ViewModels
             }
 
             return _display.RefreshFileLocalStates(entry => CreateEntryWithLocalState(instanceUri, entry, pins));
+        }
+
+        private void RefreshLocalFileStateAfterFirstRender(Uri instanceUri)
+        {
+            _ = RefreshLocalFileStateAfterFirstRenderAsync(instanceUri);
+        }
+
+        private async Task RefreshLocalFileStateAfterFirstRenderAsync(Uri instanceUri)
+        {
+            try
+            {
+                await RefreshLocalFileStateAsync(instanceUri, CancellationToken.None);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Deferred Cotton mobile local file marker refresh failed.");
+            }
         }
 
         private void ClearLocalFileMarkerIfFileMissing(Exception exception, CottonFileBrowserEntry file)

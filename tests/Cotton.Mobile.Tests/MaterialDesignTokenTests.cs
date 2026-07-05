@@ -1714,19 +1714,26 @@ namespace Cotton.Mobile.Tests
             string selectionBarView = LoadText(SelectionBarViewPath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
-            Assert.Contains("<controls:SelectionBarView IsVisible=\"{Binding Display.IsFileSelectionBarVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SelectionBarView IsBarVisible=\"{Binding Display.IsFileSelectionBarVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ShowFileSelectionActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding ClearFileSelectionCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileSelectionBarVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SelectionBar", mainPage, StringComparison.Ordinal);
 
             Assert.Contains("<controls:SelectionBarView Grid.Row=\"3\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsBarVisible=\"{Binding IsSelectionBarVisible}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding RestoreSelectionCommand}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding DeleteForeverSelectionCommand}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding CancelSelectionCommand}\"", trashPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsSelectionBarVisible}\"", trashPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SelectionBar", trashPage, StringComparison.Ordinal);
 
             Assert.Contains("private readonly ActionClusterView _actions;", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("IsBarVisibleProperty", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("BarVisibilityAnimationName = \"M3SelectionBarVisibility\"", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", selectionBarView, StringComparison.Ordinal);
+            Assert.Contains("CompleteBarVisibility", selectionBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultActionClusterStyleResourceKey = \"M3SelectionBarActionCluster\"", selectionBarView, StringComparison.Ordinal);
             Assert.Contains("_actions.PrimaryActionCommand = PrimaryActionCommand", selectionBarView, StringComparison.Ordinal);
             Assert.Contains("_actions.SecondaryActionCommand = SecondaryActionCommand", selectionBarView, StringComparison.Ordinal);

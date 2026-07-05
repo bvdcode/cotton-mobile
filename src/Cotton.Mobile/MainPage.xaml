@@ -116,7 +116,7 @@
                                                          ClearButtonVisibility="WhileEditing"
                                                          SemanticHint="Search files and folders" />
 
-                            <controls:SelectionBarView IsVisible="{Binding Display.IsFileSelectionBarVisible}"
+                            <controls:SelectionBarView IsBarVisible="{Binding Display.IsFileSelectionBarVisible}"
                                                        TitleText="{Binding Display.FileSelection.TitleText}"
                                                        DetailText="{Binding Display.FileSelection.DetailText}"
                                                        PrimaryActionIconData="{x:Static controls:IconPathData.MoreVertical}"

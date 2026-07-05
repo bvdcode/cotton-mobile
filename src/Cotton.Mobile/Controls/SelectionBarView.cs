@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultActionClusterStyleResourceKey = "M3SelectionBarActionCluster";
         private const string DefaultIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string BarVisibilityAnimationName = "M3SelectionBarVisibility";
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(
             nameof(TitleText),
@@ -127,12 +128,20 @@ namespace Cotton.Mobile.Controls
             DefaultIconButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsBarVisibleProperty = BindableProperty.Create(
+            nameof(IsBarVisible),
+            typeof(bool),
+            typeof(SelectionBarView),
+            false,
+            propertyChanged: OnBarVisiblePropertyChanged);
+
         private readonly Border _container;
         private readonly Label _detailLabel;
         private readonly Grid _grid;
         private readonly ActionClusterView _actions;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _titleLabel;
+        private bool _hasAppliedBarVisibility;
 
         public SelectionBarView()
         {
@@ -181,6 +190,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _container;
             UpdateVisualState();
+            UpdateBarVisibility(animateBarVisibility: false);
         }
 
         public string TitleText
@@ -285,10 +295,22 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TertiaryActionIconButtonStyleResourceKeyProperty, value);
         }
 
+        public bool IsBarVisible
+        {
+            get => (bool)GetValue(IsBarVisibleProperty);
+            set => SetValue(IsBarVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SelectionBarView view = (SelectionBarView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnBarVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SelectionBarView view = (SelectionBarView)bindable;
+            view.UpdateBarVisibility(animateBarVisibility: true);
         }
 
         private void UpdateVisualState()
@@ -325,6 +347,37 @@ namespace Cotton.Mobile.Controls
             _actions.IsTertiaryActionEnabled = TertiaryActionIsEnabled;
             _actions.IsTertiaryActionVisible = true;
             _actions.IsQuaternaryActionVisible = false;
+        }
+
+        private void UpdateBarVisibility(bool animateBarVisibility)
+        {
+            bool isBarVisible = IsBarVisible;
+            bool shouldAnimate = animateBarVisibility && _hasAppliedBarVisibility;
+            double targetOpacity = isBarVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isBarVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                BarVisibilityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteBarVisibility);
+            _hasAppliedBarVisibility = true;
+        }
+
+        private void CompleteBarVisibility()
+        {
+            IsVisible = IsBarVisible;
         }
 
         private static string ResolveIconButtonStyleResourceKey(string iconButtonStyleResourceKey)

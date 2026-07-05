@@ -21,6 +21,7 @@ namespace Cotton.Mobile.Tests
 
                 Assert.DoesNotContain("\"Opening...\"", content, StringComparison.Ordinal);
                 Assert.DoesNotContain("\"Preparing share...\"", content, StringComparison.Ordinal);
+                Assert.DoesNotContain("\"Copying...\"", content, StringComparison.Ordinal);
             }
         }
     }

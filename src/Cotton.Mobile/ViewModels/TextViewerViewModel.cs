@@ -99,7 +99,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task CopyAsync()
         {
             await RunViewerActionAsync(
-                "Copying...",
+                null,
                 async () =>
                 {
                     await CopyTextAsync();

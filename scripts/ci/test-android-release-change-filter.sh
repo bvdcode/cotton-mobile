@@ -66,9 +66,15 @@ app_head="$(commit_all "app")"
 output="$("$detect_script" "$detector_head" "$app_head")"
 assert_contains "$output" "Android release required: true"
 
+mkdir -p src/Cotton.Mobile/ViewModels
+printf 'namespace Cotton.Mobile.ViewModels { public class Marker { } }\n' > src/Cotton.Mobile/ViewModels/Marker.cs
+nested_app_head="$(commit_all "nested app")"
+output="$("$detect_script" "$app_head" "$nested_app_head")"
+assert_contains "$output" "Android release required: true"
+
 printf 'namespace Cotton.Mobile.Core { public class Marker { } }\n' > src/Cotton.Mobile.Core/Marker.cs
 core_head="$(commit_all "core")"
-output="$("$detect_script" "$app_head" "$core_head")"
+output="$("$detect_script" "$nested_app_head" "$core_head")"
 assert_contains "$output" "Android release required: true"
 
 printf 'next-version: 1.0.1\n' > GitVersion.yml

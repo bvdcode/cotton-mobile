@@ -38,7 +38,7 @@
             <controls:ViewerOverlayActionButtonView x:Name="ResetButton"
                                                     IconData="{x:Static controls:IconPathData.Reset}"
                                                     Command="{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}"
-                                                    IsVisible="False"
+                                                    IsActionVisible="False"
                                                     SemanticDescription="Reset image" />
         </controls:DarkViewerSurfaceView>
     </controls:ScreenShellView>

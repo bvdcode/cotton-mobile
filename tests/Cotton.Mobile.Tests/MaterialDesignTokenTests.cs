@@ -3241,6 +3241,7 @@ namespace Cotton.Mobile.Tests
         public void Dark_viewer_status_overlays_use_reusable_material_control()
         {
             string imageViewerPage = LoadText(ImageViewerPagePath);
+            string imageViewerPageCodeBehind = LoadText(ImageViewerPageCodeBehindPath);
             string mediaViewerPage = LoadText(MediaViewerPagePath);
             string darkViewerSurfaceView = LoadText(DarkViewerSurfaceViewPath);
             string viewerImageView = LoadText(ViewerImageViewPath);
@@ -3262,7 +3263,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("StatusStyleResourceKey=\"M3ViewerOverlayStatusWithTrailingAction\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerOverlayActionButtonView x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("IsActionVisible=\"False\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Reset image\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.Contains("ResetButton.IsActionVisible = true", imageViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains(
+                "ResetButton.IsActionVisible = transform.Scale > CottonImageViewerInteractionPolicy.MinimumScale",
+                imageViewerPageCodeBehind,
+                StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerStatusOverlayView Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerPlayOverlayView x:Name=\"StartOverlay\"", mediaViewerPage, StringComparison.Ordinal);
@@ -3278,6 +3285,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("_status.SetDynamicResource(StyleProperty, statusStyleResourceKey)", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.Contains("public class ViewerOverlayActionButtonView", viewerOverlayActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("ViewerOverlayActionButtonView : MaterialAnimatedContentView", viewerOverlayActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("IsActionVisibleProperty", viewerOverlayActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("OnActionVisiblePropertyChanged", viewerOverlayActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("view.IsContentVisible = (bool)newValue", viewerOverlayActionButtonView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3ViewerOverlayActionIconButton\"", viewerOverlayActionButtonView, StringComparison.Ordinal);
             Assert.Contains("_button.IconData = IconData ?? IconPathData.Reset", viewerOverlayActionButtonView, StringComparison.Ordinal);
             Assert.Contains("_button.Command = Command", viewerOverlayActionButtonView, StringComparison.Ordinal);
@@ -3322,6 +3333,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Label Text=\"{Binding Status}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding IsStatusVisible}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding IsStatusVisible}\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Command=\"{Binding Source={x:Reference RootPage}, Path=ResetImageCommand}\"\n                                                    IsVisible=\"False\"", imageViewerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ResetButton.IsVisible", imageViewerPageCodeBehind, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton x:Name=\"ResetButton\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ViewerOverlayActionIconButton}\"", imageViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Reset image\"", imageViewerPage, StringComparison.Ordinal);

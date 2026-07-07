@@ -52,7 +52,7 @@ namespace Cotton.Mobile
                     }
                     else
                     {
-                        ResetButton.IsVisible = true;
+                        ResetButton.IsActionVisible = true;
                         ClampImageTranslation();
                     }
 
@@ -131,7 +131,7 @@ namespace Cotton.Mobile
             PreviewImage.Scale = transform.Scale;
             PreviewImage.TranslationX = transform.TranslationX;
             PreviewImage.TranslationY = transform.TranslationY;
-            ResetButton.IsVisible = transform.Scale > CottonImageViewerInteractionPolicy.MinimumScale;
+            ResetButton.IsActionVisible = transform.Scale > CottonImageViewerInteractionPolicy.MinimumScale;
         }
     }
 }

@@ -6,9 +6,16 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class ViewerOverlayActionButtonView : ContentView
+    public class ViewerOverlayActionButtonView : MaterialAnimatedContentView
     {
         private const string DefaultIconButtonStyleResourceKey = "M3ViewerOverlayActionIconButton";
+
+        public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
+            nameof(IsActionVisible),
+            typeof(bool),
+            typeof(ViewerOverlayActionButtonView),
+            true,
+            propertyChanged: OnActionVisiblePropertyChanged);
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -51,6 +58,12 @@ namespace Cotton.Mobile.Controls
 
             Content = _button;
             UpdateVisualState();
+        }
+
+        public bool IsActionVisible
+        {
+            get => (bool)GetValue(IsActionVisibleProperty);
+            set => SetValue(IsActionVisibleProperty, value);
         }
 
         public Geometry? IconData
@@ -97,6 +110,12 @@ namespace Cotton.Mobile.Controls
         {
             ViewerOverlayActionButtonView view = (ViewerOverlayActionButtonView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnActionVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ViewerOverlayActionButtonView view = (ViewerOverlayActionButtonView)bindable;
+            view.IsContentVisible = (bool)newValue;
         }
 
         private void UpdateVisualState()

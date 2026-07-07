@@ -24,6 +24,13 @@ namespace Cotton.Mobile.Controls
             null,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty FooterProperty = BindableProperty.Create(
+            nameof(Footer),
+            typeof(object),
+            typeof(MaterialCollectionView),
+            null,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ItemsLayoutProperty = BindableProperty.Create(
             nameof(ItemsLayout),
             typeof(IItemsLayout),
@@ -74,6 +81,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ItemTemplateProperty, value);
         }
 
+        public object? Footer
+        {
+            get => GetValue(FooterProperty);
+            set => SetValue(FooterProperty, value);
+        }
+
         public IItemsLayout ItemsLayout
         {
             get => (IItemsLayout)GetValue(ItemsLayoutProperty);
@@ -113,6 +126,7 @@ namespace Cotton.Mobile.Controls
             _collection.SetDynamicResource(StyleProperty, collectionStyleResourceKey);
             _collection.ItemsSource = ItemsSource;
             _collection.ItemTemplate = ItemTemplate;
+            _collection.Footer = Footer;
             _collection.ItemsLayout = ItemsLayout;
             _collection.ItemSizingStrategy = ItemSizingStrategy;
             _collection.SelectionMode = SelectionMode;

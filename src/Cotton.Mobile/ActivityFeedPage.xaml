@@ -15,24 +15,43 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh activity" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="Activity"
                                        SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:MetadataListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:MetadataListSkeletonView Grid.Row="2"
+                                               IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView Grid.Row="2"
+                                     IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Activity}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
-                                       ItemsSource="{Binding Items}">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="2"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Items}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.Footer>
+                    <controls:ContentCardView IsCardVisible="{Binding IsLoadMoreVisible}">
+                        <controls:ActionListItemView Text="Load more"
+                                                     LeadingIconData="{x:Static controls:IconPathData.Activity}"
+                                                     IsLeadingIconVisible="True"
+                                                     ActionIconData="{x:Static controls:IconPathData.ArrowDown}"
+                                                     Command="{Binding LoadMoreCommand}"
+                                                     TextStyleResourceKey="M3ActionListItemTitle"
+                                                     ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                                     SemanticDescription="Load more activity" />
+                    </controls:ContentCardView>
+                </controls:MaterialCollectionView.Footer>
+
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonActivityFeedListItem">
                         <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Activity}"
                                                    LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
@@ -44,19 +63,8 @@
                                                            PrimaryTextStyleResourceKey="M3CardSupportingLongWrap" />
                         </controls:MetadataCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-
-            <controls:ContentCardView IsCardVisible="{Binding IsLoadMoreVisible}">
-                <controls:ActionListItemView Text="Load more"
-                                             LeadingIconData="{x:Static controls:IconPathData.Activity}"
-                                             IsLeadingIconVisible="True"
-                                             ActionIconData="{x:Static controls:IconPathData.ArrowDown}"
-                                             Command="{Binding LoadMoreCommand}"
-                                             TextStyleResourceKey="M3ActionListItemTitle"
-                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
-                                             SemanticDescription="Load more activity" />
-            </controls:ContentCardView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

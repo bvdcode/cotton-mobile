@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupMediaSourceRecord
+    public class CottonCameraBackupMediaSourceRecord
     {
         public CottonCameraBackupMediaSourceRecord(
             string? sourceId,

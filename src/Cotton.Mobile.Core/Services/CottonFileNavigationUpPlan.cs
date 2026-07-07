@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonFileNavigationUpPlan
+    public class CottonFileNavigationUpPlan
     {
         private CottonFileNavigationUpPlan(
             bool canNavigate,

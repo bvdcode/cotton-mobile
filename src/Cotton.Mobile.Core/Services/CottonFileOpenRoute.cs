@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonFileOpenRoute
+    public class CottonFileOpenRoute
     {
         internal CottonFileOpenRoute(
             CottonFileOpenTarget target,

@@ -9,7 +9,7 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidCameraBackupMediaSource :
+    public class AndroidCameraBackupMediaSource :
         ICottonCameraBackupMediaSource,
         ICottonCameraBackupMediaContentSource
     {

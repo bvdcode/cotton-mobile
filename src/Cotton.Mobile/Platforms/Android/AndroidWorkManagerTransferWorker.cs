@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Cotton.Mobile.Services
 {
     [Register("dev.cottoncloud.app.AndroidWorkManagerTransferWorker")]
-    public sealed class AndroidWorkManagerTransferWorker : Worker
+    public class AndroidWorkManagerTransferWorker : Worker
     {
         private const string LogTag = "CottonTransfer";
 

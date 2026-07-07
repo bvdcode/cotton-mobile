@@ -10,7 +10,7 @@ using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidCameraBackupMediaAccessPolicy : ICottonCameraBackupMediaAccessPolicy
+    public class AndroidCameraBackupMediaAccessPolicy : ICottonCameraBackupMediaAccessPolicy
     {
         private const string RequestedPreferenceKey = "cotton.cameraBackup.mediaAccess.requested";
 
@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Services
             return Android.App.Application.Context.CheckSelfPermission(permission) == Permission.Granted;
         }
 
-        private sealed class CameraBackupMediaPermission : Permissions.BasePlatformPermission
+        private class CameraBackupMediaPermission : Permissions.BasePlatformPermission
         {
             public override (string androidPermission, bool isRuntime)[] RequiredPermissions
             {

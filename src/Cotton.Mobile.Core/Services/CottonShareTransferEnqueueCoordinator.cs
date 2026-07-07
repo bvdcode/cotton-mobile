@@ -200,7 +200,7 @@ namespace Cotton.Mobile.Services
                 : candidate.Item.MimeType ?? candidate.Snapshot.SourceMimeType;
         }
 
-        private sealed class CaptureEnqueueCandidate
+        private class CaptureEnqueueCandidate
         {
             public CaptureEnqueueCandidate(
                 CottonShareIntakeSnapshot snapshot,

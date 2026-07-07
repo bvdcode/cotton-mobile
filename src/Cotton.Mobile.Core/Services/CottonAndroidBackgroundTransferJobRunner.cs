@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidBackgroundTransferJobRunner : ICottonAndroidBackgroundTransferJobRunner
+    public class CottonAndroidBackgroundTransferJobRunner : ICottonAndroidBackgroundTransferJobRunner
     {
         private readonly ICottonQueuedUploadExecutor _queuedUploadExecutor;
         private readonly ICottonTransferQueueRestoreCoordinator _restoreCoordinator;

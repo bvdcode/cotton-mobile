@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupPlanningService : ICottonCameraBackupPlanningService
+    public class CottonCameraBackupPlanningService : ICottonCameraBackupPlanningService
     {
         private readonly ICottonCameraBackupUploadedMediaStore _uploadedMediaStore;
         private readonly ICottonCameraBackupScanner _scanner;

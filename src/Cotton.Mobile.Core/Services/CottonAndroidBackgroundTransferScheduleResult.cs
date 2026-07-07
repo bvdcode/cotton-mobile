@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidBackgroundTransferScheduleResult
+    public class CottonAndroidBackgroundTransferScheduleResult
     {
         private CottonAndroidBackgroundTransferScheduleResult(
             CottonAndroidBackgroundTransferScheduleStatus status,

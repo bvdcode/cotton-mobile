@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonNotificationSettings
+    public class CottonNotificationSettings
     {
         private readonly IReadOnlyDictionary<CottonNotificationChannelKind, bool> _channelEnabled;
 

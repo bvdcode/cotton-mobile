@@ -8,7 +8,7 @@ using Android.OS;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidNotificationChannelProvisioningService
+    public class AndroidNotificationChannelProvisioningService
         : ICottonNotificationChannelProvisioningService
     {
         public void EnsureChannels()

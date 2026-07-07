@@ -10,7 +10,7 @@ using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidNotificationPermissionService : ICottonNotificationPermissionService
+    public class AndroidNotificationPermissionService : ICottonNotificationPermissionService
     {
         private const string RequestedPreferenceKey = "cotton.notifications.permission.requested";
 
@@ -95,7 +95,7 @@ namespace Cotton.Mobile.Services
             return Android.App.Application.Context.CheckSelfPermission(permission) == Permission.Granted;
         }
 
-        private sealed class NotificationPermission : Permissions.BasePlatformPermission
+        private class NotificationPermission : Permissions.BasePlatformPermission
         {
             public override (string androidPermission, bool isRuntime)[] RequiredPermissions
             {

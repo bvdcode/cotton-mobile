@@ -5,7 +5,7 @@ using System;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidTransferExecutionStrategy
+    public class CottonAndroidTransferExecutionStrategy
     {
         public CottonAndroidTransferExecutionStrategy(
             CottonAndroidTransferWorkKind workKind,

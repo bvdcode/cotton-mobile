@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidBackgroundTransferScheduleIdentity
+    public class CottonAndroidBackgroundTransferScheduleIdentity
     {
         private const string UniqueWorkPrefix = "cotton-transfer";
 

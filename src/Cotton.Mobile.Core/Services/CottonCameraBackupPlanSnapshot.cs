@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupPlanSnapshot
+    public class CottonCameraBackupPlanSnapshot
     {
         public CottonCameraBackupPlanSnapshot(
             CottonCameraBackupScanResult scanResult,

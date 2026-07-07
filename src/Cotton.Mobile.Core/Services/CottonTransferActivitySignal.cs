@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonTransferActivitySignal : ICottonTransferActivitySignal
+    public class CottonTransferActivitySignal : ICottonTransferActivitySignal
     {
         public event EventHandler? TransferActivityChanged;
 

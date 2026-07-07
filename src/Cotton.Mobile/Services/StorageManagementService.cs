@@ -927,7 +927,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private sealed class CottonOfflineStorageScan
+        private class CottonOfflineStorageScan
         {
             public static CottonOfflineStorageScan Empty => new();
 
@@ -944,7 +944,7 @@ namespace Cotton.Mobile.Services
             public HashSet<string> ProtectedDownloadDirectories { get; } = new(StringComparer.Ordinal);
         }
 
-        private sealed class CottonOfflineStoragePin
+        private class CottonOfflineStoragePin
         {
             public CottonOfflineStoragePin(
                 Guid fileId,

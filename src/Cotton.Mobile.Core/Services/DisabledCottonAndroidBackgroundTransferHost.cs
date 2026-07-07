@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class DisabledCottonAndroidBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
+    public class DisabledCottonAndroidBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
     {
         public static DisabledCottonAndroidBackgroundTransferHost Instance { get; } = new();
 

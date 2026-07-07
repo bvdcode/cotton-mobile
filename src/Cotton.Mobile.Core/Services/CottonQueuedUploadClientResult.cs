@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonQueuedUploadClientResult
+    public class CottonQueuedUploadClientResult
     {
         public CottonQueuedUploadClientResult(Guid? remoteFileId, string? remoteFileName)
         {

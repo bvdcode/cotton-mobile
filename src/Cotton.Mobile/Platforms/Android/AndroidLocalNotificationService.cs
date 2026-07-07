@@ -8,7 +8,7 @@ using Android.OS;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidLocalNotificationService : ICottonLocalNotificationService
+    public class AndroidLocalNotificationService : ICottonLocalNotificationService
     {
         private readonly ICottonNotificationPermissionService _permissionService;
         private readonly ICottonNotificationChannelProvisioningService _channelProvisioningService;

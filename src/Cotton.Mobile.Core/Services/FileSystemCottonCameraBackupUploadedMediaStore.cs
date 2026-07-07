@@ -5,7 +5,7 @@ using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class FileSystemCottonCameraBackupUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
+    public class FileSystemCottonCameraBackupUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
     {
         private const int SchemaVersion = 1;
         private const string MetadataFileName = "uploaded-media.json";
@@ -225,7 +225,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private sealed class CottonStoredCameraBackupUploadedMedia
+        private class CottonStoredCameraBackupUploadedMedia
         {
             public int SchemaVersion { get; set; }
 
@@ -234,7 +234,7 @@ namespace Cotton.Mobile.Services
             public List<CottonStoredCameraBackupUploadedMediaItem>? Items { get; set; }
         }
 
-        private sealed class CottonStoredCameraBackupUploadedMediaItem
+        private class CottonStoredCameraBackupUploadedMediaItem
         {
             public string? SourceId { get; set; }
 

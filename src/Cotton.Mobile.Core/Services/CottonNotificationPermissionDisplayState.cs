@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonNotificationPermissionDisplayState
+    public class CottonNotificationPermissionDisplayState
     {
         private CottonNotificationPermissionDisplayState(
             string title,

@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Services
             return new CottonQueuedUploadClientResult(uploadedFile.Id, uploadedFile.Name);
         }
 
-        private sealed class QueuedUploadProgress : IProgress<long>
+        private class QueuedUploadProgress : IProgress<long>
         {
             private readonly Func<long, CancellationToken, Task> _reportProgressAsync;
             private readonly CancellationToken _cancellationToken;

@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupMediaIdentity : IEquatable<CottonCameraBackupMediaIdentity>
+    public class CottonCameraBackupMediaIdentity : IEquatable<CottonCameraBackupMediaIdentity>
     {
         public CottonCameraBackupMediaIdentity(
             string sourceId,

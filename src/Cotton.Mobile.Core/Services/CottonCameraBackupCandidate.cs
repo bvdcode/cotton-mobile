@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupCandidate
+    public class CottonCameraBackupCandidate
     {
         private const string DefaultPhotoContentType = "image/jpeg";
         private const string DefaultVideoContentType = "video/mp4";

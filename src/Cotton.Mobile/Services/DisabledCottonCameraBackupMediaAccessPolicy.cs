@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class DisabledCottonCameraBackupMediaAccessPolicy : ICottonCameraBackupMediaAccessPolicy
+    public class DisabledCottonCameraBackupMediaAccessPolicy : ICottonCameraBackupMediaAccessPolicy
     {
         public Task<CottonCameraBackupMediaAccessState> GetAccessStateAsync(
             CancellationToken cancellationToken = default)

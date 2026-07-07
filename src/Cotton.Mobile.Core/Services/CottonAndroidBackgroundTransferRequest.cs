@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidBackgroundTransferRequest
+    public class CottonAndroidBackgroundTransferRequest
     {
         public CottonAndroidBackgroundTransferRequest(
             Uri instanceUri,

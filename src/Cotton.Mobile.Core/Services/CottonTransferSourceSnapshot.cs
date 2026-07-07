@@ -6,7 +6,7 @@ using System.Text;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonTransferSourceSnapshot
+    public class CottonTransferSourceSnapshot
     {
         public CottonTransferSourceSnapshot(
             CottonTransferSourceKind kind,

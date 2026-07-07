@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class DisabledCottonCameraBackupMediaSource :
+    public class DisabledCottonCameraBackupMediaSource :
         ICottonCameraBackupMediaSource,
         ICottonCameraBackupMediaContentSource
     {

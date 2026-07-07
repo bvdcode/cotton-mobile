@@ -103,7 +103,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private sealed class CameraBackupSettingsDto
+        private class CameraBackupSettingsDto
         {
             public bool IsEnabled { get; set; }
 
@@ -149,7 +149,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private sealed class CameraBackupDestinationDto
+        private class CameraBackupDestinationDto
         {
             public Guid FolderId { get; set; }
 

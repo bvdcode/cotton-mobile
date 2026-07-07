@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupHealthSnapshot
+    public class CottonCameraBackupHealthSnapshot
     {
         public static CottonCameraBackupHealthSnapshot Empty { get; } = new(0, 0, 0, 0);
 

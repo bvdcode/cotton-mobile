@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupTransferEnqueueResult
+    public class CottonCameraBackupTransferEnqueueResult
     {
         public CottonCameraBackupTransferEnqueueResult(
             int scannedCount,

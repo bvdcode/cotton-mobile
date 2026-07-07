@@ -13,7 +13,7 @@ using JobNetworkType = Android.App.Job.NetworkType;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class AndroidBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
+    public class AndroidBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
     {
         private const string LogTag = "CottonTransfer";
         private const int AndroidUserInitiatedDataTransferApiLevel = 34;

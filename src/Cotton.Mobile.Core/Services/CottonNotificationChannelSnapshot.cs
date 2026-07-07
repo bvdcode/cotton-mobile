@@ -5,7 +5,7 @@ using System;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonNotificationChannelSnapshot
+    public class CottonNotificationChannelSnapshot
     {
         public CottonNotificationChannelSnapshot(
             CottonNotificationChannelKind kind,

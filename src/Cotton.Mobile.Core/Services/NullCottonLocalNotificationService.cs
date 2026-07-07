@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class NullCottonLocalNotificationService : ICottonLocalNotificationService
+    public class NullCottonLocalNotificationService : ICottonLocalNotificationService
     {
         public static NullCottonLocalNotificationService Instance { get; } = new();
 

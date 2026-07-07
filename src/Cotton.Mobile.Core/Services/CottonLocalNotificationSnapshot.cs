@@ -5,7 +5,7 @@ using System;
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonLocalNotificationSnapshot
+    public class CottonLocalNotificationSnapshot
     {
         public CottonLocalNotificationSnapshot(
             int id,

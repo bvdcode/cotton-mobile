@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupMediaAccessDisplayState
+    public class CottonCameraBackupMediaAccessDisplayState
     {
         private CottonCameraBackupMediaAccessDisplayState(
             string title,

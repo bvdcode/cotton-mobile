@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonAndroidBackgroundTransferCoordinator :
+    public class CottonAndroidBackgroundTransferCoordinator :
         ICottonAndroidBackgroundTransferCoordinator
     {
         private readonly ICottonTransferMetadataStore _metadataStore;

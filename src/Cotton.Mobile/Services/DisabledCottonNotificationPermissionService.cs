@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class DisabledCottonNotificationPermissionService : ICottonNotificationPermissionService
+    public class DisabledCottonNotificationPermissionService : ICottonNotificationPermissionService
     {
         public Task<CottonNotificationPermissionState> GetPermissionStateAsync(
             CancellationToken cancellationToken = default)

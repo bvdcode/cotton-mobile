@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public sealed class CottonCameraBackupUploadedMediaSnapshot
+    public class CottonCameraBackupUploadedMediaSnapshot
     {
         public CottonCameraBackupUploadedMediaSnapshot(
             CottonCameraBackupMediaIdentity identity,

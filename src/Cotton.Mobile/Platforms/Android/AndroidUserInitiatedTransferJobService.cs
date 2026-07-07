@@ -17,7 +17,7 @@ namespace Cotton.Mobile.Services
         Name = "dev.cottoncloud.app.AndroidUserInitiatedTransferJobService",
         Permission = "android.permission.BIND_JOB_SERVICE",
         Exported = false)]
-    public sealed class AndroidUserInitiatedTransferJobService : JobService
+    public class AndroidUserInitiatedTransferJobService : JobService
     {
         private const string LogTag = "CottonTransfer";
 

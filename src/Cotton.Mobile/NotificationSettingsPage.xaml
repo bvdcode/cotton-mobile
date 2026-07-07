@@ -19,7 +19,7 @@
                                        SupportingText="{Binding EnabledCategoriesText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:AttentionStatusView IsVisible="{Binding IsAttentionStatusVisible}"
+            <controls:AttentionStatusView IsStatusVisible="{Binding IsAttentionStatusVisible}"
                                           Message="{Binding Status}"
                                           IconData="{x:Static controls:IconPathData.Error}"
                                           ActionIconData="{x:Static controls:IconPathData.Refresh}"

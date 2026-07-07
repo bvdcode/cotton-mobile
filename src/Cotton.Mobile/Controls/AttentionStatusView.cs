@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultGridStyleResourceKey = "M3StatusGrid";
         private const string DefaultIconStyleResourceKey = "M3AttentionStatusIcon";
         private const string DefaultPanelStyleResourceKey = "M3AttentionStatusPanel";
+        private const string StatusOpacityAnimationName = "M3AttentionStatusOpacity";
 
         public static readonly BindableProperty MessageProperty = BindableProperty.Create(
             nameof(Message),
@@ -55,6 +56,13 @@ namespace Cotton.Mobile.Controls
             typeof(AttentionStatusView),
             true,
             propertyChanged: OnActionButtonVisibilityPropertyChanged);
+
+        public static readonly BindableProperty IsStatusVisibleProperty = BindableProperty.Create(
+            nameof(IsStatusVisible),
+            typeof(bool),
+            typeof(AttentionStatusView),
+            true,
+            propertyChanged: OnStatusVisiblePropertyChanged);
 
         public static readonly BindableProperty IsRowTapEnabledProperty = BindableProperty.Create(
             nameof(IsRowTapEnabled),
@@ -105,6 +113,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _panel;
         private readonly TouchSurfaceView _touchSurface;
         private bool _hasAppliedActionButtonVisibility;
+        private bool _hasAppliedStatusVisibility;
 
         public AttentionStatusView()
         {
@@ -156,6 +165,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _panel;
             UpdateVisualState(animateActionButtonVisibility: false);
+            UpdateStatusVisibility(animateStatusVisibility: false);
         }
 
         public string Message
@@ -192,6 +202,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsActionVisibleProperty);
             set => SetValue(IsActionVisibleProperty, value);
+        }
+
+        public bool IsStatusVisible
+        {
+            get => (bool)GetValue(IsStatusVisibleProperty);
+            set => SetValue(IsStatusVisibleProperty, value);
         }
 
         public bool IsRowTapEnabled
@@ -234,6 +250,12 @@ namespace Cotton.Mobile.Controls
         {
             AttentionStatusView attentionStatusView = (AttentionStatusView)bindable;
             attentionStatusView.UpdateVisualState(animateActionButtonVisibility: false);
+        }
+
+        private static void OnStatusVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            AttentionStatusView attentionStatusView = (AttentionStatusView)bindable;
+            attentionStatusView.UpdateStatusVisibility(animateStatusVisibility: true);
         }
 
         private static void OnActionButtonVisibilityPropertyChanged(
@@ -281,6 +303,32 @@ namespace Cotton.Mobile.Controls
             SemanticProperties.SetDescription(_panel, message);
         }
 
+        private void UpdateStatusVisibility(bool animateStatusVisibility)
+        {
+            bool isStatusVisible = IsStatusVisible;
+            bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
+            double targetOpacity = isStatusVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isStatusVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                StatusOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteStatusVisibility);
+            _hasAppliedStatusVisibility = true;
+        }
+
         private void UpdateActionButtonVisibility(bool animateActionButtonVisibility)
         {
             bool shouldAnimate = animateActionButtonVisibility && _hasAppliedActionButtonVisibility;
@@ -304,6 +352,11 @@ namespace Cotton.Mobile.Controls
                 opacity => _actionButton.Opacity = opacity,
                 CompleteActionButtonVisibility);
             _hasAppliedActionButtonVisibility = true;
+        }
+
+        private void CompleteStatusVisibility()
+        {
+            IsVisible = IsStatusVisible;
         }
 
         private void CompleteActionButtonVisibility()

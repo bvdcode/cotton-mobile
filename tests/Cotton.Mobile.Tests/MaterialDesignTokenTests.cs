@@ -1104,6 +1104,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_touchSurface = new TouchSurfaceView();", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsRowTapEnabled && IsActionEnabled ? actionCommand : null;", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("ActionButtonOpacityAnimationName = \"M3AttentionStatusActionButtonOpacity\"", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3AttentionStatusOpacity\"", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisibleProperty", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("OnActionButtonVisibilityPropertyChanged", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains(
                 "nameof(IsActionVisible),\n            typeof(bool),\n            typeof(AttentionStatusView),\n            true,\n            propertyChanged: OnActionButtonVisibilityPropertyChanged);",
@@ -1115,6 +1118,7 @@ namespace Cotton.Mobile.Tests
                 StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", attentionStatusView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", attentionStatusView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("LongPressBehavior", attentionStatusView, StringComparison.Ordinal);
@@ -1122,14 +1126,18 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("_actionButton.IsVisible = IsActionVisible", attentionStatusView, StringComparison.Ordinal);
 
             Assert.Contains("<controls:AttentionStatusView", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.CanRetryFileAction}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AttentionStatusPanel", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AttentionStatusMessage", mainPage, StringComparison.Ordinal);
 
             Assert.Contains("<controls:AttentionStatusView", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding IsAttentionStatusVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsRowTapEnabled=\"True\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKey=\"M3ActionListItemGrid\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry notifications\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:AttentionStatusView IsVisible=", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:AttentionStatusView IsVisible=", notificationSettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]

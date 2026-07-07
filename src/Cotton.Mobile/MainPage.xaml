@@ -137,7 +137,7 @@
 
                             <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
 
-                            <controls:AttentionStatusView IsVisible="{Binding Display.CanRetryFileAction}"
+                            <controls:AttentionStatusView IsStatusVisible="{Binding Display.CanRetryFileAction}"
                                                           Message="{Binding Display.FilesStatus}"
                                                           IconData="{x:Static controls:IconPathData.Error}"
                                                           ActionIconData="{x:Static controls:IconPathData.Refresh}"

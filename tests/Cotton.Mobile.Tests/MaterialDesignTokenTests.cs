@@ -1817,10 +1817,12 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
 
+            Assert.Contains("x:DataType=\"viewModels:MainPageViewModel\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedItemsView IsContentVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("StackStyleResourceKey=\"M3FileListStack\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<DataTemplate x:DataType=\"services:CottonFileBrowserEntry\">", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileListEntryRowView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class FileListEntryRowView", fileListEntryRowView, StringComparison.Ordinal);
@@ -2551,6 +2553,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:WrappedItemsView IsContentVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("LayoutStyleResourceKey=\"M3FileTileWrapLayout\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:WrappedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(mainPage, "<DataTemplate x:DataType=\"services:CottonFileBrowserEntry\">"));
             Assert.Contains("<controls:FileTileEntryCardView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding Details}\"", mainPage, StringComparison.Ordinal);

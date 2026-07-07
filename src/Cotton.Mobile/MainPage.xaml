@@ -2,8 +2,11 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+             xmlns:services="clr-namespace:Cotton.Mobile.Services"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
+             x:DataType="viewModels:MainPageViewModel"
              Shell.NavBarIsVisible="False">
 
     <controls:MainPageRootView x:Name="RootLayout">
@@ -160,7 +163,7 @@
                                                        ItemsSource="{Binding Display.FileEntries}"
                                                        StackStyleResourceKey="M3FileListStack">
                                 <controls:StackedItemsView.ItemTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                                         <controls:FileListEntryRowView Title="{Binding Name}"
                                                                        Detail="{Binding DisplayDetails}"
                                                                        ThumbnailSource="{Binding Thumbnail.Source}"
@@ -185,7 +188,7 @@
                                                        ItemsSource="{Binding Display.FileEntries}"
                                                        LayoutStyleResourceKey="M3FileTileWrapLayout">
                                 <controls:WrappedItemsView.ItemTemplate>
-                                    <DataTemplate>
+                                    <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                                         <controls:FileTileEntryCardView Title="{Binding Name}"
                                                                         Detail="{Binding Details}"
                                                                         LocalCopyStatus="{Binding LocalCopyStatus}"

@@ -21,23 +21,29 @@
                             TertiaryCommand="{Binding LoadCommand}"
                             TertiaryDescription="Refresh transfers" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:MetadataListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:MetadataListSkeletonView Grid.Row="2"
+                                               IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView Grid.Row="2"
+                                     IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Transfer}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
-                                       ItemsSource="{Binding Items}">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="2"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Items}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonTransferListItem">
                         <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
                                                    LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
@@ -52,8 +58,8 @@
                                                            IsErrorTextVisible="{Binding IsFailureVisible}" />
                         </controls:MetadataCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

@@ -17,14 +17,17 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh capture inbox" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1"
+                                        ExtraAutoRows="1">
             <controls:ScreenHeaderView Title="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
+            <controls:ActionClusterView Grid.Row="2"
+                                        ClusterStyleResourceKey="M3InlineActionCluster"
                                         IsClusterVisible="{Binding IsActionBarVisible}"
                                         PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
                                         PrimaryActionCommand="{Binding DestinationCommand}"
@@ -37,16 +40,21 @@
                                         TertiaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                         TertiaryActionSemanticDescription="Queue captured items" />
 
-            <controls:MetadataListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:MetadataListSkeletonView Grid.Row="3"
+                                               IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView Grid.Row="3"
+                                     IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Transfer}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
-                                       ItemsSource="{Binding Items}">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="3"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Items}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonCaptureInboxListItem">
                         <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
                                                    LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
@@ -63,8 +71,8 @@
                                                            IsErrorTextVisible="{Binding IsFailureVisible}" />
                         </controls:MetadataCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

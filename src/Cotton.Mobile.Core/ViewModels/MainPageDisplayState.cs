@@ -700,6 +700,19 @@ namespace Cotton.Mobile.ViewModels
             NotifyFilesEmptyStateChanged();
         }
 
+        public void ShowFileActionPending()
+        {
+            ClearFileSelection();
+            IsFilesLoading = false;
+            IsFilesRefreshing = false;
+            IsFileActionInProgress = true;
+            CanCancelFileAction = false;
+            CanRetryFileAction = false;
+            FilesStatus = CreateFilesStatus();
+            ClearFilesNotice();
+            NotifyFilesEmptyStateChanged();
+        }
+
         public void ShowFileActionAwaitingFollowUp()
         {
             IsFilesLoading = false;

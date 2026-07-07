@@ -13,5 +13,18 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Status = $\"Opened {file.Name}.\";", content, StringComparison.Ordinal);
             Assert.Contains("Status = $\"Downloading {file.Name}...\";", content, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Main_file_open_defers_transient_open_status()
+        {
+            string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageFileBrowserController.cs");
+
+            Assert.DoesNotContain("BeginFileAction($\"Opening {file.Name}...\")", content, StringComparison.Ordinal);
+            Assert.Contains("BeginDeferredFileAction($\"Opening {file.Name}...\")", content, StringComparison.Ordinal);
+            Assert.Contains("ShowFileActionPending", content, StringComparison.Ordinal);
+            Assert.Contains("&& !_display.IsFilesLoading", content, StringComparison.Ordinal);
+            Assert.Contains("&& !_display.IsFileBrowserChromeEnabled", content, StringComparison.Ordinal);
+            Assert.Contains("DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(450)", content, StringComparison.Ordinal);
+        }
     }
 }

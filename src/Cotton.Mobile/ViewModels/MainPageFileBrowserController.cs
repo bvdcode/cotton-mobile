@@ -49,6 +49,7 @@ namespace Cotton.Mobile.ViewModels
         private const int PayloadTooLargeStatusCode = 413;
         private const int InsufficientStorageStatusCode = 507;
         private static readonly TimeSpan FileServerMutationTimeout = TimeSpan.FromSeconds(45);
+        private static readonly TimeSpan DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(450);
         private static readonly TimeSpan SelectionClearActivationSettleDuration = TimeSpan.FromMilliseconds(350);
 
         private readonly MainPageDisplayState _display;
@@ -5401,7 +5402,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenRemoteFileAsync(Uri instanceUri, CottonFileBrowserEntry file)
         {
-            CancellationTokenSource fileActionCancellation = BeginFileAction($"Opening {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginDeferredFileAction($"Opening {file.Name}...");
             bool shouldRunRecoveryRefresh = false;
 
             try
@@ -6133,16 +6134,50 @@ namespace Cotton.Mobile.ViewModels
         {
             CancelCurrentFileAction();
             ClearFileActionRetry();
-            var cancellation = new CancellationTokenSource();
+            CancellationTokenSource cancellation = new();
             _fileActionCancellation = cancellation;
             _display.ShowFileActionLoading(status);
             return cancellation;
         }
 
+        private CancellationTokenSource BeginDeferredFileAction(string status)
+        {
+            CancelCurrentFileAction();
+            ClearFileActionRetry();
+            CancellationTokenSource cancellation = new();
+            _fileActionCancellation = cancellation;
+            _display.ShowFileActionPending();
+            _ = ShowDeferredFileActionLoadingAsync(cancellation, status);
+            return cancellation;
+        }
+
+        private async Task ShowDeferredFileActionLoadingAsync(
+            CancellationTokenSource fileActionCancellation,
+            string status)
+        {
+            try
+            {
+                await Task.Delay(DeferredFileActionLoadingDelay).ConfigureAwait(false);
+                await MainThread.InvokeOnMainThreadAsync(() =>
+                {
+                    if (ReferenceEquals(_fileActionCancellation, fileActionCancellation)
+                        && !_display.IsFilesLoading
+                        && !_display.IsFileBrowserChromeEnabled)
+                    {
+                        _display.ShowFileActionLoading(status);
+                    }
+                }).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Failed to show deferred Cotton mobile file action status.");
+            }
+        }
+
         private CancellationTokenSource BeginFileLoad()
         {
             CancelCurrentFileLoad();
-            var cancellation = new CancellationTokenSource();
+            CancellationTokenSource cancellation = new();
             _fileLoadCancellation = cancellation;
             _isFileLoadInProgress = true;
             return cancellation;

@@ -3,7 +3,8 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              x:Class="Cotton.Mobile.Controls.TopAppBar"
-             x:Name="Root">
+             x:Name="Root"
+             x:DataType="controls:TopAppBar">
     <controls:TopAppBarContentGridView>
         <controls:IconButton x:Name="BackButton"
                              IconData="{x:Static controls:IconPathData.ArrowBack}"

@@ -1651,6 +1651,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(1, CountOccurrences(topAppBar, "<controls:IconButton"));
             Assert.Contains("<controls:TopAppBarContentGridView>", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("x:DataType=\"controls:TopAppBar\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("<controls:IconButton x:Name=\"BackButton\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("<controls:TopAppBarTitleLabel Grid.Column=\"1\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("UseDarkTheme=\"{Binding Source={x:Reference Root}, Path=UseDarkTheme}\"", topAppBar, StringComparison.Ordinal);

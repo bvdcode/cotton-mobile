@@ -3458,11 +3458,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", settingsCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3SettingsSectionStack\"", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("CardOpacityAnimationName = \"M3SettingsCardOpacity\"", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("IsCardVisibleProperty", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("OnCardVisiblePropertyChanged", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("CompleteCardVisibility", settingsCardView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _stack.Children", settingsCardView, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsCardView IsCardVisible=\"{Binding IsPermissionLedgerVisible}\">", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:SettingsCardView IsVisible=\"{Binding IsPermissionLedgerVisible}\">", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">\n                    <controls:SettingsSummaryHeaderView", securitySettingsPage, StringComparison.Ordinal);
         }
@@ -3564,6 +3571,11 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("public class ContentCardView", contentCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("CardOpacityAnimationName = \"M3ContentCardOpacity\"", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("IsCardVisibleProperty", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("OnCardVisiblePropertyChanged", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("CompleteCardVisibility", contentCardView, StringComparison.Ordinal);
             Assert.Contains("_card.Content = BodyContent", contentCardView, StringComparison.Ordinal);
             Assert.Equal(1, CountOccurrences(recentFilesPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
@@ -3586,6 +3598,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CardStyleResourceKey=\"M3TextViewerSurface\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3SelectableContentCard\"", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = \"M3SelectableTrashTileCard\"", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("<controls:ContentCardView IsCardVisible=\"{Binding IsLoadMoreVisible}\">", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Load more\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding BindingContext.RunRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -3605,9 +3618,10 @@ namespace Cotton.Mobile.Tests
 
             foreach (string page in pages)
             {
-                Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", page, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", page, StringComparison.Ordinal);
             }
 
+            Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding IsLoadMoreVisible}\">", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthPanel}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileCard}\"", mainPage, StringComparison.Ordinal);

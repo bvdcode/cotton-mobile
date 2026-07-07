@@ -53,7 +53,7 @@
                                              SemanticDescription="{Binding DeviceUnlockActionText}" />
             </controls:SettingsCardView>
 
-            <controls:SettingsCardView IsVisible="{Binding IsPermissionLedgerVisible}">
+            <controls:SettingsCardView IsCardVisible="{Binding IsPermissionLedgerVisible}">
                 <controls:SettingsSummaryHeaderView Title="{Binding PermissionLedgerTitle}"
                                                     StatusText="{Binding PermissionLedgerStatusText}"
                                                     DetailText="{Binding PermissionLedgerDetailText}" />

@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Controls
     public class ContentCardView : ContentView
     {
         private const string DefaultCardStyleResourceKey = "M3ContentCard";
+        private const string CardOpacityAnimationName = "M3ContentCardOpacity";
 
         public static readonly BindableProperty CardStyleResourceKeyProperty = BindableProperty.Create(
             nameof(CardStyleResourceKey),
@@ -22,7 +23,15 @@ namespace Cotton.Mobile.Controls
             default(View),
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsCardVisibleProperty = BindableProperty.Create(
+            nameof(IsCardVisible),
+            typeof(bool),
+            typeof(ContentCardView),
+            true,
+            propertyChanged: OnCardVisiblePropertyChanged);
+
         private readonly Border _card;
+        private bool _hasAppliedCardVisibility;
 
         public ContentCardView()
         {
@@ -30,6 +39,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _card;
             UpdateVisualState();
+            UpdateCardVisibility(animateCardVisibility: false);
         }
 
         public string CardStyleResourceKey
@@ -44,10 +54,22 @@ namespace Cotton.Mobile.Controls
             set => SetValue(BodyContentProperty, value);
         }
 
+        public bool IsCardVisible
+        {
+            get => (bool)GetValue(IsCardVisibleProperty);
+            set => SetValue(IsCardVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ContentCardView view = (ContentCardView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnCardVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ContentCardView view = (ContentCardView)bindable;
+            view.UpdateCardVisibility(animateCardVisibility: true);
         }
 
         private void UpdateVisualState()
@@ -62,6 +84,37 @@ namespace Cotton.Mobile.Controls
             {
                 _card.Content = BodyContent;
             }
+        }
+
+        private void UpdateCardVisibility(bool animateCardVisibility)
+        {
+            bool isCardVisible = IsCardVisible;
+            bool shouldAnimate = animateCardVisibility && _hasAppliedCardVisibility;
+            double targetOpacity = isCardVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isCardVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                CardOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteCardVisibility);
+            _hasAppliedCardVisibility = true;
+        }
+
+        private void CompleteCardVisibility()
+        {
+            IsVisible = IsCardVisible;
         }
     }
 }

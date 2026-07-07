@@ -47,7 +47,7 @@
                 </controls:StackedItemsView.ItemTemplate>
             </controls:StackedItemsView>
 
-            <controls:ContentCardView IsVisible="{Binding IsLoadMoreVisible}">
+            <controls:ContentCardView IsCardVisible="{Binding IsLoadMoreVisible}">
                 <controls:ActionListItemView Text="Load more"
                                              LeadingIconData="{x:Static controls:IconPathData.Activity}"
                                              IsLeadingIconVisible="True"

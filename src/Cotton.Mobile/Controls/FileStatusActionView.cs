@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTextStyleResourceKey = "M3FileStatusPrimaryText";
         private const string DefaultErrorTextStyleResourceKey = "M3FileErrorStatusPrimaryText";
         private const string DefaultDetailsStyleResourceKey = "M3FileStatusMetaText";
+        private const string StatusOpacityAnimationName = "M3FileStatusOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -73,6 +74,13 @@ namespace Cotton.Mobile.Controls
             typeof(FileStatusActionView),
             true,
             propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsStatusVisibleProperty = BindableProperty.Create(
+            nameof(IsStatusVisible),
+            typeof(bool),
+            typeof(FileStatusActionView),
+            true,
+            propertyChanged: OnStatusVisiblePropertyChanged);
 
         public static readonly BindableProperty PanelStyleResourceKeyProperty = BindableProperty.Create(
             nameof(PanelStyleResourceKey),
@@ -138,6 +146,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _text;
         private readonly TouchSurfaceView _touchSurface;
         private bool _hasAppliedDetailsVisibility;
+        private bool _hasAppliedStatusVisibility;
 
         public FileStatusActionView()
         {
@@ -187,6 +196,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _container;
             UpdateVisualState(animateDetailsVisibility: false);
+            UpdateStatusVisibility(animateStatusVisibility: false);
         }
 
         public string Text
@@ -235,6 +245,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsActionEnabledProperty);
             set => SetValue(IsActionEnabledProperty, value);
+        }
+
+        public bool IsStatusVisible
+        {
+            get => (bool)GetValue(IsStatusVisibleProperty);
+            set => SetValue(IsStatusVisibleProperty, value);
         }
 
         public string PanelStyleResourceKey
@@ -291,6 +307,12 @@ namespace Cotton.Mobile.Controls
             view.UpdateVisualState(animateDetailsVisibility: false);
         }
 
+        private static void OnStatusVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileStatusActionView view = (FileStatusActionView)bindable;
+            view.UpdateStatusVisibility(animateStatusVisibility: true);
+        }
+
         private static void OnDetailsVisibilityPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileStatusActionView view = (FileStatusActionView)bindable;
@@ -339,6 +361,32 @@ namespace Cotton.Mobile.Controls
             SemanticProperties.SetDescription(_container, accessibilityText);
         }
 
+        private void UpdateStatusVisibility(bool animateStatusVisibility)
+        {
+            bool isStatusVisible = IsStatusVisible;
+            bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
+            double targetOpacity = isStatusVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isStatusVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                StatusOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteStatusVisibility);
+            _hasAppliedStatusVisibility = true;
+        }
+
         private void UpdateDetailsVisibility(string details, bool animateDetailsVisibility)
         {
             bool isDetailsVisible = IsDetailsVisible(details);
@@ -365,6 +413,11 @@ namespace Cotton.Mobile.Controls
                 opacity => _details.Opacity = opacity,
                 CompleteDetailsVisibility);
             _hasAppliedDetailsVisibility = true;
+        }
+
+        private void CompleteStatusVisibility()
+        {
+            IsVisible = IsStatusVisible;
         }
 
         private void CompleteDetailsVisibility()

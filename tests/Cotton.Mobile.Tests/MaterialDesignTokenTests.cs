@@ -1712,6 +1712,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_touchSurface = new TouchSurfaceView();", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? command : null;", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("DetailsOpacityAnimationName = \"M3FileStatusDetailsOpacity\"", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("StatusOpacityAnimationName = \"M3FileStatusOpacity\"", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("DefaultPanelStyleResourceKey = \"M3FileStatusPanel\"", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("DefaultErrorPanelStyleResourceKey = \"M3FileErrorStatusPanel\"", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileStatusGrid\"", fileStatusActionView, StringComparison.Ordinal);
@@ -1726,9 +1727,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_icon.SetDynamicResource(StyleProperty, iconStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_text.SetDynamicResource(StyleProperty, textStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_details.SetDynamicResource(StyleProperty, detailsStyleResourceKey)", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisibleProperty", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("OnStatusVisiblePropertyChanged", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("OnDetailsVisibilityPropertyChanged", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileStatusActionView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("CompleteDetailsVisibility", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("_detailsColumn.Width = new GridLength(0)", fileStatusActionView, StringComparison.Ordinal);
             Assert.Contains("Grid.SetColumnSpan(_text, 2)", fileStatusActionView, StringComparison.Ordinal);
@@ -1741,11 +1745,15 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("_details.IsVisible = !string.IsNullOrWhiteSpace", fileStatusActionView, StringComparison.Ordinal);
 
             Assert.Equal(3, CountOccurrences(mainPage, "<controls:FileStatusActionView"));
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsTransferActivityIndicatorVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsError=\"{Binding Display.TransferActivityIndicator.HasFailures}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsBackupActivityIndicatorVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsOfflinePackProgressVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding Display.OfflinePackProgress.Text}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IconData=\"{x:Static controls:IconPathData.Download}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileStatusActionView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TapCommand=\"{Binding OpenTransfersCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TapCommand=\"{Binding OpenBackupSetupCommand}\"", mainPage, StringComparison.Ordinal);
         }

@@ -79,7 +79,7 @@
                                                        IsStatusVisible="{Binding Display.IsProfileStatusVisible}"
                                                        TextStyleResourceKey="M3BodyMedium" />
 
-                            <controls:FileStatusActionView IsVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
+                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
                                                            Text="{Binding Display.TransferActivityIndicator.Text}"
                                                            Details="{Binding Display.TransferActivityIndicator.Details}"
                                                            AccessibilityText="{Binding Display.TransferActivityIndicator.AccessibilityText}"
@@ -88,14 +88,14 @@
                                                            IsError="{Binding Display.TransferActivityIndicator.HasFailures}"
                                                            Command="{Binding OpenTransfersCommand}" />
 
-                            <controls:FileStatusActionView IsVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
+                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
                                                            Text="{Binding Display.BackupActivityIndicator.Text}"
                                                            Details="{Binding Display.BackupActivityIndicator.Details}"
                                                            AccessibilityText="{Binding Display.BackupActivityIndicator.AccessibilityText}"
                                                            IconData="{x:Static controls:IconPathData.Backup}"
                                                            Command="{Binding OpenBackupSetupCommand}" />
 
-                            <controls:FileStatusActionView IsVisible="{Binding Display.IsOfflinePackProgressVisible}"
+                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsOfflinePackProgressVisible}"
                                                            Text="{Binding Display.OfflinePackProgress.Text}"
                                                            Details="{Binding Display.OfflinePackProgress.Details}"
                                                            AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"

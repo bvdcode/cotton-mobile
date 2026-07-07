@@ -545,7 +545,7 @@ namespace Cotton.Mobile.Tests
                 new DateTime(2026, 6, 19, 8, 0, 0, DateTimeKind.Utc));
         }
 
-        private sealed class StubCameraBackupMediaSource : ICottonCameraBackupMediaSource
+        private class StubCameraBackupMediaSource : ICottonCameraBackupMediaSource
         {
             private readonly IReadOnlyList<CottonCameraBackupCandidate> _candidates;
 

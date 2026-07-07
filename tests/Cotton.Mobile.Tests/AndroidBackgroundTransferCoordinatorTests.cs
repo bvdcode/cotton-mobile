@@ -250,7 +250,7 @@ namespace Cotton.Mobile.Tests
                 source);
         }
 
-        private sealed class FakeTransferMetadataStore : ICottonTransferMetadataStore
+        private class FakeTransferMetadataStore : ICottonTransferMetadataStore
         {
             private readonly IReadOnlyList<CottonTransferQueueItem> _items;
 
@@ -282,7 +282,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeCameraBackupSettingsStore : ICottonCameraBackupSettingsStore
+        private class FakeCameraBackupSettingsStore : ICottonCameraBackupSettingsStore
         {
             private readonly CottonCameraBackupSettings _settings;
 
@@ -307,7 +307,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
+        private class FakeBackgroundTransferHost : ICottonAndroidBackgroundTransferHost
         {
             public List<CottonAndroidBackgroundTransferRequest> Requests { get; } = [];
 

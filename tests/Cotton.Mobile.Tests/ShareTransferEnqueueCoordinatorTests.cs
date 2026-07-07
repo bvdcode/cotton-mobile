@@ -316,7 +316,7 @@ namespace Cotton.Mobile.Tests
                 () => queuedTransferIds.Dequeue());
         }
 
-        private sealed record ShareFileSeed(Guid ItemId, string StagedName, string UploadName, string Content);
+        private record ShareFileSeed(Guid ItemId, string StagedName, string UploadName, string Content);
 
         private class FixedShareIntakePathProvider : ICottonShareIntakePathProvider
         {

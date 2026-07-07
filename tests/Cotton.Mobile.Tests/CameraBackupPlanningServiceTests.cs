@@ -146,7 +146,7 @@ namespace Cotton.Mobile.Tests
                 remoteFileName);
         }
 
-        private sealed class StubCameraBackupMediaSource : ICottonCameraBackupMediaSource
+        private class StubCameraBackupMediaSource : ICottonCameraBackupMediaSource
         {
             private readonly IReadOnlyList<CottonCameraBackupCandidate> _candidates;
 
@@ -163,7 +163,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class InMemoryUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
+        private class InMemoryUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
         {
             private readonly List<CottonCameraBackupUploadedMediaSnapshot> _items;
 
@@ -210,7 +210,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
+        private class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
         {
             private readonly string _directory;
 

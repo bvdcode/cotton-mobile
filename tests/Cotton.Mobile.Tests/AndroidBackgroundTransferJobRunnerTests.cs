@@ -67,7 +67,7 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(restoreCoordinator.RestoreCalls);
         }
 
-        private sealed class FakeQueuedUploadExecutor : ICottonQueuedUploadExecutor
+        private class FakeQueuedUploadExecutor : ICottonQueuedUploadExecutor
         {
             private readonly Queue<CottonQueuedUploadExecutionResult> _results;
 
@@ -95,7 +95,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeRestoreCoordinator : ICottonTransferQueueRestoreCoordinator
+        private class FakeRestoreCoordinator : ICottonTransferQueueRestoreCoordinator
         {
             private readonly IReadOnlyList<CottonTransferQueueItem> _restoredItems;
 

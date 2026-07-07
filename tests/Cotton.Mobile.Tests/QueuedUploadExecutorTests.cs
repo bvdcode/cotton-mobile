@@ -447,7 +447,7 @@ namespace Cotton.Mobile.Tests
                 100);
         }
 
-        private sealed class FakeTransferMetadataStore : ICottonTransferMetadataStore
+        private class FakeTransferMetadataStore : ICottonTransferMetadataStore
         {
             public FakeTransferMetadataStore(IReadOnlyList<CottonTransferQueueItem> items)
             {
@@ -482,7 +482,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeTransferStagingStore : ICottonTransferStagingStore
+        private class FakeTransferStagingStore : ICottonTransferStagingStore
         {
             private CottonTransferStagedFileSnapshot? _stagedFile;
 
@@ -539,7 +539,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeQueuedUploadClient : ICottonQueuedUploadClient
+        private class FakeQueuedUploadClient : ICottonQueuedUploadClient
         {
             private readonly IReadOnlyList<long> _progressValues;
             private readonly Exception? _exception;
@@ -574,7 +574,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeCameraBackupUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
+        private class FakeCameraBackupUploadedMediaStore : ICottonCameraBackupUploadedMediaStore
         {
             public IReadOnlyList<CottonCameraBackupUploadedMediaSnapshot> Items { get; private set; } = [];
 
@@ -613,7 +613,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeLocalNotificationService : ICottonLocalNotificationService
+        private class FakeLocalNotificationService : ICottonLocalNotificationService
         {
             private readonly Exception? _exception;
 
@@ -638,7 +638,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedTimeProvider : TimeProvider
+        private class FixedTimeProvider : TimeProvider
         {
             private readonly DateTimeOffset _utcNow;
 

@@ -181,7 +181,7 @@ namespace Cotton.Mobile.Tests
                 _ => Task.FromResult<Stream>(new MemoryStream(bytes)));
         }
 
-        private sealed class FakeTransferMetadataStore : ICottonTransferMetadataStore
+        private class FakeTransferMetadataStore : ICottonTransferMetadataStore
         {
             private readonly IReadOnlyList<CottonTransferQueueItem> _items;
 
@@ -217,7 +217,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeTransferStagingStore : ICottonTransferStagingStore
+        private class FakeTransferStagingStore : ICottonTransferStagingStore
         {
             public IReadOnlyList<string> StagedFileNames => _stagedFileNames;
 
@@ -277,7 +277,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class QueueGuidFactory
+        private class QueueGuidFactory
         {
             private readonly Queue<Guid> _ids;
 
@@ -292,7 +292,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedTimeProvider : TimeProvider
+        private class FixedTimeProvider : TimeProvider
         {
             private readonly DateTimeOffset _utcNow;
 

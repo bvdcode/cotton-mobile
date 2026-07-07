@@ -202,7 +202,7 @@ namespace Cotton.Mobile.Tests
             return Path.Combine(_rootDirectory, instanceUri.Host);
         }
 
-        private sealed class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
+        private class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
         {
             private readonly string _rootDirectory;
 

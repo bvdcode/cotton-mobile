@@ -6,10 +6,11 @@ namespace Cotton.Mobile.Tests
     public class CSharpStyleContractTests
     {
         [Fact]
-        public void Production_csharp_sources_do_not_use_sealed_modifier()
+        public void Csharp_sources_do_not_use_sealed_modifier()
         {
             IReadOnlyList<string> sourcePaths = RepositoryPath
                 .EnumerateFiles("src", "*.cs")
+                .Concat(RepositoryPath.EnumerateFiles("tests", "*.cs"))
                 .Where(IsSourceFilePath)
                 .ToList();
             List<string> matches = [];

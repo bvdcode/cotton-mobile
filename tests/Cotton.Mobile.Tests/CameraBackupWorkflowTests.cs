@@ -4,7 +4,7 @@ using Xunit;
 
 namespace Cotton.Mobile.Tests
 {
-    public sealed class CameraBackupWorkflowTests : IDisposable
+    public class CameraBackupWorkflowTests : IDisposable
     {
         private static readonly Uri InstanceUri = new("https://app.cottoncloud.dev");
         private static readonly Guid DestinationFolderId = Guid.Parse("11111111-2222-3333-4444-555555555555");
@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Tests
                 CapturedAt);
         }
 
-        private sealed class StubCameraBackupMediaSource :
+        private class StubCameraBackupMediaSource :
             ICottonCameraBackupMediaSource,
             ICottonCameraBackupMediaContentSource
         {
@@ -140,7 +140,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FakeQueuedUploadClient : ICottonQueuedUploadClient
+        private class FakeQueuedUploadClient : ICottonQueuedUploadClient
         {
             public async Task<CottonQueuedUploadClientResult> UploadAsync(
                 Uri instanceUri,
@@ -154,7 +154,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
+        private class FixedCameraBackupMetadataPathProvider : ICottonCameraBackupMetadataPathProvider
         {
             private readonly string _directory;
 
@@ -169,7 +169,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedTransferMetadataPathProvider : ICottonTransferMetadataPathProvider
+        private class FixedTransferMetadataPathProvider : ICottonTransferMetadataPathProvider
         {
             private readonly string _directory;
 
@@ -184,7 +184,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedTransferStagingPathProvider : ICottonTransferStagingPathProvider
+        private class FixedTransferStagingPathProvider : ICottonTransferStagingPathProvider
         {
             private readonly string _directory;
 
@@ -199,7 +199,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private sealed class FixedTimeProvider : TimeProvider
+        private class FixedTimeProvider : TimeProvider
         {
             private readonly DateTimeOffset _utcNow;
 

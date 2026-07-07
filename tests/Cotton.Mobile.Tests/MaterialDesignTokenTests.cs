@@ -1145,7 +1145,7 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> noticeIconSetters =
                 GetStyleSetters(styles, "M3FileNoticeIcon");
 
-            Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:NoticePanelView IsPanelVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IconData=\"{x:Static controls:IconPathData.Error}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding Display.FilesNoticeTitle}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Message=\"{Binding Display.FilesNoticeMessage}\"", mainPage, StringComparison.Ordinal);
@@ -1153,7 +1153,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3FileNoticeGrid\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconFrameStyleResourceKey = \"M3FileNoticeIconFrame\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStackStyleResourceKey = \"M3FileNoticeTextStack\"", noticePanelView, StringComparison.Ordinal);
-            Assert.Contains("<controls:NoticePanelView IsVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:NoticePanelView IsPanelVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding RemotePushUnavailableTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Message=\"{Binding RemotePushUnavailableDetail}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("PanelStyleResourceKey=\"M3AttentionStatusPanel\"", notificationSettingsPage, StringComparison.Ordinal);
@@ -1161,11 +1161,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionText=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ActionCommand=\"{Binding LoadCommand}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ActionTextProperty", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("IsPanelVisibleProperty", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("new ActionListItemView", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("_actionItem.Command = actionCommand", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("TitleOpacityAnimationName = \"M3NoticePanelTitleOpacity\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("MessageOpacityAnimationName = \"M3NoticePanelMessageOpacity\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("PanelOpacityAnimationName = \"M3NoticePanelOpacity\"", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("ActionItemOpacityAnimationName = \"M3NoticePanelActionItemOpacity\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("OnPanelVisiblePropertyChanged", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("OnTitleVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("OnMessageVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("OnActionTextVisibilityPropertyChanged", noticePanelView, StringComparison.Ordinal);
@@ -1189,6 +1192,7 @@ namespace Cotton.Mobile.Tests
                 StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("CompletePanelVisibility", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("CompleteElementVisibility", noticePanelView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Equal(
@@ -1208,6 +1212,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3FileNoticeIconFrame", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileNoticeTextStack", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid IsVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:NoticePanelView IsVisible=", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:NoticePanelView IsVisible=", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionListItemView Grid.Row=\"2\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("_title.IsVisible = !string.IsNullOrWhiteSpace(title)", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_message.IsVisible = !string.IsNullOrWhiteSpace(message)", noticePanelView, StringComparison.Ordinal);

@@ -55,7 +55,7 @@
                                                     IsStatusVisible="{Binding IsRemotePushStatusVisible}"
                                                     IsDetailVisible="False" />
 
-                <controls:NoticePanelView IsVisible="{Binding IsRemotePushUnavailable}"
+                <controls:NoticePanelView IsPanelVisible="{Binding IsRemotePushUnavailable}"
                                           Title="{Binding RemotePushUnavailableTitle}"
                                           Message="{Binding RemotePushUnavailableDetail}"
                                           IconData="{x:Static controls:IconPathData.Error}"

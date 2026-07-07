@@ -101,7 +101,7 @@
                                                            AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"
                                                            IconData="{x:Static controls:IconPathData.Download}" />
 
-                            <controls:NoticePanelView IsVisible="{Binding Display.IsFilesNoticeVisible}"
+                            <controls:NoticePanelView IsPanelVisible="{Binding Display.IsFilesNoticeVisible}"
                                                       IconData="{x:Static controls:IconPathData.Error}"
                                                       Title="{Binding Display.FilesNoticeTitle}"
                                                       Message="{Binding Display.FilesNoticeMessage}" />

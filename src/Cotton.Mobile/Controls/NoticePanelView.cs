@@ -19,6 +19,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTitleStyleResourceKey = "M3CardSupportingStrong";
         private const string ActionItemOpacityAnimationName = "M3NoticePanelActionItemOpacity";
         private const string MessageOpacityAnimationName = "M3NoticePanelMessageOpacity";
+        private const string PanelOpacityAnimationName = "M3NoticePanelOpacity";
         private const string TitleOpacityAnimationName = "M3NoticePanelTitleOpacity";
 
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
@@ -75,6 +76,13 @@ namespace Cotton.Mobile.Controls
             typeof(NoticePanelView),
             true,
             propertyChanged: OnActionVisibilityPropertyChanged);
+
+        public static readonly BindableProperty IsPanelVisibleProperty = BindableProperty.Create(
+            nameof(IsPanelVisible),
+            typeof(bool),
+            typeof(NoticePanelView),
+            true,
+            propertyChanged: OnPanelVisiblePropertyChanged);
 
         public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
             nameof(ActionSemanticDescription),
@@ -154,6 +162,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _panel;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
+        private bool _hasAppliedPanelVisibility;
         private bool _hasAppliedVisibilityState;
 
         public NoticePanelView()
@@ -222,6 +231,7 @@ namespace Cotton.Mobile.Controls
                 animateTitleVisibility: false,
                 animateMessageVisibility: false,
                 animateActionVisibility: false);
+            UpdatePanelVisibility(animatePanelVisibility: false);
         }
 
         public string Title
@@ -270,6 +280,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsActionVisibleProperty);
             set => SetValue(IsActionVisibleProperty, value);
+        }
+
+        public bool IsPanelVisible
+        {
+            get => (bool)GetValue(IsPanelVisibleProperty);
+            set => SetValue(IsPanelVisibleProperty, value);
         }
 
         public string ActionSemanticDescription
@@ -392,6 +408,12 @@ namespace Cotton.Mobile.Controls
                 animateActionVisibility: view.HasActionVisibleFlagChanged(oldValue, newValue));
         }
 
+        private static void OnPanelVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NoticePanelView view = (NoticePanelView)bindable;
+            view.UpdatePanelVisibility(animatePanelVisibility: true);
+        }
+
         private void UpdateVisualState(
             bool animateTitleVisibility,
             bool animateMessageVisibility,
@@ -453,6 +475,32 @@ namespace Cotton.Mobile.Controls
             UpdateElementVisibility(_actionItem, isActionVisible, ActionItemOpacityAnimationName, shouldAnimateActionVisibility);
             SemanticProperties.SetDescription(this, BuildSemanticDescription(title, message));
             _hasAppliedVisibilityState = true;
+        }
+
+        private void UpdatePanelVisibility(bool animatePanelVisibility)
+        {
+            bool isPanelVisible = IsPanelVisible;
+            bool shouldAnimate = animatePanelVisibility && _hasAppliedPanelVisibility;
+            double targetOpacity = isPanelVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isPanelVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                PanelOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompletePanelVisibility);
+            _hasAppliedPanelVisibility = true;
         }
 
         private static bool HasTextVisibilityChanged(object oldValue, object newValue)
@@ -531,6 +579,11 @@ namespace Cotton.Mobile.Controls
                 animateVisibility,
                 opacity => element.Opacity = opacity,
                 () => CompleteElementVisibility(element, isElementVisible));
+        }
+
+        private void CompletePanelVisibility()
+        {
+            IsVisible = IsPanelVisible;
         }
 
         private static void CompleteElementVisibility(VisualElement element, bool isElementVisible)

@@ -3252,6 +3252,7 @@ namespace Cotton.Mobile.Tests
             string imageViewerPage = LoadText(ImageViewerPagePath);
             string imageViewerPageCodeBehind = LoadText(ImageViewerPageCodeBehindPath);
             string mediaViewerPage = LoadText(MediaViewerPagePath);
+            string mediaViewerPageCodeBehind = LoadText(MediaViewerPageCodeBehindPath);
             string darkViewerSurfaceView = LoadText(DarkViewerSurfaceViewPath);
             string viewerImageView = LoadText(ViewerImageViewPath);
             string viewerMediaElementView = LoadText(ViewerMediaElementViewPath);
@@ -3284,6 +3285,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ViewerPlayOverlayView x:Name=\"StartOverlay\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Play media\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("StartOverlay.IsOverlayVisible = false", mediaViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("StartOverlay.IsOverlayVisible = true", mediaViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.DoesNotContain("StartOverlay.IsVisible", mediaViewerPageCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusStyleResourceKey = \"M3ViewerOverlayStatus\"", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisibleProperty", viewerStatusOverlayView, StringComparison.Ordinal);
             Assert.Contains("StatusOpacityAnimationName = \"M3ViewerOverlayStatusOpacity\"", viewerStatusOverlayView, StringComparison.Ordinal);
@@ -3304,6 +3308,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public class ViewerPlayOverlayView", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("DefaultContainerStyleResourceKey = \"M3ViewerCenteredOverlay\"", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3ViewerCenteredPlayIconButton\"", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("ViewerPlayOverlayView : MaterialAnimatedContentView", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("IsOverlayVisibleProperty", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("OnOverlayVisiblePropertyChanged", viewerPlayOverlayView, StringComparison.Ordinal);
+            Assert.Contains("view.IsContentVisible = (bool)newValue", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("IconData = IconPathData.Play", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("_playButton.Command = Command", viewerPlayOverlayView, StringComparison.Ordinal);
             Assert.Contains("public class DarkViewerSurfaceView", darkViewerSurfaceView, StringComparison.Ordinal);

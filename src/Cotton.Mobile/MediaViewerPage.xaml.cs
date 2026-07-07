@@ -44,7 +44,7 @@ namespace Cotton.Mobile
         private void PlayMedia()
         {
             EnsureMediaSourceLoaded();
-            StartOverlay.IsVisible = false;
+            StartOverlay.IsOverlayVisible = false;
             MediaPlayer.Play();
         }
 
@@ -79,7 +79,7 @@ namespace Cotton.Mobile
                 _isMediaSourceLoaded = false;
             }
 
-            StartOverlay.IsVisible = true;
+            StartOverlay.IsOverlayVisible = true;
 
             if (disconnectHandler)
             {

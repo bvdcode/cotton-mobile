@@ -5,10 +5,17 @@ using System.Windows.Input;
 
 namespace Cotton.Mobile.Controls
 {
-    public class ViewerPlayOverlayView : ContentView
+    public class ViewerPlayOverlayView : MaterialAnimatedContentView
     {
         private const string DefaultContainerStyleResourceKey = "M3ViewerCenteredOverlay";
         private const string DefaultIconButtonStyleResourceKey = "M3ViewerCenteredPlayIconButton";
+
+        public static readonly BindableProperty IsOverlayVisibleProperty = BindableProperty.Create(
+            nameof(IsOverlayVisible),
+            typeof(bool),
+            typeof(ViewerPlayOverlayView),
+            true,
+            propertyChanged: OnOverlayVisiblePropertyChanged);
 
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
@@ -64,6 +71,12 @@ namespace Cotton.Mobile.Controls
             UpdateVisualState();
         }
 
+        public bool IsOverlayVisible
+        {
+            get => (bool)GetValue(IsOverlayVisibleProperty);
+            set => SetValue(IsOverlayVisibleProperty, value);
+        }
+
         public ICommand? Command
         {
             get => (ICommand?)GetValue(CommandProperty);
@@ -98,6 +111,12 @@ namespace Cotton.Mobile.Controls
         {
             ViewerPlayOverlayView view = (ViewerPlayOverlayView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnOverlayVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ViewerPlayOverlayView view = (ViewerPlayOverlayView)bindable;
+            view.IsContentVisible = (bool)newValue;
         }
 
         private void UpdateVisualState()

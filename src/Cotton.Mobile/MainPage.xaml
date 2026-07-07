@@ -21,7 +21,7 @@
                                             Text="{Binding Display.LoadingMessage}"
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
 
-                <controls:AuthSignInPanelView IsVisible="{Binding Display.IsSignInVisible}"
+                <controls:AuthSignInPanelView IsPanelVisible="{Binding Display.IsSignInVisible}"
                                               InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
                                               Status="{Binding Display.Status}"
                                               IsStatusVisible="{Binding Display.IsStatusVisible}"
@@ -40,7 +40,7 @@
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
                                             TextStyleResourceKey="M3CardSupportingStrong" />
 
-                <controls:AuthLegalFooterView IsVisible="{Binding Display.IsLegalFooterVisible}"
+                <controls:AuthLegalFooterView IsFooterVisible="{Binding Display.IsLegalFooterVisible}"
                                               PrivacyCommand="{Binding PrivacyPolicyCommand}" />
             </controls:StackedContentView>
         </controls:ScreenScrollBodyView>

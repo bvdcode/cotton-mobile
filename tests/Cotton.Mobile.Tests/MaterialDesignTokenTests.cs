@@ -930,7 +930,7 @@ namespace Cotton.Mobile.Tests
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
             string mainPage = LoadText(MainPagePath);
 
-            Assert.Contains("<controls:AuthSignInPanelView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:AuthSignInPanelView IsPanelVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Status=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding Display.IsStatusVisible}\"", mainPage, StringComparison.Ordinal);
@@ -941,6 +941,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultFormStackStyleResourceKey = \"M3AuthFormStack\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusTextStyleResourceKey = \"M3AuthStatus\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultButtonStyleResourceKey = \"M3AuthFilledButton\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("PanelOpacityAnimationName = \"M3AuthSignInPanelOpacity\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("IsPanelVisibleProperty", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("OnPanelVisiblePropertyChanged", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("CompletePanelVisibility", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
@@ -951,6 +956,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = DefaultCardStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:AuthSignInPanelView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3AuthFormStack}\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Placeholder=\"https://app.cottoncloud.dev/\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Text=\"Connect\"", mainPage, StringComparison.Ordinal);
@@ -964,16 +970,22 @@ namespace Cotton.Mobile.Tests
             string authLegalFooterView = LoadText(AuthLegalFooterViewPath);
             string mainPage = LoadText(MainPagePath);
 
-            Assert.Contains("<controls:AuthLegalFooterView IsVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:AuthLegalFooterView IsFooterVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("PrivacyCommand=\"{Binding PrivacyPolicyCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class AuthLegalFooterView", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("DefaultFooterStyleResourceKey = \"M3LegalFooterBar\"", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("DefaultPrivacyText = \"Privacy\"", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("FooterOpacityAnimationName = \"M3AuthLegalFooterOpacity\"", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("IsFooterVisibleProperty", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("OnFooterVisiblePropertyChanged", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("CompleteFooterVisibility", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new HorizontalStackLayout", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new TextAction", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("_footer.SetDynamicResource(StyleProperty, footerStyleResourceKey)", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("_privacyAction.Command = PrivacyCommand", authLegalFooterView, StringComparison.Ordinal);
             Assert.DoesNotContain("<HorizontalStackLayout IsVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:AuthLegalFooterView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:TextAction Text=\"Privacy\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LegalFooterBar}\"", mainPage, StringComparison.Ordinal);
         }

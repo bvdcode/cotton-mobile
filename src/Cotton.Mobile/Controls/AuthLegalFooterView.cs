@@ -9,6 +9,7 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultFooterStyleResourceKey = "M3LegalFooterBar";
         private const string DefaultPrivacyText = "Privacy";
+        private const string FooterOpacityAnimationName = "M3AuthLegalFooterOpacity";
 
         public static readonly BindableProperty PrivacyTextProperty = BindableProperty.Create(
             nameof(PrivacyText),
@@ -31,8 +32,16 @@ namespace Cotton.Mobile.Controls
             DefaultFooterStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsFooterVisibleProperty = BindableProperty.Create(
+            nameof(IsFooterVisible),
+            typeof(bool),
+            typeof(AuthLegalFooterView),
+            true,
+            propertyChanged: OnFooterVisiblePropertyChanged);
+
         private readonly HorizontalStackLayout _footer;
         private readonly TextAction _privacyAction;
+        private bool _hasAppliedFooterVisibility;
 
         public AuthLegalFooterView()
         {
@@ -47,6 +56,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _footer;
             UpdateVisualState();
+            UpdateFooterVisibility(animateFooterVisibility: false);
         }
 
         public string PrivacyText
@@ -67,10 +77,22 @@ namespace Cotton.Mobile.Controls
             set => SetValue(FooterStyleResourceKeyProperty, value);
         }
 
+        public bool IsFooterVisible
+        {
+            get => (bool)GetValue(IsFooterVisibleProperty);
+            set => SetValue(IsFooterVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             AuthLegalFooterView view = (AuthLegalFooterView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnFooterVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            AuthLegalFooterView view = (AuthLegalFooterView)bindable;
+            view.UpdateFooterVisibility(animateFooterVisibility: true);
         }
 
         private void UpdateVisualState()
@@ -82,6 +104,37 @@ namespace Cotton.Mobile.Controls
             _footer.SetDynamicResource(StyleProperty, footerStyleResourceKey);
             _privacyAction.Text = PrivacyText ?? string.Empty;
             _privacyAction.Command = PrivacyCommand;
+        }
+
+        private void UpdateFooterVisibility(bool animateFooterVisibility)
+        {
+            bool isFooterVisible = IsFooterVisible;
+            bool shouldAnimate = animateFooterVisibility && _hasAppliedFooterVisibility;
+            double targetOpacity = isFooterVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isFooterVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                FooterOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteFooterVisibility);
+            _hasAppliedFooterVisibility = true;
+        }
+
+        private void CompleteFooterVisibility()
+        {
+            IsVisible = IsFooterVisible;
         }
     }
 }

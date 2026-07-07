@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultFormStackStyleResourceKey = "M3AuthFormStack";
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
+        private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
 
         public static readonly BindableProperty InstanceUrlProperty = BindableProperty.Create(
             nameof(InstanceUrl),
@@ -47,11 +48,19 @@ namespace Cotton.Mobile.Controls
             default(ICommand),
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsPanelVisibleProperty = BindableProperty.Create(
+            nameof(IsPanelVisible),
+            typeof(bool),
+            typeof(AuthSignInPanelView),
+            true,
+            propertyChanged: OnPanelVisiblePropertyChanged);
+
         private readonly FilledButton _button;
         private readonly ContentCardView _card;
         private readonly VerticalStackLayout _formStack;
         private readonly ScreenStatusView _status;
         private readonly OutlinedInputField _urlField;
+        private bool _hasAppliedPanelVisibility;
 
         public AuthSignInPanelView()
         {
@@ -96,6 +105,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _card;
             UpdateVisualState();
+            UpdatePanelVisibility(animatePanelVisibility: false);
         }
 
         public string InstanceUrl
@@ -128,10 +138,22 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ConnectCommandProperty, value);
         }
 
+        public bool IsPanelVisible
+        {
+            get => (bool)GetValue(IsPanelVisibleProperty);
+            set => SetValue(IsPanelVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             AuthSignInPanelView view = (AuthSignInPanelView)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnPanelVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            AuthSignInPanelView view = (AuthSignInPanelView)bindable;
+            view.UpdatePanelVisibility(animatePanelVisibility: true);
         }
 
         private void UpdateVisualState()
@@ -144,6 +166,37 @@ namespace Cotton.Mobile.Controls
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;
+        }
+
+        private void UpdatePanelVisibility(bool animatePanelVisibility)
+        {
+            bool isPanelVisible = IsPanelVisible;
+            bool shouldAnimate = animatePanelVisibility && _hasAppliedPanelVisibility;
+            double targetOpacity = isPanelVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isPanelVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                PanelOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompletePanelVisibility);
+            _hasAppliedPanelVisibility = true;
+        }
+
+        private void CompletePanelVisibility()
+        {
+            IsVisible = IsPanelVisible;
         }
     }
 }

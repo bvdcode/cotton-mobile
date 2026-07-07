@@ -221,7 +221,7 @@
         <controls:FloatingActionButtonView Grid.Row="1"
                                            IconData="{x:Static controls:IconPathData.Plus}"
                                            Command="{Binding ShowFileAddActionsCommand}"
-                                           IsVisible="{Binding Display.IsFileAddButtonVisible}"
+                                           IsActionVisible="{Binding Display.IsFileAddButtonVisible}"
                                            IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                            SemanticDescription="Add files" />
 

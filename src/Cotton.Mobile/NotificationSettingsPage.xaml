@@ -43,7 +43,7 @@
                                              LeadingIconFrameStyleResourceKey="M3CardActivityThumbnailFrame"
                                              ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding PermissionActionCommand}"
-                                             IsVisible="{Binding IsPermissionActionVisible}"
+                                             IsItemVisible="{Binding IsPermissionActionVisible}"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                              SemanticDescription="{Binding PermissionActionText}" />

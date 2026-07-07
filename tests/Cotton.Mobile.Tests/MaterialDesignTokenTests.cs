@@ -1266,14 +1266,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface = new TouchSurfaceView();", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface.TapCommand = IsActionEnabled ? rowTapCommand : null;", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("ItemOpacityAnimationName = \"M3ActionListItemOpacity\"", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("LeadingIconOpacityAnimationName = \"M3ActionListLeadingIconOpacity\"", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("SupportingTextOpacityAnimationName = \"M3ActionListSupportingTextOpacity\"", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("TrailingChipOpacityAnimationName = \"M3ActionListTrailingChipOpacity\"", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("IsItemVisibleProperty", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("OnItemVisiblePropertyChanged", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("OnLeadingIconVisibilityPropertyChanged", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("OnSupportingTextVisibilityPropertyChanged", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("OnTrailingChipVisibilityPropertyChanged", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("CompleteItemVisibility", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteLeadingIconVisibility", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteSupportingTextVisibility", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("CompleteTrailingChipVisibility", actionListItemView, StringComparison.Ordinal);
@@ -1293,6 +1297,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ActionListItemView Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding MediaAccessActionText}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding MediaAccessActionCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsItemVisible=\"{Binding IsMediaAccessActionVisible}\"", backupSetupPage, StringComparison.Ordinal);
 
             Assert.Contains("<controls:ActionListItemView Text=\"{Binding DisplayName}\"", captureDestinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconData=\"{x:Static controls:IconPathData.ChevronRight}\"", captureDestinationPickerPage, StringComparison.Ordinal);
@@ -1309,12 +1314,15 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, CountOccurrences(notificationSettingsPage, "<controls:ActionListItemView"));
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardActivityThumbnailFrame\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding PermissionActionText}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsItemVisible=\"{Binding IsPermissionActionVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Retry server push\"", notificationSettingsPage, StringComparison.Ordinal);
 
             Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:ActionListItemView"));
             Assert.Contains("Text=\"{Binding DeviceUnlockActionText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsActionEnabled=\"{Binding CanVerifyDeviceUnlock}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsItemVisible=\"{Binding IsDeviceUnlockActionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding RevokeCurrentSessionActionText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsItemVisible=\"{Binding IsRevokeCurrentSessionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", securitySettingsPage, StringComparison.Ordinal);
 
@@ -1322,6 +1330,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SupportingText=\"Remove evictable local copies while keeping offline files.\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ActionListItemView Text=\"{Binding MediaAccessActionText}\"\n                                             ActionIconData=\"{x:Static controls:IconPathData.OpenInNew}\"\n                                             Command=\"{Binding MediaAccessActionCommand}\"\n                                             IsVisible=", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsPermissionActionVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsDeviceUnlockActionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsRevokeCurrentSessionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1448,11 +1460,18 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Capture_inbox_action_bar_uses_reusable_material_control()
         {
+            string actionClusterView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionClusterView.cs"));
             string captureInboxPage = LoadText(CaptureInboxPagePath);
             string styles = LoadText(StylesResourcePath);
 
             Assert.Equal(1, CountOccurrences(captureInboxPage, "<controls:ActionClusterView ClusterStyleResourceKey=\"M3InlineActionCluster\""));
+            Assert.Contains("ClusterOpacityAnimationName = \"M3ActionClusterOpacity\"", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("IsClusterVisibleProperty", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("OnClusterVisiblePropertyChanged", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("CompleteClusterVisibility", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", actionClusterView, StringComparison.Ordinal);
             Assert.Contains("x:Key=\"M3InlineActionCluster\"", styles, StringComparison.Ordinal);
+            Assert.Contains("IsClusterVisible=\"{Binding IsActionBarVisible}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding DestinationCommand}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose destination\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding RenameCommand}\"", captureInboxPage, StringComparison.Ordinal);
@@ -1460,6 +1479,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TertiaryActionCommand=\"{Binding EnqueueCommand}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionSemanticDescription=\"Queue captured items\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding IsActionBarVisible}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3InlineActionBarGrid", captureInboxPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3InlineActionBarGrid", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,Auto,Auto,*\"", captureInboxPage, StringComparison.Ordinal);

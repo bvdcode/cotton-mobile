@@ -50,7 +50,7 @@
                 <controls:ActionListItemView Text="{Binding MediaAccessActionText}"
                                              ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding MediaAccessActionCommand}"
-                                             IsVisible="{Binding IsMediaAccessActionVisible}"
+                                             IsItemVisible="{Binding IsMediaAccessActionVisible}"
                                              ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                              SemanticDescription="{Binding MediaAccessActionText}" />
             </controls:SettingsCardView>

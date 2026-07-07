@@ -47,7 +47,7 @@
                                              ActionIconData="{x:Static controls:IconPathData.Check}"
                                              Command="{Binding VerifyDeviceUnlockCommand}"
                                              IsActionEnabled="{Binding CanVerifyDeviceUnlock}"
-                                             IsVisible="{Binding IsDeviceUnlockActionVisible}"
+                                             IsItemVisible="{Binding IsDeviceUnlockActionVisible}"
                                              ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding DeviceUnlockActionText}" />
@@ -86,7 +86,7 @@
                                              ActionIconData="{x:Static controls:IconPathData.Delete}"
                                              Command="{Binding RevokeCurrentSessionCommand}"
                                              IsActionEnabled="{Binding CanRevokeCurrentSession}"
-                                             IsVisible="{Binding IsRevokeCurrentSessionVisible}"
+                                             IsItemVisible="{Binding IsRevokeCurrentSessionVisible}"
                                              ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding RevokeCurrentSessionActionText}" />

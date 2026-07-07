@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
         private const string DefaultClusterStyleResourceKey = "M3RowActionCluster";
+        private const string ClusterOpacityAnimationName = "M3ActionClusterOpacity";
         private const string PrimaryActionButtonOpacityAnimationName = "M3ActionClusterPrimaryButtonOpacity";
         private const string SecondaryActionButtonOpacityAnimationName = "M3ActionClusterSecondaryButtonOpacity";
         private const string TertiaryActionButtonOpacityAnimationName = "M3ActionClusterTertiaryButtonOpacity";
@@ -21,6 +22,13 @@ namespace Cotton.Mobile.Controls
             typeof(ActionClusterView),
             DefaultClusterStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsClusterVisibleProperty = BindableProperty.Create(
+            nameof(IsClusterVisible),
+            typeof(bool),
+            typeof(ActionClusterView),
+            true,
+            propertyChanged: OnClusterVisiblePropertyChanged);
 
         public static readonly BindableProperty PrimaryActionIconDataProperty = BindableProperty.Create(
             nameof(PrimaryActionIconData),
@@ -215,6 +223,7 @@ namespace Cotton.Mobile.Controls
         private readonly IconButton _secondaryActionButton;
         private readonly IconButton _tertiaryActionButton;
         private bool _hasAppliedActionVisibilityState;
+        private bool _hasAppliedClusterVisibility;
 
         public ActionClusterView()
         {
@@ -228,12 +237,19 @@ namespace Cotton.Mobile.Controls
             Children.Add(_tertiaryActionButton);
             Children.Add(_quaternaryActionButton);
             UpdateVisualState(animateActionVisibility: false);
+            UpdateClusterVisibility(animateClusterVisibility: false);
         }
 
         public string ClusterStyleResourceKey
         {
             get => (string)GetValue(ClusterStyleResourceKeyProperty);
             set => SetValue(ClusterStyleResourceKeyProperty, value);
+        }
+
+        public bool IsClusterVisible
+        {
+            get => (bool)GetValue(IsClusterVisibleProperty);
+            set => SetValue(IsClusterVisibleProperty, value);
         }
 
         public Geometry? PrimaryActionIconData
@@ -416,6 +432,12 @@ namespace Cotton.Mobile.Controls
             view.UpdateVisualState(animateActionVisibility: true);
         }
 
+        private static void OnClusterVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ActionClusterView view = (ActionClusterView)bindable;
+            view.UpdateClusterVisibility(animateClusterVisibility: true);
+        }
+
         private void UpdateVisualState(bool animateActionVisibility)
         {
             bool shouldAnimateVisibility = animateActionVisibility && _hasAppliedActionVisibilityState;
@@ -472,6 +494,33 @@ namespace Cotton.Mobile.Controls
             _hasAppliedActionVisibilityState = true;
         }
 
+        private void UpdateClusterVisibility(bool animateClusterVisibility)
+        {
+            bool isClusterVisible = IsClusterVisible;
+            bool shouldAnimate = animateClusterVisibility && _hasAppliedClusterVisibility;
+            double targetOpacity = isClusterVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            InputTransparent = !isClusterVisible;
+            if (isClusterVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                ClusterOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteClusterVisibility);
+            _hasAppliedClusterVisibility = true;
+        }
+
         private static void UpdateActionButton(
             IconButton actionButton,
             Geometry? iconData,
@@ -524,6 +573,11 @@ namespace Cotton.Mobile.Controls
             }
 
             actionButton.IsVisible = false;
+        }
+
+        private void CompleteClusterVisibility()
+        {
+            IsVisible = IsClusterVisible;
         }
     }
 }

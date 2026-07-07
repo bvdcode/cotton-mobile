@@ -25,7 +25,7 @@
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:ActionClusterView ClusterStyleResourceKey="M3InlineActionCluster"
-                                        IsVisible="{Binding IsActionBarVisible}"
+                                        IsClusterVisible="{Binding IsActionBarVisible}"
                                         PrimaryActionIconData="{x:Static controls:IconPathData.Folder}"
                                         PrimaryActionCommand="{Binding DestinationCommand}"
                                         PrimaryActionSemanticDescription="Choose destination"

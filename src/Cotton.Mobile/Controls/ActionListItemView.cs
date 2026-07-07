@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTextStyleResourceKey = "M3ActionListItemLabel";
         private const string DefaultTrailingChipStyleResourceKey = "M3RowActionChip";
         private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
+        private const string ItemOpacityAnimationName = "M3ActionListItemOpacity";
         private const string LeadingIconOpacityAnimationName = "M3ActionListLeadingIconOpacity";
         private const string SupportingTextOpacityAnimationName = "M3ActionListSupportingTextOpacity";
         private const string TrailingChipOpacityAnimationName = "M3ActionListTrailingChipOpacity";
@@ -109,6 +110,13 @@ namespace Cotton.Mobile.Controls
             true,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsItemVisibleProperty = BindableProperty.Create(
+            nameof(IsItemVisible),
+            typeof(bool),
+            typeof(ActionListItemView),
+            true,
+            propertyChanged: OnItemVisiblePropertyChanged);
+
         public static readonly BindableProperty IsRowTapEnabledProperty = BindableProperty.Create(
             nameof(IsRowTapEnabled),
             typeof(bool),
@@ -196,6 +204,7 @@ namespace Cotton.Mobile.Controls
         private readonly Border _trailingChip;
         private readonly Label _trailingText;
         private bool _hasAppliedLeadingIconVisibility;
+        private bool _hasAppliedItemVisibility;
         private bool _hasAppliedSupportingTextVisibility;
         private bool _hasAppliedTrailingChipVisibility;
 
@@ -265,6 +274,7 @@ namespace Cotton.Mobile.Controls
                 animateLeadingIconVisibility: false,
                 animateSupportingTextVisibility: false,
                 animateTrailingChipVisibility: false);
+            UpdateItemVisibility(animateItemVisibility: false);
         }
 
         public string Text
@@ -343,6 +353,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsActionEnabledProperty);
             set => SetValue(IsActionEnabledProperty, value);
+        }
+
+        public bool IsItemVisible
+        {
+            get => (bool)GetValue(IsItemVisibleProperty);
+            set => SetValue(IsItemVisibleProperty, value);
         }
 
         public bool IsRowTapEnabled
@@ -430,6 +446,12 @@ namespace Cotton.Mobile.Controls
                 animateLeadingIconVisibility: true,
                 animateSupportingTextVisibility: false,
                 animateTrailingChipVisibility: false);
+        }
+
+        private static void OnItemVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            ActionListItemView actionListItemView = (ActionListItemView)bindable;
+            actionListItemView.UpdateItemVisibility(animateItemVisibility: true);
         }
 
         private static void OnSupportingTextVisibilityPropertyChanged(
@@ -543,6 +565,33 @@ namespace Cotton.Mobile.Controls
             _touchSurface.TapCommandParameter = rowTapCommandParameter;
             _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && rowTapCommand is not null;
             SemanticProperties.SetDescription(_container, semanticDescription);
+        }
+
+        private void UpdateItemVisibility(bool animateItemVisibility)
+        {
+            bool isItemVisible = IsItemVisible;
+            bool shouldAnimate = animateItemVisibility && _hasAppliedItemVisibility;
+            double targetOpacity = isItemVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            InputTransparent = !isItemVisible;
+            if (isItemVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                ItemOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteItemVisibility);
+            _hasAppliedItemVisibility = true;
         }
 
         private void UpdateLeadingIconVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
@@ -667,6 +716,11 @@ namespace Cotton.Mobile.Controls
         private bool IsSupportingTextActuallyVisible(string supportingText)
         {
             return IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
+        }
+
+        private void CompleteItemVisibility()
+        {
+            IsVisible = IsItemVisible;
         }
 
         private bool ResolveTrailingChipLayoutVisibility(

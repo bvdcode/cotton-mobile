@@ -19,7 +19,8 @@ namespace Cotton.Mobile.Services
             slotWidth: 150,
             previewHeight: 72,
             folderIconSize: FolderIconMinimumSize,
-            tileHeight: 146);
+            tileHeight: 146,
+            columnCount: PreferredColumnCount);
 
         public static CottonFileTileLayoutMetrics Calculate(double contentWidth)
         {
@@ -28,7 +29,8 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(contentWidth));
             }
 
-            double slotWidth = ResolveSlotWidth(contentWidth);
+            int columnCount = ResolveColumnCount(contentWidth);
+            double slotWidth = ResolveSlotWidth(contentWidth, columnCount);
             double tileWidth = slotWidth - SlotHorizontalPadding;
             double previewHeight = Math.Round(tileWidth * PreviewRatio);
             double folderIconSize = Math.Clamp(
@@ -40,15 +42,19 @@ namespace Cotton.Mobile.Services
                 slotWidth,
                 previewHeight,
                 folderIconSize,
-                previewHeight + VerticalChrome);
+                previewHeight + VerticalChrome,
+                columnCount);
         }
 
-        private static double ResolveSlotWidth(double contentWidth)
+        private static int ResolveColumnCount(double contentWidth)
         {
-            int columnCount = contentWidth >= MinimumColumnWidth * PreferredColumnCount
+            return contentWidth >= MinimumColumnWidth * PreferredColumnCount
                 ? PreferredColumnCount
                 : 1;
+        }
 
+        private static double ResolveSlotWidth(double contentWidth, int columnCount)
+        {
             return Math.Max(
                 1,
                 Math.Floor(contentWidth / columnCount) - SlotRoundingGuard);

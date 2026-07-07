@@ -62,6 +62,7 @@ namespace Cotton.Mobile.Tests
         private const string FileEntryTextViewPath = "src/Cotton.Mobile/Controls/FileEntryTextView.cs";
         private const string FileListMetadataViewPath = "src/Cotton.Mobile/Controls/FileListMetadataView.cs";
         private const string FileListEntryRowViewPath = "src/Cotton.Mobile/Controls/FileListEntryRowView.cs";
+        private const string FileBrowserContentGridViewPath = "src/Cotton.Mobile/Controls/FileBrowserContentGridView.cs";
         private const string FileBrowserTopBarViewPath = "src/Cotton.Mobile/Controls/FileBrowserTopBarView.cs";
         private const string FileStatusActionViewPath = "src/Cotton.Mobile/Controls/FileStatusActionView.cs";
         private const string FloatingActionButtonViewPath = "src/Cotton.Mobile/Controls/FloatingActionButtonView.cs";
@@ -115,7 +116,6 @@ namespace Cotton.Mobile.Tests
         private const string ViewerStatusOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerStatusOverlayView.cs";
         private const string ViewerPlayOverlayViewPath = "src/Cotton.Mobile/Controls/ViewerPlayOverlayView.cs";
         private const string ViewerOverlayActionButtonViewPath = "src/Cotton.Mobile/Controls/ViewerOverlayActionButtonView.cs";
-        private const string WrappedItemsViewPath = "src/Cotton.Mobile/Controls/WrappedItemsView.cs";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
@@ -1017,10 +1017,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"Waiting for browser approval\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding Display.AuthorizationProgressMessage}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains(
-                "IsStatusVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.FilesStatus}\"",
-                mainPage,
-                StringComparison.Ordinal);
+            Assert.Contains("IsRunning=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Text=\"{Binding Display.FilesStatus}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "IsStatusVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.LoadingMessage}\"",
                 mainPage,
@@ -1739,7 +1737,7 @@ namespace Cotton.Mobile.Tests
             string styles = LoadText(StylesResourcePath);
 
             Assert.Contains("<controls:LayeredContentView Grid.Row=\"0\"\n                                     IsLayerVisible=\"{Binding Display.IsProfileVisible}\">", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:MaterialRefreshView Command=\"{Binding RefreshFilesCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialRefreshView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding RefreshFilesCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsRefreshing=\"{Binding Display.IsFilesRefreshing, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class MaterialRefreshView : RefreshView", materialRefreshView, StringComparison.Ordinal);
@@ -1819,10 +1817,10 @@ namespace Cotton.Mobile.Tests
             string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
 
             Assert.Contains("x:DataType=\"viewModels:MainPageViewModel\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:StackedItemsView IsContentVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView IsContentVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("StackStyleResourceKey=\"M3FileListStack\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:StackedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsLayout=\"{StaticResource M3FileBrowserListItemsLayout}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView.ItemTemplate>", mainPage, StringComparison.Ordinal);
             Assert.Contains("<DataTemplate x:DataType=\"services:CottonFileBrowserEntry\">", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileListEntryRowView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
@@ -1833,7 +1831,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid Style=\"{StaticResource M3FileListRowGrid}\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileListThumbnailColumnWidth}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileActionSize}\"", mainPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3FileListStack}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:StackedItemsView IsContentVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StackedItemsView IsVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
         }
@@ -2169,7 +2167,6 @@ namespace Cotton.Mobile.Tests
                 "SettingsCardView.cs",
                 "StackedContentView.cs",
                 "StackedItemsView.cs",
-                "WrappedItemsView.cs",
             ];
             (string ControlName, int ExpectedResolutionCount)[] statusFeedbackControls =
             [
@@ -2548,12 +2545,13 @@ namespace Cotton.Mobile.Tests
             string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string interaction = LoadText(InteractionResourcePath);
-            string wrappedItemsView = LoadText(WrappedItemsViewPath);
             string materialAnimatedContentView = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialAnimatedContentView.cs"));
 
-            Assert.Contains("<controls:WrappedItemsView IsContentVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("LayoutStyleResourceKey=\"M3FileTileWrapLayout\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:WrappedItemsView.ItemTemplate>", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView IsContentVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView.ItemsLayout>", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<GridItemsLayout Orientation=\"Vertical\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Span=\"{Binding Source={x:Reference RootPage}, Path=FileTileColumnCount}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView.ItemTemplate>", mainPage, StringComparison.Ordinal);
             Assert.Equal(2, CountOccurrences(mainPage, "<DataTemplate x:DataType=\"services:CottonFileBrowserEntry\">"));
             Assert.Contains("<controls:FileTileEntryCardView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
@@ -2581,9 +2579,6 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteLocalCopyChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("CompleteOfflineAttentionChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
-            Assert.Contains("public class WrappedItemsView", wrappedItemsView, StringComparison.Ordinal);
-            Assert.Contains("WrappedItemsView : MaterialAnimatedContentView", wrappedItemsView, StringComparison.Ordinal);
-            Assert.Contains("DefaultLayoutStyleResourceKey = \"M3FileTileWrapLayout\"", wrappedItemsView, StringComparison.Ordinal);
             Assert.Contains("public abstract class MaterialAnimatedContentView : ContentView", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("AppearanceDurationProperty", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("IsContentVisibleProperty", materialAnimatedContentView, StringComparison.Ordinal);
@@ -2592,11 +2587,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionContentEnterDuration\")", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("Opacity = MaterialMotion.Value(\"M3MotionHiddenOpacity\")", materialAnimatedContentView, StringComparison.Ordinal);
-            Assert.Contains("new FlexLayout()", wrappedItemsView, StringComparison.Ordinal);
-            Assert.Contains("BindableLayout.SetItemsSource(_layout, ItemsSource)", wrappedItemsView, StringComparison.Ordinal);
-            Assert.Contains("BindableLayout.SetItemTemplate(_layout, ItemTemplate)", wrappedItemsView, StringComparison.Ordinal);
             Assert.DoesNotContain("<FlexLayout IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<controls:WrappedItemsView IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileSlotGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileContentGrid}\"", mainPage, StringComparison.Ordinal);
@@ -3926,10 +3917,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public class ScreenScrollBodyView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("ScreenScrollBodyView : MaterialAnimatedContentView", screenScrollBodyView, StringComparison.Ordinal);
             Assert.Contains("StackStyleResourceKeyProperty", screenScrollBodyView, StringComparison.Ordinal);
-            Assert.Equal(2, CountOccurrences(mainPage, "<controls:ScreenScrollBodyView"));
+            Assert.Equal(1, CountOccurrences(mainPage, "<controls:ScreenScrollBodyView"));
             Assert.Contains("<controls:ScreenScrollBodyView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsContentVisible=\"{Binding Display.IsBrandHeaderVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Equal(2, CountOccurrences(mainPage, "StackStyleResourceKey=\"M3MainContentStack\""));
+            Assert.Equal(1, CountOccurrences(mainPage, "StackStyleResourceKey=\"M3MainContentStack\""));
+            Assert.DoesNotContain("<controls:ScreenScrollBodyView StackStyleResourceKey=\"M3MainContentStack\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ScrollView", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3MainContentStack}\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("ScreenScrollBodyView Grid.Row=\"0\"\n                                       IsVisible=", mainPage, StringComparison.Ordinal);
@@ -3939,20 +3931,23 @@ namespace Cotton.Mobile.Tests
         public void Main_screen_stacked_sections_use_reusable_material_shell()
         {
             string mainPage = LoadText(MainPagePath);
+            string fileBrowserContentGridView = LoadText(FileBrowserContentGridViewPath);
             string stackedContentView = LoadText(StackedContentViewPath);
 
             Assert.Contains("public class StackedContentView", stackedContentView, StringComparison.Ordinal);
             Assert.Contains("StackedContentView : MaterialAnimatedContentView", stackedContentView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _stack.Children", stackedContentView, StringComparison.Ordinal);
-            Assert.Equal(3, CountOccurrences(mainPage, "<controls:StackedContentView"));
+            Assert.Equal(2, CountOccurrences(mainPage, "<controls:StackedContentView"));
             Assert.Contains("<controls:StackedContentView IsContentVisible=\"{Binding Display.IsBrandHeaderVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("StackStyleResourceKey=\"M3AuthShellStack\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedContentView IsContentVisible=\"{Binding Display.IsProfileVisible}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("StackStyleResourceKey=\"M3FileBrowserProfileStack\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:StackedContentView x:Name=\"FileBrowserContent\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:FileBrowserContentGridView x:Name=\"FileBrowserContent\">", mainPage, StringComparison.Ordinal);
+            Assert.Contains("public class FileBrowserContentGridView : Grid", fileBrowserContentGridView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileBrowserContentGrid\"", fileBrowserContentGridView, StringComparison.Ordinal);
+            Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", fileBrowserContentGridView, StringComparison.Ordinal);
+            Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", fileBrowserContentGridView, StringComparison.Ordinal);
             Assert.Contains("StackStyleResourceKey=\"M3FileBrowserContentStack\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthShellStack}\"", mainPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserProfileStack}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserContentStack}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StackedContentView IsVisible=\"{Binding Display.IsBrandHeaderVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StackedContentView IsVisible=\"{Binding Display.IsProfileVisible}\"", mainPage, StringComparison.Ordinal);
@@ -4147,7 +4142,8 @@ namespace Cotton.Mobile.Tests
             string[] disallowedPatterns =
             [
                 "Style=\"{StaticResource M3",
-                "<Grid",
+                "<Grid ",
+                "<Grid>",
                 "<VerticalStackLayout",
                 "<HorizontalStackLayout",
                 "<ScrollView",

@@ -14,6 +14,7 @@ namespace Cotton.Mobile
 		private double _fileTileFolderIconSize = CottonFileTileLayoutPlanner.InitialMetrics.FolderIconSize;
 		private double _fileTilePreviewHeight = CottonFileTileLayoutPlanner.InitialMetrics.PreviewHeight;
 		private double _fileTileSlotWidth = CottonFileTileLayoutPlanner.InitialMetrics.SlotWidth;
+		private int _fileTileColumnCount = CottonFileTileLayoutPlanner.InitialMetrics.ColumnCount;
 
 		public MainPage(MainPageViewModel viewModel)
 		{
@@ -51,6 +52,12 @@ namespace Cotton.Mobile
 		{
 			get => _fileTileHeight;
 			private set => SetPageProperty(ref _fileTileHeight, value, nameof(FileTileHeight));
+		}
+
+		public int FileTileColumnCount
+		{
+			get => _fileTileColumnCount;
+			private set => SetPageProperty(ref _fileTileColumnCount, value, nameof(FileTileColumnCount));
 		}
 
 		protected override async void OnAppearing()
@@ -141,11 +148,23 @@ namespace Cotton.Mobile
 			FileTilePreviewHeight = metrics.PreviewHeight;
 			FileTileFolderIconSize = metrics.FolderIconSize;
 			FileTileHeight = metrics.TileHeight;
+			FileTileColumnCount = metrics.ColumnCount;
 		}
 
 		private void SetPageProperty(ref double field, double value, string propertyName)
 		{
 			if (Math.Abs(field - value) < 0.5)
+			{
+				return;
+			}
+
+			field = value;
+			OnPropertyChanged(propertyName);
+		}
+
+		private void SetPageProperty(ref int field, int value, string propertyName)
+		{
+			if (field == value)
 			{
 				return;
 			}

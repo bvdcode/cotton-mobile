@@ -14,18 +14,20 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(72, metrics.PreviewHeight);
             Assert.Equal(62, metrics.FolderIconSize);
             Assert.Equal(146, metrics.TileHeight);
+            Assert.Equal(2, metrics.ColumnCount);
         }
 
         [Theory]
-        [InlineData(260, 259, 159, 92, 227)]
-        [InlineData(360, 179, 110, 74, 178)]
-        [InlineData(720, 359, 221, 92, 289)]
+        [InlineData(260, 259, 159, 92, 227, 1)]
+        [InlineData(360, 179, 110, 74, 178, 2)]
+        [InlineData(720, 359, 221, 92, 289, 2)]
         public void Calculate_keeps_tile_metrics_stable_across_phone_widths(
             double contentWidth,
             double expectedSlotWidth,
             double expectedPreviewHeight,
             double expectedFolderIconSize,
-            double expectedTileHeight)
+            double expectedTileHeight,
+            int expectedColumnCount)
         {
             CottonFileTileLayoutMetrics metrics = CottonFileTileLayoutPlanner.Calculate(contentWidth);
 
@@ -33,6 +35,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(expectedPreviewHeight, metrics.PreviewHeight);
             Assert.Equal(expectedFolderIconSize, metrics.FolderIconSize);
             Assert.Equal(expectedTileHeight, metrics.TileHeight);
+            Assert.Equal(expectedColumnCount, metrics.ColumnCount);
         }
 
         [Theory]

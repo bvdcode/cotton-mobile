@@ -618,9 +618,10 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
-    <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserProfileStack">
-        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
+    <Style TargetType="controls:FileBrowserContentGridView" x:Key="M3FileBrowserContentGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space12}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
     </Style>
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserContentStack">
@@ -655,10 +656,6 @@
 
     <Style TargetType="HorizontalStackLayout" x:Key="M3PanelActionCluster" BasedOn="{StaticResource M3RowActionCluster}">
         <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
-    </Style>
-
-    <Style TargetType="VerticalStackLayout" x:Key="M3FileListStack">
-        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
     </Style>
 
     <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
@@ -759,6 +756,10 @@
                        Orientation="Vertical"
                        ItemSpacing="{StaticResource M3CardListItemSpacing}" />
 
+    <LinearItemsLayout x:Key="M3FileBrowserListItemsLayout"
+                       Orientation="Vertical"
+                       ItemSpacing="{StaticResource SpaceNone}" />
+
     <GridItemsLayout x:Key="M3TrashTileItemsLayout"
                      Orientation="Vertical"
                      Span="2"
@@ -794,13 +795,6 @@
 
     <Style TargetType="VerticalStackLayout" x:Key="M3FileTileTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
-    </Style>
-
-    <Style TargetType="FlexLayout" x:Key="M3FileTileWrapLayout">
-        <Setter Property="Wrap" Value="Wrap" />
-        <Setter Property="AlignItems" Value="Start" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="JustifyContent" Value="Start" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3FileTileSlotGrid">

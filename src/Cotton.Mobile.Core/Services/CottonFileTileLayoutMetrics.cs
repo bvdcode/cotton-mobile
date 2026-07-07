@@ -9,12 +9,14 @@ namespace Cotton.Mobile.Services
             double slotWidth,
             double previewHeight,
             double folderIconSize,
-            double tileHeight)
+            double tileHeight,
+            int columnCount)
         {
             SlotWidth = slotWidth;
             PreviewHeight = previewHeight;
             FolderIconSize = folderIconSize;
             TileHeight = tileHeight;
+            ColumnCount = columnCount;
         }
 
         public double SlotWidth { get; }
@@ -24,5 +26,7 @@ namespace Cotton.Mobile.Services
         public double FolderIconSize { get; }
 
         public double TileHeight { get; }
+
+        public int ColumnCount { get; }
     }
 }

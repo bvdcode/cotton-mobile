@@ -50,176 +50,183 @@
 
         <controls:LayeredContentView Grid.Row="0"
                                      IsLayerVisible="{Binding Display.IsProfileVisible}">
-            <controls:MaterialRefreshView Command="{Binding RefreshFilesCommand}"
-                                          IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
-                <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
-                    <controls:StackedContentView IsContentVisible="{Binding Display.IsProfileVisible}"
-                                                 StackStyleResourceKey="M3FileBrowserProfileStack">
-                        <controls:StackedContentView x:Name="FileBrowserContent"
-                                                     StackStyleResourceKey="M3FileBrowserContentStack">
-                            <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
-                                                            PathText="{Binding Display.FilesPath}"
-                                                            IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
-                                                            StatusText="{Binding Display.FilesStatus}"
-                                                            IsStatusTextVisible="{Binding Display.IsFilesStatusVisible}"
-                                                            NavigateUpCommand="{Binding NavigateFilesUpCommand}"
-                                                            IsNavigateUpEnabled="{Binding Display.IsFileUpButtonEnabled}"
-                                                            IsNavigateUpVisible="{Binding Display.IsFileUpButtonVisible}"
-                                                            NavigateUpButtonOpacity="{Binding Display.FileUpButtonOpacity}"
-                                                            SearchCommand="{Binding ToggleFileSearchCommand}"
-                                                            SearchSemanticDescription="{Binding Display.FileSearchButtonDescription}"
-                                                            IsSearchActive="{Binding Display.IsFileSearchVisible}"
-                                                            IsChromeEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                            SortCommand="{Binding ShowFileSortActionsCommand}"
-                                                            IsSortVisible="{Binding Display.IsFileSortButtonVisible}"
-                                                            ViewCommand="{Binding ShowFileViewActionsCommand}"
-                                                            IsViewVisible="{Binding Display.IsFileViewButtonVisible}"
-                                                            ProfileInitials="{Binding Display.ProfileInitials}"
-                                                            AccountCommand="{Binding AccountCommand}"
-                                                            IsAccountEnabled="{Binding Display.IsAccountActionEnabled}" />
+            <controls:FileBrowserContentGridView x:Name="FileBrowserContent">
+                <controls:StackedContentView IsContentVisible="{Binding Display.IsProfileVisible}"
+                                             StackStyleResourceKey="M3FileBrowserContentStack">
+                    <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
+                                                    PathText="{Binding Display.FilesPath}"
+                                                    IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
+                                                    StatusText="{Binding Display.FilesStatus}"
+                                                    IsStatusTextVisible="{Binding Display.IsFilesStatusVisible}"
+                                                    NavigateUpCommand="{Binding NavigateFilesUpCommand}"
+                                                    IsNavigateUpEnabled="{Binding Display.IsFileUpButtonEnabled}"
+                                                    IsNavigateUpVisible="{Binding Display.IsFileUpButtonVisible}"
+                                                    NavigateUpButtonOpacity="{Binding Display.FileUpButtonOpacity}"
+                                                    SearchCommand="{Binding ToggleFileSearchCommand}"
+                                                    SearchSemanticDescription="{Binding Display.FileSearchButtonDescription}"
+                                                    IsSearchActive="{Binding Display.IsFileSearchVisible}"
+                                                    IsChromeEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                    SortCommand="{Binding ShowFileSortActionsCommand}"
+                                                    IsSortVisible="{Binding Display.IsFileSortButtonVisible}"
+                                                    ViewCommand="{Binding ShowFileViewActionsCommand}"
+                                                    IsViewVisible="{Binding Display.IsFileViewButtonVisible}"
+                                                    ProfileInitials="{Binding Display.ProfileInitials}"
+                                                    AccountCommand="{Binding AccountCommand}"
+                                                    IsAccountEnabled="{Binding Display.IsAccountActionEnabled}" />
 
-                            <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
-                                                       IsStatusVisible="{Binding Display.IsProfileStatusVisible}"
-                                                       TextStyleResourceKey="M3BodyMedium" />
+                    <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
+                                               IsStatusVisible="{Binding Display.IsProfileStatusVisible}"
+                                               TextStyleResourceKey="M3BodyMedium" />
 
-                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
-                                                           Text="{Binding Display.TransferActivityIndicator.Text}"
-                                                           Details="{Binding Display.TransferActivityIndicator.Details}"
-                                                           AccessibilityText="{Binding Display.TransferActivityIndicator.AccessibilityText}"
-                                                           IconData="{x:Static controls:IconPathData.Transfer}"
-                                                           ErrorIconData="{x:Static controls:IconPathData.Error}"
-                                                           IsError="{Binding Display.TransferActivityIndicator.HasFailures}"
-                                                           Command="{Binding OpenTransfersCommand}" />
+                    <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsTransferActivityIndicatorVisible}"
+                                                   Text="{Binding Display.TransferActivityIndicator.Text}"
+                                                   Details="{Binding Display.TransferActivityIndicator.Details}"
+                                                   AccessibilityText="{Binding Display.TransferActivityIndicator.AccessibilityText}"
+                                                   IconData="{x:Static controls:IconPathData.Transfer}"
+                                                   ErrorIconData="{x:Static controls:IconPathData.Error}"
+                                                   IsError="{Binding Display.TransferActivityIndicator.HasFailures}"
+                                                   Command="{Binding OpenTransfersCommand}" />
 
-                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
-                                                           Text="{Binding Display.BackupActivityIndicator.Text}"
-                                                           Details="{Binding Display.BackupActivityIndicator.Details}"
-                                                           AccessibilityText="{Binding Display.BackupActivityIndicator.AccessibilityText}"
-                                                           IconData="{x:Static controls:IconPathData.Backup}"
-                                                           Command="{Binding OpenBackupSetupCommand}" />
+                    <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsBackupActivityIndicatorVisible}"
+                                                   Text="{Binding Display.BackupActivityIndicator.Text}"
+                                                   Details="{Binding Display.BackupActivityIndicator.Details}"
+                                                   AccessibilityText="{Binding Display.BackupActivityIndicator.AccessibilityText}"
+                                                   IconData="{x:Static controls:IconPathData.Backup}"
+                                                   Command="{Binding OpenBackupSetupCommand}" />
 
-                            <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsOfflinePackProgressVisible}"
-                                                           Text="{Binding Display.OfflinePackProgress.Text}"
-                                                           Details="{Binding Display.OfflinePackProgress.Details}"
-                                                           AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"
-                                                           IconData="{x:Static controls:IconPathData.Download}" />
+                    <controls:FileStatusActionView IsStatusVisible="{Binding Display.IsOfflinePackProgressVisible}"
+                                                   Text="{Binding Display.OfflinePackProgress.Text}"
+                                                   Details="{Binding Display.OfflinePackProgress.Details}"
+                                                   AccessibilityText="{Binding Display.OfflinePackProgress.AccessibilityText}"
+                                                   IconData="{x:Static controls:IconPathData.Download}" />
 
-                            <controls:NoticePanelView IsPanelVisible="{Binding Display.IsFilesNoticeVisible}"
-                                                      IconData="{x:Static controls:IconPathData.Error}"
-                                                      Title="{Binding Display.FilesNoticeTitle}"
-                                                      Message="{Binding Display.FilesNoticeMessage}" />
+                    <controls:NoticePanelView IsPanelVisible="{Binding Display.IsFilesNoticeVisible}"
+                                              IconData="{x:Static controls:IconPathData.Error}"
+                                              Title="{Binding Display.FilesNoticeTitle}"
+                                              Message="{Binding Display.FilesNoticeMessage}" />
 
-                            <controls:OutlinedInputField x:Name="FileSearchField"
-                                                         Text="{Binding Display.FileSearchText, Mode=TwoWay}"
-                                                         IsFieldVisible="{Binding Display.IsFileSearchVisible}"
-                                                         IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
-                                                         Placeholder="Search"
-                                                         IconData="{x:Static controls:IconPathData.Search}"
-                                                         ReturnType="Search"
-                                                         ClearButtonVisibility="WhileEditing"
-                                                         SemanticHint="Search files and folders" />
+                    <controls:OutlinedInputField x:Name="FileSearchField"
+                                                 Text="{Binding Display.FileSearchText, Mode=TwoWay}"
+                                                 IsFieldVisible="{Binding Display.IsFileSearchVisible}"
+                                                 IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                 Placeholder="Search"
+                                                 IconData="{x:Static controls:IconPathData.Search}"
+                                                 ReturnType="Search"
+                                                 ClearButtonVisibility="WhileEditing"
+                                                 SemanticHint="Search files and folders" />
 
-                            <controls:SelectionBarView IsBarVisible="{Binding Display.IsFileSelectionBarVisible}"
-                                                       TitleText="{Binding Display.FileSelection.TitleText}"
-                                                       DetailText="{Binding Display.FileSelection.DetailText}"
-                                                       PrimaryActionIconData="{x:Static controls:IconPathData.MoreVertical}"
-                                                       PrimaryActionCommand="{Binding ShowFileSelectionActionsCommand}"
-                                                       PrimaryActionSemanticDescription="Selected file actions"
-                                                       SecondaryActionIconData="{x:Static controls:IconPathData.Close}"
-                                                       SecondaryActionCommand="{Binding ClearFileSelectionCommand}"
-                                                       SecondaryActionSemanticDescription="Cancel file selection" />
+                    <controls:SelectionBarView IsBarVisible="{Binding Display.IsFileSelectionBarVisible}"
+                                               TitleText="{Binding Display.FileSelection.TitleText}"
+                                               DetailText="{Binding Display.FileSelection.DetailText}"
+                                               PrimaryActionIconData="{x:Static controls:IconPathData.MoreVertical}"
+                                               PrimaryActionCommand="{Binding ShowFileSelectionActionsCommand}"
+                                               PrimaryActionSemanticDescription="Selected file actions"
+                                               SecondaryActionIconData="{x:Static controls:IconPathData.Close}"
+                                               SecondaryActionCommand="{Binding ClearFileSelectionCommand}"
+                                               SecondaryActionSemanticDescription="Cancel file selection" />
 
-                            <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsFilesLoading}"
-                                                        IsRunning="{Binding Display.IsFilesLoading}"
-                                                        Text="{Binding Display.FilesStatus}"
-                                                        ActionIconData="{x:Static controls:IconPathData.Close}"
-                                                        ActionCommand="{Binding CancelFileActionCommand}"
-                                                        IsActionEnabled="{Binding Display.CanCancelFileAction}"
-                                                        IsActionVisible="{Binding Display.CanCancelFileAction}"
-                                                        ActionSemanticDescription="Cancel file operation" />
+                    <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsFilesLoading}"
+                                                IsRunning="{Binding Display.IsFilesLoading}"
+                                                Text="{Binding Display.FilesStatus}"
+                                                ActionIconData="{x:Static controls:IconPathData.Close}"
+                                                ActionCommand="{Binding CancelFileActionCommand}"
+                                                IsActionEnabled="{Binding Display.CanCancelFileAction}"
+                                                IsActionVisible="{Binding Display.CanCancelFileAction}"
+                                                ActionSemanticDescription="Cancel file operation" />
 
-                            <controls:FileListSkeletonView IsSkeletonVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
+                    <controls:AttentionStatusView IsStatusVisible="{Binding Display.CanRetryFileAction}"
+                                                  Message="{Binding Display.FilesStatus}"
+                                                  IconData="{x:Static controls:IconPathData.Error}"
+                                                  ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                                  ActionCommand="{Binding RetryFileActionCommand}"
+                                                  IsActionEnabled="{Binding Display.CanRetryFileAction}"
+                                                  ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                  ActionSemanticDescription="{Binding Display.FileRetryActionText}" />
+                </controls:StackedContentView>
 
-                            <controls:AttentionStatusView IsStatusVisible="{Binding Display.CanRetryFileAction}"
-                                                          Message="{Binding Display.FilesStatus}"
-                                                          IconData="{x:Static controls:IconPathData.Error}"
-                                                          ActionIconData="{x:Static controls:IconPathData.Refresh}"
-                                                          ActionCommand="{Binding RetryFileActionCommand}"
-                                                          IsActionEnabled="{Binding Display.CanRetryFileAction}"
-                                                          ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
-                                                          ActionSemanticDescription="{Binding Display.FileRetryActionText}" />
+                <controls:MaterialRefreshView Grid.Row="1"
+                                              Command="{Binding RefreshFilesCommand}"
+                                              IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
+                    <controls:LayeredContentView>
+                        <controls:FileListSkeletonView IsSkeletonVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
 
-                            <controls:EmptyStateView IsStateVisible="{Binding Display.IsFilesEmptyVisible}"
-                                                     IconData="{x:Static controls:IconPathData.File}"
-                                                     Title="{Binding Display.FilesEmptyMessage}"
-                                                     Body="{Binding Display.FilesEmptyDetails}"
-                                                     IsBodyVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
-                                                     ActionIconData="{x:Static controls:IconPathData.Plus}"
-                                                     ActionCommand="{Binding ShowFileAddActionsCommand}"
-                                                     IsActionVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
-                                                     ActionSemanticDescription="Add files" />
+                        <controls:EmptyStateView IsStateVisible="{Binding Display.IsFilesEmptyVisible}"
+                                                 IconData="{x:Static controls:IconPathData.File}"
+                                                 Title="{Binding Display.FilesEmptyMessage}"
+                                                 Body="{Binding Display.FilesEmptyDetails}"
+                                                 IsBodyVisible="{Binding Display.IsFilesEmptyDetailsVisible}"
+                                                 ActionIconData="{x:Static controls:IconPathData.Plus}"
+                                                 ActionCommand="{Binding ShowFileAddActionsCommand}"
+                                                 IsActionVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
+                                                 ActionSemanticDescription="Add files" />
 
-                            <controls:StackedItemsView IsContentVisible="{Binding Display.IsFileListViewVisible}"
-                                                       ItemsSource="{Binding Display.FileEntries}"
-                                                       StackStyleResourceKey="M3FileListStack">
-                                <controls:StackedItemsView.ItemTemplate>
-                                    <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                                        <controls:FileListEntryRowView Title="{Binding Name}"
-                                                                       Detail="{Binding DisplayDetails}"
-                                                                       ThumbnailSource="{Binding Thumbnail.Source}"
-                                                                       IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                                       IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                                       IsLoading="{Binding Thumbnail.IsLoading}"
-                                                                       PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                                       IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                                       IsSelected="{Binding IsSelected}"
-                                                                       BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
-                                                                       ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                       EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                       CommandParameter="{Binding .}"
-                                                                       IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                       IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                       ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
-                                    </DataTemplate>
-                                </controls:StackedItemsView.ItemTemplate>
-                            </controls:StackedItemsView>
+                        <controls:MaterialCollectionView IsContentVisible="{Binding Display.IsFileListViewVisible}"
+                                                         ItemsSource="{Binding Display.FileEntries}"
+                                                         ItemSizingStrategy="MeasureFirstItem"
+                                                         ItemsLayout="{StaticResource M3FileBrowserListItemsLayout}">
+                            <controls:MaterialCollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="services:CottonFileBrowserEntry">
+                                    <controls:FileListEntryRowView Title="{Binding Name}"
+                                                                   Detail="{Binding DisplayDetails}"
+                                                                   ThumbnailSource="{Binding Thumbnail.Source}"
+                                                                   IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                                   IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                                   IsLoading="{Binding Thumbnail.IsLoading}"
+                                                                   PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                                   IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                                   IsSelected="{Binding IsSelected}"
+                                                                   BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                   ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                   EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                   CommandParameter="{Binding .}"
+                                                                   IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                   IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                   ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
+                                </DataTemplate>
+                            </controls:MaterialCollectionView.ItemTemplate>
+                        </controls:MaterialCollectionView>
 
-                            <controls:WrappedItemsView IsContentVisible="{Binding Display.IsFileTileViewVisible}"
-                                                       ItemsSource="{Binding Display.FileEntries}"
-                                                       LayoutStyleResourceKey="M3FileTileWrapLayout">
-                                <controls:WrappedItemsView.ItemTemplate>
-                                    <DataTemplate x:DataType="services:CottonFileBrowserEntry">
-                                        <controls:FileTileEntryCardView Title="{Binding Name}"
-                                                                        Detail="{Binding Details}"
-                                                                        LocalCopyStatus="{Binding LocalCopyStatus}"
-                                                                        IsLocalCopyVisible="{Binding HasLocalCopy}"
-                                                                        OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
-                                                                        IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}"
-                                                                        ThumbnailSource="{Binding Thumbnail.Source}"
-                                                                        IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
-                                                                        IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
-                                                                        IsLoading="{Binding Thumbnail.IsLoading}"
-                                                                        PlaceholderText="{Binding Thumbnail.PlaceholderText}"
-                                                                        IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
-                                                                        IsSelected="{Binding IsSelected}"
-                                                                        SlotWidth="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
-                                                                        TileHeight="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
-                                                                        PreviewHeight="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
-                                                                        FolderIconSize="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
-                                                                        BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
-                                                                        ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
-                                                                        EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
-                                                                        CommandParameter="{Binding .}"
-                                                                        IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
-                                                                        IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
-                                                                        ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
-                                    </DataTemplate>
-                                </controls:WrappedItemsView.ItemTemplate>
-                            </controls:WrappedItemsView>
-                        </controls:StackedContentView>
-                    </controls:StackedContentView>
-                </controls:ScreenScrollBodyView>
-            </controls:MaterialRefreshView>
+                        <controls:MaterialCollectionView IsContentVisible="{Binding Display.IsFileTileViewVisible}"
+                                                         ItemsSource="{Binding Display.FileEntries}"
+                                                         ItemSizingStrategy="MeasureFirstItem">
+                            <controls:MaterialCollectionView.ItemsLayout>
+                                <GridItemsLayout Orientation="Vertical"
+                                                 Span="{Binding Source={x:Reference RootPage}, Path=FileTileColumnCount}"
+                                                 HorizontalItemSpacing="{StaticResource SpaceNone}"
+                                                 VerticalItemSpacing="{StaticResource SpaceNone}" />
+                            </controls:MaterialCollectionView.ItemsLayout>
+                            <controls:MaterialCollectionView.ItemTemplate>
+                                <DataTemplate x:DataType="services:CottonFileBrowserEntry">
+                                    <controls:FileTileEntryCardView Title="{Binding Name}"
+                                                                    Detail="{Binding Details}"
+                                                                    LocalCopyStatus="{Binding LocalCopyStatus}"
+                                                                    IsLocalCopyVisible="{Binding HasLocalCopy}"
+                                                                    OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
+                                                                    IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}"
+                                                                    ThumbnailSource="{Binding Thumbnail.Source}"
+                                                                    IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
+                                                                    IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"
+                                                                    IsLoading="{Binding Thumbnail.IsLoading}"
+                                                                    PlaceholderText="{Binding Thumbnail.PlaceholderText}"
+                                                                    IsPlaceholderTextVisible="{Binding IsPlaceholderTextVisible}"
+                                                                    IsSelected="{Binding IsSelected}"
+                                                                    SlotWidth="{Binding Source={x:Reference RootPage}, Path=FileTileSlotWidth}"
+                                                                    TileHeight="{Binding Source={x:Reference RootPage}, Path=FileTileHeight}"
+                                                                    PreviewHeight="{Binding Source={x:Reference RootPage}, Path=FileTilePreviewHeight}"
+                                                                    FolderIconSize="{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}"
+                                                                    BeginSelectionCommand="{Binding BindingContext.BeginFileSelectionCommand, Source={x:Reference RootPage}}"
+                                                                    ActivateCommand="{Binding BindingContext.ActivateFileBrowserEntryCommand, Source={x:Reference RootPage}}"
+                                                                    EntryActionsCommand="{Binding BindingContext.ShowFileBrowserEntryActionsCommand, Source={x:Reference RootPage}}"
+                                                                    CommandParameter="{Binding .}"
+                                                                    IsActionEnabled="{Binding BindingContext.Display.IsFileBrowserChromeEnabled, Source={x:Reference RootPage}}"
+                                                                    IsActionVisible="{Binding BindingContext.Display.IsFileEntryActionsVisible, Source={x:Reference RootPage}}"
+                                                                    ActionSemanticDescription="{Binding Name, StringFormat='Actions for {0}'}" />
+                                </DataTemplate>
+                            </controls:MaterialCollectionView.ItemTemplate>
+                        </controls:MaterialCollectionView>
+                    </controls:LayeredContentView>
+                </controls:MaterialRefreshView>
+            </controls:FileBrowserContentGridView>
         </controls:LayeredContentView>
 
         <controls:FloatingActionButtonView Grid.Row="1"

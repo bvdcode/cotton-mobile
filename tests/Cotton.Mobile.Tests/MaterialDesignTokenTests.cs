@@ -4089,6 +4089,58 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void App_screen_xaml_uses_compiled_bindings()
+        {
+            string repositoryRoot = FindRepositoryRoot(StylesResourcePath);
+            string mobileRoot = Path.Combine(repositoryRoot, "src", "Cotton.Mobile");
+            string[] appScreenPaths = Directory.GetFiles(mobileRoot, "*.xaml", SearchOption.TopDirectoryOnly)
+                .Where(path =>
+                {
+                    string fileName = Path.GetFileName(path);
+                    return !string.Equals(fileName, "App.xaml", StringComparison.Ordinal)
+                        && !string.Equals(fileName, "AppShell.xaml", StringComparison.Ordinal);
+                })
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+            string[] xamlPaths = Directory.GetFiles(mobileRoot, "*.xaml", SearchOption.AllDirectories)
+                .Where(path =>
+                    !path.Contains($"{Path.DirectorySeparatorChar}Resources{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal))
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+
+            Assert.NotEmpty(appScreenPaths);
+
+            foreach (string path in appScreenPaths)
+            {
+                string relativePath = Path.GetRelativePath(repositoryRoot, path);
+                string content = File.ReadAllText(path);
+
+                Assert.True(
+                    content.Contains("x:DataType=", StringComparison.Ordinal),
+                    $"{relativePath} does not declare x:DataType.");
+                Assert.False(
+                    content.Contains("<DataTemplate>", StringComparison.Ordinal),
+                    $"{relativePath} contains a default untyped DataTemplate.");
+            }
+
+            foreach (string path in xamlPaths)
+            {
+                string relativePath = Path.GetRelativePath(repositoryRoot, path);
+                string content = File.ReadAllText(path);
+                Match untypedTemplate = Regex.Match(
+                    content,
+                    "<DataTemplate(?![^>]*x:DataType=)",
+                    RegexOptions.Singleline);
+
+                Assert.False(
+                    untypedTemplate.Success,
+                    $"{relativePath} contains an untyped DataTemplate.");
+            }
+        }
+
+        [Fact]
         public void Page_and_control_xaml_avoid_raw_material_layout_hotspots()
         {
             string[] disallowedPatterns =

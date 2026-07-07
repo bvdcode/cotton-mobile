@@ -16,6 +16,7 @@
 
         <controls:ActionClusterView x:Name="Actions"
                                     Grid.Column="2"
+                                    IsClusterVisible="{Binding Source={x:Reference Root}, Path=IsActionClusterVisible}"
                                     PrimaryActionIconData="{Binding Source={x:Reference Root}, Path=PrimaryIconData}"
                                     PrimaryActionCommand="{Binding Source={x:Reference Root}, Path=PrimaryCommand}"
                                     PrimaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=PrimaryDescription}"

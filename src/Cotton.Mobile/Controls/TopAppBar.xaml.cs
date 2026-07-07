@@ -31,12 +31,14 @@ namespace Cotton.Mobile.Controls
             nameof(PrimaryIconData),
             typeof(Geometry),
             typeof(TopAppBar),
-            default(Geometry));
+            default(Geometry),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty PrimaryCommandProperty = BindableProperty.Create(
             nameof(PrimaryCommand),
             typeof(ICommand),
-            typeof(TopAppBar));
+            typeof(TopAppBar),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty PrimaryDescriptionProperty = BindableProperty.Create(
             nameof(PrimaryDescription),
@@ -48,18 +50,21 @@ namespace Cotton.Mobile.Controls
             nameof(IsPrimaryActionVisible),
             typeof(bool),
             typeof(TopAppBar),
-            true);
+            true,
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty SecondaryIconDataProperty = BindableProperty.Create(
             nameof(SecondaryIconData),
             typeof(Geometry),
             typeof(TopAppBar),
-            default(Geometry));
+            default(Geometry),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty SecondaryCommandProperty = BindableProperty.Create(
             nameof(SecondaryCommand),
             typeof(ICommand),
-            typeof(TopAppBar));
+            typeof(TopAppBar),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty SecondaryDescriptionProperty = BindableProperty.Create(
             nameof(SecondaryDescription),
@@ -71,18 +76,21 @@ namespace Cotton.Mobile.Controls
             nameof(IsSecondaryActionVisible),
             typeof(bool),
             typeof(TopAppBar),
-            true);
+            true,
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty TertiaryIconDataProperty = BindableProperty.Create(
             nameof(TertiaryIconData),
             typeof(Geometry),
             typeof(TopAppBar),
-            default(Geometry));
+            default(Geometry),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty TertiaryCommandProperty = BindableProperty.Create(
             nameof(TertiaryCommand),
             typeof(ICommand),
-            typeof(TopAppBar));
+            typeof(TopAppBar),
+            propertyChanged: OnActionPropertyChanged);
 
         public static readonly BindableProperty TertiaryDescriptionProperty = BindableProperty.Create(
             nameof(TertiaryDescription),
@@ -94,7 +102,8 @@ namespace Cotton.Mobile.Controls
             nameof(IsTertiaryActionVisible),
             typeof(bool),
             typeof(TopAppBar),
-            false);
+            false,
+            propertyChanged: OnActionPropertyChanged);
 
         public TopAppBar()
         {
@@ -104,6 +113,11 @@ namespace Cotton.Mobile.Controls
         }
 
         public ICommand BackCommand { get; }
+
+        public bool IsActionClusterVisible =>
+            IsVisibleAction(PrimaryIconData, PrimaryCommand, IsPrimaryActionVisible)
+            || IsVisibleAction(SecondaryIconData, SecondaryCommand, IsSecondaryActionVisible)
+            || IsVisibleAction(TertiaryIconData, TertiaryCommand, IsTertiaryActionVisible);
 
         public string TitleText
         {
@@ -199,6 +213,17 @@ namespace Cotton.Mobile.Controls
         {
             TopAppBar view = (TopAppBar)bindable;
             view.UpdateVisualState();
+        }
+
+        private static void OnActionPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            TopAppBar view = (TopAppBar)bindable;
+            view.OnPropertyChanged(nameof(IsActionClusterVisible));
+        }
+
+        private static bool IsVisibleAction(Geometry? iconData, ICommand? command, bool isVisible)
+        {
+            return isVisible && iconData is not null && command is not null;
         }
 
         private void UpdateVisualState()

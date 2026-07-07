@@ -1655,6 +1655,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:TopAppBarTitleLabel Grid.Column=\"1\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("UseDarkTheme=\"{Binding Source={x:Reference Root}, Path=UseDarkTheme}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("<controls:ActionClusterView x:Name=\"Actions\"", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("IsClusterVisible=\"{Binding Source={x:Reference Root}, Path=IsActionClusterVisible}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionIconData=\"{Binding Source={x:Reference Root}, Path=PrimaryIconData}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding Source={x:Reference Root}, Path=PrimaryCommand}\"", topAppBar, StringComparison.Ordinal);
             Assert.Contains("IsPrimaryActionVisible=\"{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}\"", topAppBar, StringComparison.Ordinal);
@@ -1668,6 +1669,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultActionIconButtonStyleResourceKey = \"M3TopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("DarkActionIconButtonStyleResourceKey = \"M3DarkTopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("propertyChanged: OnVisualPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("propertyChanged: OnActionPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public bool IsActionClusterVisible =>", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("IsVisibleAction(PrimaryIconData, PrimaryCommand, IsPrimaryActionVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("IsVisibleAction(SecondaryIconData, SecondaryCommand, IsSecondaryActionVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("IsVisibleAction(TertiaryIconData, TertiaryCommand, IsTertiaryActionVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("view.OnPropertyChanged(nameof(IsActionClusterVisible))", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("private static bool IsVisibleAction(Geometry? iconData, ICommand? command, bool isVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("return isVisible && iconData is not null && command is not null", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, surfaceStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("BackButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("Actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey", topAppBarCodeBehind, StringComparison.Ordinal);

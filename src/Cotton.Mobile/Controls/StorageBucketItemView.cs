@@ -8,7 +8,7 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class StorageBucketItemView : ContentView
+    public class StorageBucketItemView : MaterialAnimatedContentView
     {
         private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingLine";
         private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
@@ -25,6 +25,13 @@ namespace Cotton.Mobile.Controls
             typeof(StorageBucketItemView),
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsBucketVisibleProperty = BindableProperty.Create(
+            nameof(IsBucketVisible),
+            typeof(bool),
+            typeof(StorageBucketItemView),
+            true,
+            propertyChanged: OnBucketVisiblePropertyChanged);
 
         public static readonly BindableProperty DetailTextProperty = BindableProperty.Create(
             nameof(DetailText),
@@ -174,6 +181,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TitleProperty, value);
         }
 
+        public bool IsBucketVisible
+        {
+            get => (bool)GetValue(IsBucketVisibleProperty);
+            set => SetValue(IsBucketVisibleProperty, value);
+        }
+
         public string DetailText
         {
             get => (string)GetValue(DetailTextProperty);
@@ -247,6 +260,12 @@ namespace Cotton.Mobile.Controls
                 animatePrimaryMetricTextVisibility: false,
                 animateProgressVisibility: false,
                 animateSecondaryMetricTextVisibility: false);
+        }
+
+        private static void OnBucketVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            StorageBucketItemView view = (StorageBucketItemView)bindable;
+            view.IsContentVisible = (bool)newValue;
         }
 
         private static void OnPrimaryMetricTextVisibilityPropertyChanged(

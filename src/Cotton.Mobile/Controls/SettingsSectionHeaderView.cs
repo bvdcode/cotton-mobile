@@ -9,7 +9,7 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class SettingsSectionHeaderView : ContentView
+    public class SettingsSectionHeaderView : MaterialAnimatedContentView
     {
         private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
         private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
@@ -32,6 +32,13 @@ namespace Cotton.Mobile.Controls
             typeof(SettingsSectionHeaderView),
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsHeaderVisibleProperty = BindableProperty.Create(
+            nameof(IsHeaderVisible),
+            typeof(bool),
+            typeof(SettingsSectionHeaderView),
+            true,
+            propertyChanged: OnHeaderVisiblePropertyChanged);
 
         public static readonly BindableProperty PrimaryDetailTextProperty = BindableProperty.Create(
             nameof(PrimaryDetailText),
@@ -286,6 +293,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TitleProperty, value);
         }
 
+        public bool IsHeaderVisible
+        {
+            get => (bool)GetValue(IsHeaderVisibleProperty);
+            set => SetValue(IsHeaderVisibleProperty, value);
+        }
+
         public string PrimaryDetailText
         {
             get => (string)GetValue(PrimaryDetailTextProperty);
@@ -435,6 +448,12 @@ namespace Cotton.Mobile.Controls
                 animateTertiaryDetailTextVisibility: false,
                 animateQuaternaryDetailTextVisibility: false,
                 animateTrailingContentVisibility: false);
+        }
+
+        private static void OnHeaderVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
+            view.IsContentVisible = (bool)newValue;
         }
 
         private static void OnLeadingIconVisibilityPropertyChanged(

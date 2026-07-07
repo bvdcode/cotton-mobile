@@ -4,7 +4,7 @@
 namespace Cotton.Mobile.Controls
 {
     [ContentProperty(nameof(Items))]
-    public class ScreenScrollBodyView : ContentView
+    public class ScreenScrollBodyView : MaterialAnimatedContentView
     {
         private const string DefaultStackStyleResourceKey = "M3ScreenContentStack";
 

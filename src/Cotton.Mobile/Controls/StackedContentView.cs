@@ -4,7 +4,7 @@
 namespace Cotton.Mobile.Controls
 {
     [ContentProperty(nameof(Items))]
-    public class StackedContentView : ContentView
+    public class StackedContentView : MaterialAnimatedContentView
     {
         private const string DefaultStackStyleResourceKey = "M3SettingsSectionStack";
 

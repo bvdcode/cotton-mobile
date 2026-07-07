@@ -8,9 +8,9 @@
 
     <controls:MainPageRootView x:Name="RootLayout">
         <controls:ScreenScrollBodyView Grid.Row="0"
-                                       IsVisible="{Binding Display.IsBrandHeaderVisible}"
+                                       IsContentVisible="{Binding Display.IsBrandHeaderVisible}"
                                        StackStyleResourceKey="M3MainContentStack">
-            <controls:StackedContentView IsVisible="{Binding Display.IsBrandHeaderVisible}"
+            <controls:StackedContentView IsContentVisible="{Binding Display.IsBrandHeaderVisible}"
                                          StackStyleResourceKey="M3AuthShellStack">
                 <controls:BrandHeaderView Source="cotton_brand_mark.svg"
                                           Title="Cotton Cloud"
@@ -45,15 +45,15 @@
             </controls:StackedContentView>
         </controls:ScreenScrollBodyView>
 
-        <controls:MaterialRefreshView Grid.Row="0"
-                                      IsVisible="{Binding Display.IsProfileVisible}"
-                                      Command="{Binding RefreshFilesCommand}"
-                                      IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
-            <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
-                <controls:StackedContentView IsVisible="{Binding Display.IsProfileVisible}"
-                                             StackStyleResourceKey="M3FileBrowserProfileStack">
-                    <controls:StackedContentView x:Name="FileBrowserContent"
-                                                 StackStyleResourceKey="M3FileBrowserContentStack">
+        <controls:LayeredContentView Grid.Row="0"
+                                     IsLayerVisible="{Binding Display.IsProfileVisible}">
+            <controls:MaterialRefreshView Command="{Binding RefreshFilesCommand}"
+                                          IsRefreshing="{Binding Display.IsFilesRefreshing, Mode=TwoWay}">
+                <controls:ScreenScrollBodyView StackStyleResourceKey="M3MainContentStack">
+                    <controls:StackedContentView IsContentVisible="{Binding Display.IsProfileVisible}"
+                                                 StackStyleResourceKey="M3FileBrowserProfileStack">
+                        <controls:StackedContentView x:Name="FileBrowserContent"
+                                                     StackStyleResourceKey="M3FileBrowserContentStack">
                             <controls:FileBrowserTopBarView Title="{Binding Display.FilesTitle}"
                                                             PathText="{Binding Display.FilesPath}"
                                                             IsPathTextVisible="{Binding Display.IsFilesPathVisible}"
@@ -213,10 +213,11 @@
                                     </DataTemplate>
                                 </controls:WrappedItemsView.ItemTemplate>
                             </controls:WrappedItemsView>
+                        </controls:StackedContentView>
                     </controls:StackedContentView>
-                </controls:StackedContentView>
-            </controls:ScreenScrollBodyView>
-        </controls:MaterialRefreshView>
+                </controls:ScreenScrollBodyView>
+            </controls:MaterialRefreshView>
+        </controls:LayeredContentView>
 
         <controls:FloatingActionButtonView Grid.Row="1"
                                            IconData="{x:Static controls:IconPathData.Plus}"

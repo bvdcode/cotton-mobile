@@ -91,7 +91,7 @@
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
 
-                <controls:SettingsSectionHeaderView IsVisible="{Binding IsAccountSessionsEmptyVisible}"
+                <controls:SettingsSectionHeaderView IsHeaderVisible="{Binding IsAccountSessionsEmptyVisible}"
                                                     Title="{Binding AccountSessionsEmptyTitle}"
                                                     PrimaryDetailText="{Binding AccountSessionsEmptyDetails}"
                                                     TextStackStyleResourceKey="M3SettingsDenseStack"

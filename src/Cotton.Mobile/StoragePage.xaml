@@ -75,7 +75,7 @@
                                            StackStyleResourceKey="M3SettingsItemListStack">
                     <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonOnDeviceStorageBucketSnapshot">
-                            <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
+                            <controls:StorageBucketItemView IsBucketVisible="{Binding IsVisible}"
                                                             LeadingIconData="{x:Static controls:IconPathData.File}"
                                                             Title="{Binding Title}"
                                                             PrimaryMetricText="{Binding SizeText}"
@@ -97,7 +97,7 @@
                                            StackStyleResourceKey="M3SettingsItemListStack">
                     <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonStorageBudgetBucketSnapshot">
-                            <controls:StorageBucketItemView IsVisible="{Binding IsVisible}"
+                            <controls:StorageBucketItemView IsBucketVisible="{Binding IsVisible}"
                                                             LeadingIconData="{x:Static controls:IconPathData.File}"
                                                             Title="{Binding Title}"
                                                             PrimaryMetricText="{Binding UsageText}"

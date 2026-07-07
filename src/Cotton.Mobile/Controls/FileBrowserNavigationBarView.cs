@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultUnselectedItemStyleResourceKey = "M3NavigationBarItemUnselected";
         private const string DefaultSyncText = "Sync";
         private const string DefaultMoreText = "More";
+        private const string NavigationOpacityAnimationName = "M3FileBrowserNavigationOpacity";
 
         public static readonly BindableProperty FilesTextProperty = BindableProperty.Create(
             nameof(FilesText),
@@ -111,11 +112,19 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsNavigationVisibleProperty = BindableProperty.Create(
+            nameof(IsNavigationVisible),
+            typeof(bool),
+            typeof(FileBrowserNavigationBarView),
+            true,
+            propertyChanged: OnNavigationVisiblePropertyChanged);
+
         private readonly NavigationBarItem _backupItem;
         private readonly NavigationBarItem _filesItem;
         private readonly NavigationBarItem _moreItem;
         private readonly NavigationBarView _navigationBar;
         private readonly NavigationBarItem _syncItem;
+        private bool _hasAppliedNavigationVisibility;
 
         public FileBrowserNavigationBarView()
         {
@@ -137,6 +146,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _navigationBar;
             UpdateVisualState();
+            UpdateNavigationVisibility(animateNavigationVisibility: false);
         }
 
         public string FilesText
@@ -223,6 +233,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(MoreSemanticDescriptionProperty, value);
         }
 
+        public bool IsNavigationVisible
+        {
+            get => (bool)GetValue(IsNavigationVisibleProperty);
+            set => SetValue(IsNavigationVisibleProperty, value);
+        }
+
         private static NavigationBarItem CreateItem(Geometry iconData, string styleResourceKey, int column)
         {
             NavigationBarItem item = new()
@@ -241,12 +257,44 @@ namespace Cotton.Mobile.Controls
             view.UpdateVisualState();
         }
 
+        private static void OnNavigationVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileBrowserNavigationBarView view = (FileBrowserNavigationBarView)bindable;
+            view.UpdateNavigationVisibility(animateNavigationVisibility: true);
+        }
+
         private void UpdateVisualState()
         {
             ApplyItem(_filesItem, FilesText, null, true, FilesSemanticDescription);
             ApplyItem(_syncItem, ResolveText(SyncText, DefaultSyncText), SyncCommand, IsSyncEnabled, SyncSemanticDescription);
             ApplyItem(_backupItem, BackupText, BackupCommand, IsBackupEnabled, BackupSemanticDescription);
             ApplyItem(_moreItem, ResolveText(MoreText, DefaultMoreText), MoreCommand, IsMoreEnabled, MoreSemanticDescription);
+        }
+
+        private void UpdateNavigationVisibility(bool animateNavigationVisibility)
+        {
+            bool isNavigationVisible = IsNavigationVisible;
+            bool shouldAnimate = animateNavigationVisibility && _hasAppliedNavigationVisibility;
+            double targetOpacity = isNavigationVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isNavigationVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                NavigationOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteNavigationVisibility);
+            _hasAppliedNavigationVisibility = true;
         }
 
         private static void ApplyItem(
@@ -267,6 +315,11 @@ namespace Cotton.Mobile.Controls
             return string.IsNullOrWhiteSpace(text)
                 ? fallbackText
                 : text;
+        }
+
+        private void CompleteNavigationVisibility()
+        {
+            IsVisible = IsNavigationVisible;
         }
     }
 }

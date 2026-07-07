@@ -226,7 +226,7 @@
                                            SemanticDescription="Add files" />
 
         <controls:FileBrowserNavigationBarView Grid.Row="2"
-                                               IsVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
+                                               IsNavigationVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
                                                FilesText="{Binding Display.FilesNavigation.Label}"
                                                FilesSemanticDescription="{Binding Display.FilesNavigation.AccessibilityText}"
                                                SyncCommand="{Binding OpenSyncSettingsCommand}"

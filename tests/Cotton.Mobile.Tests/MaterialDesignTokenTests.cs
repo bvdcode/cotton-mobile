@@ -1865,7 +1865,10 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3NavigationBarItem");
 
             Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains(
+                "IsNavigationVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"",
+                mainPage,
+                StringComparison.Ordinal);
             Assert.Contains("FilesText=\"{Binding Display.FilesNavigation.Label}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("FilesSemanticDescription=\"{Binding Display.FilesNavigation.AccessibilityText}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SyncCommand=\"{Binding OpenSyncSettingsCommand}\"", mainPage, StringComparison.Ordinal);
@@ -1883,6 +1886,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CreateItem(IconPathData.MoreVertical, DefaultUnselectedItemStyleResourceKey, 3)", fileBrowserNavigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultSelectedItemStyleResourceKey = \"M3NavigationBarItemSelected\"", fileBrowserNavigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultUnselectedItemStyleResourceKey = \"M3NavigationBarItemUnselected\"", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("NavigationOpacityAnimationName = \"M3FileBrowserNavigationOpacity\"", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("IsNavigationVisibleProperty", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("OnNavigationVisiblePropertyChanged", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", fileBrowserNavigationBarView, StringComparison.Ordinal);
+            Assert.Contains("CompleteNavigationVisibility", fileBrowserNavigationBarView, StringComparison.Ordinal);
             Assert.Contains("SemanticProperties.SetDescription(item, semanticDescription ?? string.Empty)", fileBrowserNavigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultColumnCount = 4", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3NavigationBarGrid\"", navigationBarView, StringComparison.Ordinal);
@@ -1895,6 +1903,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarItem", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarSurface}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarGrid}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NavigationBarItemSelected}\"", mainPage, StringComparison.Ordinal);

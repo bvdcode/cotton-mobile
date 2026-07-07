@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ShowFileActionPending", content, StringComparison.Ordinal);
             Assert.Contains("&& !_display.IsFilesLoading", content, StringComparison.Ordinal);
             Assert.Contains("&& !_display.IsFileBrowserChromeEnabled", content, StringComparison.Ordinal);
-            Assert.Contains("DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(450)", content, StringComparison.Ordinal);
+            Assert.Contains("DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(1200)", content, StringComparison.Ordinal);
         }
     }
 }

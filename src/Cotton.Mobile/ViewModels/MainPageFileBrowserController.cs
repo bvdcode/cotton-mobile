@@ -49,7 +49,7 @@ namespace Cotton.Mobile.ViewModels
         private const int PayloadTooLargeStatusCode = 413;
         private const int InsufficientStorageStatusCode = 507;
         private static readonly TimeSpan FileServerMutationTimeout = TimeSpan.FromSeconds(45);
-        private static readonly TimeSpan DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(450);
+        private static readonly TimeSpan DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(1200);
         private static readonly TimeSpan SelectionClearActivationSettleDuration = TimeSpan.FromMilliseconds(350);
 
         private readonly MainPageDisplayState _display;

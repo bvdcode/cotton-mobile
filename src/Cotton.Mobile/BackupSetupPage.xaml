@@ -6,7 +6,7 @@
              x:Class="Cotton.Mobile.BackupSetupPage"
              x:DataType="viewModels:BackupSetupViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Camera Backup">
+             Title="Camera backup">
 
     <controls:ScreenShellView>
         <controls:TopAppBar IsPrimaryActionVisible="False"
@@ -15,7 +15,7 @@
                             SecondaryDescription="Save camera backup" />
 
         <controls:ScreenScrollBodyView Grid.Row="1">
-            <controls:ScreenHeaderView Title="Camera Backup"
+            <controls:ScreenHeaderView Title="Camera backup"
                                        SupportingText="{Binding ExecutionStatusText}"
                                        IsSupportingTextMultiline="True"
                                        IsBusy="{Binding IsBusy}" />

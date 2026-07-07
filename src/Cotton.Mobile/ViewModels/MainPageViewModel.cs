@@ -1336,7 +1336,7 @@ namespace Cotton.Mobile.ViewModels
             if (instanceUri is null)
             {
                 await _dialogService.ShowAlertAsync(
-                    "Camera Backup",
+                    "Camera backup",
                     "Could not open camera backup for this instance.",
                     "OK");
                 return;
@@ -1350,7 +1350,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to open Cotton mobile camera backup setup page.");
                 await _dialogService.ShowAlertAsync(
-                    "Camera Backup",
+                    "Camera backup",
                     "Could not open camera backup setup.",
                     "OK");
             }
@@ -1369,7 +1369,7 @@ namespace Cotton.Mobile.ViewModels
                 if (showAlertOnFailure)
                 {
                     await _dialogService.ShowAlertAsync(
-                        "Capture Inbox",
+                        "Capture inbox",
                         "Could not open captured items for this instance.",
                         "OK");
                 }
@@ -1388,7 +1388,7 @@ namespace Cotton.Mobile.ViewModels
                 if (showAlertOnFailure)
                 {
                     await _dialogService.ShowAlertAsync(
-                        "Capture Inbox",
+                        "Capture inbox",
                         "Could not inspect captured items.",
                         "OK");
                 }

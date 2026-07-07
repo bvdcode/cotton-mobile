@@ -6,7 +6,7 @@
              x:Class="Cotton.Mobile.CaptureDestinationPickerPage"
              x:DataType="viewModels:CaptureDestinationPickerViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Choose Destination">
+             Title="Choose destination">
 
     <controls:ScreenShellView>
         <controls:TopAppBar IsPrimaryActionVisible="False"

@@ -37,7 +37,7 @@ namespace Cotton.Mobile.Services
                 ? "Upload"
                 : transfer.DisplayName.Trim();
             string failure = string.IsNullOrWhiteSpace(transfer.FailureMessage)
-                ? "Open Transfers for details."
+                ? "Open transfers for details."
                 : transfer.FailureMessage.Trim();
 
             return new CottonLocalNotificationSnapshot(
@@ -52,7 +52,7 @@ namespace Cotton.Mobile.Services
             string reason)
         {
             string message = string.IsNullOrWhiteSpace(reason)
-                ? "Open Camera Backup for details."
+                ? "Open camera backup for details."
                 : reason.Trim();
 
             return new CottonLocalNotificationSnapshot(

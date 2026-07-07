@@ -7,7 +7,7 @@
              x:Class="Cotton.Mobile.CaptureInboxPage"
              x:DataType="viewModels:CaptureInboxViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Capture Inbox">
+             Title="Capture inbox">
 
     <controls:ScreenShellView>
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"

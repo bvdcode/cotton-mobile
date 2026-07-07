@@ -989,25 +989,33 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(3, CountOccurrences(mainPage, "<controls:LoadingStatusView"));
             Assert.Contains("<controls:LoadingStatusView", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsVisible=\"{Binding Display.IsLoadingVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsLoadingVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ContainerStyleResourceKey=\"M3AuthLoadingStatusPanel\"", mainPage, StringComparison.Ordinal);
             Assert.Equal(1, CountOccurrences(mainPage, "Text=\"{Binding Display.LoadingMessage}\""));
             Assert.Contains("Text=\"{Binding Display.LoadingMessage}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Waiting for browser approval\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding Display.AuthorizationProgressMessage}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains(
-                "IsVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.FilesStatus}\"",
+                "IsStatusVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.FilesStatus}\"",
                 mainPage,
                 StringComparison.Ordinal);
             Assert.DoesNotContain(
-                "IsVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.LoadingMessage}\"",
+                "IsStatusVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.LoadingMessage}\"",
                 mainPage,
                 StringComparison.Ordinal);
+            Match directVisibilityMatch = Regex.Match(
+                mainPage,
+                @"<controls:LoadingStatusView(?:(?!>).)*\bIsVisible=""",
+                RegexOptions.Singleline,
+                TimeSpan.FromSeconds(1));
+
+            Assert.False(directVisibilityMatch.Success, "MainPage uses direct LoadingStatusView IsVisible.");
             Assert.Contains("ActionCommand=\"{Binding CancelAuthorizationCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionCommand=\"{Binding CancelFileActionCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionSemanticDescription=\"Cancel file operation\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsBusy=\"{Binding IsBusy}\"", appLockGatePage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisibleProperty", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("DetailTextProperty", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("ContainerStyleResourceKeyProperty", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKeyProperty", loadingStatusView, StringComparison.Ordinal);
@@ -1025,6 +1033,10 @@ namespace Cotton.Mobile.Tests
                 "ActionButtonOpacityAnimationName = \"M3LoadingStatusActionButtonOpacity\"",
                 loadingStatusView,
                 StringComparison.Ordinal);
+            Assert.Contains(
+                "StatusOpacityAnimationName = \"M3LoadingStatusOpacity\"",
+                loadingStatusView,
+                StringComparison.Ordinal);
             Assert.Contains("OnDetailMessageVisibilityPropertyChanged", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("OnActionButtonVisibilityPropertyChanged", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", loadingStatusView, StringComparison.Ordinal);
@@ -1032,6 +1044,7 @@ namespace Cotton.Mobile.Tests
                 "MaterialResources.Get<int>(\"M3MotionStatusDuration\")",
                 loadingStatusView,
                 StringComparison.Ordinal);
+            Assert.Contains("CompleteStatusVisibility", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteDetailMessageVisibility", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);

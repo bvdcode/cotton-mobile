@@ -17,6 +17,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
         private const string DefaultTextStyleResourceKey = "M3LoadingMessage";
         private const string DetailMessageOpacityAnimationName = "M3LoadingStatusDetailMessageOpacity";
+        private const string StatusOpacityAnimationName = "M3LoadingStatusOpacity";
 
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
@@ -38,6 +39,13 @@ namespace Cotton.Mobile.Controls
             typeof(LoadingStatusView),
             false,
             propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsStatusVisibleProperty = BindableProperty.Create(
+            nameof(IsStatusVisible),
+            typeof(bool),
+            typeof(LoadingStatusView),
+            true,
+            propertyChanged: OnStatusVisiblePropertyChanged);
 
         public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
             nameof(ActionIconData),
@@ -124,6 +132,7 @@ namespace Cotton.Mobile.Controls
         private readonly VerticalStackLayout _textStack;
         private bool _hasAppliedActionButtonVisibility;
         private bool _hasAppliedDetailMessageVisibility;
+        private bool _hasAppliedStatusVisibility;
 
         public LoadingStatusView()
         {
@@ -177,6 +186,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _container;
             UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
+            UpdateStatusVisibility(animateStatusVisibility: false);
         }
 
         public string Text
@@ -195,6 +205,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (bool)GetValue(IsRunningProperty);
             set => SetValue(IsRunningProperty, value);
+        }
+
+        public bool IsStatusVisible
+        {
+            get => (bool)GetValue(IsStatusVisibleProperty);
+            set => SetValue(IsStatusVisibleProperty, value);
         }
 
         public Geometry? ActionIconData
@@ -269,6 +285,12 @@ namespace Cotton.Mobile.Controls
             view.UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
         }
 
+        private static void OnStatusVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            LoadingStatusView view = (LoadingStatusView)bindable;
+            view.UpdateStatusVisibility(animateStatusVisibility: true);
+        }
+
         private static void OnDetailMessageVisibilityPropertyChanged(
             BindableObject bindable,
             object oldValue,
@@ -329,6 +351,32 @@ namespace Cotton.Mobile.Controls
             SemanticProperties.SetDescription(_actionButton, ActionSemanticDescription ?? string.Empty);
         }
 
+        private void UpdateStatusVisibility(bool animateStatusVisibility)
+        {
+            bool isStatusVisible = IsStatusVisible;
+            bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
+            double targetOpacity = isStatusVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isStatusVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                StatusOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteStatusVisibility);
+            _hasAppliedStatusVisibility = true;
+        }
+
         private void UpdateDetailMessageVisibility(string detailText, bool animateDetailMessageVisibility)
         {
             bool isDetailMessageVisible = IsDetailMessageActuallyVisible(detailText);
@@ -378,6 +426,11 @@ namespace Cotton.Mobile.Controls
                 opacity => _actionButton.Opacity = opacity,
                 CompleteActionButtonVisibility);
             _hasAppliedActionButtonVisibility = true;
+        }
+
+        private void CompleteStatusVisibility()
+        {
+            IsVisible = IsStatusVisible;
         }
 
         private void CompleteDetailMessageVisibility()

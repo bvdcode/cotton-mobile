@@ -16,7 +16,7 @@
                                           Title="Cotton Cloud"
                                           SemanticDescription="Cotton Cloud" />
 
-                <controls:LoadingStatusView IsVisible="{Binding Display.IsLoadingVisible}"
+                <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsLoadingVisible}"
                                             IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
                                             Text="{Binding Display.LoadingMessage}"
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
@@ -28,7 +28,7 @@
                                               IsInputEnabled="{Binding Display.IsInputEnabled}"
                                               ConnectCommand="{Binding ConnectCommand}" />
 
-                <controls:LoadingStatusView IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                             IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
                                             Text="Waiting for browser approval"
                                             DetailText="{Binding Display.AuthorizationProgressMessage}"
@@ -126,7 +126,7 @@
                                                        SecondaryActionCommand="{Binding ClearFileSelectionCommand}"
                                                        SecondaryActionSemanticDescription="Cancel file selection" />
 
-                            <controls:LoadingStatusView IsVisible="{Binding Display.IsFilesLoading}"
+                            <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsFilesLoading}"
                                                         IsRunning="{Binding Display.IsFilesLoading}"
                                                         Text="{Binding Display.FilesStatus}"
                                                         ActionIconData="{x:Static controls:IconPathData.Close}"

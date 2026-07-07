@@ -14,17 +14,20 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh destinations" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1"
+                                        ExtraAutoRows="1">
             <controls:ScreenHeaderView Title="{Binding CurrentFolderName}"
                                        SupportingText="{Binding PathText}"
                                        IsSupportingTextVisible="{Binding IsPathTextVisible}"
                                        IsSupportingTextMultiline="True"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:SettingsActionHeaderCardView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+            <controls:SettingsActionHeaderCardView Grid.Row="2"
+                                                   LeadingIconData="{x:Static controls:IconPathData.Folder}"
                                                    LeadingIconFrameStyleResourceKey="M3FolderThumbnailFrame"
                                                    Title="Current folder"
                                                    PrimaryDetailText="{Binding SummaryText}"
@@ -36,15 +39,20 @@
                                                    SecondaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                    SecondaryActionSemanticDescription="Choose current folder" />
 
-            <controls:FileListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:FileListSkeletonView Grid.Row="3"
+                                           IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView Grid.Row="3"
+                                     IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No subfolders here" />
 
-            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
-                                       ItemsSource="{Binding Folders}">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="3"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Folders}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">
                         <controls:ContentCardView>
                             <controls:ActionListItemView Text="{Binding DisplayName}"
@@ -58,8 +66,8 @@
                                                          SemanticDescription="{Binding DisplayName, StringFormat='Open {0}'}" />
                         </controls:ContentCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

@@ -2625,6 +2625,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsContentVisible=\"{Binding IsListVisible}\"", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("IsContentVisible=\"{Binding IsListVisible}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("IsContentVisible=\"{Binding IsTileVisible}\"", trashPage, StringComparison.Ordinal);
+            Assert.Contains("IsContentVisible=\"{Binding IsPreviewVisible}\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("CollectionStyleResourceKey=\"M3DocumentViewerCollection\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("public class MaterialCollectionView", materialCollectionView, StringComparison.Ordinal);
@@ -2651,6 +2652,7 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("SelectionMode=\"None\"", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("<CollectionView.ItemTemplate>", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("MaterialCollectionView ItemsSource=\"{Binding Items}\"\n                                             IsVisible=", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("IsVisible=\"{Binding IsPreviewVisible}\"", page, StringComparison.Ordinal);
             }
         }
 
@@ -3149,7 +3151,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKey=\"M3TextViewerContentGrid\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:DocumentViewerBodyView Grid.Row=\"1\">", pdfViewerPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:LayeredContentView Grid.Row=\"1\"\n                                         IsVisible=\"{Binding IsEmptyVisible}\"\n                                         GridStyleResourceKey=\"M3PdfEmptyStateLayer\">", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:LayeredContentView Grid.Row=\"1\"\n                                         IsLayerVisible=\"{Binding IsEmptyVisible}\"\n                                         GridStyleResourceKey=\"M3PdfEmptyStateLayer\">", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerInfoHeaderView Details=\"{Binding Details}\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("Status=\"{Binding Status}\"", textViewerPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding IsStatusVisible}\"", textViewerPage, StringComparison.Ordinal);
@@ -3784,11 +3786,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"2\">", trashPage, StringComparison.Ordinal);
             Assert.Contains("public class LayeredContentView", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKeyProperty", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("IsLayerVisibleProperty", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3LayeredContent\"", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("LayerOpacityAnimationName = \"M3LayeredContentOpacity\"", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("new Grid()", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.ResolveStyleResourceKey(", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("_grid.SetDynamicResource(StyleProperty, gridStyleResourceKey)", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("OnLayerVisiblePropertyChanged", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("MaterialMotion.UpdateDouble(", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", layeredContentView, StringComparison.Ordinal);
+            Assert.Contains("CompleteLayerVisibility", layeredContentView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_grid.IsVisible = IsLayerVisible", layeredContentView, StringComparison.Ordinal);
             Assert.Contains("public class ScreenShellView", screenShellView, StringComparison.Ordinal);
             Assert.Contains("GridStyleResourceKeyProperty", screenShellView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3ScreenShell\"", screenShellView, StringComparison.Ordinal);

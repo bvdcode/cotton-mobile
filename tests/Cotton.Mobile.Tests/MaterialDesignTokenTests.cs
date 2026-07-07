@@ -991,8 +991,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:LoadingStatusView", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsVisible=\"{Binding Display.IsLoadingVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ContainerStyleResourceKey=\"M3AuthLoadingStatusPanel\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(mainPage, "Text=\"{Binding Display.LoadingMessage}\""));
+            Assert.Contains("Text=\"{Binding Display.LoadingMessage}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Waiting for browser approval\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding Display.AuthorizationProgressMessage}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains(
+                "IsVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.FilesStatus}\"",
+                mainPage,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "IsVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.LoadingMessage}\"",
+                mainPage,
+                StringComparison.Ordinal);
             Assert.Contains("ActionCommand=\"{Binding CancelAuthorizationCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionCommand=\"{Binding CancelFileActionCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionSemanticDescription=\"Cancel file operation\"", mainPage, StringComparison.Ordinal);

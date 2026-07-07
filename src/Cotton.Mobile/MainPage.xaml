@@ -128,7 +128,7 @@
 
                             <controls:LoadingStatusView IsVisible="{Binding Display.IsFilesLoading}"
                                                         IsRunning="{Binding Display.IsFilesLoading}"
-                                                        Text="{Binding Display.LoadingMessage}"
+                                                        Text="{Binding Display.FilesStatus}"
                                                         ActionIconData="{x:Static controls:IconPathData.Close}"
                                                         ActionCommand="{Binding CancelFileActionCommand}"
                                                         IsActionEnabled="{Binding Display.CanCancelFileAction}"

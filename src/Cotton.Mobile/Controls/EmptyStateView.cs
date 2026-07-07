@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultFilledActionButtonStyleResourceKey = "M3PanelActionFilledButton";
         private const string DefaultIconFrameStyleResourceKey = "M3EmptyStateIconFrame";
         private const string FilledActionButtonOpacityAnimationName = "M3EmptyStateFilledActionOpacity";
+        private const string StateOpacityAnimationName = "M3EmptyStateOpacity";
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -137,6 +138,13 @@ namespace Cotton.Mobile.Controls
             DefaultFilledActionButtonStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsStateVisibleProperty = BindableProperty.Create(
+            nameof(IsStateVisible),
+            typeof(bool),
+            typeof(EmptyStateView),
+            true,
+            propertyChanged: OnStateVisiblePropertyChanged);
+
         private readonly IconButton _actionButton;
         private readonly IconButton _actionIconOnlyButton;
         private readonly Label _actionLabel;
@@ -151,6 +159,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _body;
         private bool _hasAppliedBusyState;
         private bool _hasAppliedContentVisibilityState;
+        private bool _hasAppliedStateVisibility;
 
         public EmptyStateView()
         {
@@ -230,6 +239,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _card;
             UpdateVisualState(animateBusy: false);
+            UpdateStateVisibility(animateStateVisibility: false);
         }
 
         public Geometry? IconData
@@ -334,6 +344,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(FilledActionButtonStyleResourceKeyProperty, value);
         }
 
+        public bool IsStateVisible
+        {
+            get => (bool)GetValue(IsStateVisibleProperty);
+            set => SetValue(IsStateVisibleProperty, value);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             EmptyStateView emptyStateView = (EmptyStateView)bindable;
@@ -344,6 +360,12 @@ namespace Cotton.Mobile.Controls
         {
             EmptyStateView emptyStateView = (EmptyStateView)bindable;
             emptyStateView.UpdateVisualState(animateBusy: true);
+        }
+
+        private static void OnStateVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            EmptyStateView emptyStateView = (EmptyStateView)bindable;
+            emptyStateView.UpdateStateVisibility(animateStateVisibility: true);
         }
 
         private void UpdateVisualState(bool animateBusy)
@@ -425,6 +447,37 @@ namespace Cotton.Mobile.Controls
                 : $"{title}. {body}";
             SemanticProperties.SetDescription(_card, description);
             _hasAppliedContentVisibilityState = true;
+        }
+
+        private void UpdateStateVisibility(bool animateStateVisibility)
+        {
+            bool isStateVisible = IsStateVisible;
+            bool shouldAnimate = animateStateVisibility && _hasAppliedStateVisibility;
+            double targetOpacity = isStateVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
+
+            if (isStateVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                duration,
+                StateOpacityAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteStateVisibility);
+            _hasAppliedStateVisibility = true;
+        }
+
+        private void CompleteStateVisibility()
+        {
+            IsVisible = IsStateVisible;
         }
 
         private void UpdateBusyState(bool animateBusy)

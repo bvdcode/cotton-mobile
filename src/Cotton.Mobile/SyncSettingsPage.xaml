@@ -27,7 +27,7 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:EmptyStateView IsVisible="{Binding IsEmptyVisible}"
+            <controls:EmptyStateView IsStateVisible="{Binding IsEmptyVisible}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No folders yet"
                                      Body="Pick a folder in Files to enable sync."

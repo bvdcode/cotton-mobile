@@ -752,6 +752,32 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("M3EmptyStateStack", page, StringComparison.Ordinal);
             }
 
+            string[] animatedEmptyStateScreenPaths =
+            [
+                MainPagePath,
+                RecentFilesPagePath,
+                ActivityFeedPagePath,
+                TransfersPagePath,
+                FileVersionHistoryPagePath,
+                CaptureInboxPagePath,
+                CaptureDestinationPickerPagePath,
+                TrashPagePath,
+                SyncSettingsPagePath,
+            ];
+
+            foreach (string screenPath in animatedEmptyStateScreenPaths)
+            {
+                string page = LoadText(screenPath);
+                Match directVisibilityMatch = Regex.Match(
+                    page,
+                    @"<controls:EmptyStateView(?:(?!>).)*\bIsVisible=""",
+                    RegexOptions.Singleline,
+                    TimeSpan.FromSeconds(1));
+
+                Assert.Contains("IsStateVisible=\"{Binding", page, StringComparison.Ordinal);
+                Assert.False(directVisibilityMatch.Success, $"{screenPath} uses direct EmptyStateView IsVisible.");
+            }
+
             string mainPage = LoadText(MainPagePath);
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
@@ -784,9 +810,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_grid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", centeredGateView, StringComparison.Ordinal);
             Assert.Contains("Grid.SetRow(BodyContent, 1)", centeredGateView, StringComparison.Ordinal);
             Assert.Contains("IsBusyProperty", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("IsStateVisibleProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("IsFilledActionProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("StateOpacityAnimationName = \"M3EmptyStateOpacity\"", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("BodyOpacityAnimationName = \"M3EmptyStateBodyOpacity\"", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("BusyIndicatorOpacityAnimationName = \"M3EmptyStateBusyIndicatorOpacity\"", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("ActionRowOpacityAnimationName = \"M3EmptyStateActionRowOpacity\"", emptyStateView, StringComparison.Ordinal);
@@ -801,6 +829,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnBusyPropertyChanged", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("CompleteStateVisibility", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("CompleteElementVisibility", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("CompleteBusyState", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);

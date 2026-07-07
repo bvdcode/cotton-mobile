@@ -83,7 +83,7 @@
                                    TertiaryActionSemanticDescription="Cancel selection" />
 
         <controls:LayeredContentView Grid.Row="4">
-            <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Delete}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />

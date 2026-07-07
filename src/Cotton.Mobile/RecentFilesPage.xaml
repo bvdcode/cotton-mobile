@@ -32,7 +32,7 @@
                                            IsBodyLineVisible="False" />
 
         <controls:EmptyStateView Grid.Row="2"
-                                 IsVisible="{Binding IsEmpty}"
+                                 IsStateVisible="{Binding IsEmpty}"
                                  IconData="{x:Static controls:IconPathData.File}"
                                  Title="{Binding EmptyMessage}"
                                  Body="{Binding EmptyDetails}" />

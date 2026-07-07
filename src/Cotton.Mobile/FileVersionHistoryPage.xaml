@@ -30,7 +30,7 @@
             <controls:LayeredContentView Grid.Row="2">
                 <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-                <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
+                <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                          IconData="{x:Static controls:IconPathData.File}"
                                          Title="{Binding EmptyMessage}"
                                          Body="{Binding EmptyDetails}" />

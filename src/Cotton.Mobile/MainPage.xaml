@@ -146,7 +146,7 @@
                                                           ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
                                                           ActionSemanticDescription="{Binding Display.FileRetryActionText}" />
 
-                            <controls:EmptyStateView IsVisible="{Binding Display.IsFilesEmptyVisible}"
+                            <controls:EmptyStateView IsStateVisible="{Binding Display.IsFilesEmptyVisible}"
                                                      IconData="{x:Static controls:IconPathData.File}"
                                                      Title="{Binding Display.FilesEmptyMessage}"
                                                      Body="{Binding Display.FilesEmptyDetails}"

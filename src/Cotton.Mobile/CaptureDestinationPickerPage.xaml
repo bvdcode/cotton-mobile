@@ -38,7 +38,7 @@
 
             <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
 
-            <controls:EmptyStateView IsVisible="{Binding IsEmpty}"
+            <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No subfolders here" />
 

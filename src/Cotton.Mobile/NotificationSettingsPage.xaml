@@ -69,7 +69,7 @@
                                           ActionCommand="{Binding LoadCommand}"
                                           ActionSemanticDescription="Retry server push" />
 
-                <controls:StackedItemsView IsVisible="{Binding HasRemotePushPreferences}"
+                <controls:StackedItemsView IsContentVisible="{Binding HasRemotePushPreferences}"
                                            ItemsSource="{Binding RemotePushPreferences}">
                     <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="viewModels:RemotePushPreferenceItemViewModel">

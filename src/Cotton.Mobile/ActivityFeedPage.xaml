@@ -23,14 +23,14 @@
             <controls:ScreenStatusView Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:MetadataListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
             <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Activity}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
-            <controls:StackedItemsView IsVisible="{Binding IsListVisible}"
+            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
                                        ItemsSource="{Binding Items}">
                 <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonActivityFeedListItem">

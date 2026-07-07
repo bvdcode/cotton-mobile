@@ -14,6 +14,14 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnAppearancePropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<int>("M3MotionContentEnterDuration"));
 
+        public static readonly BindableProperty IsContentVisibleProperty = BindableProperty.Create(
+            nameof(IsContentVisible),
+            typeof(bool),
+            typeof(MaterialAnimatedContentView),
+            true,
+            propertyChanged: OnContentVisiblePropertyChanged);
+
+        private bool _hasAppliedContentVisibility;
         private bool _isLoaded;
 
         protected MaterialAnimatedContentView()
@@ -27,6 +35,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (int)GetValue(AppearanceDurationProperty);
             set => SetValue(AppearanceDurationProperty, value);
+        }
+
+        public bool IsContentVisible
+        {
+            get => (bool)GetValue(IsContentVisibleProperty);
+            set => SetValue(IsContentVisibleProperty, value);
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -43,6 +57,12 @@ namespace Cotton.Mobile.Controls
         {
             MaterialAnimatedContentView view = (MaterialAnimatedContentView)bindable;
             view.UpdateAppearanceState();
+        }
+
+        private static void OnContentVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            MaterialAnimatedContentView view = (MaterialAnimatedContentView)bindable;
+            view.UpdateContentVisibility(animateContentVisibility: true);
         }
 
         private void OnLoaded(object? sender, EventArgs e)
@@ -62,9 +82,10 @@ namespace Cotton.Mobile.Controls
         {
             this.AbortAnimation(AppearanceAnimationName);
 
-            if (!_isLoaded || !IsVisible)
+            if (!_isLoaded || !IsVisible || !IsContentVisible)
             {
                 Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+                _hasAppliedContentVisibility = true;
                 return;
             }
 
@@ -77,6 +98,37 @@ namespace Cotton.Mobile.Controls
                 true,
                 opacity => Opacity = opacity,
                 finished: null);
+            _hasAppliedContentVisibility = true;
+        }
+
+        private void UpdateContentVisibility(bool animateContentVisibility)
+        {
+            bool isContentVisible = IsContentVisible;
+            bool shouldAnimate = animateContentVisibility && _hasAppliedContentVisibility && _isLoaded;
+            double targetOpacity = isContentVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+
+            if (isContentVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                AppearanceDuration,
+                AppearanceAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteContentVisibility);
+            _hasAppliedContentVisibility = true;
+        }
+
+        private void CompleteContentVisibility()
+        {
+            IsVisible = IsContentVisible;
         }
     }
 }

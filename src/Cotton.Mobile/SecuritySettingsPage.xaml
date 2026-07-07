@@ -99,7 +99,7 @@
                                                     PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
                                                     IsTapEnabled="False" />
 
-                <controls:StackedItemsView IsVisible="{Binding IsAccountSessionsListVisible}"
+                <controls:StackedItemsView IsContentVisible="{Binding IsAccountSessionsListVisible}"
                                            ItemsSource="{Binding AccountSessions}">
                     <controls:StackedItemsView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonAccountSessionListItem">

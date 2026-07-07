@@ -28,7 +28,7 @@
                                    IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:LayeredContentView Grid.Row="2">
-                <controls:MetadataListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
+                <controls:MetadataListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
                 <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                          IconData="{x:Static controls:IconPathData.File}"
@@ -36,7 +36,7 @@
                                          Body="{Binding EmptyDetails}" />
 
                 <controls:MaterialCollectionView ItemsSource="{Binding Items}"
-                                                 IsVisible="{Binding IsListVisible}"
+                                                 IsContentVisible="{Binding IsListVisible}"
                                                  ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                     <controls:MaterialCollectionView.ItemTemplate>
                         <DataTemplate x:DataType="services:CottonFileVersionItemSnapshot">

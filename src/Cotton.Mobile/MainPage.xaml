@@ -135,7 +135,7 @@
                                                         IsActionVisible="{Binding Display.CanCancelFileAction}"
                                                         ActionSemanticDescription="Cancel file operation" />
 
-                            <controls:FileListSkeletonView IsVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
+                            <controls:FileListSkeletonView IsSkeletonVisible="{Binding Display.IsInlineFilesLoadingVisible}" />
 
                             <controls:AttentionStatusView IsStatusVisible="{Binding Display.CanRetryFileAction}"
                                                           Message="{Binding Display.FilesStatus}"
@@ -156,7 +156,7 @@
                                                      IsActionVisible="{Binding Display.IsFilesEmptyAddActionVisible}"
                                                      ActionSemanticDescription="Add files" />
 
-                            <controls:StackedItemsView IsVisible="{Binding Display.IsFileListViewVisible}"
+                            <controls:StackedItemsView IsContentVisible="{Binding Display.IsFileListViewVisible}"
                                                        ItemsSource="{Binding Display.FileEntries}"
                                                        StackStyleResourceKey="M3FileListStack">
                                 <controls:StackedItemsView.ItemTemplate>
@@ -181,7 +181,7 @@
                                 </controls:StackedItemsView.ItemTemplate>
                             </controls:StackedItemsView>
 
-                            <controls:WrappedItemsView IsVisible="{Binding Display.IsFileTileViewVisible}"
+                            <controls:WrappedItemsView IsContentVisible="{Binding Display.IsFileTileViewVisible}"
                                                        ItemsSource="{Binding Display.FileEntries}"
                                                        LayoutStyleResourceKey="M3FileTileWrapLayout">
                                 <controls:WrappedItemsView.ItemTemplate>

@@ -21,6 +21,14 @@ namespace Cotton.Mobile.Controls
             3,
             propertyChanged: OnRowCountChanged);
 
+        public static readonly BindableProperty IsSkeletonVisibleProperty = BindableProperty.Create(
+            nameof(IsSkeletonVisible),
+            typeof(bool),
+            typeof(SkeletonListView),
+            true,
+            propertyChanged: OnSkeletonVisiblePropertyChanged);
+
+        private bool _hasAppliedSkeletonVisibility;
         private bool _isLoaded;
 
         protected SkeletonListView()
@@ -41,6 +49,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (int)GetValue(RowCountProperty);
             set => SetValue(RowCountProperty, value);
+        }
+
+        public bool IsSkeletonVisible
+        {
+            get => (bool)GetValue(IsSkeletonVisibleProperty);
+            set => SetValue(IsSkeletonVisibleProperty, value);
         }
 
         protected abstract View CreateRow();
@@ -78,6 +92,12 @@ namespace Cotton.Mobile.Controls
             skeletonListView.RebuildRows();
         }
 
+        private static void OnSkeletonVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            SkeletonListView skeletonListView = (SkeletonListView)bindable;
+            skeletonListView.UpdateSkeletonVisibility(animateSkeletonVisibility: true);
+        }
+
         private void OnLoaded(object? sender, EventArgs e)
         {
             _isLoaded = true;
@@ -95,9 +115,10 @@ namespace Cotton.Mobile.Controls
         {
             this.AbortAnimation(AppearanceAnimationName);
 
-            if (!_isLoaded || !IsVisible)
+            if (!_isLoaded || !IsVisible || !IsSkeletonVisible)
             {
                 Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+                _hasAppliedSkeletonVisibility = true;
                 return;
             }
 
@@ -105,6 +126,7 @@ namespace Cotton.Mobile.Controls
             if (duration <= 0)
             {
                 Opacity = MaterialMotion.Value("M3MotionVisibleOpacity");
+                _hasAppliedSkeletonVisibility = true;
                 return;
             }
 
@@ -117,6 +139,37 @@ namespace Cotton.Mobile.Controls
                 this,
                 AppearanceAnimationName,
                 length: MaterialMotion.Duration(duration));
+            _hasAppliedSkeletonVisibility = true;
+        }
+
+        private void UpdateSkeletonVisibility(bool animateSkeletonVisibility)
+        {
+            bool isSkeletonVisible = IsSkeletonVisible;
+            bool shouldAnimate = animateSkeletonVisibility && _hasAppliedSkeletonVisibility && _isLoaded;
+            double targetOpacity = isSkeletonVisible
+                ? MaterialMotion.Value("M3MotionVisibleOpacity")
+                : MaterialMotion.Value("M3MotionHiddenOpacity");
+
+            if (isSkeletonVisible)
+            {
+                IsVisible = true;
+            }
+
+            MaterialMotion.UpdateDouble(
+                this,
+                Opacity,
+                targetOpacity,
+                AppearanceDuration,
+                AppearanceAnimationName,
+                shouldAnimate,
+                opacity => Opacity = opacity,
+                CompleteSkeletonVisibility);
+            _hasAppliedSkeletonVisibility = true;
+        }
+
+        private void CompleteSkeletonVisibility()
+        {
+            IsVisible = IsSkeletonVisible;
         }
     }
 }

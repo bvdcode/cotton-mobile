@@ -28,7 +28,7 @@
                                    IsStatusVisible="{Binding IsStatusVisible}" />
 
         <controls:MetadataListSkeletonView Grid.Row="2"
-                                           IsVisible="{Binding IsLoadingPlaceholderVisible}"
+                                           IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}"
                                            IsBodyLineVisible="False" />
 
         <controls:EmptyStateView Grid.Row="2"
@@ -39,7 +39,7 @@
 
         <controls:MaterialCollectionView Grid.Row="2"
                                          ItemsSource="{Binding Items}"
-                                         IsVisible="{Binding IsListVisible}"
+                                         IsContentVisible="{Binding IsListVisible}"
                                          ItemSizingStrategy="MeasureFirstItem"
                                          ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
             <controls:MaterialCollectionView.ItemTemplate>

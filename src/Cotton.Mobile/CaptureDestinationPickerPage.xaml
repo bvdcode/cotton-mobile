@@ -36,13 +36,13 @@
                                                    SecondaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                                    SecondaryActionSemanticDescription="Choose current folder" />
 
-            <controls:FileListSkeletonView IsVisible="{Binding IsLoadingPlaceholderVisible}" />
+            <controls:FileListSkeletonView IsSkeletonVisible="{Binding IsLoadingPlaceholderVisible}" />
 
             <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No subfolders here" />
 
-            <controls:StackedItemsView IsVisible="{Binding IsListVisible}"
+            <controls:StackedItemsView IsContentVisible="{Binding IsListVisible}"
                                        ItemsSource="{Binding Folders}">
                 <controls:StackedItemsView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CaptureDestinationFolderItemViewModel">

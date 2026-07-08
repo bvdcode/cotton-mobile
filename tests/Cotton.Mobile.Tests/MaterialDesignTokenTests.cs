@@ -2606,6 +2606,7 @@ namespace Cotton.Mobile.Tests
             string activityFeedPage = LoadText(ActivityFeedPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string diagnosticsPage = LoadText(DiagnosticsPagePath);
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string materialCollectionView = LoadText(MaterialCollectionViewPath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
@@ -2618,6 +2619,7 @@ namespace Cotton.Mobile.Tests
             string combinedPages = activityFeedPage
                 + captureInboxPage
                 + captureDestinationPickerPage
+                + diagnosticsPage
                 + fileVersionHistoryPage
                 + pdfViewerPage
                 + recentFilesPage
@@ -2630,6 +2632,7 @@ namespace Cotton.Mobile.Tests
                 ActivityFeedPagePath,
                 CaptureInboxPagePath,
                 CaptureDestinationPickerPagePath,
+                DiagnosticsPagePath,
                 FileVersionHistoryPagePath,
                 PdfViewerPagePath,
                 RecentFilesPagePath,
@@ -2638,11 +2641,12 @@ namespace Cotton.Mobile.Tests
                 TransfersPagePath,
             ];
 
-            Assert.Equal(10, CountOccurrences(combinedPages, "<controls:MaterialCollectionView "));
-            Assert.Equal(10, CountOccurrences(combinedPages, "<controls:MaterialCollectionView.ItemTemplate>"));
+            Assert.Equal(11, CountOccurrences(combinedPages, "<controls:MaterialCollectionView "));
+            Assert.Equal(11, CountOccurrences(combinedPages, "<controls:MaterialCollectionView.ItemTemplate>"));
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\"", syncSettingsPage, StringComparison.Ordinal);
@@ -3086,7 +3090,9 @@ namespace Cotton.Mobile.Tests
             string diagnosticsItemView = LoadText(DiagnosticsItemViewPath);
             string stackedContentView = LoadText(StackedContentViewPath);
 
-            Assert.Contains("<controls:StackedItemsView ItemsSource=\"{Binding Sections}\"\n                                       StackStyleResourceKey=\"M3DiagnosticsSectionListStack\">", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView Grid.Row=\"2\"\n                                             ItemsSource=\"{Binding Sections}\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"\n                                             ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\">", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MaterialCollectionView.ItemTemplate>", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedContentView>", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedItemsView ItemsSource=\"{Binding Items}\"\n                                                           StackStyleResourceKey=\"M3DiagnosticsItemListStack\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSectionHeaderView Title=\"{Binding Title}\"", diagnosticsPage, StringComparison.Ordinal);
@@ -3103,6 +3109,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultValueTextStyleResourceKey = \"M3CardSupportingPrimaryBlock\"", diagnosticsItemView, StringComparison.Ordinal);
             Assert.Contains("M3DiagnosticsLabelColumnWidth", diagnosticsItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", diagnosticsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:StackedItemsView ItemsSource=\"{Binding Sections}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3DiagnosticsSectionListStack}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3DiagnosticsItemListStack}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsSectionStack}\">", diagnosticsPage, StringComparison.Ordinal);
@@ -3832,6 +3839,7 @@ namespace Cotton.Mobile.Tests
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
             string captureDestinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
+            string diagnosticsPage = LoadText(DiagnosticsPagePath);
             string layeredContentView = LoadText(LayeredContentViewPath);
             string recentFilesPage = LoadText(RecentFilesPagePath);
             string screenContentGridView = LoadText(ScreenContentGridViewPath);
@@ -3844,6 +3852,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenShellView>", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView>", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView>", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenShellView>", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView>", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView>", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenShellView>", syncSettingsPage, StringComparison.Ordinal);
@@ -3854,6 +3863,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"1\">", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\"\n                                        ExtraAutoRows=\"1\">", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenContentGridView Grid.Row=\"1\">", syncSettingsPage, StringComparison.Ordinal);
@@ -3894,6 +3904,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public IList<IView> Items => _grid.Children", screenContentGridView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,Auto,*\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Grid.Row=\"1\"\n              RowDefinitions=\"Auto,Auto,*\"", syncSettingsPage, StringComparison.Ordinal);
@@ -3905,10 +3916,12 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", captureInboxPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", syncSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ScreenScrollBodyView Grid.Row=\"1\">", transfersPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", captureInboxPage, StringComparison.Ordinal);
@@ -3917,6 +3930,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Grid RowDefinitions=\"Auto,*\">", transfersPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", activityFeedPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", recentFilesPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3ScreenContentGrid}\"", captureInboxPage, StringComparison.Ordinal);
@@ -3934,7 +3948,6 @@ namespace Cotton.Mobile.Tests
             string[] scrollBodyScreenPaths =
             [
                 BackupSetupPagePath,
-                DiagnosticsPagePath,
                 NotificationSettingsPagePath,
                 SecuritySettingsPagePath,
                 StoragePagePath,

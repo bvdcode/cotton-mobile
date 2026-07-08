@@ -16,17 +16,20 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh diagnostics" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="{Binding HeaderTitleText}"
                                        SupportingText="{Binding HeaderVersionText}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:StackedItemsView ItemsSource="{Binding Sections}"
-                                       StackStyleResourceKey="M3DiagnosticsSectionListStack">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="2"
+                                             ItemsSource="{Binding Sections}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:DiagnosticsSectionViewModel">
                         <controls:ContentCardView>
                             <controls:StackedContentView>
@@ -45,8 +48,8 @@
                             </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

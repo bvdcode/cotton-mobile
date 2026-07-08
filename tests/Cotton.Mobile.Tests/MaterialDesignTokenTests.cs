@@ -2585,6 +2585,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsContentVisibleProperty", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("OnContentVisiblePropertyChanged", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("CompleteContentVisibility", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("protected virtual bool IsContentInteractiveWhenVisible => true", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsContentVisible || !IsContentInteractiveWhenVisible", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionContentEnterDuration\")", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("Opacity = MaterialMotion.Value(\"M3MotionHiddenOpacity\")", materialAnimatedContentView, StringComparison.Ordinal);
@@ -2976,6 +2979,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsProgressVisible=\"True\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("public class StorageBucketItemView", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("StorageBucketItemView : MaterialAnimatedContentView", storageBucketItemView, StringComparison.Ordinal);
+            Assert.Contains("protected override bool IsContentInteractiveWhenVisible => false", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("IsBucketVisibleProperty", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("OnBucketVisiblePropertyChanged", storageBucketItemView, StringComparison.Ordinal);
             Assert.Contains("view.IsContentVisible = (bool)newValue", storageBucketItemView, StringComparison.Ordinal);
@@ -3022,6 +3026,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("BindableLayout.ItemsSource", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3SettingsItemListStack}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StorageBucketItemView IsVisible=\"{Binding IsVisible}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("InputTransparent = true", storageBucketItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("_progress.IsVisible = IsProgressVisible", storageBucketItemView, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "_primaryMetricText.IsVisible = !string.IsNullOrWhiteSpace(primaryMetricText)",

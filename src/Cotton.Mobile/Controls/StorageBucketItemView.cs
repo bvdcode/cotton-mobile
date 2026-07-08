@@ -123,8 +123,6 @@ namespace Cotton.Mobile.Controls
 
         public StorageBucketItemView()
         {
-            InputTransparent = true;
-
             _leadingIcon = new IconFrame();
             _title = new Label();
             _primaryMetricText = new Label();
@@ -174,6 +172,8 @@ namespace Cotton.Mobile.Controls
                 animateProgressVisibility: false,
                 animateSecondaryMetricTextVisibility: false);
         }
+
+        protected override bool IsContentInteractiveWhenVisible => false;
 
         public string Title
         {

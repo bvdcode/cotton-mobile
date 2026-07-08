@@ -27,6 +27,7 @@ namespace Cotton.Mobile.Controls
         protected MaterialAnimatedContentView()
         {
             Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+            UpdateInputTransparency();
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
@@ -42,6 +43,8 @@ namespace Cotton.Mobile.Controls
             get => (bool)GetValue(IsContentVisibleProperty);
             set => SetValue(IsContentVisibleProperty, value);
         }
+
+        protected virtual bool IsContentInteractiveWhenVisible => true;
 
         protected override void OnPropertyChanged(string? propertyName = null)
         {
@@ -81,6 +84,7 @@ namespace Cotton.Mobile.Controls
         private void UpdateAppearanceState()
         {
             this.AbortAnimation(AppearanceAnimationName);
+            UpdateInputTransparency();
 
             if (!_isLoaded || !IsVisible || !IsContentVisible)
             {
@@ -113,6 +117,10 @@ namespace Cotton.Mobile.Controls
             {
                 IsVisible = true;
             }
+            else
+            {
+                UpdateInputTransparency();
+            }
 
             MaterialMotion.UpdateDouble(
                 this,
@@ -129,6 +137,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteContentVisibility()
         {
             IsVisible = IsContentVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsContentVisible || !IsContentInteractiveWhenVisible;
         }
     }
 }

@@ -36,7 +36,7 @@
             <controls:MaterialCollectionView Grid.Row="2"
                                              IsContentVisible="{Binding IsListVisible}"
                                              ItemsSource="{Binding Items}"
-                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemSizingStrategy="MeasureAllItems"
                                              ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                 <controls:MaterialCollectionView.Footer>
                     <controls:ContentCardView IsCardVisible="{Binding IsLoadMoreVisible}">

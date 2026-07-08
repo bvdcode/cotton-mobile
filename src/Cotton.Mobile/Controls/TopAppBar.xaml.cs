@@ -13,6 +13,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultActionClusterStyleResourceKey = "M3TopAppBarActionCluster";
         private const string DefaultActionIconButtonStyleResourceKey = "M3TopAppBarIconButton";
         private const string DefaultSurfaceStyleResourceKey = "M3TopAppBarSurface";
+        private readonly Command _backCommand;
+        private bool _isNavigatingBack;
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(
             nameof(TitleText),
@@ -107,12 +109,12 @@ namespace Cotton.Mobile.Controls
 
         public TopAppBar()
         {
-            BackCommand = new Command(ExecuteBackCommand);
+            _backCommand = new Command(ExecuteBackCommand, CanNavigateBack);
             InitializeComponent();
             UpdateVisualState();
         }
 
-        public ICommand BackCommand { get; }
+        public ICommand BackCommand => _backCommand;
 
         public bool IsActionClusterVisible =>
             IsVisibleAction(PrimaryIconData, PrimaryCommand, IsPrimaryActionVisible)
@@ -205,8 +207,34 @@ namespace Cotton.Mobile.Controls
 
         private async void ExecuteBackCommand()
         {
-            INavigation navigation = Shell.Current.Navigation;
-            await navigation.PopAsync();
+            if (!CanNavigateBack())
+            {
+                return;
+            }
+
+            _isNavigatingBack = true;
+            _backCommand.ChangeCanExecute();
+
+            try
+            {
+                INavigation navigation = Shell.Current.Navigation;
+                await navigation.PopAsync();
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine($"Top app bar back navigation failed: {exception}");
+            }
+            finally
+            {
+                _isNavigatingBack = false;
+                _backCommand.ChangeCanExecute();
+            }
+        }
+
+        private bool CanNavigateBack()
+        {
+            INavigation? navigation = Shell.Current?.Navigation;
+            return !_isNavigatingBack && navigation?.NavigationStack.Count > 1;
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)

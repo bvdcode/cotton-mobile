@@ -26,6 +26,8 @@ namespace Cotton.Mobile.ViewModels
         private bool _wifiOnly = true;
         private bool _allowCellular;
         private bool _chargingOnly;
+        private bool _isBackupEnabled;
+        private bool _canEnableBackup;
         private bool _isDestinationStorageEstimateCurrent;
         private CottonCameraBackupMediaAccessDisplayState _latestMediaAccessDisplay =
             CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.NotRequested);
@@ -122,9 +124,32 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public bool IsBackupEnabled => false;
+        public bool IsBackupEnabled
+        {
+            get => _isBackupEnabled;
+            set
+            {
+                if (SetProperty(ref _isBackupEnabled, value && CanEnableBackup))
+                {
+                    RefreshPolicyPreview();
+                }
+            }
+        }
 
-        public bool CanEnableBackup => false;
+        public bool CanEnableBackup
+        {
+            get => _canEnableBackup;
+            private set
+            {
+                if (SetProperty(ref _canEnableBackup, value))
+                {
+                    if (!value && IsBackupEnabled)
+                    {
+                        IsBackupEnabled = false;
+                    }
+                }
+            }
+        }
 
         public bool PhotosOnly
         {
@@ -474,6 +499,7 @@ namespace Cotton.Mobile.ViewModels
         private CottonCameraBackupSettings CreateSettingsFromUi()
         {
             return _settings
+                .WithEnabled(IsBackupEnabled && CanEnableBackup)
                 .WithPhotosOnly(PhotosOnly)
                 .WithWifiOnly(WifiOnly)
                 .WithAllowCellular(AllowCellular)
@@ -489,6 +515,8 @@ namespace Cotton.Mobile.ViewModels
             ChargingOnly = settings.ChargingOnly;
             CottonCameraBackupSetupDisplayState display =
                 CottonCameraBackupSetupDisplayState.Create(settings);
+            CanEnableBackup = display.CanEnableBackup;
+            IsBackupEnabled = settings.IsEnabled && display.CanEnableBackup;
             DestinationText = display.DestinationText;
             ExecutionStatusText = display.ExecutionStatusText;
             PolicySummaryText = display.PolicySummaryText;

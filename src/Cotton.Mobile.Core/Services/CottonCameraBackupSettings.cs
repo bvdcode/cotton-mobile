@@ -60,6 +60,17 @@ namespace Cotton.Mobile.Services
                 ChargingOnly);
         }
 
+        public CottonCameraBackupSettings WithEnabled(bool isEnabled)
+        {
+            return new CottonCameraBackupSettings(
+                isEnabled,
+                Destination,
+                PhotosOnly,
+                WifiOnly,
+                AllowCellular,
+                ChargingOnly);
+        }
+
         public CottonCameraBackupSettings WithPhotosOnly(bool photosOnly)
         {
             return new CottonCameraBackupSettings(

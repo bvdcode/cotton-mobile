@@ -73,7 +73,7 @@
                                                  LeadingIconData="{x:Static controls:IconPathData.Backup}"
                                                  LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
                                                  IsEnabled="{Binding CanEnableBackup}"
-                                                 IsToggled="{Binding IsBackupEnabled, Mode=OneWay}"
+                                                 IsToggled="{Binding IsBackupEnabled, Mode=TwoWay}"
                                                  SemanticDescription="Camera backup" />
 
                 <controls:SettingsToggleItemView Text="Photos only"

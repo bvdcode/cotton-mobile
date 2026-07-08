@@ -167,6 +167,34 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Camera_backup_enabled_state_updates_after_destination_is_available()
+        {
+            CottonCameraBackupSettings settings =
+                CottonCameraBackupSettings.Default.WithDestination(CreateDestination());
+
+            CottonCameraBackupSettings enabled = settings.WithEnabled(true);
+            CottonCameraBackupSettings disabled = enabled.WithEnabled(false);
+
+            Assert.True(enabled.IsEnabled);
+            Assert.False(disabled.IsEnabled);
+            Assert.Equal(settings.Destination, enabled.Destination);
+            Assert.Equal(settings.PhotosOnly, enabled.PhotosOnly);
+            Assert.Equal(settings.WifiOnly, enabled.WifiOnly);
+            Assert.Equal(settings.AllowCellular, enabled.AllowCellular);
+            Assert.Equal(settings.ChargingOnly, enabled.ChargingOnly);
+        }
+
+        [Fact]
+        public void Camera_backup_view_model_does_not_expose_placeholder_enable_toggle()
+        {
+            string source = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/BackupSetupViewModel.cs");
+
+            Assert.DoesNotContain("public bool IsBackupEnabled => false;", source, StringComparison.Ordinal);
+            Assert.DoesNotContain("public bool CanEnableBackup => false;", source, StringComparison.Ordinal);
+            Assert.Contains(".WithEnabled(IsBackupEnabled && CanEnableBackup)", source, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Camera_backup_media_identity_is_stable_until_source_version_changes()
         {
             var identity = new CottonCameraBackupMediaIdentity(

@@ -1698,6 +1698,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DarkActionIconButtonStyleResourceKey = \"M3DarkTopAppBarIconButton\"", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("propertyChanged: OnVisualPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("propertyChanged: OnActionPropertyChanged", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("_backCommand = new Command(ExecuteBackCommand, CanNavigateBack)", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("public ICommand BackCommand => _backCommand", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("private bool CanNavigateBack()", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("navigation?.NavigationStack.Count > 1", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("_backCommand.ChangeCanExecute()", topAppBarCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("catch (Exception exception)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("public bool IsActionClusterVisible =>", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("IsVisibleAction(PrimaryIconData, PrimaryCommand, IsPrimaryActionVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
             Assert.Contains("IsVisibleAction(SecondaryIconData, SecondaryCommand, IsSecondaryActionVisible)", topAppBarCodeBehind, StringComparison.Ordinal);
@@ -2696,6 +2702,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsContentVisible=\"{Binding IsPreviewVisible}\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("CollectionStyleResourceKey=\"M3DocumentViewerCollection\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", pdfViewerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", activityFeedPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", transfersPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(trashPage, "ItemSizingStrategy=\"MeasureAllItems\""));
+            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("public class MaterialCollectionView", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("MaterialCollectionView : MaterialAnimatedContentView", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("DefaultCollectionStyleResourceKey = \"M3MaterialCollectionView\"", materialCollectionView, StringComparison.Ordinal);
@@ -3125,7 +3139,7 @@ namespace Cotton.Mobile.Tests
             string stackedContentView = LoadText(StackedContentViewPath);
 
             Assert.Contains("<controls:MaterialCollectionView Grid.Row=\"2\"\n                                             ItemsSource=\"{Binding Sections}\"", diagnosticsPage, StringComparison.Ordinal);
-            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"\n                                             ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\">", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"\n                                             ItemsLayout=\"{StaticResource M3VerticalCardListItemsLayout}\">", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:MaterialCollectionView.ItemTemplate>", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedContentView>", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:StackedItemsView ItemsSource=\"{Binding Items}\"\n                                                           StackStyleResourceKey=\"M3DiagnosticsItemListStack\">", diagnosticsPage, StringComparison.Ordinal);
@@ -3612,7 +3626,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(2, CountOccurrences(securitySettingsPage, "<controls:SettingsToggleItemView"));
             Assert.Contains("Text=\"Camera backup\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsEnabled=\"{Binding CanEnableBackup}\"", backupSetupPage, StringComparison.Ordinal);
-            Assert.Contains("IsToggled=\"{Binding IsBackupEnabled, Mode=OneWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsToggled=\"{Binding IsBackupEnabled, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Photos only\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding PhotosOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Require charging\"", backupSetupPage, StringComparison.Ordinal);

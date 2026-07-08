@@ -139,11 +139,14 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isEmptyVisible, value))
                 {
                     OnPropertyChanged(nameof(IsSummaryVisible));
+                    OnPropertyChanged(nameof(IsListVisible));
                 }
             }
         }
 
         public bool IsSummaryVisible => !IsEmptyVisible;
+
+        public bool IsListVisible => !IsEmptyVisible;
 
         public void Configure(Uri instanceUri)
         {

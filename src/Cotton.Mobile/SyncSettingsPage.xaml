@@ -18,16 +18,18 @@
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh sync settings" />
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
+        <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="Folders"
                                        SupportingText="{Binding SummaryText}"
                                        IsSupportingTextVisible="{Binding IsSummaryVisible}"
                                        IsBusy="{Binding IsBusy}" />
 
-            <controls:ScreenStatusView Text="{Binding Status}"
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
                                        IsStatusVisible="{Binding IsStatusVisible}" />
 
-            <controls:EmptyStateView IsStateVisible="{Binding IsEmptyVisible}"
+            <controls:EmptyStateView Grid.Row="2"
+                                     IsStateVisible="{Binding IsEmptyVisible}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No folders yet"
                                      Body="Pick a folder in Files to enable sync."
@@ -38,8 +40,12 @@
                                      ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
                                      ActionSemanticDescription="Choose sync folder" />
 
-            <controls:StackedItemsView ItemsSource="{Binding Roots}">
-                <controls:StackedItemsView.ItemTemplate>
+            <controls:MaterialCollectionView Grid.Row="2"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Roots}"
+                                             ItemSizingStrategy="MeasureFirstItem"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
                         <controls:ContentCardView>
                             <controls:StackedContentView StackStyleResourceKey="M3SettingsDenseStack">
@@ -82,8 +88,8 @@
                             </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>
-                </controls:StackedItemsView.ItemTemplate>
-            </controls:StackedItemsView>
-        </controls:ScreenScrollBodyView>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
     </controls:ScreenShellView>
 </ContentPage>

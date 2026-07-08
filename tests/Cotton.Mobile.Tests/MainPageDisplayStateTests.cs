@@ -1,5 +1,6 @@
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
+using System.Collections.Specialized;
 using Xunit;
 
 namespace Cotton.Mobile.Tests
@@ -97,6 +98,33 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsFilesEmptyVisible);
             Assert.False(display.IsFilesEmptyAddActionVisible);
             Assert.Equal("0 matches · A-Z", display.FilesStatus);
+        }
+
+        [Fact]
+        public void File_feed_replaces_visible_entries_with_single_collection_reset()
+        {
+            MainPageDisplayState display = CreateSignedInDisplay();
+            var actions = new List<NotifyCollectionChangedAction>();
+            display.FileEntries.CollectionChanged += (_, args) => actions.Add(args.Action);
+
+            display.ShowFiles(
+                CreateContent(
+                    Enumerable
+                        .Range(0, 120)
+                        .Select(index => CreateFile($"file-{index:000}.txt", "Text", index, Older))
+                        .ToArray()),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+
+            Assert.Equal([NotifyCollectionChangedAction.Reset], actions);
+            Assert.Equal(120, display.VisibleFileEntryCount);
+
+            actions.Clear();
+            display.FileSearchText = "file-00";
+
+            Assert.Equal([NotifyCollectionChangedAction.Reset], actions);
+            Assert.Equal(10, display.VisibleFileEntryCount);
         }
 
         [Fact]

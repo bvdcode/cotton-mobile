@@ -3,7 +3,6 @@
 
 namespace Cotton.Mobile.ViewModels
 {
-    using System.Collections.ObjectModel;
     using Cotton.Mobile.Services;
 
     public class MainPageDisplayState : ViewModelBase
@@ -224,7 +223,7 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsFilesPathVisible => !string.IsNullOrWhiteSpace(FilesPath);
 
-        public ObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
+        public RangeObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
 
         public IReadOnlyList<CottonFileBrowserEntry> AllFileEntries => _allFileEntries;
 
@@ -658,7 +657,7 @@ namespace Cotton.Mobile.ViewModels
             OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
             ClearFileSelection();
             _allFileEntries.Clear();
-            FileEntries.Clear();
+            FileEntries.ReplaceWith([]);
             NotifyFilesEmptyStateChanged();
             IsLogoutEnabled = true;
             IsCancelAuthorizationEnabled = false;
@@ -690,7 +689,7 @@ namespace Cotton.Mobile.ViewModels
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
             _allFileEntries.Clear();
-            FileEntries.Clear();
+            FileEntries.ReplaceWith([]);
             ClearFileSearch();
             NotifyFilesEmptyStateChanged();
         }
@@ -1195,11 +1194,7 @@ namespace Cotton.Mobile.ViewModels
                     _allFileEntries.Where(entry => entry.Matches(FileSearchText)))
                 .ToList();
 
-            FileEntries.Clear();
-            foreach (CottonFileBrowserEntry entry in visibleEntries)
-            {
-                FileEntries.Add(entry);
-            }
+            FileEntries.ReplaceWith(visibleEntries);
 
             ResolveFilesEmptyState(visibleEntries.Count);
             if (!IsFileBrowserBusy)

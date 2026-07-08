@@ -971,6 +971,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("PlaceholderProperty", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_urlField.Placeholder = Placeholder ?? string.Empty", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("ChangeServerActionText = \"Change server\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("UseDefaultServerActionText = \"Use default server\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_toggleServerFieldCommand = new Command(ToggleServerField)", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new TextAction", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_urlField.IsFieldVisible = isServerFieldVisible", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("Dispatcher.DispatchDelayed(", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);

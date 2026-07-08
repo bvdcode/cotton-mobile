@@ -11,6 +11,8 @@ namespace Cotton.Mobile.Controls
         private const string DefaultFormStackStyleResourceKey = "M3AuthFormStack";
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
+        private const string ChangeServerActionText = "Change server";
+        private const string UseDefaultServerActionText = "Use default server";
         private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
 
         public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
@@ -25,7 +27,8 @@ namespace Cotton.Mobile.Controls
             typeof(string),
             typeof(AuthSignInPanelView),
             string.Empty,
-            BindingMode.TwoWay);
+            BindingMode.TwoWay,
+            propertyChanged: OnInstanceUrlChanged);
 
         public static readonly BindableProperty StatusProperty = BindableProperty.Create(
             nameof(Status),
@@ -65,12 +68,17 @@ namespace Cotton.Mobile.Controls
         private readonly FilledButton _button;
         private readonly ContentCardView _card;
         private readonly VerticalStackLayout _formStack;
+        private readonly TextAction _serverAction;
         private readonly ScreenStatusView _status;
+        private readonly ICommand _toggleServerFieldCommand;
         private readonly OutlinedInputField _urlField;
         private bool _hasAppliedPanelVisibility;
+        private bool _isServerFieldExpanded;
 
         public AuthSignInPanelView()
         {
+            _toggleServerFieldCommand = new Command(ToggleServerField);
+
             _urlField = new OutlinedInputField
             {
                 IconData = IconPathData.Cloud,
@@ -92,6 +100,11 @@ namespace Cotton.Mobile.Controls
             };
             _button.SetDynamicResource(StyleProperty, DefaultButtonStyleResourceKey);
 
+            _serverAction = new TextAction
+            {
+                Command = _toggleServerFieldCommand,
+            };
+
             _formStack = new VerticalStackLayout
             {
                 Children =
@@ -99,6 +112,7 @@ namespace Cotton.Mobile.Controls
                     _urlField,
                     _status,
                     _button,
+                    _serverAction,
                 },
             };
             _formStack.SetDynamicResource(StyleProperty, DefaultFormStackStyleResourceKey);
@@ -111,6 +125,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _card;
             UpdateVisualState();
+            UpdateServerFieldState();
             UpdatePanelVisibility(animatePanelVisibility: false);
             UpdateInputTransparency();
         }
@@ -157,6 +172,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsPanelVisibleProperty, value);
         }
 
+        private static void OnInstanceUrlChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            AuthSignInPanelView view = (AuthSignInPanelView)bindable;
+            view.UpdateServerFieldState();
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             AuthSignInPanelView view = (AuthSignInPanelView)bindable;
@@ -180,7 +201,50 @@ namespace Cotton.Mobile.Controls
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;
+            _serverAction.IsEnabled = IsInputEnabled;
+            UpdateServerFieldState();
             UpdateInputTransparency();
+        }
+
+        private void ToggleServerField()
+        {
+            if (!IsInputEnabled)
+            {
+                return;
+            }
+
+            if (IsServerFieldVisible())
+            {
+                _isServerFieldExpanded = false;
+                InstanceUrl = string.Empty;
+                _urlField.UnfocusInput();
+                UpdateServerFieldState();
+                return;
+            }
+
+            _isServerFieldExpanded = true;
+            UpdateServerFieldState();
+            Dispatcher.DispatchDelayed(
+                TimeSpan.FromMilliseconds(50),
+                () =>
+                {
+                    if (IsServerFieldVisible())
+                    {
+                        _urlField.FocusInput();
+                    }
+                });
+        }
+
+        private void UpdateServerFieldState()
+        {
+            bool isServerFieldVisible = IsServerFieldVisible();
+            _urlField.IsFieldVisible = isServerFieldVisible;
+            _serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText;
+        }
+
+        private bool IsServerFieldVisible()
+        {
+            return _isServerFieldExpanded || !string.IsNullOrWhiteSpace(InstanceUrl);
         }
 
         private void UpdatePanelVisibility(bool animatePanelVisibility)

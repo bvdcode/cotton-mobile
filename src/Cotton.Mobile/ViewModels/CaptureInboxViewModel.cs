@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -66,7 +65,7 @@ namespace Cotton.Mobile.ViewModels
             ClearCommand = new AsyncCommand(ClearAsync, LogUnhandledCommandException, () => !IsBusy && Items.Count > 0);
         }
 
-        public ObservableCollection<CottonCaptureInboxListItem> Items { get; }
+        public RangeObservableCollection<CottonCaptureInboxListItem> Items { get; }
 
         public AsyncCommand LoadCommand { get; }
 
@@ -397,11 +396,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSnapshot(CottonCaptureInboxListSnapshot snapshot)
         {
-            Items.Clear();
-            foreach (CottonCaptureInboxListItem item in snapshot.Items)
-            {
-                Items.Add(item);
-            }
+            Items.ReplaceWith(snapshot.Items);
 
             SummaryText = snapshot.SummaryText;
             EmptyMessage = snapshot.EmptyMessage;

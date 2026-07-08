@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -69,7 +68,7 @@ namespace Cotton.Mobile.ViewModels
             ChooseCommand = new AsyncCommand(ChooseCurrentAsync, LogUnhandledCommandException, () => !IsBusy && _currentFolder is not null);
         }
 
-        public ObservableCollection<CaptureDestinationFolderItemViewModel> Folders { get; }
+        public RangeObservableCollection<CaptureDestinationFolderItemViewModel> Folders { get; }
 
         public AsyncCommand LoadCommand { get; }
 
@@ -306,19 +305,16 @@ namespace Cotton.Mobile.ViewModels
             _currentFolder = new CottonFolderHandle(content.FolderId, content.FolderName);
             CurrentFolderName = _currentFolder.Name;
             PathText = CreatePathText();
-            Folders.Clear();
 
-            foreach (CottonFileBrowserEntry folder in content.Entries
-                         .Where(entry => entry.Type == CottonFileBrowserEntryType.Folder)
-                         .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
-                         .ThenBy(entry => entry.Id))
-            {
-                Folders.Add(
-                    new CaptureDestinationFolderItemViewModel(
+            Folders.ReplaceWith(
+                content.Entries
+                    .Where(entry => entry.Type == CottonFileBrowserEntryType.Folder)
+                    .OrderBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase)
+                    .ThenBy(entry => entry.Id)
+                    .Select(folder => new CaptureDestinationFolderItemViewModel(
                         new CottonFolderHandle(folder.Id, folder.Name),
                         OpenFolderAsync,
-                        LogUnhandledCommandException));
-            }
+                        LogUnhandledCommandException)));
 
             SummaryText = Folders.Count == 1 ? "1 folder" : $"{Folders.Count:N0} folders";
             RaiseFolderStateChanged();

@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -98,7 +97,7 @@ namespace Cotton.Mobile.ViewModels
                 _ => !IsBusy);
         }
 
-        public ObservableCollection<CottonFileBrowserEntry> Items { get; } = [];
+        public RangeObservableCollection<CottonFileBrowserEntry> Items { get; } = [];
 
         public AsyncCommand LoadCommand { get; }
 
@@ -960,7 +959,7 @@ namespace Cotton.Mobile.ViewModels
         private void ShowOfflineState()
         {
             _allItems.Clear();
-            Items.Clear();
+            Items.ReplaceWith([]);
             SummaryText = "Trash needs internet";
             EmptyMessage = "Trash unavailable offline";
             EmptyDetails = "Connect and refresh to view deleted items.";
@@ -996,11 +995,7 @@ namespace Cotton.Mobile.ViewModels
                 _isSearchOpen,
                 _sortMode,
                 _viewMode);
-            Items.Clear();
-            foreach (CottonFileBrowserEntry item in state.Items)
-            {
-                Items.Add(item);
-            }
+            Items.ReplaceWith(state.Items);
 
             SummaryText = state.SummaryText;
             EmptyMessage = state.EmptyMessage;

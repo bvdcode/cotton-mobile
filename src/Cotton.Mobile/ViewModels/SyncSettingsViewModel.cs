@@ -4,7 +4,6 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -91,7 +90,7 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand<CottonSyncRootListItem> ResumeRootCommand { get; }
 
-        public ObservableCollection<CottonSyncRootListItem> Roots { get; } = new();
+        public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = new();
 
         public bool IsBusy
         {
@@ -550,11 +549,7 @@ namespace Cotton.Mobile.ViewModels
         private void ShowRoots(IReadOnlyList<CottonSyncRootSnapshot> roots, IReadOnlySet<Guid> pausedRootIds)
         {
             CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create(roots, pausedRootIds);
-            Roots.Clear();
-            foreach (CottonSyncRootListItem item in state.Items)
-            {
-                Roots.Add(item);
-            }
+            Roots.ReplaceWith(state.Items);
 
             SummaryText = state.SummaryText;
             IsEmptyVisible = state.IsEmptyVisible;

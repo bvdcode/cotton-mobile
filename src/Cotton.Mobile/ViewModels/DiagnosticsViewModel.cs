@@ -6,7 +6,6 @@ using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.ApplicationModel.DataTransfer;
-using System.Collections.ObjectModel;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -54,7 +53,7 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand CopyCommand { get; }
 
-        public ObservableCollection<DiagnosticsSectionViewModel> Sections { get; } = new();
+        public RangeObservableCollection<DiagnosticsSectionViewModel> Sections { get; } = new();
 
         public bool IsBusy
         {
@@ -200,11 +199,7 @@ namespace Cotton.Mobile.ViewModels
             HeaderVersionText = CreateHeaderVersionText();
             _hasCacheDetails = summary is not null;
             _hasRemotePushDetails = remotePush is not null;
-            Sections.Clear();
-            foreach (DiagnosticsSectionViewModel section in CreateSections(summary, remotePush))
-            {
-                Sections.Add(section);
-            }
+            Sections.ReplaceWith(CreateSections(summary, remotePush));
         }
 
         private IReadOnlyList<DiagnosticsSectionViewModel> CreateSections(

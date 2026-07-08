@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -63,7 +62,7 @@ namespace Cotton.Mobile.ViewModels
                 _ => !IsBusy);
         }
 
-        public ObservableCollection<CottonRecentFileListItem> Items { get; } = [];
+        public RangeObservableCollection<CottonRecentFileListItem> Items { get; } = [];
 
         public AsyncCommand LoadCommand { get; }
 
@@ -302,11 +301,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSnapshot(CottonRecentFileListSnapshot snapshot)
         {
-            Items.Clear();
-            foreach (CottonRecentFileListItem item in snapshot.Items)
-            {
-                Items.Add(item);
-            }
+            Items.ReplaceWith(snapshot.Items);
 
             SummaryText = snapshot.SummaryText;
             EmptyMessage = snapshot.EmptyMessage;

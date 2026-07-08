@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -67,7 +66,7 @@ namespace Cotton.Mobile.ViewModels
                 () => !IsBusy && _canClearHistory);
         }
 
-        public ObservableCollection<CottonTransferListItem> Items { get; }
+        public RangeObservableCollection<CottonTransferListItem> Items { get; }
 
         public AsyncCommand LoadCommand { get; }
 
@@ -266,11 +265,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSnapshot(CottonTransferListSnapshot snapshot, bool canClearHistory)
         {
-            Items.Clear();
-            foreach (CottonTransferListItem item in snapshot.Items)
-            {
-                Items.Add(item);
-            }
+            Items.ReplaceWith(snapshot.Items);
 
             SetCanClearHistory(canClearHistory);
             SummaryText = snapshot.SummaryText;

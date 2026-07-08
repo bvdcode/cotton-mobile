@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -48,7 +47,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string FileName => _file.Name;
 
-        public ObservableCollection<CottonFileVersionItemSnapshot> Items { get; } = [];
+        public RangeObservableCollection<CottonFileVersionItemSnapshot> Items { get; } = [];
 
         public AsyncCommand LoadCommand { get; }
 
@@ -153,11 +152,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowSnapshot(CottonFileVersionListSnapshot snapshot)
         {
-            Items.Clear();
-            foreach (CottonFileVersionItemSnapshot item in snapshot.Items)
-            {
-                Items.Add(item);
-            }
+            Items.ReplaceWith(snapshot.Items);
 
             SummaryText = snapshot.SummaryText;
             EmptyMessage = snapshot.EmptyText;
@@ -171,7 +166,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void ShowOfflineState()
         {
-            Items.Clear();
+            Items.ReplaceWith([]);
             SummaryText = "Version history needs internet.";
             EmptyMessage = "Version history unavailable offline.";
             EmptyDetails = "Connect and refresh to view versions.";

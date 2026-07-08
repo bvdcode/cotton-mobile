@@ -169,6 +169,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Downloading zeta.txt... 50%", display.FilesStatus);
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.True(display.IsFilesLoadingPanelVisible);
+            Assert.True(display.IsFileActionStatusPanelVisible);
             Assert.False(display.IsAccountActionEnabled);
             Assert.True(display.CanCancelFileAction);
 
@@ -190,17 +192,26 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsFilesLoading);
             Assert.False(display.IsFilesRefreshing);
             Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.False(display.IsFilesLoadingPanelVisible);
+            Assert.False(display.IsFileActionStatusPanelVisible);
             Assert.False(display.CanCancelFileAction);
             Assert.False(display.CanRetryFileAction);
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.IsAccountActionEnabled);
 
-            display.ShowFileActionLoading("Opening zeta.txt...");
+            display.ShowFileActionLoading("Opening zeta.txt...", showStatusPanel: false);
 
             Assert.True(display.IsFilesLoading);
             Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.False(display.IsFilesLoadingPanelVisible);
+            Assert.False(display.IsFileActionStatusPanelVisible);
             Assert.True(display.CanCancelFileAction);
             Assert.Equal("Opening zeta.txt...", display.FilesStatus);
+
+            display.ShowFileActionLoading("Downloading zeta.txt...");
+
+            Assert.True(display.IsFilesLoadingPanelVisible);
+            Assert.True(display.IsFileActionStatusPanelVisible);
         }
 
         [Fact]
@@ -260,12 +271,14 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.CanRefreshFiles);
             Assert.False(display.IsAccountActionEnabled);
+            Assert.True(display.IsFilesLoadingPanelVisible);
 
             display.ShowFilesLoading("Loading files...");
 
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.CanRefreshFiles);
             Assert.True(display.IsInlineFilesLoadingVisible);
+            Assert.True(display.IsFilesLoadingPanelVisible);
         }
 
         [Fact]

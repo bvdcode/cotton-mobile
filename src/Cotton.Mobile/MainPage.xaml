@@ -125,8 +125,8 @@
                                                SecondaryActionCommand="{Binding ClearFileSelectionCommand}"
                                                SecondaryActionSemanticDescription="Cancel file selection" />
 
-                    <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsFilesLoading}"
-                                                IsRunning="{Binding Display.IsFilesLoading}"
+                    <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsFilesLoadingPanelVisible}"
+                                                IsRunning="{Binding Display.IsFilesLoadingPanelVisible}"
                                                 Text="{Binding Display.FilesStatus}"
                                                 ActionIconData="{x:Static controls:IconPathData.Close}"
                                                 ActionCommand="{Binding CancelFileActionCommand}"

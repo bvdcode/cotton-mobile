@@ -1546,6 +1546,7 @@ namespace Cotton.Mobile.ViewModels
                     CreateFileDownloadProgress(
                         file,
                         "Downloading",
+                        showStatusPanel: true,
                         () => IsActiveFileAction(fileActionCancellation, instanceUri),
                         fileActionCancellation.Token),
                     fileActionCancellation.Token);
@@ -2095,6 +2096,7 @@ namespace Cotton.Mobile.ViewModels
                     CreateFileDownloadProgress(
                         file,
                         progressActionName,
+                        showStatusPanel: true,
                         () => IsActiveFileAction(fileActionCancellation, instanceUri),
                         fileActionCancellation.Token),
                     fileActionCancellation.Token);
@@ -3014,6 +3016,7 @@ namespace Cotton.Mobile.ViewModels
                         CreateFileDownloadProgress(
                             file,
                             $"Saving {item.Position} of {queue.TotalCount}",
+                            showStatusPanel: true,
                             () => IsActiveFileAction(fileActionCancellation, instanceUri),
                             fileActionCancellation.Token),
                         fileActionCancellation.Token);
@@ -4373,6 +4376,7 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     file,
                     "Preparing",
+                    showStatusPanel: true,
                     () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
@@ -5379,6 +5383,7 @@ namespace Cotton.Mobile.ViewModels
             Uri instanceUri,
             CottonFileBrowserEntry file,
             string actionName,
+            bool showStatusPanel,
             Func<bool> canUpdateProgress,
             CancellationToken cancellationToken)
         {
@@ -5393,7 +5398,12 @@ namespace Cotton.Mobile.ViewModels
             CottonFileDownloadResult downloadedFile = await _fileBrowserService.DownloadAsync(
                 instanceUri,
                 file,
-                CreateFileDownloadProgress(file, actionName, canUpdateProgress, cancellationToken),
+                CreateFileDownloadProgress(
+                    file,
+                    actionName,
+                    showStatusPanel,
+                    canUpdateProgress,
+                    cancellationToken),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
             await RefreshLocalFileStateAsync(instanceUri, cancellationToken);
@@ -5402,7 +5412,9 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenRemoteFileAsync(Uri instanceUri, CottonFileBrowserEntry file)
         {
-            CancellationTokenSource fileActionCancellation = BeginDeferredFileAction($"Opening {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginDeferredFileAction(
+                $"Opening {file.Name}...",
+                showStatusPanelWhenLoading: false);
             bool shouldRunRecoveryRefresh = false;
 
             try
@@ -5411,6 +5423,7 @@ namespace Cotton.Mobile.ViewModels
                     instanceUri,
                     file,
                     "Opening",
+                    showStatusPanel: false,
                     () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 await OpenPreparedFileAsync(file, result, fileActionCancellation.Token);
@@ -5942,6 +5955,7 @@ namespace Cotton.Mobile.ViewModels
         private IProgress<long>? CreateFileDownloadProgress(
             CottonFileBrowserEntry file,
             string actionName,
+            bool showStatusPanel,
             Func<bool> canUpdateProgress,
             CancellationToken cancellationToken)
         {
@@ -5966,7 +5980,9 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 lastPercent = percent;
-                _display.ShowFileActionLoading($"{actionName} {file.Name}... {percent}%");
+                _display.ShowFileActionLoading(
+                    $"{actionName} {file.Name}... {percent}%",
+                    showStatusPanel);
             });
         }
 
@@ -6140,20 +6156,23 @@ namespace Cotton.Mobile.ViewModels
             return cancellation;
         }
 
-        private CancellationTokenSource BeginDeferredFileAction(string status)
+        private CancellationTokenSource BeginDeferredFileAction(
+            string status,
+            bool showStatusPanelWhenLoading = true)
         {
             CancelCurrentFileAction();
             ClearFileActionRetry();
             CancellationTokenSource cancellation = new();
             _fileActionCancellation = cancellation;
             _display.ShowFileActionPending();
-            _ = ShowDeferredFileActionLoadingAsync(cancellation, status);
+            _ = ShowDeferredFileActionLoadingAsync(cancellation, status, showStatusPanelWhenLoading);
             return cancellation;
         }
 
         private async Task ShowDeferredFileActionLoadingAsync(
             CancellationTokenSource fileActionCancellation,
-            string status)
+            string status,
+            bool showStatusPanel)
         {
             try
             {
@@ -6164,7 +6183,7 @@ namespace Cotton.Mobile.ViewModels
                         && !_display.IsFilesLoading
                         && !_display.IsFileBrowserChromeEnabled)
                     {
-                        _display.ShowFileActionLoading(status);
+                        _display.ShowFileActionLoading(status, showStatusPanel);
                     }
                 }).ConfigureAwait(false);
             }

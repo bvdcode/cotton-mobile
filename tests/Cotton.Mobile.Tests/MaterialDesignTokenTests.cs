@@ -1016,13 +1016,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"{Binding Display.LoadingMessage}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Waiting for browser approval\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding Display.AuthorizationProgressMessage}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsStatusVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("IsRunning=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsStatusVisible=\"{Binding Display.IsFilesLoadingPanelVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsRunning=\"{Binding Display.IsFilesLoadingPanelVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding Display.FilesStatus}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "IsStatusVisible=\"{Binding Display.IsFilesLoading}\"\n                                                        IsRunning=\"{Binding Display.IsFilesLoading}\"\n                                                        Text=\"{Binding Display.LoadingMessage}\"",
                 mainPage,
                 StringComparison.Ordinal);
+            Assert.DoesNotContain("IsStatusVisible=\"{Binding Display.IsFilesLoading}\"", mainPage, StringComparison.Ordinal);
             Match directVisibilityMatch = Regex.Match(
                 mainPage,
                 @"<controls:LoadingStatusView(?:(?!>).)*\bIsVisible=""",

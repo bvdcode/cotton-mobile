@@ -20,7 +20,9 @@ namespace Cotton.Mobile.Tests
             string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageFileBrowserController.cs");
 
             Assert.DoesNotContain("BeginFileAction($\"Opening {file.Name}...\")", content, StringComparison.Ordinal);
-            Assert.Contains("BeginDeferredFileAction($\"Opening {file.Name}...\")", content, StringComparison.Ordinal);
+            Assert.Contains("BeginDeferredFileAction(", content, StringComparison.Ordinal);
+            Assert.Contains("showStatusPanelWhenLoading: false", content, StringComparison.Ordinal);
+            Assert.Contains("showStatusPanel: false", content, StringComparison.Ordinal);
             Assert.Contains("ShowFileActionPending", content, StringComparison.Ordinal);
             Assert.Contains("&& !_display.IsFilesLoading", content, StringComparison.Ordinal);
             Assert.Contains("&& !_display.IsFileBrowserChromeEnabled", content, StringComparison.Ordinal);

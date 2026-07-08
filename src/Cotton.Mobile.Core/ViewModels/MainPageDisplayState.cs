@@ -41,6 +41,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _isFilesLoading;
         private bool _isFilesRefreshing;
         private bool _isFileActionInProgress;
+        private bool _isFileActionStatusPanelVisible;
         private bool _isFileSearchOpen;
         private bool _canNavigateFilesUp;
         private bool _canCancelFileAction;
@@ -417,6 +418,7 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isFilesLoading, value))
                 {
                     OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
+                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
                     NotifyFileBrowserChromeStateChanged();
                     NotifyFilesEmptyStateChanged();
                 }
@@ -424,6 +426,21 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsInlineFilesLoadingVisible => IsFilesLoading && !IsFileActionInProgress;
+
+        public bool IsFilesLoadingPanelVisible =>
+            IsFilesLoading && (!IsFileActionInProgress || IsFileActionStatusPanelVisible);
+
+        public bool IsFileActionStatusPanelVisible
+        {
+            get => _isFileActionStatusPanelVisible;
+            private set
+            {
+                if (SetProperty(ref _isFileActionStatusPanelVisible, value))
+                {
+                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
+                }
+            }
+        }
 
         public bool IsFilesRefreshing
         {
@@ -545,7 +562,13 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isFileActionInProgress, value))
                 {
+                    if (!value)
+                    {
+                        IsFileActionStatusPanelVisible = false;
+                    }
+
                     OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
+                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
                     OnPropertyChanged(nameof(IsAccountActionEnabled));
                     NotifyFileBrowserChromeStateChanged();
                 }
@@ -687,9 +710,10 @@ namespace Cotton.Mobile.ViewModels
             NotifyFilesEmptyStateChanged();
         }
 
-        public void ShowFileActionLoading(string status)
+        public void ShowFileActionLoading(string status, bool showStatusPanel = true)
         {
             ClearFileSelection();
+            IsFileActionStatusPanelVisible = showStatusPanel;
             IsFilesLoading = true;
             IsFilesRefreshing = false;
             IsFileActionInProgress = true;
@@ -703,6 +727,7 @@ namespace Cotton.Mobile.ViewModels
         public void ShowFileActionPending()
         {
             ClearFileSelection();
+            IsFileActionStatusPanelVisible = false;
             IsFilesLoading = false;
             IsFilesRefreshing = false;
             IsFileActionInProgress = true;

@@ -428,7 +428,7 @@ namespace Cotton.Mobile.ViewModels
         public bool IsInlineFilesLoadingVisible => IsFilesLoading && !IsFileActionInProgress;
 
         public bool IsFilesLoadingPanelVisible =>
-            IsFilesLoading && (!IsFileActionInProgress || IsFileActionStatusPanelVisible);
+            IsFilesLoading && IsFileActionInProgress && IsFileActionStatusPanelVisible;
 
         public bool IsFileActionStatusPanelVisible
         {

@@ -278,7 +278,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.CanRefreshFiles);
             Assert.True(display.IsInlineFilesLoadingVisible);
-            Assert.True(display.IsFilesLoadingPanelVisible);
+            Assert.False(display.IsFilesLoadingPanelVisible);
         }
 
         [Fact]

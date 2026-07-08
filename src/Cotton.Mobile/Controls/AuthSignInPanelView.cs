@@ -13,6 +13,13 @@ namespace Cotton.Mobile.Controls
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
         private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
 
+        public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
+            nameof(Placeholder),
+            typeof(string),
+            typeof(AuthSignInPanelView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty InstanceUrlProperty = BindableProperty.Create(
             nameof(InstanceUrl),
             typeof(string),
@@ -66,7 +73,6 @@ namespace Cotton.Mobile.Controls
         {
             _urlField = new OutlinedInputField
             {
-                Placeholder = "https://app.cottoncloud.dev/",
                 IconData = IconPathData.Cloud,
                 Keyboard = Keyboard.Url,
                 ReturnType = ReturnType.Go,
@@ -115,6 +121,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(InstanceUrlProperty, value);
         }
 
+        public string Placeholder
+        {
+            get => (string)GetValue(PlaceholderProperty);
+            set => SetValue(PlaceholderProperty, value);
+        }
+
         public string Status
         {
             get => (string)GetValue(StatusProperty);
@@ -159,6 +171,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
+            _urlField.Placeholder = Placeholder ?? string.Empty;
             _urlField.IsEnabled = IsInputEnabled;
             _urlField.ReturnCommand = ConnectCommand;
 

@@ -611,6 +611,8 @@ namespace Cotton.Mobile.Tests
             string outlinedInputField = LoadText(OutlinedInputFieldPath);
             string focusedInputChromeBehavior = LoadText(FocusedInputChromeBehaviorPath);
             string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
+            string colors = LoadText(ColorsResourcePath);
+            string stylesText = LoadText(StylesResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> outlinedInputSetters =
                 GetStyleSetters(styles, "M3OutlinedInputField");
@@ -626,6 +628,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteFieldVisibility", outlinedInputField, StringComparison.Ordinal);
             Assert.Contains("UpdateInputTransparency", outlinedInputField, StringComparison.Ordinal);
             Assert.Contains("InputTransparent = !IsVisible || !IsFieldVisible || !IsEnabled", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightInputPlaceholder\">#99424947</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkInputPlaceholder\">#99BEC7C2</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains(
+                "PlaceholderColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightInputPlaceholder}, Dark={StaticResource M3DarkInputPlaceholder}}",
+                stylesText,
+                StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
                 outlinedInputSetters["BackgroundColor"]);
@@ -943,6 +951,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("<controls:AuthSignInPanelView IsPanelVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Placeholder=\"{Binding Display.InstanceUrlPlaceholder}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Status=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding Display.IsStatusVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsInputEnabled=\"{Binding Display.IsInputEnabled}\"", mainPage, StringComparison.Ordinal);
@@ -960,7 +969,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("UpdateInputTransparency", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("InputTransparent = !IsVisible || !IsPanelVisible || !IsInputEnabled", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("PlaceholderProperty", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_urlField.Placeholder = Placeholder ?? string.Empty", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_status.IsStatusVisible = IsStatusVisible", authSignInPanelView, StringComparison.Ordinal);

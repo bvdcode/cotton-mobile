@@ -26,6 +26,7 @@
 
                 <controls:AuthSignInPanelView IsPanelVisible="{Binding Display.IsSignInVisible}"
                                               InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                              Placeholder="{Binding Display.InstanceUrlPlaceholder}"
                                               Status="{Binding Display.Status}"
                                               IsStatusVisible="{Binding Display.IsStatusVisible}"
                                               IsInputEnabled="{Binding Display.IsInputEnabled}"

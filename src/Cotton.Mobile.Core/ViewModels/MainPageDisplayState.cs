@@ -55,7 +55,7 @@ namespace Cotton.Mobile.ViewModels
                 throw new ArgumentException("Default instance URL is required.", nameof(defaultInstanceUrl));
             }
 
-            InstanceUrl = defaultInstanceUrl;
+            DefaultInstanceUrl = defaultInstanceUrl.Trim();
         }
 
         public event EventHandler? FileSearchTextChanged;
@@ -78,8 +78,22 @@ namespace Cotton.Mobile.ViewModels
         public string InstanceUrl
         {
             get => _instanceUrl;
-            set => SetProperty(ref _instanceUrl, value);
+            set
+            {
+                if (SetProperty(ref _instanceUrl, value ?? string.Empty))
+                {
+                    OnPropertyChanged(nameof(EffectiveInstanceUrl));
+                }
+            }
         }
+
+        public string DefaultInstanceUrl { get; }
+
+        public string InstanceUrlPlaceholder => DefaultInstanceUrl;
+
+        public string EffectiveInstanceUrl => string.IsNullOrWhiteSpace(InstanceUrl)
+            ? DefaultInstanceUrl
+            : InstanceUrl;
 
         public string LoadingMessage
         {

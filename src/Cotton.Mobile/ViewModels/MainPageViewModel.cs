@@ -478,7 +478,7 @@ namespace Cotton.Mobile.ViewModels
             await ClearLocalSessionAndCachedStateAsync("session expiration");
 
             _fileBrowser.Clear();
-            Display.InstanceUrl = instanceUri?.AbsoluteUri ?? _options.DefaultInstanceUrl;
+            Display.InstanceUrl = instanceUri?.AbsoluteUri ?? string.Empty;
             ShowSignIn("Session expired. Sign in again.");
         }
 
@@ -689,7 +689,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _fileBrowser.Clear();
-                Display.InstanceUrl = _options.DefaultInstanceUrl;
+                Display.InstanceUrl = string.Empty;
                 ShowSignIn("Signed out.");
             }
             catch (Exception exception)
@@ -737,7 +737,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _fileBrowser.Clear();
-                Display.InstanceUrl = _options.DefaultInstanceUrl;
+                Display.InstanceUrl = string.Empty;
                 ShowSignIn("Current session revoked. Sign in again.");
                 await ReturnToSignedOutRootAsync();
             }
@@ -1737,7 +1737,7 @@ namespace Cotton.Mobile.ViewModels
 
         private Uri? ResolveInstanceUri()
         {
-            Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.InstanceUrl);
+            Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.EffectiveInstanceUrl);
             if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
             {
                 return null;

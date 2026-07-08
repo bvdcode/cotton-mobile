@@ -1537,7 +1537,7 @@
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="FontSize" Value="{StaticResource M3ControlFontSize}" />
-        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="PlaceholderColor" Value="{AppThemeBinding Light={StaticResource M3LightInputPlaceholder}, Dark={StaticResource M3DarkInputPlaceholder}}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ControlMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ControlMinSize}" />
     </Style>

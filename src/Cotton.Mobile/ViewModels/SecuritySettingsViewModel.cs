@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -108,9 +107,9 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand RevokeCurrentSessionCommand { get; }
 
-        public ObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];
+        public RangeObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];
 
-        public ObservableCollection<CottonPermissionLedgerItem> PermissionLedgerItems { get; } = [];
+        public RangeObservableCollection<CottonPermissionLedgerItem> PermissionLedgerItems { get; } = [];
 
         public bool IsBusy
         {
@@ -555,11 +554,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(display);
 
             PermissionLedgerDisplay = display;
-            PermissionLedgerItems.Clear();
-            foreach (CottonPermissionLedgerItem item in display.Items)
-            {
-                PermissionLedgerItems.Add(item);
-            }
+            PermissionLedgerItems.ReplaceWith(display.Items);
 
             OnPropertyChanged(nameof(PermissionLedgerTitle));
             OnPropertyChanged(nameof(PermissionLedgerStatusText));
@@ -584,11 +579,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(display);
 
             AccountSessionDisplay = display;
-            AccountSessions.Clear();
-            foreach (CottonAccountSessionListItem item in display.Items)
-            {
-                AccountSessions.Add(item);
-            }
+            AccountSessions.ReplaceWith(display.Items);
 
             OnPropertyChanged(nameof(AccountSessionsTitle));
             OnPropertyChanged(nameof(AccountSessionsStatusText));

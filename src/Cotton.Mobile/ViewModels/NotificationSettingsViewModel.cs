@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -51,7 +50,7 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand PermissionActionCommand { get; }
 
-        public ObservableCollection<RemotePushPreferenceItemViewModel> RemotePushPreferences { get; } = [];
+        public RangeObservableCollection<RemotePushPreferenceItemViewModel> RemotePushPreferences { get; } = [];
 
         public bool IsBusy
         {
@@ -193,7 +192,7 @@ namespace Cotton.Mobile.ViewModels
                 _logger.LogWarning(exception, "Failed to load Cotton mobile push notification preferences.");
                 _remotePushPreferences = null;
                 _remotePushFailureStatus = "Server alerts unavailable.";
-                RemotePushPreferences.Clear();
+                RemotePushPreferences.ReplaceWith([]);
                 RaiseRemotePushPresentationChanged();
                 return false;
             }
@@ -283,16 +282,18 @@ namespace Cotton.Mobile.ViewModels
             _remotePushPreferences = preferences;
             _remotePushFailureStatus = null;
             CottonRemotePushPreferenceDisplayState display = CreateRemotePushDisplay();
-            RemotePushPreferences.Clear();
-            foreach (CottonRemotePushPreferenceDisplayItem item in display.Items)
-            {
-                var viewModel = new RemotePushPreferenceItemViewModel(item);
-                viewModel.SetCanToggle(!IsBusy);
-                viewModel.ToggleRequested += RemotePushPreference_ToggleRequested;
-                RemotePushPreferences.Add(viewModel);
-            }
+            RemotePushPreferences.ReplaceWith(display.Items.Select(CreateRemotePushPreferenceViewModel));
 
             RaiseRemotePushPresentationChanged();
+        }
+
+        private RemotePushPreferenceItemViewModel CreateRemotePushPreferenceViewModel(
+            CottonRemotePushPreferenceDisplayItem item)
+        {
+            var viewModel = new RemotePushPreferenceItemViewModel(item);
+            viewModel.SetCanToggle(!IsBusy);
+            viewModel.ToggleRequested += RemotePushPreference_ToggleRequested;
+            return viewModel;
         }
 
         private CottonRemotePushPreferenceDisplayState CreateRemotePushDisplay()

@@ -46,6 +46,41 @@ namespace Cotton.Mobile.Tests
                 "public RangeObservableCollection<DiagnosticsSectionViewModel> Sections { get; } = new();",
                 "Sections.ReplaceWith(CreateSections(summary, remotePush));"
             },
+            {
+                "src/Cotton.Mobile/ViewModels/NotificationSettingsViewModel.cs",
+                "public RangeObservableCollection<RemotePushPreferenceItemViewModel> RemotePushPreferences { get; } = [];",
+                "RemotePushPreferences.ReplaceWith(display.Items.Select(CreateRemotePushPreferenceViewModel));"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/StorageSettingsViewModel.cs",
+                "public RangeObservableCollection<CottonOnDeviceStorageBucketSnapshot> OnDeviceBuckets { get; } = new();",
+                "OnDeviceBuckets.ReplaceWith(summary.Buckets);"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/StorageSettingsViewModel.cs",
+                "public RangeObservableCollection<CottonStorageBudgetBucketSnapshot> StorageBudgetBuckets { get; } = new();",
+                "StorageBudgetBuckets.ReplaceWith(budget.Buckets);"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/SecuritySettingsViewModel.cs",
+                "public RangeObservableCollection<CottonAccountSessionListItem> AccountSessions { get; } = [];",
+                "AccountSessions.ReplaceWith(display.Items);"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/SecuritySettingsViewModel.cs",
+                "public RangeObservableCollection<CottonPermissionLedgerItem> PermissionLedgerItems { get; } = [];",
+                "PermissionLedgerItems.ReplaceWith(display.Items);"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/PdfViewerViewModel.cs",
+                "public RangeObservableCollection<PdfPreviewPageSnapshot> Pages { get; }",
+                "Pages.ReplaceWith(document.Pages);"
+            },
+            {
+                "src/Cotton.Mobile/ViewModels/ActivityFeedViewModel.cs",
+                "public RangeObservableCollection<CottonActivityFeedListItem> Items { get; } = [];",
+                "Items.ReplaceWith(snapshot.Items);"
+            },
         };
 
         [Theory]

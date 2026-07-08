@@ -4,7 +4,6 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
-using System.Collections.ObjectModel;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -81,9 +80,9 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand ClearAllCommand { get; }
 
-        public ObservableCollection<CottonOnDeviceStorageBucketSnapshot> OnDeviceBuckets { get; } = new();
+        public RangeObservableCollection<CottonOnDeviceStorageBucketSnapshot> OnDeviceBuckets { get; } = new();
 
-        public ObservableCollection<CottonStorageBudgetBucketSnapshot> StorageBudgetBuckets { get; } = new();
+        public RangeObservableCollection<CottonStorageBudgetBucketSnapshot> StorageBudgetBuckets { get; } = new();
 
         public bool IsBusy
         {
@@ -426,11 +425,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(summary);
 
             OnDeviceSummaryText = summary.SummaryText;
-            OnDeviceBuckets.Clear();
-            foreach (CottonOnDeviceStorageBucketSnapshot bucket in summary.Buckets)
-            {
-                OnDeviceBuckets.Add(bucket);
-            }
+            OnDeviceBuckets.ReplaceWith(summary.Buckets);
         }
 
         private void ShowStorageBudget(CottonStorageBudgetSummary budget)
@@ -439,11 +434,7 @@ namespace Cotton.Mobile.ViewModels
 
             StorageBudgetSummaryText = budget.SummaryText;
             ProtectedOfflineText = budget.ProtectedOfflineText;
-            StorageBudgetBuckets.Clear();
-            foreach (CottonStorageBudgetBucketSnapshot bucket in budget.Buckets)
-            {
-                StorageBudgetBuckets.Add(bucket);
-            }
+            StorageBudgetBuckets.ReplaceWith(budget.Buckets);
         }
 
         private void ShowCloudQuota(CottonCloudStorageQuotaSnapshot quota)

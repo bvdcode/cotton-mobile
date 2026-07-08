@@ -1,7 +1,6 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using System.Collections.ObjectModel;
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
@@ -49,7 +48,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string Details { get; }
 
-        public ObservableCollection<PdfPreviewPageSnapshot> Pages { get; }
+        public RangeObservableCollection<PdfPreviewPageSnapshot> Pages { get; }
 
         public AsyncCommand LoadCommand { get; }
 
@@ -103,11 +102,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 PdfPreviewDocumentSnapshot document = await _pdfPreviewRenderer.RenderAsync(_file.FilePath);
-                Pages.Clear();
-                foreach (PdfPreviewPageSnapshot page in document.Pages)
-                {
-                    Pages.Add(page);
-                }
+                Pages.ReplaceWith(document.Pages);
 
                 _didLoad = true;
                 Status = document.HasPages ? document.StatusText : EmptyText;

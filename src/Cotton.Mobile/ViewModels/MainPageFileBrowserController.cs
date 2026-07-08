@@ -4367,7 +4367,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CancellationTokenSource fileActionCancellation = BeginFileAction($"Preparing {file.Name}...");
+            CancellationTokenSource fileActionCancellation = BeginDeferredFileAction($"Preparing {file.Name}...");
             bool shouldRunRecoveryRefresh = false;
 
             try

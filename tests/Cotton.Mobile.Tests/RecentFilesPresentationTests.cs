@@ -28,5 +28,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("&& !_display.IsFileBrowserChromeEnabled", content, StringComparison.Ordinal);
             Assert.Contains("DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(1200)", content, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Main_file_share_defers_transient_prepare_status()
+        {
+            string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageFileBrowserController.cs");
+
+            Assert.DoesNotContain("BeginFileAction($\"Preparing {file.Name}...\")", content, StringComparison.Ordinal);
+            Assert.Contains("BeginDeferredFileAction($\"Preparing {file.Name}...\")", content, StringComparison.Ordinal);
+        }
     }
 }

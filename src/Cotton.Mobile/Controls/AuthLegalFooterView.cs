@@ -57,6 +57,7 @@ namespace Cotton.Mobile.Controls
             Content = _footer;
             UpdateVisualState();
             UpdateFooterVisibility(animateFooterVisibility: false);
+            UpdateInputTransparency();
         }
 
         public string PrivacyText
@@ -104,6 +105,7 @@ namespace Cotton.Mobile.Controls
             _footer.SetDynamicResource(StyleProperty, footerStyleResourceKey);
             _privacyAction.Text = PrivacyText ?? string.Empty;
             _privacyAction.Command = PrivacyCommand;
+            UpdateInputTransparency();
         }
 
         private void UpdateFooterVisibility(bool animateFooterVisibility)
@@ -118,6 +120,10 @@ namespace Cotton.Mobile.Controls
             if (isFooterVisible)
             {
                 IsVisible = true;
+            }
+            else
+            {
+                UpdateInputTransparency();
             }
 
             MaterialMotion.UpdateDouble(
@@ -135,6 +141,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteFooterVisibility()
         {
             IsVisible = IsFooterVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsFooterVisible || PrivacyCommand is null;
         }
     }
 }

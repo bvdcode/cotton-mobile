@@ -34,6 +34,7 @@ namespace Cotton.Mobile.Controls
 
         public ScreenStatusView()
         {
+            InputTransparent = true;
             _label = new Label();
 
             Content = _label;

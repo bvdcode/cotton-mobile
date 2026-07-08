@@ -130,6 +130,7 @@ namespace Cotton.Mobile.Controls
             Content = _field;
             UpdateVisualState();
             UpdateFieldVisibility(animateFieldVisibility: false);
+            UpdateInputTransparency();
         }
 
         public string Text
@@ -248,6 +249,7 @@ namespace Cotton.Mobile.Controls
             _entry.IsEnabled = IsEnabled;
             _icon.IconData = IconData;
             SemanticProperties.SetHint(_entry, SemanticHint);
+            UpdateInputTransparency();
         }
 
         private void UpdateFieldVisibility(bool animateFieldVisibility)
@@ -262,6 +264,10 @@ namespace Cotton.Mobile.Controls
             if (isFieldVisible)
             {
                 IsVisible = true;
+            }
+            else
+            {
+                UpdateInputTransparency();
             }
 
             MaterialMotion.UpdateDouble(
@@ -279,6 +285,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteFieldVisibility()
         {
             IsVisible = IsFieldVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsFieldVisible || !IsEnabled;
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -288,6 +300,7 @@ namespace Cotton.Mobile.Controls
             if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
             {
                 UpdateVisualState();
+                UpdateInputTransparency();
             }
         }
     }

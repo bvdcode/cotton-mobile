@@ -106,6 +106,7 @@ namespace Cotton.Mobile.Controls
             Content = _card;
             UpdateVisualState();
             UpdatePanelVisibility(animatePanelVisibility: false);
+            UpdateInputTransparency();
         }
 
         public string InstanceUrl
@@ -166,6 +167,7 @@ namespace Cotton.Mobile.Controls
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;
+            UpdateInputTransparency();
         }
 
         private void UpdatePanelVisibility(bool animatePanelVisibility)
@@ -180,6 +182,10 @@ namespace Cotton.Mobile.Controls
             if (isPanelVisible)
             {
                 IsVisible = true;
+            }
+            else
+            {
+                UpdateInputTransparency();
             }
 
             MaterialMotion.UpdateDouble(
@@ -197,6 +203,12 @@ namespace Cotton.Mobile.Controls
         private void CompletePanelVisibility()
         {
             IsVisible = IsPanelVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsPanelVisible || !IsInputEnabled;
         }
     }
 }

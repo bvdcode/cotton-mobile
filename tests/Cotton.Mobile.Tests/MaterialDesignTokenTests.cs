@@ -624,6 +624,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FieldVisibilityAnimationName = \"M3OutlinedInputFieldVisibility\"", outlinedInputField, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", outlinedInputField, StringComparison.Ordinal);
             Assert.Contains("CompleteFieldVisibility", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", outlinedInputField, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsFieldVisible || !IsEnabled", outlinedInputField, StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
                 outlinedInputSetters["BackgroundColor"]);
@@ -955,6 +957,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnPanelVisiblePropertyChanged", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CompletePanelVisibility", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsPanelVisible || !IsInputEnabled", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new OutlinedInputField", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
@@ -989,6 +993,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnFooterVisiblePropertyChanged", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("CompleteFooterVisibility", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsFooterVisible || PrivacyCommand is null", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new HorizontalStackLayout", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new TextAction", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("_footer.SetDynamicResource(StyleProperty, footerStyleResourceKey)", authLegalFooterView, StringComparison.Ordinal);
@@ -1067,6 +1073,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteStatusVisibility", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteDetailMessageVisibility", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", loadingStatusView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", loadingStatusView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsStatusVisible || !IsActionButtonActuallyVisible(ActionCommand)", loadingStatusView, StringComparison.Ordinal);
+            Assert.Contains("_actionButton.InputTransparent = true", loadingStatusView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsLoadingVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border IsVisible=\"{Binding Display.IsAuthorizationProgressVisible}\"", mainPage, StringComparison.Ordinal);
@@ -1102,6 +1111,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialMotion.UpdateDouble(", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("CompleteStatusVisibility", screenStatusView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = true", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("TextStyleResourceKeyProperty", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStyleResourceKey = \"M3ScreenStatus\"", screenStatusView, StringComparison.Ordinal);
             Assert.Contains("_label.SetDynamicResource(StyleProperty, textStyleResourceKey)", screenStatusView, StringComparison.Ordinal);

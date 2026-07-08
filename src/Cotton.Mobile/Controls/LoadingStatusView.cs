@@ -187,6 +187,7 @@ namespace Cotton.Mobile.Controls
             Content = _container;
             UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
             UpdateStatusVisibility(animateStatusVisibility: false);
+            UpdateInputTransparency();
         }
 
         public string Text
@@ -349,6 +350,7 @@ namespace Cotton.Mobile.Controls
             _actionButton.IsEnabled = IsActionEnabled;
             UpdateActionButtonVisibility(isActionVisible, animateActionButtonVisibility);
             SemanticProperties.SetDescription(_actionButton, ActionSemanticDescription ?? string.Empty);
+            UpdateInputTransparency();
         }
 
         private void UpdateStatusVisibility(bool animateStatusVisibility)
@@ -363,6 +365,10 @@ namespace Cotton.Mobile.Controls
             if (isStatusVisible)
             {
                 IsVisible = true;
+            }
+            else
+            {
+                UpdateInputTransparency();
             }
 
             MaterialMotion.UpdateDouble(
@@ -415,6 +421,10 @@ namespace Cotton.Mobile.Controls
             {
                 _actionButton.IsVisible = true;
             }
+            else
+            {
+                _actionButton.InputTransparent = true;
+            }
 
             MaterialMotion.UpdateDouble(
                 _actionButton,
@@ -431,6 +441,7 @@ namespace Cotton.Mobile.Controls
         private void CompleteStatusVisibility()
         {
             IsVisible = IsStatusVisible;
+            UpdateInputTransparency();
         }
 
         private void CompleteDetailMessageVisibility()
@@ -449,10 +460,14 @@ namespace Cotton.Mobile.Controls
             if (IsActionButtonActuallyVisible(ActionCommand))
             {
                 _actionButton.IsVisible = true;
+                _actionButton.InputTransparent = false;
+                UpdateInputTransparency();
                 return;
             }
 
             _actionButton.IsVisible = false;
+            _actionButton.InputTransparent = true;
+            UpdateInputTransparency();
         }
 
         private static bool IsDetailMessageActuallyVisible(string detailText)
@@ -463,6 +478,11 @@ namespace Cotton.Mobile.Controls
         private bool IsActionButtonActuallyVisible(ICommand? actionCommand)
         {
             return IsActionVisible && actionCommand is not null;
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsStatusVisible || !IsActionButtonActuallyVisible(ActionCommand);
         }
     }
 }

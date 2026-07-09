@@ -255,11 +255,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Light_theme_primary_fill_is_quieter_than_lime_accent()
+        public void Light_theme_keeps_readable_primary_and_exposes_lime_action_surface()
         {
             string colors = LoadText(ColorsResourcePath);
 
             Assert.Contains("<Color x:Key=\"M3Accent\">#C6FF00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightAction\">#B8F000</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightActionPressed\">#A4D800</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightOnAction\">#151900</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkAction\">#C6FF00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkActionPressed\">#B2E600</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkOnAction\">#151900</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimary\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimaryPressed\">#405100</Color>", colors, StringComparison.Ordinal);
@@ -271,6 +277,45 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3OnAccent", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AccentBrush", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Color x:Key=\"M3LightAction\">#4F6200</Color>", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Color x:Key=\"M3LightOnAction\">#FFFFFF</Color>", colors, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void High_emphasis_action_surfaces_use_lime_action_roles()
+        {
+            const string actionBinding = "{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}";
+            const string actionPressedBinding = "{AppThemeBinding Light={StaticResource M3LightActionPressed}, Dark={StaticResource M3DarkActionPressed}}";
+            const string onActionBinding = "{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}";
+
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> filledButtonSetters =
+                GetStyleSetters(styles, "M3FilledButton");
+            IReadOnlyDictionary<string, string> floatingActionSetters =
+                GetStyleSetters(styles, "M3FloatingActionIconButton");
+            IReadOnlyDictionary<string, string> selectionMarkSetters =
+                GetStyleSetters(styles, "M3FileSelectionMark");
+            IReadOnlyDictionary<string, string> selectionCheckSetters =
+                GetStyleSetters(styles, "M3FileSelectionCheckIcon");
+            IReadOnlyDictionary<string, string> localCopyChipSetters =
+                GetStyleSetters(styles, "M3LocalCopyChip");
+
+            Assert.Equal(actionBinding, filledButtonSetters["ButtonBackgroundColor"]);
+            Assert.Equal(actionPressedBinding, filledButtonSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal(actionBinding, filledButtonSetters["BorderColor"]);
+            Assert.Equal(onActionBinding, filledButtonSetters["TextColor"]);
+            Assert.Equal(actionBinding, floatingActionSetters["ButtonBackgroundColor"]);
+            Assert.Equal(actionPressedBinding, floatingActionSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal(actionBinding, floatingActionSetters["BorderColor"]);
+            Assert.Equal(onActionBinding, floatingActionSetters["IconColor"]);
+            Assert.Equal(actionBinding, selectionMarkSetters["Stroke"]);
+            Assert.Equal(actionBinding, selectionMarkSetters["BackgroundColor"]);
+            Assert.Equal(onActionBinding, selectionCheckSetters["IconColor"]);
+            Assert.Equal(actionBinding, localCopyChipSetters["Stroke"]);
+
+            Assert.DoesNotContain("M3LightPrimary", filledButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", floatingActionSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", selectionMarkSetters["BackgroundColor"], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -2637,7 +2682,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultLocalChipLabelStyleResourceKey = \"M3LocalCopyChipLabel\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultOfflineChipStyleResourceKey = \"M3FileAttentionChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
+                "{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}",
                 localCopyChipSetters["Stroke"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",

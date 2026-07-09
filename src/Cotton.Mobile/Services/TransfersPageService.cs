@@ -33,7 +33,7 @@ namespace Cotton.Mobile.Services
                 var page = ActivatorUtilities.CreateInstance<TransfersPage>(
                     _serviceProvider,
                     viewModel);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

@@ -43,7 +43,7 @@ namespace Cotton.Mobile.Services
                     viewModel.SetCurrentSessionRevocationHandler(revocationHandler);
                 }
 
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

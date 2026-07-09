@@ -49,7 +49,11 @@ namespace Cotton.Mobile.Services
                 {
                     completion.TrySetResult(null);
                 };
-                await Shell.Current.Navigation.PushAsync(page);
+                bool pushed = await CottonShellNavigation.PushAsync(page, cancellationToken);
+                if (!pushed)
+                {
+                    completion.TrySetResult(null);
+                }
             });
 
             await using (cancellationToken.Register(() => completion.TrySetCanceled(cancellationToken)))

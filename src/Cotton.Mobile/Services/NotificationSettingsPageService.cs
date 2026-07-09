@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 var page = ActivatorUtilities.CreateInstance<NotificationSettingsPage>(_serviceProvider);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

@@ -94,7 +94,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreateImageViewerPage(file, downloadedFile);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreateMediaViewerPage(file, downloadedFile, previewKind);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -123,7 +123,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreatePdfViewerPage(file, downloadedFile);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }
@@ -138,7 +138,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 ContentPage page = CreateTextViewerPage(file, downloadedFile, content);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

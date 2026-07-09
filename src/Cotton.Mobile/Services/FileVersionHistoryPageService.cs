@@ -43,7 +43,7 @@ namespace Cotton.Mobile.Services
                     instanceUri,
                     file);
                 var page = ActivatorUtilities.CreateInstance<FileVersionHistoryPage>(_serviceProvider, viewModel);
-                await Shell.Current.Navigation.PushAsync(page);
+                await CottonShellNavigation.PushAsync(page, cancellationToken);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

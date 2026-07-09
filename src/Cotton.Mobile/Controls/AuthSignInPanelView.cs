@@ -225,15 +225,6 @@ namespace Cotton.Mobile.Controls
 
             _isServerFieldExpanded = true;
             UpdateServerFieldState();
-            Dispatcher.DispatchDelayed(
-                TimeSpan.FromMilliseconds(50),
-                () =>
-                {
-                    if (IsServerFieldVisible())
-                    {
-                        _urlField.FocusInput();
-                    }
-                });
         }
 
         private void UpdateServerFieldState()

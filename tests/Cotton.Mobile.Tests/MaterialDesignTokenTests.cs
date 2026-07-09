@@ -1314,7 +1314,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_card.CardStyleResourceKey = ShouldUseFramedPanel()", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("return IsServerFieldVisible() || IsStatusVisible;", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("Dispatcher.DispatchDelayed(", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Dispatcher.DispatchDelayed(", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_urlField.FocusInput()", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new ScreenStatusView", authSignInPanelView, StringComparison.Ordinal);

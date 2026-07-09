@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Tests
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
+        private const string AppPath = "src/Cotton.Mobile/App.xaml.cs";
         private const string MainActivityPath = "src/Cotton.Mobile/Platforms/Android/MainActivity.cs";
         private const string AndroidLightColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/colors.xml";
         private const string AndroidDarkColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/colors.xml";
@@ -225,6 +226,32 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3DarkTertiary", statusActivitySetters["Color"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightTertiary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3DarkTertiary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void App_defers_notification_channel_provisioning_until_window_created()
+        {
+            string app = LoadText(AppPath);
+            int constructorStart = app.IndexOf("\t\tpublic App(", StringComparison.Ordinal);
+            int createWindowStart = app.IndexOf("\t\tprotected override Window CreateWindow", StringComparison.Ordinal);
+
+            Assert.True(constructorStart >= 0);
+            Assert.True(createWindowStart > constructorStart);
+            string constructorBlock = app[constructorStart..createWindowStart];
+            Assert.DoesNotContain(
+                "ICottonNotificationChannelProvisioningService",
+                constructorBlock,
+                StringComparison.Ordinal);
+            Assert.Contains("GetRequiredService<ICottonAppLockCoordinator>()", constructorBlock, StringComparison.Ordinal);
+            Assert.Contains("window.Created += Window_Created;", app, StringComparison.Ordinal);
+            Assert.Contains("Dispatcher.Dispatch(ProvisionStartupNotificationChannels);", app, StringComparison.Ordinal);
+            Assert.Contains("private void ProvisionStartupNotificationChannels()", app, StringComparison.Ordinal);
+            Assert.Contains(
+                "GetRequiredService<ICottonNotificationChannelProvisioningService>()",
+                app,
+                StringComparison.Ordinal);
+            Assert.Contains(".EnsureChannels();", app, StringComparison.Ordinal);
+            Assert.Contains("_didProvisionStartupNotificationChannels", app, StringComparison.Ordinal);
         }
 
         [Fact]

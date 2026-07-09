@@ -431,12 +431,13 @@ namespace Cotton.Mobile.Controls
             _thumbnail.IsPlaceholderTextVisible = IsPlaceholderTextVisible;
             _thumbnail.IsSelected = IsSelected;
 
-            _metadata.Title = Title ?? string.Empty;
-            _metadata.Detail = Detail ?? string.Empty;
-            _metadata.LocalCopyStatus = LocalCopyStatus ?? string.Empty;
-            _metadata.IsLocalCopyVisible = IsLocalCopyVisible;
-            _metadata.OfflineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
-            _metadata.IsOfflineAttentionVisible = IsOfflineAttentionVisible;
+            _metadata.ApplyMetadataState(
+                Title ?? string.Empty,
+                Detail ?? string.Empty,
+                LocalCopyStatus ?? string.Empty,
+                IsLocalCopyVisible,
+                OfflineAttentionStatus ?? string.Empty,
+                IsOfflineAttentionVisible);
 
             _touchSurface.Command = BeginSelectionCommand;
             _touchSurface.CommandParameter = CommandParameter;

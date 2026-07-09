@@ -3008,11 +3008,21 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_contentGrid.SetDynamicResource(StyleProperty, \"M3FileTileContentGrid\")", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_previewRow.Height = new GridLength(PreviewHeight)", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_thumbnail.HeightRequest = PreviewHeight", fileTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_metadata.LocalCopyStatus = LocalCopyStatus ?? string.Empty", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.ApplyMetadataState(", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.Title =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.Detail =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.LocalCopyStatus =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.IsLocalCopyVisible =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.OfflineAttentionStatus =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.IsOfflineAttentionVisible =", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultStackStyleResourceKey = \"M3FileTileTextStack\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultMetadataGridStyleResourceKey = \"M3FileTileMetadataGrid\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3CardSupportingStrongLine\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailStyleResourceKey = \"M3CardMetaLine\"", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("internal void ApplyMetadataState(", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("ApplyResolvedVisualState(", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("_currentLocalCopyStatus", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("_currentOfflineAttentionStatus", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("LocalCopyChipOpacityAnimationName = \"M3FileTileLocalChipOpacity\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("OfflineAttentionChipOpacityAnimationName = \"M3FileTileOfflineChipOpacity\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("OnLocalCopyChipVisibilityPropertyChanged", fileTileMetadataView, StringComparison.Ordinal);
@@ -3021,6 +3031,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("CompleteLocalCopyChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("CompleteOfflineAttentionChipVisibility", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("IsLocalCopyChipActuallyVisible", fileTileMetadataView, StringComparison.Ordinal);
+            Assert.Contains("IsOfflineAttentionChipActuallyVisible", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Contains("public abstract class MaterialAnimatedContentView : ContentView", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("AppearanceDurationProperty", materialAnimatedContentView, StringComparison.Ordinal);
@@ -4325,7 +4337,13 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("_metadata.TrailingTextStyleResourceKey =", fileListEntryRowView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileTileMetadataView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileTileMetadataView", fileTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_metadata.Title = Title ?? string.Empty", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.ApplyMetadataState(", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.Title =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.Detail =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.LocalCopyStatus =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.IsLocalCopyVisible =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.OfflineAttentionStatus =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_metadata.IsOfflineAttentionVisible =", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileListTextStack}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileEntryTextView", mainPage, StringComparison.Ordinal);
 

@@ -124,6 +124,10 @@ namespace Cotton.Mobile.Controls
         private readonly Label _titleLabel;
         private bool _hasAppliedLocalCopyChipVisibility;
         private bool _hasAppliedOfflineAttentionChipVisibility;
+        private bool _isCurrentLocalCopyVisible;
+        private bool _isCurrentOfflineAttentionVisible;
+        private string _currentLocalCopyStatus = string.Empty;
+        private string _currentOfflineAttentionStatus = string.Empty;
 
         public FileTileMetadataView()
         {
@@ -274,30 +278,98 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateLocalCopyChipVisibility, bool animateOfflineAttentionChipVisibility)
         {
-            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+            ApplyResolvedVisualState(
+                Title ?? string.Empty,
+                Detail ?? string.Empty,
+                LocalCopyStatus ?? string.Empty,
+                IsLocalCopyVisible,
+                OfflineAttentionStatus ?? string.Empty,
+                IsOfflineAttentionVisible,
                 StackStyleResourceKey,
+                TitleStyleResourceKey,
+                MetadataGridStyleResourceKey,
+                DetailStyleResourceKey,
+                LocalChipStyleResourceKey,
+                LocalChipLabelStyleResourceKey,
+                OfflineChipStyleResourceKey,
+                OfflineChipLabelStyleResourceKey,
+                animateLocalCopyChipVisibility,
+                animateOfflineAttentionChipVisibility);
+        }
+
+        internal void ApplyMetadataState(
+            string title,
+            string detail,
+            string localCopyStatus,
+            bool isLocalCopyVisible,
+            string offlineAttentionStatus,
+            bool isOfflineAttentionVisible)
+        {
+            ApplyResolvedVisualState(
+                title,
+                detail,
+                localCopyStatus,
+                isLocalCopyVisible,
+                offlineAttentionStatus,
+                isOfflineAttentionVisible,
+                StackStyleResourceKey,
+                TitleStyleResourceKey,
+                MetadataGridStyleResourceKey,
+                DetailStyleResourceKey,
+                LocalChipStyleResourceKey,
+                LocalChipLabelStyleResourceKey,
+                OfflineChipStyleResourceKey,
+                OfflineChipLabelStyleResourceKey,
+                animateLocalCopyChipVisibility: true,
+                animateOfflineAttentionChipVisibility: true);
+        }
+
+        private void ApplyResolvedVisualState(
+            string title,
+            string detail,
+            string localCopyStatus,
+            bool isLocalCopyVisible,
+            string offlineAttentionStatus,
+            bool isOfflineAttentionVisible,
+            string requestedStackStyleResourceKey,
+            string requestedTitleStyleResourceKey,
+            string requestedMetadataGridStyleResourceKey,
+            string requestedDetailStyleResourceKey,
+            string requestedLocalChipStyleResourceKey,
+            string requestedLocalChipLabelStyleResourceKey,
+            string requestedOfflineChipStyleResourceKey,
+            string requestedOfflineChipLabelStyleResourceKey,
+            bool animateLocalCopyChipVisibility,
+            bool animateOfflineAttentionChipVisibility)
+        {
+            string stackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedStackStyleResourceKey,
                 DefaultStackStyleResourceKey);
             string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TitleStyleResourceKey,
+                requestedTitleStyleResourceKey,
                 DefaultTitleStyleResourceKey);
             string metadataGridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                MetadataGridStyleResourceKey,
+                requestedMetadataGridStyleResourceKey,
                 DefaultMetadataGridStyleResourceKey);
             string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                DetailStyleResourceKey,
+                requestedDetailStyleResourceKey,
                 DefaultDetailStyleResourceKey);
             string localChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                LocalChipStyleResourceKey,
+                requestedLocalChipStyleResourceKey,
                 DefaultLocalChipStyleResourceKey);
             string localChipLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                LocalChipLabelStyleResourceKey,
+                requestedLocalChipLabelStyleResourceKey,
                 DefaultLocalChipLabelStyleResourceKey);
             string offlineChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                OfflineChipStyleResourceKey,
+                requestedOfflineChipStyleResourceKey,
                 DefaultOfflineChipStyleResourceKey);
             string offlineChipLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                OfflineChipLabelStyleResourceKey,
+                requestedOfflineChipLabelStyleResourceKey,
                 DefaultOfflineChipLabelStyleResourceKey);
+            string currentTitle = title ?? string.Empty;
+            string currentDetail = detail ?? string.Empty;
+            string currentLocalCopyStatus = localCopyStatus ?? string.Empty;
+            string currentOfflineAttentionStatus = offlineAttentionStatus ?? string.Empty;
 
             _stack.SetDynamicResource(StyleProperty, stackStyleResourceKey);
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);
@@ -308,21 +380,32 @@ namespace Cotton.Mobile.Controls
             _offlineAttentionChip.ChipStyleResourceKey = offlineChipStyleResourceKey;
             _offlineAttentionChip.LabelStyleResourceKey = offlineChipLabelStyleResourceKey;
 
-            _titleLabel.Text = Title ?? string.Empty;
-            _detailLabel.Text = Detail ?? string.Empty;
-            string localCopyStatus = LocalCopyStatus ?? string.Empty;
-            string offlineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
-            _localCopyChip.Text = localCopyStatus;
-            _offlineAttentionChip.Text = offlineAttentionStatus;
-            UpdateLocalCopyChipVisibility(localCopyStatus, animateLocalCopyChipVisibility);
-            UpdateOfflineAttentionChipVisibility(offlineAttentionStatus, animateOfflineAttentionChipVisibility);
+            _titleLabel.Text = currentTitle;
+            _detailLabel.Text = currentDetail;
+            _localCopyChip.Text = currentLocalCopyStatus;
+            _offlineAttentionChip.Text = currentOfflineAttentionStatus;
+            _currentLocalCopyStatus = currentLocalCopyStatus;
+            _isCurrentLocalCopyVisible = isLocalCopyVisible;
+            _currentOfflineAttentionStatus = currentOfflineAttentionStatus;
+            _isCurrentOfflineAttentionVisible = isOfflineAttentionVisible;
+            UpdateLocalCopyChipVisibility(
+                currentLocalCopyStatus,
+                isLocalCopyVisible,
+                animateLocalCopyChipVisibility);
+            UpdateOfflineAttentionChipVisibility(
+                currentOfflineAttentionStatus,
+                isOfflineAttentionVisible,
+                animateOfflineAttentionChipVisibility);
         }
 
-        private void UpdateLocalCopyChipVisibility(string localCopyStatus, bool animateLocalCopyChipVisibility)
+        private void UpdateLocalCopyChipVisibility(
+            string localCopyStatus,
+            bool isLocalCopyVisible,
+            bool animateLocalCopyChipVisibility)
         {
             UpdateChipVisibility(
                 _localCopyChip,
-                IsLocalCopyChipVisible(localCopyStatus),
+                IsLocalCopyChipActuallyVisible(localCopyStatus, isLocalCopyVisible),
                 animateLocalCopyChipVisibility,
                 ref _hasAppliedLocalCopyChipVisibility,
                 LocalCopyChipOpacityAnimationName,
@@ -331,11 +414,12 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateOfflineAttentionChipVisibility(
             string offlineAttentionStatus,
+            bool isOfflineAttentionVisible,
             bool animateOfflineAttentionChipVisibility)
         {
             UpdateChipVisibility(
                 _offlineAttentionChip,
-                IsOfflineAttentionChipVisible(offlineAttentionStatus),
+                IsOfflineAttentionChipActuallyVisible(offlineAttentionStatus, isOfflineAttentionVisible),
                 animateOfflineAttentionChipVisibility,
                 ref _hasAppliedOfflineAttentionChipVisibility,
                 OfflineAttentionChipOpacityAnimationName,
@@ -375,7 +459,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteLocalCopyChipVisibility()
         {
-            if (IsLocalCopyChipVisible(LocalCopyStatus ?? string.Empty))
+            if (IsLocalCopyChipActuallyVisible(_currentLocalCopyStatus, _isCurrentLocalCopyVisible))
             {
                 _localCopyChip.IsVisible = true;
                 return;
@@ -386,7 +470,9 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteOfflineAttentionChipVisibility()
         {
-            if (IsOfflineAttentionChipVisible(OfflineAttentionStatus ?? string.Empty))
+            if (IsOfflineAttentionChipActuallyVisible(
+                _currentOfflineAttentionStatus,
+                _isCurrentOfflineAttentionVisible))
             {
                 _offlineAttentionChip.IsVisible = true;
                 return;
@@ -395,14 +481,16 @@ namespace Cotton.Mobile.Controls
             _offlineAttentionChip.IsVisible = false;
         }
 
-        private bool IsLocalCopyChipVisible(string localCopyStatus)
+        private static bool IsLocalCopyChipActuallyVisible(string localCopyStatus, bool isLocalCopyVisible)
         {
-            return IsLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus);
+            return isLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus);
         }
 
-        private bool IsOfflineAttentionChipVisible(string offlineAttentionStatus)
+        private static bool IsOfflineAttentionChipActuallyVisible(
+            string offlineAttentionStatus,
+            bool isOfflineAttentionVisible)
         {
-            return IsOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus);
+            return isOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus);
         }
     }
 }

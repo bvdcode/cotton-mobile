@@ -11,7 +11,6 @@ namespace Cotton.Mobile.Controls
         {
             RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
             RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-            RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
             SetDynamicResource(StyleProperty, DefaultGridStyleResourceKey);
         }
     }

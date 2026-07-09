@@ -165,6 +165,10 @@
                                                          ItemsSource="{Binding Display.FileEntries}"
                                                          ItemSizingStrategy="MeasureFirstItem"
                                                          ItemsLayout="{StaticResource M3FileBrowserListItemsLayout}">
+                            <controls:MaterialCollectionView.Footer>
+                                <BoxView HeightRequest="{StaticResource M3FloatingActionButtonScrollInset}"
+                                         Color="{StaticResource M3Transparent}" />
+                            </controls:MaterialCollectionView.Footer>
                             <controls:MaterialCollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                                     <controls:FileListEntryRowView Title="{Binding Name}"
@@ -190,6 +194,10 @@
                         <controls:MaterialCollectionView IsContentVisible="{Binding Display.IsFileTileViewVisible}"
                                                          ItemsSource="{Binding Display.FileEntries}"
                                                          ItemSizingStrategy="MeasureFirstItem">
+                            <controls:MaterialCollectionView.Footer>
+                                <BoxView HeightRequest="{StaticResource M3FloatingActionButtonScrollInset}"
+                                         Color="{StaticResource M3Transparent}" />
+                            </controls:MaterialCollectionView.Footer>
                             <controls:MaterialCollectionView.ItemsLayout>
                                 <GridItemsLayout Orientation="Vertical"
                                                  Span="{Binding Source={x:Reference RootPage}, Path=FileTileColumnCount}"
@@ -230,14 +238,14 @@
             </controls:FileBrowserContentGridView>
         </controls:LayeredContentView>
 
-        <controls:FloatingActionButtonView Grid.Row="1"
+        <controls:FloatingActionButtonView Grid.Row="0"
                                            IconData="{x:Static controls:IconPathData.Plus}"
                                            Command="{Binding ShowFileAddActionsCommand}"
                                            IsActionVisible="{Binding Display.IsFileAddButtonVisible}"
                                            IsEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
                                            SemanticDescription="Add files" />
 
-        <controls:FileBrowserNavigationBarView Grid.Row="2"
+        <controls:FileBrowserNavigationBarView Grid.Row="1"
                                                IsNavigationVisible="{Binding Display.IsFileBrowserQuickNavigationVisible}"
                                                FilesText="{Binding Display.FilesNavigation.Label}"
                                                FilesSemanticDescription="{Binding Display.FilesNavigation.AccessibilityText}"

@@ -1771,6 +1771,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MainPageRootGrid\"", mainPageRootView, StringComparison.Ordinal);
             Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Star })", mainPageRootView, StringComparison.Ordinal);
             Assert.Contains("RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })", mainPageRootView, StringComparison.Ordinal);
+            Assert.Equal(1, CountOccurrences(mainPageRootView, "RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto })"));
             Assert.Contains("SetDynamicResource(StyleProperty, DefaultGridStyleResourceKey)", mainPageRootView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid x:Name=\"RootLayout\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("RowDefinitions=\"*,Auto,Auto\"", mainPage, StringComparison.Ordinal);
@@ -1967,7 +1968,7 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> navigationItemSetters =
                 GetStyleSetters(styles, "M3NavigationBarItem");
 
-            Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.Contains(
                 "IsNavigationVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"",
                 mainPage,
@@ -2004,6 +2005,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_label.FontAttributes = TextFontAttributes", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarItem", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Border Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileBrowserQuickNavigationVisible}\"", mainPage, StringComparison.Ordinal);
@@ -3789,13 +3791,17 @@ namespace Cotton.Mobile.Tests
         {
             string floatingActionButtonView = LoadText(FloatingActionButtonViewPath);
             string mainPage = LoadText(MainPagePath);
+            string spacing = LoadText(SpacingResourcePath);
+            string styles = LoadText(StylesResourcePath);
 
-            Assert.Contains("<controls:FloatingActionButtonView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:FloatingActionButtonView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IconData=\"{x:Static controls:IconPathData.Plus}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsActionVisible=\"{Binding Display.IsFileAddButtonVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsEnabled=\"{Binding Display.IsFileBrowserChromeEnabled}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SemanticDescription=\"Add files\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(mainPage, "HeightRequest=\"{StaticResource M3FloatingActionButtonScrollInset}\""));
             Assert.Contains("public class FloatingActionButtonView", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("ActionOpacityAnimationName = \"M3FloatingActionOpacity\"", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("DefaultIconButtonStyleResourceKey = \"M3FloatingActionIconButton\"", floatingActionButtonView, StringComparison.Ordinal);
@@ -3808,7 +3814,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteActionVisibility", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("UpdateInputTransparency", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("InputTransparent = !IsVisible || !IsActionVisible || !IsEnabled || Command is null", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("<x:Double x:Key=\"M3FloatingActionButtonScrollInset\">88</x:Double>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" x:Key=\"M3FloatingActionButtonOverlay\">", styles, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" BasedOn=\"{StaticResource M3FloatingActionButtonOverlay}\" />", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FloatingActionButtonView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileAddButtonVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FloatingActionIconButton}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("SemanticProperties.Description=\"Add files\"", mainPage, StringComparison.Ordinal);

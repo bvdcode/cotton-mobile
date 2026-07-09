@@ -1342,6 +1342,14 @@
         <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
     </Style>
 
+    <Style TargetType="controls:FloatingActionButtonView" x:Key="M3FloatingActionButtonOverlay">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="End" />
+        <Setter Property="Margin" Value="{StaticResource M3FloatingActionButtonMargin}" />
+    </Style>
+
+    <Style TargetType="controls:FloatingActionButtonView" BasedOn="{StaticResource M3FloatingActionButtonOverlay}" />
+
     <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
         <Setter Property="IconSize" Value="{StaticResource M3FloatingActionButtonIconSize}" />
@@ -1350,9 +1358,6 @@
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkPrimaryPressed}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
-        <Setter Property="HorizontalOptions" Value="End" />
-        <Setter Property="VerticalOptions" Value="End" />
-        <Setter Property="Margin" Value="{StaticResource M3FloatingActionButtonMargin}" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">

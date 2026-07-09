@@ -94,6 +94,7 @@
     <Thickness x:Key="M3FileTileSelectionMarkMargin">4</Thickness>
     <Thickness x:Key="M3FooterLinkPadding">8,0</Thickness>
     <Thickness x:Key="M3FloatingActionButtonMargin">0,0,0,16</Thickness>
+    <x:Double x:Key="M3FloatingActionButtonScrollInset">88</x:Double>
     <Thickness x:Key="M3InlineStatusPanelPadding">12</Thickness>
     <Thickness x:Key="M3MainContentBottomPadding">0,0,0,16</Thickness>
     <Thickness x:Key="M3MainPagePadding">16,0,16,16</Thickness>

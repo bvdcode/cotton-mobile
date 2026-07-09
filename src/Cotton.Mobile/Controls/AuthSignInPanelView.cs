@@ -9,9 +9,11 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultCardStyleResourceKey = "M3AuthPanel";
         private const string DefaultFlatCardStyleResourceKey = "M3AuthPanelFlat";
+        private const string DefaultActionRowStyleResourceKey = "M3AuthActionRow";
         private const string DefaultFormStackStyleResourceKey = "M3AuthFormStack";
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
+        private const string DefaultServerActionButtonStyleResourceKey = "M3AuthServerActionButton";
         private const string ChangeServerActionText = "Change server";
         private const string UseDefaultServerActionText = "Use default server";
         private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
@@ -67,9 +69,10 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnPanelVisiblePropertyChanged);
 
         private readonly FilledButton _button;
+        private readonly Grid _actionRow;
         private readonly ContentCardView _card;
         private readonly VerticalStackLayout _formStack;
-        private readonly TextAction _serverAction;
+        private readonly IconButton _serverActionButton;
         private readonly ScreenStatusView _status;
         private readonly ICommand _toggleServerFieldCommand;
         private readonly OutlinedInputField _urlField;
@@ -101,10 +104,23 @@ namespace Cotton.Mobile.Controls
             };
             _button.SetDynamicResource(StyleProperty, DefaultButtonStyleResourceKey);
 
-            _serverAction = new TextAction
+            _serverActionButton = new IconButton
             {
                 Command = _toggleServerFieldCommand,
             };
+            _serverActionButton.SetDynamicResource(StyleProperty, DefaultServerActionButtonStyleResourceKey);
+
+            _actionRow = new Grid
+            {
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                },
+            };
+            _actionRow.SetDynamicResource(StyleProperty, DefaultActionRowStyleResourceKey);
+            _actionRow.Add(_button, 0, 0);
+            _actionRow.Add(_serverActionButton, 1, 0);
 
             _formStack = new VerticalStackLayout
             {
@@ -112,8 +128,7 @@ namespace Cotton.Mobile.Controls
                 {
                     _urlField,
                     _status,
-                    _button,
-                    _serverAction,
+                    _actionRow,
                 },
             };
             _formStack.SetDynamicResource(StyleProperty, DefaultFormStackStyleResourceKey);
@@ -202,7 +217,7 @@ namespace Cotton.Mobile.Controls
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;
-            _serverAction.IsEnabled = IsInputEnabled;
+            _serverActionButton.IsEnabled = IsInputEnabled;
             UpdateServerFieldState();
             UpdateInputTransparency();
         }
@@ -231,7 +246,13 @@ namespace Cotton.Mobile.Controls
         {
             bool isServerFieldVisible = IsServerFieldVisible();
             _urlField.IsFieldVisible = isServerFieldVisible;
-            _serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText;
+            _serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Edit;
+            SemanticProperties.SetDescription(
+                _serverActionButton,
+                isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText);
+            SemanticProperties.SetHint(
+                _serverActionButton,
+                "Choose the default Cotton Cloud server or enter a custom address.");
             _card.CardStyleResourceKey = ShouldUseFramedPanel()
                 ? DefaultCardStyleResourceKey
                 : DefaultFlatCardStyleResourceKey;

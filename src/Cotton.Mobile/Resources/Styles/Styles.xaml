@@ -283,6 +283,10 @@
         <Setter Property="Spacing" Value="{StaticResource Space16}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3AuthActionRow">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3AppLockGateGrid">
         <Setter Property="Padding" Value="{StaticResource M3AppLockGatePadding}" />
     </Style>
@@ -1313,6 +1317,8 @@
         <Setter Property="VerticalOptions" Value="Start" />
         <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
     </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3AuthServerActionButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 

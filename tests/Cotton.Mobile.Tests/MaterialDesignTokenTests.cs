@@ -1282,6 +1282,7 @@ namespace Cotton.Mobile.Tests
         {
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
             string mainPage = LoadText(MainPagePath);
+            string styles = LoadText(StylesResourcePath);
 
             Assert.Contains("<controls:AuthSignInPanelView IsPanelVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
@@ -1293,9 +1294,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public class AuthSignInPanelView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3AuthPanel\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultFlatCardStyleResourceKey = \"M3AuthPanelFlat\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultActionRowStyleResourceKey = \"M3AuthActionRow\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultFormStackStyleResourceKey = \"M3AuthFormStack\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusTextStyleResourceKey = \"M3AuthStatus\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultButtonStyleResourceKey = \"M3AuthFilledButton\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultServerActionButtonStyleResourceKey = \"M3AuthServerActionButton\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("PanelOpacityAnimationName = \"M3AuthSignInPanelOpacity\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("IsPanelVisibleProperty", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("OnPanelVisiblePropertyChanged", authSignInPanelView, StringComparison.Ordinal);
@@ -1309,9 +1312,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ChangeServerActionText = \"Change server\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("UseDefaultServerActionText = \"Use default server\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_toggleServerFieldCommand = new Command(ToggleServerField)", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("new TextAction", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("new IconButton", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_actionRow.SetDynamicResource(StyleProperty, DefaultActionRowStyleResourceKey)", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_actionRow.Add(_button, 0, 0)", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_actionRow.Add(_serverActionButton, 1, 0)", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_urlField.IsFieldVisible = isServerFieldVisible", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("_serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Edit", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("SemanticProperties.SetDescription(", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_card.CardStyleResourceKey = ShouldUseFramedPanel()", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("return IsServerFieldVisible() || IsStatusVisible;", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("Dispatcher.DispatchDelayed(", authSignInPanelView, StringComparison.Ordinal);
@@ -1322,8 +1330,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_status.IsStatusVisible = IsStatusVisible", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("new FilledButton", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Text = \"Connect\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("M3AuthActionRow", styles, StringComparison.Ordinal);
+            Assert.Contains("M3AuthServerActionButton", styles, StringComparison.Ordinal);
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = DefaultCardStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("new TextAction", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_serverAction.Text =", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:AuthSignInPanelView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3AuthFormStack}\">", mainPage, StringComparison.Ordinal);

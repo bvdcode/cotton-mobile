@@ -3849,6 +3849,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnCardVisiblePropertyChanged", contentCardView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", contentCardView, StringComparison.Ordinal);
             Assert.Contains("CompleteCardVisibility", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", contentCardView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !isCardVisible", contentCardView, StringComparison.Ordinal);
             Assert.Contains("_card.Content = BodyContent", contentCardView, StringComparison.Ordinal);
             Assert.Equal(1, CountOccurrences(recentFilesPage, "<controls:ContentCardView"));
             Assert.Equal(1, CountOccurrences(activityFeedPage, "<controls:ContentCardView"));
@@ -3891,7 +3893,7 @@ namespace Cotton.Mobile.Tests
 
             foreach (string page in pages)
             {
-            Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", page, StringComparison.Ordinal);
+                Assert.DoesNotContain("<Border Style=\"{StaticResource M3ContentCard}\"", page, StringComparison.Ordinal);
             }
 
             Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding IsLoadMoreVisible}\">", activityFeedPage, StringComparison.Ordinal);

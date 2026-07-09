@@ -100,6 +100,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            UpdateInputTransparency(isCardVisible);
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -115,6 +116,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteCardVisibility()
         {
             IsVisible = IsCardVisible;
+            UpdateInputTransparency(IsCardVisible);
+        }
+
+        private void UpdateInputTransparency(bool isCardVisible)
+        {
+            InputTransparent = !isCardVisible;
         }
     }
 }

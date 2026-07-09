@@ -297,10 +297,19 @@ namespace Cotton.Mobile.Tests
             const string onActionBinding = "{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}";
 
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            XDocument type = LoadResourceDictionary(TypeResourcePath);
             IReadOnlyDictionary<string, string> filledButtonSetters =
                 GetStyleSetters(styles, "M3FilledButton");
             IReadOnlyDictionary<string, string> floatingActionSetters =
                 GetStyleSetters(styles, "M3FloatingActionIconButton");
+            IReadOnlyDictionary<string, string> implicitIndicatorSetters =
+                GetImplicitStyleSetters(styles, "IndicatorView");
+            IReadOnlyDictionary<string, string> selectedNavigationSetters =
+                GetStyleSetters(styles, "M3NavigationBarItemSelected");
+            IReadOnlyDictionary<string, string> actionSheetItemSetters =
+                GetStyleSetters(styles, "M3ActionSheetItem");
+            IReadOnlyDictionary<string, string> navigationSelectedLabelSetters =
+                GetStyleSetters(type, "M3NavigationSelectedLabel");
             IReadOnlyDictionary<string, string> selectionMarkSetters =
                 GetStyleSetters(styles, "M3FileSelectionMark");
             IReadOnlyDictionary<string, string> selectionCheckSetters =
@@ -316,6 +325,14 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(actionPressedBinding, floatingActionSetters["PressedButtonBackgroundColor"]);
             Assert.Equal(actionBinding, floatingActionSetters["BorderColor"]);
             Assert.Equal(onActionBinding, floatingActionSetters["IconColor"]);
+            Assert.Equal(actionBinding, implicitIndicatorSetters["SelectedIndicatorColor"]);
+            Assert.Equal(actionBinding, selectedNavigationSetters["FillColor"]);
+            Assert.Equal(actionPressedBinding, selectedNavigationSetters["PressedFillColor"]);
+            Assert.Equal(actionBinding, selectedNavigationSetters["BorderColor"]);
+            Assert.Equal(onActionBinding, selectedNavigationSetters["IconColor"]);
+            Assert.Equal(onActionBinding, selectedNavigationSetters["TextColor"]);
+            Assert.Equal(actionBinding, actionSheetItemSetters["SelectedIconColor"]);
+            Assert.Equal(onActionBinding, navigationSelectedLabelSetters["TextColor"]);
             Assert.Equal(actionBinding, selectionMarkSetters["Stroke"]);
             Assert.Equal(actionBinding, selectionMarkSetters["BackgroundColor"]);
             Assert.Equal(onActionBinding, selectionCheckSetters["IconColor"]);
@@ -323,6 +340,12 @@ namespace Cotton.Mobile.Tests
 
             Assert.DoesNotContain("M3LightPrimary", filledButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", floatingActionSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", implicitIndicatorSetters["SelectedIndicatorColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", selectedNavigationSetters["FillColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", selectedNavigationSetters["FillColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightOnPrimaryContainer", selectedNavigationSetters["TextColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", actionSheetItemSetters["SelectedIconColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightOnPrimaryContainer", navigationSelectedLabelSetters["TextColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", selectionMarkSetters["BackgroundColor"], StringComparison.Ordinal);
         }
 

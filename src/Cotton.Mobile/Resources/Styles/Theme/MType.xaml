@@ -322,7 +322,7 @@
     <Style TargetType="Label" x:Key="M3AuthStatus" BasedOn="{StaticResource M3CardSupportingPrimary}" />
 
     <Style TargetType="Label" x:Key="M3NavigationSelectedLabel">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="FontSize" Value="{StaticResource M3NavigationSelectedLabelFontSize}" />
         <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
         <Setter Property="FontAttributes" Value="None" />

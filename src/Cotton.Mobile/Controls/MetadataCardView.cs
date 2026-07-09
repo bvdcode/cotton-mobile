@@ -205,12 +205,13 @@ namespace Cotton.Mobile.Controls
 
             _card.SetDynamicResource(StyleProperty, cardStyleResourceKey);
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _header.Title = Title ?? string.Empty;
-            _header.SupportingText = SupportingText ?? string.Empty;
-            _header.TrailingText = TrailingText ?? string.Empty;
-            _header.IsTrailingTextVisible = IsTrailingTextVisible;
-            _header.LeadingIconData = LeadingIconData;
-            _header.LeadingIconFrameStyleResourceKey = leadingIconFrameStyleResourceKey;
+            _header.ApplyHeaderState(
+                Title ?? string.Empty,
+                SupportingText ?? string.Empty,
+                TrailingText ?? string.Empty,
+                IsTrailingTextVisible,
+                LeadingIconData,
+                leadingIconFrameStyleResourceKey);
 
             bool hasBodyContent = bodyContent is not null;
             if (hasBodyContent && _bodyContentHost.Content != bodyContent)

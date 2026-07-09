@@ -2903,6 +2903,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TrailingText=\"{Binding StatusText}\"", captureInboxPage, StringComparison.Ordinal);
 
             Assert.Contains("new MetadataCardHeaderView", metadataCardView, StringComparison.Ordinal);
+            Assert.Contains("_header.ApplyHeaderState(", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.Title =", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.SupportingText =", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.TrailingText =", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.IsTrailingTextVisible =", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.LeadingIconData =", metadataCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_header.LeadingIconFrameStyleResourceKey =", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3ContentCard\"", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3MetadataCardGrid\"", metadataCardView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<double>(\"M3FileThumbnailSize\")", metadataCardView, StringComparison.Ordinal);
@@ -2919,6 +2926,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TrailingChipOpacityAnimationName = \"M3MetadataCardTrailingChipOpacity\"", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("TrailingTextProperty", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("OnTrailingChipVisibilityPropertyChanged", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("internal void ApplyHeaderState(", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("ApplyResolvedVisualState(", metadataCardHeaderView, StringComparison.Ordinal);
+            Assert.Contains("_currentTrailingText", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", metadataCardHeaderView, StringComparison.Ordinal);
             Assert.Contains("CompleteTrailingChipVisibility", metadataCardHeaderView, StringComparison.Ordinal);

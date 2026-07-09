@@ -105,6 +105,8 @@ namespace Cotton.Mobile.Controls
         private readonly FileEntryTextView _textBlock;
         private readonly ChipView _trailingChip;
         private bool _hasAppliedTrailingChipVisibility;
+        private bool _isCurrentTrailingTextVisible = true;
+        private string _currentTrailingText = string.Empty;
 
         public MetadataCardHeaderView()
         {
@@ -223,45 +225,108 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateTrailingChipVisibility)
         {
-            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+            ApplyResolvedVisualState(
+                Title ?? string.Empty,
+                SupportingText ?? string.Empty,
+                TrailingText ?? string.Empty,
+                IsTrailingTextVisible,
+                LeadingIconData,
                 GridStyleResourceKey,
-                DefaultGridStyleResourceKey);
-            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 LeadingIconFrameStyleResourceKey,
-                DefaultLeadingIconFrameStyleResourceKey);
-            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 TextStackStyleResourceKey,
-                DefaultTextStackStyleResourceKey);
-            string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 TitleStyleResourceKey,
-                DefaultTitleStyleResourceKey);
-            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 SupportingTextStyleResourceKey,
-                DefaultSupportingTextStyleResourceKey);
-            string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 TrailingChipStyleResourceKey,
-                DefaultTrailingChipStyleResourceKey);
-            string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
                 TrailingTextStyleResourceKey,
-                DefaultTrailingTextStyleResourceKey);
-
-            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
-            _leadingIcon.IconData = LeadingIconData;
-            _textBlock.Title = Title ?? string.Empty;
-            _textBlock.Detail = SupportingText ?? string.Empty;
-            _textBlock.StackStyleResourceKey = textStackStyleResourceKey;
-            _textBlock.TitleStyleResourceKey = titleStyleResourceKey;
-            _textBlock.DetailStyleResourceKey = supportingTextStyleResourceKey;
-            _trailingChip.Text = TrailingText ?? string.Empty;
-            _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
-            _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
-            UpdateTrailingChipVisibility(TrailingText ?? string.Empty, animateTrailingChipVisibility);
+                animateTrailingChipVisibility);
         }
 
-        private void UpdateTrailingChipVisibility(string trailingText, bool animateTrailingChipVisibility)
+        internal void ApplyHeaderState(
+            string title,
+            string supportingText,
+            string trailingText,
+            bool isTrailingTextVisible,
+            Geometry? leadingIconData,
+            string leadingIconFrameStyleResourceKey)
         {
-            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText);
+            ApplyResolvedVisualState(
+                title,
+                supportingText,
+                trailingText,
+                isTrailingTextVisible,
+                leadingIconData,
+                GridStyleResourceKey,
+                leadingIconFrameStyleResourceKey,
+                TextStackStyleResourceKey,
+                TitleStyleResourceKey,
+                SupportingTextStyleResourceKey,
+                TrailingChipStyleResourceKey,
+                TrailingTextStyleResourceKey,
+                animateTrailingChipVisibility: true);
+        }
+
+        private void ApplyResolvedVisualState(
+            string title,
+            string supportingText,
+            string trailingText,
+            bool isTrailingTextVisible,
+            Geometry? leadingIconData,
+            string requestedGridStyleResourceKey,
+            string requestedLeadingIconFrameStyleResourceKey,
+            string requestedTextStackStyleResourceKey,
+            string requestedTitleStyleResourceKey,
+            string requestedSupportingTextStyleResourceKey,
+            string requestedTrailingChipStyleResourceKey,
+            string requestedTrailingTextStyleResourceKey,
+            bool animateTrailingChipVisibility)
+        {
+            string resolvedGridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedGridStyleResourceKey,
+                DefaultGridStyleResourceKey);
+            string resolvedLeadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedLeadingIconFrameStyleResourceKey,
+                DefaultLeadingIconFrameStyleResourceKey);
+            string resolvedTextStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedTextStackStyleResourceKey,
+                DefaultTextStackStyleResourceKey);
+            string resolvedTitleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedTitleStyleResourceKey,
+                DefaultTitleStyleResourceKey);
+            string resolvedSupportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedSupportingTextStyleResourceKey,
+                DefaultSupportingTextStyleResourceKey);
+            string resolvedTrailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedTrailingChipStyleResourceKey,
+                DefaultTrailingChipStyleResourceKey);
+            string resolvedTrailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedTrailingTextStyleResourceKey,
+                DefaultTrailingTextStyleResourceKey);
+            string currentTitle = title ?? string.Empty;
+            string currentSupportingText = supportingText ?? string.Empty;
+            string currentTrailingText = trailingText ?? string.Empty;
+
+            _grid.SetDynamicResource(StyleProperty, resolvedGridStyleResourceKey);
+            _leadingIcon.SetDynamicResource(StyleProperty, resolvedLeadingIconFrameStyleResourceKey);
+            _leadingIcon.IconData = leadingIconData;
+            _textBlock.Title = currentTitle;
+            _textBlock.Detail = currentSupportingText;
+            _textBlock.StackStyleResourceKey = resolvedTextStackStyleResourceKey;
+            _textBlock.TitleStyleResourceKey = resolvedTitleStyleResourceKey;
+            _textBlock.DetailStyleResourceKey = resolvedSupportingTextStyleResourceKey;
+            _trailingChip.Text = currentTrailingText;
+            _trailingChip.ChipStyleResourceKey = resolvedTrailingChipStyleResourceKey;
+            _trailingChip.LabelStyleResourceKey = resolvedTrailingTextStyleResourceKey;
+            _currentTrailingText = currentTrailingText;
+            _isCurrentTrailingTextVisible = isTrailingTextVisible;
+            UpdateTrailingChipVisibility(currentTrailingText, isTrailingTextVisible, animateTrailingChipVisibility);
+        }
+
+        private void UpdateTrailingChipVisibility(
+            string trailingText,
+            bool isTrailingTextVisible,
+            bool animateTrailingChipVisibility)
+        {
+            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText, isTrailingTextVisible);
             bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
             double targetOpacity = isTrailingChipVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -287,7 +352,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteTrailingChipVisibility()
         {
-            if (IsTrailingChipActuallyVisible(TrailingText ?? string.Empty))
+            if (IsTrailingChipActuallyVisible(_currentTrailingText, _isCurrentTrailingTextVisible))
             {
                 _trailingChip.IsVisible = true;
                 return;
@@ -296,9 +361,9 @@ namespace Cotton.Mobile.Controls
             _trailingChip.IsVisible = false;
         }
 
-        private bool IsTrailingChipActuallyVisible(string trailingText)
+        private static bool IsTrailingChipActuallyVisible(string trailingText, bool isTrailingTextVisible)
         {
-            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
+            return isTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
         }
     }
 }

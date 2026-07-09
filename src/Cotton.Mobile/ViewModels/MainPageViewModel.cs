@@ -564,10 +564,6 @@ namespace Cotton.Mobile.ViewModels
                 Display.ShowProfileStatus(OfflineCachedSessionStatus);
                 _isShowingCachedOfflineSession = true;
 
-                IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
-                    await RestoreTransferQueueBestEffortAsync(instanceUri);
-                ShowTransferActivityIndicators(restoredTransfers);
-
                 if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri))
                 {
                     _fileBrowser.Clear();
@@ -575,6 +571,7 @@ namespace Cotton.Mobile.ViewModels
                     return false;
                 }
 
+                QueueTransferActivityRefresh(instanceUri, "cached offline session");
                 RefreshCommands();
                 QueuePendingCaptureInboxOpen("cached offline session");
                 QueuePendingNotificationOpen("cached offline session");
@@ -1760,18 +1757,13 @@ namespace Cotton.Mobile.ViewModels
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 await SaveCachedProfileBestEffortAsync(result.InstanceUri, profile);
                 ShowProfile(profile);
-                IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
-                    await RestoreTransferQueueBestEffortAsync(result.InstanceUri);
-                ShowTransferActivityIndicators(restoredTransfers);
-                await ResumeQueuedBackgroundTransferBestEffortAsync(result.InstanceUri);
-                await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(result.InstanceUri);
-                _ = ScheduleRemotePushTokenRefreshBestEffortAsync("authenticated session");
                 string? accountScopeKey = CottonAccountScopeKey.TryCreateFromUsername(
                     result.User.Username,
                     out string resolvedAccountScopeKey)
                         ? resolvedAccountScopeKey
                         : null;
                 await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
+                QueueAuthenticatedSessionMaintenance(result.InstanceUri, "authenticated session");
                 QueueCloudToDeviceSyncRestore(result.InstanceUri, "authenticated session");
                 _ = ScheduleCloudToDeviceBackgroundSyncBestEffortAsync(result.InstanceUri, "authenticated session");
                 RefreshCommands();
@@ -1829,13 +1821,85 @@ namespace Cotton.Mobile.ViewModels
         {
             try
             {
-                return await _transferQueueRestoreCoordinator.RestoreAsync(instanceUri);
+                return await _transferQueueRestoreCoordinator.RestoreAsync(instanceUri).ConfigureAwait(false);
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile transfer queue.");
                 return [];
             }
+        }
+
+        private void QueueTransferActivityRefresh(Uri instanceUri, string reason)
+        {
+            _ = RefreshTransferActivityBestEffortAsync(instanceUri, reason);
+        }
+
+        private async Task RefreshTransferActivityBestEffortAsync(Uri instanceUri, string reason)
+        {
+            IReadOnlyList<CottonTransferQueueItem> restoredTransfers =
+                await RestoreTransferQueueBestEffortAsync(instanceUri).ConfigureAwait(false);
+            bool didShow = await MainThread.InvokeOnMainThreadAsync(() =>
+            {
+                if (!Display.IsProfileVisible || !Uri.Equals(ResolveInstanceUri(), instanceUri))
+                {
+                    return false;
+                }
+
+                ShowTransferActivityIndicators(restoredTransfers);
+                return true;
+            }).ConfigureAwait(false);
+            if (!didShow)
+            {
+                _logger.LogDebug(
+                    "Skipped stale Cotton mobile transfer activity refresh after {Reason}.",
+                    reason);
+            }
+        }
+
+        private void QueueAuthenticatedSessionMaintenance(Uri instanceUri, string reason)
+        {
+            _ = RunAuthenticatedSessionMaintenanceBestEffortAsync(instanceUri, reason);
+        }
+
+        private async Task RunAuthenticatedSessionMaintenanceBestEffortAsync(Uri instanceUri, string reason)
+        {
+            try
+            {
+                await RefreshTransferActivityBestEffortAsync(instanceUri, reason).ConfigureAwait(false);
+                if (!await IsCurrentVisibleSessionOnMainThreadAsync(instanceUri).ConfigureAwait(false))
+                {
+                    return;
+                }
+
+                await ResumeQueuedBackgroundTransferBestEffortAsync(instanceUri).ConfigureAwait(false);
+                if (!await IsCurrentVisibleSessionOnMainThreadAsync(instanceUri).ConfigureAwait(false))
+                {
+                    return;
+                }
+
+                await _remotePushRegistrationService.RegisterCurrentSessionBestEffortAsync(instanceUri)
+                    .ConfigureAwait(false);
+                if (!await IsCurrentVisibleSessionOnMainThreadAsync(instanceUri).ConfigureAwait(false))
+                {
+                    return;
+                }
+
+                await ScheduleRemotePushTokenRefreshBestEffortAsync(reason).ConfigureAwait(false);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to run Cotton mobile authenticated session maintenance after {Reason}.",
+                    reason);
+            }
+        }
+
+        private Task<bool> IsCurrentVisibleSessionOnMainThreadAsync(Uri instanceUri)
+        {
+            return MainThread.InvokeOnMainThreadAsync(() =>
+                Display.IsProfileVisible && Uri.Equals(ResolveInstanceUri(), instanceUri));
         }
 
         private async Task ResumeQueuedBackgroundTransferBestEffortAsync(Uri instanceUri)

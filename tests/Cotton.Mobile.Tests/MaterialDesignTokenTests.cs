@@ -19,6 +19,8 @@ namespace Cotton.Mobile.Tests
         private const string AndroidDarkColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/colors.xml";
         private const string AndroidLightStylesPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/styles.xml";
         private const string AndroidDarkStylesPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/styles.xml";
+        private const string AndroidSplashMarkPath = "src/Cotton.Mobile/Platforms/Android/Resources/drawable/cotton_splash_mark.xml";
+        private const string AndroidSplashScreenPath = "src/Cotton.Mobile/Platforms/Android/Resources/drawable/cotton_splash_screen.xml";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
@@ -654,6 +656,8 @@ namespace Cotton.Mobile.Tests
             string darkColors = LoadText(AndroidDarkColorsPath);
             string lightStyles = LoadText(AndroidLightStylesPath);
             string darkStyles = LoadText(AndroidDarkStylesPath);
+            string splashMark = LoadText(AndroidSplashMarkPath);
+            string splashScreen = LoadText(AndroidSplashScreenPath);
 
             Assert.Contains("using AndroidX.Core.View;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Resource.Color.cotton_system_bar_background", mainActivity, StringComparison.Ordinal);
@@ -687,6 +691,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("decorView.SystemUiFlags = flags;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_system_bar_background\">#F7F8F7</color>", lightColors, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_system_bar_background\">#090B0A</color>", darkColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_splash_background\">#F7F8F7</color>", lightColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_splash_background\">#090B0A</color>", darkColors, StringComparison.Ordinal);
+            Assert.Contains("<item android:drawable=\"@color/cotton_splash_background\" />", splashScreen, StringComparison.Ordinal);
+            Assert.Contains("android:drawable=\"@drawable/cotton_splash_mark\"", splashScreen, StringComparison.Ordinal);
+            Assert.Contains("android:src=\"@drawable/cotton_brand_mark\"", splashMark, StringComparison.Ordinal);
+            Assert.Contains("android:width=\"108dp\"", splashMark, StringComparison.Ordinal);
+            Assert.Contains("android:height=\"108dp\"", splashMark, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowBackground\">@drawable/cotton_splash_screen</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowBackground\">@drawable/cotton_splash_screen</item>", darkStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowSplashScreenBackground\">@color/cotton_splash_background</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowSplashScreenBackground\">@color/cotton_splash_background</item>", darkStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowSplashScreenAnimatedIcon\">@drawable/cotton_splash_mark</item>", lightStyles, StringComparison.Ordinal);
+            Assert.Contains("<item name=\"android:windowSplashScreenAnimatedIcon\">@drawable/cotton_splash_mark</item>", darkStyles, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_system_bar_background</item>", lightStyles, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:statusBarColor\">@color/cotton_system_bar_background</item>", darkStyles, StringComparison.Ordinal);
             Assert.Contains("<item name=\"android:navigationBarColor\">@color/cotton_system_bar_background</item>", lightStyles, StringComparison.Ordinal);

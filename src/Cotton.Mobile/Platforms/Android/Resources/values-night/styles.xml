@@ -8,6 +8,9 @@
         <item name="android:textSelectHandle">@drawable/cotton_text_select_handle</item>
         <item name="android:textSelectHandleLeft">@drawable/cotton_text_select_handle</item>
         <item name="android:textSelectHandleRight">@drawable/cotton_text_select_handle</item>
+        <item name="android:windowBackground">@drawable/cotton_splash_screen</item>
+        <item name="android:windowSplashScreenBackground">@color/cotton_splash_background</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/cotton_splash_mark</item>
         <item name="android:statusBarColor">@color/cotton_system_bar_background</item>
         <item name="android:navigationBarColor">@color/cotton_system_bar_background</item>
         <item name="android:navigationBarDividerColor">@color/cotton_system_bar_background</item>

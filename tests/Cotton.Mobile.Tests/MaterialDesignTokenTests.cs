@@ -303,6 +303,7 @@ namespace Cotton.Mobile.Tests
 
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             XDocument type = LoadResourceDictionary(TypeResourcePath);
+            XDocument spacing = LoadResourceDictionary(SpacingResourcePath);
             IReadOnlyDictionary<string, string> attentionPanelSetters =
                 GetStyleSetters(styles, "M3AttentionStatusPanel");
             IReadOnlyDictionary<string, string> attentionIconSetters =
@@ -340,6 +341,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(errorContainerBinding, fileAttentionChipSetters["Stroke"]);
             Assert.Equal(errorContainerBinding, fileAttentionChipSetters["BackgroundColor"]);
             Assert.Equal(onErrorContainerBinding, errorChipLabelSetters["TextColor"]);
+            Assert.True(GetDoubleResource(type, "M3CompactChipLabelFontSize") >= 11);
+            Assert.Equal("{StaticResource M3CompactChipLabelFontSize}", errorChipLabelSetters["FontSize"]);
+            Assert.Equal("6,2", GetResourceValue(spacing, "M3CompactChipPadding"));
 
             Assert.Equal(errorBinding, destructiveIconButtonSetters["IconColor"]);
             Assert.Equal(errorBinding, destructiveActionSheetSetters["TextColor"]);
@@ -2520,6 +2524,7 @@ namespace Cotton.Mobile.Tests
             string trashTileEntryCardView = LoadText(TrashTileEntryCardViewPath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             XDocument type = LoadResourceDictionary(TypeResourcePath);
+            XDocument spacing = LoadResourceDictionary(SpacingResourcePath);
             IReadOnlyDictionary<string, string> localCopyChipSetters =
                 GetStyleSetters(styles, "M3LocalCopyChip");
             IReadOnlyDictionary<string, string> localCopyChipLabelSetters =
@@ -2538,6 +2543,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 localCopyChipLabelSetters["TextColor"]);
+            Assert.True(GetDoubleResource(type, "M3CompactChipLabelFontSize") >= 11);
+            Assert.Equal("{StaticResource M3CompactChipLabelFontSize}", localCopyChipLabelSetters["FontSize"]);
+            Assert.Equal("6,2", GetResourceValue(spacing, "M3CompactChipPadding"));
             Assert.DoesNotContain("M3AccentChipLabel", type.ToString(), StringComparison.Ordinal);
             Assert.DoesNotContain("M3AccentOutlineChip", styles.ToString() + type.ToString() + fileTileMetadataView, StringComparison.Ordinal);
             Assert.DoesNotContain("M3Accent", styles.ToString() + type, StringComparison.Ordinal);
@@ -4395,6 +4403,16 @@ namespace Cotton.Mobile.Tests
                     key,
                     StringComparison.Ordinal));
             return int.Parse(element.Value, CultureInfo.InvariantCulture);
+        }
+
+        private static string GetResourceValue(XDocument document, string key)
+        {
+            XElement element = document.Descendants()
+                .Single(descendant => string.Equals(
+                    (string?)descendant.Attribute(XamlNamespace + "Key"),
+                    key,
+                    StringComparison.Ordinal));
+            return element.Value;
         }
 
         private static IReadOnlyDictionary<string, string> GetStyleSetters(XDocument document, string styleKey)

@@ -773,6 +773,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IconColorAnimationName = \"M3InputIconColor\"", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.Contains("LightSurfaceContainerLowResourceKey = \"M3LightSurfaceContainerLow\"", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.Contains("DarkSurfaceContainerLowResourceKey = \"M3DarkSurfaceContainerLow\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("LightActionResourceKey = \"M3LightAction\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("DarkActionResourceKey = \"M3DarkAction\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("LightOnActionResourceKey = \"M3LightOnAction\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("DarkOnActionResourceKey = \"M3DarkOnAction\"", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("AnimateBorderStroke(Field, actionColor, FieldStrokeAnimationName, animate)", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("AnimateBackground(LeadingIconFrame, actionColor, IconFrameBackgroundAnimationName, animate)", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.Contains("AnimateIconColor(LeadingIcon, onActionColor, animate)", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.Contains("return LightSurfaceContainerHighResourceKey;", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.Contains("return LightSurfaceContainerLowResourceKey;", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.Contains("return DarkSurfaceContainerHighResourceKey;", focusedInputChromeBehavior, StringComparison.Ordinal);
@@ -791,6 +798,9 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("LeadingIcon.IconColor =", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.DoesNotContain("LightSurfaceContainerLowestResourceKey", focusedInputChromeBehavior, StringComparison.Ordinal);
             Assert.DoesNotContain("DarkSurfaceContainerResourceKey", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.DoesNotContain("PrimaryResourceKey", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.DoesNotContain("PrimaryContainerResourceKey", focusedInputChromeBehavior, StringComparison.Ordinal);
+            Assert.DoesNotContain("OnPrimaryContainerResourceKey", focusedInputChromeBehavior, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -33,16 +33,14 @@ namespace Cotton.Mobile.Behaviors
             default(IconView),
             propertyChanged: OnVisualTargetChanged);
 
-        private const string LightPrimaryResourceKey = "M3LightPrimary";
-        private const string LightPrimaryContainerResourceKey = "M3LightPrimaryContainer";
-        private const string LightOnPrimaryContainerResourceKey = "M3LightOnPrimaryContainer";
+        private const string LightActionResourceKey = "M3LightAction";
+        private const string LightOnActionResourceKey = "M3LightOnAction";
         private const string LightOutlineVariantResourceKey = "M3LightOutlineVariant";
         private const string LightSurfaceContainerHighResourceKey = "M3LightSurfaceContainerHigh";
         private const string LightSurfaceContainerLowResourceKey = "M3LightSurfaceContainerLow";
         private const string LightOnSurfaceVariantResourceKey = "M3LightOnSurfaceVariant";
-        private const string DarkPrimaryResourceKey = "M3DarkPrimary";
-        private const string DarkPrimaryContainerResourceKey = "M3DarkPrimaryContainer";
-        private const string DarkOnPrimaryContainerResourceKey = "M3DarkOnPrimaryContainer";
+        private const string DarkActionResourceKey = "M3DarkAction";
+        private const string DarkOnActionResourceKey = "M3DarkOnAction";
         private const string DarkOutlineVariantResourceKey = "M3DarkOutlineVariant";
         private const string DarkSurfaceContainerHighResourceKey = "M3DarkSurfaceContainerHigh";
         private const string DarkSurfaceContainerLowResourceKey = "M3DarkSurfaceContainerLow";
@@ -127,28 +125,27 @@ namespace Cotton.Mobile.Behaviors
 
         private void ApplyFocusedState(bool animate)
         {
-            Color primaryColor = GetRequiredColor(GetPrimaryResourceKey());
-            Color primaryContainerColor = GetRequiredColor(GetPrimaryContainerResourceKey());
-            Color onPrimaryContainerColor = GetRequiredColor(GetOnPrimaryContainerResourceKey());
+            Color actionColor = GetRequiredColor(GetActionResourceKey());
+            Color onActionColor = GetRequiredColor(GetOnActionResourceKey());
             Color fieldBackgroundColor = GetRequiredColor(GetFocusedFieldBackgroundResourceKey());
             double focusStroke = GetRequiredDouble(FocusStrokeResourceKey);
 
             if (Field is not null)
             {
-                AnimateBorderStroke(Field, primaryColor, FieldStrokeAnimationName, animate);
+                AnimateBorderStroke(Field, actionColor, FieldStrokeAnimationName, animate);
                 Field.StrokeThickness = focusStroke;
                 AnimateBackground(Field, fieldBackgroundColor, FieldBackgroundAnimationName, animate);
             }
 
             if (LeadingIconFrame is not null)
             {
-                AnimateBorderStroke(LeadingIconFrame, primaryColor, IconFrameStrokeAnimationName, animate);
-                AnimateBackground(LeadingIconFrame, primaryContainerColor, IconFrameBackgroundAnimationName, animate);
+                AnimateBorderStroke(LeadingIconFrame, actionColor, IconFrameStrokeAnimationName, animate);
+                AnimateBackground(LeadingIconFrame, actionColor, IconFrameBackgroundAnimationName, animate);
             }
 
             if (LeadingIcon is not null)
             {
-                AnimateIconColor(LeadingIcon, onPrimaryContainerColor, animate);
+                AnimateIconColor(LeadingIcon, onActionColor, animate);
             }
         }
 
@@ -247,37 +244,26 @@ namespace Cotton.Mobile.Behaviors
             return DarkOnSurfaceVariantResourceKey;
         }
 
-        private static string GetPrimaryResourceKey()
+        private static string GetActionResourceKey()
         {
             Application application = GetApplication();
             if (application.RequestedTheme == AppTheme.Light)
             {
-                return LightPrimaryResourceKey;
+                return LightActionResourceKey;
             }
 
-            return DarkPrimaryResourceKey;
+            return DarkActionResourceKey;
         }
 
-        private static string GetPrimaryContainerResourceKey()
+        private static string GetOnActionResourceKey()
         {
             Application application = GetApplication();
             if (application.RequestedTheme == AppTheme.Light)
             {
-                return LightPrimaryContainerResourceKey;
+                return LightOnActionResourceKey;
             }
 
-            return DarkPrimaryContainerResourceKey;
-        }
-
-        private static string GetOnPrimaryContainerResourceKey()
-        {
-            Application application = GetApplication();
-            if (application.RequestedTheme == AppTheme.Light)
-            {
-                return LightOnPrimaryContainerResourceKey;
-            }
-
-            return DarkOnPrimaryContainerResourceKey;
+            return DarkOnActionResourceKey;
         }
 
         private static Color GetRequiredColor(string key)

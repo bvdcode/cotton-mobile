@@ -2828,6 +2828,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", activityFeedPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", diagnosticsPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", transfersPage, StringComparison.Ordinal);
             Assert.Equal(2, CountOccurrences(trashPage, "ItemSizingStrategy=\"MeasureAllItems\""));

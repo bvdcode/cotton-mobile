@@ -87,8 +87,8 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
-                                                    LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Cleanup}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
                                                     Title="Temporary files"
                                                     PrimaryDetailText="{Binding StorageBudgetSummaryText}"
                                                     SecondaryDetailText="{Binding ProtectedOfflineText}" />

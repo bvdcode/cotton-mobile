@@ -1142,6 +1142,7 @@ namespace Cotton.Mobile.Tests
             }
 
             string mainPage = LoadText(MainPagePath);
+            string captureInboxPage = LoadText(CaptureInboxPagePath);
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
             string pdfViewerPage = LoadText(PdfViewerPagePath);
             string appLockGatePage = LoadText(AppLockGatePagePath);
@@ -1159,6 +1160,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionText=\"Choose folder\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3PrimaryIconButton\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IconData=\"{x:Static controls:IconPathData.Image}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3CenteredPdfEmptyStateCard\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("IconFrameStyleResourceKey=\"M3PdfEmptyStateIconFrame\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:CenteredGateView>", appLockGatePage, StringComparison.Ordinal);
@@ -2041,6 +2043,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose destination\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding RenameCommand}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionSemanticDescription=\"Rename capture item\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionIconData=\"{x:Static controls:IconPathData.Upload}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding EnqueueCommand}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionIconButtonStyleResourceKey=\"M3PrimaryIconButton\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionSemanticDescription=\"Queue captured items\"", captureInboxPage, StringComparison.Ordinal);
@@ -3425,7 +3428,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SupportingText=\"{Binding DetailText}\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding StatusText}\"", transfersPage, StringComparison.Ordinal);
 
-            Assert.Contains("<controls:MetadataCardView LeadingIconData=\"{x:Static controls:IconPathData.Transfer}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:MetadataCardView LeadingIconData=\"{x:Static controls:IconPathData.Upload}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("LeadingIconFrameStyleResourceKey=\"M3CardCaptureThumbnailFrame\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding DisplayName}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding DetailText}\"", captureInboxPage, StringComparison.Ordinal);
@@ -3761,6 +3764,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Title=\"Files on this device\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailText=\"{Binding OnDeviceSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("Title=\"Temporary files\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Cleanup}\"\n                                                    LeadingIconFrameStyleResourceKey=\"M3CardUtilityThumbnailFrame\"\n                                                    Title=\"Temporary files\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailText=\"{Binding StorageBudgetSummaryText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("SecondaryDetailText=\"{Binding ProtectedOfflineText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("public class SettingsSectionHeaderView", settingsSectionHeaderView, StringComparison.Ordinal);
@@ -4295,9 +4299,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"Require charging\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding ChargingOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Wi-Fi only\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Wifi}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding WifiOnly, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"Cellular uploads\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsToggled=\"{Binding AllowCellular, Mode=TwoWay}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("public static Geometry Upload => Create(", LoadText(Path.Combine(ControlsDirectoryPath, "IconPathData.cs")), StringComparison.Ordinal);
+            Assert.Contains("public static Geometry Wifi => Create(", LoadText(Path.Combine(ControlsDirectoryPath, "IconPathData.cs")), StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding Title}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding DetailText}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsLeadingIconVisible=\"False\"", notificationSettingsPage, StringComparison.Ordinal);

@@ -73,7 +73,11 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Transfer => Create("M7 3 L3 7 L6 7 L6 14 L8 14 L8 7 L11 7 Z M17 21 L21 17 L18 17 L18 10 L16 10 L16 17 L13 17 Z");
 
+        public static Geometry Upload => Create("M11 17 L13 17 L13 8 L16.5 11.5 L18 10 L12 4 L6 10 L7.5 11.5 L11 8 Z M5 19 L19 19 L19 21 L5 21 Z");
+
         public static Geometry ViewTiles => Create("M4 5 L10 5 L10 11 L4 11 Z M14 5 L20 5 L20 11 L14 11 Z M4 13 L10 13 L10 19 L4 19 Z M14 13 L20 13 L20 19 L14 19 Z");
+
+        public static Geometry Wifi => Create("M2.5 8.5 C7.8 3.8 16.2 3.8 21.5 8.5 L20 10 C15.6 6.3 8.4 6.3 4 10 Z M6 12 C9.3 9.5 14.7 9.5 18 12 L16.5 13.5 C14 11.8 10 11.8 7.5 13.5 Z M9.5 16 C11 15 13 15 14.5 16 L12 18.5 Z");
 
         private static Geometry Create(string path)
         {

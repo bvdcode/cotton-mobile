@@ -36,7 +36,7 @@
                                         SecondaryActionIconData="{x:Static controls:IconPathData.Edit}"
                                         SecondaryActionCommand="{Binding RenameCommand}"
                                         SecondaryActionSemanticDescription="Rename capture item"
-                                        TertiaryActionIconData="{x:Static controls:IconPathData.Transfer}"
+                                        TertiaryActionIconData="{x:Static controls:IconPathData.Upload}"
                                         TertiaryActionCommand="{Binding EnqueueCommand}"
                                         TertiaryActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                         TertiaryActionSemanticDescription="Queue captured items" />
@@ -46,7 +46,7 @@
 
             <controls:EmptyStateView Grid.Row="3"
                                      IsStateVisible="{Binding IsEmpty}"
-                                     IconData="{x:Static controls:IconPathData.Transfer}"
+                                     IconData="{x:Static controls:IconPathData.Image}"
                                      Title="{Binding EmptyMessage}"
                                      Body="{Binding EmptyDetails}" />
 
@@ -57,7 +57,7 @@
                                              ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
                 <controls:MaterialCollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonCaptureInboxListItem">
-                        <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Transfer}"
+                        <controls:MetadataCardView LeadingIconData="{x:Static controls:IconPathData.Upload}"
                                                    LeadingIconFrameStyleResourceKey="M3CardCaptureThumbnailFrame"
                                                    Title="{Binding DisplayName}"
                                                    SupportingText="{Binding DetailText}"

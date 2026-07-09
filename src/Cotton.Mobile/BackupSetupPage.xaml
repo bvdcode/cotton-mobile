@@ -92,7 +92,7 @@
             <controls:SettingsCardView>
                 <controls:SettingsToggleItemView Text="Wi-Fi only"
                                                  SupportingText="Pause uploads on mobile networks."
-                                                 LeadingIconData="{x:Static controls:IconPathData.Transfer}"
+                                                 LeadingIconData="{x:Static controls:IconPathData.Wifi}"
                                                  LeadingIconFrameStyleResourceKey="M3CardTransferThumbnailFrame"
                                                  IsToggled="{Binding WifiOnly, Mode=TwoWay}" />
 

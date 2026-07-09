@@ -5412,7 +5412,7 @@ namespace Cotton.Mobile.ViewModels
                     cancellationToken),
                 cancellationToken);
             cancellationToken.ThrowIfCancellationRequested();
-            await RefreshLocalFileStateAsync(instanceUri, cancellationToken);
+            RefreshLocalFileStateInBackground(instanceUri);
             return downloadedFile;
         }
 
@@ -5939,10 +5939,15 @@ namespace Cotton.Mobile.ViewModels
 
         private void RefreshLocalFileStateAfterFirstRender(Uri instanceUri)
         {
-            _ = RefreshLocalFileStateAfterFirstRenderAsync(instanceUri);
+            RefreshLocalFileStateInBackground(instanceUri);
         }
 
-        private async Task RefreshLocalFileStateAfterFirstRenderAsync(Uri instanceUri)
+        private void RefreshLocalFileStateInBackground(Uri instanceUri)
+        {
+            _ = RefreshLocalFileStateInBackgroundAsync(instanceUri);
+        }
+
+        private async Task RefreshLocalFileStateInBackgroundAsync(Uri instanceUri)
         {
             try
             {

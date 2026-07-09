@@ -16,6 +16,22 @@ namespace Cotton.Mobile.Tests
                 CountOccurrences(controller, "RefreshLocalFileStateAfterFirstRender(instanceUri);"));
         }
 
+        [Fact]
+        public void File_open_does_not_wait_for_local_file_markers_after_download()
+        {
+            string controller = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/MainPageFileBrowserController.cs");
+
+            Assert.DoesNotContain(
+                "await RefreshLocalFileStateAsync(instanceUri, cancellationToken);\n            return downloadedFile;",
+                controller,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "RefreshLocalFileStateInBackground(instanceUri);\n            return downloadedFile;",
+                controller,
+                StringComparison.Ordinal);
+        }
+
         private static int CountOccurrences(string text, string value)
         {
             int count = 0;

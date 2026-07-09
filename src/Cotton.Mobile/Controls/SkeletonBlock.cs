@@ -28,6 +28,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnPulsePropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<int>("M3MotionSkeletonPulseDuration"));
 
+        public static readonly BindableProperty IsPulseEnabledProperty = BindableProperty.Create(
+            nameof(IsPulseEnabled),
+            typeof(bool),
+            typeof(SkeletonBlock),
+            true,
+            propertyChanged: OnPulsePropertyChanged);
+
         private bool _isLoaded;
         private bool _isPulsing;
 
@@ -55,6 +62,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (int)GetValue(PulseDurationProperty);
             set => SetValue(PulseDurationProperty, value);
+        }
+
+        public bool IsPulseEnabled
+        {
+            get => (bool)GetValue(IsPulseEnabledProperty);
+            set => SetValue(IsPulseEnabledProperty, value);
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -157,7 +170,7 @@ namespace Cotton.Mobile.Controls
 
         private bool ShouldPulse()
         {
-            return _isLoaded && IsVisible;
+            return _isLoaded && IsVisible && IsPulseEnabled;
         }
     }
 }

@@ -68,6 +68,8 @@ namespace Cotton.Mobile.Controls
             {
                 Children.Add(CreateRow());
             }
+
+            UpdateSkeletonBlocksPulseState();
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -102,18 +104,21 @@ namespace Cotton.Mobile.Controls
         {
             _isLoaded = true;
             UpdateAppearanceState();
+            UpdateSkeletonBlocksPulseState();
         }
 
         private void OnUnloaded(object? sender, EventArgs e)
         {
             _isLoaded = false;
             this.AbortAnimation(AppearanceAnimationName);
+            UpdateSkeletonBlocksPulseState();
             Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
         }
 
         private void UpdateAppearanceState()
         {
             this.AbortAnimation(AppearanceAnimationName);
+            UpdateSkeletonBlocksPulseState();
 
             if (!_isLoaded || !IsVisible || !IsSkeletonVisible)
             {
@@ -155,6 +160,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            UpdateSkeletonBlocksPulseState();
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -170,6 +176,43 @@ namespace Cotton.Mobile.Controls
         private void CompleteSkeletonVisibility()
         {
             IsVisible = IsSkeletonVisible;
+            UpdateSkeletonBlocksPulseState();
+        }
+
+        private void UpdateSkeletonBlocksPulseState()
+        {
+            bool isPulseEnabled = _isLoaded && IsVisible && IsSkeletonVisible;
+            foreach (SkeletonBlock skeletonBlock in EnumerateSkeletonBlocks(this))
+            {
+                skeletonBlock.IsPulseEnabled = isPulseEnabled;
+            }
+        }
+
+        private static IEnumerable<SkeletonBlock> EnumerateSkeletonBlocks(IView view)
+        {
+            if (view is SkeletonBlock skeletonBlock)
+            {
+                yield return skeletonBlock;
+            }
+
+            if (view is Border border && border.Content is IView borderContent)
+            {
+                foreach (SkeletonBlock childSkeletonBlock in EnumerateSkeletonBlocks(borderContent))
+                {
+                    yield return childSkeletonBlock;
+                }
+            }
+
+            if (view is Layout layout)
+            {
+                foreach (IView child in layout.Children)
+                {
+                    foreach (SkeletonBlock childSkeletonBlock in EnumerateSkeletonBlocks(child))
+                    {
+                        yield return childSkeletonBlock;
+                    }
+                }
+            }
         }
     }
 }

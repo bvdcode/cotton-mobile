@@ -541,15 +541,21 @@ namespace Cotton.Mobile.Tests
         {
             string fileListSkeletonView = LoadText(FileListSkeletonViewPath);
             string mainPage = LoadText(MainPagePath);
+            string skeletonBlock = LoadText(Path.Combine(ControlsDirectoryPath, "SkeletonBlock.cs"));
             string skeletonListView = LoadText(Path.Combine(ControlsDirectoryPath, "SkeletonListView.cs"));
 
             Assert.Contains("<controls:FileListSkeletonView", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsSkeletonVisible=\"{Binding Display.IsInlineFilesLoadingVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("DefaultStyleResourceKey = \"M3FileListSkeletonView\"", fileListSkeletonView, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, DefaultStyleResourceKey)", fileListSkeletonView, StringComparison.Ordinal);
+            Assert.Contains("IsPulseEnabledProperty", skeletonBlock, StringComparison.Ordinal);
+            Assert.Contains("return _isLoaded && IsVisible && IsPulseEnabled", skeletonBlock, StringComparison.Ordinal);
             Assert.Contains("IsSkeletonVisibleProperty", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("OnSkeletonVisiblePropertyChanged", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("CompleteSkeletonVisibility", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("UpdateSkeletonBlocksPulseState", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("bool isPulseEnabled = _isLoaded && IsVisible && IsSkeletonVisible", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("skeletonBlock.IsPulseEnabled = isPulseEnabled", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", skeletonListView, StringComparison.Ordinal);
             Assert.DoesNotContain("FileListSkeletonView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileListSkeletonView}\"", mainPage, StringComparison.Ordinal);

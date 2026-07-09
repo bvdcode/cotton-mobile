@@ -8,6 +8,7 @@ namespace Cotton.Mobile.Controls
     public class AuthSignInPanelView : ContentView
     {
         private const string DefaultCardStyleResourceKey = "M3AuthPanel";
+        private const string DefaultFlatCardStyleResourceKey = "M3AuthPanelFlat";
         private const string DefaultFormStackStyleResourceKey = "M3AuthFormStack";
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
@@ -240,11 +241,19 @@ namespace Cotton.Mobile.Controls
             bool isServerFieldVisible = IsServerFieldVisible();
             _urlField.IsFieldVisible = isServerFieldVisible;
             _serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText;
+            _card.CardStyleResourceKey = ShouldUseFramedPanel()
+                ? DefaultCardStyleResourceKey
+                : DefaultFlatCardStyleResourceKey;
         }
 
         private bool IsServerFieldVisible()
         {
             return _isServerFieldExpanded || !string.IsNullOrWhiteSpace(InstanceUrl);
+        }
+
+        private bool ShouldUseFramedPanel()
+        {
+            return IsServerFieldVisible() || IsStatusVisible;
         }
 
         private void UpdatePanelVisibility(bool animatePanelVisibility)

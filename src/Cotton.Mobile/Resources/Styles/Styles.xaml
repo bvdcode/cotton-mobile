@@ -219,6 +219,15 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="Border" x:Key="M3AuthPanelFlat">
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="Padding" Value="{StaticResource M3AuthPanelFlatPadding}" />
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3AuthPanelMaxWidth}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3AuthShellStack">
         <Setter Property="Spacing" Value="{StaticResource Space20}" />
         <Setter Property="Margin" Value="{StaticResource M3AuthShellMargin}" />

@@ -1160,6 +1160,7 @@ namespace Cotton.Mobile.Tests
             XElement authTitleStyle = GetStyleByKey(styles, "M3AuthTitle");
             IReadOnlyDictionary<string, string> authTitleSetters = GetStyleSetters(styles, "M3AuthTitle");
             IReadOnlyDictionary<string, string> authPanelSetters = GetStyleSetters(styles, "M3AuthPanel");
+            IReadOnlyDictionary<string, string> authPanelFlatSetters = GetStyleSetters(styles, "M3AuthPanelFlat");
 
             Assert.Equal("{StaticResource M3TitleLarge}", (string?)authTitleStyle.Attribute("BasedOn"));
             Assert.Equal("{StaticResource M3FontFamilyMedium}", authTitleSetters["FontFamily"]);
@@ -1170,7 +1171,11 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
                 authPanelSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3Transparent}", authPanelFlatSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3AuthPanelFlatPadding}", authPanelFlatSetters["Padding"]);
+            Assert.Equal("{StaticResource M3AuthPanelMaxWidth}", authPanelFlatSetters["MaximumWidthRequest"]);
             Assert.Contains("<Thickness x:Key=\"M3AuthPanelPadding\">20</Thickness>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<Thickness x:Key=\"M3AuthPanelFlatPadding\">20,0</Thickness>", spacing, StringComparison.Ordinal);
             Assert.DoesNotContain("<Thickness x:Key=\"M3AuthPanelPadding\">16</Thickness>", spacing, StringComparison.Ordinal);
         }
 
@@ -1227,6 +1232,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ConnectCommand=\"{Binding ConnectCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class AuthSignInPanelView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultCardStyleResourceKey = \"M3AuthPanel\"", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultFlatCardStyleResourceKey = \"M3AuthPanelFlat\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultFormStackStyleResourceKey = \"M3AuthFormStack\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultStatusTextStyleResourceKey = \"M3AuthStatus\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("DefaultButtonStyleResourceKey = \"M3AuthFilledButton\"", authSignInPanelView, StringComparison.Ordinal);
@@ -1246,6 +1252,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new TextAction", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_urlField.IsFieldVisible = isServerFieldVisible", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_serverAction.Text = isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_card.CardStyleResourceKey = ShouldUseFramedPanel()", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("return IsServerFieldVisible() || IsStatusVisible;", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("Dispatcher.DispatchDelayed(", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("Placeholder = \"https://app.cottoncloud.dev/\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticHint = \"Cotton Cloud address\"", authSignInPanelView, StringComparison.Ordinal);

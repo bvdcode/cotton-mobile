@@ -6174,9 +6174,11 @@ namespace Cotton.Mobile.ViewModels
             string status,
             bool showStatusPanel)
         {
+            CancellationToken cancellationToken = fileActionCancellation.Token;
             try
             {
-                await Task.Delay(DeferredFileActionLoadingDelay).ConfigureAwait(false);
+                await Task.Delay(DeferredFileActionLoadingDelay, cancellationToken)
+                    .ConfigureAwait(false);
                 await MainThread.InvokeOnMainThreadAsync(() =>
                 {
                     if (ReferenceEquals(_fileActionCancellation, fileActionCancellation)
@@ -6186,6 +6188,9 @@ namespace Cotton.Mobile.ViewModels
                         _display.ShowFileActionLoading(status, showStatusPanel);
                     }
                 }).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
             }
             catch (Exception exception)
             {
@@ -6206,11 +6211,13 @@ namespace Cotton.Mobile.ViewModels
         {
             if (!ReferenceEquals(_fileActionCancellation, cancellation))
             {
+                cancellation.Cancel();
                 cancellation.Dispose();
                 return;
             }
 
             _fileActionCancellation = null;
+            cancellation.Cancel();
             cancellation.Dispose();
             if (shouldRunRecoveryRefresh && string.IsNullOrWhiteSpace(_fileLoadRecoveryPendingAfterBusyReason))
             {

@@ -27,6 +27,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("&& !_display.IsFilesLoading", content, StringComparison.Ordinal);
             Assert.Contains("&& !_display.IsFileBrowserChromeEnabled", content, StringComparison.Ordinal);
             Assert.Contains("DeferredFileActionLoadingDelay = TimeSpan.FromMilliseconds(1200)", content, StringComparison.Ordinal);
+            Assert.Contains("CancellationToken cancellationToken = fileActionCancellation.Token;", content, StringComparison.Ordinal);
+            Assert.Contains("Task.Delay(DeferredFileActionLoadingDelay, cancellationToken)", content, StringComparison.Ordinal);
+            Assert.Contains(
+                "catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)",
+                content,
+                StringComparison.Ordinal);
+            Assert.Contains("_fileActionCancellation = null;\n            cancellation.Cancel();", content, StringComparison.Ordinal);
         }
 
         [Fact]

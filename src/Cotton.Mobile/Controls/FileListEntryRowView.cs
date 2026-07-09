@@ -351,9 +351,7 @@ namespace Cotton.Mobile.Controls
             _thumbnail.IsPlaceholderTextVisible = IsPlaceholderTextVisible;
             _thumbnail.IsSelected = IsSelected;
 
-            _metadata.Title = Title ?? string.Empty;
-            _metadata.Detail = Detail ?? string.Empty;
-            ApplyStatusChip();
+            ApplyMetadataState();
 
             _touchSurface.Command = BeginSelectionCommand;
             _touchSurface.CommandParameter = CommandParameter;
@@ -367,32 +365,34 @@ namespace Cotton.Mobile.Controls
             _actionButton.SemanticDescription = ActionSemanticDescription ?? string.Empty;
         }
 
-        private void ApplyStatusChip()
+        private void ApplyMetadataState()
+        {
+            (string trailingText, bool isTrailingTextVisible, string trailingChipStyle, string trailingTextStyle) =
+                CreateStatusChipState();
+            _metadata.ApplyMetadataState(
+                Title ?? string.Empty,
+                Detail ?? string.Empty,
+                trailingText,
+                isTrailingTextVisible,
+                trailingChipStyle,
+                trailingTextStyle);
+        }
+
+        private (string Text, bool IsVisible, string ChipStyle, string TextStyle) CreateStatusChipState()
         {
             string localCopyStatus = LocalCopyStatus ?? string.Empty;
             string offlineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
             if (IsOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus))
             {
-                _metadata.TrailingChipStyleResourceKey = "M3FileAttentionChip";
-                _metadata.TrailingTextStyleResourceKey = "M3ErrorChipLabel";
-                _metadata.TrailingText = offlineAttentionStatus;
-                _metadata.IsTrailingTextVisible = true;
-                return;
+                return (offlineAttentionStatus, true, "M3FileAttentionChip", "M3ErrorChipLabel");
             }
 
             if (IsLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus))
             {
-                _metadata.TrailingChipStyleResourceKey = "M3LocalCopyChip";
-                _metadata.TrailingTextStyleResourceKey = "M3LocalCopyChipLabel";
-                _metadata.TrailingText = localCopyStatus;
-                _metadata.IsTrailingTextVisible = true;
-                return;
+                return (localCopyStatus, true, "M3LocalCopyChip", "M3LocalCopyChipLabel");
             }
 
-            _metadata.TrailingChipStyleResourceKey = "M3NeutralChip";
-            _metadata.TrailingTextStyleResourceKey = "M3ChipLabel";
-            _metadata.TrailingText = string.Empty;
-            _metadata.IsTrailingTextVisible = false;
+            return (string.Empty, false, "M3NeutralChip", "M3ChipLabel");
         }
     }
 }

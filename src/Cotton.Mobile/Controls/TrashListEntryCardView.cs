@@ -15,10 +15,7 @@ namespace Cotton.Mobile.Controls
         public TrashListEntryCardView()
         {
             _thumbnail = new FileThumbnailView();
-            _metadata = new FileListMetadataView
-            {
-                IsTrailingTextVisible = true,
-            };
+            _metadata = new FileListMetadataView();
             _touchSurface = new TouchSurfaceView();
             _actions = new ActionClusterView();
 
@@ -63,9 +60,13 @@ namespace Cotton.Mobile.Controls
         {
             _grid.SetDynamicResource(StyleProperty, "M3MetadataCardGrid");
             _thumbnail.SurfaceStyleResourceKey = "M3MetadataFileThumbnailSurface";
-            _metadata.Title = Title ?? string.Empty;
-            _metadata.Detail = Detail ?? string.Empty;
-            _metadata.TrailingText = BadgeText ?? string.Empty;
+            _metadata.ApplyMetadataState(
+                Title ?? string.Empty,
+                Detail ?? string.Empty,
+                BadgeText ?? string.Empty,
+                isTrailingTextVisible: true,
+                "M3NeutralChip",
+                "M3ChipLabel");
 
             UpdateThumbnail(_thumbnail);
             UpdateTouchSurface(_touchSurface);

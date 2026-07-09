@@ -80,6 +80,8 @@ namespace Cotton.Mobile.Controls
         private readonly Label _titleLabel;
         private readonly ChipView _trailingChip;
         private bool _hasAppliedTrailingChipVisibility;
+        private bool _isCurrentTrailingTextVisible;
+        private string _currentTrailingText = string.Empty;
 
         public FileListMetadataView()
         {
@@ -185,22 +187,70 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState(bool animateTrailingChipVisibility)
         {
-            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+            ApplyResolvedVisualState(
+                Title ?? string.Empty,
+                Detail ?? string.Empty,
+                TrailingText ?? string.Empty,
+                IsTrailingTextVisible,
                 GridStyleResourceKey,
+                TitleStyleResourceKey,
+                DetailStyleResourceKey,
+                TrailingChipStyleResourceKey,
+                TrailingTextStyleResourceKey,
+                animateTrailingChipVisibility);
+        }
+
+        internal void ApplyMetadataState(
+            string title,
+            string detail,
+            string trailingText,
+            bool isTrailingTextVisible,
+            string trailingChipStyleResourceKey,
+            string trailingTextStyleResourceKey)
+        {
+            ApplyResolvedVisualState(
+                title,
+                detail,
+                trailingText,
+                isTrailingTextVisible,
+                GridStyleResourceKey,
+                TitleStyleResourceKey,
+                DetailStyleResourceKey,
+                trailingChipStyleResourceKey,
+                trailingTextStyleResourceKey,
+                animateTrailingChipVisibility: true);
+        }
+
+        private void ApplyResolvedVisualState(
+            string title,
+            string detail,
+            string trailingText,
+            bool isTrailingTextVisible,
+            string requestedGridStyleResourceKey,
+            string requestedTitleStyleResourceKey,
+            string requestedDetailStyleResourceKey,
+            string requestedTrailingChipStyleResourceKey,
+            string requestedTrailingTextStyleResourceKey,
+            bool animateTrailingChipVisibility)
+        {
+            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedGridStyleResourceKey,
                 DefaultGridStyleResourceKey);
             string titleStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TitleStyleResourceKey,
+                requestedTitleStyleResourceKey,
                 DefaultTitleStyleResourceKey);
             string detailStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                DetailStyleResourceKey,
+                requestedDetailStyleResourceKey,
                 DefaultDetailStyleResourceKey);
             string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TrailingChipStyleResourceKey,
+                requestedTrailingChipStyleResourceKey,
                 DefaultTrailingChipStyleResourceKey);
             string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TrailingTextStyleResourceKey,
+                requestedTrailingTextStyleResourceKey,
                 DefaultTrailingTextStyleResourceKey);
-            string trailingText = TrailingText ?? string.Empty;
+            string currentTitle = title ?? string.Empty;
+            string currentDetail = detail ?? string.Empty;
+            string currentTrailingText = trailingText ?? string.Empty;
 
             _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
             _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);
@@ -208,15 +258,20 @@ namespace Cotton.Mobile.Controls
             _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
             _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
 
-            _titleLabel.Text = Title ?? string.Empty;
-            _detailLabel.Text = Detail ?? string.Empty;
-            _trailingChip.Text = trailingText;
-            UpdateTrailingChipVisibility(trailingText, animateTrailingChipVisibility);
+            _titleLabel.Text = currentTitle;
+            _detailLabel.Text = currentDetail;
+            _trailingChip.Text = currentTrailingText;
+            _currentTrailingText = currentTrailingText;
+            _isCurrentTrailingTextVisible = isTrailingTextVisible;
+            UpdateTrailingChipVisibility(currentTrailingText, isTrailingTextVisible, animateTrailingChipVisibility);
         }
 
-        private void UpdateTrailingChipVisibility(string trailingText, bool animateTrailingChipVisibility)
+        private void UpdateTrailingChipVisibility(
+            string trailingText,
+            bool isTrailingTextVisible,
+            bool animateTrailingChipVisibility)
         {
-            bool isTrailingChipVisible = IsTrailingChipVisible(trailingText);
+            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText, isTrailingTextVisible);
             bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
             double targetOpacity = isTrailingChipVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -242,7 +297,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteTrailingChipVisibility()
         {
-            if (IsTrailingChipVisible(TrailingText ?? string.Empty))
+            if (IsTrailingChipActuallyVisible(_currentTrailingText, _isCurrentTrailingTextVisible))
             {
                 _trailingChip.IsVisible = true;
                 return;
@@ -251,9 +306,9 @@ namespace Cotton.Mobile.Controls
             _trailingChip.IsVisible = false;
         }
 
-        private bool IsTrailingChipVisible(string trailingText)
+        private static bool IsTrailingChipActuallyVisible(string trailingText, bool isTrailingTextVisible)
         {
-            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
+            return isTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
         }
     }
 }

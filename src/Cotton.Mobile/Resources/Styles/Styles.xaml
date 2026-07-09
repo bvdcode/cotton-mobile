@@ -6,17 +6,17 @@
     xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
 
     <Style TargetType="ActivityIndicator">
-        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="ActivityIndicator" x:Key="M3ThumbnailActivityIndicator">
-        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
     <Style TargetType="ActivityIndicator" x:Key="M3StatusActivityIndicator">
-        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
         <Setter Property="WidthRequest" Value="{StaticResource M3FileInlineIconSize}" />
@@ -1555,16 +1555,16 @@
     </Style>
 
     <Style TargetType="ProgressBar">
-        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="ProgressBar" x:Key="M3LinearProgressBar">
         <Setter Property="HeightRequest" Value="{StaticResource Space4}" />
-        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="ProgressColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="RefreshView" x:Key="M3RefreshViewBase">
-        <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="RefreshColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
     </Style>
 
     <Style TargetType="RefreshView" BasedOn="{StaticResource M3RefreshViewBase}" />

@@ -193,7 +193,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Material_progress_styles_use_quiet_tonal_role()
+        public void Material_progress_styles_use_primary_action_role()
         {
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
@@ -207,24 +207,24 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> linearProgressSetters = GetStyleSetters(styles, "M3LinearProgressBar");
 
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 implicitActivitySetters["Color"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 thumbnailActivitySetters["Color"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 statusActivitySetters["Color"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 implicitProgressSetters["ProgressColor"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}",
+                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 linearProgressSetters["ProgressColor"]);
-            Assert.DoesNotContain("M3LightPrimary", implicitActivitySetters["Color"], StringComparison.Ordinal);
-            Assert.DoesNotContain("M3DarkPrimary", statusActivitySetters["Color"], StringComparison.Ordinal);
-            Assert.DoesNotContain("M3LightPrimary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
-            Assert.DoesNotContain("M3DarkPrimary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightTertiary", implicitActivitySetters["Color"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkTertiary", statusActivitySetters["Color"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightTertiary", implicitProgressSetters["ProgressColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkTertiary", linearProgressSetters["ProgressColor"], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1798,7 +1798,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultRefreshStyleResourceKey = \"M3MaterialRefreshView\"", materialRefreshView, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, DefaultRefreshStyleResourceKey)", materialRefreshView, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"RefreshView\" x:Key=\"M3RefreshViewBase\">", styles, StringComparison.Ordinal);
-            Assert.Contains("<Setter Property=\"RefreshColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}\" />", styles, StringComparison.Ordinal);
+            Assert.Contains("<Setter Property=\"RefreshColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}\" />", styles, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"RefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
             Assert.Contains("<Style TargetType=\"controls:MaterialRefreshView\" x:Key=\"M3MaterialRefreshView\" BasedOn=\"{StaticResource M3RefreshViewBase}\" />", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("<RefreshView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);

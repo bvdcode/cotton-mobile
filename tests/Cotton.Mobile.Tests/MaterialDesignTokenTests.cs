@@ -535,7 +535,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(errorContainerBinding, fileAttentionChipSetters["Stroke"]);
             Assert.Equal(errorContainerBinding, fileAttentionChipSetters["BackgroundColor"]);
             Assert.Equal(onErrorContainerBinding, errorChipLabelSetters["TextColor"]);
-            Assert.True(GetDoubleResource(type, "M3CompactChipLabelFontSize") >= 11);
+            Assert.Equal(12, GetDoubleResource(type, "M3CompactChipLabelFontSize"));
             Assert.Equal("{StaticResource M3CompactChipLabelFontSize}", errorChipLabelSetters["FontSize"]);
             Assert.Equal("6,2", GetResourceValue(spacing, "M3CompactChipPadding"));
 
@@ -3132,7 +3132,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 localCopyChipLabelSetters["TextColor"]);
-            Assert.True(GetDoubleResource(type, "M3CompactChipLabelFontSize") >= 11);
+            Assert.Equal(12, GetDoubleResource(type, "M3ChipLabelFontSize"));
+            Assert.Equal(12, GetDoubleResource(type, "M3CompactChipLabelFontSize"));
             Assert.Equal("{StaticResource M3CompactChipLabelFontSize}", localCopyChipLabelSetters["FontSize"]);
             Assert.Equal("6,2", GetResourceValue(spacing, "M3CompactChipPadding"));
             Assert.DoesNotContain("M3AccentChipLabel", type.ToString(), StringComparison.Ordinal);

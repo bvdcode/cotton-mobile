@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionListItemView : ContentView
     {
-        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
         private const string DefaultGridStyleResourceKey = "M3ActionListItemGrid";
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3ActivityThumbnailFrame";
         private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingBlock";

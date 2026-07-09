@@ -1308,6 +1308,17 @@
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
+    <Style TargetType="controls:IconButton" x:Key="M3PrimaryIconButton" BasedOn="{StaticResource M3DefaultIconButton}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainerPressed}, Dark={StaticResource M3DarkActionContainerPressed}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
+    </Style>
+
+    <Style TargetType="controls:IconButton" x:Key="M3DestructiveIconButton" BasedOn="{StaticResource M3DefaultIconButton}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+    </Style>
+
     <Style TargetType="controls:IconButton" x:Key="M3PrimaryFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}" />
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
@@ -1315,7 +1326,7 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryFileChromeIconButton}">
+    <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryIconButton}">
         <Setter Property="HorizontalOptions" Value="Center" />
     </Style>
 

@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultActionClusterStyleResourceKey = "M3InlineActionCluster";
         private const string DefaultCardStyleResourceKey = "M3ContentCard";
         private const string DefaultPrimaryDetailTextStyleResourceKey = "M3CardSupportingLine";
-        private const string DefaultSecondaryActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultSecondaryActionIconButtonStyleResourceKey = "M3DefaultIconButton";
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),

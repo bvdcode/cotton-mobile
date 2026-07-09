@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Controls
     public class LoadingStatusView : ContentView
     {
         private const string ActionButtonOpacityAnimationName = "M3LoadingStatusActionButtonOpacity";
-        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
         private const string DefaultContainerStyleResourceKey = "M3LoadingStatusPanel";
         private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
         private const string DefaultGridStyleResourceKey = "M3LoadingStatusGrid";

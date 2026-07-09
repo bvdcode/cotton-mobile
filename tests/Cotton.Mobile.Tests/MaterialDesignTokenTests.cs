@@ -400,6 +400,8 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3FileSelectionOverlay");
             IReadOnlyDictionary<string, string> fileSelectionRowOverlaySetters =
                 GetStyleSetters(styles, "M3FileSelectionRowOverlay");
+            IReadOnlyDictionary<string, string> primaryIconButtonSetters =
+                GetStyleSetters(styles, "M3PrimaryIconButton");
             IReadOnlyDictionary<string, string> primaryFileChromeIconButtonSetters =
                 GetStyleSetters(styles, "M3PrimaryFileChromeIconButton");
             IReadOnlyDictionary<string, string> viewerPlayIconButtonSetters =
@@ -409,6 +411,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(actionContainerBinding, selectableSurfaceSelectedSetters["BackgroundColor"]);
             Assert.Equal(actionBinding, fileSelectionOverlaySetters["Stroke"]);
             Assert.Equal(actionContainerBinding, fileSelectionRowOverlaySetters["BackgroundColor"]);
+            Assert.Equal(onActionContainerBinding, primaryIconButtonSetters["IconColor"]);
+            Assert.Equal(actionContainerBinding, primaryIconButtonSetters["ButtonBackgroundColor"]);
+            Assert.Equal(actionContainerPressedBinding, primaryIconButtonSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal(actionContainerBinding, primaryIconButtonSetters["BorderColor"]);
             Assert.Equal(onActionContainerBinding, primaryFileChromeIconButtonSetters["IconColor"]);
             Assert.Equal(actionContainerBinding, primaryFileChromeIconButtonSetters["ButtonBackgroundColor"]);
             Assert.Equal(actionContainerPressedBinding, primaryFileChromeIconButtonSetters["PressedButtonBackgroundColor"]);
@@ -422,6 +428,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LightPrimaryContainer", selectableSurfaceSelectedSetters["BackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", fileSelectionOverlaySetters["Stroke"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimaryContainer", fileSelectionRowOverlaySetters["BackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightOnPrimaryContainer", primaryIconButtonSetters["IconColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", primaryIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightOnPrimaryContainer", primaryFileChromeIconButtonSetters["IconColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimaryContainer", primaryFileChromeIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3DarkPrimary", viewerPlayIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
@@ -505,6 +513,8 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> errorChipLabelSetters =
                 GetStyleSetters(type, "M3ErrorChipLabel");
             IReadOnlyDictionary<string, string> destructiveIconButtonSetters =
+                GetStyleSetters(styles, "M3DestructiveIconButton");
+            IReadOnlyDictionary<string, string> destructiveFileIconButtonSetters =
                 GetStyleSetters(styles, "M3DestructiveFileChromeIconButton");
             IReadOnlyDictionary<string, string> destructiveActionSheetSetters =
                 GetStyleSetters(styles, "M3ActionSheetDestructiveItem");
@@ -528,6 +538,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("6,2", GetResourceValue(spacing, "M3CompactChipPadding"));
 
             Assert.Equal(errorBinding, destructiveIconButtonSetters["IconColor"]);
+            Assert.Equal(errorBinding, destructiveFileIconButtonSetters["IconColor"]);
             Assert.Equal(errorBinding, destructiveActionSheetSetters["TextColor"]);
             Assert.Equal(errorBinding, destructiveActionSheetSetters["IconColor"]);
             Assert.Equal(errorBinding, destructiveActionSheetSetters["SelectedIconColor"]);
@@ -1140,7 +1151,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ActionCommand=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ActionText=\"Choose folder\"", syncSettingsPage, StringComparison.Ordinal);
-            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3PrimaryIconButton\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey=\"M3CenteredPdfEmptyStateCard\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("IconFrameStyleResourceKey=\"M3PdfEmptyStateIconFrame\"", pdfViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:CenteredGateView>", appLockGatePage, StringComparison.Ordinal);
@@ -1433,6 +1444,38 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("{StaticResource M3FileActionIconSize}", fileChromeIconButtonSetters["IconSize"]);
             Assert.DoesNotContain("M3FileAction", defaultIconButtonSetters["ButtonSize"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3FileAction", defaultIconButtonSetters["IconSize"], StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Reusable_action_controls_default_to_generic_icon_chrome()
+        {
+            string[] genericActionControlPaths =
+            [
+                Path.Combine(ControlsDirectoryPath, "ActionClusterView.cs"),
+                ActionListItemViewPath,
+                AttentionStatusViewPath,
+                LoadingStatusViewPath,
+                NoticePanelViewPath,
+                SelectionBarViewPath,
+                SettingsActionHeaderCardViewPath,
+            ];
+
+            foreach (string controlPath in genericActionControlPaths)
+            {
+                string control = LoadText(controlPath);
+
+                Assert.Contains("\"M3DefaultIconButton\"", control, StringComparison.Ordinal);
+                Assert.DoesNotContain("\"M3FileChromeIconButton\"", control, StringComparison.Ordinal);
+            }
+
+            Assert.Contains(
+                "DefaultIconButtonStyleResourceKey = \"M3FileChromeIconButton\"",
+                LoadText(Path.Combine(ControlsDirectoryPath, "FileEntryActionButtonView.cs")),
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "DefaultActionIconButtonStyleResourceKey = \"M3FileBrowserTopBarIconButton\"",
+                LoadText(FileBrowserTopBarViewPath),
+                StringComparison.Ordinal);
         }
 
         [Fact]
@@ -1802,12 +1845,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsItemVisible=\"{Binding IsDeviceUnlockActionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding RevokeCurrentSessionActionText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsItemVisible=\"{Binding IsRevokeCurrentSessionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveIconButton\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", securitySettingsPage, StringComparison.Ordinal);
 
             Assert.Equal(2, CountOccurrences(storagePage, "<controls:ActionListItemView"));
             Assert.Contains("SupportingText=\"Remove evictable local copies while keeping offline files.\"", storagePage, StringComparison.Ordinal);
-            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveIconButton\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("ActionListItemView Text=\"{Binding MediaAccessActionText}\"\n                                             ActionIconData=\"{x:Static controls:IconPathData.OpenInNew}\"\n                                             Command=\"{Binding MediaAccessActionCommand}\"\n                                             IsVisible=", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding IsPermissionActionVisible}\"", notificationSettingsPage, StringComparison.Ordinal);
@@ -1974,7 +2017,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryActionCommand=\"{Binding RenameCommand}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionSemanticDescription=\"Rename capture item\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionCommand=\"{Binding EnqueueCommand}\"", captureInboxPage, StringComparison.Ordinal);
-            Assert.Contains("TertiaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("TertiaryActionIconButtonStyleResourceKey=\"M3PrimaryIconButton\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryActionSemanticDescription=\"Queue captured items\"", captureInboxPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding IsActionBarVisible}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3InlineActionBarGrid", captureInboxPage, StringComparison.Ordinal);
@@ -2000,7 +2043,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("PrimaryActionCommand=\"{Binding UpCommand}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Go to parent folder\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionCommand=\"{Binding ChooseCommand}\"", destinationPickerPage, StringComparison.Ordinal);
-            Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3PrimaryFileChromeIconButton\"", destinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("SecondaryActionIconButtonStyleResourceKey=\"M3PrimaryIconButton\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryActionSemanticDescription=\"Choose current folder\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:SettingsSectionHeaderView LeadingIconData", destinationPickerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:SettingsSectionHeaderView.TrailingContent>", destinationPickerPage, StringComparison.Ordinal);
@@ -3551,7 +3594,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("TertiaryActionCommand=\"{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsTertiaryActionVisible=\"{Binding CanResumeSync}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("QuaternaryActionCommand=\"{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}\"", syncSettingsPage, StringComparison.Ordinal);
-            Assert.Contains("QuaternaryActionIconButtonStyleResourceKey=\"M3DestructiveFileChromeIconButton\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("QuaternaryActionIconButtonStyleResourceKey=\"M3DestructiveIconButton\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsQuaternaryActionVisible=\"{Binding CanStopSync}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("public class SettingsInfoItemView", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("AttentionLeadingIconDataProperty", settingsInfoItemView, StringComparison.Ordinal);

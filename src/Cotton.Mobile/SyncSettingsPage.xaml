@@ -37,7 +37,7 @@
                                      ActionIconData="{x:Static controls:IconPathData.Folder}"
                                      ActionCommand="{Binding OpenFilesCommand}"
                                      IsActionVisible="True"
-                                     ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                     ActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                      ActionSemanticDescription="Choose sync folder" />
 
             <controls:MaterialCollectionView Grid.Row="2"
@@ -81,7 +81,7 @@
                                                             QuaternaryActionIconData="{x:Static controls:IconPathData.Delete}"
                                                             QuaternaryActionCommand="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncPageRoot}}"
                                                             QuaternaryActionCommandParameter="{Binding .}"
-                                                            QuaternaryActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                                            QuaternaryActionIconButtonStyleResourceKey="M3DestructiveIconButton"
                                                             QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
                                                             IsQuaternaryActionEnabled="{Binding CanStopSync}"
                                                             IsQuaternaryActionVisible="{Binding CanStopSync}" />

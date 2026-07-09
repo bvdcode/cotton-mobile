@@ -38,7 +38,7 @@
                                         SecondaryActionSemanticDescription="Rename capture item"
                                         TertiaryActionIconData="{x:Static controls:IconPathData.Transfer}"
                                         TertiaryActionCommand="{Binding EnqueueCommand}"
-                                        TertiaryActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                        TertiaryActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                         TertiaryActionSemanticDescription="Queue captured items" />
 
             <controls:MetadataListSkeletonView Grid.Row="3"

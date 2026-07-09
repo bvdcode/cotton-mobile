@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionClusterView : HorizontalStackLayout
     {
-        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
         private const string DefaultClusterStyleResourceKey = "M3RowActionCluster";
         private const string ClusterOpacityAnimationName = "M3ActionClusterOpacity";
         private const string PrimaryActionButtonOpacityAnimationName = "M3ActionClusterPrimaryButtonOpacity";

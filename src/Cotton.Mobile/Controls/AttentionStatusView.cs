@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Controls
     public class AttentionStatusView : ContentView
     {
         private const string ActionButtonOpacityAnimationName = "M3AttentionStatusActionButtonOpacity";
-        private const string DefaultActionIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
         private const string DefaultGridStyleResourceKey = "M3StatusGrid";
         private const string DefaultIconStyleResourceKey = "M3AttentionStatusIcon";
         private const string DefaultPanelStyleResourceKey = "M3AttentionStatusPanel";

@@ -45,7 +45,7 @@
                                              Command="{Binding PermissionActionCommand}"
                                              IsItemVisible="{Binding IsPermissionActionVisible}"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
-                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                              SemanticDescription="{Binding PermissionActionText}" />
             </controls:SettingsCardView>
 

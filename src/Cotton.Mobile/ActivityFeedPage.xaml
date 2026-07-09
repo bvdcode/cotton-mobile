@@ -46,7 +46,7 @@
                                                      ActionIconData="{x:Static controls:IconPathData.ArrowDown}"
                                                      Command="{Binding LoadMoreCommand}"
                                                      TextStyleResourceKey="M3ActionListItemTitle"
-                                                     ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                                     ActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                                      SemanticDescription="Load more activity" />
                     </controls:ContentCardView>
                 </controls:MaterialCollectionView.Footer>

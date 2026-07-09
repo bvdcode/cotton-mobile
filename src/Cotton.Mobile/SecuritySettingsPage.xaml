@@ -48,7 +48,7 @@
                                              Command="{Binding VerifyDeviceUnlockCommand}"
                                              IsActionEnabled="{Binding CanVerifyDeviceUnlock}"
                                              IsItemVisible="{Binding IsDeviceUnlockActionVisible}"
-                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding DeviceUnlockActionText}" />
             </controls:SettingsCardView>
@@ -87,7 +87,7 @@
                                              Command="{Binding RevokeCurrentSessionCommand}"
                                              IsActionEnabled="{Binding CanRevokeCurrentSession}"
                                              IsItemVisible="{Binding IsRevokeCurrentSessionVisible}"
-                                             ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                             ActionIconButtonStyleResourceKey="M3DestructiveIconButton"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
 

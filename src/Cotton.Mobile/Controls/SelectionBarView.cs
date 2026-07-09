@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Controls
     public class SelectionBarView : ContentView
     {
         private const string DefaultActionClusterStyleResourceKey = "M3SelectionBarActionCluster";
-        private const string DefaultIconButtonStyleResourceKey = "M3FileChromeIconButton";
+        private const string DefaultIconButtonStyleResourceKey = "M3DefaultIconButton";
         private const string BarVisibilityAnimationName = "M3SelectionBarVisibility";
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(

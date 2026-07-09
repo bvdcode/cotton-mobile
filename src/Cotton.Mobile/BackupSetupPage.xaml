@@ -51,7 +51,7 @@
                                              ActionIconData="{x:Static controls:IconPathData.OpenInNew}"
                                              Command="{Binding MediaAccessActionCommand}"
                                              IsItemVisible="{Binding IsMediaAccessActionVisible}"
-                                             ActionIconButtonStyleResourceKey="M3PrimaryFileChromeIconButton"
+                                             ActionIconButtonStyleResourceKey="M3PrimaryIconButton"
                                              SemanticDescription="{Binding MediaAccessActionText}" />
             </controls:SettingsCardView>
 

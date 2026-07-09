@@ -61,7 +61,7 @@
                                              Command="{Binding ClearAllCommand}"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              TextStyleResourceKey="M3CardSupportingStrongLine"
-                                             ActionIconButtonStyleResourceKey="M3DestructiveFileChromeIconButton"
+                                             ActionIconButtonStyleResourceKey="M3DestructiveIconButton"
                                              SemanticDescription="Clear all cached files" />
             </controls:SettingsCardView>
 

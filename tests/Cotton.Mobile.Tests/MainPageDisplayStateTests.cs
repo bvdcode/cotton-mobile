@@ -230,7 +230,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Pending_file_action_disables_chrome_without_showing_loader()
+        public void Pending_file_action_defaults_to_blocking_without_showing_loader()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();
 
@@ -246,6 +246,27 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.CanRetryFileAction);
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.IsAccountActionEnabled);
+            Assert.False(display.CanRefreshFiles);
+        }
+
+        [Fact]
+        public void Pending_file_action_can_stay_non_blocking_without_showing_loader()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            display.ShowFileActionPending(blockBrowserChrome: false);
+
+            Assert.Equal("4 items · A-Z", display.FilesStatus);
+            Assert.False(display.IsFilesLoading);
+            Assert.False(display.IsFilesRefreshing);
+            Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.False(display.IsFilesLoadingPanelVisible);
+            Assert.False(display.IsFileActionStatusPanelVisible);
+            Assert.False(display.CanCancelFileAction);
+            Assert.False(display.CanRetryFileAction);
+            Assert.True(display.IsFileBrowserChromeEnabled);
+            Assert.True(display.IsAccountActionEnabled);
+            Assert.True(display.CanRefreshFiles);
 
             display.ShowFileActionLoading(
                 "Opening zeta.txt...",

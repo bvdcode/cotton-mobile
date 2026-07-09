@@ -5421,7 +5421,9 @@ namespace Cotton.Mobile.ViewModels
             CancellationTokenSource fileActionCancellation = BeginDeferredFileAction(
                 $"Opening {file.Name}...",
                 showStatusPanelWhenLoading: false,
-                showStatusTextWhenLoading: false);
+                showStatusTextWhenLoading: false,
+                blockBrowserChromeWhilePending: false,
+                showLoadingAfterDelay: false);
             bool shouldRunRecoveryRefresh = false;
 
             try
@@ -6169,18 +6171,24 @@ namespace Cotton.Mobile.ViewModels
         private CancellationTokenSource BeginDeferredFileAction(
             string status,
             bool showStatusPanelWhenLoading = true,
-            bool showStatusTextWhenLoading = true)
+            bool showStatusTextWhenLoading = true,
+            bool blockBrowserChromeWhilePending = true,
+            bool showLoadingAfterDelay = true)
         {
             CancelCurrentFileAction();
             ClearFileActionRetry();
             CancellationTokenSource cancellation = new();
             _fileActionCancellation = cancellation;
-            _display.ShowFileActionPending();
-            _ = ShowDeferredFileActionLoadingAsync(
-                cancellation,
-                status,
-                showStatusPanelWhenLoading,
-                showStatusTextWhenLoading);
+            _display.ShowFileActionPending(blockBrowserChromeWhilePending);
+            if (showLoadingAfterDelay)
+            {
+                _ = ShowDeferredFileActionLoadingAsync(
+                    cancellation,
+                    status,
+                    showStatusPanelWhenLoading,
+                    showStatusTextWhenLoading);
+            }
+
             return cancellation;
         }
 

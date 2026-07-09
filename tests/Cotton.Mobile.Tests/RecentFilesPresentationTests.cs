@@ -23,6 +23,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("BeginDeferredFileAction(", content, StringComparison.Ordinal);
             Assert.Contains("showStatusPanelWhenLoading: false", content, StringComparison.Ordinal);
             Assert.Contains("showStatusTextWhenLoading: false", content, StringComparison.Ordinal);
+            Assert.Contains("blockBrowserChromeWhilePending: false", content, StringComparison.Ordinal);
+            Assert.Contains("showLoadingAfterDelay: false", content, StringComparison.Ordinal);
             Assert.Contains("showStatusPanel: false", content, StringComparison.Ordinal);
             Assert.Contains("showStatusText: false", content, StringComparison.Ordinal);
             Assert.Contains("ShowFileActionPending", content, StringComparison.Ordinal);

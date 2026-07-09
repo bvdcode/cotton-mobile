@@ -740,13 +740,13 @@ namespace Cotton.Mobile.ViewModels
             NotifyFilesEmptyStateChanged();
         }
 
-        public void ShowFileActionPending()
+        public void ShowFileActionPending(bool blockBrowserChrome = true)
         {
             ClearFileSelection();
             IsFileActionStatusPanelVisible = false;
             IsFilesLoading = false;
             IsFilesRefreshing = false;
-            IsFileActionInProgress = true;
+            IsFileActionInProgress = blockBrowserChrome;
             CanCancelFileAction = false;
             CanRetryFileAction = false;
             FilesStatus = CreateFilesStatus();

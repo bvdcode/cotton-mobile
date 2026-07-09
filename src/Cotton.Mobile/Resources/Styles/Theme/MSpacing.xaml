@@ -20,6 +20,8 @@
     <x:Double x:Key="M3InputIconSize">18</x:Double>
     <x:Double x:Key="M3AuthPanelMaxWidth">480</x:Double>
     <x:Double x:Key="M3FilledButtonHeight">48</x:Double>
+    <x:Double x:Key="M3AuthActionButtonSize">48</x:Double>
+    <x:Double x:Key="M3AuthActionIconSize">20</x:Double>
     <x:Double x:Key="M3AuthBrandMarkFrameSize">56</x:Double>
     <x:Double x:Key="M3AuthBrandMarkImageSize">40</x:Double>
     <x:Double x:Key="M3FileActionSize">48</x:Double>

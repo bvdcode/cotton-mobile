@@ -1283,6 +1283,9 @@ namespace Cotton.Mobile.Tests
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
             string mainPage = LoadText(MainPagePath);
             string styles = LoadText(StylesResourcePath);
+            XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> authServerActionSetters =
+                GetStyleSetters(stylesDocument, "M3AuthServerActionButton");
 
             Assert.Contains("<controls:AuthSignInPanelView IsPanelVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
@@ -1332,10 +1335,16 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text = \"Connect\"", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("M3AuthActionRow", styles, StringComparison.Ordinal);
             Assert.Contains("M3AuthServerActionButton", styles, StringComparison.Ordinal);
+            Assert.Contains("M3AuthActionButtonSize", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Contains("M3AuthActionIconSize", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3AuthActionButtonSize}", authServerActionSetters["ButtonSize"]);
+            Assert.Equal("{StaticResource M3AuthActionIconSize}", authServerActionSetters["IconSize"]);
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}", authServerActionSetters["ButtonBackgroundColor"]);
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = DefaultCardStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("new TextAction", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_serverAction.Text =", authSignInPanelView, StringComparison.Ordinal);
+            Assert.DoesNotContain("x:Key=\"M3AuthServerActionButton\" BasedOn=\"{StaticResource M3FileChromeIconButton}\"", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ContentCardView IsVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:AuthSignInPanelView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<VerticalStackLayout Style=\"{StaticResource M3AuthFormStack}\">", mainPage, StringComparison.Ordinal);

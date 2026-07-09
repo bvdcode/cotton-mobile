@@ -1318,7 +1318,16 @@
         <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3AuthServerActionButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
+    <Style TargetType="controls:IconButton" x:Key="M3AuthServerActionButton" BasedOn="{StaticResource M3IconButtonBase}">
+        <Setter Property="ButtonSize" Value="{StaticResource M3AuthActionButtonSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3AuthActionIconSize}" />
+        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
 
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3FileChromeIconButton}" />
 

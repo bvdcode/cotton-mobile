@@ -12,6 +12,8 @@ namespace Cotton.Mobile.Tests
         private const string TypeResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MType.xaml";
         private const string InteractionResourcePath = "src/Cotton.Mobile/Resources/Styles/Theme/MInteraction.xaml";
         private const string StylesResourcePath = "src/Cotton.Mobile/Resources/Styles/Styles.xaml";
+        private const string FrameworkStylesResourcePath = "src/Cotton.Mobile/Resources/Styles/MFramework.xaml";
+        private const string AppXamlPath = "src/Cotton.Mobile/App.xaml";
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
         private const string AppPath = "src/Cotton.Mobile/App.xaml.cs";
         private const string MainActivityPath = "src/Cotton.Mobile/Platforms/Android/MainActivity.cs";
@@ -206,7 +208,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Material_progress_styles_use_primary_action_role()
         {
-            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            XDocument styles = LoadMergedResourceDictionary(StylesResourcePath, FrameworkStylesResourcePath);
 
             IReadOnlyDictionary<string, string> implicitActivitySetters =
                 GetImplicitStyleSetters(styles, "ActivityIndicator");
@@ -537,7 +539,7 @@ namespace Cotton.Mobile.Tests
             const string appSurfaceBinding = "{AppThemeBinding Light={StaticResource M3LightSurfaceBright}, Dark={StaticResource M3DarkSurfaceDim}}";
             const string darkSurfaceDim = "{StaticResource M3DarkSurfaceDim}";
 
-            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            XDocument styles = LoadMergedResourceDictionary(StylesResourcePath, FrameworkStylesResourcePath);
             IReadOnlyDictionary<string, string> pageSetters = GetImplicitStyleSetters(styles, "Page");
             IReadOnlyDictionary<string, string> shellSetters = GetImplicitStyleSetters(styles, "Shell");
             IReadOnlyDictionary<string, string> documentViewerPageSetters =
@@ -880,7 +882,7 @@ namespace Cotton.Mobile.Tests
             string focusedInputChromeBehavior = LoadText(FocusedInputChromeBehaviorPath);
             string materialMotion = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialMotion.cs"));
             string colors = LoadText(ColorsResourcePath);
-            string stylesText = LoadText(StylesResourcePath);
+            string frameworkStylesText = LoadText(FrameworkStylesResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> outlinedInputSetters =
                 GetStyleSetters(styles, "M3OutlinedInputField");
@@ -900,7 +902,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<Color x:Key=\"M3DarkInputPlaceholder\">#99BEC7C2</Color>", colors, StringComparison.Ordinal);
             Assert.Contains(
                 "PlaceholderColor\" Value=\"{AppThemeBinding Light={StaticResource M3LightInputPlaceholder}, Dark={StaticResource M3DarkInputPlaceholder}}",
-                stylesText,
+                frameworkStylesText,
                 StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
@@ -1393,6 +1395,44 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("Text=\"Connect\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("TextStyleResourceKey=\"M3AuthStatus\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AuthFilledButton}\"", mainPage, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Generic_icon_button_fallback_does_not_inherit_file_browser_chrome()
+        {
+            string spacing = LoadText(SpacingResourcePath);
+            string styles = LoadText(StylesResourcePath);
+            XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> defaultIconButtonSetters =
+                GetStyleSetters(stylesDocument, "M3DefaultIconButton");
+            IReadOnlyDictionary<string, string> implicitIconButtonSetters =
+                GetImplicitStyleSetters(stylesDocument, "controls:IconButton");
+            IReadOnlyDictionary<string, string> fileChromeIconButtonSetters =
+                GetStyleSetters(stylesDocument, "M3FileChromeIconButton");
+
+            Assert.Contains("<x:Double x:Key=\"M3IconButtonSize\">48</x:Double>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<x:Double x:Key=\"M3IconButtonIconSize\">20</x:Double>", spacing, StringComparison.Ordinal);
+            Assert.Contains(
+                "<Style TargetType=\"controls:IconButton\" x:Key=\"M3DefaultIconButton\" BasedOn=\"{StaticResource M3IconButtonBase}\">",
+                styles,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "<Style TargetType=\"controls:IconButton\" BasedOn=\"{StaticResource M3DefaultIconButton}\" />",
+                styles,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "<Style TargetType=\"controls:IconButton\" BasedOn=\"{StaticResource M3FileChromeIconButton}\" />",
+                styles,
+                StringComparison.Ordinal);
+
+            Assert.Equal("{StaticResource M3IconButtonSize}", defaultIconButtonSetters["ButtonSize"]);
+            Assert.Equal("{StaticResource M3IconButtonIconSize}", defaultIconButtonSetters["IconSize"]);
+            Assert.Equal("{StaticResource M3IconButtonSize}", implicitIconButtonSetters["ButtonSize"]);
+            Assert.Equal("{StaticResource M3IconButtonIconSize}", implicitIconButtonSetters["IconSize"]);
+            Assert.Equal("{StaticResource M3FileActionSize}", fileChromeIconButtonSetters["ButtonSize"]);
+            Assert.Equal("{StaticResource M3FileActionIconSize}", fileChromeIconButtonSetters["IconSize"]);
+            Assert.DoesNotContain("M3FileAction", defaultIconButtonSetters["ButtonSize"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3FileAction", defaultIconButtonSetters["IconSize"], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -2198,10 +2238,12 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Main_file_browser_refresh_uses_reusable_material_control()
         {
+            string appXaml = LoadText(AppXamlPath);
             string mainPage = LoadText(MainPagePath);
             string materialRefreshView = LoadText(MaterialRefreshViewPath);
-            string styles = LoadText(StylesResourcePath);
+            string styles = LoadText(FrameworkStylesResourcePath);
 
+            Assert.Contains("<ResourceDictionary Source=\"Resources/Styles/MFramework.xaml\" />", appXaml, StringComparison.Ordinal);
             Assert.Contains("<controls:LayeredContentView Grid.Row=\"0\"\n                                     IsLayerVisible=\"{Binding Display.IsProfileVisible}\">", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:MaterialRefreshView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding RefreshFilesCommand}\"", mainPage, StringComparison.Ordinal);
@@ -4907,6 +4949,23 @@ namespace Cotton.Mobile.Tests
             string repositoryRoot = FindRepositoryRoot(relativePath);
             string resourcePath = Path.Combine(repositoryRoot, relativePath);
             return XDocument.Load(resourcePath);
+        }
+
+        private static XDocument LoadMergedResourceDictionary(params string[] relativePaths)
+        {
+            XDocument merged = new(new XElement("ResourceDictionary"));
+
+            foreach (string relativePath in relativePaths)
+            {
+                XDocument document = LoadResourceDictionary(relativePath);
+
+                foreach (XElement element in document.Root!.Elements())
+                {
+                    merged.Root!.Add(new XElement(element));
+                }
+            }
+
+            return merged;
         }
 
         private static string LoadText(string relativePath)

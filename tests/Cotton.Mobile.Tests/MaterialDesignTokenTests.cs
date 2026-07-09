@@ -608,6 +608,45 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Theme_color_fallbacks_refresh_after_runtime_theme_changes()
+        {
+            string materialResources = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialResources.cs"));
+            string materialThemeContentView = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialThemeContentView.cs"));
+            string pressableContentView = LoadText(Path.Combine(ControlsDirectoryPath, "PressableContentView.cs"));
+            string[] themeAwareControls =
+            [
+                "ActionSheetItemView.cs",
+                "FilledButton.cs",
+                "IconButton.cs",
+                "IconFrame.cs",
+                "IconView.cs",
+                "InitialsButton.cs",
+                "NavigationBarItem.cs",
+                "TextAction.cs",
+                "ToggleSwitch.cs",
+            ];
+
+            Assert.Contains("public abstract class MaterialThemeContentView : ContentView", materialThemeContentView, StringComparison.Ordinal);
+            Assert.Contains("currentApplication.RequestedThemeChanged += HandleRequestedThemeChanged", materialThemeContentView, StringComparison.Ordinal);
+            Assert.Contains("_observedApplication.RequestedThemeChanged -= HandleRequestedThemeChanged", materialThemeContentView, StringComparison.Ordinal);
+            Assert.Contains("protected virtual void OnRequestedThemeChanged(AppThemeChangedEventArgs e)", materialThemeContentView, StringComparison.Ordinal);
+            Assert.Contains("public abstract class PressableContentView : MaterialThemeContentView", pressableContentView, StringComparison.Ordinal);
+            Assert.Contains("public static Color ResolveThemeColor(", materialResources, StringComparison.Ordinal);
+            Assert.Contains("bindable.IsSet(property)", materialResources, StringComparison.Ordinal);
+            Assert.Contains("return GetThemeColor(lightResourceKey, darkResourceKey);", materialResources, StringComparison.Ordinal);
+
+            foreach (string controlName in themeAwareControls)
+            {
+                string control = LoadText(Path.Combine(ControlsDirectoryPath, controlName));
+                Assert.Contains("MaterialResources.ResolveThemeColor(", control, StringComparison.Ordinal);
+                Assert.Contains("protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)", control, StringComparison.Ordinal);
+            }
+
+            Assert.Contains("public class IconView : MaterialThemeContentView", LoadText(Path.Combine(ControlsDirectoryPath, "IconView.cs")), StringComparison.Ordinal);
+            Assert.Contains("public class IconFrame : MaterialThemeContentView", LoadText(Path.Combine(ControlsDirectoryPath, "IconFrame.cs")), StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Android_system_bars_apply_theme_appearance_after_r()
         {
             string mainActivity = LoadText(MainActivityPath);

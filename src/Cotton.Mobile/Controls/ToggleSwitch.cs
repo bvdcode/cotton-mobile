@@ -189,43 +189,71 @@ namespace Cotton.Mobile.Controls
 
         public Color TrackOnColor
         {
-            get => (Color)GetValue(TrackOnColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOnColorProperty,
+                "M3LightAction",
+                "M3DarkAction");
             set => SetValue(TrackOnColorProperty, value);
         }
 
         public Color TrackOffColor
         {
-            get => (Color)GetValue(TrackOffColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOffColorProperty,
+                "M3LightSurfaceContainerHighest",
+                "M3DarkSurfaceContainerHighest");
             set => SetValue(TrackOffColorProperty, value);
         }
 
         public Color TrackOnPressedColor
         {
-            get => (Color)GetValue(TrackOnPressedColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOnPressedColorProperty,
+                "M3LightActionPressed",
+                "M3DarkActionPressed");
             set => SetValue(TrackOnPressedColorProperty, value);
         }
 
         public Color TrackOffPressedColor
         {
-            get => (Color)GetValue(TrackOffPressedColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOffPressedColorProperty,
+                "M3LightSurfaceContainerHigh",
+                "M3DarkSurfaceContainerHigh");
             set => SetValue(TrackOffPressedColorProperty, value);
         }
 
         public Color TrackDisabledColor
         {
-            get => (Color)GetValue(TrackDisabledColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackDisabledColorProperty,
+                "M3LightSurfaceContainer",
+                "M3DarkSurfaceContainer");
             set => SetValue(TrackDisabledColorProperty, value);
         }
 
         public Color TrackOnBorderColor
         {
-            get => (Color)GetValue(TrackOnBorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOnBorderColorProperty,
+                "M3LightAction",
+                "M3DarkAction");
             set => SetValue(TrackOnBorderColorProperty, value);
         }
 
         public Color TrackOffBorderColor
         {
-            get => (Color)GetValue(TrackOffBorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TrackOffBorderColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             set => SetValue(TrackOffBorderColorProperty, value);
         }
 
@@ -237,19 +265,31 @@ namespace Cotton.Mobile.Controls
 
         public Color ThumbOnColor
         {
-            get => (Color)GetValue(ThumbOnColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                ThumbOnColorProperty,
+                "M3LightOnAction",
+                "M3DarkOnAction");
             set => SetValue(ThumbOnColorProperty, value);
         }
 
         public Color ThumbOffColor
         {
-            get => (Color)GetValue(ThumbOffColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                ThumbOffColorProperty,
+                "M3LightSurfaceContainerLowest",
+                "M3DarkOnSurface");
             set => SetValue(ThumbOffColorProperty, value);
         }
 
         public Color ThumbDisabledColor
         {
-            get => (Color)GetValue(ThumbDisabledColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                ThumbDisabledColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             set => SetValue(ThumbDisabledColorProperty, value);
         }
 
@@ -326,6 +366,11 @@ namespace Cotton.Mobile.Controls
         protected override void OnPressedStateChanged()
         {
             UpdateVisualState(animateState: true, animateThumbTranslation: false);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState(animateState: false, animateThumbTranslation: false);
         }
 
         protected override void ExecutePress()

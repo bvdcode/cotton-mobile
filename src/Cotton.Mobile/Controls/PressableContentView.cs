@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Controls
 {
-    public abstract class PressableContentView : ContentView
+    public abstract class PressableContentView : MaterialThemeContentView
     {
         public static readonly BindableProperty PressedScaleProperty = BindableProperty.Create(
             nameof(PressedScale),
@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Controls
         protected PressableContentView()
         {
 #if ANDROID
-            HandlerChanged += OnHandlerChanged;
+            HandlerChanged += OnAndroidHandlerChanged;
 #else
             TapGestureRecognizer tap = new();
             tap.Tapped += HandleTapped;
@@ -165,7 +165,7 @@ namespace Cotton.Mobile.Controls
         }
 
 #if ANDROID
-        private void OnHandlerChanged(object? sender, EventArgs e)
+        private void OnAndroidHandlerChanged(object? sender, EventArgs e)
         {
             if (Handler?.PlatformView is not Android.Views.View platformView)
             {

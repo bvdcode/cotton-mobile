@@ -6,7 +6,7 @@ using MauiPath = Microsoft.Maui.Controls.Shapes.Path;
 
 namespace Cotton.Mobile.Controls
 {
-    public class IconView : ContentView
+    public class IconView : MaterialThemeContentView
     {
         private const string IconColorAnimationName = "M3IconViewColor";
 
@@ -56,8 +56,17 @@ namespace Cotton.Mobile.Controls
 
         public Color IconColor
         {
-            get => (Color)GetValue(IconColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconColorProperty,
+                "M3LightOnSurface",
+                "M3DarkOnSurface");
             set => SetValue(IconColorProperty, value);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState();
         }
 
         public double IconSize

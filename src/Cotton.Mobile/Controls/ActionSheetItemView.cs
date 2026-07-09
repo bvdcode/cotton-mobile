@@ -230,19 +230,31 @@ namespace Cotton.Mobile.Controls
 
         public Color TextColor
         {
-            get => (Color)GetValue(TextColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TextColorProperty,
+                "M3LightOnSurface",
+                "M3DarkOnSurface");
             set => SetValue(TextColorProperty, value);
         }
 
         public Color IconColor
         {
-            get => (Color)GetValue(IconColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconColorProperty,
+                "M3LightOnSurfaceVariant",
+                "M3DarkOnSurfaceVariant");
             set => SetValue(IconColorProperty, value);
         }
 
         public Color SelectedIconColor
         {
-            get => (Color)GetValue(SelectedIconColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                SelectedIconColorProperty,
+                "M3LightAction",
+                "M3DarkAction");
             set => SetValue(SelectedIconColorProperty, value);
         }
 
@@ -254,19 +266,31 @@ namespace Cotton.Mobile.Controls
 
         public Color PressedRowBackgroundColor
         {
-            get => (Color)GetValue(PressedRowBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                PressedRowBackgroundColorProperty,
+                "M3LightSurfaceContainerHigh",
+                "M3DarkSurfaceContainerHigh");
             set => SetValue(PressedRowBackgroundColorProperty, value);
         }
 
         public Color IconFrameBackgroundColor
         {
-            get => (Color)GetValue(IconFrameBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconFrameBackgroundColorProperty,
+                "M3LightSurfaceContainer",
+                "M3DarkSurfaceContainer");
             set => SetValue(IconFrameBackgroundColorProperty, value);
         }
 
         public Color IconFrameBorderColor
         {
-            get => (Color)GetValue(IconFrameBorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconFrameBorderColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             set => SetValue(IconFrameBorderColorProperty, value);
         }
 
@@ -338,6 +362,11 @@ namespace Cotton.Mobile.Controls
         protected override void OnCommandStateChanged()
         {
             UpdateVisualState(animateBackground: false, animateSelection: false, animateChrome: true);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState(animateBackground: false, animateSelection: false, animateChrome: false);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)

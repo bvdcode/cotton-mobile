@@ -108,7 +108,11 @@ namespace Cotton.Mobile.Controls
 
         public Color IconColor
         {
-            get => (Color)GetValue(IconColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconColorProperty,
+                "M3LightOnSurface",
+                "M3DarkOnSurface");
             set => SetValue(IconColorProperty, value);
         }
 
@@ -120,7 +124,11 @@ namespace Cotton.Mobile.Controls
 
         public Color PressedButtonBackgroundColor
         {
-            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                PressedButtonBackgroundColorProperty,
+                "M3LightSurfaceContainerHigh",
+                "M3DarkSurfaceContainerHigh");
             set => SetValue(PressedButtonBackgroundColorProperty, value);
         }
 
@@ -184,6 +192,11 @@ namespace Cotton.Mobile.Controls
         protected override void OnCommandStateChanged()
         {
             UpdateVisualState(true);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState(false);
         }
 
         private void UpdateVisualState(bool animateState)

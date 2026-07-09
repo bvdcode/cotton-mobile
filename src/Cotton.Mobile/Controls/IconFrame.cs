@@ -5,7 +5,7 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class IconFrame : ContentView
+    public class IconFrame : MaterialThemeContentView
     {
         private const string BorderColorAnimationName = "M3IconFrameBorderColor";
         private const string FrameBackgroundAnimationName = "M3IconFrameBackground";
@@ -93,20 +93,37 @@ namespace Cotton.Mobile.Controls
 
         public Color IconColor
         {
-            get => (Color)GetValue(IconColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                IconColorProperty,
+                "M3LightOnSurfaceVariant",
+                "M3DarkOnSurfaceVariant");
             set => SetValue(IconColorProperty, value);
         }
 
         public Color FrameBackgroundColor
         {
-            get => (Color)GetValue(FrameBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                FrameBackgroundColorProperty,
+                "M3LightSurfaceVariant",
+                "M3DarkSurfaceVariant");
             set => SetValue(FrameBackgroundColorProperty, value);
         }
 
         public Color BorderColor
         {
-            get => (Color)GetValue(BorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                BorderColorProperty,
+                "M3LightOutlineVariant",
+                "M3DarkOutlineVariant");
             set => SetValue(BorderColorProperty, value);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState();
         }
 
         public double BorderWidth

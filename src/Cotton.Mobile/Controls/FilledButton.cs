@@ -146,37 +146,61 @@ namespace Cotton.Mobile.Controls
 
         public Color TextColor
         {
-            get => (Color)GetValue(TextColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TextColorProperty,
+                "M3LightOnAction",
+                "M3DarkOnAction");
             set => SetValue(TextColorProperty, value);
         }
 
         public Color DisabledTextColor
         {
-            get => (Color)GetValue(DisabledTextColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                DisabledTextColorProperty,
+                "M3LightOnSurfaceVariant",
+                "M3DarkOnSurfaceVariant");
             set => SetValue(DisabledTextColorProperty, value);
         }
 
         public Color ButtonBackgroundColor
         {
-            get => (Color)GetValue(ButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                ButtonBackgroundColorProperty,
+                "M3LightAction",
+                "M3DarkAction");
             set => SetValue(ButtonBackgroundColorProperty, value);
         }
 
         public Color PressedButtonBackgroundColor
         {
-            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                PressedButtonBackgroundColorProperty,
+                "M3LightActionPressed",
+                "M3DarkActionPressed");
             set => SetValue(PressedButtonBackgroundColorProperty, value);
         }
 
         public Color DisabledButtonBackgroundColor
         {
-            get => (Color)GetValue(DisabledButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                DisabledButtonBackgroundColorProperty,
+                "M3LightSurfaceContainerHighest",
+                "M3DarkSurfaceContainerHighest");
             set => SetValue(DisabledButtonBackgroundColorProperty, value);
         }
 
         public Color BorderColor
         {
-            get => (Color)GetValue(BorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                BorderColorProperty,
+                "M3LightAction",
+                "M3DarkAction");
             set => SetValue(BorderColorProperty, value);
         }
 
@@ -246,6 +270,11 @@ namespace Cotton.Mobile.Controls
         protected override void OnCommandStateChanged()
         {
             UpdateVisualState(true);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState(false);
         }
 
         private void UpdateVisualState(bool animateState)

@@ -132,25 +132,41 @@ namespace Cotton.Mobile.Controls
 
         public Color TextColor
         {
-            get => (Color)GetValue(TextColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                TextColorProperty,
+                "M3LightOnActionContainer",
+                "M3DarkOnActionContainer");
             set => SetValue(TextColorProperty, value);
         }
 
         public Color ButtonBackgroundColor
         {
-            get => (Color)GetValue(ButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                ButtonBackgroundColorProperty,
+                "M3LightActionContainer",
+                "M3DarkActionContainer");
             set => SetValue(ButtonBackgroundColorProperty, value);
         }
 
         public Color PressedButtonBackgroundColor
         {
-            get => (Color)GetValue(PressedButtonBackgroundColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                PressedButtonBackgroundColorProperty,
+                "M3LightActionContainerPressed",
+                "M3DarkActionContainerPressed");
             set => SetValue(PressedButtonBackgroundColorProperty, value);
         }
 
         public Color BorderColor
         {
-            get => (Color)GetValue(BorderColorProperty);
+            get => MaterialResources.ResolveThemeColor(
+                this,
+                BorderColorProperty,
+                "M3LightActionContainer",
+                "M3DarkActionContainer");
             set => SetValue(BorderColorProperty, value);
         }
 
@@ -220,6 +236,11 @@ namespace Cotton.Mobile.Controls
         protected override void OnCommandStateChanged()
         {
             UpdateVisualState(true);
+        }
+
+        protected override void OnRequestedThemeChanged(AppThemeChangedEventArgs e)
+        {
+            UpdateVisualState(false);
         }
 
         private void UpdateVisualState(bool animateState)

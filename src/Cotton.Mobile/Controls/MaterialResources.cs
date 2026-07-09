@@ -37,6 +37,20 @@ namespace Cotton.Mobile.Controls
             return Get<Color>(resourceKey);
         }
 
+        public static Color ResolveThemeColor(
+            BindableObject bindable,
+            BindableProperty property,
+            string lightResourceKey,
+            string darkResourceKey)
+        {
+            if (bindable.IsSet(property) && bindable.GetValue(property) is Color color)
+            {
+                return color;
+            }
+
+            return GetThemeColor(lightResourceKey, darkResourceKey);
+        }
+
         public static string ResolveStyleResourceKey(string resourceKey, string defaultResourceKey)
         {
             return string.IsNullOrWhiteSpace(resourceKey)

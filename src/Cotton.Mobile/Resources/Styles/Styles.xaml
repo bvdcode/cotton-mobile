@@ -1049,6 +1049,10 @@
         <Setter Property="RowSpacing" Value="{StaticResource Space16}" />
     </Style>
 
+    <Style TargetType="Grid" x:Key="M3ScreenContentGridCollapsedRows" BasedOn="{StaticResource M3ScreenContentGrid}">
+        <Setter Property="RowSpacing" Value="{StaticResource SpaceNone}" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3ScreenHeaderGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>

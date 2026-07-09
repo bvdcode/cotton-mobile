@@ -22,7 +22,8 @@
                             TertiaryDescription="Refresh transfers" />
 
         <controls:ScreenContentGridView Grid.Row="1">
-            <controls:ScreenHeaderView Title="{Binding SummaryText}"
+            <controls:ScreenHeaderView Title="Transfers"
+                                       SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Grid.Row="1"

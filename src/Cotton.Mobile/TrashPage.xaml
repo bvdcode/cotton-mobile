@@ -23,6 +23,7 @@
                             TertiaryDescription="Refresh trash" />
 
         <controls:ScreenContentGridView Grid.Row="1"
+                                        GridStyleResourceKey="M3ScreenContentGridCollapsedRows"
                                         ExtraAutoRows="2">
         <controls:ScreenHeaderView Title="Trash"
                                    SupportingText="{Binding SummaryText}"
@@ -53,6 +54,7 @@
         </controls:ScreenHeaderView>
 
         <controls:OutlinedInputField Grid.Row="1"
+                                     Margin="{StaticResource M3ScreenContentRowMargin}"
                                      Text="{Binding SearchText, Mode=TwoWay}"
                                      IsFieldVisible="{Binding IsSearchVisible}"
                                      Placeholder="Search trash"
@@ -62,10 +64,12 @@
                                      SemanticHint="Search deleted files and folders" />
 
         <controls:ScreenStatusView Grid.Row="2"
+                                   Margin="{StaticResource M3ScreenContentRowMargin}"
                                    Text="{Binding Status}"
                                    IsStatusVisible="{Binding IsStatusVisible}" />
 
         <controls:SelectionBarView Grid.Row="3"
+                                   Margin="{StaticResource M3ScreenContentRowMargin}"
                                    IsBarVisible="{Binding IsSelectionBarVisible}"
                                    TitleText="{Binding SelectionTitleText}"
                                    DetailText="{Binding SelectionDetailText}"
@@ -82,7 +86,8 @@
                                    TertiaryActionCommand="{Binding CancelSelectionCommand}"
                                    TertiaryActionSemanticDescription="Cancel selection" />
 
-        <controls:LayeredContentView Grid.Row="4">
+        <controls:LayeredContentView Grid.Row="4"
+                                     Margin="{StaticResource M3ScreenContentRowMargin}">
             <controls:EmptyStateView IsStateVisible="{Binding IsEmpty}"
                                      IconData="{x:Static controls:IconPathData.Delete}"
                                      Title="{Binding EmptyMessage}"

@@ -109,6 +109,7 @@
     <Thickness x:Key="M3PdfPagePadding">12,0</Thickness>
     <Thickness x:Key="M3FilledButtonPadding">18,10</Thickness>
     <Thickness x:Key="M3SelectionBarPadding">12,8</Thickness>
+    <Thickness x:Key="M3ScreenContentRowMargin">0,16,0,0</Thickness>
     <Thickness x:Key="M3TopAppBarPadding">4,8</Thickness>
     <Thickness x:Key="M3TrashTilePadding">12</Thickness>
     <Thickness x:Key="M3TextViewerPadding">16</Thickness>

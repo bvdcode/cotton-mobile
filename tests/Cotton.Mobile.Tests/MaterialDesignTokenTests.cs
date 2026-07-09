@@ -2442,6 +2442,22 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.ApplyThumbnailState(", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.ApplyThumbnailState(", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.ThumbnailSource =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsPreviewImageVisible =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsFolderThumbnailVisible =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsLoading =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.PlaceholderText =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsPlaceholderTextVisible =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsSelected =", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.ThumbnailSource =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsPreviewImageVisible =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsFolderThumbnailVisible =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsLoading =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.PlaceholderText =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsPlaceholderTextVisible =", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.IsSelected =", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("PreviewImageOpacityAnimationName = \"M3FileThumbnailPreviewOpacity\"", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("FolderIconOpacityAnimationName = \"M3FileThumbnailFolderOpacity\"", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("PlaceholderOpacityAnimationName = \"M3FileThumbnailPlaceholderOpacity\"", fileThumbnailView, StringComparison.Ordinal);
@@ -2455,6 +2471,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnLoadingPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("OnBadgeVisibilityPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("OnSelectedPropertyChanged", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("internal void ApplyThumbnailState(", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("ApplyResolvedVisualState(", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_isCurrentPreviewImageVisible", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_isCurrentFolderThumbnailVisible", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_currentPlaceholderText", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_isCurrentLoading", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_currentBadgeText", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("_isCurrentSelected", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionStatusDuration\")", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("CompletePreviewImageVisibility", fileThumbnailView, StringComparison.Ordinal);
@@ -2463,7 +2487,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteBadgeVisibility", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("IsPlaceholderActuallyVisible", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("IsBadgeActuallyVisible", fileThumbnailView, StringComparison.Ordinal);
-            Assert.Contains("!string.IsNullOrWhiteSpace(BadgeText)", fileThumbnailView, StringComparison.Ordinal);
+            Assert.Contains("!string.IsNullOrWhiteSpace(badgeText)", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("M3MotionSelectionHiddenScale", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionSelectionDuration\")", fileThumbnailView, StringComparison.Ordinal);
             Assert.Contains("<x:Double x:Key=\"M3MotionSelectionHiddenScale\">0.82</x:Double>", interaction, StringComparison.Ordinal);
@@ -2475,15 +2499,21 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("_loadingIndicator.IsVisible = IsLoading", fileThumbnailView, StringComparison.Ordinal);
             Assert.DoesNotContain("_badge.IsVisible = IsBadgeVisible", fileThumbnailView, StringComparison.Ordinal);
             Assert.DoesNotContain("_selectionMark.IsVisible = IsSelected", fileThumbnailView, StringComparison.Ordinal);
+            Assert.DoesNotContain("if (IsPreviewImageVisible)", fileThumbnailView, StringComparison.Ordinal);
+            Assert.DoesNotContain("if (IsFolderThumbnailVisible)", fileThumbnailView, StringComparison.Ordinal);
+            Assert.DoesNotContain("if (IsLoading)", fileThumbnailView, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:FileThumbnailView", trashPage, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("new FileThumbnailView", trashTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_thumbnail.SurfaceStyleResourceKey = \"M3MetadataFileThumbnailSurface\"", trashListEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("SurfaceStyleResourceKey = \"M3MetadataFileThumbnailSurface\"", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("SurfaceStyleResourceKey = \"M3TrashTilePreviewSurface\"", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkStyleResourceKey = \"M3FileTileSelectionMark\"", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("IsBadgeVisible = true", trashTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_thumbnail.BadgeText = BadgeText", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("UpdateThumbnail(_thumbnail, BadgeText ?? string.Empty, isBadgeVisible: true)", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("thumbnail.ApplyThumbnailState(", LoadText(TrashEntryCardViewBasePath), StringComparison.Ordinal);
+            Assert.DoesNotContain("_thumbnail.BadgeText =", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.DoesNotContain("thumbnail.ThumbnailSource =", LoadText(TrashEntryCardViewBasePath), StringComparison.Ordinal);
 
             string[] pages =
             [
@@ -2940,7 +2970,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(2, CountOccurrences(trashPage, "BadgeText=\"{Binding BadgeText}\""));
             Assert.Contains("BadgeText ?? string.Empty", trashListEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_metadata.ApplyMetadataState(", trashListEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_thumbnail.BadgeText = BadgeText", trashTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("UpdateThumbnail(_thumbnail, BadgeText ?? string.Empty, isBadgeVisible: true)", trashTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3NeutralChip}\"", trashPage, StringComparison.Ordinal);
 
             Assert.DoesNotContain("<controls:ChipView", backupSetupPage, StringComparison.Ordinal);

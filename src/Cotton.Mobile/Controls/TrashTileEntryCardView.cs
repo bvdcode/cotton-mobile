@@ -60,9 +60,8 @@ namespace Cotton.Mobile.Controls
             _grid.SetDynamicResource(StyleProperty, "M3FileTileContentGrid");
             _metadata.Title = Title ?? string.Empty;
             _metadata.Detail = Detail ?? string.Empty;
-            _thumbnail.BadgeText = BadgeText ?? string.Empty;
 
-            UpdateThumbnail(_thumbnail);
+            UpdateThumbnail(_thumbnail, BadgeText ?? string.Empty, isBadgeVisible: true);
             UpdateTouchSurface(_touchSurface);
             UpdateEntryActions(_actions);
         }

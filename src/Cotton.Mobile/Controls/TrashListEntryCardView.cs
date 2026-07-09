@@ -14,7 +14,10 @@ namespace Cotton.Mobile.Controls
 
         public TrashListEntryCardView()
         {
-            _thumbnail = new FileThumbnailView();
+            _thumbnail = new FileThumbnailView
+            {
+                SurfaceStyleResourceKey = "M3MetadataFileThumbnailSurface",
+            };
             _metadata = new FileListMetadataView();
             _touchSurface = new TouchSurfaceView();
             _actions = new ActionClusterView();
@@ -59,7 +62,6 @@ namespace Cotton.Mobile.Controls
         protected override void UpdateVisualState()
         {
             _grid.SetDynamicResource(StyleProperty, "M3MetadataCardGrid");
-            _thumbnail.SurfaceStyleResourceKey = "M3MetadataFileThumbnailSurface";
             _metadata.ApplyMetadataState(
                 Title ?? string.Empty,
                 Detail ?? string.Empty,

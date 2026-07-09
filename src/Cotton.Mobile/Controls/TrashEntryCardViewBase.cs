@@ -205,15 +205,21 @@ namespace Cotton.Mobile.Controls
 
         protected abstract void UpdateVisualState();
 
-        protected void UpdateThumbnail(FileThumbnailView thumbnail)
+        protected void UpdateThumbnail(
+            FileThumbnailView thumbnail,
+            string badgeText = "",
+            bool isBadgeVisible = false)
         {
-            thumbnail.ThumbnailSource = ThumbnailSource;
-            thumbnail.IsPreviewImageVisible = IsPreviewImageVisible;
-            thumbnail.IsFolderThumbnailVisible = IsFolderThumbnailVisible;
-            thumbnail.IsLoading = IsLoading;
-            thumbnail.PlaceholderText = PlaceholderText ?? string.Empty;
-            thumbnail.IsPlaceholderTextVisible = IsPlaceholderTextVisible;
-            thumbnail.IsSelected = IsSelected;
+            thumbnail.ApplyThumbnailState(
+                ThumbnailSource,
+                IsPreviewImageVisible,
+                IsFolderThumbnailVisible,
+                IsLoading,
+                PlaceholderText ?? string.Empty,
+                IsPlaceholderTextVisible,
+                IsSelected,
+                badgeText: badgeText,
+                isBadgeVisible: isBadgeVisible);
         }
 
         protected void UpdateTouchSurface(TouchSurfaceView touchSurface)

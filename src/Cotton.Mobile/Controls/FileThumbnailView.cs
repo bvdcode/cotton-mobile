@@ -131,6 +131,14 @@ namespace Cotton.Mobile.Controls
         private bool _hasAppliedPlaceholderVisibility;
         private bool _hasAppliedPreviewImageVisibility;
         private bool _hasAppliedSelectionState;
+        private bool _isCurrentBadgeVisible;
+        private bool _isCurrentFolderThumbnailVisible;
+        private bool _isCurrentLoading;
+        private bool _isCurrentPlaceholderTextVisible;
+        private bool _isCurrentPreviewImageVisible;
+        private bool _isCurrentSelected;
+        private string _currentBadgeText = string.Empty;
+        private string _currentPlaceholderText = string.Empty;
 
         public FileThumbnailView()
         {
@@ -392,18 +400,100 @@ namespace Cotton.Mobile.Controls
             bool animateBadgeVisibility,
             bool animateSelection)
         {
-            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+            ApplyResolvedVisualState(
+                ThumbnailSource,
+                IsPreviewImageVisible,
+                IsFolderThumbnailVisible,
+                IsLoading,
+                PlaceholderText ?? string.Empty,
+                IsPlaceholderTextVisible,
+                IsSelected,
+                FolderIconSize,
+                BadgeText ?? string.Empty,
+                IsBadgeVisible,
                 SurfaceStyleResourceKey,
+                SelectionMarkStyleResourceKey,
+                BadgeStyleResourceKey,
+                BadgeLabelStyleResourceKey,
+                animatePreviewImageVisibility,
+                animateFolderIconVisibility,
+                animatePlaceholderVisibility,
+                animateLoading,
+                animateBadgeVisibility,
+                animateSelection);
+        }
+
+        internal void ApplyThumbnailState(
+            ImageSource? thumbnailSource,
+            bool isPreviewImageVisible,
+            bool isFolderThumbnailVisible,
+            bool isLoading,
+            string placeholderText,
+            bool isPlaceholderTextVisible,
+            bool isSelected,
+            double folderIconSize = 0d,
+            string badgeText = "",
+            bool isBadgeVisible = false)
+        {
+            ApplyResolvedVisualState(
+                thumbnailSource,
+                isPreviewImageVisible,
+                isFolderThumbnailVisible,
+                isLoading,
+                placeholderText,
+                isPlaceholderTextVisible,
+                isSelected,
+                folderIconSize,
+                badgeText,
+                isBadgeVisible,
+                SurfaceStyleResourceKey,
+                SelectionMarkStyleResourceKey,
+                BadgeStyleResourceKey,
+                BadgeLabelStyleResourceKey,
+                animatePreviewImageVisibility: true,
+                animateFolderIconVisibility: true,
+                animatePlaceholderVisibility: true,
+                animateLoading: true,
+                animateBadgeVisibility: true,
+                animateSelection: true);
+        }
+
+        private void ApplyResolvedVisualState(
+            ImageSource? thumbnailSource,
+            bool isPreviewImageVisible,
+            bool isFolderThumbnailVisible,
+            bool isLoading,
+            string placeholderText,
+            bool isPlaceholderTextVisible,
+            bool isSelected,
+            double folderIconSize,
+            string badgeText,
+            bool isBadgeVisible,
+            string requestedSurfaceStyleResourceKey,
+            string requestedSelectionMarkStyleResourceKey,
+            string requestedBadgeStyleResourceKey,
+            string requestedBadgeLabelStyleResourceKey,
+            bool animatePreviewImageVisibility,
+            bool animateFolderIconVisibility,
+            bool animatePlaceholderVisibility,
+            bool animateLoading,
+            bool animateBadgeVisibility,
+            bool animateSelection)
+        {
+            string surfaceStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
+                requestedSurfaceStyleResourceKey,
                 DefaultSurfaceStyleResourceKey);
             string selectionMarkStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                SelectionMarkStyleResourceKey,
+                requestedSelectionMarkStyleResourceKey,
                 DefaultSelectionMarkStyleResourceKey);
             string badgeStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                BadgeStyleResourceKey,
+                requestedBadgeStyleResourceKey,
                 DefaultBadgeStyleResourceKey);
             string badgeLabelStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                BadgeLabelStyleResourceKey,
+                requestedBadgeLabelStyleResourceKey,
                 DefaultBadgeLabelStyleResourceKey);
+            string currentPlaceholderText = placeholderText ?? string.Empty;
+            string currentBadgeText = badgeText ?? string.Empty;
 
             _surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
             _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");
@@ -411,55 +501,70 @@ namespace Cotton.Mobile.Controls
             _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
             _selectionMark.SetDynamicResource(StyleProperty, selectionMarkStyleResourceKey);
             _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
-            _image.Source = ThumbnailSource;
-            UpdatePreviewImageVisibility(animatePreviewImageVisibility);
-            UpdateFolderIconVisibility(animateFolderIconVisibility);
-            UpdateLoadingState(animateLoading);
-            _placeholder.Text = PlaceholderText ?? string.Empty;
-            UpdatePlaceholderVisibility(animatePlaceholderVisibility);
+            _image.Source = thumbnailSource;
+            _isCurrentPreviewImageVisible = isPreviewImageVisible;
+            _isCurrentFolderThumbnailVisible = isFolderThumbnailVisible;
+            _isCurrentLoading = isLoading;
+            _currentPlaceholderText = currentPlaceholderText;
+            _isCurrentPlaceholderTextVisible = isPlaceholderTextVisible;
+            _isCurrentSelected = isSelected;
+            _currentBadgeText = currentBadgeText;
+            _isCurrentBadgeVisible = isBadgeVisible;
+            UpdatePreviewImageVisibility(isPreviewImageVisible, animatePreviewImageVisibility);
+            UpdateFolderIconVisibility(isFolderThumbnailVisible, animateFolderIconVisibility);
+            UpdateLoadingState(isLoading, animateLoading);
+            _placeholder.Text = currentPlaceholderText;
+            UpdatePlaceholderVisibility(currentPlaceholderText, isPlaceholderTextVisible, animatePlaceholderVisibility);
             _selectionMark.IsVisible = true;
-            UpdateSelectionState(animateSelection);
-            _badge.Text = BadgeText ?? string.Empty;
+            UpdateSelectionState(isSelected, animateSelection);
+            _badge.Text = currentBadgeText;
             _badge.ChipStyleResourceKey = badgeStyleResourceKey;
             _badge.LabelStyleResourceKey = badgeLabelStyleResourceKey;
-            UpdateBadgeVisibility(animateBadgeVisibility);
+            UpdateBadgeVisibility(currentBadgeText, isBadgeVisible, animateBadgeVisibility);
 
-            if (FolderIconSize > 0)
+            if (folderIconSize > 0)
             {
-                _folderIcon.IconSize = FolderIconSize;
+                _folderIcon.IconSize = folderIconSize;
                 return;
             }
 
             _folderIcon.ClearValue(IconView.IconSizeProperty);
         }
 
-        private void UpdatePreviewImageVisibility(bool animatePreviewImageVisibility)
+        private void UpdatePreviewImageVisibility(
+            bool isPreviewImageVisible,
+            bool animatePreviewImageVisibility)
         {
             UpdateThumbnailLayerVisibility(
                 _image,
-                IsPreviewImageVisible,
+                isPreviewImageVisible,
                 animatePreviewImageVisibility,
                 ref _hasAppliedPreviewImageVisibility,
                 PreviewImageOpacityAnimationName,
                 CompletePreviewImageVisibility);
         }
 
-        private void UpdateFolderIconVisibility(bool animateFolderIconVisibility)
+        private void UpdateFolderIconVisibility(
+            bool isFolderThumbnailVisible,
+            bool animateFolderIconVisibility)
         {
             UpdateThumbnailLayerVisibility(
                 _folderIcon,
-                IsFolderThumbnailVisible,
+                isFolderThumbnailVisible,
                 animateFolderIconVisibility,
                 ref _hasAppliedFolderIconVisibility,
                 FolderIconOpacityAnimationName,
                 CompleteFolderIconVisibility);
         }
 
-        private void UpdatePlaceholderVisibility(bool animatePlaceholderVisibility)
+        private void UpdatePlaceholderVisibility(
+            string placeholderText,
+            bool isPlaceholderTextVisible,
+            bool animatePlaceholderVisibility)
         {
             UpdateThumbnailLayerVisibility(
                 _placeholder,
-                IsPlaceholderActuallyVisible(),
+                IsPlaceholderActuallyVisible(placeholderText, isPlaceholderTextVisible),
                 animatePlaceholderVisibility,
                 ref _hasAppliedPlaceholderVisibility,
                 PlaceholderOpacityAnimationName,
@@ -499,7 +604,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompletePreviewImageVisibility()
         {
-            if (IsPreviewImageVisible)
+            if (_isCurrentPreviewImageVisible)
             {
                 _image.IsVisible = true;
                 return;
@@ -510,7 +615,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteFolderIconVisibility()
         {
-            if (IsFolderThumbnailVisible)
+            if (_isCurrentFolderThumbnailVisible)
             {
                 _folderIcon.IsVisible = true;
                 return;
@@ -521,7 +626,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompletePlaceholderVisibility()
         {
-            if (IsPlaceholderActuallyVisible())
+            if (IsPlaceholderActuallyVisible(_currentPlaceholderText, _isCurrentPlaceholderTextVisible))
             {
                 _placeholder.IsVisible = true;
                 return;
@@ -530,21 +635,24 @@ namespace Cotton.Mobile.Controls
             _placeholder.IsVisible = false;
         }
 
-        private bool IsPlaceholderActuallyVisible()
+        private static bool IsPlaceholderActuallyVisible(string placeholderText, bool isPlaceholderTextVisible)
         {
-            return IsPlaceholderTextVisible && !string.IsNullOrWhiteSpace(PlaceholderText);
+            return isPlaceholderTextVisible && !string.IsNullOrWhiteSpace(placeholderText);
         }
 
-        private void UpdateBadgeVisibility(bool animateBadgeVisibility)
+        private void UpdateBadgeVisibility(
+            string badgeText,
+            bool isBadgeVisible,
+            bool animateBadgeVisibility)
         {
-            bool isBadgeVisible = IsBadgeActuallyVisible();
+            bool isBadgeActuallyVisible = IsBadgeActuallyVisible(badgeText, isBadgeVisible);
             bool shouldAnimate = animateBadgeVisibility && _hasAppliedBadgeVisibility;
-            double targetOpacity = isBadgeVisible
+            double targetOpacity = isBadgeActuallyVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
                 : MaterialMotion.Value("M3MotionHiddenOpacity");
             int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
 
-            if (isBadgeVisible)
+            if (isBadgeActuallyVisible)
             {
                 _badge.IsVisible = true;
             }
@@ -563,7 +671,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteBadgeVisibility()
         {
-            if (IsBadgeActuallyVisible())
+            if (IsBadgeActuallyVisible(_currentBadgeText, _isCurrentBadgeVisible))
             {
                 _badge.IsVisible = true;
                 return;
@@ -572,14 +680,13 @@ namespace Cotton.Mobile.Controls
             _badge.IsVisible = false;
         }
 
-        private bool IsBadgeActuallyVisible()
+        private static bool IsBadgeActuallyVisible(string badgeText, bool isBadgeVisible)
         {
-            return IsBadgeVisible && !string.IsNullOrWhiteSpace(BadgeText);
+            return isBadgeVisible && !string.IsNullOrWhiteSpace(badgeText);
         }
 
-        private void UpdateLoadingState(bool animateLoading)
+        private void UpdateLoadingState(bool isLoading, bool animateLoading)
         {
-            bool isLoading = IsLoading;
             bool shouldAnimate = animateLoading && _hasAppliedLoadingState;
             double targetOpacity = isLoading
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -606,7 +713,7 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteLoadingState()
         {
-            if (IsLoading)
+            if (_isCurrentLoading)
             {
                 _loadingIndicator.IsVisible = true;
                 _loadingIndicator.IsRunning = true;
@@ -617,12 +724,12 @@ namespace Cotton.Mobile.Controls
             _loadingIndicator.IsVisible = false;
         }
 
-        private void UpdateSelectionState(bool animateSelection)
+        private void UpdateSelectionState(bool isSelected, bool animateSelection)
         {
-            double targetOpacity = IsSelected
+            double targetOpacity = isSelected
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
                 : MaterialMotion.Value("M3MotionHiddenOpacity");
-            double targetScale = IsSelected
+            double targetScale = isSelected
                 ? MaterialMotion.Value("M3InteractionRestScale")
                 : MaterialMotion.Value("M3MotionSelectionHiddenScale");
             bool shouldAnimate = animateSelection && _hasAppliedSelectionState;

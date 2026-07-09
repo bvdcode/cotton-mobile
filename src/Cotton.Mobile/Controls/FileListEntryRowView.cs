@@ -343,13 +343,14 @@ namespace Cotton.Mobile.Controls
 
             _selectionOverlay.IsSelected = IsSelected;
 
-            _thumbnail.ThumbnailSource = ThumbnailSource;
-            _thumbnail.IsPreviewImageVisible = IsPreviewImageVisible;
-            _thumbnail.IsFolderThumbnailVisible = IsFolderThumbnailVisible;
-            _thumbnail.IsLoading = IsLoading;
-            _thumbnail.PlaceholderText = PlaceholderText ?? string.Empty;
-            _thumbnail.IsPlaceholderTextVisible = IsPlaceholderTextVisible;
-            _thumbnail.IsSelected = IsSelected;
+            _thumbnail.ApplyThumbnailState(
+                ThumbnailSource,
+                IsPreviewImageVisible,
+                IsFolderThumbnailVisible,
+                IsLoading,
+                PlaceholderText ?? string.Empty,
+                IsPlaceholderTextVisible,
+                IsSelected);
 
             ApplyMetadataState();
 

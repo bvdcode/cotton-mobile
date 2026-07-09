@@ -1376,7 +1376,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_actionRow.Add(_button, 0, 0)", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_actionRow.Add(_serverActionButton, 1, 0)", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_urlField.IsFieldVisible = isServerFieldVisible", authSignInPanelView, StringComparison.Ordinal);
-            Assert.Contains("_serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Edit", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("_serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Language", authSignInPanelView, StringComparison.Ordinal);
+            Assert.Contains("public static Geometry Language => Create(", LoadText(Path.Combine(ControlsDirectoryPath, "IconPathData.cs")), StringComparison.Ordinal);
+            Assert.DoesNotContain("_serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Edit", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("SemanticProperties.SetDescription(", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("_card.CardStyleResourceKey = ShouldUseFramedPanel()", authSignInPanelView, StringComparison.Ordinal);

@@ -246,7 +246,7 @@ namespace Cotton.Mobile.Controls
         {
             bool isServerFieldVisible = IsServerFieldVisible();
             _urlField.IsFieldVisible = isServerFieldVisible;
-            _serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Edit;
+            _serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Language;
             SemanticProperties.SetDescription(
                 _serverActionButton,
                 isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText);

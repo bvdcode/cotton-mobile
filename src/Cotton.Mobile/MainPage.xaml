@@ -44,10 +44,12 @@
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
                                             TextStyleResourceKey="M3CardSupportingStrong" />
 
-                <controls:AuthLegalFooterView IsFooterVisible="{Binding Display.IsLegalFooterVisible}"
-                                              PrivacyCommand="{Binding PrivacyPolicyCommand}" />
             </controls:StackedContentView>
         </controls:ScreenScrollBodyView>
+
+        <controls:AuthLegalFooterView Grid.Row="0"
+                                      IsFooterVisible="{Binding Display.IsLegalFooterVisible}"
+                                      PrivacyCommand="{Binding PrivacyPolicyCommand}" />
 
         <controls:LayeredContentView Grid.Row="0"
                                      IsLayerVisible="{Binding Display.IsProfileVisible}">

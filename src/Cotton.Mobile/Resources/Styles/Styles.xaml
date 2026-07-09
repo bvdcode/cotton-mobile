@@ -235,6 +235,12 @@
         <Setter Property="HorizontalOptions" Value="Fill" />
     </Style>
 
+    <Style TargetType="controls:AuthLegalFooterView" x:Key="M3AuthLegalFooterContainer">
+        <Setter Property="Margin" Value="{StaticResource M3AuthLegalFooterMargin}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="End" />
+    </Style>
+
     <Style TargetType="Grid" x:Key="M3AuthBrandGrid">
         <Setter Property="ColumnSpacing" Value="{StaticResource Space16}" />
     </Style>

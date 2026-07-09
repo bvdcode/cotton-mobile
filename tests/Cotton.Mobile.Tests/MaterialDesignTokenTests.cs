@@ -1277,10 +1277,14 @@ namespace Cotton.Mobile.Tests
         {
             string authLegalFooterView = LoadText(AuthLegalFooterViewPath);
             string mainPage = LoadText(MainPagePath);
+            string spacing = LoadText(SpacingResourcePath);
+            string styles = LoadText(StylesResourcePath);
 
-            Assert.Contains("<controls:AuthLegalFooterView IsFooterVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:AuthLegalFooterView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsFooterVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("PrivacyCommand=\"{Binding PrivacyPolicyCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class AuthLegalFooterView", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("DefaultContainerStyleResourceKey = \"M3AuthLegalFooterContainer\"", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("DefaultFooterStyleResourceKey = \"M3LegalFooterBar\"", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("DefaultPrivacyText = \"Privacy\"", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("FooterOpacityAnimationName = \"M3AuthLegalFooterOpacity\"", authLegalFooterView, StringComparison.Ordinal);
@@ -1292,9 +1296,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("InputTransparent = !IsVisible || !IsFooterVisible || PrivacyCommand is null", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new HorizontalStackLayout", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("new TextAction", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("SetDynamicResource(StyleProperty, DefaultContainerStyleResourceKey)", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("_footer.SetDynamicResource(StyleProperty, footerStyleResourceKey)", authLegalFooterView, StringComparison.Ordinal);
             Assert.Contains("_privacyAction.Command = PrivacyCommand", authLegalFooterView, StringComparison.Ordinal);
+            Assert.Contains("<Thickness x:Key=\"M3AuthLegalFooterMargin\">0,0,0,24</Thickness>", spacing, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:AuthLegalFooterView\" x:Key=\"M3AuthLegalFooterContainer\">", styles, StringComparison.Ordinal);
+            Assert.Contains("<Setter Property=\"VerticalOptions\" Value=\"End\" />", styles, StringComparison.Ordinal);
+            Assert.True(
+                mainPage.IndexOf("<controls:AuthLegalFooterView Grid.Row=\"0\"", StringComparison.Ordinal) >
+                mainPage.IndexOf("</controls:ScreenScrollBodyView>", StringComparison.Ordinal));
             Assert.DoesNotContain("<HorizontalStackLayout IsVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:AuthLegalFooterView IsFooterVisible=\"{Binding Display.IsLegalFooterVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:AuthLegalFooterView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:TextAction Text=\"Privacy\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3LegalFooterBar}\"", mainPage, StringComparison.Ordinal);

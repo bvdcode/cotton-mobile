@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Controls
 {
     public class AuthLegalFooterView : ContentView
     {
+        private const string DefaultContainerStyleResourceKey = "M3AuthLegalFooterContainer";
         private const string DefaultFooterStyleResourceKey = "M3LegalFooterBar";
         private const string DefaultPrivacyText = "Privacy";
         private const string FooterOpacityAnimationName = "M3AuthLegalFooterOpacity";
@@ -55,6 +56,7 @@ namespace Cotton.Mobile.Controls
             };
 
             Content = _footer;
+            SetDynamicResource(StyleProperty, DefaultContainerStyleResourceKey);
             UpdateVisualState();
             UpdateFooterVisibility(animateFooterVisibility: false);
             UpdateInputTransparency();

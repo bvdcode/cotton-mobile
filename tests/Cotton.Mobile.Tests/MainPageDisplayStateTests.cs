@@ -247,14 +247,17 @@ namespace Cotton.Mobile.Tests
             Assert.False(display.IsFileBrowserChromeEnabled);
             Assert.False(display.IsAccountActionEnabled);
 
-            display.ShowFileActionLoading("Opening zeta.txt...", showStatusPanel: false);
+            display.ShowFileActionLoading(
+                "Opening zeta.txt...",
+                showStatusPanel: false,
+                showStatusText: false);
 
             Assert.True(display.IsFilesLoading);
             Assert.False(display.IsInlineFilesLoadingVisible);
             Assert.False(display.IsFilesLoadingPanelVisible);
             Assert.False(display.IsFileActionStatusPanelVisible);
             Assert.True(display.CanCancelFileAction);
-            Assert.Equal("Opening zeta.txt...", display.FilesStatus);
+            Assert.Equal("4 items · A-Z", display.FilesStatus);
 
             display.ShowFileActionLoading("Downloading zeta.txt...");
 

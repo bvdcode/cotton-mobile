@@ -1547,6 +1547,7 @@ namespace Cotton.Mobile.ViewModels
                         file,
                         "Downloading",
                         showStatusPanel: true,
+                        showStatusText: true,
                         () => IsActiveFileAction(fileActionCancellation, instanceUri),
                         fileActionCancellation.Token),
                     fileActionCancellation.Token);
@@ -2097,6 +2098,7 @@ namespace Cotton.Mobile.ViewModels
                         file,
                         progressActionName,
                         showStatusPanel: true,
+                        showStatusText: true,
                         () => IsActiveFileAction(fileActionCancellation, instanceUri),
                         fileActionCancellation.Token),
                     fileActionCancellation.Token);
@@ -3017,6 +3019,7 @@ namespace Cotton.Mobile.ViewModels
                             file,
                             $"Saving {item.Position} of {queue.TotalCount}",
                             showStatusPanel: true,
+                            showStatusText: true,
                             () => IsActiveFileAction(fileActionCancellation, instanceUri),
                             fileActionCancellation.Token),
                         fileActionCancellation.Token);
@@ -4377,6 +4380,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     "Preparing",
                     showStatusPanel: true,
+                    showStatusText: true,
                     () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 await _fileInteractionService.ShareAsync(result, fileActionCancellation.Token);
@@ -5384,6 +5388,7 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             string actionName,
             bool showStatusPanel,
+            bool showStatusText,
             Func<bool> canUpdateProgress,
             CancellationToken cancellationToken)
         {
@@ -5402,6 +5407,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     actionName,
                     showStatusPanel,
+                    showStatusText,
                     canUpdateProgress,
                     cancellationToken),
                 cancellationToken);
@@ -5414,7 +5420,8 @@ namespace Cotton.Mobile.ViewModels
         {
             CancellationTokenSource fileActionCancellation = BeginDeferredFileAction(
                 $"Opening {file.Name}...",
-                showStatusPanelWhenLoading: false);
+                showStatusPanelWhenLoading: false,
+                showStatusTextWhenLoading: false);
             bool shouldRunRecoveryRefresh = false;
 
             try
@@ -5424,6 +5431,7 @@ namespace Cotton.Mobile.ViewModels
                     file,
                     "Opening",
                     showStatusPanel: false,
+                    showStatusText: false,
                     () => IsActiveFileAction(fileActionCancellation, instanceUri),
                     fileActionCancellation.Token);
                 await OpenPreparedFileAsync(file, result, fileActionCancellation.Token);
@@ -5956,10 +5964,11 @@ namespace Cotton.Mobile.ViewModels
             CottonFileBrowserEntry file,
             string actionName,
             bool showStatusPanel,
+            bool showStatusText,
             Func<bool> canUpdateProgress,
             CancellationToken cancellationToken)
         {
-            if (file.SizeBytes is not > 0)
+            if (!showStatusText || file.SizeBytes is not > 0)
             {
                 return null;
             }
@@ -5982,7 +5991,8 @@ namespace Cotton.Mobile.ViewModels
                 lastPercent = percent;
                 _display.ShowFileActionLoading(
                     $"{actionName} {file.Name}... {percent}%",
-                    showStatusPanel);
+                    showStatusPanel,
+                    showStatusText);
             });
         }
 
@@ -6158,21 +6168,27 @@ namespace Cotton.Mobile.ViewModels
 
         private CancellationTokenSource BeginDeferredFileAction(
             string status,
-            bool showStatusPanelWhenLoading = true)
+            bool showStatusPanelWhenLoading = true,
+            bool showStatusTextWhenLoading = true)
         {
             CancelCurrentFileAction();
             ClearFileActionRetry();
             CancellationTokenSource cancellation = new();
             _fileActionCancellation = cancellation;
             _display.ShowFileActionPending();
-            _ = ShowDeferredFileActionLoadingAsync(cancellation, status, showStatusPanelWhenLoading);
+            _ = ShowDeferredFileActionLoadingAsync(
+                cancellation,
+                status,
+                showStatusPanelWhenLoading,
+                showStatusTextWhenLoading);
             return cancellation;
         }
 
         private async Task ShowDeferredFileActionLoadingAsync(
             CancellationTokenSource fileActionCancellation,
             string status,
-            bool showStatusPanel)
+            bool showStatusPanel,
+            bool showStatusText)
         {
             CancellationToken cancellationToken = fileActionCancellation.Token;
             try
@@ -6185,7 +6201,7 @@ namespace Cotton.Mobile.ViewModels
                         && !_display.IsFilesLoading
                         && !_display.IsFileBrowserChromeEnabled)
                     {
-                        _display.ShowFileActionLoading(status, showStatusPanel);
+                        _display.ShowFileActionLoading(status, showStatusPanel, showStatusText);
                     }
                 }).ConfigureAwait(false);
             }

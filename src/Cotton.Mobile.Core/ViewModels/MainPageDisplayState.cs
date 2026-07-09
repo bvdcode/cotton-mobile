@@ -723,7 +723,10 @@ namespace Cotton.Mobile.ViewModels
             NotifyFilesEmptyStateChanged();
         }
 
-        public void ShowFileActionLoading(string status, bool showStatusPanel = true)
+        public void ShowFileActionLoading(
+            string status,
+            bool showStatusPanel = true,
+            bool showStatusText = true)
         {
             ClearFileSelection();
             IsFileActionStatusPanelVisible = showStatusPanel;
@@ -732,7 +735,7 @@ namespace Cotton.Mobile.ViewModels
             IsFileActionInProgress = true;
             CanCancelFileAction = true;
             CanRetryFileAction = false;
-            FilesStatus = status;
+            FilesStatus = showStatusText ? status : CreateFilesStatus();
             ClearFilesNotice();
             NotifyFilesEmptyStateChanged();
         }

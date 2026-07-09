@@ -69,14 +69,14 @@ namespace Cotton.Mobile.Controls
             _brandMark = new BrandMarkView();
             _titleLabel = new Label();
 
-            Grid.SetColumn(_titleLabel, 1);
+            Grid.SetRow(_titleLabel, 1);
 
             _grid = new Grid
             {
-                ColumnDefinitions =
+                RowDefinitions =
                 {
-                    new ColumnDefinition { Width = GridLength.Auto },
-                    new ColumnDefinition { Width = GridLength.Star },
+                    new RowDefinition { Height = GridLength.Auto },
+                    new RowDefinition { Height = GridLength.Auto },
                 },
                 Children =
                 {

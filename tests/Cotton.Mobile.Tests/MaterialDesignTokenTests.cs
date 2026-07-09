@@ -1180,6 +1180,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SemanticDescription=\"Cotton Cloud\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class BrandHeaderView", brandHeaderView, StringComparison.Ordinal);
             Assert.Contains("new BrandMarkView", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("Grid.SetRow(_titleLabel, 1)", brandHeaderView, StringComparison.Ordinal);
+            Assert.Contains("new RowDefinition { Height = GridLength.Auto }", brandHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("Grid.SetColumn(_titleLabel, 1)", brandHeaderView, StringComparison.Ordinal);
+            Assert.DoesNotContain("new ColumnDefinition { Width = GridLength.Star }", brandHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultGridStyleResourceKey = \"M3AuthBrandGrid\"", brandHeaderView, StringComparison.Ordinal);
             Assert.Contains("DefaultTitleStyleResourceKey = \"M3AuthTitle\"", brandHeaderView, StringComparison.Ordinal);
             Assert.Contains("SemanticProperties.SetHeadingLevel(_titleLabel, SemanticHeadingLevel.Level1)", brandHeaderView, StringComparison.Ordinal);

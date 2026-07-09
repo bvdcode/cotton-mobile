@@ -283,14 +283,22 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task OpenFilesAsync()
         {
-            var navigation = Shell.Current.Navigation;
-            if (navigation.NavigationStack.Count <= 1)
+            INavigation? navigation = Shell.Current?.Navigation;
+            if (navigation is null || navigation.NavigationStack.Count <= 1)
             {
                 Status = "Open Files from the main screen.";
                 return;
             }
 
-            await navigation.PopAsync();
+            try
+            {
+                await navigation.PopAsync();
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Cotton mobile sync settings navigation back failed.");
+                Status = "Could not open Files.";
+            }
         }
 
         private async Task StopRootAsync(CottonSyncRootListItem item)

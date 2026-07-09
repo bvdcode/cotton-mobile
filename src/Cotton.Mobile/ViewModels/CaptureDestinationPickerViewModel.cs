@@ -286,7 +286,11 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 Status = _successStatusFactory(destination);
-                await Shell.Current.Navigation.PopAsync();
+                INavigation? navigation = Shell.Current?.Navigation;
+                if (navigation is not null && navigation.NavigationStack.Count > 1)
+                {
+                    await navigation.PopAsync();
+                }
             }
             catch (Exception exception)
             {

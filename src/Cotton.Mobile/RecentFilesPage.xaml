@@ -40,7 +40,7 @@
         <controls:MaterialCollectionView Grid.Row="2"
                                          ItemsSource="{Binding Items}"
                                          IsContentVisible="{Binding IsListVisible}"
-                                         ItemSizingStrategy="MeasureFirstItem"
+                                         ItemSizingStrategy="MeasureAllItems"
                                          ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
             <controls:MaterialCollectionView.ItemTemplate>
                 <DataTemplate x:DataType="services:CottonRecentFileListItem">

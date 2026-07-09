@@ -50,6 +50,8 @@ namespace Cotton.Mobile.Tests
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
+        private const string CaptureDestinationPickerViewModelPath = "src/Cotton.Mobile/ViewModels/CaptureDestinationPickerViewModel.cs";
+        private const string SyncSettingsViewModelPath = "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs";
         private const string AuthLegalFooterViewPath = "src/Cotton.Mobile/Controls/AuthLegalFooterView.cs";
         private const string AuthSignInPanelViewPath = "src/Cotton.Mobile/Controls/AuthSignInPanelView.cs";
         private const string FocusedInputChromeBehaviorPath = "src/Cotton.Mobile/Behaviors/FocusedInputChromeBehavior.cs";
@@ -3306,11 +3308,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", diagnosticsPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", fileVersionHistoryPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("ItemSizingStrategy=\"MeasureAllItems\"", transfersPage, StringComparison.Ordinal);
             Assert.Equal(2, CountOccurrences(trashPage, "ItemSizingStrategy=\"MeasureAllItems\""));
-            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"", captureDestinationPickerPage, StringComparison.Ordinal);
-            Assert.Contains("ItemSizingStrategy=\"MeasureFirstItem\"", recentFilesPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ItemSizingStrategy=\"MeasureFirstItem\"", captureDestinationPickerPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("ItemSizingStrategy=\"MeasureFirstItem\"", recentFilesPage, StringComparison.Ordinal);
             Assert.Contains("public class MaterialCollectionView", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("MaterialCollectionView : MaterialAnimatedContentView", materialCollectionView, StringComparison.Ordinal);
             Assert.Contains("DefaultCollectionStyleResourceKey = \"M3MaterialCollectionView\"", materialCollectionView, StringComparison.Ordinal);
@@ -3339,6 +3343,31 @@ namespace Cotton.Mobile.Tests
                 Assert.DoesNotContain("MaterialCollectionView ItemsSource=\"{Binding Items}\"\n                                             IsVisible=", page, StringComparison.Ordinal);
                 Assert.DoesNotContain("IsVisible=\"{Binding IsPreviewVisible}\"", page, StringComparison.Ordinal);
             }
+        }
+
+        [Fact]
+        public void View_model_back_navigation_paths_are_guarded()
+        {
+            string captureDestinationPickerViewModel = LoadText(CaptureDestinationPickerViewModelPath);
+            string syncSettingsViewModel = LoadText(SyncSettingsViewModelPath);
+
+            Assert.Contains("INavigation? navigation = Shell.Current?.Navigation;", syncSettingsViewModel, StringComparison.Ordinal);
+            Assert.Contains("navigation is null || navigation.NavigationStack.Count <= 1", syncSettingsViewModel, StringComparison.Ordinal);
+            Assert.Contains("await navigation.PopAsync();", syncSettingsViewModel, StringComparison.Ordinal);
+            Assert.Contains("catch (Exception exception)", syncSettingsViewModel, StringComparison.Ordinal);
+            Assert.Contains(
+                "_logger.LogWarning(exception, \"Cotton mobile sync settings navigation back failed.\");",
+                syncSettingsViewModel,
+                StringComparison.Ordinal);
+            Assert.Contains("Status = \"Could not open Files.\";", syncSettingsViewModel, StringComparison.Ordinal);
+
+            Assert.Contains("INavigation? navigation = Shell.Current?.Navigation;", captureDestinationPickerViewModel, StringComparison.Ordinal);
+            Assert.Contains(
+                "navigation is not null && navigation.NavigationStack.Count > 1",
+                captureDestinationPickerViewModel,
+                StringComparison.Ordinal);
+            Assert.Contains("await navigation.PopAsync();", captureDestinationPickerViewModel, StringComparison.Ordinal);
+            Assert.Contains("catch (Exception exception)", captureDestinationPickerViewModel, StringComparison.Ordinal);
         }
 
         [Fact]

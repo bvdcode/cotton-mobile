@@ -43,10 +43,10 @@
 
                 <controls:ActionListItemView Text="Free space"
                                              SupportingText="Remove evictable local copies while keeping offline files."
-                                             LeadingIconData="{x:Static controls:IconPathData.Download}"
+                                             LeadingIconData="{x:Static controls:IconPathData.Cleanup}"
                                              IsLeadingIconVisible="True"
                                              LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                             ActionIconData="{x:Static controls:IconPathData.Download}"
+                                             ActionIconData="{x:Static controls:IconPathData.Cleanup}"
                                              Command="{Binding FreeDeviceSpaceCommand}"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              TextStyleResourceKey="M3CardSupportingStrongLine"

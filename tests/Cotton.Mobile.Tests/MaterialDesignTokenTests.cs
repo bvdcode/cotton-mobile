@@ -1871,7 +1871,11 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(2, CountOccurrences(storagePage, "<controls:ActionListItemView"));
             Assert.Contains("SupportingText=\"Remove evictable local copies while keeping offline files.\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("LeadingIconData=\"{x:Static controls:IconPathData.Cleanup}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("ActionIconData=\"{x:Static controls:IconPathData.Cleanup}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveIconButton\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("public static Geometry Cleanup => Create(", LoadText(Path.Combine(ControlsDirectoryPath, "IconPathData.cs")), StringComparison.Ordinal);
+            Assert.DoesNotContain("Text=\"Free space\"\n                                             SupportingText=\"Remove evictable local copies while keeping offline files.\"\n                                             LeadingIconData=\"{x:Static controls:IconPathData.Download}\"", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<behaviors:LongPressBehavior", storagePage, StringComparison.Ordinal);
             Assert.DoesNotContain("ActionListItemView Text=\"{Binding MediaAccessActionText}\"\n                                             ActionIconData=\"{x:Static controls:IconPathData.OpenInNew}\"\n                                             Command=\"{Binding MediaAccessActionCommand}\"\n                                             IsVisible=", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding IsPermissionActionVisible}\"", notificationSettingsPage, StringComparison.Ordinal);

@@ -945,6 +945,47 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void App_screens_do_not_use_raw_maui_form_controls()
+        {
+            string[] forbiddenTags =
+            [
+                "<ActivityIndicator",
+                "<Button",
+                "<CheckBox",
+                "<Editor",
+                "<Entry",
+                "<ImageButton",
+                "<Picker",
+                "<ProgressBar",
+                "<RadioButton",
+                "<SearchBar",
+                "<Slider",
+                "<Switch",
+            ];
+            string repositoryRoot = FindRepositoryRoot(MainPagePath);
+            string[] screenPaths = Directory.GetFiles(
+                    Path.Combine(repositoryRoot, "src", "Cotton.Mobile"),
+                    "*.xaml",
+                    SearchOption.TopDirectoryOnly)
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+
+            Assert.NotEmpty(screenPaths);
+
+            foreach (string screenPath in screenPaths)
+            {
+                string relativeScreenPath = Path.GetRelativePath(repositoryRoot, screenPath);
+                string screen = LoadText(relativeScreenPath);
+                foreach (string forbiddenTag in forbiddenTags)
+                {
+                    Assert.False(
+                        screen.Contains(forbiddenTag, StringComparison.Ordinal),
+                        $"{relativeScreenPath} must use Cotton Material controls instead of raw MAUI {forbiddenTag}.");
+                }
+            }
+        }
+
+        [Fact]
         public void Modal_pages_use_dynamic_material_style_resources()
         {
             string actionSheetItemView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"));

@@ -585,7 +585,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("OnSkeletonVisiblePropertyChanged", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("CompleteSkeletonVisibility", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("UpdateSkeletonBlocksPulseState", skeletonListView, StringComparison.Ordinal);
-            Assert.Contains("bool isPulseEnabled = _isLoaded && IsVisible && IsSkeletonVisible", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("bool isPulseEnabled = _isLoaded && IsEffectivelyVisible() && IsSkeletonVisible", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("RefreshVisibilityAncestorSubscriptions", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("OnAncestorPropertyChanged", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("visualAncestor.PropertyChanged += OnAncestorPropertyChanged", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("ancestor.PropertyChanged -= OnAncestorPropertyChanged", skeletonListView, StringComparison.Ordinal);
+            Assert.Contains("if (!ancestor.IsVisible)", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("skeletonBlock.IsPulseEnabled = isPulseEnabled", skeletonListView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", skeletonListView, StringComparison.Ordinal);
             Assert.DoesNotContain("FileListSkeletonView IsVisible=", mainPage, StringComparison.Ordinal);

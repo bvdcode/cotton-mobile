@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using System.ComponentModel;
+
 namespace Cotton.Mobile.Controls
 {
     public abstract class SkeletonListView : VerticalStackLayout
@@ -30,11 +32,13 @@ namespace Cotton.Mobile.Controls
 
         private bool _hasAppliedSkeletonVisibility;
         private bool _isLoaded;
+        private readonly List<VisualElement> _visibilityAncestors = [];
 
         protected SkeletonListView()
         {
             InputTransparent = true;
             Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+            ParentChanged += OnParentChanged;
             Loaded += OnLoaded;
             Unloaded += OnUnloaded;
         }
@@ -103,6 +107,7 @@ namespace Cotton.Mobile.Controls
         private void OnLoaded(object? sender, EventArgs e)
         {
             _isLoaded = true;
+            RefreshVisibilityAncestorSubscriptions();
             UpdateAppearanceState();
             UpdateSkeletonBlocksPulseState();
         }
@@ -110,9 +115,24 @@ namespace Cotton.Mobile.Controls
         private void OnUnloaded(object? sender, EventArgs e)
         {
             _isLoaded = false;
+            ClearVisibilityAncestorSubscriptions();
             this.AbortAnimation(AppearanceAnimationName);
             UpdateSkeletonBlocksPulseState();
             Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
+        }
+
+        private void OnParentChanged(object? sender, EventArgs e)
+        {
+            RefreshVisibilityAncestorSubscriptions();
+            UpdateAppearanceState();
+        }
+
+        private void OnAncestorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName is null || string.Equals(e.PropertyName, nameof(IsVisible), StringComparison.Ordinal))
+            {
+                UpdateAppearanceState();
+            }
         }
 
         private void UpdateAppearanceState()
@@ -120,7 +140,7 @@ namespace Cotton.Mobile.Controls
             this.AbortAnimation(AppearanceAnimationName);
             UpdateSkeletonBlocksPulseState();
 
-            if (!_isLoaded || !IsVisible || !IsSkeletonVisible)
+            if (!_isLoaded || !IsEffectivelyVisible() || !IsSkeletonVisible)
             {
                 Opacity = MaterialMotion.Value("M3MotionHiddenOpacity");
                 _hasAppliedSkeletonVisibility = true;
@@ -181,11 +201,56 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateSkeletonBlocksPulseState()
         {
-            bool isPulseEnabled = _isLoaded && IsVisible && IsSkeletonVisible;
+            bool isPulseEnabled = _isLoaded && IsEffectivelyVisible() && IsSkeletonVisible;
             foreach (SkeletonBlock skeletonBlock in EnumerateSkeletonBlocks(this))
             {
                 skeletonBlock.IsPulseEnabled = isPulseEnabled;
             }
+        }
+
+        private void RefreshVisibilityAncestorSubscriptions()
+        {
+            ClearVisibilityAncestorSubscriptions();
+
+            Element? ancestor = Parent;
+            while (ancestor is not null)
+            {
+                if (ancestor is VisualElement visualAncestor)
+                {
+                    visualAncestor.PropertyChanged += OnAncestorPropertyChanged;
+                    _visibilityAncestors.Add(visualAncestor);
+                }
+
+                ancestor = ancestor.Parent;
+            }
+        }
+
+        private void ClearVisibilityAncestorSubscriptions()
+        {
+            foreach (VisualElement ancestor in _visibilityAncestors)
+            {
+                ancestor.PropertyChanged -= OnAncestorPropertyChanged;
+            }
+
+            _visibilityAncestors.Clear();
+        }
+
+        private bool IsEffectivelyVisible()
+        {
+            if (!IsVisible)
+            {
+                return false;
+            }
+
+            foreach (VisualElement ancestor in _visibilityAncestors)
+            {
+                if (!ancestor.IsVisible)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         private static IEnumerable<SkeletonBlock> EnumerateSkeletonBlocks(IView view)

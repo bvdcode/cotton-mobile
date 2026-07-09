@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
 
+    <x:String x:Key="M3FontFamilyMedium">sans-serif-medium</x:String>
     <x:Double x:Key="M3ButtonFontSize">14</x:Double>
     <x:Double x:Key="M3ControlFontSize">14</x:Double>
     <x:Double x:Key="M3FooterLinkFontSize">12</x:Double>
@@ -50,13 +51,15 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3ScreenMetric" BasedOn="{StaticResource M3HeadlineLarge}">
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="MaxLines" Value="1" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3ScreenTitle" BasedOn="{StaticResource M3HeadlineMedium}">
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="MaxLines" Value="1" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />
     </Style>
@@ -76,7 +79,8 @@
     </Style>
 
     <Style TargetType="Label" x:Key="M3PanelTitle" BasedOn="{StaticResource M3TitleMedium}">
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3EmptyTitle" BasedOn="{StaticResource M3PanelTitle}">
@@ -88,7 +92,8 @@
     <Style TargetType="Label" x:Key="M3BrowserTitle">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3BrowserTitleFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3BrowserTitleLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
@@ -101,7 +106,8 @@
     <Style TargetType="Label" x:Key="M3AppBarTitle">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3AppBarTitleFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3AppBarTitleLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>
@@ -156,7 +162,8 @@
 
     <Style TargetType="Label" x:Key="M3CardTitle" BasedOn="{StaticResource M3LabelLarge}">
         <Setter Property="FontSize" Value="{StaticResource M3CardTitleFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3CardTitleLineHeight}" />
         <Setter Property="MaxLines" Value="1" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />
@@ -212,7 +219,8 @@
 
     <Style TargetType="Label" x:Key="M3CardSupportingStrong" BasedOn="{StaticResource M3LabelMedium}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3CardSupportingStrongLine" BasedOn="{StaticResource M3CardSupportingStrong}">
@@ -247,7 +255,8 @@
     <Style TargetType="Label" x:Key="M3ChipLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3ChipLabelFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3LabelSmallLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="MaxLines" Value="1" />
@@ -256,7 +265,8 @@
 
     <Style TargetType="Label" x:Key="M3ThumbnailPlaceholder">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />
         <Setter Property="VerticalTextAlignment" Value="Center" />
@@ -271,7 +281,8 @@
     <Style TargetType="Label" x:Key="M3LocalCopyChipLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="FontSize" Value="{StaticResource M3CompactChipLabelFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3LabelSmallLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="MaxLines" Value="1" />
@@ -281,7 +292,8 @@
     <Style TargetType="Label" x:Key="M3ErrorChipLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
         <Setter Property="FontSize" Value="{StaticResource M3CompactChipLabelFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3LabelSmallLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="MaxLines" Value="1" />
@@ -312,7 +324,8 @@
     <Style TargetType="Label" x:Key="M3NavigationSelectedLabel">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
         <Setter Property="FontSize" Value="{StaticResource M3NavigationSelectedLabelFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="LineHeight" Value="{StaticResource M3NavigationSelectedLabelLineHeight}" />
         <Setter Property="CharacterSpacing" Value="0" />
     </Style>

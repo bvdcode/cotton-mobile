@@ -977,7 +977,8 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> authPanelSetters = GetStyleSetters(styles, "M3AuthPanel");
 
             Assert.Equal("{StaticResource M3TitleLarge}", (string?)authTitleStyle.Attribute("BasedOn"));
-            Assert.Equal("Bold", authTitleSetters["FontAttributes"]);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", authTitleSetters["FontFamily"]);
+            Assert.Equal("None", authTitleSetters["FontAttributes"]);
             Assert.Equal("1", authTitleSetters["MaxLines"]);
             Assert.Equal("TailTruncation", authTitleSetters["LineBreakMode"]);
             Assert.Equal("Center", authTitleSetters["VerticalOptions"]);
@@ -986,6 +987,44 @@ namespace Cotton.Mobile.Tests
                 authPanelSetters["BackgroundColor"]);
             Assert.Contains("<Thickness x:Key=\"M3AuthPanelPadding\">20</Thickness>", spacing, StringComparison.Ordinal);
             Assert.DoesNotContain("<Thickness x:Key=\"M3AuthPanelPadding\">16</Thickness>", spacing, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Material_typography_uses_android_medium_weight_instead_of_bold_title_ramp()
+        {
+            XDocument type = LoadResourceDictionary(TypeResourcePath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+
+            Assert.Equal("sans-serif-medium", GetResourceValue(type, "M3FontFamilyMedium"));
+
+            string[] typeStyleKeys =
+            [
+                "M3ScreenMetric",
+                "M3ScreenTitle",
+                "M3PanelTitle",
+                "M3BrowserTitle",
+                "M3AppBarTitle",
+                "M3CardTitle",
+                "M3CardSupportingStrong",
+                "M3ChipLabel",
+                "M3ThumbnailPlaceholder",
+                "M3LocalCopyChipLabel",
+                "M3ErrorChipLabel",
+                "M3NavigationSelectedLabel",
+            ];
+
+            foreach (string styleKey in typeStyleKeys)
+            {
+                IReadOnlyDictionary<string, string> setters = GetStyleSetters(type, styleKey);
+
+                Assert.Equal("{StaticResource M3FontFamilyMedium}", setters["FontFamily"]);
+                Assert.Equal("None", setters["FontAttributes"]);
+            }
+
+            IReadOnlyDictionary<string, string> authTitleSetters = GetStyleSetters(styles, "M3AuthTitle");
+
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", authTitleSetters["FontFamily"]);
+            Assert.Equal("None", authTitleSetters["FontAttributes"]);
         }
 
         [Fact]

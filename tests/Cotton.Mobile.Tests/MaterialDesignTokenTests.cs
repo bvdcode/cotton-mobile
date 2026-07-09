@@ -2227,14 +2227,24 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:MaterialCollectionView.ItemTemplate>", mainPage, StringComparison.Ordinal);
             Assert.Contains("<DataTemplate x:DataType=\"services:CottonFileBrowserEntry\">", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileListEntryRowView Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Detail=\"{Binding Details}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("LocalCopyStatus=\"{Binding LocalCopyStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsLocalCopyVisible=\"{Binding HasLocalCopy}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("OfflineAttentionStatus=\"{Binding OfflineAttentionStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsOfflineAttentionVisible=\"{Binding IsOfflineAttentionVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("public class FileListEntryRowView", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("_grid.SetDynamicResource(StyleProperty, \"M3FileListRowGrid\")", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<double>(\"M3FileListThumbnailColumnWidth\")", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<double>(\"M3FileActionSize\")", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("ApplyStatusChip()", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingChipStyleResourceKey = \"M3LocalCopyChip\"", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingTextStyleResourceKey = \"M3LocalCopyChipLabel\"", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingChipStyleResourceKey = \"M3FileAttentionChip\"", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingTextStyleResourceKey = \"M3ErrorChipLabel\"", fileListEntryRowView, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid Style=\"{StaticResource M3FileListRowGrid}\">", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileListThumbnailColumnWidth}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ColumnDefinition Width=\"{StaticResource M3FileActionSize}\"", mainPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StackedItemsView IsContentVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:StackedItemsView IsVisible=\"{Binding Display.IsFileListViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource=\"{Binding Display.FileEntries}\"", mainPage, StringComparison.Ordinal);
@@ -2887,6 +2897,7 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
+            string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
             string fileListMetadataView = LoadText(FileListMetadataViewPath);
             string fileTileMetadataView = LoadText(FileTileMetadataViewPath);
             string settingsSectionHeaderView = LoadText(SettingsSectionHeaderViewPath);
@@ -2904,6 +2915,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:ChipView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileListMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultTrailingChipStyleResourceKey = \"M3NeutralChip\"", fileListMetadataView, StringComparison.Ordinal);
+            Assert.Contains("TrailingChipStyleResourceKey = \"M3LocalCopyChip\"", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("TrailingChipStyleResourceKey = \"M3FileAttentionChip\"", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultLocalChipStyleResourceKey = \"M3LocalCopyChip\"", fileTileMetadataView, StringComparison.Ordinal);
             Assert.Contains("DefaultLocalChipLabelStyleResourceKey = \"M3LocalCopyChipLabel\"", fileTileMetadataView, StringComparison.Ordinal);
@@ -4298,9 +4311,14 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(0, CountOccurrences(mainPage, "<controls:FileListMetadataView"));
             Assert.Contains("Title=\"{Binding Name}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("Detail=\"{Binding DisplayDetails}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("Detail=\"{Binding Details}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("LocalCopyStatus=\"{Binding LocalCopyStatus}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("OfflineAttentionStatus=\"{Binding OfflineAttentionStatus}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileListMetadataView", fileListEntryRowView, StringComparison.Ordinal);
             Assert.Contains("_metadata.Title = Title ?? string.Empty", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.Detail = Detail ?? string.Empty", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingText = localCopyStatus", fileListEntryRowView, StringComparison.Ordinal);
+            Assert.Contains("_metadata.TrailingText = offlineAttentionStatus", fileListEntryRowView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileTileMetadataView", mainPage, StringComparison.Ordinal);
             Assert.Contains("new FileTileMetadataView", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_metadata.Title = Title ?? string.Empty", fileTileEntryCardView, StringComparison.Ordinal);

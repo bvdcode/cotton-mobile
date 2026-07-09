@@ -21,6 +21,34 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty LocalCopyStatusProperty = BindableProperty.Create(
+            nameof(LocalCopyStatus),
+            typeof(string),
+            typeof(FileListEntryRowView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsLocalCopyVisibleProperty = BindableProperty.Create(
+            nameof(IsLocalCopyVisible),
+            typeof(bool),
+            typeof(FileListEntryRowView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty OfflineAttentionStatusProperty = BindableProperty.Create(
+            nameof(OfflineAttentionStatus),
+            typeof(string),
+            typeof(FileListEntryRowView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsOfflineAttentionVisibleProperty = BindableProperty.Create(
+            nameof(IsOfflineAttentionVisible),
+            typeof(bool),
+            typeof(FileListEntryRowView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ThumbnailSourceProperty = BindableProperty.Create(
             nameof(ThumbnailSource),
             typeof(ImageSource),
@@ -173,6 +201,30 @@ namespace Cotton.Mobile.Controls
             set => SetValue(DetailProperty, value);
         }
 
+        public string LocalCopyStatus
+        {
+            get => (string)GetValue(LocalCopyStatusProperty);
+            set => SetValue(LocalCopyStatusProperty, value);
+        }
+
+        public bool IsLocalCopyVisible
+        {
+            get => (bool)GetValue(IsLocalCopyVisibleProperty);
+            set => SetValue(IsLocalCopyVisibleProperty, value);
+        }
+
+        public string OfflineAttentionStatus
+        {
+            get => (string)GetValue(OfflineAttentionStatusProperty);
+            set => SetValue(OfflineAttentionStatusProperty, value);
+        }
+
+        public bool IsOfflineAttentionVisible
+        {
+            get => (bool)GetValue(IsOfflineAttentionVisibleProperty);
+            set => SetValue(IsOfflineAttentionVisibleProperty, value);
+        }
+
         public ImageSource? ThumbnailSource
         {
             get => (ImageSource?)GetValue(ThumbnailSourceProperty);
@@ -301,6 +353,7 @@ namespace Cotton.Mobile.Controls
 
             _metadata.Title = Title ?? string.Empty;
             _metadata.Detail = Detail ?? string.Empty;
+            ApplyStatusChip();
 
             _touchSurface.Command = BeginSelectionCommand;
             _touchSurface.CommandParameter = CommandParameter;
@@ -312,6 +365,34 @@ namespace Cotton.Mobile.Controls
             _actionButton.IsActionEnabled = IsActionEnabled;
             _actionButton.IsActionVisible = IsActionVisible;
             _actionButton.SemanticDescription = ActionSemanticDescription ?? string.Empty;
+        }
+
+        private void ApplyStatusChip()
+        {
+            string localCopyStatus = LocalCopyStatus ?? string.Empty;
+            string offlineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
+            if (IsOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus))
+            {
+                _metadata.TrailingChipStyleResourceKey = "M3FileAttentionChip";
+                _metadata.TrailingTextStyleResourceKey = "M3ErrorChipLabel";
+                _metadata.TrailingText = offlineAttentionStatus;
+                _metadata.IsTrailingTextVisible = true;
+                return;
+            }
+
+            if (IsLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus))
+            {
+                _metadata.TrailingChipStyleResourceKey = "M3LocalCopyChip";
+                _metadata.TrailingTextStyleResourceKey = "M3LocalCopyChipLabel";
+                _metadata.TrailingText = localCopyStatus;
+                _metadata.IsTrailingTextVisible = true;
+                return;
+            }
+
+            _metadata.TrailingChipStyleResourceKey = "M3NeutralChip";
+            _metadata.TrailingTextStyleResourceKey = "M3ChipLabel";
+            _metadata.TrailingText = string.Empty;
+            _metadata.IsTrailingTextVisible = false;
         }
     }
 }

@@ -174,7 +174,11 @@
                             <controls:MaterialCollectionView.ItemTemplate>
                                 <DataTemplate x:DataType="services:CottonFileBrowserEntry">
                                     <controls:FileListEntryRowView Title="{Binding Name}"
-                                                                   Detail="{Binding DisplayDetails}"
+                                                                   Detail="{Binding Details}"
+                                                                   LocalCopyStatus="{Binding LocalCopyStatus}"
+                                                                   IsLocalCopyVisible="{Binding HasLocalCopy}"
+                                                                   OfflineAttentionStatus="{Binding OfflineAttentionStatus}"
+                                                                   IsOfflineAttentionVisible="{Binding IsOfflineAttentionVisible}"
                                                                    ThumbnailSource="{Binding Thumbnail.Source}"
                                                                    IsPreviewImageVisible="{Binding IsPreviewImageVisible}"
                                                                    IsFolderThumbnailVisible="{Binding IsFolderThumbnailVisible}"

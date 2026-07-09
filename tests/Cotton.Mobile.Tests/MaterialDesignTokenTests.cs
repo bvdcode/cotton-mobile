@@ -271,9 +271,15 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<Color x:Key=\"M3LightAction\">#B8F000</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightActionPressed\">#A4D800</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightOnAction\">#151900</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightActionContainer\">#E7FF9A</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightActionContainerPressed\">#D6F27B</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3LightOnActionContainer\">#151900</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkAction\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkActionPressed\">#B2E600</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkOnAction\">#151900</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkActionContainer\">#2D3D00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkActionContainerPressed\">#384B00</Color>", colors, StringComparison.Ordinal);
+            Assert.Contains("<Color x:Key=\"M3DarkOnActionContainer\">#D8FF60</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3DarkPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimary\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimaryPressed\">#405100</Color>", colors, StringComparison.Ordinal);
@@ -287,6 +293,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Color x:Key=\"M3LightPrimary\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightAction\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightOnAction\">#FFFFFF</Color>", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Color x:Key=\"M3LightActionContainer\">#DDE7B2</Color>", colors, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -347,6 +354,41 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LightPrimary", actionSheetItemSetters["SelectedIconColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightOnPrimaryContainer", navigationSelectedLabelSetters["TextColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimary", selectionMarkSetters["BackgroundColor"], StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Tonal_active_surfaces_use_action_container_roles()
+        {
+            const string actionBinding = "{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}";
+            const string actionContainerBinding = "{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}";
+            const string actionContainerPressedBinding = "{AppThemeBinding Light={StaticResource M3LightActionContainerPressed}, Dark={StaticResource M3DarkActionContainerPressed}}";
+            const string onActionContainerBinding = "{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}";
+
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> selectableSurfaceSelectedSetters =
+                GetStyleDataTriggerSetters(styles, "M3SelectableSurfaceCard", "IsSelected", "True");
+            IReadOnlyDictionary<string, string> fileSelectionOverlaySetters =
+                GetStyleSetters(styles, "M3FileSelectionOverlay");
+            IReadOnlyDictionary<string, string> fileSelectionRowOverlaySetters =
+                GetStyleSetters(styles, "M3FileSelectionRowOverlay");
+            IReadOnlyDictionary<string, string> primaryFileChromeIconButtonSetters =
+                GetStyleSetters(styles, "M3PrimaryFileChromeIconButton");
+
+            Assert.Equal(actionBinding, selectableSurfaceSelectedSetters["Stroke"]);
+            Assert.Equal(actionContainerBinding, selectableSurfaceSelectedSetters["BackgroundColor"]);
+            Assert.Equal(actionBinding, fileSelectionOverlaySetters["Stroke"]);
+            Assert.Equal(actionContainerBinding, fileSelectionRowOverlaySetters["BackgroundColor"]);
+            Assert.Equal(onActionContainerBinding, primaryFileChromeIconButtonSetters["IconColor"]);
+            Assert.Equal(actionContainerBinding, primaryFileChromeIconButtonSetters["ButtonBackgroundColor"]);
+            Assert.Equal(actionContainerPressedBinding, primaryFileChromeIconButtonSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal(actionContainerBinding, primaryFileChromeIconButtonSetters["BorderColor"]);
+
+            Assert.DoesNotContain("M3LightPrimary", selectableSurfaceSelectedSetters["Stroke"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", selectableSurfaceSelectedSetters["BackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", fileSelectionOverlaySetters["Stroke"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", fileSelectionRowOverlaySetters["BackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightOnPrimaryContainer", primaryFileChromeIconButtonSetters["IconColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", primaryFileChromeIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -497,6 +539,7 @@ namespace Cotton.Mobile.Tests
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));
             string toggleSwitch = LoadText(Path.Combine(ControlsDirectoryPath, "ToggleSwitch.cs"));
+            string actionSheetItemView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"));
 
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", filledButton, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", filledButton, StringComparison.Ordinal);
@@ -504,12 +547,14 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", toggleSwitch, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", toggleSwitch, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnAction\", \"M3DarkOnAction\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", actionSheetItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", toggleSwitch, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", toggleSwitch, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", actionSheetItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3Accent\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3AccentPressed\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3OnAccent\")", filledButton, StringComparison.Ordinal);
@@ -4628,6 +4673,27 @@ namespace Cotton.Mobile.Tests
             XElement style = GetStyleByKey(document, styleKey);
 
             return style.Elements()
+                .Where(element => string.Equals(element.Name.LocalName, "Setter", StringComparison.Ordinal))
+                .ToDictionary(
+                    element => (string)element.Attribute("Property")!,
+                    element => (string)element.Attribute("Value")!,
+                    StringComparer.Ordinal);
+        }
+
+        private static IReadOnlyDictionary<string, string> GetStyleDataTriggerSetters(
+            XDocument document,
+            string styleKey,
+            string bindingPath,
+            string triggerValue)
+        {
+            XElement style = GetStyleByKey(document, styleKey);
+            XElement trigger = style.Descendants()
+                .Single(element =>
+                    string.Equals(element.Name.LocalName, "DataTrigger", StringComparison.Ordinal)
+                    && string.Equals((string?)element.Attribute("Binding"), $"{{Binding {bindingPath}}}", StringComparison.Ordinal)
+                    && string.Equals((string?)element.Attribute("Value"), triggerValue, StringComparison.Ordinal));
+
+            return trigger.Elements()
                 .Where(element => string.Equals(element.Name.LocalName, "Setter", StringComparison.Ordinal))
                 .ToDictionary(
                     element => (string)element.Attribute("Property")!,

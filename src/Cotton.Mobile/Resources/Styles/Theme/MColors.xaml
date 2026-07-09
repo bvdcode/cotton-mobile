@@ -11,6 +11,9 @@
     <Color x:Key="M3LightAction">#B8F000</Color>
     <Color x:Key="M3LightActionPressed">#A4D800</Color>
     <Color x:Key="M3LightOnAction">#151900</Color>
+    <Color x:Key="M3LightActionContainer">#E7FF9A</Color>
+    <Color x:Key="M3LightActionContainerPressed">#D6F27B</Color>
+    <Color x:Key="M3LightOnActionContainer">#151900</Color>
     <Color x:Key="M3LightPrimary">#4F6200</Color>
     <Color x:Key="M3LightPrimaryPressed">#405100</Color>
     <Color x:Key="M3LightOnPrimary">#FFFFFF</Color>
@@ -52,6 +55,9 @@
     <Color x:Key="M3DarkAction">#C6FF00</Color>
     <Color x:Key="M3DarkActionPressed">#B2E600</Color>
     <Color x:Key="M3DarkOnAction">#151900</Color>
+    <Color x:Key="M3DarkActionContainer">#2D3D00</Color>
+    <Color x:Key="M3DarkActionContainerPressed">#384B00</Color>
+    <Color x:Key="M3DarkOnActionContainer">#D8FF60</Color>
     <Color x:Key="M3DarkPrimary">#C6FF00</Color>
     <Color x:Key="M3DarkPrimaryPressed">#B2E600</Color>
     <Color x:Key="M3DarkOnPrimary">#151900</Color>

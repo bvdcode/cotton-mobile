@@ -61,11 +61,11 @@
                          Binding="{Binding IsSelected}"
                          Value="True">
                 <Setter Property="Stroke"
-                        Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+                        Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
                 <Setter Property="StrokeThickness"
                         Value="{StaticResource M3StrokeThin}" />
                 <Setter Property="BackgroundColor"
-                        Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+                        Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
             </DataTrigger>
         </Style.Triggers>
     </Style>
@@ -472,7 +472,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -483,7 +483,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionRowOverlay" BasedOn="{StaticResource M3FileSelectionOverlay}">
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileStatusPanel" BasedOn="{StaticResource M3StatusPanel}" />
@@ -1271,10 +1271,10 @@
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3PrimaryFileChromeIconButton" BasedOn="{StaticResource M3FileChromeIconButton}">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
-        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainerPressed}, Dark={StaticResource M3DarkPrimaryContainerPressed}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}" />
+        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
+        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainerPressed}, Dark={StaticResource M3DarkActionContainerPressed}}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
     </Style>
 
     <Style TargetType="controls:IconButton" x:Key="M3EmptyStateActionIconButton" BasedOn="{StaticResource M3PrimaryFileChromeIconButton}">

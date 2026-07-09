@@ -267,7 +267,6 @@ namespace Cotton.Mobile.Tests
         {
             string colors = LoadText(ColorsResourcePath);
 
-            Assert.Contains("<Color x:Key=\"M3Accent\">#C6FF00</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightAction\">#B8F000</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightActionPressed\">#A4D800</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightOnAction\">#151900</Color>", colors, StringComparison.Ordinal);
@@ -284,6 +283,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<Color x:Key=\"M3LightPrimary\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightPrimaryPressed\">#405100</Color>", colors, StringComparison.Ordinal);
             Assert.Contains("<Color x:Key=\"M3LightOnPrimary\">#FFFFFF</Color>", colors, StringComparison.Ordinal);
+            Assert.DoesNotContain("<Color x:Key=\"M3Accent\">", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3Primary\">", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3OnPrimary\">", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("M3PrimaryBrush", colors, StringComparison.Ordinal);
@@ -294,6 +294,31 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<Color x:Key=\"M3LightAction\">#4F6200</Color>", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightOnAction\">#FFFFFF</Color>", colors, StringComparison.Ordinal);
             Assert.DoesNotContain("<Color x:Key=\"M3LightActionContainer\">#DDE7B2</Color>", colors, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Material_resources_do_not_use_generic_accent_aliases()
+        {
+            string repositoryRoot = FindRepositoryRoot(StylesResourcePath);
+            string sourceRoot = Path.Combine(repositoryRoot, "src", "Cotton.Mobile");
+            string[] sourceFiles = Directory.GetFiles(sourceRoot, "*.*", SearchOption.AllDirectories)
+                .Where(path =>
+                    !path.Contains($"{Path.DirectorySeparatorChar}bin{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && !path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}", StringComparison.Ordinal)
+                    && (path.EndsWith(".xaml", StringComparison.Ordinal)
+                        || path.EndsWith(".cs", StringComparison.Ordinal)
+                        || path.EndsWith(".xml", StringComparison.Ordinal)))
+                .OrderBy(path => path, StringComparer.Ordinal)
+                .ToArray();
+
+            foreach (string filePath in sourceFiles)
+            {
+                string source = File.ReadAllText(filePath);
+
+                Assert.DoesNotContain("M3Accent", source, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3PrimaryBrush", source, StringComparison.Ordinal);
+                Assert.DoesNotContain("M3OnAccent", source, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

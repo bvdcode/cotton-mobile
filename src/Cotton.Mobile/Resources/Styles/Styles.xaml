@@ -1378,7 +1378,7 @@
         <Setter Property="ItemCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
-        <Setter Property="TextFontAttributes" Value="Bold" />
+        <Setter Property="TextFontAttributes" Value="None" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />

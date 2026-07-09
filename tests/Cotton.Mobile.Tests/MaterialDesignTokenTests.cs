@@ -2000,6 +2000,7 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string navigationBarItem = LoadText(Path.Combine(ControlsDirectoryPath, "NavigationBarItem.cs"));
             string navigationBarView = LoadText(NavigationBarViewPath);
+            XDocument spacing = LoadResourceDictionary(SpacingResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> navigationItemSetters =
                 GetStyleSetters(styles, "M3NavigationBarItem");
@@ -2036,7 +2037,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3NavigationBarGrid\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("DefaultSurfaceStyleResourceKey = \"M3NavigationBarSurface\"", navigationBarView, StringComparison.Ordinal);
             Assert.Contains("public IList<IView> Items => _grid.Children", navigationBarView, StringComparison.Ordinal);
-            Assert.Equal("Bold", navigationItemSetters["TextFontAttributes"]);
+            Assert.Equal(24, GetDoubleResource(spacing, "M3NavigationBarIconSize"));
+            Assert.Equal(12, GetDoubleResource(spacing, "M3NavigationBarLabelFontSize"));
+            Assert.True(GetDoubleResource(spacing, "M3NavigationBarHeight") >= 64);
+            Assert.Contains("<Thickness x:Key=\"M3NavigationBarPadding\">8,6</Thickness>", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Contains("<Thickness x:Key=\"M3NavigationBarItemPadding\">8,6</Thickness>", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Equal("None", navigationItemSetters["TextFontAttributes"]);
             Assert.Contains("TextFontAttributesProperty", navigationBarItem, StringComparison.Ordinal);
             Assert.Contains("_label.FontAttributes = TextFontAttributes", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", navigationBarItem, StringComparison.Ordinal);

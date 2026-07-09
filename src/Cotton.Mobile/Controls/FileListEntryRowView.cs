@@ -121,6 +121,7 @@ namespace Cotton.Mobile.Controls
         private readonly SelectionOverlayView _selectionOverlay;
         private readonly FileThumbnailView _thumbnail;
         private readonly TouchSurfaceView _touchSurface;
+        private bool _isVisualStateUpdatePending;
 
         public FileListEntryRowView()
         {
@@ -259,7 +260,29 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileListEntryRowView view = (FileListEntryRowView)bindable;
-            view.UpdateVisualState();
+            view.ScheduleVisualStateUpdate();
+        }
+
+        private void ScheduleVisualStateUpdate()
+        {
+            if (_isVisualStateUpdatePending)
+            {
+                return;
+            }
+
+            _isVisualStateUpdatePending = true;
+            if (Dispatcher.Dispatch(ApplyPendingVisualStateUpdate))
+            {
+                return;
+            }
+
+            ApplyPendingVisualStateUpdate();
+        }
+
+        private void ApplyPendingVisualStateUpdate()
+        {
+            _isVisualStateUpdatePending = false;
+            UpdateVisualState();
         }
 
         private void UpdateVisualState()

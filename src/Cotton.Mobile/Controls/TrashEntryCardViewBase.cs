@@ -201,6 +201,7 @@ namespace Cotton.Mobile.Controls
         }
 
         private bool _hasAppliedEntryActionsVisibility;
+        private bool _isVisualStateUpdatePending;
 
         protected abstract void UpdateVisualState();
 
@@ -277,7 +278,29 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             TrashEntryCardViewBase view = (TrashEntryCardViewBase)bindable;
-            view.UpdateVisualState();
+            view.ScheduleVisualStateUpdate();
+        }
+
+        private void ScheduleVisualStateUpdate()
+        {
+            if (_isVisualStateUpdatePending)
+            {
+                return;
+            }
+
+            _isVisualStateUpdatePending = true;
+            if (Dispatcher.Dispatch(ApplyPendingVisualStateUpdate))
+            {
+                return;
+            }
+
+            ApplyPendingVisualStateUpdate();
+        }
+
+        private void ApplyPendingVisualStateUpdate()
+        {
+            _isVisualStateUpdatePending = false;
+            UpdateVisualState();
         }
     }
 }

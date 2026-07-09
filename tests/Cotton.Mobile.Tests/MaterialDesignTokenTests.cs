@@ -2480,6 +2480,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressInDuration\")", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionPressOutDuration\")", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("RequestedThemeChanged += OnRequestedThemeChanged", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("RequestedThemeChanged -= OnRequestedThemeChanged", longPressBehavior, StringComparison.Ordinal);
+            Assert.Contains("private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)", longPressBehavior, StringComparison.Ordinal);
             Assert.Contains("public static void UpdateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("public static void AnimateBackgroundColor(", materialMotion, StringComparison.Ordinal);
             Assert.Contains("Animation animation = new(", materialMotion, StringComparison.Ordinal);
@@ -4182,6 +4185,29 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("SemanticProperties.Description=\"{Binding Name, StringFormat='Actions for {0}'}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileActionIconButton}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("_actionButton.IsVisible = IsActionVisible", fileEntryActionButtonView, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void File_browser_hot_entry_rows_coalesce_visual_state_updates()
+        {
+            string fileListEntryRowView = LoadText(FileListEntryRowViewPath);
+            string fileTileEntryCardView = LoadText(FileTileEntryCardViewPath);
+            string trashEntryCardViewBase = LoadText(TrashEntryCardViewBasePath);
+
+            foreach (string entryView in new[]
+            {
+                fileListEntryRowView,
+                fileTileEntryCardView,
+                trashEntryCardViewBase,
+            })
+            {
+                Assert.Contains("private bool _isVisualStateUpdatePending;", entryView, StringComparison.Ordinal);
+                Assert.Contains("view.ScheduleVisualStateUpdate();", entryView, StringComparison.Ordinal);
+                Assert.Contains("private void ScheduleVisualStateUpdate()", entryView, StringComparison.Ordinal);
+                Assert.Contains("Dispatcher.Dispatch(ApplyPendingVisualStateUpdate)", entryView, StringComparison.Ordinal);
+                Assert.Contains("private void ApplyPendingVisualStateUpdate()", entryView, StringComparison.Ordinal);
+                Assert.DoesNotContain("view.UpdateVisualState();", entryView, StringComparison.Ordinal);
+            }
         }
 
         [Fact]

@@ -45,6 +45,7 @@ namespace Cotton.Mobile.Behaviors
             propertyChanged: OnBackgroundColorChanged);
 
         private VisualElement? _visualElement;
+        private Application? _application;
         private bool _isPressed;
 
 #if ANDROID
@@ -96,6 +97,12 @@ namespace Cotton.Mobile.Behaviors
         {
             base.OnAttachedTo(bindable);
             _visualElement = bindable;
+            _application = Application.Current;
+            if (_application is not null)
+            {
+                _application.RequestedThemeChanged += OnRequestedThemeChanged;
+            }
+
             ApplyCurrentBackgroundColor(false);
             bindable.HandlerChanged += OnHandlerChanged;
             AttachPlatformLongPress(bindable);
@@ -104,6 +111,12 @@ namespace Cotton.Mobile.Behaviors
         protected override void OnDetachingFrom(VisualElement bindable)
         {
             ApplyRestingBackgroundColor(false);
+            if (_application is not null)
+            {
+                _application.RequestedThemeChanged -= OnRequestedThemeChanged;
+                _application = null;
+            }
+
             _visualElement = null;
             bindable.HandlerChanged -= OnHandlerChanged;
             DetachPlatformLongPress();
@@ -114,6 +127,11 @@ namespace Cotton.Mobile.Behaviors
         {
             LongPressBehavior behavior = (LongPressBehavior)bindable;
             behavior.ApplyCurrentBackgroundColor(false);
+        }
+
+        private void OnRequestedThemeChanged(object? sender, AppThemeChangedEventArgs e)
+        {
+            ApplyCurrentBackgroundColor(false);
         }
 
         private void OnHandlerChanged(object? sender, EventArgs e)

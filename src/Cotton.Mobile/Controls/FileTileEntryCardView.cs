@@ -180,6 +180,7 @@ namespace Cotton.Mobile.Controls
         private readonly Grid _slotGrid;
         private readonly FileThumbnailView _thumbnail;
         private readonly TouchSurfaceView _touchSurface;
+        private bool _isVisualStateUpdatePending;
 
         public FileTileEntryCardView()
         {
@@ -385,7 +386,29 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             FileTileEntryCardView view = (FileTileEntryCardView)bindable;
-            view.UpdateVisualState();
+            view.ScheduleVisualStateUpdate();
+        }
+
+        private void ScheduleVisualStateUpdate()
+        {
+            if (_isVisualStateUpdatePending)
+            {
+                return;
+            }
+
+            _isVisualStateUpdatePending = true;
+            if (Dispatcher.Dispatch(ApplyPendingVisualStateUpdate))
+            {
+                return;
+            }
+
+            ApplyPendingVisualStateUpdate();
+        }
+
+        private void ApplyPendingVisualStateUpdate()
+        {
+            _isVisualStateUpdatePending = false;
+            UpdateVisualState();
         }
 
         private void UpdateVisualState()

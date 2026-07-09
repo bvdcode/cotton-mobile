@@ -2638,6 +2638,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("MaterialResources.Get<int>(\"M3MotionContentEnterDuration\")", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.Contains("Opacity = MaterialMotion.Value(\"M3MotionHiddenOpacity\")", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("ApplyRestingOpacityForCurrentVisibility", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("Opacity = IsVisible && IsContentVisible", materialAnimatedContentView, StringComparison.Ordinal);
+            Assert.Contains("? MaterialMotion.Value(\"M3MotionVisibleOpacity\")", materialAnimatedContentView, StringComparison.Ordinal);
             Assert.DoesNotContain("<FlexLayout IsVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("BindableLayout.ItemsSource", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileTileSlotGrid}\"", mainPage, StringComparison.Ordinal);

@@ -373,6 +373,8 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(styles, "M3FileSelectionRowOverlay");
             IReadOnlyDictionary<string, string> primaryFileChromeIconButtonSetters =
                 GetStyleSetters(styles, "M3PrimaryFileChromeIconButton");
+            IReadOnlyDictionary<string, string> viewerPlayIconButtonSetters =
+                GetStyleSetters(styles, "M3ViewerPlayIconButton");
 
             Assert.Equal(actionBinding, selectableSurfaceSelectedSetters["Stroke"]);
             Assert.Equal(actionContainerBinding, selectableSurfaceSelectedSetters["BackgroundColor"]);
@@ -382,6 +384,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(actionContainerBinding, primaryFileChromeIconButtonSetters["ButtonBackgroundColor"]);
             Assert.Equal(actionContainerPressedBinding, primaryFileChromeIconButtonSetters["PressedButtonBackgroundColor"]);
             Assert.Equal(actionContainerBinding, primaryFileChromeIconButtonSetters["BorderColor"]);
+            Assert.Equal("{StaticResource M3DarkOnAction}", viewerPlayIconButtonSetters["IconColor"]);
+            Assert.Equal("{StaticResource M3DarkAction}", viewerPlayIconButtonSetters["ButtonBackgroundColor"]);
+            Assert.Equal("{StaticResource M3DarkActionPressed}", viewerPlayIconButtonSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal("{StaticResource M3DarkAction}", viewerPlayIconButtonSetters["BorderColor"]);
 
             Assert.DoesNotContain("M3LightPrimary", selectableSurfaceSelectedSetters["Stroke"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimaryContainer", selectableSurfaceSelectedSetters["BackgroundColor"], StringComparison.Ordinal);
@@ -389,6 +395,8 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3LightPrimaryContainer", fileSelectionRowOverlaySetters["BackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightOnPrimaryContainer", primaryFileChromeIconButtonSetters["IconColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3LightPrimaryContainer", primaryFileChromeIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimary", viewerPlayIconButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3DarkPrimaryPressed", viewerPlayIconButtonSetters["PressedButtonBackgroundColor"], StringComparison.Ordinal);
         }
 
         [Fact]
@@ -538,12 +546,16 @@ namespace Cotton.Mobile.Tests
         public void Control_color_fallbacks_use_theme_roles_not_generic_aliases()
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));
+            string initialsButton = LoadText(Path.Combine(ControlsDirectoryPath, "InitialsButton.cs"));
             string toggleSwitch = LoadText(Path.Combine(ControlsDirectoryPath, "ToggleSwitch.cs"));
             string actionSheetItemView = LoadText(Path.Combine(ControlsDirectoryPath, "ActionSheetItemView.cs"));
 
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", filledButton, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", filledButton, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnAction\", \"M3DarkOnAction\")", filledButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionContainer\", \"M3DarkActionContainer\")", initialsButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionContainerPressed\", \"M3DarkActionContainerPressed\")", initialsButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnActionContainer\", \"M3DarkOnActionContainer\")", initialsButton, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", toggleSwitch, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", toggleSwitch, StringComparison.Ordinal);
             Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnAction\", \"M3DarkOnAction\")", toggleSwitch, StringComparison.Ordinal);
@@ -551,6 +563,9 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", filledButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", initialsButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryContainer\", \"M3DarkPrimaryContainer\")", initialsButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimaryContainer\", \"M3DarkOnPrimaryContainer\")", initialsButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", toggleSwitch, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", toggleSwitch, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", toggleSwitch, StringComparison.Ordinal);
@@ -1692,8 +1707,17 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
             Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
             Assert.Equal(
-                "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
+                "{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}",
                 accountButtonSetters["TextColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}",
+                accountButtonSetters["ButtonBackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightActionContainerPressed}, Dark={StaticResource M3DarkActionContainerPressed}}",
+                accountButtonSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal(
+                "{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}",
+                accountButtonSetters["BorderColor"]);
             Assert.Equal("{StaticResource M3FontFamilyMedium}", accountButtonSetters["TextFontFamily"]);
             Assert.Equal("None", accountButtonSetters["TextFontAttributes"]);
             Assert.Contains("TextFontFamilyProperty", initialsButton, StringComparison.Ordinal);
@@ -1701,6 +1725,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_label.FontAttributes = TextFontAttributes", initialsButton, StringComparison.Ordinal);
             Assert.Contains("_label.FontFamily = TextFontFamily", initialsButton, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", initialsButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimary", accountButtonSetters["TextColor"], StringComparison.Ordinal);
+            Assert.DoesNotContain("M3LightPrimaryContainer", accountButtonSetters["ButtonBackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionClusterView ClusterStyleResourceKey=\"M3FileBrowserActionCluster\"", mainPage, StringComparison.Ordinal);

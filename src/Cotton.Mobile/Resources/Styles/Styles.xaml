@@ -1127,7 +1127,8 @@
         <Setter Property="DisabledBorderColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="BorderWidth" Value="{StaticResource M3StrokeNone}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="FontAttributes" Value="None" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3FilledButtonPadding}" />
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
@@ -1327,7 +1328,8 @@
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
-        <Setter Property="TextFontAttributes" Value="Bold" />
+        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
+        <Setter Property="TextFontAttributes" Value="None" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
@@ -1379,6 +1381,7 @@
         <Setter Property="ItemCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
         <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
+        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
         <Setter Property="TextFontAttributes" Value="None" />
     </Style>
 

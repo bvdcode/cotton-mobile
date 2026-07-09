@@ -118,6 +118,13 @@ namespace Cotton.Mobile.Controls
             FontAttributes.None,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty TextFontFamilyProperty = BindableProperty.Create(
+            nameof(TextFontFamily),
+            typeof(string),
+            typeof(NavigationBarItem),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
             nameof(Command),
             typeof(ICommand),
@@ -271,6 +278,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TextFontAttributesProperty, value);
         }
 
+        public string TextFontFamily
+        {
+            get => (string)GetValue(TextFontFamilyProperty);
+            set => SetValue(TextFontFamilyProperty, value);
+        }
+
         public ICommand? Command
         {
             get => (ICommand?)GetValue(CommandProperty);
@@ -412,6 +425,7 @@ namespace Cotton.Mobile.Controls
                 shouldAnimate);
             _label.FontSize = TextFontSize;
             _label.FontAttributes = TextFontAttributes;
+            _label.FontFamily = TextFontFamily;
             _hasAppliedVisualState = true;
         }
 

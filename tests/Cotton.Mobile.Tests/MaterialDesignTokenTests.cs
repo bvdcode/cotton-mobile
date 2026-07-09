@@ -517,8 +517,11 @@ namespace Cotton.Mobile.Tests
             IReadOnlyDictionary<string, string> filledButtonSetters =
                 GetStyleSetters(styles, "M3FilledButton");
 
-            Assert.Equal("Bold", filledButtonSetters["FontAttributes"]);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", filledButtonSetters["FontFamily"]);
+            Assert.Equal("None", filledButtonSetters["FontAttributes"]);
+            Assert.Contains("FontFamilyProperty", filledButton, StringComparison.Ordinal);
             Assert.Contains("_label.FontAttributes = FontAttributes", filledButton, StringComparison.Ordinal);
+            Assert.Contains("_label.FontFamily = FontFamily", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes.Bold", filledButton, StringComparison.Ordinal);
         }
 
@@ -1549,9 +1552,12 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}",
                 accountButtonSetters["TextColor"]);
-            Assert.Equal("Bold", accountButtonSetters["TextFontAttributes"]);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", accountButtonSetters["TextFontFamily"]);
+            Assert.Equal("None", accountButtonSetters["TextFontAttributes"]);
+            Assert.Contains("TextFontFamilyProperty", initialsButton, StringComparison.Ordinal);
             Assert.Contains("TextFontAttributesProperty", initialsButton, StringComparison.Ordinal);
             Assert.Contains("_label.FontAttributes = TextFontAttributes", initialsButton, StringComparison.Ordinal);
+            Assert.Contains("_label.FontFamily = TextFontFamily", initialsButton, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", initialsButton, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid ColumnDefinitions=\"Auto,*,Auto\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FileBrowserTopBar}\"", mainPage, StringComparison.Ordinal);
@@ -2081,9 +2087,12 @@ namespace Cotton.Mobile.Tests
             Assert.True(GetDoubleResource(spacing, "M3NavigationBarHeight") >= 64);
             Assert.Contains("<Thickness x:Key=\"M3NavigationBarPadding\">8,6</Thickness>", LoadText(SpacingResourcePath), StringComparison.Ordinal);
             Assert.Contains("<Thickness x:Key=\"M3NavigationBarItemPadding\">8,6</Thickness>", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", navigationItemSetters["TextFontFamily"]);
             Assert.Equal("None", navigationItemSetters["TextFontAttributes"]);
+            Assert.Contains("TextFontFamilyProperty", navigationBarItem, StringComparison.Ordinal);
             Assert.Contains("TextFontAttributesProperty", navigationBarItem, StringComparison.Ordinal);
             Assert.Contains("_label.FontAttributes = TextFontAttributes", navigationBarItem, StringComparison.Ordinal);
+            Assert.Contains("_label.FontFamily = TextFontFamily", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("FontAttributes = FontAttributes.Bold", navigationBarItem, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);

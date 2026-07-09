@@ -97,6 +97,13 @@ namespace Cotton.Mobile.Controls
             FontAttributes.None,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty FontFamilyProperty = BindableProperty.Create(
+            nameof(FontFamily),
+            typeof(string),
+            typeof(FilledButton),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
             nameof(ContentPadding),
             typeof(Thickness),
@@ -203,6 +210,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(FontAttributesProperty, value);
         }
 
+        public string FontFamily
+        {
+            get => (string)GetValue(FontFamilyProperty);
+            set => SetValue(FontFamilyProperty, value);
+        }
+
         public Thickness ContentPadding
         {
             get => (Thickness)GetValue(ContentPaddingProperty);
@@ -287,6 +300,7 @@ namespace Cotton.Mobile.Controls
                 shouldAnimate);
             _label.FontSize = TextFontSize;
             _label.FontAttributes = FontAttributes;
+            _label.FontFamily = FontFamily;
             _hasAppliedVisualState = true;
         }
 

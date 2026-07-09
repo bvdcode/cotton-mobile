@@ -75,6 +75,13 @@ namespace Cotton.Mobile.Controls
             FontAttributes.None,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty TextFontFamilyProperty = BindableProperty.Create(
+            nameof(TextFontFamily),
+            typeof(string),
+            typeof(InitialsButton),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ButtonCornerRadiusProperty = BindableProperty.Create(
             nameof(ButtonCornerRadius),
             typeof(double),
@@ -169,6 +176,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (FontAttributes)GetValue(TextFontAttributesProperty);
             set => SetValue(TextFontAttributesProperty, value);
+        }
+
+        public string TextFontFamily
+        {
+            get => (string)GetValue(TextFontFamilyProperty);
+            set => SetValue(TextFontFamilyProperty, value);
         }
 
         public double ButtonCornerRadius
@@ -266,6 +279,7 @@ namespace Cotton.Mobile.Controls
                 shouldAnimate);
             _label.FontSize = TextFontSize;
             _label.FontAttributes = TextFontAttributes;
+            _label.FontFamily = TextFontFamily;
             _hasAppliedVisualState = true;
         }
 

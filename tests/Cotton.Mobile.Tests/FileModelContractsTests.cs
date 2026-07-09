@@ -182,15 +182,21 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Thumbnail_snapshots_expose_stable_display_flags()
         {
+            CottonFileThumbnailSnapshot shortPlaceholder = CottonFileThumbnailSnapshot.Placeholder("JS", "cache-key-short");
             CottonFileThumbnailSnapshot placeholder = CottonFileThumbnailSnapshot.Placeholder("PDF", "cache-key");
+            CottonFileThumbnailSnapshot fourCharacterPlaceholder = CottonFileThumbnailSnapshot.Placeholder("DOCX", "cache-key-docx");
+            CottonFileThumbnailSnapshot longPlaceholder = CottonFileThumbnailSnapshot.Placeholder("ARCHIVE", "cache-key-archive");
             CottonFileThumbnailSnapshot loading = CottonFileThumbnailSnapshot.Loading("IMG", "cache-key");
             CottonFileThumbnailSnapshot ready = CottonFileThumbnailSnapshot.Ready("IMG", "file:///tmp/preview.webp", "cache-key");
             CottonFileThumbnailSnapshot failed = CottonFileThumbnailSnapshot.Failed("TXT", "cache-key");
 
+            Assert.Equal(28d, shortPlaceholder.PlaceholderFontSize);
             Assert.True(placeholder.IsPlaceholderVisible);
             Assert.False(placeholder.HasImage);
             Assert.False(placeholder.IsLoading);
-            Assert.Equal(10d, placeholder.PlaceholderFontSize);
+            Assert.Equal(14d, placeholder.PlaceholderFontSize);
+            Assert.Equal(12d, fourCharacterPlaceholder.PlaceholderFontSize);
+            Assert.Equal(11d, longPlaceholder.PlaceholderFontSize);
 
             Assert.True(loading.IsLoading);
             Assert.False(loading.IsPlaceholderVisible);

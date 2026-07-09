@@ -2065,6 +2065,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}",
                 thumbnailPlaceholderSetters["TextColor"]);
+            Assert.Equal("1", thumbnailPlaceholderSetters["MaxLines"]);
+            Assert.Equal("TailTruncation", thumbnailPlaceholderSetters["LineBreakMode"]);
             Assert.Contains("SurfaceStyleResourceKey = \"M3FilePreviewSurface\"", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("SelectionMarkStyleResourceKey = \"M3FileTileSelectionMark\"", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("FolderIconSize=\"{Binding Source={x:Reference RootPage}, Path=FileTileFolderIconSize}\"", mainPage, StringComparison.Ordinal);

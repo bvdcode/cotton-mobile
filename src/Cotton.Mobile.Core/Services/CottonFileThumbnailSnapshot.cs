@@ -5,6 +5,11 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileThumbnailSnapshot
     {
+        private const double ShortPlaceholderFontSize = 28d;
+        private const double ThreeCharacterPlaceholderFontSize = 14d;
+        private const double FourCharacterPlaceholderFontSize = 12d;
+        private const double LongPlaceholderFontSize = 11d;
+
         private CottonFileThumbnailSnapshot(
             CottonFileThumbnailState state,
             string placeholderText,
@@ -32,7 +37,13 @@ namespace Cotton.Mobile.Services
 
         public string? Source { get; }
 
-        public double PlaceholderFontSize => PlaceholderText.Length <= 2 ? 28d : 10d;
+        public double PlaceholderFontSize => PlaceholderText.Length switch
+        {
+            <= 2 => ShortPlaceholderFontSize,
+            3 => ThreeCharacterPlaceholderFontSize,
+            4 => FourCharacterPlaceholderFontSize,
+            _ => LongPlaceholderFontSize,
+        };
 
         public bool IsLoading => State == CottonFileThumbnailState.Loading;
 

@@ -600,6 +600,7 @@ namespace Cotton.Mobile.Controls
                 element.IsVisible = true;
             }
 
+            element.InputTransparent = !isElementVisible;
             MaterialMotion.UpdateDouble(
                 element,
                 element.Opacity,
@@ -617,10 +618,12 @@ namespace Cotton.Mobile.Controls
             if (IsNavigateUpVisible)
             {
                 _upButtonHost.IsVisible = true;
+                _upButtonHost.InputTransparent = false;
                 return;
             }
 
             _upButtonHost.IsVisible = false;
+            _upButtonHost.InputTransparent = true;
         }
 
         private void CompletePathTextVisibility()
@@ -628,10 +631,12 @@ namespace Cotton.Mobile.Controls
             if (IsPathTextActuallyVisible())
             {
                 _pathText.IsVisible = true;
+                _pathText.InputTransparent = false;
                 return;
             }
 
             _pathText.IsVisible = false;
+            _pathText.InputTransparent = true;
         }
 
         private void CompleteStatusTextVisibility()
@@ -639,10 +644,12 @@ namespace Cotton.Mobile.Controls
             if (IsStatusTextActuallyVisible())
             {
                 _statusText.IsVisible = true;
+                _statusText.InputTransparent = false;
                 return;
             }
 
             _statusText.IsVisible = false;
+            _statusText.InputTransparent = true;
         }
 
         private bool IsPathTextActuallyVisible()

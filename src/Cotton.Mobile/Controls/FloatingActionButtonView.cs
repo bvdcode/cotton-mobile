@@ -103,7 +103,8 @@ namespace Cotton.Mobile.Controls
         {
             base.OnPropertyChanged(propertyName);
 
-            if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
+            if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal)
+                || string.Equals(propertyName, nameof(IsVisible), StringComparison.Ordinal))
             {
                 UpdateVisualState();
             }
@@ -133,6 +134,7 @@ namespace Cotton.Mobile.Controls
             _button.CommandParameter = CommandParameter;
             _button.IsEnabled = IsEnabled;
             SemanticProperties.SetDescription(_button, SemanticDescription ?? string.Empty);
+            UpdateInputTransparency();
         }
 
         private void UpdateActionVisibility(bool animateActionVisibility)
@@ -149,6 +151,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            UpdateInputTransparency();
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -164,6 +167,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteActionVisibility()
         {
             IsVisible = IsActionVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsActionVisible || !IsEnabled || Command is null;
         }
     }
 }

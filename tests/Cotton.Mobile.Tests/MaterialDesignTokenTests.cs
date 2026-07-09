@@ -851,6 +851,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompleteStateVisibility", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("CompleteElementVisibility", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("CompleteBusyState", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !isStateVisible", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("element.InputTransparent = !isElementVisible", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("element.InputTransparent = true", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.DoesNotContain("_loadingIndicator.IsVisible = IsBusy", emptyStateView, StringComparison.Ordinal);
             Assert.DoesNotContain("_body.IsVisible = IsBodyVisible", emptyStateView, StringComparison.Ordinal);
@@ -1455,6 +1458,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("CompletePathTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("CompleteStatusTextVisibility", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionButtonVisibility", actionClusterView, StringComparison.Ordinal);
+            Assert.Contains("element.InputTransparent = !isElementVisible", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_upButtonHost.InputTransparent = true", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_pathText.InputTransparent = true", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_statusText.InputTransparent = true", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
             Assert.Equal("{StaticResource Space8}", actionsContainerSetters["Spacing"]);
             Assert.Equal("{StaticResource Space4}", actionClusterSetters["Spacing"]);
@@ -3790,6 +3797,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_button.IsEnabled = IsEnabled", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("CompleteActionVisibility", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("UpdateInputTransparency", floatingActionButtonView, StringComparison.Ordinal);
+            Assert.Contains("InputTransparent = !IsVisible || !IsActionVisible || !IsEnabled || Command is null", floatingActionButtonView, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("IsVisible=\"{Binding Display.IsFileAddButtonVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3FloatingActionIconButton}\"", mainPage, StringComparison.Ordinal);

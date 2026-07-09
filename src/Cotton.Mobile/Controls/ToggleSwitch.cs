@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightAction", "M3DarkAction"));
 
         public static readonly BindableProperty TrackOffColorProperty = BindableProperty.Create(
             nameof(TrackOffColor),
@@ -40,7 +40,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimaryPressed", "M3DarkPrimaryPressed"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightActionPressed", "M3DarkActionPressed"));
 
         public static readonly BindableProperty TrackOffPressedColorProperty = BindableProperty.Create(
             nameof(TrackOffPressedColor),
@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightAction", "M3DarkAction"));
 
         public static readonly BindableProperty TrackOffBorderColorProperty = BindableProperty.Create(
             nameof(TrackOffBorderColor),
@@ -82,7 +82,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ToggleSwitch),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnPrimary", "M3DarkOnPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnAction", "M3DarkOnAction"));
 
         public static readonly BindableProperty ThumbOffColorProperty = BindableProperty.Create(
             nameof(ThumbOffColor),

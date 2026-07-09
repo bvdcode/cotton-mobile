@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnPrimary", "M3DarkOnPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightOnAction", "M3DarkOnAction"));
 
         public static readonly BindableProperty DisabledTextColorProperty = BindableProperty.Create(
             nameof(DisabledTextColor),
@@ -39,14 +39,14 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightAction", "M3DarkAction"));
 
         public static readonly BindableProperty PressedButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(PressedButtonBackgroundColor),
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimaryPressed", "M3DarkPrimaryPressed"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightActionPressed", "M3DarkActionPressed"));
 
         public static readonly BindableProperty DisabledButtonBackgroundColorProperty = BindableProperty.Create(
             nameof(DisabledButtonBackgroundColor),
@@ -60,7 +60,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(FilledButton),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkPrimary"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightAction", "M3DarkAction"));
 
         public static readonly BindableProperty DisabledBorderColorProperty = BindableProperty.Create(
             nameof(DisabledBorderColor),

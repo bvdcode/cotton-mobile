@@ -136,11 +136,19 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Material_switch_style_uses_shared_touch_target()
         {
+            const string actionBinding = "{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}";
+            const string actionPressedBinding = "{AppThemeBinding Light={StaticResource M3LightActionPressed}, Dark={StaticResource M3DarkActionPressed}}";
+            const string onActionBinding = "{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}";
+
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
 
             IReadOnlyDictionary<string, string> switchSetters = GetStyleSetters(styles, "M3Switch");
 
             Assert.Equal("{StaticResource TouchTarget}", switchSetters["TouchTargetSize"]);
+            Assert.Equal(actionBinding, switchSetters["TrackOnColor"]);
+            Assert.Equal(actionPressedBinding, switchSetters["TrackOnPressedColor"]);
+            Assert.Equal(actionBinding, switchSetters["TrackOnBorderColor"]);
+            Assert.Equal(onActionBinding, switchSetters["ThumbOnColor"]);
         }
 
         [Fact]
@@ -462,17 +470,23 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Control_color_fallbacks_use_theme_primary_roles_not_generic_aliases()
+        public void Control_color_fallbacks_use_theme_roles_not_generic_aliases()
         {
             string filledButton = LoadText(Path.Combine(ControlsDirectoryPath, "FilledButton.cs"));
             string toggleSwitch = LoadText(Path.Combine(ControlsDirectoryPath, "ToggleSwitch.cs"));
 
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", filledButton, StringComparison.Ordinal);
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", filledButton, StringComparison.Ordinal);
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", filledButton, StringComparison.Ordinal);
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", toggleSwitch, StringComparison.Ordinal);
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", toggleSwitch, StringComparison.Ordinal);
-            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", filledButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", filledButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnAction\", \"M3DarkOnAction\")", filledButton, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightAction\", \"M3DarkAction\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightActionPressed\", \"M3DarkActionPressed\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.Contains("MaterialResources.GetThemeColor(\"M3LightOnAction\", \"M3DarkOnAction\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", filledButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", filledButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", filledButton, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimary\", \"M3DarkPrimary\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightPrimaryPressed\", \"M3DarkPrimaryPressed\")", toggleSwitch, StringComparison.Ordinal);
+            Assert.DoesNotContain("MaterialResources.GetThemeColor(\"M3LightOnPrimary\", \"M3DarkOnPrimary\")", toggleSwitch, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3Accent\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3AccentPressed\")", filledButton, StringComparison.Ordinal);
             Assert.DoesNotContain("MaterialResources.Get<Color>(\"M3OnAccent\")", filledButton, StringComparison.Ordinal);

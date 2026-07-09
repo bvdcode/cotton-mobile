@@ -4455,7 +4455,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsSupportingTextMultiline=\"True\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("SupportingTextStyleResourceKey=\"M3CardTitle\"", fileVersionHistoryPage, StringComparison.Ordinal);
             Assert.Contains("DetailTextStyleResourceKey=\"M3ScreenHeaderSupportingMultiline\"", fileVersionHistoryPage, StringComparison.Ordinal);
-            Assert.Contains("TitleStyleResourceKey=\"M3ScreenMetric\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenHeaderView Title=\"Storage\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding TotalSizeText}\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("SupportingTextStyleResourceKey=\"M3ScreenMetric\"", storagePage, StringComparison.Ordinal);
+            Assert.Contains("DetailText=\"{Binding TotalFileCountText}\"", storagePage, StringComparison.Ordinal);
+            Assert.DoesNotContain("Title=\"{Binding TotalSizeText}\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("DetailTextStyleResourceKey=\"M3CardSupportingLine\"", storagePage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView Title=\"Trash\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView Title=\"Transfers\"", transfersPage, StringComparison.Ordinal);

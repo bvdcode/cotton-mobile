@@ -16,10 +16,10 @@
                             SecondaryDescription="Refresh storage" />
 
         <controls:ScreenScrollBodyView Grid.Row="1">
-            <controls:ScreenHeaderView Title="{Binding TotalSizeText}"
-                                       TitleStyleResourceKey="M3ScreenMetric"
-                                       SupportingText="{Binding TotalFileCountText}"
-                                       DetailText="Files saved on this device"
+            <controls:ScreenHeaderView Title="Storage"
+                                       SupportingText="{Binding TotalSizeText}"
+                                       SupportingTextStyleResourceKey="M3ScreenMetric"
+                                       DetailText="{Binding TotalFileCountText}"
                                        DetailTextStyleResourceKey="M3CardSupportingLine"
                                        IsBusy="{Binding IsBusy}" />
 

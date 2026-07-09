@@ -1694,20 +1694,27 @@ namespace Cotton.Mobile.Tests
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string noticePanelView = LoadText(NoticePanelViewPath);
             string interaction = LoadText(InteractionResourcePath);
+            string stylesText = LoadText(StylesResourcePath);
             XDocument styles = LoadResourceDictionary(StylesResourcePath);
             IReadOnlyDictionary<string, string> noticeIconFrameSetters =
-                GetStyleSetters(styles, "M3FileNoticeIconFrame");
+                GetStyleSetters(styles, "M3NoticeIconFrame");
             IReadOnlyDictionary<string, string> noticeIconSetters =
-                GetStyleSetters(styles, "M3FileNoticeIcon");
+                GetStyleSetters(styles, "M3NoticeIcon");
 
             Assert.Contains("<controls:NoticePanelView IsPanelVisible=\"{Binding Display.IsFilesNoticeVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IconData=\"{x:Static controls:IconPathData.Error}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding Display.FilesNoticeTitle}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Message=\"{Binding Display.FilesNoticeMessage}\"", mainPage, StringComparison.Ordinal);
-            Assert.Contains("DefaultPanelStyleResourceKey = \"M3FileNoticePanel\"", noticePanelView, StringComparison.Ordinal);
-            Assert.Contains("DefaultGridStyleResourceKey = \"M3FileNoticeGrid\"", noticePanelView, StringComparison.Ordinal);
-            Assert.Contains("DefaultIconFrameStyleResourceKey = \"M3FileNoticeIconFrame\"", noticePanelView, StringComparison.Ordinal);
-            Assert.Contains("DefaultTextStackStyleResourceKey = \"M3FileNoticeTextStack\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultPanelStyleResourceKey = \"M3NoticePanel\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultGridStyleResourceKey = \"M3NoticeGrid\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconFrameStyleResourceKey = \"M3NoticeIconFrame\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultIconStyleResourceKey = \"M3NoticeIcon\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("DefaultTextStackStyleResourceKey = \"M3NoticeTextStack\"", noticePanelView, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3FileNoticePanel\" BasedOn=\"{StaticResource M3NoticePanel}\"", stylesText, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3FileNoticeIconFrame\" BasedOn=\"{StaticResource M3NoticeIconFrame}\"", stylesText, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3FileNoticeIcon\" BasedOn=\"{StaticResource M3NoticeIcon}\"", stylesText, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3FileNoticeTextStack\" BasedOn=\"{StaticResource M3NoticeTextStack}\"", stylesText, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3FileNoticeGrid\" BasedOn=\"{StaticResource M3NoticeGrid}\"", stylesText, StringComparison.Ordinal);
             Assert.Contains("<controls:NoticePanelView IsPanelVisible=\"{Binding IsRemotePushUnavailable}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Title=\"{Binding RemotePushUnavailableTitle}\"", notificationSettingsPage, StringComparison.Ordinal);
             Assert.Contains("Message=\"{Binding RemotePushUnavailableDetail}\"", notificationSettingsPage, StringComparison.Ordinal);
@@ -1770,6 +1777,7 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("<controls:NoticePanelView IsVisible=", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:NoticePanelView IsVisible=", notificationSettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ActionListItemView Grid.Row=\"2\"", notificationSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("\"M3FileNotice", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_title.IsVisible = !string.IsNullOrWhiteSpace(title)", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_message.IsVisible = !string.IsNullOrWhiteSpace(message)", noticePanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("_actionItem.IsVisible = isActionVisible", noticePanelView, StringComparison.Ordinal);
@@ -1788,6 +1796,7 @@ namespace Cotton.Mobile.Tests
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string storagePage = LoadText(StoragePagePath);
             string interaction = LoadText(InteractionResourcePath);
+            string styles = LoadText(StylesResourcePath);
 
             Assert.Contains("private readonly TouchSurfaceView _touchSurface;", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("_touchSurface = new TouchSurfaceView();", actionListItemView, StringComparison.Ordinal);
@@ -1810,6 +1819,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ResolveLeadingIconLayoutVisibility", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("ResolveTrailingChipLayoutVisibility", actionListItemView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
+            Assert.Contains("DefaultLeadingIconFrameStyleResourceKey = \"M3ActionListItemIconFrame\"", actionListItemView, StringComparison.Ordinal);
+            Assert.Contains("x:Key=\"M3ActionListItemIconFrame\" BasedOn=\"{StaticResource M3NeutralThumbnailFrame}\"", styles, StringComparison.Ordinal);
+            Assert.DoesNotContain("DefaultLeadingIconFrameStyleResourceKey = \"M3ActivityThumbnailFrame\"", actionListItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("_leadingIcon.IsVisible = isLeadingIconVisible", actionListItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("_supportingText.IsVisible = IsSupportingTextVisible", actionListItemView, StringComparison.Ordinal);
             Assert.DoesNotContain("_trailingChip.IsVisible = isTrailingTextVisible", actionListItemView, StringComparison.Ordinal);

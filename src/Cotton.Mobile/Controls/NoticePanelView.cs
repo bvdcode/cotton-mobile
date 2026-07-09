@@ -8,14 +8,14 @@ namespace Cotton.Mobile.Controls
 {
     public class NoticePanelView : ContentView
     {
-        private const string DefaultGridStyleResourceKey = "M3FileNoticeGrid";
+        private const string DefaultGridStyleResourceKey = "M3NoticeGrid";
         private const string DefaultActionGridStyleResourceKey = "M3SettingsListItemGrid";
         private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
-        private const string DefaultIconFrameStyleResourceKey = "M3FileNoticeIconFrame";
-        private const string DefaultIconStyleResourceKey = "M3FileNoticeIcon";
+        private const string DefaultIconFrameStyleResourceKey = "M3NoticeIconFrame";
+        private const string DefaultIconStyleResourceKey = "M3NoticeIcon";
         private const string DefaultMessageStyleResourceKey = "M3CardSupportingWrap";
-        private const string DefaultPanelStyleResourceKey = "M3FileNoticePanel";
-        private const string DefaultTextStackStyleResourceKey = "M3FileNoticeTextStack";
+        private const string DefaultPanelStyleResourceKey = "M3NoticePanel";
+        private const string DefaultTextStackStyleResourceKey = "M3NoticeTextStack";
         private const string DefaultTitleStyleResourceKey = "M3CardSupportingStrong";
         private const string ActionItemOpacityAnimationName = "M3NoticePanelActionItemOpacity";
         private const string MessageOpacityAnimationName = "M3NoticePanelMessageOpacity";

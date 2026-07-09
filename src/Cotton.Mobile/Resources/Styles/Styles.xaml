@@ -451,6 +451,8 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
+    <Style TargetType="controls:IconFrame" x:Key="M3ActionListItemIconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
     <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
     <Style TargetType="controls:IconFrame" x:Key="M3TransferThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
@@ -555,11 +557,13 @@
         <Setter Property="VerticalTextAlignment" Value="Center" />
     </Style>
 
-    <Style TargetType="Border" x:Key="M3FileNoticePanel" BasedOn="{StaticResource M3TonalPanel}">
+    <Style TargetType="Border" x:Key="M3NoticePanel" BasedOn="{StaticResource M3TonalPanel}">
         <Setter Property="Padding" Value="{StaticResource M3FileNoticePadding}" />
     </Style>
 
-    <Style TargetType="Border" x:Key="M3FileNoticeIconFrame">
+    <Style TargetType="Border" x:Key="M3FileNoticePanel" BasedOn="{StaticResource M3NoticePanel}" />
+
+    <Style TargetType="Border" x:Key="M3NoticeIconFrame">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileStatusIconFrameSize}" />
         <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightTertiaryContainer}, Dark={StaticResource M3DarkTertiaryContainer}}" />
@@ -573,21 +577,29 @@
         <Setter Property="VerticalOptions" Value="Start" />
     </Style>
 
-    <Style TargetType="controls:IconView" x:Key="M3FileNoticeIcon">
+    <Style TargetType="Border" x:Key="M3FileNoticeIconFrame" BasedOn="{StaticResource M3NoticeIconFrame}" />
+
+    <Style TargetType="controls:IconView" x:Key="M3NoticeIcon">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnTertiaryContainer}, Dark={StaticResource M3DarkOnTertiaryContainer}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileStatusIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
 
-    <Style TargetType="VerticalStackLayout" x:Key="M3FileNoticeTextStack">
+    <Style TargetType="controls:IconView" x:Key="M3FileNoticeIcon" BasedOn="{StaticResource M3NoticeIcon}" />
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3NoticeTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3FileNoticeGrid">
+    <Style TargetType="VerticalStackLayout" x:Key="M3FileNoticeTextStack" BasedOn="{StaticResource M3NoticeTextStack}" />
+
+    <Style TargetType="Grid" x:Key="M3NoticeGrid">
         <Setter Property="RowSpacing" Value="{StaticResource Space12}" />
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
+
+    <Style TargetType="Grid" x:Key="M3FileNoticeGrid" BasedOn="{StaticResource M3NoticeGrid}" />
 
     <Style TargetType="Border" x:Key="M3FileSelectionMark">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />

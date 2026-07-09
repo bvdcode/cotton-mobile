@@ -1036,6 +1036,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("ApplyStyle(new ActionSheetItemView", materialActionSheetPage, StringComparison.Ordinal);
             Assert.Contains("ApplyStyle(new BoxView(), \"M3ActionSheetDivider\")", materialActionSheetPage, StringComparison.Ordinal);
             Assert.Contains("M3ActionSheetDestructiveItem", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Contains("DismissAndPopBestEffortAsync", materialDialogPage, StringComparison.Ordinal);
+            Assert.Contains("DismissAndPopBestEffortAsync", materialActionSheetPage, StringComparison.Ordinal);
+            Assert.Equal(4, CountOccurrences(combinedModalPages, "catch (Exception exception)"));
+            Assert.Equal(4, CountOccurrences(combinedModalPages, "System.Diagnostics.Debug.WriteLine("));
+            Assert.Equal(2, CountOccurrences(combinedModalPages, "await Navigation.PopModalAsync(animated: false);"));
             Assert.Contains("SelectedIconOpacityAnimationName = \"M3ActionSheetSelectedIconOpacity\"", actionSheetItemView, StringComparison.Ordinal);
             Assert.Contains("SelectedIconScaleAnimationName = \"M3ActionSheetSelectedIconScale\"", actionSheetItemView, StringComparison.Ordinal);
             Assert.Contains("OnSelectedPropertyChanged", actionSheetItemView, StringComparison.Ordinal);

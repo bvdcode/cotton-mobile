@@ -203,15 +203,35 @@ namespace Cotton.Mobile.Controls
             _isCompleting = true;
             try
             {
+                await DismissAndPopBestEffortAsync();
+            }
+            finally
+            {
+                _completion.TrySetResult(result);
+            }
+        }
+
+        private async Task DismissAndPopBestEffortAsync()
+        {
+            try
+            {
                 await DismissAsync();
+            }
+            catch (Exception exception)
+            {
+                System.Diagnostics.Debug.WriteLine($"Material action sheet dismiss animation failed: {exception}");
+            }
+
+            try
+            {
                 if (Navigation.ModalStack.Contains(this))
                 {
                     await Navigation.PopModalAsync(animated: false);
                 }
             }
-            finally
+            catch (Exception exception)
             {
-                _completion.TrySetResult(result);
+                System.Diagnostics.Debug.WriteLine($"Material action sheet modal pop failed: {exception}");
             }
         }
 

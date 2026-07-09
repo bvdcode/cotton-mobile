@@ -12,6 +12,7 @@ namespace Cotton.Mobile
 {
     public class AndroidPdfPreviewRenderer : IPdfPreviewRenderer
     {
+        private const int MaxPreviewPageCount = 8;
         private const int MaxPageWidthPixels = 1440;
         private const int MaxPageHeightPixels = 2200;
 
@@ -44,8 +45,9 @@ namespace Cotton.Mobile
             }
 
             using var renderer = new PdfRenderer(descriptor);
-            var pages = new List<PdfPreviewPageSnapshot>(renderer.PageCount);
-            for (int index = 0; index < renderer.PageCount; index++)
+            int renderedPageCount = Math.Min(renderer.PageCount, MaxPreviewPageCount);
+            var pages = new List<PdfPreviewPageSnapshot>(renderedPageCount);
+            for (int index = 0; index < renderedPageCount; index++)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 pages.Add(RenderPage(renderer, index));

@@ -25,8 +25,19 @@ namespace Cotton.Mobile.Services
 
         public bool HasPages => Pages.Count > 0;
 
-        public string StatusText => TotalPageCount == 1
-            ? "1 page"
-            : $"{TotalPageCount} pages";
+        public string StatusText
+        {
+            get
+            {
+                if (Pages.Count > 0 && Pages.Count < TotalPageCount)
+                {
+                    return $"Showing first {Pages.Count} of {TotalPageCount} pages";
+                }
+
+                return TotalPageCount == 1
+                    ? "1 page"
+                    : $"{TotalPageCount} pages";
+            }
+        }
     }
 }

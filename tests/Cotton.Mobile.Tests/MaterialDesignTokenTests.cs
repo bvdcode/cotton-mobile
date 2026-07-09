@@ -24,6 +24,7 @@ namespace Cotton.Mobile.Tests
         private const string AndroidSplashMarkPath = "src/Cotton.Mobile/Platforms/Android/Resources/drawable/cotton_splash_mark.xml";
         private const string AndroidSplashScreenPath = "src/Cotton.Mobile/Platforms/Android/Resources/drawable/cotton_splash_screen.xml";
         private const string MainPagePath = "src/Cotton.Mobile/MainPage.xaml";
+        private const string MainPageDisplayStatePath = "src/Cotton.Mobile.Core/ViewModels/MainPageDisplayState.cs";
         private const string TrashPagePath = "src/Cotton.Mobile/TrashPage.xaml";
         private const string MaterialDialogPagePath = "src/Cotton.Mobile/Controls/MaterialDialogPage.cs";
         private const string MaterialActionSheetPagePath = "src/Cotton.Mobile/Controls/MaterialActionSheetPage.cs";
@@ -1344,6 +1345,7 @@ namespace Cotton.Mobile.Tests
         public void Auth_sign_in_panel_uses_reusable_material_control()
         {
             string authSignInPanelView = LoadText(AuthSignInPanelViewPath);
+            string mainPageDisplayState = LoadText(MainPageDisplayStatePath);
             string mainPage = LoadText(MainPagePath);
             string styles = LoadText(StylesResourcePath);
             XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
@@ -1353,6 +1355,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:AuthSignInPanelView IsPanelVisible=\"{Binding Display.IsSignInVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("InstanceUrl=\"{Binding Display.InstanceUrl, Mode=TwoWay}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Placeholder=\"{Binding Display.InstanceUrlPlaceholder}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("InstanceUrlPlaceholder => \"Custom server URL\"", mainPageDisplayState, StringComparison.Ordinal);
+            Assert.DoesNotContain("InstanceUrlPlaceholder => DefaultInstanceUrl", mainPageDisplayState, StringComparison.Ordinal);
             Assert.Contains("Status=\"{Binding Display.Status}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsStatusVisible=\"{Binding Display.IsStatusVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsInputEnabled=\"{Binding Display.IsInputEnabled}\"", mainPage, StringComparison.Ordinal);

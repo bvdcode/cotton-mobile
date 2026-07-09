@@ -11,13 +11,13 @@ namespace Cotton.Mobile.Tests
         private static readonly DateTime Newer = new(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc);
 
         [Fact]
-        public void Default_instance_url_stays_as_hint_until_user_enters_url()
+        public void Default_instance_url_stays_effective_without_being_field_placeholder()
         {
             var display = new MainPageDisplayState(" https://app.cottoncloud.dev/ ");
 
             Assert.Equal(string.Empty, display.InstanceUrl);
             Assert.Equal("https://app.cottoncloud.dev/", display.DefaultInstanceUrl);
-            Assert.Equal("https://app.cottoncloud.dev/", display.InstanceUrlPlaceholder);
+            Assert.Equal("Custom server URL", display.InstanceUrlPlaceholder);
             Assert.Equal("https://app.cottoncloud.dev/", display.EffectiveInstanceUrl);
 
             display.InstanceUrl = "https://files.example.test";

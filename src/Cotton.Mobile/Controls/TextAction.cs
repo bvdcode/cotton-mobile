@@ -32,6 +32,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<double>("M3FooterLinkFontSize"));
 
+        public static readonly BindableProperty TextFontFamilyProperty = BindableProperty.Create(
+            nameof(TextFontFamily),
+            typeof(string),
+            typeof(TextAction),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty ContentPaddingProperty = BindableProperty.Create(
             nameof(ContentPadding),
             typeof(Thickness),
@@ -104,6 +111,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (double)GetValue(TextFontSizeProperty);
             set => SetValue(TextFontSizeProperty, value);
+        }
+
+        public string TextFontFamily
+        {
+            get => (string)GetValue(TextFontFamilyProperty);
+            set => SetValue(TextFontFamilyProperty, value);
         }
 
         public Thickness ContentPadding
@@ -196,6 +209,7 @@ namespace Cotton.Mobile.Controls
                 LabelTextColorAnimationName,
                 shouldAnimate);
             _label.FontSize = TextFontSize;
+            _label.FontFamily = TextFontFamily;
             _hasAppliedVisualState = true;
         }
     }

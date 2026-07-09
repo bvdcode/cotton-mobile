@@ -127,6 +127,13 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged,
             defaultValueCreator: _ => MaterialResources.Get<double>("M3LabelLargeFontSize"));
 
+        public static readonly BindableProperty TextFontFamilyProperty = BindableProperty.Create(
+            nameof(TextFontFamily),
+            typeof(string),
+            typeof(ActionSheetItemView),
+            string.Empty,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty TextLineHeightProperty = BindableProperty.Create(
             nameof(TextLineHeight),
             typeof(double),
@@ -299,6 +306,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TextFontSizeProperty, value);
         }
 
+        public string TextFontFamily
+        {
+            get => (string)GetValue(TextFontFamilyProperty);
+            set => SetValue(TextFontFamilyProperty, value);
+        }
+
         public double TextLineHeight
         {
             get => (double)GetValue(TextLineHeightProperty);
@@ -406,6 +419,7 @@ namespace Cotton.Mobile.Controls
                 LabelTextColorAnimationName,
                 shouldAnimateChrome);
             _label.FontSize = TextFontSize;
+            _label.FontFamily = TextFontFamily;
             _label.LineHeight = TextLineHeight;
 
             _selectedIcon.IconColor = SelectedIconColor;

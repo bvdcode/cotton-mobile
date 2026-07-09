@@ -762,6 +762,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3Transparent}, Dark={StaticResource M3Transparent}}",
                 actionSheetItemSetters["RowBackgroundColor"]);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", actionSheetItemSetters["TextFontFamily"]);
+            Assert.Contains("TextFontFamilyProperty", actionSheetItemView, StringComparison.Ordinal);
+            Assert.Contains("_label.FontFamily = TextFontFamily", actionSheetItemView, StringComparison.Ordinal);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}",
                 actionSheetItemSetters["PressedRowBackgroundColor"]);
@@ -2555,11 +2558,17 @@ namespace Cotton.Mobile.Tests
         public void Text_action_animates_opacity_state_without_snap_assignment()
         {
             string textAction = LoadText(Path.Combine(ControlsDirectoryPath, "TextAction.cs"));
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> footerTextActionSetters =
+                GetStyleSetters(styles, "M3FooterTextAction");
 
             Assert.Contains("OpacityAnimationName = \"M3TextActionOpacity\"", textAction, StringComparison.Ordinal);
             Assert.Contains("MaterialMotion.UpdateDouble(", textAction, StringComparison.Ordinal);
             Assert.Contains("bool shouldAnimate = animateState && _hasAppliedVisualState", textAction, StringComparison.Ordinal);
             Assert.Contains("IsPressed ? PressInDuration : PressOutDuration", textAction, StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3FontFamilyMedium}", footerTextActionSetters["TextFontFamily"]);
+            Assert.Contains("TextFontFamilyProperty", textAction, StringComparison.Ordinal);
+            Assert.Contains("_label.FontFamily = TextFontFamily", textAction, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 $"{Environment.NewLine}            Opacity = ResolvePressableOpacity(1);",
                 textAction,

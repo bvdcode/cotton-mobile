@@ -1484,6 +1484,7 @@
         <Setter Property="IconSize" Value="{StaticResource M3ActionSheetRowIconSize}" />
         <Setter Property="IconFrameBorderWidth" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3LabelLargeFontSize}" />
+        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
         <Setter Property="TextLineHeight" Value="{StaticResource M3LabelLargeLineHeight}" />
         <Setter Property="ContentSpacing" Value="{StaticResource Space12}" />
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
@@ -1516,6 +1517,7 @@
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3FooterLinkFontSize}" />
+        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3FooterLinkPadding}" />
         <Setter Property="ButtonBackgroundColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />

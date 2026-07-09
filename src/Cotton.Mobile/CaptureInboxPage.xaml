@@ -19,7 +19,8 @@
 
         <controls:ScreenContentGridView Grid.Row="1"
                                         ExtraAutoRows="1">
-            <controls:ScreenHeaderView Title="{Binding SummaryText}"
+            <controls:ScreenHeaderView Title="Capture inbox"
+                                       SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Grid.Row="1"

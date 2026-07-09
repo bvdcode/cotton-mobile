@@ -4447,6 +4447,7 @@ namespace Cotton.Mobile.Tests
             string storagePage = LoadText(StoragePagePath);
             string trashPage = LoadText(TrashPagePath);
             string transfersPage = LoadText(TransfersPagePath);
+            string captureInboxPage = LoadText(CaptureInboxPagePath);
 
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
@@ -4459,6 +4460,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenHeaderView Title=\"Trash\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView Title=\"Transfers\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding SummaryText}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenHeaderView Title=\"Capture inbox\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("SupportingText=\"{Binding SummaryText}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ScreenHeaderView Title=\"{Binding SummaryText}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView.ActionContent>", trashPage, StringComparison.Ordinal);
             Assert.Contains("IsBusy=\"{Binding IsBusy}\"", trashPage, StringComparison.Ordinal);
         }

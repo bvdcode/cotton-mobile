@@ -40,7 +40,10 @@ namespace Cotton.Mobile.Services
                     viewModel.Configure(instanceUri);
                 }
 
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is SyncSettingsPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

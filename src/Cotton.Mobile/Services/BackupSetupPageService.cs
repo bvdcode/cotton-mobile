@@ -33,7 +33,10 @@ namespace Cotton.Mobile.Services
                 var page = ActivatorUtilities.CreateInstance<BackupSetupPage>(
                     _serviceProvider,
                     viewModel);
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is BackupSetupPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

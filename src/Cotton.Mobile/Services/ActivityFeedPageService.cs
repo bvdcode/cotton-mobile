@@ -38,7 +38,10 @@ namespace Cotton.Mobile.Services
                     _serviceProvider,
                     instanceUri);
                 var page = ActivatorUtilities.CreateInstance<ActivityFeedPage>(_serviceProvider, viewModel);
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is ActivityFeedPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

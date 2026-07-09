@@ -37,7 +37,10 @@ namespace Cotton.Mobile.Services
                     _serviceProvider,
                     instanceUri);
                 var page = ActivatorUtilities.CreateInstance<TrashPage>(_serviceProvider, viewModel);
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is TrashPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

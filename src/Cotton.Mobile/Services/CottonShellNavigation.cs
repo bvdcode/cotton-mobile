@@ -9,17 +9,24 @@ namespace Cotton.Mobile.Services
     {
         private static readonly SemaphoreSlim PushGate = new(1, 1);
 
-        public static Task<bool> PushAsync(Page page, CancellationToken cancellationToken = default)
+        public static Task<bool> PushAsync(
+            Page page,
+            CancellationToken cancellationToken = default,
+            Func<Page, bool>? isDuplicateTopPage = null)
         {
             ArgumentNullException.ThrowIfNull(page);
             cancellationToken.ThrowIfCancellationRequested();
 
             return MainThread.IsMainThread
-                ? PushOnMainThreadAsync(page, cancellationToken)
-                : MainThread.InvokeOnMainThreadAsync(() => PushOnMainThreadAsync(page, cancellationToken));
+                ? PushOnMainThreadAsync(page, cancellationToken, isDuplicateTopPage)
+                : MainThread.InvokeOnMainThreadAsync(() =>
+                    PushOnMainThreadAsync(page, cancellationToken, isDuplicateTopPage));
         }
 
-        private static async Task<bool> PushOnMainThreadAsync(Page page, CancellationToken cancellationToken)
+        private static async Task<bool> PushOnMainThreadAsync(
+            Page page,
+            CancellationToken cancellationToken,
+            Func<Page, bool>? isDuplicateTopPage)
         {
             await PushGate.WaitAsync(cancellationToken);
             try
@@ -33,7 +40,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 Page? currentPage = navigation.NavigationStack.LastOrDefault();
-                if (currentPage is not null && currentPage.GetType() == page.GetType())
+                if (currentPage is not null && isDuplicateTopPage?.Invoke(currentPage) == true)
                 {
                     return false;
                 }

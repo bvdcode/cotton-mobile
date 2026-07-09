@@ -43,7 +43,10 @@ namespace Cotton.Mobile.Services
                     viewModel.SetCurrentSessionRevocationHandler(revocationHandler);
                 }
 
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is SecuritySettingsPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

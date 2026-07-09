@@ -26,7 +26,10 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var page = ActivatorUtilities.CreateInstance<StoragePage>(_serviceProvider);
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is StoragePage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

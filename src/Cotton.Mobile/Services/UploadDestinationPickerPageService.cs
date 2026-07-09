@@ -49,7 +49,10 @@ namespace Cotton.Mobile.Services
                 {
                     completion.TrySetResult(null);
                 };
-                bool pushed = await CottonShellNavigation.PushAsync(page, cancellationToken);
+                bool pushed = await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is CaptureDestinationPickerPage);
                 if (!pushed)
                 {
                     completion.TrySetResult(null);

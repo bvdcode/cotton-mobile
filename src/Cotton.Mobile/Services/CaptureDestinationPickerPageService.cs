@@ -33,7 +33,10 @@ namespace Cotton.Mobile.Services
                 var page = ActivatorUtilities.CreateInstance<CaptureDestinationPickerPage>(
                     _serviceProvider,
                     viewModel);
-                await CottonShellNavigation.PushAsync(page, cancellationToken);
+                await CottonShellNavigation.PushAsync(
+                    page,
+                    cancellationToken,
+                    currentPage => currentPage is CaptureDestinationPickerPage);
             });
             cancellationToken.ThrowIfCancellationRequested();
         }

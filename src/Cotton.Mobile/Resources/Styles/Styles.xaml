@@ -1164,6 +1164,7 @@
         <Setter Property="MaximumWidthRequest" Value="{StaticResource M3DialogMaxWidth}" />
         <Setter Property="Margin" Value="{StaticResource M3DialogMargin}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3DialogCornerRadius}" />
@@ -1361,6 +1362,7 @@
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
         <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkPrimaryPressed}}" />
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
+        <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
     </Style>
 
     <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItem">
@@ -1438,6 +1440,7 @@
         <Setter Property="VerticalOptions" Value="End" />
         <Setter Property="MaximumWidthRequest" Value="{StaticResource M3ActionSheetMaxWidth}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="Shadow" Value="{StaticResource M3ShadowSoft}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ActionSheetCornerRadius}" />

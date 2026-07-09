@@ -756,9 +756,11 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}",
                 dialogSurfaceSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3ShadowSoft}", dialogSurfaceSetters["Shadow"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}",
                 actionSheetSurfaceSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3ShadowSoft}", actionSheetSurfaceSetters["Shadow"]);
             Assert.Equal(
                 "{AppThemeBinding Light={StaticResource M3Transparent}, Dark={StaticResource M3Transparent}}",
                 actionSheetItemSetters["RowBackgroundColor"]);
@@ -3908,7 +3910,10 @@ namespace Cotton.Mobile.Tests
             string floatingActionButtonView = LoadText(FloatingActionButtonViewPath);
             string mainPage = LoadText(MainPagePath);
             string spacing = LoadText(SpacingResourcePath);
-            string styles = LoadText(StylesResourcePath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            string stylesText = LoadText(StylesResourcePath);
+            IReadOnlyDictionary<string, string> floatingIconSetters =
+                GetStyleSetters(styles, "M3FloatingActionIconButton");
 
             Assert.Contains("<controls:FloatingActionButtonView Grid.Row=\"0\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("<controls:FileBrowserNavigationBarView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
@@ -3931,8 +3936,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("UpdateInputTransparency", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("InputTransparent = !IsVisible || !IsActionVisible || !IsEnabled || Command is null", floatingActionButtonView, StringComparison.Ordinal);
             Assert.Contains("<x:Double x:Key=\"M3FloatingActionButtonScrollInset\">88</x:Double>", spacing, StringComparison.Ordinal);
-            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" x:Key=\"M3FloatingActionButtonOverlay\">", styles, StringComparison.Ordinal);
-            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" BasedOn=\"{StaticResource M3FloatingActionButtonOverlay}\" />", styles, StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3ShadowSoft}", floatingIconSetters["Shadow"]);
+            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" x:Key=\"M3FloatingActionButtonOverlay\">", stylesText, StringComparison.Ordinal);
+            Assert.Contains("<Style TargetType=\"controls:FloatingActionButtonView\" BasedOn=\"{StaticResource M3FloatingActionButtonOverlay}\" />", stylesText, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:IconButton Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FloatingActionButtonView Grid.Row=\"1\"", mainPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:FileBrowserNavigationBarView Grid.Row=\"2\"", mainPage, StringComparison.Ordinal);

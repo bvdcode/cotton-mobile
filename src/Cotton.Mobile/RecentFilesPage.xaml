@@ -14,6 +14,7 @@
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearRecentFilesCommand}"
                             PrimaryDescription="Clear recent files"
+                            IsPrimaryActionVisible="{Binding IsClearActionVisible}"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh recent files" />

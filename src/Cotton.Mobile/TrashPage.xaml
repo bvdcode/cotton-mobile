@@ -14,9 +14,11 @@
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding EmptyTrashCommand}"
                             PrimaryDescription="Empty trash"
+                            IsPrimaryActionVisible="{Binding IsEmptyTrashActionVisible}"
                             SecondaryIconData="{x:Static controls:IconPathData.Check}"
                             SecondaryCommand="{Binding ToggleSelectionModeCommand}"
                             SecondaryDescription="{Binding SelectionToolbarText}"
+                            IsSecondaryActionVisible="{Binding IsSelectionActionVisible}"
                             IsTertiaryActionVisible="True"
                             TertiaryIconData="{x:Static controls:IconPathData.Refresh}"
                             TertiaryCommand="{Binding LoadCommand}"
@@ -31,6 +33,7 @@
                                    IsBusy="{Binding IsBusy}">
             <controls:ScreenHeaderView.ActionContent>
                 <controls:ActionClusterView ClusterStyleResourceKey="M3ScreenHeaderActionCluster"
+                                            IsClusterVisible="{Binding IsHeaderActionClusterVisible}"
                                             PrimaryActionIconData="{x:Static controls:IconPathData.Search}"
                                             PrimaryActionCommand="{Binding ToggleSearchCommand}"
                                             PrimaryActionSemanticDescription="{Binding SearchButtonDescription}"

@@ -131,6 +131,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsHeaderSummaryVisible => Items.Count > 0;
 
+        public bool IsClearActionVisible => Items.Count > 0;
+
         public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
 
         public bool IsListVisible => Items.Count > 0;
@@ -410,6 +412,7 @@ namespace Cotton.Mobile.ViewModels
         {
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsHeaderSummaryVisible));
+            OnPropertyChanged(nameof(IsClearActionVisible));
             OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanChooseDestination));

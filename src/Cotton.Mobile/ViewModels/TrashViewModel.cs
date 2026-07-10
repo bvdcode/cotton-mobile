@@ -66,13 +66,22 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
             ApplyPreferences(LoadPreferences());
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
-            ToggleSearchCommand = new AsyncCommand(ToggleSearchAsync, LogUnhandledCommandException, () => !IsBusy);
-            ShowSortActionsCommand = new AsyncCommand(ShowSortActionsAsync, LogUnhandledCommandException, () => !IsBusy);
-            ShowViewActionsCommand = new AsyncCommand(ShowViewActionsAsync, LogUnhandledCommandException, () => !IsBusy);
+            ToggleSearchCommand = new AsyncCommand(
+                ToggleSearchAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && (_allItems.Count > 0 || IsSearchVisible));
+            ShowSortActionsCommand = new AsyncCommand(
+                ShowSortActionsAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && _allItems.Count > 0);
+            ShowViewActionsCommand = new AsyncCommand(
+                ShowViewActionsAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && _allItems.Count > 0);
             ToggleSelectionModeCommand = new AsyncCommand(
                 ToggleSelectionModeAsync,
                 LogUnhandledCommandException,
-                () => !IsBusy);
+                () => !IsBusy && (_allItems.Count > 0 || IsSelectionModeActive));
             EmptyTrashCommand = new AsyncCommand(EmptyTrashAsync, LogUnhandledCommandException, CanEmptyTrash);
             ToggleSelectionCommand = new AsyncCommand<CottonFileBrowserEntry>(
                 ToggleSelectionAsync,
@@ -198,6 +207,12 @@ namespace Cotton.Mobile.ViewModels
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
         public bool IsHeaderSummaryVisible => Items.Count > 0;
+
+        public bool IsEmptyTrashActionVisible => _allItems.Count > 0;
+
+        public bool IsSelectionActionVisible => _allItems.Count > 0;
+
+        public bool IsHeaderActionClusterVisible => _allItems.Count > 0 || IsSearchVisible;
 
         public bool IsListVisible => Items.Count > 0 && _viewMode == CottonFileBrowserViewMode.List;
 
@@ -1010,6 +1025,9 @@ namespace Cotton.Mobile.ViewModels
         {
             OnPropertyChanged(nameof(IsEmpty));
             OnPropertyChanged(nameof(IsHeaderSummaryVisible));
+            OnPropertyChanged(nameof(IsEmptyTrashActionVisible));
+            OnPropertyChanged(nameof(IsSelectionActionVisible));
+            OnPropertyChanged(nameof(IsHeaderActionClusterVisible));
             OnPropertyChanged(nameof(IsStatusVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(IsTileVisible));
@@ -1024,6 +1042,10 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(SelectionTitleText));
             OnPropertyChanged(nameof(SelectionDetailText));
             OnPropertyChanged(nameof(IsBulkActionEnabled));
+            ToggleSearchCommand.RaiseCanExecuteChanged();
+            ShowSortActionsCommand.RaiseCanExecuteChanged();
+            ShowViewActionsCommand.RaiseCanExecuteChanged();
+            ToggleSelectionModeCommand.RaiseCanExecuteChanged();
             EmptyTrashCommand.RaiseCanExecuteChanged();
         }
 

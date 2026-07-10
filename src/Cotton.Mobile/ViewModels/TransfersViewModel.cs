@@ -21,6 +21,7 @@ namespace Cotton.Mobile.ViewModels
 
         private bool _isLoadingPlaceholderEnabled;
         private bool _isBusy;
+        private bool _canRunWaiting;
         private bool _canClearHistory;
         private string _summaryText = "0 transfers";
         private string _emptyMessage = "No transfers yet";
@@ -59,7 +60,10 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
             Items = [];
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
-            RunWaitingCommand = new AsyncCommand(RunWaitingAsync, LogUnhandledCommandException, () => !IsBusy);
+            RunWaitingCommand = new AsyncCommand(
+                RunWaitingAsync,
+                LogUnhandledCommandException,
+                () => !IsBusy && _canRunWaiting);
             ClearHistoryCommand = new AsyncCommand(
                 ClearHistoryAsync,
                 LogUnhandledCommandException,
@@ -125,6 +129,10 @@ namespace Cotton.Mobile.ViewModels
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
         public bool IsHeaderSummaryVisible => Items.Count > 0;
+
+        public bool IsRunWaitingActionVisible => _canRunWaiting;
+
+        public bool IsClearHistoryActionVisible => _canClearHistory;
 
         public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
 
@@ -221,7 +229,10 @@ namespace Cotton.Mobile.ViewModels
             {
                 IReadOnlyList<CottonTransferQueueItem> transfers = await _metadataStore.LoadAsync(_instanceUri);
                 CottonTransferHistoryCleanupPlan plan = CottonTransferHistoryCleanupPolicy.CreatePlan(transfers);
-                ShowSnapshot(CottonTransferListSnapshot.Create(transfers), plan.HasRemovedItems);
+                ShowSnapshot(
+                    CottonTransferListSnapshot.Create(transfers),
+                    plan.HasRemovedItems,
+                    CanRunWaiting(transfers));
                 if (!plan.HasRemovedItems)
                 {
                     Status = CottonTransferHistoryCleanupText.CreateClearedStatus(plan);
@@ -242,7 +253,10 @@ namespace Cotton.Mobile.ViewModels
                 await _metadataStore.SaveAsync(_instanceUri, plan.RetainedItems);
                 await _stagingStore.CleanupAsync(_instanceUri, plan.RetainedItems);
                 _transferActivitySignal.NotifyTransferActivityChanged();
-                ShowSnapshot(CottonTransferListSnapshot.Create(plan.RetainedItems), canClearHistory: false);
+                ShowSnapshot(
+                    CottonTransferListSnapshot.Create(plan.RetainedItems),
+                    canClearHistory: false,
+                    CanRunWaiting(plan.RetainedItems));
                 Status = CottonTransferHistoryCleanupText.CreateClearedStatus(plan);
             }
             catch (Exception exception)
@@ -262,13 +276,20 @@ namespace Cotton.Mobile.ViewModels
         private void ShowTransfers(IReadOnlyList<CottonTransferQueueItem> transfers)
         {
             CottonTransferHistoryCleanupPlan plan = CottonTransferHistoryCleanupPolicy.CreatePlan(transfers);
-            ShowSnapshot(CottonTransferListSnapshot.Create(transfers), plan.HasRemovedItems);
+            ShowSnapshot(
+                CottonTransferListSnapshot.Create(transfers),
+                plan.HasRemovedItems,
+                CanRunWaiting(transfers));
         }
 
-        private void ShowSnapshot(CottonTransferListSnapshot snapshot, bool canClearHistory)
+        private void ShowSnapshot(
+            CottonTransferListSnapshot snapshot,
+            bool canClearHistory,
+            bool canRunWaiting)
         {
             Items.ReplaceWith(snapshot.Items);
 
+            SetCanRunWaiting(canRunWaiting);
             SetCanClearHistory(canClearHistory);
             SummaryText = snapshot.SummaryText;
             EmptyMessage = snapshot.EmptyMessage;
@@ -279,6 +300,18 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsListVisible));
         }
 
+        private void SetCanRunWaiting(bool canRunWaiting)
+        {
+            if (_canRunWaiting == canRunWaiting)
+            {
+                return;
+            }
+
+            _canRunWaiting = canRunWaiting;
+            OnPropertyChanged(nameof(IsRunWaitingActionVisible));
+            RunWaitingCommand.RaiseCanExecuteChanged();
+        }
+
         private void SetCanClearHistory(bool canClearHistory)
         {
             if (_canClearHistory == canClearHistory)
@@ -287,7 +320,13 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _canClearHistory = canClearHistory;
+            OnPropertyChanged(nameof(IsClearHistoryActionVisible));
             ClearHistoryCommand.RaiseCanExecuteChanged();
+        }
+
+        private static bool CanRunWaiting(IEnumerable<CottonTransferQueueItem> transfers)
+        {
+            return transfers.Any(item => item.Status == CottonTransferStatus.Queued);
         }
 
         private void LogUnhandledCommandException(Exception exception)

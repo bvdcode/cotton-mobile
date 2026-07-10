@@ -13,6 +13,7 @@
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Delete}"
                             PrimaryCommand="{Binding ClearCommand}"
                             PrimaryDescription="Clear capture inbox"
+                            IsPrimaryActionVisible="{Binding IsClearActionVisible}"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh capture inbox" />

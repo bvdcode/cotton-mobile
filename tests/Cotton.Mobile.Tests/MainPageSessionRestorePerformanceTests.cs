@@ -5,6 +5,15 @@ namespace Cotton.Mobile.Tests
     public class MainPageSessionRestorePerformanceTests
     {
         [Fact]
+        public void Session_restore_does_not_expose_internal_operation_copy()
+        {
+            string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");
+
+            Assert.Contains("ShowLoading(string.Empty);", content, StringComparison.Ordinal);
+            Assert.DoesNotContain("Restoring session...", content, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Authenticated_session_initializes_file_browser_before_session_maintenance()
         {
             string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");

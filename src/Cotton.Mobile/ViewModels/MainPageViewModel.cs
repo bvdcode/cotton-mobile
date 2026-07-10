@@ -493,7 +493,7 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                ShowLoading("Restoring session...");
+                ShowLoading(string.Empty);
                 _shouldRetrySessionRestoreWhenOnline = false;
                 _shouldRetrySessionRestoreOnResume = false;
                 CottonSessionResult result = await _sessionService.RestoreAsync();

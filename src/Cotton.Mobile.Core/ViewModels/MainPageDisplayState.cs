@@ -13,7 +13,7 @@ namespace Cotton.Mobile.ViewModels
 
         private MainPageViewState _state = MainPageViewState.SignIn;
         private string _instanceUrl = string.Empty;
-        private string _loadingMessage = "Restoring session...";
+        private string _loadingMessage = string.Empty;
         private string? _status;
         private string _authorizationProgressMessage = "Approve the request in your browser, then return to Cotton Cloud.";
         private string _profileName = string.Empty;
@@ -1031,7 +1031,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(refreshEntry);
 
-            bool changed = false;
+            List<CottonFileBrowserEntry> changedEntries = [];
             for (int index = 0; index < _allFileEntries.Count; index++)
             {
                 CottonFileBrowserEntry entry = _allFileEntries[index];
@@ -1047,15 +1047,19 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 _allFileEntries[index] = updatedEntry;
-                changed = true;
+                changedEntries.Add(updatedEntry);
             }
 
-            if (changed)
+            foreach (CottonFileBrowserEntry updatedEntry in changedEntries)
             {
-                ApplyFileFilters();
+                int visibleIndex = FindEntryIndex(FileEntries, updatedEntry.Id);
+                if (visibleIndex >= 0)
+                {
+                    FileEntries[visibleIndex] = updatedEntry;
+                }
             }
 
-            return changed;
+            return changedEntries.Count > 0;
         }
 
         public void ClearFileLocalCopies()

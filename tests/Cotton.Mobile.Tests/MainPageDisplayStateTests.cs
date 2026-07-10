@@ -16,6 +16,7 @@ namespace Cotton.Mobile.Tests
             var display = new MainPageDisplayState(" https://app.cottoncloud.dev/ ");
 
             Assert.Equal(string.Empty, display.InstanceUrl);
+            Assert.Equal(string.Empty, display.LoadingMessage);
             Assert.Equal("https://app.cottoncloud.dev/", display.DefaultInstanceUrl);
             Assert.Equal("Custom server URL", display.InstanceUrlPlaceholder);
             Assert.Equal("https://app.cottoncloud.dev/", display.EffectiveInstanceUrl);
@@ -542,6 +543,24 @@ namespace Cotton.Mobile.Tests
             Assert.True(fresh.HasLocalCopy);
             Assert.False(fresh.IsOfflineAttentionVisible);
             Assert.Equal("10 B · Text · On device", fresh.DisplayDetails);
+        }
+
+        [Fact]
+        public void Local_file_state_refresh_replaces_only_changed_visible_entries()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            CottonFileBrowserEntry file = display.FileEntries.Single(entry => entry.Name == "zeta.txt");
+            var localFile = new CottonLocalFileSnapshot("zeta.txt", 10, Older);
+            var collectionChanges = new List<NotifyCollectionChangedEventArgs>();
+            display.FileEntries.CollectionChanged += (_, eventArgs) => collectionChanges.Add(eventArgs);
+
+            bool changed = display.RefreshFileLocalStates(entry =>
+                entry.Id == file.Id ? entry.WithLocalFile(localFile) : entry);
+
+            Assert.True(changed);
+            NotifyCollectionChangedEventArgs replacement = Assert.Single(collectionChanges);
+            Assert.Equal(NotifyCollectionChangedAction.Replace, replacement.Action);
+            Assert.Equal(file.Id, Assert.IsType<CottonFileBrowserEntry>(replacement.NewItems![0]).Id);
         }
 
         [Fact]

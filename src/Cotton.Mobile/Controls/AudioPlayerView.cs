@@ -254,11 +254,15 @@ namespace Cotton.Mobile.Controls
                 position = duration;
             }
 
-            _timeline.Value = duration > TimeSpan.Zero
+            bool hasDuration = duration > TimeSpan.Zero;
+            _timeline.IsEnabled = hasDuration;
+            _timeline.Value = hasDuration
                 ? position.TotalSeconds / duration.TotalSeconds
                 : 0;
             _elapsed.Text = CottonMediaTimeFormatter.Format(position);
-            _duration.Text = CottonMediaTimeFormatter.Format(duration);
+            _duration.Text = hasDuration
+                ? CottonMediaTimeFormatter.Format(duration)
+                : "--:--";
         }
 
         private void UpdatePlayback()

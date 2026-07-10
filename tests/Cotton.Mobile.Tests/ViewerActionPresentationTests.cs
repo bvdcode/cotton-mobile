@@ -59,6 +59,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsPlaying ? \"Pause audio\" : \"Play audio\"", player, StringComparison.Ordinal);
             Assert.Contains("SeekRequested?.Invoke(this, new AudioSeekRequestedEventArgs(position))", player, StringComparison.Ordinal);
             Assert.Contains("CottonMediaTimeFormatter.Format(previewPosition)", player, StringComparison.Ordinal);
+            Assert.Contains("_timeline.IsEnabled = hasDuration", player, StringComparison.Ordinal);
+            Assert.Contains(": \"--:--\"", player, StringComparison.Ordinal);
             Assert.Contains("UpdateAudioPosition(e.Position)", codeBehind, StringComparison.Ordinal);
             Assert.Contains("UpdateAudioPosition(_mediaDuration)", codeBehind, StringComparison.Ordinal);
             Assert.Contains("AndroidViewType = AndroidViewType.TextureView", mediaElement, StringComparison.Ordinal);

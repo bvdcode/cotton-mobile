@@ -1349,6 +1349,8 @@ namespace Cotton.Mobile.Tests
             string mainPage = LoadText(MainPagePath);
             string styles = LoadText(StylesResourcePath);
             XDocument stylesDocument = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> authActionRowSetters =
+                GetStyleSetters(stylesDocument, "M3AuthActionRow");
             IReadOnlyDictionary<string, string> authServerActionSetters =
                 GetStyleSetters(stylesDocument, "M3AuthServerActionButton");
 
@@ -1406,9 +1408,13 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("M3AuthServerActionButton", styles, StringComparison.Ordinal);
             Assert.Contains("M3AuthActionButtonSize", LoadText(SpacingResourcePath), StringComparison.Ordinal);
             Assert.Contains("M3AuthActionIconSize", LoadText(SpacingResourcePath), StringComparison.Ordinal);
+            Assert.Equal("{StaticResource Space8}", authActionRowSetters["ColumnSpacing"]);
             Assert.Equal("{StaticResource M3AuthActionButtonSize}", authServerActionSetters["ButtonSize"]);
             Assert.Equal("{StaticResource M3AuthActionIconSize}", authServerActionSetters["IconSize"]);
-            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}", authServerActionSetters["ButtonBackgroundColor"]);
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}", authServerActionSetters["IconColor"]);
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}", authServerActionSetters["ButtonBackgroundColor"]);
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightPrimaryContainerPressed}, Dark={StaticResource M3DarkPrimaryContainerPressed}}", authServerActionSetters["PressedButtonBackgroundColor"]);
+            Assert.Equal("{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}", authServerActionSetters["BorderColor"]);
             Assert.Contains("new ContentCardView", authSignInPanelView, StringComparison.Ordinal);
             Assert.Contains("CardStyleResourceKey = DefaultCardStyleResourceKey", authSignInPanelView, StringComparison.Ordinal);
             Assert.DoesNotContain("new TextAction", authSignInPanelView, StringComparison.Ordinal);

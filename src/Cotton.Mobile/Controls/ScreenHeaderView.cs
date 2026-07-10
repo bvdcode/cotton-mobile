@@ -402,6 +402,7 @@ namespace Cotton.Mobile.Controls
                 element.IsVisible = true;
             }
 
+            element.InputTransparent = !isElementVisible;
             MaterialMotion.UpdateDouble(
                 element,
                 element.Opacity,

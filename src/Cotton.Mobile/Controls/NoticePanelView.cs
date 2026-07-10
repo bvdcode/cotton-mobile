@@ -491,6 +491,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            InputTransparent = !isPanelVisible;
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -570,6 +571,7 @@ namespace Cotton.Mobile.Controls
                 element.IsVisible = true;
             }
 
+            element.InputTransparent = !isElementVisible;
             MaterialMotion.UpdateDouble(
                 element,
                 element.Opacity,
@@ -584,6 +586,7 @@ namespace Cotton.Mobile.Controls
         private void CompletePanelVisibility()
         {
             IsVisible = IsPanelVisible;
+            InputTransparent = !IsVisible || !IsPanelVisible;
         }
 
         private static void CompleteElementVisibility(VisualElement element, bool isElementVisible)
@@ -591,10 +594,12 @@ namespace Cotton.Mobile.Controls
             if (isElementVisible)
             {
                 element.IsVisible = true;
+                element.InputTransparent = false;
                 return;
             }
 
             element.IsVisible = false;
+            element.InputTransparent = true;
         }
     }
 }

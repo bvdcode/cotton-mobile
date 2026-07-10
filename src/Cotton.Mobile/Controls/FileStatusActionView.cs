@@ -375,6 +375,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            InputTransparent = !isStatusVisible;
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -418,6 +419,7 @@ namespace Cotton.Mobile.Controls
         private void CompleteStatusVisibility()
         {
             IsVisible = IsStatusVisible;
+            InputTransparent = !IsVisible || !IsStatusVisible;
         }
 
         private void CompleteDetailsVisibility()

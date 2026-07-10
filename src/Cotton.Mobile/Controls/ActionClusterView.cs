@@ -547,6 +547,7 @@ namespace Cotton.Mobile.Controls
             actionButton.Command = command;
             actionButton.CommandParameter = commandParameter;
             actionButton.IsEnabled = isEnabled;
+            actionButton.InputTransparent = !isActionVisible;
             if (isActionVisible)
             {
                 actionButton.IsVisible = true;
@@ -569,15 +570,18 @@ namespace Cotton.Mobile.Controls
             if (isActionVisible)
             {
                 actionButton.IsVisible = true;
+                actionButton.InputTransparent = false;
                 return;
             }
 
             actionButton.IsVisible = false;
+            actionButton.InputTransparent = true;
         }
 
         private void CompleteClusterVisibility()
         {
             IsVisible = IsClusterVisible;
+            InputTransparent = !IsVisible || !IsClusterVisible;
         }
     }
 }

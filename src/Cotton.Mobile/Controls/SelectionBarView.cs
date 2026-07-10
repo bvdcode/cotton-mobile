@@ -363,6 +363,7 @@ namespace Cotton.Mobile.Controls
                 IsVisible = true;
             }
 
+            UpdateInputTransparency();
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
@@ -378,6 +379,12 @@ namespace Cotton.Mobile.Controls
         private void CompleteBarVisibility()
         {
             IsVisible = IsBarVisible;
+            UpdateInputTransparency();
+        }
+
+        private void UpdateInputTransparency()
+        {
+            InputTransparent = !IsVisible || !IsBarVisible;
         }
 
         private static string ResolveIconButtonStyleResourceKey(string iconButtonStyleResourceKey)

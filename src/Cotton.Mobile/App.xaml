@@ -12,6 +12,7 @@
                 <ResourceDictionary Source="Resources/Styles/Theme/MInteraction.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Theme/MType.xaml" />
                 <ResourceDictionary Source="Resources/Styles/Styles.xaml" />
+                <ResourceDictionary Source="Resources/Styles/AudioPlayerStyles.xaml" />
                 <ResourceDictionary Source="Resources/Styles/MFramework.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>

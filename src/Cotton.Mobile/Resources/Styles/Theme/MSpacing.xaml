@@ -69,6 +69,12 @@
     <x:Double x:Key="M3ViewerPlayButtonCornerRadius">32</x:Double>
     <x:Double x:Key="M3ViewerPlayButtonSize">64</x:Double>
     <x:Double x:Key="M3ViewerPlayIconSize">24</x:Double>
+    <x:Double x:Key="M3AudioPlayerMaxWidth">520</x:Double>
+    <x:Double x:Key="M3AudioArtworkSize">152</x:Double>
+    <x:Double x:Key="M3AudioArtworkIconSize">56</x:Double>
+    <x:Double x:Key="M3AudioArtworkCornerRadius">36</x:Double>
+    <x:Double x:Key="M3AudioTimelineHeight">48</x:Double>
+    <x:Double x:Key="M3AudioTimeLabelMinWidth">48</x:Double>
     <x:Double x:Key="M3PdfPageSpacing">12</x:Double>
     <x:Double x:Key="M3TrashTileHeight">236</x:Double>
     <x:Double x:Key="M3TrashTilePreviewHeight">92</x:Double>
@@ -121,6 +127,7 @@
     <Thickness x:Key="M3TextViewerPadding">16</Thickness>
     <Thickness x:Key="M3ViewerOverlayMargin">16</Thickness>
     <Thickness x:Key="M3ViewerStatusWithTrailingActionMargin">16,0,80,16</Thickness>
+    <Thickness x:Key="M3AudioPlayerPadding">24,24,24,32</Thickness>
     <Thickness x:Key="M3ActionSheetPadding">16,10,16,16</Thickness>
     <Thickness x:Key="M3ActionSheetTitleMargin">8,8,8,6</Thickness>
     <Thickness x:Key="M3ActionSheetDividerMargin">8,4</Thickness>

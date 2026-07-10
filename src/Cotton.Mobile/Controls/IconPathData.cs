@@ -13,6 +13,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Activity => Create("M12 2 C8.7 2 6 4.7 6 8 L6 13 L4 17 L20 17 L18 13 L18 8 C18 4.7 15.3 2 12 2 Z M8 8 C8 5.8 9.8 4 12 4 C14.2 4 16 5.8 16 8 L16 13.5 L16.8 15 L7.2 15 L8 13.5 Z M10 19 C10.3 20.2 11.1 21 12 21 C12.9 21 13.7 20.2 14 19 Z");
 
+        public static Geometry Audio => Create("M12 3 C7 3 3 7 3 12 L3 17 C3 18.1 3.9 19 5 19 L8 19 L8 12 L5 12 C5 8.1 8.1 5 12 5 C15.9 5 19 8.1 19 12 L16 12 L16 19 L19 19 C20.1 19 21 18.1 21 17 L21 12 C21 7 17 3 12 3 Z M5 14 L6 14 L6 17 L5 17 Z M18 14 L19 14 L19 17 L18 17 Z");
+
         public static Geometry ArrowDown => Create("M4 12 L5.4 10.6 L11 16.2 L11 4 L13 4 L13 16.2 L18.6 10.6 L20 12 L12 20 Z");
 
         public static Geometry ArrowUp => Create("M4 12 L5.4 13.4 L11 7.8 L11 20 L13 20 L13 7.8 L18.6 13.4 L20 12 L12 4 Z");

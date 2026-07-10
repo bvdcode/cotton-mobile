@@ -85,6 +85,23 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
 
+        internal void ReportPlaybackFailure(string? errorMessage)
+        {
+            _logger.LogWarning(
+                "Media playback failed for {FilePath}: {ErrorMessage}",
+                _file.FilePath,
+                errorMessage);
+            Status = "Playback failed.";
+        }
+
+        internal void ClearPlaybackFailure()
+        {
+            if (string.Equals(Status, "Playback failed.", StringComparison.Ordinal))
+            {
+                Status = null;
+            }
+        }
+
         private async Task ShareAsync()
         {
             await RunViewerActionAsync(

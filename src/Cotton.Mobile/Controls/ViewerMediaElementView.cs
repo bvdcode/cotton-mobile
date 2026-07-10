@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 
 namespace Cotton.Mobile.Controls
@@ -11,6 +12,7 @@ namespace Cotton.Mobile.Controls
 
         public ViewerMediaElementView()
         {
+            AndroidViewType = AndroidViewType.TextureView;
             Aspect = Aspect.AspectFit;
             ShouldAutoPlay = false;
             ShouldLoopPlayback = false;

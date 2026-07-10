@@ -69,6 +69,8 @@
                                                     SearchSemanticDescription="{Binding Display.FileSearchButtonDescription}"
                                                     IsSearchActive="{Binding Display.IsFileSearchVisible}"
                                                     IsChromeEnabled="{Binding Display.IsFileBrowserChromeEnabled}"
+                                                    RefreshCommand="{Binding RefreshFilesCommand}"
+                                                    IsRefreshing="{Binding Display.IsFilesRefreshing}"
                                                     SortCommand="{Binding ShowFileSortActionsCommand}"
                                                     IsSortVisible="{Binding Display.IsFileSortButtonVisible}"
                                                     ViewCommand="{Binding ShowFileViewActionsCommand}"

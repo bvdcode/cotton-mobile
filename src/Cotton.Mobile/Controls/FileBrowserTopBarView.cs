@@ -108,6 +108,19 @@ namespace Cotton.Mobile.Controls
             true,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty RefreshCommandProperty = BindableProperty.Create(
+            nameof(RefreshCommand),
+            typeof(ICommand),
+            typeof(FileBrowserTopBarView),
+            propertyChanged: OnVisualPropertyChanged);
+
+        public static readonly BindableProperty IsRefreshingProperty = BindableProperty.Create(
+            nameof(IsRefreshing),
+            typeof(bool),
+            typeof(FileBrowserTopBarView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty SortCommandProperty = BindableProperty.Create(
             nameof(SortCommand),
             typeof(ICommand),
@@ -354,6 +367,18 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsChromeEnabledProperty, value);
         }
 
+        public ICommand? RefreshCommand
+        {
+            get => (ICommand?)GetValue(RefreshCommandProperty);
+            set => SetValue(RefreshCommandProperty, value);
+        }
+
+        public bool IsRefreshing
+        {
+            get => (bool)GetValue(IsRefreshingProperty);
+            set => SetValue(IsRefreshingProperty, value);
+        }
+
         public ICommand? SortCommand
         {
             get => (ICommand?)GetValue(SortCommandProperty);
@@ -541,6 +566,14 @@ namespace Cotton.Mobile.Controls
             _actionCluster.TertiaryActionSemanticDescription = "Change file view";
             _actionCluster.IsTertiaryActionEnabled = IsChromeEnabled;
             _actionCluster.IsTertiaryActionVisible = IsViewVisible;
+            _actionCluster.QuaternaryActionIconData = IconPathData.Refresh;
+            _actionCluster.QuaternaryActionCommand = RefreshCommand;
+            _actionCluster.QuaternaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
+            _actionCluster.QuaternaryActionSemanticDescription = IsRefreshing
+                ? "Refreshing files"
+                : "Refresh files";
+            _actionCluster.IsQuaternaryActionEnabled = IsChromeEnabled && !IsRefreshing;
+            _actionCluster.IsQuaternaryActionVisible = !IsSearchActive;
 
             _accountButton.Text = ProfileInitials ?? string.Empty;
             _accountButton.Command = AccountCommand;

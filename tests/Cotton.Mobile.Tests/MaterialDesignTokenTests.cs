@@ -2076,6 +2076,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SearchCommand=\"{Binding ToggleFileSearchCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SearchSemanticDescription=\"{Binding Display.FileSearchButtonDescription}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsSearchActive=\"{Binding Display.IsFileSearchVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("RefreshCommand=\"{Binding RefreshFilesCommand}\"", mainPage, StringComparison.Ordinal);
+            Assert.Contains("IsRefreshing=\"{Binding Display.IsFilesRefreshing}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("SortCommand=\"{Binding ShowFileSortActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsSortVisible=\"{Binding Display.IsFileSortButtonVisible}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("ViewCommand=\"{Binding ShowFileViewActionsCommand}\"", mainPage, StringComparison.Ordinal);
@@ -2091,6 +2093,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsSearchActive ? IconPathData.Close : IconPathData.Search", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionsContainer.SetDynamicResource(StyleProperty, actionsContainerStyleResourceKey)", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("_actionCluster.ClusterStyleResourceKey = actionClusterStyleResourceKey", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionCluster.QuaternaryActionIconData = IconPathData.Refresh", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionCluster.QuaternaryActionCommand = RefreshCommand", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionCluster.IsQuaternaryActionEnabled = IsChromeEnabled && !IsRefreshing", fileBrowserTopBarView, StringComparison.Ordinal);
+            Assert.Contains("_actionCluster.IsQuaternaryActionVisible = !IsSearchActive", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("NavigateUpButtonOpacityAnimationName = \"M3FileBrowserNavigateUpButtonOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("PathTextOpacityAnimationName = \"M3FileBrowserPathTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);
             Assert.Contains("StatusTextOpacityAnimationName = \"M3FileBrowserStatusTextOpacity\"", fileBrowserTopBarView, StringComparison.Ordinal);

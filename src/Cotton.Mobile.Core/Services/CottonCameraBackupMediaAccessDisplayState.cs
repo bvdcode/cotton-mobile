@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Services
             return state switch
             {
                 CottonCameraBackupMediaAccessState.Allowed => new CottonCameraBackupMediaAccessDisplayState(
-                    "Media Access",
+                    "Media access",
                     "Allowed",
                     "Cotton can scan photos and videos after backup execution is enabled.",
                     actionText: string.Empty,
@@ -58,7 +58,7 @@ namespace Cotton.Mobile.Services
                     needsAttention: false,
                     shouldOpenSettings: false),
                 CottonCameraBackupMediaAccessState.Limited => new CottonCameraBackupMediaAccessDisplayState(
-                    "Media Access",
+                    "Media access",
                     "Selected media only",
                     "Automatic camera backup needs access to all photos and videos.",
                     actionText: "Settings",
@@ -67,7 +67,7 @@ namespace Cotton.Mobile.Services
                     needsAttention: true,
                     shouldOpenSettings: true),
                 CottonCameraBackupMediaAccessState.Denied => new CottonCameraBackupMediaAccessDisplayState(
-                    "Media Access",
+                    "Media access",
                     "Denied",
                     "Allow photo access in Android settings before camera backup can scan media.",
                     actionText: "Settings",
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Services
                     needsAttention: true,
                     shouldOpenSettings: true),
                 CottonCameraBackupMediaAccessState.Unavailable => new CottonCameraBackupMediaAccessDisplayState(
-                    "Media Access",
+                    "Media access",
                     "Unavailable",
                     "Media library access is not available on this device.",
                     actionText: string.Empty,
@@ -85,7 +85,7 @@ namespace Cotton.Mobile.Services
                     needsAttention: true,
                     shouldOpenSettings: false),
                 _ => new CottonCameraBackupMediaAccessDisplayState(
-                    "Media Access",
+                    "Media access",
                     "Not requested",
                     "Cotton will ask before scanning photos or videos.",
                     actionText: "Allow",

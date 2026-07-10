@@ -36,16 +36,61 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(settings);
             ArgumentNullException.ThrowIfNull(health);
 
-            string statusText = settings.CanRunBackup
-                ? health.HasActivity ? "Backup activity is ready." : "No backup activity yet."
-                : "Backup health will appear after background backup is available.";
+            string statusText = CreateStatusText(settings, health);
 
             return new CottonCameraBackupHealthDisplayState(
-                "Backup Health",
+                "Backup health",
                 statusText,
-                $"Pending {health.PendingCount:N0} · Uploaded {health.UploadedCount:N0} · Failed {health.FailedCount:N0} · Blocked {health.BlockedCount:N0}",
-                !settings.CanRunBackup,
+                CreateCountsText(health),
+                !settings.CanRunBackup || health.FailedCount > 0 || health.BlockedCount > 0,
                 health.HasActivity);
+        }
+
+        private static string CreateStatusText(
+            CottonCameraBackupSettings settings,
+            CottonCameraBackupHealthSnapshot health)
+        {
+            if (!settings.HasDestination)
+            {
+                return "Choose a destination to see backup activity.";
+            }
+
+            if (!settings.CanRunBackup)
+            {
+                return "Backup activity is not available yet.";
+            }
+
+            if (health.FailedCount > 0 || health.BlockedCount > 0)
+            {
+                return "Some items need attention.";
+            }
+
+            if (health.PendingCount > 0)
+            {
+                return "Items are waiting to upload.";
+            }
+
+            return health.UploadedCount > 0
+                ? "Backup activity is up to date."
+                : "No backup activity yet.";
+        }
+
+        private static string CreateCountsText(CottonCameraBackupHealthSnapshot health)
+        {
+            List<string> counts = [];
+            AddCount(counts, health.PendingCount, "pending");
+            AddCount(counts, health.UploadedCount, "uploaded");
+            AddCount(counts, health.FailedCount, "failed");
+            AddCount(counts, health.BlockedCount, "blocked");
+            return string.Join(" · ", counts);
+        }
+
+        private static void AddCount(ICollection<string> counts, int count, string label)
+        {
+            if (count > 0)
+            {
+                counts.Add($"{count:N0} {label}");
+            }
         }
     }
 }

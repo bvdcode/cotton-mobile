@@ -61,10 +61,11 @@
                                                    PrimaryDetailText="{Binding HealthCountsText}"
                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingStrongBlock"
                                                    SecondaryDetailText="{Binding HealthStatusText}"
-                                                   IsTapEnabled="True"
+                                                   IsTapEnabled="{Binding CanQueueNow}"
                                                    TapCommand="{Binding QueueNowCommand}"
                                                    PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
                                                    PrimaryActionCommand="{Binding QueueNowCommand}"
+                                                   IsPrimaryActionEnabled="{Binding CanQueueNow}"
                                                    PrimaryActionSemanticDescription="Queue camera backup now" />
 
             <controls:SettingsCardView>

@@ -52,6 +52,7 @@ namespace Cotton.Mobile.Tests
         private const string NotificationSettingsViewModelPath = "src/Cotton.Mobile/ViewModels/NotificationSettingsViewModel.cs";
         private const string SecuritySettingsPagePath = "src/Cotton.Mobile/SecuritySettingsPage.xaml";
         private const string BackupSetupPagePath = "src/Cotton.Mobile/BackupSetupPage.xaml";
+        private const string BackupSetupViewModelPath = "src/Cotton.Mobile/ViewModels/BackupSetupViewModel.cs";
         private const string StoragePagePath = "src/Cotton.Mobile/StoragePage.xaml";
         private const string CaptureDestinationPickerViewModelPath = "src/Cotton.Mobile/ViewModels/CaptureDestinationPickerViewModel.cs";
         private const string SyncSettingsViewModelPath = "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs";
@@ -2254,10 +2255,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryDetailTextStyleResourceKey=\"M3CardSupportingLine\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryDetailTextStyleResourceKey=\"M3CardSupportingStrongLine\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingStrongBlock\"", backupSetupPage, StringComparison.Ordinal);
-            Assert.Equal(2, CountOccurrences(backupSetupPage, "IsTapEnabled=\"True\""));
+            Assert.Equal(1, CountOccurrences(backupSetupPage, "IsTapEnabled=\"True\""));
+            Assert.Contains("IsTapEnabled=\"{Binding CanQueueNow}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Choose backup destination\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsPrimaryActionEnabled=\"{Binding CanQueueNow}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryActionSemanticDescription=\"Queue camera backup now\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding ChooseDestinationCommand}\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("TapCommand=\"{Binding QueueNowCommand}\"", backupSetupPage, StringComparison.Ordinal);
@@ -4364,6 +4367,8 @@ namespace Cotton.Mobile.Tests
             string notificationSettingsPage = LoadText(NotificationSettingsPagePath);
             string securitySettingsPage = LoadText(SecuritySettingsPagePath);
             string settingsToggleItemView = LoadText(SettingsToggleItemViewPath);
+            string settingsActionHeaderCardView = LoadText(SettingsActionHeaderCardViewPath);
+            string backupSetupViewModel = LoadText(BackupSetupViewModelPath);
             string interaction = LoadText(InteractionResourcePath);
             string styles = LoadText(StylesResourcePath);
 
@@ -4402,6 +4407,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DefaultGridStyleResourceKey = \"M3SettingsListItemGrid\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultTextStackStyleResourceKey = \"M3SettingsDenseStack\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultSwitchStyleResourceKey = \"M3Switch\"", settingsToggleItemView, StringComparison.Ordinal);
+            Assert.Contains("DefaultSupportingTextStyleResourceKey = \"M3CardSupportingWrap\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DetailTextProperty", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("DefaultDetailTextStyleResourceKey = \"M3CardSupportingBlock\"", settingsToggleItemView, StringComparison.Ordinal);
             Assert.Contains("SupportingTextOpacityAnimationName = \"M3SettingsToggleSupportingTextOpacity\"", settingsToggleItemView, StringComparison.Ordinal);
@@ -4433,6 +4439,11 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("M3SettingsToggleGroupGrid", backupSetupPage, StringComparison.Ordinal);
             Assert.DoesNotContain("M3SettingsToggleGroupGrid", styles, StringComparison.Ordinal);
             Assert.DoesNotContain("Grid.RowSpan=\"3\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("IsTapEnabled=\"{Binding CanQueueNow}\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.Contains("() => CanQueueNow", backupSetupViewModel, StringComparison.Ordinal);
+            Assert.Contains("_latestMediaAccessDisplay.CanScanFullLibrary", backupSetupViewModel, StringComparison.Ordinal);
+            Assert.Contains("IsPrimaryActionEnabledProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
+            Assert.Contains("_actions.IsPrimaryActionEnabled = IsPrimaryActionEnabled", settingsActionHeaderCardView, StringComparison.Ordinal);
         }
 
         [Fact]

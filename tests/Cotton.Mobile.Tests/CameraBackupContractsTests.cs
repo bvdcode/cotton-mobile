@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Tests
             CottonCameraBackupMediaAccessDisplayState display =
                 CottonCameraBackupMediaAccessDisplayState.Create(state);
 
-            Assert.Equal("Media Access", display.Title);
+            Assert.Equal("Media access", display.Title);
             Assert.Equal(statusText, display.StatusText);
             Assert.Equal(actionText, display.ActionText);
             Assert.Equal(!string.IsNullOrWhiteSpace(actionText), display.IsActionVisible);
@@ -498,13 +498,69 @@ namespace Cotton.Mobile.Tests
                     CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
                     CottonCameraBackupHealthSnapshot.Empty);
 
-            Assert.Equal("Backup Health", display.Title);
+            Assert.Equal("Backup health", display.Title);
             Assert.Equal(
                 "No backup activity yet.",
                 display.StatusText);
-            Assert.Equal("Pending 0 · Uploaded 0 · Failed 0 · Blocked 0", display.CountsText);
+            Assert.Equal(string.Empty, display.CountsText);
             Assert.False(display.IsBlocked);
             Assert.False(display.HasActivity);
+        }
+
+        [Fact]
+        public void Camera_backup_health_prompts_for_destination_without_zero_count_noise()
+        {
+            CottonCameraBackupHealthDisplayState display =
+                CottonCameraBackupHealthDisplayState.Create(
+                    CottonCameraBackupSettings.Default,
+                    CottonCameraBackupHealthSnapshot.Empty);
+
+            Assert.Equal("Choose a destination to see backup activity.", display.StatusText);
+            Assert.Equal(string.Empty, display.CountsText);
+            Assert.True(display.IsBlocked);
+            Assert.False(display.HasActivity);
+        }
+
+        [Fact]
+        public void Camera_backup_health_reports_only_nonzero_activity_counts()
+        {
+            CottonCameraBackupHealthDisplayState display =
+                CottonCameraBackupHealthDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    new CottonCameraBackupHealthSnapshot(2, 0, 1, 0));
+
+            Assert.Equal("Some items need attention.", display.StatusText);
+            Assert.Equal("2 pending · 1 failed", display.CountsText);
+            Assert.True(display.IsBlocked);
+            Assert.True(display.HasActivity);
+        }
+
+        [Theory]
+        [InlineData(2, 0, 0, 0, "Items are waiting to upload.", "2 pending", false)]
+        [InlineData(0, 3, 0, 0, "Backup activity is up to date.", "3 uploaded", false)]
+        [InlineData(0, 0, 0, 4, "Some items need attention.", "4 blocked", true)]
+        public void Camera_backup_health_status_matches_the_nonzero_activity(
+            int pendingCount,
+            int uploadedCount,
+            int failedCount,
+            int blockedCount,
+            string expectedStatus,
+            string expectedCounts,
+            bool expectedBlocked)
+        {
+            CottonCameraBackupHealthDisplayState display =
+                CottonCameraBackupHealthDisplayState.Create(
+                    CottonCameraBackupSettings.Default.WithDestination(CreateDestination()),
+                    new CottonCameraBackupHealthSnapshot(
+                        pendingCount,
+                        uploadedCount,
+                        failedCount,
+                        blockedCount));
+
+            Assert.Equal(expectedStatus, display.StatusText);
+            Assert.Equal(expectedCounts, display.CountsText);
+            Assert.Equal(expectedBlocked, display.IsBlocked);
+            Assert.True(display.HasActivity);
         }
 
         [Theory]

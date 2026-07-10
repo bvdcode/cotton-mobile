@@ -38,12 +38,12 @@ namespace Cotton.Mobile.ViewModels
         private string _policySummaryText = "Photos only, Wi-Fi only, any battery state.";
         private string _destinationStorageEstimateTitle = "Destination estimate";
         private string _destinationStorageEstimateText = "Choose a folder to estimate backup storage.";
-        private string _healthTitle = "Backup Health";
-        private string _healthStatusText = "Backup health will appear after background backup is available.";
-        private string _healthCountsText = "Pending 0 · Uploaded 0 · Failed 0 · Blocked 0";
+        private string _healthTitle = "Backup health";
+        private string _healthStatusText = "Choose a destination to see backup activity.";
+        private string _healthCountsText = string.Empty;
         private string _localMediaRetentionText =
             CottonCameraBackupLocalMediaRetentionPolicy.Mvp.SetupSummaryText;
-        private string _mediaAccessTitle = "Media Access";
+        private string _mediaAccessTitle = "Media access";
         private string _mediaAccessStatusText = "Not requested";
         private string _mediaAccessDetailText = "Cotton will ask before scanning photos or videos.";
         private string _mediaAccessActionText = "Allow";
@@ -98,7 +98,7 @@ namespace Cotton.Mobile.ViewModels
                 RunMediaAccessActionAsync,
                 LogUnhandledCommandException,
                 () => !IsBusy && IsMediaAccessActionVisible);
-            QueueNowCommand = new AsyncCommand(QueueNowAsync, LogUnhandledCommandException, () => !IsBusy);
+            QueueNowCommand = new AsyncCommand(QueueNowAsync, LogUnhandledCommandException, () => CanQueueNow);
             SaveCommand = new AsyncCommand(SaveAsync, LogUnhandledCommandException, () => !IsBusy);
         }
 
@@ -119,6 +119,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isBusy, value))
                 {
+                    OnPropertyChanged(nameof(CanQueueNow));
                     RaiseCommandStatesChanged();
                 }
             }
@@ -314,6 +315,11 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public bool CanQueueNow =>
+            !IsBusy
+            && _settings.HasDestination
+            && _latestMediaAccessDisplay.CanScanFullLibrary;
 
         public bool ConsumeReloadOnAppearing()
         {
@@ -522,6 +528,7 @@ namespace Cotton.Mobile.ViewModels
             PolicySummaryText = display.PolicySummaryText;
             LocalMediaRetentionText = display.LocalMediaRetentionText;
             ShowHealth(settings);
+            NotifyQueueNowStateChanged();
         }
 
         private void RefreshPolicyPreview()
@@ -586,6 +593,7 @@ namespace Cotton.Mobile.ViewModels
             IsMediaAccessActionVisible = display.IsActionVisible;
             _mediaAccessShouldOpenSettings = display.ShouldOpenSettings;
             _latestMediaAccessDisplay = display;
+            NotifyQueueNowStateChanged();
             return display;
         }
 
@@ -634,6 +642,12 @@ namespace Cotton.Mobile.ViewModels
             MediaAccessActionCommand.RaiseCanExecuteChanged();
             QueueNowCommand.RaiseCanExecuteChanged();
             SaveCommand.RaiseCanExecuteChanged();
+        }
+
+        private void NotifyQueueNowStateChanged()
+        {
+            OnPropertyChanged(nameof(CanQueueNow));
+            QueueNowCommand.RaiseCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

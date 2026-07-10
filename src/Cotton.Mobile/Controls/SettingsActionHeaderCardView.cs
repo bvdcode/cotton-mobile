@@ -136,6 +136,13 @@ namespace Cotton.Mobile.Controls
             typeof(SettingsActionHeaderCardView),
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsPrimaryActionEnabledProperty = BindableProperty.Create(
+            nameof(IsPrimaryActionEnabled),
+            typeof(bool),
+            typeof(SettingsActionHeaderCardView),
+            true,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty PrimaryActionSemanticDescriptionProperty = BindableProperty.Create(
             nameof(PrimaryActionSemanticDescription),
             typeof(string),
@@ -298,6 +305,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(PrimaryActionCommandProperty, value);
         }
 
+        public bool IsPrimaryActionEnabled
+        {
+            get => (bool)GetValue(IsPrimaryActionEnabledProperty);
+            set => SetValue(IsPrimaryActionEnabledProperty, value);
+        }
+
         public string PrimaryActionSemanticDescription
         {
             get => (string)GetValue(PrimaryActionSemanticDescriptionProperty);
@@ -369,6 +382,7 @@ namespace Cotton.Mobile.Controls
             _actions.ClusterStyleResourceKey = actionClusterStyleResourceKey;
             _actions.PrimaryActionIconData = PrimaryActionIconData;
             _actions.PrimaryActionCommand = PrimaryActionCommand;
+            _actions.IsPrimaryActionEnabled = IsPrimaryActionEnabled;
             _actions.PrimaryActionSemanticDescription = PrimaryActionSemanticDescription ?? string.Empty;
             _actions.SecondaryActionIconData = SecondaryActionIconData;
             _actions.SecondaryActionCommand = SecondaryActionCommand;

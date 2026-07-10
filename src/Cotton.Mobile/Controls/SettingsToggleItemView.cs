@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
         private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
         private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardUtilityThumbnailFrame";
-        private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingLine";
+        private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingWrap";
         private const string DefaultSwitchStyleResourceKey = "M3Switch";
         private const string DefaultTextStackStyleResourceKey = "M3SettingsDenseStack";
         private const string DefaultTextStyleResourceKey = "M3LabelLargeLine";

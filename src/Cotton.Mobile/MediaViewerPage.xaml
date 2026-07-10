@@ -27,6 +27,10 @@
                                              PositionChanged="OnMediaPositionChanged"
                                              StateChanged="OnMediaStateChanged" />
 
+            <controls:ViewerImageView x:Name="VideoPoster"
+                                      Source="{Binding VideoPosterSource}"
+                                      InputTransparent="True" />
+
             <controls:ViewerPlayOverlayView x:Name="StartOverlay"
                                             Command="{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}"
                                             SemanticDescription="Play media" />

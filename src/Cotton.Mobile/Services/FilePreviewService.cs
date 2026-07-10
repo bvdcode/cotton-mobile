@@ -162,11 +162,15 @@ namespace Cotton.Mobile.Services
             CottonFilePreviewKind previewKind)
         {
             string details = CreateDetails(file);
+            string? videoPosterSource = previewKind == CottonFilePreviewKind.Video && file.Thumbnail.HasImage
+                ? file.Thumbnail.Source
+                : null;
             var viewModel = ActivatorUtilities.CreateInstance<MediaViewerViewModel>(
                 _serviceProvider,
                 file.Name,
                 details,
                 previewKind,
+                videoPosterSource ?? string.Empty,
                 downloadedFile);
             return ActivatorUtilities.CreateInstance<MediaViewerPage>(_serviceProvider, viewModel);
         }

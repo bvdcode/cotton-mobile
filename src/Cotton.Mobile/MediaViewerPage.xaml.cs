@@ -13,6 +13,7 @@ namespace Cotton.Mobile
     {
         private const double HiddenAudioSurfaceSize = 1;
 
+        private readonly bool _hasVideoPoster;
         private readonly MediaViewerViewModel _viewModel;
         private TimeSpan _mediaDuration;
         private bool _hasMediaEnded;
@@ -27,6 +28,7 @@ namespace Cotton.Mobile
             PlayMediaCommand = new Command(PlayMedia);
             InitializeComponent();
             BindingContext = viewModel;
+            _hasVideoPoster = !string.IsNullOrWhiteSpace(viewModel.VideoPosterSource);
             ConfigurePlaybackSurface();
             Unloaded += OnPageUnloaded;
         }
@@ -59,11 +61,14 @@ namespace Cotton.Mobile
 
             try
             {
-                if (_viewModel.IsAudioPreview && _hasMediaEnded)
+                if (_hasMediaEnded)
                 {
                     await MediaPlayer.SeekTo(TimeSpan.Zero, CancellationToken.None);
                     _hasMediaEnded = false;
-                    UpdateAudioPosition(TimeSpan.Zero);
+                    if (_viewModel.IsAudioPreview)
+                    {
+                        UpdateAudioPosition(TimeSpan.Zero);
+                    }
                 }
 
                 StartOverlay.IsOverlayVisible = false;
@@ -78,6 +83,7 @@ namespace Cotton.Mobile
         private void ConfigurePlaybackSurface()
         {
             bool isAudioPreview = _viewModel.IsAudioPreview;
+            MediaPlayer.ShouldAutoPlay = !isAudioPreview;
             MediaPlayer.ShouldShowPlaybackControls = !isAudioPreview;
             MediaPlayer.InputTransparent = isAudioPreview;
             MediaPlayer.Opacity = isAudioPreview ? 0 : 1;
@@ -90,31 +96,35 @@ namespace Cotton.Mobile
             }
 
             StartOverlay.IsOverlayVisible = !isAudioPreview;
+            ShowVideoPoster(!isAudioPreview);
             UpdateAudioPlaybackButton(isPlaying: false);
         }
 
         private void OnMediaOpened(object? sender, EventArgs e)
         {
+            _hasMediaEnded = false;
+            _viewModel.ClearPlaybackFailure();
             if (!_viewModel.IsAudioPreview)
             {
+                StartOverlay.IsOverlayVisible = false;
                 return;
             }
 
             RefreshAudioDuration();
-            _hasMediaEnded = false;
             UpdateAudioPosition(MediaPlayer.Position);
-            _viewModel.ClearPlaybackFailure();
         }
 
         private void OnMediaEnded(object? sender, EventArgs e)
         {
+            _hasMediaEnded = true;
             if (!_viewModel.IsAudioPreview)
             {
+                StartOverlay.IsOverlayVisible = true;
+                ShowVideoPoster(true);
                 return;
             }
 
             RefreshAudioDuration();
-            _hasMediaEnded = true;
             UpdateAudioPosition(_mediaDuration);
             UpdateAudioPlaybackButton(isPlaying: false);
         }
@@ -125,26 +135,45 @@ namespace Cotton.Mobile
             {
                 UpdateAudioPlaybackButton(isPlaying: false);
             }
+            else
+            {
+                StartOverlay.IsOverlayVisible = true;
+                ShowVideoPoster(true);
+            }
 
             _viewModel.ReportPlaybackFailure(e.ErrorMessage);
         }
 
         private void OnMediaPositionChanged(object? sender, MediaPositionChangedEventArgs e)
         {
-            if (_viewModel.IsAudioPreview)
+            if (!_viewModel.IsAudioPreview)
             {
-                RefreshAudioDuration();
-                UpdateAudioPosition(e.Position);
+                if (e.Position > TimeSpan.Zero)
+                {
+                    ShowVideoPoster(false);
+                }
+
+                return;
             }
+
+            RefreshAudioDuration();
+            UpdateAudioPosition(e.Position);
         }
 
         private void OnMediaStateChanged(object? sender, MediaStateChangedEventArgs e)
         {
-            if (_viewModel.IsAudioPreview)
+            if (!_viewModel.IsAudioPreview)
             {
-                RefreshAudioDuration();
-                UpdateAudioPlaybackButton(e.NewState == MediaElementState.Playing);
+                if (e.NewState == MediaElementState.Playing)
+                {
+                    StartOverlay.IsOverlayVisible = false;
+                }
+
+                return;
             }
+
+            RefreshAudioDuration();
+            UpdateAudioPlaybackButton(e.NewState == MediaElementState.Playing);
         }
 
         private async void OnAudioSeekRequested(object? sender, AudioSeekRequestedEventArgs e)
@@ -233,12 +262,18 @@ namespace Cotton.Mobile
             AudioPlayer.Position = TimeSpan.Zero;
             UpdateAudioPlaybackButton(isPlaying: false);
             StartOverlay.IsOverlayVisible = !_viewModel.IsAudioPreview;
+            ShowVideoPoster(!_viewModel.IsAudioPreview);
 
             if (disconnectHandler)
             {
                 MediaPlayer.Handler?.DisconnectHandler();
                 _isHandlerDisconnected = true;
             }
+        }
+
+        private void ShowVideoPoster(bool isVisible)
+        {
+            VideoPoster.IsVisible = _hasVideoPoster && isVisible;
         }
     }
 }

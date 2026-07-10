@@ -19,6 +19,7 @@ namespace Cotton.Mobile.ViewModels
             string title,
             string details,
             CottonFilePreviewKind previewKind,
+            string? videoPosterSource,
             CottonFileDownloadResult file,
             IFileInteractionService fileInteractionService,
             ILogger<MediaViewerViewModel> logger)
@@ -37,6 +38,10 @@ namespace Cotton.Mobile.ViewModels
             Title = title;
             Details = details;
             PreviewKind = previewKind;
+            VideoPosterSource = previewKind == CottonFilePreviewKind.Video
+                && !string.IsNullOrWhiteSpace(videoPosterSource)
+                    ? videoPosterSource.Trim()
+                    : null;
             _file = file;
             _fileInteractionService = fileInteractionService;
             _logger = logger;
@@ -52,6 +57,8 @@ namespace Cotton.Mobile.ViewModels
         public CottonFilePreviewKind PreviewKind { get; }
 
         public bool IsAudioPreview => PreviewKind == CottonFilePreviewKind.Audio;
+
+        public string? VideoPosterSource { get; }
 
         public string MediaFilePath { get; }
 

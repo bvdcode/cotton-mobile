@@ -4174,6 +4174,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ViewerImageView x:Name=\"PreviewImage\"", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerImageView.GestureRecognizers>", imageViewerPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ViewerMediaElementView x:Name=\"MediaPlayer\"", mediaViewerPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ViewerImageView x:Name=\"VideoPoster\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("MediaOpened=\"OnMediaOpened\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("MediaEnded=\"OnMediaEnded\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("MediaFailed=\"OnMediaFailed\"", mediaViewerPage, StringComparison.Ordinal);
@@ -4205,6 +4206,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("PlaybackCommand=\"{Binding Source={x:Reference RootPage}, Path=PlayMediaCommand}\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("SeekRequested=\"OnAudioSeekRequested\"", mediaViewerPage, StringComparison.Ordinal);
             Assert.Contains("MediaPlayer.ShouldShowPlaybackControls = !isAudioPreview", mediaViewerPageCodeBehind, StringComparison.Ordinal);
+            Assert.Contains("MediaPlayer.ShouldAutoPlay = !isAudioPreview", mediaViewerPageCodeBehind, StringComparison.Ordinal);
             Assert.Contains("MediaPlayer.CurrentState == MediaElementState.Playing", mediaViewerPageCodeBehind, StringComparison.Ordinal);
             Assert.Contains("await MediaPlayer.SeekTo(e.Position, CancellationToken.None)", mediaViewerPageCodeBehind, StringComparison.Ordinal);
             Assert.Contains("AudioPlayer.Duration = duration", mediaViewerPageCodeBehind, StringComparison.Ordinal);

@@ -76,5 +76,24 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("x:Key=\"M3AudioPlaybackIconButton\"", audioStyles, StringComparison.Ordinal);
             Assert.DoesNotContain("M3AudioPlayerLayer", sharedStyles, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Video_viewer_starts_playback_and_exposes_replay_state()
+        {
+            string page = RepositoryPath.ReadText("src/Cotton.Mobile/MediaViewerPage.xaml");
+            string codeBehind = RepositoryPath.ReadText("src/Cotton.Mobile/MediaViewerPage.xaml.cs");
+            string previewService = RepositoryPath.ReadText("src/Cotton.Mobile/Services/FilePreviewService.cs");
+
+            Assert.Contains("MediaPlayer.ShouldAutoPlay = !isAudioPreview", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("if (_hasMediaEnded)", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("await MediaPlayer.SeekTo(TimeSpan.Zero, CancellationToken.None)", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("StartOverlay.IsOverlayVisible = true", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("e.NewState == MediaElementState.Playing", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("<controls:ViewerImageView x:Name=\"VideoPoster\"", page, StringComparison.Ordinal);
+            Assert.Contains("Source=\"{Binding VideoPosterSource}\"", page, StringComparison.Ordinal);
+            Assert.Contains("ShowVideoPoster(false)", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("ShowVideoPoster(true)", codeBehind, StringComparison.Ordinal);
+            Assert.Contains("file.Thumbnail.HasImage", previewService, StringComparison.Ordinal);
+        }
     }
 }

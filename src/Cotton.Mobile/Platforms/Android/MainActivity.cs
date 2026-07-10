@@ -357,6 +357,11 @@ namespace Cotton.Mobile
             decorView.PostDelayed(ApplySystemBars, FourthSystemBarReapplyDelayMilliseconds);
         }
 
+        internal void RefreshSystemBars()
+        {
+            RequestApplySystemBars();
+        }
+
         private void ApplySystemBars()
         {
             if (Window is null || Resources is null)
@@ -376,7 +381,13 @@ namespace Cotton.Mobile
             }
 
 #pragma warning disable CA1416, CA1422
-            Android.Graphics.Color systemBarColor = Resources.GetColor(Resource.Color.cotton_system_bar_background, Theme);
+            bool useDarkViewerSystemBars = IPlatformApplication.Current?.Services
+                .GetService<IViewerSystemChromeService>()
+                ?.IsDarkViewerActive == true;
+            int systemBarColorResource = useDarkViewerSystemBars
+                ? Resource.Color.cotton_dark_viewer_system_bar_background
+                : Resource.Color.cotton_system_bar_background;
+            Android.Graphics.Color systemBarColor = Resources.GetColor(systemBarColorResource, Theme);
             Android.Views.View decorView = Window.DecorView;
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
@@ -390,8 +401,8 @@ namespace Cotton.Mobile
             }
 
             bool isNightMode = (configuration.UiMode & UiMode.NightMask) == UiMode.NightYes;
-            bool useLightStatusBars = !isNightMode;
-            bool useLightNavigationBars = !isNightMode;
+            bool useLightStatusBars = !isNightMode && !useDarkViewerSystemBars;
+            bool useLightNavigationBars = !isNightMode && !useDarkViewerSystemBars;
             WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);
             if (compatInsetsController is not null)
             {

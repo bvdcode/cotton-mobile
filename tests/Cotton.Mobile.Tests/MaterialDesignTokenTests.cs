@@ -744,8 +744,14 @@ namespace Cotton.Mobile.Tests
             string darkStyles = LoadText(AndroidDarkStylesPath);
             string splashMark = LoadText(AndroidSplashMarkPath);
             string splashScreen = LoadText(AndroidSplashScreenPath);
+            string androidViewerSystemChrome = LoadText(
+                "src/Cotton.Mobile/Platforms/Android/AndroidViewerSystemChromeService.cs");
+            string viewerSystemChrome = LoadText(
+                "src/Cotton.Mobile/Services/IViewerSystemChromeService.cs");
+            string mauiProgram = LoadText("src/Cotton.Mobile/MauiProgram.cs");
 
             Assert.Contains("using AndroidX.Core.View;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("Resource.Color.cotton_dark_viewer_system_bar_background", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Resource.Color.cotton_system_bar_background", mainActivity, StringComparison.Ordinal);
             Assert.Contains("private Android.Views.View? _statusBarScrim;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("WindowCompat.SetDecorFitsSystemWindows(Window, true);", mainActivity, StringComparison.Ordinal);
@@ -768,8 +774,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Android.Views.View decorView = Window.DecorView;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("WindowInsetsControllerCompat? compatInsetsController = WindowCompat.GetInsetsController(Window, decorView);", mainActivity, StringComparison.Ordinal);
             Assert.Contains("if (compatInsetsController is not null)", mainActivity, StringComparison.Ordinal);
-            Assert.Contains("bool useLightStatusBars = !isNightMode;", mainActivity, StringComparison.Ordinal);
-            Assert.Contains("bool useLightNavigationBars = !isNightMode;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("bool useLightStatusBars = !isNightMode && !useDarkViewerSystemBars;", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("bool useLightNavigationBars = !isNightMode && !useDarkViewerSystemBars;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("compatInsetsController.AppearanceLightStatusBars = useLightStatusBars;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("compatInsetsController.AppearanceLightNavigationBars = useLightNavigationBars;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("Window.InsetsController?.SetSystemBarsAppearance(appearance, mask);", mainActivity, StringComparison.Ordinal);
@@ -777,6 +783,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("decorView.SystemUiFlags = flags;", mainActivity, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_system_bar_background\">#F7F8F7</color>", lightColors, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_system_bar_background\">#090B0A</color>", darkColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_dark_viewer_system_bar_background\">#090B0A</color>", lightColors, StringComparison.Ordinal);
+            Assert.Contains("<color name=\"cotton_dark_viewer_system_bar_background\">#090B0A</color>", darkColors, StringComparison.Ordinal);
+            Assert.Contains("bool IsDarkViewerActive { get; }", viewerSystemChrome, StringComparison.Ordinal);
+            Assert.Contains("activity.RefreshSystemBars()", androidViewerSystemChrome, StringComparison.Ordinal);
+            Assert.Contains("AddSingleton<IViewerSystemChromeService, AndroidViewerSystemChromeService>()", mauiProgram, StringComparison.Ordinal);
+            Assert.Contains("AddSingleton<IViewerSystemChromeService, DisabledViewerSystemChromeService>()", mauiProgram, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_splash_background\">#F7F8F7</color>", lightColors, StringComparison.Ordinal);
             Assert.Contains("<color name=\"cotton_splash_background\">#090B0A</color>", darkColors, StringComparison.Ordinal);
             Assert.Contains("<item android:drawable=\"@color/cotton_splash_background\" />", splashScreen, StringComparison.Ordinal);
@@ -4020,6 +4032,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("public class DarkViewerPage : ContentPage", darkViewerPage, StringComparison.Ordinal);
             Assert.Contains("DefaultPageStyleResourceKey = \"M3DarkViewerPage\"", darkViewerPage, StringComparison.Ordinal);
             Assert.Contains("SetDynamicResource(StyleProperty, DefaultPageStyleResourceKey)", darkViewerPage, StringComparison.Ordinal);
+            Assert.Contains("SetDarkViewerActive(true)", darkViewerPage, StringComparison.Ordinal);
+            Assert.Contains("SetDarkViewerActive(false)", darkViewerPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<ContentPage xmlns=\"http://schemas.microsoft.com/dotnet/2021/maui\"", combinedViewerPages, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3DocumentViewerPage}\"", combinedViewerPages, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3DarkViewerPage}\"", combinedViewerPages, StringComparison.Ordinal);

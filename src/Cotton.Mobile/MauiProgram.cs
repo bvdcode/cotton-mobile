@@ -85,6 +85,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
 			builder.Services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
 #if ANDROID
+			builder.Services.AddSingleton<IViewerSystemChromeService, AndroidViewerSystemChromeService>();
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost, AndroidBackgroundSyncHost>();
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
@@ -99,6 +100,7 @@ namespace Cotton.Mobile
 			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
 				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
 #else
+			builder.Services.AddSingleton<IViewerSystemChromeService, DisabledViewerSystemChromeService>();
 			builder.Services.AddSingleton<IAndroidApiLevelProvider, DisabledAndroidApiLevelProvider>();
 			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost>(_ => DisabledCottonAndroidBackgroundSyncHost.Instance);
 			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();

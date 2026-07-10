@@ -4876,6 +4876,32 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Secondary_screen_content_hosts_limit_tablet_line_length()
+        {
+            XDocument spacing = LoadResourceDictionary(SpacingResourcePath);
+            XDocument styles = LoadResourceDictionary(StylesResourcePath);
+            IReadOnlyDictionary<string, string> readingHostSetters =
+                GetImplicitStyleSetters(styles, "controls:ScreenScrollBodyView");
+            IReadOnlyDictionary<string, string> collectionHostSetters =
+                GetImplicitStyleSetters(styles, "controls:ScreenContentGridView");
+
+            double readingMaxWidth = GetDoubleResource(spacing, "M3ScreenReadingContentMaxWidth");
+            double collectionMaxWidth = GetDoubleResource(spacing, "M3ScreenCollectionContentMaxWidth");
+
+            Assert.Equal(720, readingMaxWidth);
+            Assert.Equal(840, collectionMaxWidth);
+            Assert.True(collectionMaxWidth >= readingMaxWidth);
+            Assert.Equal(
+                "{StaticResource M3ScreenReadingContentMaxWidth}",
+                readingHostSetters["MaximumWidthRequest"]);
+            Assert.Equal(
+                "{StaticResource M3ScreenCollectionContentMaxWidth}",
+                collectionHostSetters["MaximumWidthRequest"]);
+            Assert.Equal("Center", readingHostSetters["HorizontalOptions"]);
+            Assert.Equal("Fill", collectionHostSetters["HorizontalOptions"]);
+        }
+
+        [Fact]
         public void Main_screen_scroll_bodies_use_reusable_material_shell()
         {
             string mainPage = LoadText(MainPagePath);

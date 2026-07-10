@@ -1087,6 +1087,16 @@
         <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
     </Style>
 
+    <Style TargetType="controls:ScreenScrollBodyView">
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3ScreenReadingContentMaxWidth}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:ScreenContentGridView">
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3ScreenCollectionContentMaxWidth}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
     <Style TargetType="VerticalStackLayout" x:Key="M3ScreenContentStack">
         <Setter Property="Padding" Value="{StaticResource M3ScreenPadding}" />
         <Setter Property="Spacing" Value="{StaticResource Space16}" />

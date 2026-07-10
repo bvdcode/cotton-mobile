@@ -318,6 +318,15 @@ namespace Cotton.Mobile
                                 filesStatus: null,
                                 hasInternetAccess: true));
                         break;
+                    case "viewer-text":
+                    case "viewer-image":
+                    case "viewer-audio":
+                    case "viewer-pdf":
+                        await AndroidVisualQaFixture.OpenFilePreviewAsync(services, pageName);
+                        break;
+                    case "app-lock":
+                        await AndroidVisualQaFixture.OpenAppLockGateAsync(services);
+                        break;
                     default:
                         Log.Warn(VisualQaIntentLogTag, $"Ignored unknown visual QA page '{pageName}'.");
                         return;

@@ -17,6 +17,7 @@ namespace Cotton.Mobile.Tests
         private const string ControlsDirectoryPath = "src/Cotton.Mobile/Controls";
         private const string AppPath = "src/Cotton.Mobile/App.xaml.cs";
         private const string MainActivityPath = "src/Cotton.Mobile/Platforms/Android/MainActivity.cs";
+        private const string AndroidVisualQaFixturePath = "src/Cotton.Mobile/Platforms/Android/AndroidVisualQaFixture.cs";
         private const string AndroidLightColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/colors.xml";
         private const string AndroidDarkColorsPath = "src/Cotton.Mobile/Platforms/Android/Resources/values-night/colors.xml";
         private const string AndroidLightStylesPath = "src/Cotton.Mobile/Platforms/Android/Resources/values/styles.xml";
@@ -278,6 +279,7 @@ namespace Cotton.Mobile.Tests
         public void Android_visual_qa_navigation_is_debug_only_and_uses_product_page_services()
         {
             string mainActivity = LoadText(MainActivityPath);
+            string visualQaFixture = LoadText(AndroidVisualQaFixturePath);
             const string visualQaExtra = "dev.cottoncloud.app.debug.extra.VISUAL_QA_PAGE";
 
             Assert.Contains("#if DEBUG", mainActivity, StringComparison.Ordinal);
@@ -301,6 +303,18 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("case \"diagnostics\":", mainActivity, StringComparison.Ordinal);
             Assert.Contains("IDiagnosticsPageService", mainActivity, StringComparison.Ordinal);
             Assert.Contains("new CottonDiagnosticsContext(", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"viewer-text\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"viewer-image\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"viewer-audio\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"viewer-pdf\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"app-lock\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("AndroidVisualQaFixture.OpenFilePreviewAsync", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("AndroidVisualQaFixture.OpenAppLockGateAsync", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("#if DEBUG", visualQaFixture, StringComparison.Ordinal);
+            Assert.Contains("FileSystem.CacheDirectory", visualQaFixture, StringComparison.Ordinal);
+            Assert.Contains("GetRequiredService<IFilePreviewService>()", visualQaFixture, StringComparison.Ordinal);
+            Assert.Contains("PushModalAsync(page, animated: false)", visualQaFixture, StringComparison.Ordinal);
+            Assert.DoesNotContain("FileSystem.AppDataDirectory", visualQaFixture, StringComparison.Ordinal);
             Assert.DoesNotContain($"[IntentFilter(\"{visualQaExtra}\"", mainActivity, StringComparison.Ordinal);
         }
 

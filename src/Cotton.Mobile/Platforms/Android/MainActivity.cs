@@ -26,6 +26,11 @@ namespace Cotton.Mobile
         private const long ThirdSystemBarReapplyDelayMilliseconds = 2500;
         private const long FourthSystemBarReapplyDelayMilliseconds = 5000;
         private const string NotificationIntentLogTag = "CottonNotification";
+#if DEBUG
+        private const string VisualQaIntentLogTag = "CottonVisualQa";
+        private const string VisualQaPageExtra = "dev.cottoncloud.app.debug.extra.VISUAL_QA_PAGE";
+        private const long VisualQaLaunchDelayMilliseconds = 1000;
+#endif
         private Android.Views.View? _statusBarScrim;
 
         protected override void OnCreate(Bundle? savedInstanceState)
@@ -35,6 +40,9 @@ namespace Cotton.Mobile
             RequestApplySystemBars();
             StageShareIntent(Intent);
             StageNotificationIntent(Intent);
+#if DEBUG
+            StageVisualQaIntent(Intent);
+#endif
         }
 
         protected override void OnNewIntent(Intent? intent)
@@ -43,6 +51,9 @@ namespace Cotton.Mobile
 
             StageShareIntent(intent);
             StageNotificationIntent(intent);
+#if DEBUG
+            StageVisualQaIntent(intent);
+#endif
         }
 
         protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
@@ -209,6 +220,84 @@ namespace Cotton.Mobile
             intent?.RemoveExtra(AndroidNotificationIntentExtras.NotificationId);
             intent?.RemoveExtra(AndroidNotificationIntentExtras.EventCategory);
         }
+
+#if DEBUG
+        private void StageVisualQaIntent(Intent? intent)
+        {
+            string? pageName = intent?.GetStringExtra(VisualQaPageExtra);
+            if (string.IsNullOrWhiteSpace(pageName))
+            {
+                return;
+            }
+
+            intent?.RemoveExtra(VisualQaPageExtra);
+            Android.Views.View? decorView = Window?.DecorView;
+            if (decorView is null)
+            {
+                Log.Warn(VisualQaIntentLogTag, "Ignored visual QA launch because the Android window is unavailable.");
+                return;
+            }
+
+            string normalizedPageName = pageName.Trim().ToLowerInvariant();
+            decorView.PostDelayed(
+                () => _ = OpenVisualQaPageAsync(normalizedPageName),
+                VisualQaLaunchDelayMilliseconds);
+        }
+
+        private static async Task OpenVisualQaPageAsync(string pageName)
+        {
+            try
+            {
+                IServiceProvider? services = IPlatformApplication.Current?.Services;
+                if (services is null)
+                {
+                    Log.Warn(VisualQaIntentLogTag, "Ignored visual QA launch because application services are unavailable.");
+                    return;
+                }
+
+                Uri instanceUri = services.GetRequiredService<CottonMobileOptions>().DefaultInstanceUri;
+                switch (pageName)
+                {
+                    case "storage":
+                        await services.GetRequiredService<IStorageSettingsPageService>().OpenAsync();
+                        break;
+                    case "notifications":
+                        await services.GetRequiredService<INotificationSettingsPageService>().OpenAsync();
+                        break;
+                    case "sync":
+                        await services.GetRequiredService<ISyncSettingsPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "transfers":
+                        await services.GetRequiredService<ITransfersPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "backup":
+                        await services.GetRequiredService<IBackupSetupPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "capture":
+                        await services.GetRequiredService<ICaptureInboxPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "recent":
+                        await services.GetRequiredService<IRecentFilesPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "trash":
+                        await services.GetRequiredService<ITrashPageService>().OpenAsync(instanceUri);
+                        break;
+                    case "activity":
+                        await services.GetRequiredService<IActivityFeedPageService>().OpenAsync(instanceUri);
+                        break;
+                    default:
+                        Log.Warn(VisualQaIntentLogTag, $"Ignored unknown visual QA page '{pageName}'.");
+                        return;
+                }
+
+                Log.Info(VisualQaIntentLogTag, $"Opened visual QA page '{pageName}'.");
+            }
+            catch (Exception exception)
+            {
+                Log.Warn(VisualQaIntentLogTag, $"Failed to open visual QA page '{pageName}'. {exception}");
+            }
+        }
+#endif
 
         private void RequestApplySystemBars()
         {

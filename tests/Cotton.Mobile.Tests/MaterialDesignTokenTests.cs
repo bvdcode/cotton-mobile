@@ -270,6 +270,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Android_visual_qa_navigation_is_debug_only_and_uses_product_page_services()
+        {
+            string mainActivity = LoadText(MainActivityPath);
+            const string visualQaExtra = "dev.cottoncloud.app.debug.extra.VISUAL_QA_PAGE";
+
+            Assert.Contains("#if DEBUG", mainActivity, StringComparison.Ordinal);
+            Assert.Contains($"VisualQaPageExtra = \"{visualQaExtra}\"", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("StageVisualQaIntent(Intent);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("StageVisualQaIntent(intent);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("intent?.RemoveExtra(VisualQaPageExtra);", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("OpenVisualQaPageAsync(normalizedPageName)", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("IStorageSettingsPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("INotificationSettingsPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ISyncSettingsPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ITransfersPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("IBackupSetupPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ICaptureInboxPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("IRecentFilesPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ITrashPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("IActivityFeedPageService", mainActivity, StringComparison.Ordinal);
+            Assert.DoesNotContain($"[IntentFilter(\"{visualQaExtra}\"", mainActivity, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Light_theme_keeps_readable_primary_and_exposes_lime_action_surface()
         {
             string colors = LoadText(ColorsResourcePath);

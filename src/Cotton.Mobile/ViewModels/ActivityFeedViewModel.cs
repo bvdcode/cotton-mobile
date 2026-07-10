@@ -93,6 +93,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsHeaderSummaryVisible => Items.Count > 0;
+
         public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
 
         public bool IsListVisible => Items.Count > 0;
@@ -120,7 +122,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Cotton mobile activity feed load failed.");
-                Status = "Could not load activity.";
+                ShowLoadFailure();
             }
             finally
             {
@@ -182,6 +184,7 @@ namespace Cotton.Mobile.ViewModels
             EmptyMessage = snapshot.EmptyMessage;
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsHeaderSummaryVisible));
             OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
         }
@@ -194,6 +197,19 @@ namespace Cotton.Mobile.ViewModels
                 _pagingState.TotalItemCount);
             OnPropertyChanged(nameof(IsLoadMoreVisible));
             LoadMoreCommand.RaiseCanExecuteChanged();
+        }
+
+        private void ShowLoadFailure()
+        {
+            if (Items.Count == 0)
+            {
+                EmptyMessage = "Activity unavailable";
+                EmptyDetails = "Refresh to try again.";
+                Status = null;
+                return;
+            }
+
+            Status = "Could not load activity.";
         }
 
         private bool CanLoadMore()

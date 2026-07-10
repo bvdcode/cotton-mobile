@@ -193,9 +193,11 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status) && Items.Count > 0;
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
+
+        public bool IsHeaderSummaryVisible => Items.Count > 0;
 
         public bool IsListVisible => Items.Count > 0 && _viewMode == CottonFileBrowserViewMode.List;
 
@@ -1007,6 +1009,8 @@ namespace Cotton.Mobile.ViewModels
         private void NotifyPresentationStateChanged()
         {
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsHeaderSummaryVisible));
+            OnPropertyChanged(nameof(IsStatusVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(IsTileVisible));
             OnPropertyChanged(nameof(IsSearchVisible));

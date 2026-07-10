@@ -21,6 +21,7 @@
         <controls:ScreenContentGridView Grid.Row="1">
         <controls:ScreenHeaderView Title="Recent files"
                                    SupportingText="{Binding SummaryText}"
+                                   IsSupportingTextVisible="{Binding IsHeaderSummaryVisible}"
                                    IsBusy="{Binding IsBusy}" />
 
         <controls:ScreenStatusView Grid.Row="1"

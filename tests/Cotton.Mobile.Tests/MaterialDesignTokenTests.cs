@@ -32,6 +32,7 @@ namespace Cotton.Mobile.Tests
         private const string AppLockGatePagePath = "src/Cotton.Mobile/AppLockGatePage.xaml";
         private const string RecentFilesPagePath = "src/Cotton.Mobile/RecentFilesPage.xaml";
         private const string ActivityFeedPagePath = "src/Cotton.Mobile/ActivityFeedPage.xaml";
+        private const string ActivityFeedViewModelPath = "src/Cotton.Mobile/ViewModels/ActivityFeedViewModel.cs";
         private const string TransfersPagePath = "src/Cotton.Mobile/TransfersPage.xaml";
         private const string FileVersionHistoryPagePath = "src/Cotton.Mobile/FileVersionHistoryPage.xaml";
         private const string CaptureInboxPagePath = "src/Cotton.Mobile/CaptureInboxPage.xaml";
@@ -1180,6 +1181,8 @@ namespace Cotton.Mobile.Tests
                 GetStyleSetters(stylesDocument, "M3EmptyStateIconFrame");
             IReadOnlyDictionary<string, string> emptyIconSetters =
                 GetStyleSetters(stylesDocument, "M3EmptyStateIcon");
+            IReadOnlyDictionary<string, string> emptySurfaceSetters =
+                GetStyleSetters(stylesDocument, "M3EmptyStateSurface");
 
             Assert.Contains("ActionCommand=\"{Binding ShowFileAddActionsCommand}\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("IsBodyVisible=\"{Binding Display.IsFilesEmptyDetailsVisible}\"", mainPage, StringComparison.Ordinal);
@@ -1203,6 +1206,8 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsStateVisibleProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("IsFilledActionProperty", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("FilledActionButtonStyleResourceKeyProperty", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("DefaultCardStyleResourceKey = \"M3EmptyStateSurface\"", emptyStateView, StringComparison.Ordinal);
+            Assert.Contains("_card.SetDynamicResource(StyleProperty, DefaultCardStyleResourceKey);", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("new LoadingIndicatorView", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("StateOpacityAnimationName = \"M3EmptyStateOpacity\"", emptyStateView, StringComparison.Ordinal);
             Assert.Contains("BodyOpacityAnimationName = \"M3EmptyStateBodyOpacity\"", emptyStateView, StringComparison.Ordinal);
@@ -1248,6 +1253,10 @@ namespace Cotton.Mobile.Tests
                 emptyIconSetters["IconColor"]);
             Assert.DoesNotContain("M3LightPrimaryContainer", emptyIconFrameSetters["BackgroundColor"], StringComparison.Ordinal);
             Assert.DoesNotContain("M3DarkPrimaryContainer", emptyIconFrameSetters["Stroke"], StringComparison.Ordinal);
+            Assert.Equal("{StaticResource M3Transparent}", emptySurfaceSetters["Stroke"]);
+            Assert.Equal("{StaticResource M3StrokeNone}", emptySurfaceSetters["StrokeThickness"]);
+            Assert.Equal("{StaticResource M3Transparent}", emptySurfaceSetters["BackgroundColor"]);
+            Assert.Equal("{StaticResource M3EmptyStateCardPadding}", emptySurfaceSetters["Padding"]);
             Assert.DoesNotContain("<Border Grid.Row=\"1\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Grid RowDefinitions=\"*,Auto,*\"", appLockGatePage, StringComparison.Ordinal);
             Assert.DoesNotContain("Style=\"{StaticResource M3AppLockGateGrid}\"", appLockGatePage, StringComparison.Ordinal);
@@ -4874,6 +4883,7 @@ namespace Cotton.Mobile.Tests
             string trashPage = LoadText(TrashPagePath);
             string transfersPage = LoadText(TransfersPagePath);
             string captureInboxPage = LoadText(CaptureInboxPagePath);
+            string activityFeedViewModel = LoadText(ActivityFeedViewModelPath);
 
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
@@ -4890,8 +4900,17 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("<controls:ScreenHeaderView Title=\"Trash\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView Title=\"Transfers\"", transfersPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding SummaryText}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsHeaderSummaryVisible}\"", transfersPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsHeaderSummaryVisible}\"", trashPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView Title=\"Capture inbox\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("SupportingText=\"{Binding SummaryText}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsHeaderSummaryVisible}\"", captureInboxPage, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsHeaderSummaryVisible}\"", LoadText(ActivityFeedPagePath), StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextVisible=\"{Binding IsHeaderSummaryVisible}\"", LoadText(RecentFilesPagePath), StringComparison.Ordinal);
+            Assert.Contains("ShowLoadFailure();", activityFeedViewModel, StringComparison.Ordinal);
+            Assert.Contains("private void ShowLoadFailure()", activityFeedViewModel, StringComparison.Ordinal);
+            Assert.Contains("EmptyMessage = \"Activity unavailable\";", activityFeedViewModel, StringComparison.Ordinal);
+            Assert.Contains("EmptyDetails = \"Refresh to try again.\";", activityFeedViewModel, StringComparison.Ordinal);
             Assert.DoesNotContain("<controls:ScreenHeaderView Title=\"{Binding SummaryText}\"", captureInboxPage, StringComparison.Ordinal);
             Assert.Contains("<controls:ScreenHeaderView.ActionContent>", trashPage, StringComparison.Ordinal);
             Assert.Contains("IsBusy=\"{Binding IsBusy}\"", trashPage, StringComparison.Ordinal);

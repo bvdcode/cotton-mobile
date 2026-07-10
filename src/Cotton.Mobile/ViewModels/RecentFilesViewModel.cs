@@ -124,6 +124,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsEmpty => Items.Count == 0 && !IsBusy;
 
+        public bool IsHeaderSummaryVisible => Items.Count > 0;
+
         public bool IsLoadingPlaceholderVisible => _isLoadingPlaceholderEnabled && IsBusy && Items.Count == 0;
 
         public bool IsListVisible => Items.Count > 0;
@@ -307,6 +309,7 @@ namespace Cotton.Mobile.ViewModels
             EmptyMessage = snapshot.EmptyMessage;
             EmptyDetails = snapshot.EmptyDetails;
             OnPropertyChanged(nameof(IsEmpty));
+            OnPropertyChanged(nameof(IsHeaderSummaryVisible));
             OnPropertyChanged(nameof(IsLoadingPlaceholderVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanClearRecentFiles));

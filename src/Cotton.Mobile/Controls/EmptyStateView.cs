@@ -14,7 +14,7 @@ namespace Cotton.Mobile.Controls
         private const string BusyIndicatorOpacityAnimationName = "M3EmptyStateBusyIndicatorOpacity";
         private const string DefaultActionIconButtonStyleResourceKey = "M3EmptyStateActionIconButton";
         private const string DefaultActionRowStyleResourceKey = "M3PanelActionListItemGrid";
-        private const string DefaultCardStyleResourceKey = "M3EmptyStateCard";
+        private const string DefaultCardStyleResourceKey = "M3EmptyStateSurface";
         private const string DefaultFilledActionButtonStyleResourceKey = "M3PanelActionFilledButton";
         private const string DefaultIconFrameStyleResourceKey = "M3EmptyStateIconFrame";
         private const string FilledActionButtonOpacityAnimationName = "M3EmptyStateFilledActionOpacity";
@@ -235,7 +235,7 @@ namespace Cotton.Mobile.Controls
             {
                 Content = stack,
             };
-            _card.SetDynamicResource(StyleProperty, "M3EmptyStateCard");
+            _card.SetDynamicResource(StyleProperty, DefaultCardStyleResourceKey);
 
             Content = _card;
             UpdateVisualState(animateBusy: false);

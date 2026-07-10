@@ -27,6 +27,7 @@
                                         ExtraAutoRows="2">
         <controls:ScreenHeaderView Title="Trash"
                                    SupportingText="{Binding SummaryText}"
+                                   IsSupportingTextVisible="{Binding IsHeaderSummaryVisible}"
                                    IsBusy="{Binding IsBusy}">
             <controls:ScreenHeaderView.ActionContent>
                 <controls:ActionClusterView ClusterStyleResourceKey="M3ScreenHeaderActionCluster"

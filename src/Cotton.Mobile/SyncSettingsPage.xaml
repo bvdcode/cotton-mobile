@@ -14,12 +14,13 @@
         <controls:TopAppBar PrimaryIconData="{x:Static controls:IconPathData.Play}"
                             PrimaryCommand="{Binding RunAllCommand}"
                             PrimaryDescription="Run all sync roots"
+                            IsPrimaryActionVisible="{Binding IsRunAllVisible}"
                             SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
                             SecondaryCommand="{Binding LoadCommand}"
                             SecondaryDescription="Refresh sync settings" />
 
         <controls:ScreenContentGridView Grid.Row="1">
-            <controls:ScreenHeaderView Title="Folders"
+            <controls:ScreenHeaderView Title="Sync"
                                        SupportingText="{Binding SummaryText}"
                                        IsSupportingTextVisible="{Binding IsSummaryVisible}"
                                        IsBusy="{Binding IsBusy}" />

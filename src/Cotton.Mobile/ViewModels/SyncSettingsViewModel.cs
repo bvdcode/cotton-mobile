@@ -147,6 +147,8 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsListVisible => !IsEmptyVisible;
 
+        public bool IsRunAllVisible => _canRunAll;
+
         public void Configure(Uri instanceUri)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
@@ -561,7 +563,13 @@ namespace Cotton.Mobile.ViewModels
 
             SummaryText = state.SummaryText;
             IsEmptyVisible = state.IsEmptyVisible;
+            bool canRunAllChanged = _canRunAll != state.CanRunAny;
             _canRunAll = state.CanRunAny;
+            if (canRunAllChanged)
+            {
+                OnPropertyChanged(nameof(IsRunAllVisible));
+            }
+
             RunAllCommand.RaiseCanExecuteChanged();
         }
 

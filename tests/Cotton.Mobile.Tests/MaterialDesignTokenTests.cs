@@ -4941,6 +4941,7 @@ namespace Cotton.Mobile.Tests
             }
 
             string syncSettingsPage = LoadText(SyncSettingsPagePath);
+            string syncSettingsViewModel = LoadText(SyncSettingsViewModelPath);
             string backupSetupPage = LoadText(BackupSetupPagePath);
             string destinationPickerPage = LoadText(CaptureDestinationPickerPagePath);
             string fileVersionHistoryPage = LoadText(FileVersionHistoryPagePath);
@@ -4951,6 +4952,11 @@ namespace Cotton.Mobile.Tests
             string activityFeedViewModel = LoadText(ActivityFeedViewModelPath);
 
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsSummaryVisible}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:ScreenHeaderView Title=\"Sync\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("<controls:ScreenHeaderView Title=\"Folders\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsPrimaryActionVisible=\"{Binding IsRunAllVisible}\"", syncSettingsPage, StringComparison.Ordinal);
+            Assert.Contains("public bool IsRunAllVisible => _canRunAll;", syncSettingsViewModel, StringComparison.Ordinal);
+            Assert.Contains("OnPropertyChanged(nameof(IsRunAllVisible));", syncSettingsViewModel, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextVisible=\"{Binding IsPathTextVisible}\"", destinationPickerPage, StringComparison.Ordinal);
             Assert.Contains("IsSupportingTextMultiline=\"True\"", destinationPickerPage, StringComparison.Ordinal);

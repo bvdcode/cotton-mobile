@@ -285,6 +285,39 @@ namespace Cotton.Mobile
                     case "activity":
                         await services.GetRequiredService<IActivityFeedPageService>().OpenAsync(instanceUri);
                         break;
+                    case "security":
+                    {
+                        ICottonCurrentSessionRevocationHandler? revocationHandler =
+                            Shell.Current?.CurrentPage?.BindingContext as ICottonCurrentSessionRevocationHandler
+                            ?? Shell.Current?.Navigation.NavigationStack
+                                .Select(page => page.BindingContext)
+                                .OfType<ICottonCurrentSessionRevocationHandler>()
+                                .FirstOrDefault();
+                        if (revocationHandler is null)
+                        {
+                            throw new InvalidOperationException(
+                                "Visual QA security launch requires the current app session handler.");
+                        }
+
+                        await services.GetRequiredService<ISecuritySettingsPageService>()
+                            .OpenAsync(revocationHandler);
+                        break;
+                    }
+                    case "diagnostics":
+                        await services.GetRequiredService<IDiagnosticsPageService>().OpenAsync(
+                            new CottonDiagnosticsContext(
+                                instanceUri.AbsoluteUri,
+                                profileName: null,
+                                screen: "Files",
+                                fileLocation: "Files",
+                                visibleFileCount: 0,
+                                totalFileCount: 0,
+                                fileViewMode: "List",
+                                fileSortMode: "A-Z",
+                                isFileSearchActive: false,
+                                filesStatus: null,
+                                hasInternetAccess: true));
+                        break;
                     default:
                         Log.Warn(VisualQaIntentLogTag, $"Ignored unknown visual QA page '{pageName}'.");
                         return;

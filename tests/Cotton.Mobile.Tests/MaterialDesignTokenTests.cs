@@ -295,6 +295,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IRecentFilesPageService", mainActivity, StringComparison.Ordinal);
             Assert.Contains("ITrashPageService", mainActivity, StringComparison.Ordinal);
             Assert.Contains("IActivityFeedPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"security\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ISecuritySettingsPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("ICottonCurrentSessionRevocationHandler", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("case \"diagnostics\":", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("IDiagnosticsPageService", mainActivity, StringComparison.Ordinal);
+            Assert.Contains("new CottonDiagnosticsContext(", mainActivity, StringComparison.Ordinal);
             Assert.DoesNotContain($"[IntentFilter(\"{visualQaExtra}\"", mainActivity, StringComparison.Ordinal);
         }
 

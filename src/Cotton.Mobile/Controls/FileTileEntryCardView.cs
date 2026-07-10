@@ -2,6 +2,7 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Services;
 
 namespace Cotton.Mobile.Controls
 {
@@ -102,29 +103,29 @@ namespace Cotton.Mobile.Controls
             nameof(SlotWidth),
             typeof(double),
             typeof(FileTileEntryCardView),
-            0d,
-            propertyChanged: OnVisualPropertyChanged);
+            CottonFileTileLayoutPlanner.InitialMetrics.SlotWidth,
+            propertyChanged: OnLayoutPropertyChanged);
 
         public static readonly BindableProperty TileHeightProperty = BindableProperty.Create(
             nameof(TileHeight),
             typeof(double),
             typeof(FileTileEntryCardView),
-            0d,
-            propertyChanged: OnVisualPropertyChanged);
+            CottonFileTileLayoutPlanner.InitialMetrics.TileHeight,
+            propertyChanged: OnLayoutPropertyChanged);
 
         public static readonly BindableProperty PreviewHeightProperty = BindableProperty.Create(
             nameof(PreviewHeight),
             typeof(double),
             typeof(FileTileEntryCardView),
-            0d,
-            propertyChanged: OnVisualPropertyChanged);
+            CottonFileTileLayoutPlanner.InitialMetrics.PreviewHeight,
+            propertyChanged: OnLayoutPropertyChanged);
 
         public static readonly BindableProperty FolderIconSizeProperty = BindableProperty.Create(
             nameof(FolderIconSize),
             typeof(double),
             typeof(FileTileEntryCardView),
-            0d,
-            propertyChanged: OnVisualPropertyChanged);
+            CottonFileTileLayoutPlanner.InitialMetrics.FolderIconSize,
+            propertyChanged: OnLayoutPropertyChanged);
 
         public static readonly BindableProperty BeginSelectionCommandProperty = BindableProperty.Create(
             nameof(BeginSelectionCommand),
@@ -234,6 +235,8 @@ namespace Cotton.Mobile.Controls
                     _card,
                 },
             };
+            _slotGrid.SetDynamicResource(StyleProperty, "M3FileTileSlotGrid");
+            _contentGrid.SetDynamicResource(StyleProperty, "M3FileTileContentGrid");
 
             Content = _slotGrid;
             UpdateVisualState();
@@ -389,6 +392,13 @@ namespace Cotton.Mobile.Controls
             view.ScheduleVisualStateUpdate();
         }
 
+        private static void OnLayoutPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            FileTileEntryCardView view = (FileTileEntryCardView)bindable;
+            view.ApplyLayoutMetrics();
+            view.ScheduleVisualStateUpdate();
+        }
+
         private void ScheduleVisualStateUpdate()
         {
             if (_isVisualStateUpdatePending)
@@ -413,15 +423,10 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            _slotGrid.SetDynamicResource(StyleProperty, "M3FileTileSlotGrid");
-            _slotGrid.WidthRequest = SlotWidth;
-            _card.HeightRequest = TileHeight;
-            _contentGrid.SetDynamicResource(StyleProperty, "M3FileTileContentGrid");
-            _previewRow.Height = new GridLength(PreviewHeight);
+            ApplyLayoutMetrics();
 
-            _selectionOverlay.IsSelected = IsSelected;
+            _selectionOverlay.ApplySelectionState(IsSelected, animateSelection: false);
 
-            _thumbnail.HeightRequest = PreviewHeight;
             _thumbnail.ApplyThumbnailState(
                 ThumbnailSource,
                 IsPreviewImageVisible,
@@ -430,7 +435,8 @@ namespace Cotton.Mobile.Controls
                 PlaceholderText ?? string.Empty,
                 IsPlaceholderTextVisible,
                 IsSelected,
-                FolderIconSize);
+                FolderIconSize,
+                animateChanges: false);
 
             _metadata.ApplyMetadataState(
                 Title ?? string.Empty,
@@ -450,6 +456,20 @@ namespace Cotton.Mobile.Controls
             _actionButton.IsActionEnabled = IsActionEnabled;
             _actionButton.IsActionVisible = IsActionVisible;
             _actionButton.SemanticDescription = ActionSemanticDescription ?? string.Empty;
+        }
+
+        private void ApplyLayoutMetrics()
+        {
+            double slotWidth = SlotWidth > 0 ? SlotWidth : CottonFileTileLayoutPlanner.InitialMetrics.SlotWidth;
+            double tileHeight = TileHeight > 0 ? TileHeight : CottonFileTileLayoutPlanner.InitialMetrics.TileHeight;
+            double previewHeight = PreviewHeight > 0
+                ? PreviewHeight
+                : CottonFileTileLayoutPlanner.InitialMetrics.PreviewHeight;
+
+            _slotGrid.WidthRequest = slotWidth;
+            _card.HeightRequest = tileHeight;
+            _previewRow.Height = new GridLength(previewHeight);
+            _thumbnail.HeightRequest = previewHeight;
         }
     }
 }

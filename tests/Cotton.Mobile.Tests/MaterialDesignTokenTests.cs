@@ -3347,6 +3347,7 @@ namespace Cotton.Mobile.Tests
             string materialAnimatedContentView = LoadText(Path.Combine(ControlsDirectoryPath, "MaterialAnimatedContentView.cs"));
 
             Assert.Contains("<controls:MaterialCollectionView IsContentVisible=\"{Binding Display.IsFileTileViewVisible}\"", mainPage, StringComparison.Ordinal);
+            Assert.Equal(2, CountOccurrences(mainPage, "ItemSizingStrategy=\"MeasureFirstItem\""));
             Assert.Contains("<controls:MaterialCollectionView.ItemsLayout>", mainPage, StringComparison.Ordinal);
             Assert.Contains("<GridItemsLayout Orientation=\"Vertical\"", mainPage, StringComparison.Ordinal);
             Assert.Contains("Span=\"{Binding Source={x:Reference RootPage}, Path=FileTileColumnCount}\"", mainPage, StringComparison.Ordinal);
@@ -3362,8 +3363,12 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("new FileTileMetadataView", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_slotGrid.SetDynamicResource(StyleProperty, \"M3FileTileSlotGrid\")", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_contentGrid.SetDynamicResource(StyleProperty, \"M3FileTileContentGrid\")", fileTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_previewRow.Height = new GridLength(PreviewHeight)", fileTileEntryCardView, StringComparison.Ordinal);
-            Assert.Contains("_thumbnail.HeightRequest = PreviewHeight", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("CottonFileTileLayoutPlanner.InitialMetrics.SlotWidth", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("propertyChanged: OnLayoutPropertyChanged", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("view.ApplyLayoutMetrics()", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_previewRow.Height = new GridLength(previewHeight)", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("_thumbnail.HeightRequest = previewHeight", fileTileEntryCardView, StringComparison.Ordinal);
+            Assert.Contains("animateChanges: false", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.Contains("_metadata.ApplyMetadataState(", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("_metadata.Title =", fileTileEntryCardView, StringComparison.Ordinal);
             Assert.DoesNotContain("_metadata.Detail =", fileTileEntryCardView, StringComparison.Ordinal);

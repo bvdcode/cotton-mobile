@@ -177,11 +177,10 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Devices and sessions", display.Title);
             Assert.Equal("2 active", display.StatusText);
             Assert.True(display.HasItems);
-            Assert.False(display.IsEmptyVisible);
             Assert.Equal("session-current", display.CurrentSessionId);
             Assert.True(display.CanRevokeCurrentSession);
             Assert.Equal("Revoke current session", display.CurrentSessionRevokeActionText);
-            Assert.Equal("Signed-in account sessions reported by the server.", display.DetailText);
+            Assert.Empty(display.DetailText);
 
             CottonAccountSessionListItem current = display.Items[0];
             Assert.Equal("Cotton Mobile", current.Title);
@@ -203,13 +202,11 @@ namespace Cotton.Mobile.Tests
             CottonAccountSessionListDisplayState empty = CottonAccountSessionListDisplayState.Create(
                 Array.Empty<CottonAccountSessionSnapshot>());
 
-            Assert.Equal("0 active", empty.StatusText);
+            Assert.Equal("No active sessions", empty.StatusText);
             Assert.False(empty.HasItems);
-            Assert.True(empty.IsEmptyVisible);
             Assert.Null(empty.CurrentSessionId);
             Assert.False(empty.CanRevokeCurrentSession);
-            Assert.Equal("No active sessions", empty.EmptyTitle);
-            Assert.Equal("The server did not return any active account sessions.", empty.EmptyDetails);
+            Assert.Empty(empty.DetailText);
 
             CottonAccountSessionListDisplayState unavailable =
                 CottonAccountSessionListDisplayState.Unavailable("Could not load signed-in devices.");
@@ -217,8 +214,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Unavailable", unavailable.StatusText);
             Assert.Null(unavailable.CurrentSessionId);
             Assert.False(unavailable.CanRevokeCurrentSession);
-            Assert.Equal("Sessions unavailable", unavailable.EmptyTitle);
-            Assert.Equal("Could not load signed-in devices.", unavailable.EmptyDetails);
+            Assert.Equal("Could not load signed-in devices.", unavailable.DetailText);
         }
 
         [Fact]

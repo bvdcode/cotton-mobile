@@ -35,35 +35,12 @@ namespace Cotton.Mobile.Services
 
         public static CottonPermissionLedgerDisplayState Create(
             CottonNotificationPermissionState notificationPermission,
-            CottonCameraBackupMediaAccessState mediaAccess,
-            CottonAppLockSettings appLockSettings,
-            CottonAppLockCapabilitySnapshot appLockCapability,
-            CottonDeviceUnlockAvailabilitySnapshot deviceUnlockAvailability)
+            CottonCameraBackupMediaAccessState mediaAccess)
         {
-            ArgumentNullException.ThrowIfNull(appLockSettings);
-            ArgumentNullException.ThrowIfNull(appLockCapability);
-            ArgumentNullException.ThrowIfNull(deviceUnlockAvailability);
-
             CottonPermissionLedgerItem[] items =
             [
                 CreateNotificationItem(notificationPermission),
                 CreateMediaAccessItem(mediaAccess),
-                CreateAppLockItem(appLockSettings, appLockCapability, deviceUnlockAvailability),
-                new CottonPermissionLedgerItem(
-                    "Selected files",
-                    "Private",
-                    "Manual uploads and shared items use only files selected or shared by the user.",
-                    needsAttention: false),
-                new CottonPermissionLedgerItem(
-                    "Document scan",
-                    "No camera access",
-                    "Scans are returned by Android's document scanner; Cotton does not request camera permission.",
-                    needsAttention: false),
-                new CottonPermissionLedgerItem(
-                    "Network",
-                    "Online access",
-                    "Internet and network-state access are used to connect to Cotton and show offline state.",
-                    needsAttention: false),
             ];
 
             return new CottonPermissionLedgerDisplayState(
@@ -112,36 +89,6 @@ namespace Cotton.Mobile.Services
                 display.StatusText,
                 display.DetailText,
                 display.NeedsAttention);
-        }
-
-        private static CottonPermissionLedgerItem CreateAppLockItem(
-            CottonAppLockSettings appLockSettings,
-            CottonAppLockCapabilitySnapshot appLockCapability,
-            CottonDeviceUnlockAvailabilitySnapshot deviceUnlockAvailability)
-        {
-            if (appLockSettings.IsEnabled && appLockCapability.CanEnable)
-            {
-                return new CottonPermissionLedgerItem(
-                    "Device lock",
-                    "Protected",
-                    "App lock uses the device screen lock after Cotton is in the background.",
-                    needsAttention: false);
-            }
-
-            if (appLockCapability.CanEnable && deviceUnlockAvailability.CanVerify)
-            {
-                return new CottonPermissionLedgerItem(
-                    "Device lock",
-                    "Available",
-                    "Cotton can require device unlock when App lock is turned on.",
-                    needsAttention: false);
-            }
-
-            return new CottonPermissionLedgerItem(
-                "Device lock",
-                "Unavailable",
-                appLockCapability.DetailText,
-                needsAttention: true);
         }
 
         private static string CreateStatusText(IReadOnlyCollection<CottonPermissionLedgerItem> items)

@@ -10,17 +10,14 @@ namespace Cotton.Mobile.Tests
         {
             CottonPermissionLedgerDisplayState display = CottonPermissionLedgerDisplayState.Create(
                 CottonNotificationPermissionState.Allowed,
-                CottonCameraBackupMediaAccessState.Allowed,
-                new CottonAppLockSettings(isEnabled: true),
-                CottonAppLockCapabilitySnapshot.Available,
-                CottonDeviceUnlockAvailabilitySnapshot.Available);
+                CottonCameraBackupMediaAccessState.Allowed);
 
             Assert.Equal("Device access", display.Title);
             Assert.Equal("Looks good", display.StatusText);
             Assert.Equal("Permissions Cotton uses on this device.", display.DetailText);
             Assert.True(display.HasItems);
             Assert.False(display.HasAttention);
-            Assert.Equal(6, display.Items.Count);
+            Assert.Equal(2, display.Items.Count);
 
             Assert.Collection(
                 display.Items,
@@ -33,26 +30,6 @@ namespace Cotton.Mobile.Tests
                     item,
                     "Photos and videos",
                     "Allowed",
-                    needsAttention: false),
-                item => AssertLedgerItem(
-                    item,
-                    "Device lock",
-                    "Protected",
-                    needsAttention: false),
-                item => AssertLedgerItem(
-                    item,
-                    "Selected files",
-                    "Private",
-                    needsAttention: false),
-                item => AssertLedgerItem(
-                    item,
-                    "Document scan",
-                    "No camera access",
-                    needsAttention: false),
-                item => AssertLedgerItem(
-                    item,
-                    "Network",
-                    "Online access",
                     needsAttention: false));
         }
 
@@ -61,19 +38,13 @@ namespace Cotton.Mobile.Tests
         {
             CottonPermissionLedgerDisplayState display = CottonPermissionLedgerDisplayState.Create(
                 CottonNotificationPermissionState.Denied,
-                CottonCameraBackupMediaAccessState.Limited,
-                CottonAppLockSettings.Disabled,
-                CottonAppLockCapabilitySnapshot.Unavailable("Set a screen lock first."),
-                CottonDeviceUnlockAvailabilitySnapshot.Unavailable("Set a screen lock first."));
+                CottonCameraBackupMediaAccessState.Limited);
 
-            Assert.Equal("3 items need review", display.StatusText);
+            Assert.Equal("2 items need review", display.StatusText);
             Assert.True(display.HasAttention);
 
             AssertLedgerItem(display.Items[0], "Notifications", "Denied", needsAttention: true);
             AssertLedgerItem(display.Items[1], "Photos and videos", "Selected media only", needsAttention: true);
-            AssertLedgerItem(display.Items[2], "Device lock", "Unavailable", needsAttention: true);
-            Assert.Contains("Set a screen lock first.", display.Items[2].DetailText, StringComparison.Ordinal);
-            Assert.False(display.Items[3].NeedsAttention);
         }
 
         [Fact]

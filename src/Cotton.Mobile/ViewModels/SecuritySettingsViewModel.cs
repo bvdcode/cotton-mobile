@@ -150,8 +150,6 @@ namespace Cotton.Mobile.ViewModels
 
         public string PermissionLedgerStatusText => PermissionLedgerDisplay.StatusText;
 
-        public string PermissionLedgerDetailText => PermissionLedgerDisplay.DetailText;
-
         public bool IsPermissionLedgerVisible => PermissionLedgerDisplay.HasItems;
 
         public string LogoutCacheCleanupTitle => LogoutCleanupDisplay.Title;
@@ -183,13 +181,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string AccountSessionsDetailText => AccountSessionDisplay.DetailText;
 
-        public string AccountSessionsEmptyTitle => AccountSessionDisplay.EmptyTitle;
-
-        public string AccountSessionsEmptyDetails => AccountSessionDisplay.EmptyDetails;
-
         public bool IsAccountSessionsListVisible => AccountSessionDisplay.HasItems;
-
-        public bool IsAccountSessionsEmptyVisible => AccountSessionDisplay.IsEmptyVisible;
 
         public string RevokeCurrentSessionActionText => AccountSessionDisplay.CurrentSessionRevokeActionText;
 
@@ -213,10 +205,6 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool CanToggleAppLock => !IsBusy && AppLockDisplay.CanToggle;
-
-        public string SummaryText => AppLockDisplay.IsEnabled
-            ? "App lock on"
-            : "App lock off";
 
         public string? Status
         {
@@ -286,15 +274,11 @@ namespace Cotton.Mobile.ViewModels
                 ShowAppLock(CottonAppLockSettingsDisplayState.Create(_settings, _capability));
                 ShowDeviceUnlock(CottonDeviceUnlockDisplayState.Create(_deviceUnlockAvailability));
                 ShowLogoutCleanup(CottonLogoutCacheCleanupDisplayState.Create(_logoutCleanupSettings));
-                bool loadedPermissionLedger = await TryLoadPermissionLedgerAsync();
-                bool loadedAccountSessions = await TryLoadAccountSessionsAsync();
+                await TryLoadPermissionLedgerAsync();
+                await TryLoadAccountSessionsAsync();
                 Status = disabledUnavailableAppLock
                     ? "App lock was turned off because device unlock is unavailable."
-                    : !loadedPermissionLedger
-                        ? "Could not inspect device access."
-                        : _capability.CanEnable
-                            ? loadedAccountSessions ? null : "Could not load account sessions."
-                            : "App lock is unavailable.";
+                    : null;
                 if (disabledUnavailableAppLock)
                 {
                     _ = _windowPrivacyService.ApplyAsync();
@@ -321,7 +305,7 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task<bool> TryLoadPermissionLedgerAsync()
+        private async Task TryLoadPermissionLedgerAsync()
         {
             try
             {
@@ -331,22 +315,17 @@ namespace Cotton.Mobile.ViewModels
                     await _mediaAccessPolicy.GetAccessStateAsync();
                 ShowPermissionLedger(CottonPermissionLedgerDisplayState.Create(
                     notificationPermission,
-                    mediaAccess,
-                    _settings,
-                    _capability,
-                    _deviceUnlockAvailability));
-                return true;
+                    mediaAccess));
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to inspect Cotton mobile permission ledger.");
                 ShowPermissionLedger(CottonPermissionLedgerDisplayState.Unavailable(
                     "Could not inspect device access."));
-                return false;
             }
         }
 
-        private async Task<bool> TryLoadAccountSessionsAsync()
+        private async Task TryLoadAccountSessionsAsync()
         {
             try
             {
@@ -354,14 +333,12 @@ namespace Cotton.Mobile.ViewModels
                 IReadOnlyList<CottonAccountSessionSnapshot> sessions =
                     await _accountSessionService.GetActiveSessionsAsync(instanceUri);
                 ShowAccountSessions(CottonAccountSessionListDisplayState.Create(sessions));
-                return true;
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile account sessions.");
                 ShowAccountSessions(CottonAccountSessionListDisplayState.Unavailable(
                     "Could not load signed-in devices."));
-                return false;
             }
         }
 
@@ -532,7 +509,6 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(AppLockStatusText));
             OnPropertyChanged(nameof(AppLockDetailText));
             OnPropertyChanged(nameof(CanToggleAppLock));
-            OnPropertyChanged(nameof(SummaryText));
         }
 
         private void ShowDeviceUnlock(CottonDeviceUnlockDisplayState display)
@@ -558,7 +534,6 @@ namespace Cotton.Mobile.ViewModels
 
             OnPropertyChanged(nameof(PermissionLedgerTitle));
             OnPropertyChanged(nameof(PermissionLedgerStatusText));
-            OnPropertyChanged(nameof(PermissionLedgerDetailText));
             OnPropertyChanged(nameof(IsPermissionLedgerVisible));
         }
 
@@ -584,10 +559,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(AccountSessionsTitle));
             OnPropertyChanged(nameof(AccountSessionsStatusText));
             OnPropertyChanged(nameof(AccountSessionsDetailText));
-            OnPropertyChanged(nameof(AccountSessionsEmptyTitle));
-            OnPropertyChanged(nameof(AccountSessionsEmptyDetails));
             OnPropertyChanged(nameof(IsAccountSessionsListVisible));
-            OnPropertyChanged(nameof(IsAccountSessionsEmptyVisible));
             OnPropertyChanged(nameof(RevokeCurrentSessionActionText));
             OnPropertyChanged(nameof(IsRevokeCurrentSessionVisible));
             OnPropertyChanged(nameof(CanRevokeCurrentSession));

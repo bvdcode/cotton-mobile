@@ -17,7 +17,6 @@
 
         <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Security"
-                                       SupportingText="{Binding SummaryText}"
                                        IsBusy="{Binding IsBusy}" />
 
             <controls:ScreenStatusView Text="{Binding Status}"
@@ -35,7 +34,7 @@
                                                  IsToggled="{Binding IsAppLockEnabled, Mode=TwoWay}" />
             </controls:SettingsCardView>
 
-            <controls:SettingsCardView>
+            <controls:SettingsCardView IsCardVisible="{Binding IsDeviceUnlockActionVisible}">
                 <controls:SettingsSummaryHeaderView Title="{Binding DeviceUnlockTitle}"
                                                     StatusText="{Binding DeviceUnlockStatusText}"
                                                     DetailText="{Binding DeviceUnlockDetailText}" />
@@ -56,7 +55,7 @@
             <controls:SettingsCardView IsCardVisible="{Binding IsPermissionLedgerVisible}">
                 <controls:SettingsSummaryHeaderView Title="{Binding PermissionLedgerTitle}"
                                                     StatusText="{Binding PermissionLedgerStatusText}"
-                                                    DetailText="{Binding PermissionLedgerDetailText}" />
+                                                    IsDetailVisible="False" />
 
                 <controls:StackedItemsView ItemsSource="{Binding PermissionLedgerItems}">
                     <controls:StackedItemsView.ItemTemplate>
@@ -90,14 +89,6 @@
                                              ActionIconButtonStyleResourceKey="M3DestructiveIconButton"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              SemanticDescription="{Binding RevokeCurrentSessionActionText}" />
-
-                <controls:SettingsSectionHeaderView IsHeaderVisible="{Binding IsAccountSessionsEmptyVisible}"
-                                                    Title="{Binding AccountSessionsEmptyTitle}"
-                                                    PrimaryDetailText="{Binding AccountSessionsEmptyDetails}"
-                                                    TextStackStyleResourceKey="M3SettingsDenseStack"
-                                                    TitleTextStyleResourceKey="M3CardSupportingStrongLine"
-                                                    PrimaryDetailTextStyleResourceKey="M3CardSupportingBlock"
-                                                    IsTapEnabled="False" />
 
                 <controls:StackedItemsView IsContentVisible="{Binding IsAccountSessionsListVisible}"
                                            ItemsSource="{Binding AccountSessions}">

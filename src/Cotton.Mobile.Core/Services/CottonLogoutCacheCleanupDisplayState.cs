@@ -11,8 +11,8 @@ namespace Cotton.Mobile.Services
             IsEnabled = settings.ClearCachedFilesOnLogout;
             StatusText = IsEnabled ? "On" : "Off";
             DetailText = IsEnabled
-                ? "Remove cached previews, saved folder lists, and downloaded files when you log out."
-                : "Keep local cached files on this device when you log out.";
+                ? "Remove cached files from this device on logout."
+                : "Keep cached files on this device after logout.";
         }
 
         public CottonLogoutCacheCleanupSettings Settings { get; }

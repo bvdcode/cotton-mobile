@@ -11,16 +11,12 @@ namespace Cotton.Mobile.Services
             IReadOnlyList<CottonAccountSessionListItem> items,
             string? currentSessionId,
             string statusText,
-            string detailText,
-            string emptyTitle,
-            string emptyDetails)
+            string detailText)
         {
             Items = items;
             CurrentSessionId = currentSessionId;
             StatusText = statusText;
             DetailText = detailText;
-            EmptyTitle = emptyTitle;
-            EmptyDetails = emptyDetails;
         }
 
         public string Title => "Devices and sessions";
@@ -33,13 +29,7 @@ namespace Cotton.Mobile.Services
 
         public string DetailText { get; }
 
-        public string EmptyTitle { get; }
-
-        public string EmptyDetails { get; }
-
         public bool HasItems => Items.Count > 0;
-
-        public bool IsEmptyVisible => !HasItems;
 
         public bool CanRevokeCurrentSession => !string.IsNullOrWhiteSpace(CurrentSessionId);
 
@@ -63,12 +53,8 @@ namespace Cotton.Mobile.Services
             return new CottonAccountSessionListDisplayState(
                 items,
                 currentSessionId,
-                CreateStatusText(items.Length),
-                items.Length == 0
-                    ? "No active account sessions were returned by the server."
-                    : "Signed-in account sessions reported by the server.",
-                "No active sessions",
-                "The server did not return any active account sessions.");
+                items.Length == 0 ? "No active sessions" : CreateStatusText(items.Length),
+                string.Empty);
         }
 
         public static CottonAccountSessionListDisplayState Unavailable(string detailText)
@@ -79,8 +65,6 @@ namespace Cotton.Mobile.Services
                 Array.Empty<CottonAccountSessionListItem>(),
                 currentSessionId: null,
                 "Unavailable",
-                detailText.Trim(),
-                "Sessions unavailable",
                 detailText.Trim());
         }
 

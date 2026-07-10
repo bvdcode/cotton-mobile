@@ -1976,6 +1976,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"{Binding DeviceUnlockActionText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsActionEnabled=\"{Binding CanVerifyDeviceUnlock}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsItemVisible=\"{Binding IsDeviceUnlockActionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("<controls:SettingsCardView IsCardVisible=\"{Binding IsDeviceUnlockActionVisible}\">", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("Text=\"{Binding RevokeCurrentSessionActionText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("IsItemVisible=\"{Binding IsRevokeCurrentSessionVisible}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("ActionIconButtonStyleResourceKey=\"M3DestructiveIconButton\"", securitySettingsPage, StringComparison.Ordinal);
@@ -4229,18 +4230,11 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("SecondaryDetailText=\"{Binding AccessText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("TertiaryDetailText=\"{Binding DurationText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("TrailingText=\"{Binding BadgeText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("<controls:SettingsSectionHeaderView IsHeaderVisible=\"{Binding IsAccountSessionsEmptyVisible}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("Title=\"{Binding AccountSessionsEmptyTitle}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("PrimaryDetailText=\"{Binding AccountSessionsEmptyDetails}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("TextStackStyleResourceKey=\"M3SettingsDenseStack\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("TitleTextStyleResourceKey=\"M3CardSupportingStrongLine\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("public class SettingsInfoItemView", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("IsAttentionStateProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("AttentionLeadingIconFrameStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("AttentionTrailingTextStyleResourceKeyProperty", settingsInfoItemView, StringComparison.Ordinal);
             Assert.Contains("new ChipView", settingsInfoItemView, StringComparison.Ordinal);
-            Assert.DoesNotContain("<controls:SettingsSectionHeaderView IsVisible=\"{Binding IsAccountSessionsEmptyVisible}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains(
                 "LeadingIconOpacityAnimationName = \"M3SettingsInfoLeadingIconOpacity\"",
                 settingsInfoItemView,
@@ -4283,8 +4277,6 @@ namespace Cotton.Mobile.Tests
             Assert.DoesNotContain("TargetType=\"controls:ChipView\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Grid.Column=\"1\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain("<Label Grid.Row=\"1\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyTitle}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.DoesNotContain("<Label Text=\"{Binding AccountSessionsEmptyDetails}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.DoesNotContain(
                 "_primaryDetailText.IsVisible = !string.IsNullOrWhiteSpace(primaryDetailText)",
                 settingsInfoItemView,
@@ -4325,7 +4317,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("DetailText=\"{Binding DeviceUnlockDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding PermissionLedgerTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding PermissionLedgerStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
-            Assert.Contains("DetailText=\"{Binding PermissionLedgerDetailText}\"", securitySettingsPage, StringComparison.Ordinal);
+            Assert.Contains("IsDetailVisible=\"False\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("<controls:SettingsSummaryHeaderView Title=\"{Binding AccountSessionsTitle}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("StatusText=\"{Binding AccountSessionsStatusText}\"", securitySettingsPage, StringComparison.Ordinal);
             Assert.Contains("DetailText=\"{Binding AccountSessionsDetailText}\"", securitySettingsPage, StringComparison.Ordinal);

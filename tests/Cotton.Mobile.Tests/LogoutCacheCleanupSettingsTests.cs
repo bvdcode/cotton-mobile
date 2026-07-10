@@ -15,7 +15,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Clear cache on logout", display.Title);
             Assert.Equal("On", display.StatusText);
             Assert.Equal(
-                "Remove cached previews, saved folder lists, and downloaded files when you log out.",
+                "Remove cached files from this device on logout.",
                 display.DetailText);
         }
 
@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(display.IsEnabled);
             Assert.Equal("Off", display.StatusText);
-            Assert.Equal("Keep local cached files on this device when you log out.", display.DetailText);
+            Assert.Equal("Keep cached files on this device after logout.", display.DetailText);
         }
     }
 }

@@ -62,13 +62,19 @@ namespace Cotton.Mobile.Tests
             CottonCameraBackupSetupDisplayState withDestination =
                 CottonCameraBackupSetupDisplayState.Create(
                     CottonCameraBackupSettings.Default.WithDestination(CreateDestination()));
+            CottonCameraBackupSetupDisplayState enabled =
+                CottonCameraBackupSetupDisplayState.Create(
+                    CottonCameraBackupSettings.Default
+                        .WithDestination(CreateDestination())
+                        .WithEnabled(true));
 
             Assert.Equal("No folder selected", missingDestination.DestinationText);
-            Assert.Equal("Choose a folder before camera backup can run.", missingDestination.ExecutionStatusText);
+            Assert.Equal(string.Empty, missingDestination.ExecutionStatusText);
             Assert.False(missingDestination.CanEnableBackup);
 
-            Assert.Equal("Setup saved. Background backup is not running yet.", withDestination.ExecutionStatusText);
+            Assert.Equal("Camera backup is off.", withDestination.ExecutionStatusText);
             Assert.True(withDestination.CanEnableBackup);
+            Assert.Equal("Camera backup is on.", enabled.ExecutionStatusText);
         }
 
         [Fact]
@@ -84,19 +90,6 @@ namespace Cotton.Mobile.Tests
             Assert.False(policy.RequiresMediaDeletePermission);
             Assert.Equal("Queue camera media to Cotton. Originals stay on this device.", policy.SetupSummaryText);
             Assert.Equal(policy.SetupSummaryText, display.LocalMediaRetentionText);
-        }
-
-        [Fact]
-        public void Camera_backup_policy_summary_tracks_media_network_and_charging_choices()
-        {
-            CottonCameraBackupSettings settings = CottonCameraBackupSettings.Default
-                .WithPhotosOnly(false)
-                .WithAllowCellular(true)
-                .WithChargingOnly(true);
-
-            CottonCameraBackupSetupDisplayState display = CottonCameraBackupSetupDisplayState.Create(settings);
-
-            Assert.Equal("Photos and videos, cellular allowed, while charging.", display.PolicySummaryText);
         }
 
         [Theory]
@@ -443,7 +436,7 @@ namespace Cotton.Mobile.Tests
                 CottonCameraBackupMediaAccessDisplayState.Create(CottonCameraBackupMediaAccessState.Allowed);
 
             Assert.Equal(
-                "Choose a folder to estimate backup storage.",
+                string.Empty,
                 CottonCameraBackupDestinationStorageEstimateDisplayState.Create(
                     CottonCameraBackupSettings.Default,
                     allowed,
@@ -486,7 +479,6 @@ namespace Cotton.Mobile.Tests
                         unknownSizeCount),
                     isCurrent: true);
 
-            Assert.Equal("Destination estimate", display.Title);
             Assert.Equal(expectedSummary, display.SummaryText);
         }
 

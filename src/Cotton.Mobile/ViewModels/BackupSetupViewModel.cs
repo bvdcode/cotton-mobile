@@ -34,10 +34,8 @@ namespace Cotton.Mobile.ViewModels
         private CottonCameraBackupDestinationStorageEstimate _latestDestinationStorageEstimate =
             CottonCameraBackupDestinationStorageEstimate.Empty;
         private string _destinationText = "No folder selected";
-        private string _executionStatusText = "Choose a folder before camera backup can run.";
-        private string _policySummaryText = "Photos only, Wi-Fi only, any battery state.";
-        private string _destinationStorageEstimateTitle = "Destination estimate";
-        private string _destinationStorageEstimateText = "Choose a folder to estimate backup storage.";
+        private string _executionStatusText = string.Empty;
+        private string _destinationStorageEstimateText = string.Empty;
         private string _healthTitle = "Backup health";
         private string _healthStatusText = "Choose a destination to see backup activity.";
         private string _healthCountsText = string.Empty;
@@ -222,18 +220,6 @@ namespace Cotton.Mobile.ViewModels
         {
             get => _executionStatusText;
             private set => SetProperty(ref _executionStatusText, value);
-        }
-
-        public string PolicySummaryText
-        {
-            get => _policySummaryText;
-            private set => SetProperty(ref _policySummaryText, value);
-        }
-
-        public string DestinationStorageEstimateTitle
-        {
-            get => _destinationStorageEstimateTitle;
-            private set => SetProperty(ref _destinationStorageEstimateTitle, value);
         }
 
         public string DestinationStorageEstimateText
@@ -525,7 +511,6 @@ namespace Cotton.Mobile.ViewModels
             IsBackupEnabled = settings.IsEnabled && display.CanEnableBackup;
             DestinationText = display.DestinationText;
             ExecutionStatusText = display.ExecutionStatusText;
-            PolicySummaryText = display.PolicySummaryText;
             LocalMediaRetentionText = display.LocalMediaRetentionText;
             ShowHealth(settings);
             NotifyQueueNowStateChanged();
@@ -534,11 +519,12 @@ namespace Cotton.Mobile.ViewModels
         private void RefreshPolicyPreview()
         {
             CottonCameraBackupSettings preview = _settings
+                .WithEnabled(IsBackupEnabled && CanEnableBackup)
                 .WithPhotosOnly(PhotosOnly)
                 .WithWifiOnly(WifiOnly)
                 .WithAllowCellular(AllowCellular)
                 .WithChargingOnly(ChargingOnly);
-            PolicySummaryText = CottonCameraBackupSetupDisplayState.Create(preview).PolicySummaryText;
+            ExecutionStatusText = CottonCameraBackupSetupDisplayState.Create(preview).ExecutionStatusText;
             ShowHealth(preview);
         }
 
@@ -608,7 +594,6 @@ namespace Cotton.Mobile.ViewModels
                     mediaAccess,
                     estimate,
                     _isDestinationStorageEstimateCurrent);
-            DestinationStorageEstimateTitle = display.Title;
             DestinationStorageEstimateText = display.SummaryText;
         }
 

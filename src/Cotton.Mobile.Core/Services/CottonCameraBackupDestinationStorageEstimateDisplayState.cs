@@ -5,15 +5,10 @@ namespace Cotton.Mobile.Services
 {
     public class CottonCameraBackupDestinationStorageEstimateDisplayState
     {
-        private CottonCameraBackupDestinationStorageEstimateDisplayState(
-            string title,
-            string summaryText)
+        private CottonCameraBackupDestinationStorageEstimateDisplayState(string summaryText)
         {
-            Title = title;
             SummaryText = summaryText;
         }
-
-        public string Title { get; }
 
         public string SummaryText { get; }
 
@@ -29,7 +24,7 @@ namespace Cotton.Mobile.Services
 
             if (!settings.HasDestination)
             {
-                return Create("Choose a folder to estimate backup storage.");
+                return Create(string.Empty);
             }
 
             if (!mediaAccess.CanScanFullLibrary)
@@ -65,9 +60,7 @@ namespace Cotton.Mobile.Services
 
         private static CottonCameraBackupDestinationStorageEstimateDisplayState Create(string summaryText)
         {
-            return new CottonCameraBackupDestinationStorageEstimateDisplayState(
-                "Destination estimate",
-                summaryText);
+            return new CottonCameraBackupDestinationStorageEstimateDisplayState(summaryText);
         }
 
         private static string FormatCount(int count, string singular, string plural)

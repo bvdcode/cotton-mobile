@@ -2281,7 +2281,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("IsTrailingTextVisible=\"True\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingBlock\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("SecondaryDetailTextStyleResourceKey=\"M3CardSupportingLine\"", backupSetupPage, StringComparison.Ordinal);
-            Assert.Contains("TertiaryDetailTextStyleResourceKey=\"M3CardSupportingStrongLine\"", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("TertiaryDetailTextStyleResourceKey", backupSetupPage, StringComparison.Ordinal);
             Assert.Contains("PrimaryDetailTextStyleResourceKey=\"M3CardSupportingStrongBlock\"", backupSetupPage, StringComparison.Ordinal);
             Assert.Equal(1, CountOccurrences(backupSetupPage, "IsTapEnabled=\"True\""));
             Assert.Contains("IsTapEnabled=\"{Binding CanQueueNow}\"", backupSetupPage, StringComparison.Ordinal);
@@ -4472,6 +4472,26 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_latestMediaAccessDisplay.CanScanFullLibrary", backupSetupViewModel, StringComparison.Ordinal);
             Assert.Contains("IsPrimaryActionEnabledProperty", settingsActionHeaderCardView, StringComparison.Ordinal);
             Assert.Contains("_actions.IsPrimaryActionEnabled = IsPrimaryActionEnabled", settingsActionHeaderCardView, StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Camera_backup_destination_card_avoids_redundant_policy_text()
+        {
+            string backupSetupPage = LoadText(BackupSetupPagePath);
+            string backupSetupViewModel = LoadText(BackupSetupViewModelPath);
+
+            Assert.Contains(
+                "PrimaryDetailText=\"{Binding DestinationText}\"",
+                backupSetupPage,
+                StringComparison.Ordinal);
+            Assert.Contains(
+                "SecondaryDetailText=\"{Binding DestinationStorageEstimateText}\"",
+                backupSetupPage,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain("PolicySummaryText", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("DestinationStorageEstimateTitle", backupSetupPage, StringComparison.Ordinal);
+            Assert.DoesNotContain("PolicySummaryText", backupSetupViewModel, StringComparison.Ordinal);
+            Assert.DoesNotContain("DestinationStorageEstimateTitle", backupSetupViewModel, StringComparison.Ordinal);
         }
 
         [Fact]

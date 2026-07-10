@@ -613,6 +613,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Folder_loading_hides_previous_collection_until_new_files_arrive()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+
+            Assert.True(display.IsFileListViewVisible);
+
+            display.ShowFilesLoading("Loading Projects...");
+
+            Assert.True(display.IsInlineFilesLoadingVisible);
+            Assert.False(display.IsFileListViewVisible);
+            Assert.False(display.IsFileTileViewVisible);
+
+            display.ShowFiles(
+                CreateContent(CreateFile("fresh.txt", "Text", 10, Newer)),
+                isRoot: false,
+                canNavigateUp: true,
+                path: "Files / Projects");
+
+            Assert.False(display.IsInlineFilesLoadingVisible);
+            Assert.True(display.IsFileListViewVisible);
+        }
+
+        [Fact]
         public void Preferences_apply_view_mode_and_sort_mode()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

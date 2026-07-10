@@ -404,9 +404,11 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public bool IsFileListViewVisible => FileViewMode == CottonFileBrowserViewMode.List;
+        public bool IsFileListViewVisible =>
+            FileViewMode == CottonFileBrowserViewMode.List && !IsInlineFilesLoadingVisible;
 
-        public bool IsFileTileViewVisible => FileViewMode == CottonFileBrowserViewMode.Tiles;
+        public bool IsFileTileViewVisible =>
+            FileViewMode == CottonFileBrowserViewMode.Tiles && !IsInlineFilesLoadingVisible;
 
         public bool IsFileUpButtonVisible => CanNavigateFilesUp;
 
@@ -432,6 +434,8 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
                     OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
+                    OnPropertyChanged(nameof(IsFileListViewVisible));
+                    OnPropertyChanged(nameof(IsFileTileViewVisible));
                     NotifyFileBrowserChromeStateChanged();
                     NotifyFilesEmptyStateChanged();
                 }
@@ -582,6 +586,8 @@ namespace Cotton.Mobile.ViewModels
 
                     OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
                     OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
+                    OnPropertyChanged(nameof(IsFileListViewVisible));
+                    OnPropertyChanged(nameof(IsFileTileViewVisible));
                     OnPropertyChanged(nameof(IsAccountActionEnabled));
                     NotifyFileBrowserChromeStateChanged();
                 }

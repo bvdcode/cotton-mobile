@@ -27,7 +27,7 @@
 
     <Style TargetType="IndicatorView">
         <Setter Property="IndicatorColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
-        <Setter Property="SelectedIndicatorColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="SelectedIndicatorColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
     </Style>
 
     <Style TargetType="Border">
@@ -61,7 +61,7 @@
                          Binding="{Binding IsSelected}"
                          Value="True">
                 <Setter Property="Stroke"
-                        Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+                        Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
                 <Setter Property="StrokeThickness"
                         Value="{StaticResource M3StrokeThin}" />
                 <Setter Property="BackgroundColor"
@@ -315,7 +315,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3OutlinedInputField">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutline}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3OutlinedInputCornerRadius}" />
@@ -352,7 +352,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3LocalCopyChip">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
@@ -510,7 +510,7 @@
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileSelectionOverlay">
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
@@ -617,14 +617,14 @@
     <Style TargetType="Border" x:Key="M3FileSelectionMark">
         <Setter Property="WidthRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileSelectionMarkSize}" />
-        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="StrokeShape">
             <Setter.Value>
                 <RoundRectangle CornerRadius="{StaticResource M3InsetCornerRadius}" />
             </Setter.Value>
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
     </Style>
 
     <Style TargetType="Border" x:Key="M3FileListSelectionMark" BasedOn="{StaticResource M3FileSelectionMark}">
@@ -639,7 +639,7 @@
     </Style>
 
     <Style TargetType="controls:IconView" x:Key="M3FileSelectionCheckIcon">
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileSelectionIconSize}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
@@ -1391,15 +1391,15 @@
         <Setter Property="ThumbCornerRadius" Value="{StaticResource M3SwitchThumbCornerRadius}" />
         <Setter Property="ThumbInset" Value="{StaticResource M3SwitchThumbInset}" />
         <Setter Property="TouchTargetSize" Value="{StaticResource TouchTarget}" />
-        <Setter Property="TrackOnColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="TrackOnColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="TrackOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
-        <Setter Property="TrackOnPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightActionPressed}, Dark={StaticResource M3DarkActionPressed}}" />
+        <Setter Property="TrackOnPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkActionPressed}}" />
         <Setter Property="TrackOffPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="TrackDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
-        <Setter Property="TrackOnBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
-        <Setter Property="TrackOffBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="TrackOnBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="TrackOffBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutline}}" />
         <Setter Property="TrackDisabledBorderColor" Value="{StaticResource M3Transparent}" />
-        <Setter Property="ThumbOnColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
+        <Setter Property="ThumbOnColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="ThumbOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="ThumbDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
     </Style>
@@ -1582,7 +1582,7 @@
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
         <Setter Property="RowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3Transparent}, Dark={StaticResource M3Transparent}}" />
         <Setter Property="PressedRowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="IconFrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />

@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Controls
             typeof(Color),
             typeof(ActionSheetItemView),
             propertyChanged: OnVisualPropertyChanged,
-            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightAction", "M3DarkAction"));
+            defaultValueCreator: _ => MaterialResources.GetThemeColor("M3LightPrimary", "M3DarkAction"));
 
         public static readonly BindableProperty RowBackgroundColorProperty = BindableProperty.Create(
             nameof(RowBackgroundColor),

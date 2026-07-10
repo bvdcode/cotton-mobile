@@ -33,7 +33,7 @@
     <Color x:Key="M3LightOnSurface">#181C1A</Color>
     <Color x:Key="M3LightOnSurfaceVariant">#424947</Color>
     <Color x:Key="M3LightSurfaceVariant">#DDE5E1</Color>
-    <Color x:Key="M3LightInputPlaceholder">#99424947</Color>
+    <Color x:Key="M3LightInputPlaceholder">#D9424947</Color>
     <Color x:Key="M3LightSurfaceContainerLowest">#FFFFFF</Color>
     <Color x:Key="M3LightSurfaceContainerLow">#F0F2F0</Color>
     <Color x:Key="M3LightSurfaceContainer">#E8EBE9</Color>
@@ -77,7 +77,7 @@
     <Color x:Key="M3DarkOnSurface">#E4E8E6</Color>
     <Color x:Key="M3DarkOnSurfaceVariant">#BEC7C2</Color>
     <Color x:Key="M3DarkSurfaceVariant">#3F4944</Color>
-    <Color x:Key="M3DarkInputPlaceholder">#99BEC7C2</Color>
+    <Color x:Key="M3DarkInputPlaceholder">#AFBEC7C2</Color>
     <Color x:Key="M3DarkSurfaceContainerLowest">#040605</Color>
     <Color x:Key="M3DarkSurfaceContainerLow">#111413</Color>
     <Color x:Key="M3DarkSurfaceContainer">#171A19</Color>

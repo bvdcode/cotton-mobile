@@ -71,6 +71,12 @@ namespace Cotton.Mobile
 			}
 		}
 
+		protected override async void OnDisappearing()
+		{
+			base.OnDisappearing();
+			await FileSearchField.DismissInputAsync();
+		}
+
 		private void MainPage_Loaded(object? sender, EventArgs e)
 		{
 			UpdateFileTileMetrics();

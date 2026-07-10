@@ -2,6 +2,7 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Behaviors;
+using Microsoft.Maui;
 using Microsoft.Maui.Controls.Shapes;
 using System.Windows.Input;
 
@@ -200,6 +201,12 @@ namespace Cotton.Mobile.Controls
 
         public void UnfocusInput()
         {
+            _entry.Unfocus();
+        }
+
+        public async Task DismissInputAsync(CancellationToken cancellationToken = default)
+        {
+            await _entry.HideSoftInputAsync(cancellationToken);
             _entry.Unfocus();
         }
 

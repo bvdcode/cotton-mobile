@@ -117,14 +117,16 @@ namespace Cotton.Mobile.Controls
             DefaultBadgeLabelStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
-        private readonly ChipView _badge;
-        private readonly IconView _folderIcon;
-        private readonly Image _image;
-        private readonly ActivityIndicator _loadingIndicator;
-        private readonly Label _placeholder;
-        private readonly Border _selectionMark;
-        private readonly IconView _selectionMarkIcon;
+        private readonly Grid _root;
         private readonly Border _surface;
+        private readonly Grid _surfaceContent;
+        private ChipView? _badge;
+        private IconView? _folderIcon;
+        private Image? _image;
+        private ActivityIndicator? _loadingIndicator;
+        private Label? _placeholder;
+        private Border? _selectionMark;
+        private IconView? _selectionMarkIcon;
         private string? _appliedBadgeLabelStyleResourceKey;
         private string? _appliedBadgeStyleResourceKey;
         private string? _appliedSelectionMarkStyleResourceKey;
@@ -148,67 +150,21 @@ namespace Cotton.Mobile.Controls
         {
             InputTransparent = true;
 
-            _image = new Image
-            {
-                Aspect = Aspect.AspectFill,
-            };
-
-            _folderIcon = new IconView
-            {
-                IconData = IconPathData.Folder,
-            };
-
-            _loadingIndicator = new ActivityIndicator
-            {
-                IsVisible = false,
-                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
-            };
-
-            _placeholder = new Label();
-
-            _badge = new ChipView();
-
-            Grid surfaceContent = new()
-            {
-                Children =
-                {
-                    _image,
-                    _folderIcon,
-                    _loadingIndicator,
-                    _placeholder,
-                    _badge,
-                },
-            };
-
+            _surfaceContent = new Grid();
             _surface = new Border
             {
-                Content = surfaceContent,
+                Content = _surfaceContent,
             };
 
-            _selectionMarkIcon = new IconView
-            {
-                IconData = IconPathData.Check,
-            };
-
-            _selectionMark = new Border
-            {
-                Content = _selectionMarkIcon,
-            };
-
-            Grid root = new()
+            _root = new Grid
             {
                 Children =
                 {
                     _surface,
-                    _selectionMark,
                 },
             };
 
-            _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");
-            _loadingIndicator.SetDynamicResource(StyleProperty, "M3ThumbnailActivityIndicator");
-            _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
-            _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
-            Content = root;
+            Content = _root;
             UpdateVisualState(animateSelection: false);
         }
 
@@ -505,13 +461,18 @@ namespace Cotton.Mobile.Controls
             string currentBadgeText = badgeText ?? string.Empty;
 
             ApplyStyleIfChanged(_surface, surfaceStyleResourceKey, ref _appliedSurfaceStyleResourceKey);
-            ApplyStyleIfChanged(
-                _selectionMark,
-                selectionMarkStyleResourceKey,
-                ref _appliedSelectionMarkStyleResourceKey);
-            if (!Equals(_image.Source, thumbnailSource))
+            if (isSelected || _selectionMark is not null)
             {
-                _image.Source = thumbnailSource;
+                ApplyStyleIfChanged(
+                    EnsureSelectionMark(),
+                    selectionMarkStyleResourceKey,
+                    ref _appliedSelectionMarkStyleResourceKey);
+            }
+
+            if ((isPreviewImageVisible || _image is not null)
+                && !Equals(EnsureImage().Source, thumbnailSource))
+            {
+                _image!.Source = thumbnailSource;
             }
 
             if (!_hasAppliedPreviewImageVisibility || _isCurrentPreviewImageVisible != isPreviewImageVisible)
@@ -532,9 +493,12 @@ namespace Cotton.Mobile.Controls
                 UpdateLoadingState(isLoading, animateLoading);
             }
 
-            if (!string.Equals(_placeholder.Text, currentPlaceholderText, StringComparison.Ordinal))
+            bool isPlaceholderActuallyVisible =
+                IsPlaceholderActuallyVisible(currentPlaceholderText, isPlaceholderTextVisible);
+            if ((isPlaceholderActuallyVisible || _placeholder is not null)
+                && !string.Equals(EnsurePlaceholder().Text, currentPlaceholderText, StringComparison.Ordinal))
             {
-                _placeholder.Text = currentPlaceholderText;
+                _placeholder!.Text = currentPlaceholderText;
             }
 
             if (!_hasAppliedPlaceholderVisibility
@@ -549,7 +513,6 @@ namespace Cotton.Mobile.Controls
                     animatePlaceholderVisibility);
             }
 
-            _selectionMark.IsVisible = true;
             if (!_hasAppliedSelectionState || _isCurrentSelected != isSelected)
             {
                 _isCurrentSelected = isSelected;
@@ -568,11 +531,16 @@ namespace Cotton.Mobile.Controls
                 || !string.Equals(_currentBadgeText, currentBadgeText, StringComparison.Ordinal)
                 || _isCurrentBadgeVisible != isBadgeVisible)
             {
-                _badge.ApplyChipState(
-                    currentBadgeText,
-                    badgeStyleResourceKey,
-                    badgeLabelStyleResourceKey,
-                    animateBadgeVisibility);
+                bool isBadgeActuallyVisible = IsBadgeActuallyVisible(currentBadgeText, isBadgeVisible);
+                if (isBadgeActuallyVisible || _badge is not null)
+                {
+                    EnsureBadge().ApplyChipState(
+                        currentBadgeText,
+                        badgeStyleResourceKey,
+                        badgeLabelStyleResourceKey,
+                        animateBadgeVisibility);
+                }
+
                 _appliedBadgeStyleResourceKey = badgeStyleResourceKey;
                 _appliedBadgeLabelStyleResourceKey = badgeLabelStyleResourceKey;
                 _currentBadgeText = currentBadgeText;
@@ -580,13 +548,121 @@ namespace Cotton.Mobile.Controls
                 UpdateBadgeVisibility(currentBadgeText, isBadgeVisible, animateBadgeVisibility);
             }
 
-            if (folderIconSize > 0)
+            if ((isFolderThumbnailVisible || _folderIcon is not null) && folderIconSize > 0)
             {
-                _folderIcon.IconSize = folderIconSize;
+                EnsureFolderIcon().IconSize = folderIconSize;
                 return;
             }
 
-            _folderIcon.ClearValue(IconView.IconSizeProperty);
+            _folderIcon?.ClearValue(IconView.IconSizeProperty);
+        }
+
+        private Image EnsureImage()
+        {
+            if (_image is not null)
+            {
+                return _image;
+            }
+
+            _image = new Image
+            {
+                Aspect = Aspect.AspectFill,
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            _surfaceContent.Children.Add(_image);
+            return _image;
+        }
+
+        private IconView EnsureFolderIcon()
+        {
+            if (_folderIcon is not null)
+            {
+                return _folderIcon;
+            }
+
+            _folderIcon = new IconView
+            {
+                IconData = IconPathData.Folder,
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");
+            _surfaceContent.Children.Add(_folderIcon);
+            return _folderIcon;
+        }
+
+        private ActivityIndicator EnsureLoadingIndicator()
+        {
+            if (_loadingIndicator is not null)
+            {
+                return _loadingIndicator;
+            }
+
+            _loadingIndicator = new ActivityIndicator
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            _loadingIndicator.SetDynamicResource(StyleProperty, "M3ThumbnailActivityIndicator");
+            _surfaceContent.Children.Add(_loadingIndicator);
+            return _loadingIndicator;
+        }
+
+        private Label EnsurePlaceholder()
+        {
+            if (_placeholder is not null)
+            {
+                return _placeholder;
+            }
+
+            _placeholder = new Label
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
+            _surfaceContent.Children.Add(_placeholder);
+            return _placeholder;
+        }
+
+        private ChipView EnsureBadge()
+        {
+            if (_badge is not null)
+            {
+                return _badge;
+            }
+
+            _badge = new ChipView
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            _surfaceContent.Children.Add(_badge);
+            return _badge;
+        }
+
+        private Border EnsureSelectionMark()
+        {
+            if (_selectionMark is not null)
+            {
+                return _selectionMark;
+            }
+
+            _selectionMarkIcon = new IconView
+            {
+                IconData = IconPathData.Check,
+            };
+            _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
+            _selectionMark = new Border
+            {
+                Content = _selectionMarkIcon,
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+                Scale = MaterialMotion.Value("M3MotionSelectionHiddenScale"),
+            };
+            _root.Children.Add(_selectionMark);
+            return _selectionMark;
         }
 
         private static void ApplyStyleIfChanged(
@@ -607,8 +683,14 @@ namespace Cotton.Mobile.Controls
             bool isPreviewImageVisible,
             bool animatePreviewImageVisibility)
         {
+            if (!isPreviewImageVisible && _image is null)
+            {
+                _hasAppliedPreviewImageVisibility = true;
+                return;
+            }
+
             UpdateThumbnailLayerVisibility(
-                _image,
+                EnsureImage(),
                 isPreviewImageVisible,
                 animatePreviewImageVisibility,
                 ref _hasAppliedPreviewImageVisibility,
@@ -620,8 +702,14 @@ namespace Cotton.Mobile.Controls
             bool isFolderThumbnailVisible,
             bool animateFolderIconVisibility)
         {
+            if (!isFolderThumbnailVisible && _folderIcon is null)
+            {
+                _hasAppliedFolderIconVisibility = true;
+                return;
+            }
+
             UpdateThumbnailLayerVisibility(
-                _folderIcon,
+                EnsureFolderIcon(),
                 isFolderThumbnailVisible,
                 animateFolderIconVisibility,
                 ref _hasAppliedFolderIconVisibility,
@@ -634,9 +722,18 @@ namespace Cotton.Mobile.Controls
             bool isPlaceholderTextVisible,
             bool animatePlaceholderVisibility)
         {
+            bool isPlaceholderVisible = IsPlaceholderActuallyVisible(
+                placeholderText,
+                isPlaceholderTextVisible);
+            if (!isPlaceholderVisible && _placeholder is null)
+            {
+                _hasAppliedPlaceholderVisibility = true;
+                return;
+            }
+
             UpdateThumbnailLayerVisibility(
-                _placeholder,
-                IsPlaceholderActuallyVisible(placeholderText, isPlaceholderTextVisible),
+                EnsurePlaceholder(),
+                isPlaceholderVisible,
                 animatePlaceholderVisibility,
                 ref _hasAppliedPlaceholderVisibility,
                 PlaceholderOpacityAnimationName,
@@ -676,6 +773,11 @@ namespace Cotton.Mobile.Controls
 
         private void CompletePreviewImageVisibility()
         {
+            if (_image is null)
+            {
+                return;
+            }
+
             if (_isCurrentPreviewImageVisible)
             {
                 _image.IsVisible = true;
@@ -687,6 +789,11 @@ namespace Cotton.Mobile.Controls
 
         private void CompleteFolderIconVisibility()
         {
+            if (_folderIcon is null)
+            {
+                return;
+            }
+
             if (_isCurrentFolderThumbnailVisible)
             {
                 _folderIcon.IsVisible = true;
@@ -698,6 +805,11 @@ namespace Cotton.Mobile.Controls
 
         private void CompletePlaceholderVisibility()
         {
+            if (_placeholder is null)
+            {
+                return;
+            }
+
             if (IsPlaceholderActuallyVisible(_currentPlaceholderText, _isCurrentPlaceholderTextVisible))
             {
                 _placeholder.IsVisible = true;
@@ -718,6 +830,13 @@ namespace Cotton.Mobile.Controls
             bool animateBadgeVisibility)
         {
             bool isBadgeActuallyVisible = IsBadgeActuallyVisible(badgeText, isBadgeVisible);
+            if (!isBadgeActuallyVisible && _badge is null)
+            {
+                _hasAppliedBadgeVisibility = true;
+                return;
+            }
+
+            ChipView badge = EnsureBadge();
             bool shouldAnimate = animateBadgeVisibility && _hasAppliedBadgeVisibility;
             double targetOpacity = isBadgeActuallyVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -726,23 +845,28 @@ namespace Cotton.Mobile.Controls
 
             if (isBadgeActuallyVisible)
             {
-                _badge.IsVisible = true;
+                badge.IsVisible = true;
             }
 
             MaterialMotion.UpdateDouble(
-                _badge,
-                _badge.Opacity,
+                badge,
+                badge.Opacity,
                 targetOpacity,
                 duration,
                 BadgeOpacityAnimationName,
                 shouldAnimate,
-                opacity => _badge.Opacity = opacity,
+                opacity => badge.Opacity = opacity,
                 CompleteBadgeVisibility);
             _hasAppliedBadgeVisibility = true;
         }
 
         private void CompleteBadgeVisibility()
         {
+            if (_badge is null)
+            {
+                return;
+            }
+
             if (IsBadgeActuallyVisible(_currentBadgeText, _isCurrentBadgeVisible))
             {
                 _badge.IsVisible = true;
@@ -759,6 +883,13 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateLoadingState(bool isLoading, bool animateLoading)
         {
+            if (!isLoading && _loadingIndicator is null)
+            {
+                _hasAppliedLoadingState = true;
+                return;
+            }
+
+            ActivityIndicator loadingIndicator = EnsureLoadingIndicator();
             bool shouldAnimate = animateLoading && _hasAppliedLoadingState;
             double targetOpacity = isLoading
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -767,24 +898,29 @@ namespace Cotton.Mobile.Controls
 
             if (isLoading)
             {
-                _loadingIndicator.IsVisible = true;
-                _loadingIndicator.IsRunning = true;
+                loadingIndicator.IsVisible = true;
+                loadingIndicator.IsRunning = true;
             }
 
             MaterialMotion.UpdateDouble(
-                _loadingIndicator,
-                _loadingIndicator.Opacity,
+                loadingIndicator,
+                loadingIndicator.Opacity,
                 targetOpacity,
                 duration,
                 LoadingIndicatorOpacityAnimationName,
                 shouldAnimate,
-                opacity => _loadingIndicator.Opacity = opacity,
+                opacity => loadingIndicator.Opacity = opacity,
                 CompleteLoadingState);
             _hasAppliedLoadingState = true;
         }
 
         private void CompleteLoadingState()
         {
+            if (_loadingIndicator is null)
+            {
+                return;
+            }
+
             if (_isCurrentLoading)
             {
                 _loadingIndicator.IsVisible = true;
@@ -798,6 +934,18 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateSelectionState(bool isSelected, bool animateSelection)
         {
+            if (!isSelected && _selectionMark is null)
+            {
+                _hasAppliedSelectionState = true;
+                return;
+            }
+
+            Border selectionMark = EnsureSelectionMark();
+            if (isSelected)
+            {
+                selectionMark.IsVisible = true;
+            }
+
             double targetOpacity = isSelected
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
                 : MaterialMotion.Value("M3MotionHiddenOpacity");
@@ -808,21 +956,21 @@ namespace Cotton.Mobile.Controls
             int duration = MaterialResources.Get<int>("M3MotionSelectionDuration");
 
             MaterialMotion.UpdateDouble(
-                _selectionMark,
-                _selectionMark.Opacity,
+                selectionMark,
+                selectionMark.Opacity,
                 targetOpacity,
                 duration,
                 SelectionMarkOpacityAnimationName,
                 shouldAnimate,
-                opacity => _selectionMark.Opacity = opacity);
+                opacity => selectionMark.Opacity = opacity);
             MaterialMotion.UpdateDouble(
-                _selectionMark,
-                _selectionMark.Scale,
+                selectionMark,
+                selectionMark.Scale,
                 targetScale,
                 duration,
                 SelectionMarkScaleAnimationName,
                 shouldAnimate,
-                scale => _selectionMark.Scale = scale);
+                scale => selectionMark.Scale = scale);
             _hasAppliedSelectionState = true;
         }
     }

@@ -6,7 +6,7 @@ using Cotton.Mobile.Services;
 
 namespace Cotton.Mobile.Controls
 {
-    public class FileTileEntryCardView : ContentView
+    public class FileTileEntryCardView : Grid
     {
         public static readonly BindableProperty TitleProperty = BindableProperty.Create(
             nameof(Title),
@@ -172,35 +172,64 @@ namespace Cotton.Mobile.Controls
             string.Empty,
             propertyChanged: OnVisualPropertyChanged);
 
-        private readonly FileEntryActionButtonView _actionButton;
-        private readonly ContentCardView _card;
+        private readonly Button _actionButton;
+        private readonly Border _card;
         private readonly Grid _contentGrid;
-        private readonly FileTileMetadataView _metadata;
+        private readonly Label _detailLabel;
+        private readonly Grid _metadataGrid;
+        private readonly VerticalStackLayout _metadata;
         private readonly RowDefinition _previewRow;
-        private readonly SelectionOverlayView _selectionOverlay;
-        private readonly Grid _slotGrid;
-        private readonly FileThumbnailView _thumbnail;
+        private readonly Border _thumbnail;
+        private readonly Label _titleLabel;
         private readonly TouchSurfaceView _touchSurface;
+        private ActivityIndicator? _thumbnailActivity;
+        private IconView? _thumbnailIcon;
+        private Image? _thumbnailImage;
+        private Label? _thumbnailPlaceholder;
+        private bool _isThumbnailSelectionIcon;
+        private SelectionOverlayView? _selectionOverlay;
+        private ChipView? _statusChip;
         private bool _isVisualStateUpdatePending;
 
         public FileTileEntryCardView()
         {
-            _selectionOverlay = new SelectionOverlayView();
-            _thumbnail = new FileThumbnailView
+            _thumbnail = new Border();
+            _thumbnail.SetDynamicResource(StyleProperty, "M3FilePreviewSurface");
+            _titleLabel = new Label();
+            _titleLabel.SetDynamicResource(StyleProperty, "M3CardSupportingStrongLine");
+            _detailLabel = new Label();
+            _detailLabel.SetDynamicResource(StyleProperty, "M3CardMetaLine");
+            _metadataGrid = new Grid
             {
-                SurfaceStyleResourceKey = "M3FilePreviewSurface",
-                SelectionMarkStyleResourceKey = "M3FileTileSelectionMark",
+                ColumnDefinitions =
+                {
+                    new ColumnDefinition { Width = GridLength.Star },
+                    new ColumnDefinition { Width = GridLength.Auto },
+                },
+                Children =
+                {
+                    _detailLabel,
+                },
             };
-            _metadata = new FileTileMetadataView();
+            _metadataGrid.SetDynamicResource(StyleProperty, "M3FileTileMetadataGrid");
+            _metadata = new VerticalStackLayout
+            {
+                Children =
+                {
+                    _titleLabel,
+                    _metadataGrid,
+                },
+            };
+            _metadata.SetDynamicResource(StyleProperty, "M3FileTileTextStack");
             _touchSurface = new TouchSurfaceView();
-            _actionButton = new FileEntryActionButtonView
+            _actionButton = new Button
             {
-                IconButtonStyleResourceKey = "M3FileTileActionIconButton",
+                Text = "\u22ee",
             };
+            ConfigureActionButton(_actionButton);
 
             _previewRow = new RowDefinition { Height = new GridLength(0) };
 
-            Grid.SetRowSpan(_selectionOverlay, 2);
             Grid.SetRow(_metadata, 1);
             Grid.SetRowSpan(_touchSurface, 2);
             Grid.SetRow(_actionButton, 0);
@@ -214,7 +243,6 @@ namespace Cotton.Mobile.Controls
                 },
                 Children =
                 {
-                    _selectionOverlay,
                     _thumbnail,
                     _metadata,
                     _touchSurface,
@@ -222,23 +250,14 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
-            _card = new ContentCardView
+            _card = new Border
             {
-                CardStyleResourceKey = "M3FileTileCard",
-                BodyContent = _contentGrid,
+                Content = _contentGrid,
             };
-
-            _slotGrid = new Grid
-            {
-                Children =
-                {
-                    _card,
-                },
-            };
-            _slotGrid.SetDynamicResource(StyleProperty, "M3FileTileSlotGrid");
+            _card.SetDynamicResource(StyleProperty, "M3FileTileCard");
+            Children.Add(_card);
+            SetDynamicResource(StyleProperty, "M3FileTileSlotGrid");
             _contentGrid.SetDynamicResource(StyleProperty, "M3FileTileContentGrid");
-
-            Content = _slotGrid;
             UpdateVisualState();
         }
 
@@ -425,26 +444,13 @@ namespace Cotton.Mobile.Controls
         {
             ApplyLayoutMetrics();
 
-            _selectionOverlay.ApplySelectionState(IsSelected, animateSelection: false);
+            if (IsSelected || _selectionOverlay is not null)
+            {
+                EnsureSelectionOverlay().ApplySelectionState(IsSelected, animateSelection: false);
+            }
 
-            _thumbnail.ApplyThumbnailState(
-                ThumbnailSource,
-                IsPreviewImageVisible,
-                IsFolderThumbnailVisible,
-                IsLoading,
-                PlaceholderText ?? string.Empty,
-                IsPlaceholderTextVisible,
-                IsSelected,
-                FolderIconSize,
-                animateChanges: false);
-
-            _metadata.ApplyMetadataState(
-                Title ?? string.Empty,
-                Detail ?? string.Empty,
-                LocalCopyStatus ?? string.Empty,
-                IsLocalCopyVisible,
-                OfflineAttentionStatus ?? string.Empty,
-                IsOfflineAttentionVisible);
+            ApplyThumbnailState();
+            ApplyMetadataState();
 
             _touchSurface.Command = BeginSelectionCommand;
             _touchSurface.CommandParameter = CommandParameter;
@@ -453,9 +459,12 @@ namespace Cotton.Mobile.Controls
 
             _actionButton.Command = EntryActionsCommand;
             _actionButton.CommandParameter = CommandParameter;
-            _actionButton.IsActionEnabled = IsActionEnabled;
-            _actionButton.IsActionVisible = IsActionVisible;
-            _actionButton.SemanticDescription = ActionSemanticDescription ?? string.Empty;
+            _actionButton.IsEnabled = IsActionEnabled;
+            _actionButton.IsVisible = IsActionVisible;
+            _actionButton.InputTransparent = !IsActionVisible || !IsActionEnabled;
+            SemanticProperties.SetDescription(
+                _actionButton,
+                ActionSemanticDescription ?? string.Empty);
         }
 
         private void ApplyLayoutMetrics()
@@ -466,10 +475,229 @@ namespace Cotton.Mobile.Controls
                 ? PreviewHeight
                 : CottonFileTileLayoutPlanner.InitialMetrics.PreviewHeight;
 
-            _slotGrid.WidthRequest = slotWidth;
+            WidthRequest = slotWidth;
             _card.HeightRequest = tileHeight;
             _previewRow.Height = new GridLength(previewHeight);
             _thumbnail.HeightRequest = previewHeight;
+        }
+
+        private void ApplyThumbnailState()
+        {
+            if (IsSelected)
+            {
+                SetThumbnailContent(EnsureThumbnailIcon(showSelection: true));
+                return;
+            }
+
+            if (IsPreviewImageVisible)
+            {
+                Image image = EnsureThumbnailImage();
+                if (!Equals(image.Source, ThumbnailSource))
+                {
+                    image.Source = ThumbnailSource;
+                }
+
+                SetThumbnailContent(image);
+                return;
+            }
+
+            if (IsFolderThumbnailVisible)
+            {
+                SetThumbnailContent(EnsureThumbnailIcon(showSelection: false));
+                return;
+            }
+
+            if (IsLoading)
+            {
+                ActivityIndicator activity = EnsureThumbnailActivity();
+                activity.IsRunning = true;
+                SetThumbnailContent(activity);
+                return;
+            }
+
+            Label placeholder = EnsureThumbnailPlaceholder();
+            string placeholderText = IsPlaceholderTextVisible
+                ? PlaceholderText ?? string.Empty
+                : string.Empty;
+            if (!string.Equals(placeholder.Text, placeholderText, StringComparison.Ordinal))
+            {
+                placeholder.Text = placeholderText;
+            }
+
+            SetThumbnailContent(placeholder);
+        }
+
+        private Image EnsureThumbnailImage()
+        {
+            return _thumbnailImage ??= new Image
+            {
+                Aspect = Aspect.AspectFill,
+            };
+        }
+
+        private IconView EnsureThumbnailIcon(bool showSelection)
+        {
+            if (_thumbnailIcon is null)
+            {
+                _thumbnailIcon = new IconView();
+                _isThumbnailSelectionIcon = !showSelection;
+            }
+
+            if (_isThumbnailSelectionIcon != showSelection)
+            {
+                _isThumbnailSelectionIcon = showSelection;
+                _thumbnailIcon.IconData = showSelection ? IconPathData.Check : IconPathData.Folder;
+                _thumbnailIcon.SetDynamicResource(
+                    StyleProperty,
+                    showSelection ? "M3FileSelectionCheckIcon" : "M3FolderThumbnailIcon");
+            }
+
+            if (!showSelection && FolderIconSize > 0)
+            {
+                _thumbnailIcon.IconSize = FolderIconSize;
+            }
+
+            return _thumbnailIcon;
+        }
+
+        private ActivityIndicator EnsureThumbnailActivity()
+        {
+            if (_thumbnailActivity is not null)
+            {
+                return _thumbnailActivity;
+            }
+
+            _thumbnailActivity = new ActivityIndicator();
+            _thumbnailActivity.SetDynamicResource(StyleProperty, "M3ThumbnailActivityIndicator");
+            return _thumbnailActivity;
+        }
+
+        private Label EnsureThumbnailPlaceholder()
+        {
+            if (_thumbnailPlaceholder is not null)
+            {
+                return _thumbnailPlaceholder;
+            }
+
+            _thumbnailPlaceholder = new Label();
+            _thumbnailPlaceholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
+            return _thumbnailPlaceholder;
+        }
+
+        private void SetThumbnailContent(View content)
+        {
+            if (ReferenceEquals(_thumbnail.Content, content))
+            {
+                return;
+            }
+
+            if (_thumbnail.Content is ActivityIndicator previousActivity)
+            {
+                previousActivity.IsRunning = false;
+            }
+
+            _thumbnail.Content = content;
+        }
+
+        private SelectionOverlayView EnsureSelectionOverlay()
+        {
+            if (_selectionOverlay is not null)
+            {
+                return _selectionOverlay;
+            }
+
+            _selectionOverlay = new SelectionOverlayView();
+            Grid.SetRowSpan(_selectionOverlay, 2);
+            _contentGrid.Children.Insert(0, _selectionOverlay);
+            return _selectionOverlay;
+        }
+
+        private void ApplyMetadataState()
+        {
+            string title = Title ?? string.Empty;
+            string detail = Detail ?? string.Empty;
+            if (!string.Equals(_titleLabel.Text, title, StringComparison.Ordinal))
+            {
+                _titleLabel.Text = title;
+            }
+
+            if (!string.Equals(_detailLabel.Text, detail, StringComparison.Ordinal))
+            {
+                _detailLabel.Text = detail;
+            }
+
+            (string text, bool isVisible, string chipStyle, string textStyle) = CreateStatusChipState();
+            if (isVisible)
+            {
+                ChipView statusChip = EnsureStatusChip();
+                statusChip.ApplyChipState(
+                    text,
+                    chipStyle,
+                    textStyle,
+                    animateTextVisibility: false);
+                statusChip.Opacity = MaterialMotion.Value("M3MotionVisibleOpacity");
+                statusChip.IsVisible = true;
+            }
+            else if (_statusChip is not null)
+            {
+                _statusChip.IsVisible = false;
+            }
+        }
+
+        private ChipView EnsureStatusChip()
+        {
+            if (_statusChip is not null)
+            {
+                return _statusChip;
+            }
+
+            _statusChip = new ChipView
+            {
+                IsVisible = false,
+            };
+            Grid.SetColumn(_statusChip, 1);
+            _metadataGrid.Children.Add(_statusChip);
+            return _statusChip;
+        }
+
+        private (string Text, bool IsVisible, string ChipStyle, string TextStyle) CreateStatusChipState()
+        {
+            string offlineAttentionStatus = OfflineAttentionStatus ?? string.Empty;
+            if (IsOfflineAttentionVisible && !string.IsNullOrWhiteSpace(offlineAttentionStatus))
+            {
+                return (offlineAttentionStatus, true, "M3FileAttentionChip", "M3ErrorChipLabel");
+            }
+
+            string localCopyStatus = LocalCopyStatus ?? string.Empty;
+            if (IsLocalCopyVisible && !string.IsNullOrWhiteSpace(localCopyStatus))
+            {
+                return (localCopyStatus, true, "M3LocalCopyChip", "M3LocalCopyChipLabel");
+            }
+
+            return (string.Empty, false, "M3NeutralChip", "M3ChipLabel");
+        }
+
+        private static void ConfigureActionButton(Button button)
+        {
+            double size = MaterialResources.Get<double>("M3FileActionSize");
+            button.WidthRequest = size;
+            button.HeightRequest = size;
+            button.MinimumWidthRequest = size;
+            button.MinimumHeightRequest = size;
+            button.Padding = new Thickness(0);
+            button.BorderWidth = MaterialResources.Get<double>("M3StrokeNone");
+            button.FontSize = MaterialResources.Get<double>("M3FileActionIconSize");
+            button.FontFamily = MaterialResources.Get<string>("M3FontFamilyMedium");
+            button.FontAttributes = FontAttributes.None;
+            button.HorizontalOptions = LayoutOptions.End;
+            button.VerticalOptions = LayoutOptions.Start;
+            button.Margin = MaterialResources.Get<Thickness>("M3FileTileActionMargin");
+            button.BackgroundColor = MaterialResources.Get<Color>("M3Transparent");
+            MaterialResources.SetThemeColor(
+                button,
+                Button.TextColorProperty,
+                "M3LightOnSurfaceVariant",
+                "M3DarkOnSurfaceVariant");
         }
     }
 }

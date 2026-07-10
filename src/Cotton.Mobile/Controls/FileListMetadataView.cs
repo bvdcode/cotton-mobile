@@ -78,7 +78,7 @@ namespace Cotton.Mobile.Controls
         private readonly Label _detailLabel;
         private readonly Grid _grid;
         private readonly Label _titleLabel;
-        private readonly ChipView _trailingChip;
+        private ChipView? _trailingChip;
         private string? _appliedDetailStyleResourceKey;
         private string? _appliedGridStyleResourceKey;
         private string? _appliedTitleStyleResourceKey;
@@ -92,11 +92,9 @@ namespace Cotton.Mobile.Controls
 
             _titleLabel = new Label();
             _detailLabel = new Label();
-            _trailingChip = new ChipView();
 
             Grid.SetRow(_detailLabel, 1);
             Grid.SetColumnSpan(_detailLabel, 2);
-            Grid.SetColumn(_trailingChip, 1);
 
             _grid = new Grid
             {
@@ -114,7 +112,6 @@ namespace Cotton.Mobile.Controls
                 {
                     _titleLabel,
                     _detailLabel,
-                    _trailingChip,
                 },
             };
 
@@ -275,11 +272,15 @@ namespace Cotton.Mobile.Controls
             bool isTrailingChipVisible = IsTrailingChipActuallyVisible(
                 currentTrailingText,
                 isTrailingTextVisible);
-            _trailingChip.ApplyChipState(
-                currentTrailingText,
-                trailingChipStyleResourceKey,
-                trailingTextStyleResourceKey,
-                animateTextVisibility: false);
+            if (isTrailingChipVisible || _trailingChip is not null)
+            {
+                EnsureTrailingChip().ApplyChipState(
+                    currentTrailingText,
+                    trailingChipStyleResourceKey,
+                    trailingTextStyleResourceKey,
+                    animateTextVisibility: false);
+            }
+
             _currentTrailingText = currentTrailingText;
             _isCurrentTrailingTextVisible = isTrailingTextVisible;
             if (!_hasAppliedTrailingChipVisibility || wasTrailingChipVisible != isTrailingChipVisible)
@@ -305,12 +306,36 @@ namespace Cotton.Mobile.Controls
             appliedStyleResourceKey = styleResourceKey;
         }
 
+        private ChipView EnsureTrailingChip()
+        {
+            if (_trailingChip is not null)
+            {
+                return _trailingChip;
+            }
+
+            _trailingChip = new ChipView
+            {
+                IsVisible = false,
+                Opacity = MaterialMotion.Value("M3MotionHiddenOpacity"),
+            };
+            Grid.SetColumn(_trailingChip, 1);
+            _grid.Children.Add(_trailingChip);
+            return _trailingChip;
+        }
+
         private void UpdateTrailingChipVisibility(
             string trailingText,
             bool isTrailingTextVisible,
             bool animateTrailingChipVisibility)
         {
             bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText, isTrailingTextVisible);
+            if (!isTrailingChipVisible && _trailingChip is null)
+            {
+                _hasAppliedTrailingChipVisibility = true;
+                return;
+            }
+
+            ChipView trailingChip = EnsureTrailingChip();
             bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
             double targetOpacity = isTrailingChipVisible
                 ? MaterialMotion.Value("M3MotionVisibleOpacity")
@@ -319,23 +344,28 @@ namespace Cotton.Mobile.Controls
 
             if (isTrailingChipVisible)
             {
-                _trailingChip.IsVisible = true;
+                trailingChip.IsVisible = true;
             }
 
             MaterialMotion.UpdateDouble(
-                _trailingChip,
-                _trailingChip.Opacity,
+                trailingChip,
+                trailingChip.Opacity,
                 targetOpacity,
                 duration,
                 TrailingChipOpacityAnimationName,
                 shouldAnimate,
-                opacity => _trailingChip.Opacity = opacity,
+                opacity => trailingChip.Opacity = opacity,
                 CompleteTrailingChipVisibility);
             _hasAppliedTrailingChipVisibility = true;
         }
 
         private void CompleteTrailingChipVisibility()
         {
+            if (_trailingChip is null)
+            {
+                return;
+            }
+
             if (IsTrailingChipActuallyVisible(_currentTrailingText, _isCurrentTrailingTextVisible))
             {
                 _trailingChip.IsVisible = true;

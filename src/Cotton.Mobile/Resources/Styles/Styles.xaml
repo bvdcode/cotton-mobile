@@ -290,8 +290,8 @@
         <Setter Property="Spacing" Value="{StaticResource Space16}" />
     </Style>
 
-    <Style TargetType="Grid" x:Key="M3AuthActionRow">
-        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    <Style TargetType="VerticalStackLayout" x:Key="M3AuthActionStack">
+        <Setter Property="Spacing" Value="{StaticResource Space4}" />
     </Style>
 
     <Style TargetType="Grid" x:Key="M3AppLockGateGrid">
@@ -1375,17 +1375,6 @@
         <Setter Property="Margin" Value="{StaticResource M3FileTileActionMargin}" />
     </Style>
 
-    <Style TargetType="controls:IconButton" x:Key="M3AuthServerActionButton" BasedOn="{StaticResource M3IconButtonBase}">
-        <Setter Property="ButtonSize" Value="{StaticResource M3AuthActionButtonSize}" />
-        <Setter Property="IconSize" Value="{StaticResource M3AuthActionIconSize}" />
-        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimaryContainer}, Dark={StaticResource M3DarkOnPrimaryContainer}}" />
-        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainerPressed}, Dark={StaticResource M3DarkPrimaryContainerPressed}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryContainer}, Dark={StaticResource M3DarkPrimaryContainer}}" />
-        <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3DefaultIconButton}" />
 
     <Style TargetType="controls:ToggleSwitch" x:Key="M3Switch">
@@ -1625,6 +1614,14 @@
     </Style>
 
     <Style TargetType="controls:TextAction" BasedOn="{StaticResource M3FooterTextAction}" />
+
+    <Style TargetType="controls:TextAction" x:Key="M3AuthServerTextAction" BasedOn="{StaticResource M3FooterTextAction}">
+        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
+        <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
+        <Setter Property="ContentPadding" Value="{StaticResource M3FooterLinkPadding}" />
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
 
     <Style TargetType="controls:TextAction" x:Key="M3DialogTextAction" BasedOn="{StaticResource M3FooterTextAction}">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />

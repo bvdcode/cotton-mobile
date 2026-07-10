@@ -9,11 +9,11 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultCardStyleResourceKey = "M3AuthPanel";
         private const string DefaultFlatCardStyleResourceKey = "M3AuthPanelFlat";
-        private const string DefaultActionRowStyleResourceKey = "M3AuthActionRow";
+        private const string DefaultActionStackStyleResourceKey = "M3AuthActionStack";
         private const string DefaultFormStackStyleResourceKey = "M3AuthFormStack";
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
-        private const string DefaultServerActionButtonStyleResourceKey = "M3AuthServerActionButton";
+        private const string DefaultServerActionStyleResourceKey = "M3AuthServerTextAction";
         private const string ChangeServerActionText = "Change server";
         private const string UseDefaultServerActionText = "Use default server";
         private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
@@ -69,10 +69,10 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnPanelVisiblePropertyChanged);
 
         private readonly FilledButton _button;
-        private readonly Grid _actionRow;
+        private readonly VerticalStackLayout _actionStack;
         private readonly ContentCardView _card;
         private readonly VerticalStackLayout _formStack;
-        private readonly IconButton _serverActionButton;
+        private readonly TextAction _serverAction;
         private readonly ScreenStatusView _status;
         private readonly ICommand _toggleServerFieldCommand;
         private readonly OutlinedInputField _urlField;
@@ -104,23 +104,21 @@ namespace Cotton.Mobile.Controls
             };
             _button.SetDynamicResource(StyleProperty, DefaultButtonStyleResourceKey);
 
-            _serverActionButton = new IconButton
+            _serverAction = new TextAction
             {
                 Command = _toggleServerFieldCommand,
             };
-            _serverActionButton.SetDynamicResource(StyleProperty, DefaultServerActionButtonStyleResourceKey);
+            _serverAction.SetDynamicResource(StyleProperty, DefaultServerActionStyleResourceKey);
 
-            _actionRow = new Grid
+            _actionStack = new VerticalStackLayout
             {
-                ColumnDefinitions =
+                Children =
                 {
-                    new ColumnDefinition { Width = GridLength.Star },
-                    new ColumnDefinition { Width = GridLength.Auto },
+                    _button,
+                    _serverAction,
                 },
             };
-            _actionRow.SetDynamicResource(StyleProperty, DefaultActionRowStyleResourceKey);
-            _actionRow.Add(_button, 0, 0);
-            _actionRow.Add(_serverActionButton, 1, 0);
+            _actionStack.SetDynamicResource(StyleProperty, DefaultActionStackStyleResourceKey);
 
             _formStack = new VerticalStackLayout
             {
@@ -128,7 +126,7 @@ namespace Cotton.Mobile.Controls
                 {
                     _urlField,
                     _status,
-                    _actionRow,
+                    _actionStack,
                 },
             };
             _formStack.SetDynamicResource(StyleProperty, DefaultFormStackStyleResourceKey);
@@ -217,7 +215,7 @@ namespace Cotton.Mobile.Controls
 
             _button.Command = ConnectCommand;
             _button.IsEnabled = IsInputEnabled;
-            _serverActionButton.IsEnabled = IsInputEnabled;
+            _serverAction.IsEnabled = IsInputEnabled;
             UpdateServerFieldState();
             UpdateInputTransparency();
         }
@@ -246,12 +244,15 @@ namespace Cotton.Mobile.Controls
         {
             bool isServerFieldVisible = IsServerFieldVisible();
             _urlField.IsFieldVisible = isServerFieldVisible;
-            _serverActionButton.IconData = isServerFieldVisible ? IconPathData.Close : IconPathData.Language;
+            string serverActionText = isServerFieldVisible
+                ? UseDefaultServerActionText
+                : ChangeServerActionText;
+            _serverAction.Text = serverActionText;
             SemanticProperties.SetDescription(
-                _serverActionButton,
-                isServerFieldVisible ? UseDefaultServerActionText : ChangeServerActionText);
+                _serverAction,
+                serverActionText);
             SemanticProperties.SetHint(
-                _serverActionButton,
+                _serverAction,
                 "Choose the default Cotton Cloud server or enter a custom address.");
             _card.CardStyleResourceKey = ShouldUseFramedPanel()
                 ? DefaultCardStyleResourceKey

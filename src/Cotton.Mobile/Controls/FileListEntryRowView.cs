@@ -184,6 +184,7 @@ namespace Cotton.Mobile.Controls
                     _actionButton,
                 },
             };
+            _grid.SetDynamicResource(StyleProperty, "M3FileListRowGrid");
 
             Content = _grid;
             UpdateVisualState();
@@ -339,9 +340,7 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateVisualState()
         {
-            _grid.SetDynamicResource(StyleProperty, "M3FileListRowGrid");
-
-            _selectionOverlay.IsSelected = IsSelected;
+            _selectionOverlay.ApplySelectionState(IsSelected, animateSelection: false);
 
             _thumbnail.ApplyThumbnailState(
                 ThumbnailSource,
@@ -350,7 +349,8 @@ namespace Cotton.Mobile.Controls
                 IsLoading,
                 PlaceholderText ?? string.Empty,
                 IsPlaceholderTextVisible,
-                IsSelected);
+                IsSelected,
+                animateChanges: false);
 
             ApplyMetadataState();
 
@@ -376,7 +376,8 @@ namespace Cotton.Mobile.Controls
                 trailingText,
                 isTrailingTextVisible,
                 trailingChipStyle,
-                trailingTextStyle);
+                trailingTextStyle,
+                animateTrailingChipVisibility: false);
         }
 
         private (string Text, bool IsVisible, string ChipStyle, string TextStyle) CreateStatusChipState()

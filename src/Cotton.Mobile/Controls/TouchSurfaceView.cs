@@ -42,6 +42,7 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly LongPressBehavior _longPressBehavior;
+        private string? _appliedSurfaceStyleResourceKey;
 
         public TouchSurfaceView()
         {
@@ -92,11 +93,34 @@ namespace Cotton.Mobile.Controls
                 SurfaceStyleResourceKey,
                 DefaultSurfaceStyleResourceKey);
 
-            SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
-            _longPressBehavior.Command = Command;
-            _longPressBehavior.CommandParameter = CommandParameter;
-            _longPressBehavior.TapCommand = TapCommand;
-            _longPressBehavior.TapCommandParameter = TapCommandParameter;
+            if (!string.Equals(
+                    _appliedSurfaceStyleResourceKey,
+                    surfaceStyleResourceKey,
+                    StringComparison.Ordinal))
+            {
+                SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
+                _appliedSurfaceStyleResourceKey = surfaceStyleResourceKey;
+            }
+
+            if (!ReferenceEquals(_longPressBehavior.Command, Command))
+            {
+                _longPressBehavior.Command = Command;
+            }
+
+            if (!Equals(_longPressBehavior.CommandParameter, CommandParameter))
+            {
+                _longPressBehavior.CommandParameter = CommandParameter;
+            }
+
+            if (!ReferenceEquals(_longPressBehavior.TapCommand, TapCommand))
+            {
+                _longPressBehavior.TapCommand = TapCommand;
+            }
+
+            if (!Equals(_longPressBehavior.TapCommandParameter, TapCommandParameter))
+            {
+                _longPressBehavior.TapCommandParameter = TapCommandParameter;
+            }
         }
     }
 }

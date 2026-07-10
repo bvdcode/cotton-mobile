@@ -59,7 +59,10 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly IconButton _actionButton;
+        private string? _appliedIconButtonStyleResourceKey;
+        private string _currentSemanticDescription = string.Empty;
         private bool _hasAppliedActionVisibility;
+        private bool _isCurrentActionVisible;
 
         public FileEntryActionButtonView()
         {
@@ -128,13 +131,48 @@ namespace Cotton.Mobile.Controls
                 IconButtonStyleResourceKey,
                 DefaultIconButtonStyleResourceKey);
 
-            _actionButton.SetDynamicResource(StyleProperty, iconButtonStyleResourceKey);
-            _actionButton.IconData = IconData ?? IconPathData.MoreVertical;
-            _actionButton.Command = Command;
-            _actionButton.CommandParameter = CommandParameter;
-            _actionButton.IsEnabled = IsActionEnabled;
-            UpdateActionButtonVisibility(animateActionVisibility);
-            SemanticProperties.SetDescription(_actionButton, SemanticDescription ?? string.Empty);
+            if (!string.Equals(
+                    _appliedIconButtonStyleResourceKey,
+                    iconButtonStyleResourceKey,
+                    StringComparison.Ordinal))
+            {
+                _actionButton.SetDynamicResource(StyleProperty, iconButtonStyleResourceKey);
+                _appliedIconButtonStyleResourceKey = iconButtonStyleResourceKey;
+            }
+
+            Geometry iconData = IconData ?? IconPathData.MoreVertical;
+            if (!Equals(_actionButton.IconData, iconData))
+            {
+                _actionButton.IconData = iconData;
+            }
+
+            if (!ReferenceEquals(_actionButton.Command, Command))
+            {
+                _actionButton.Command = Command;
+            }
+
+            if (!Equals(_actionButton.CommandParameter, CommandParameter))
+            {
+                _actionButton.CommandParameter = CommandParameter;
+            }
+
+            if (_actionButton.IsEnabled != IsActionEnabled)
+            {
+                _actionButton.IsEnabled = IsActionEnabled;
+            }
+
+            if (!_hasAppliedActionVisibility || _isCurrentActionVisible != IsActionVisible)
+            {
+                _isCurrentActionVisible = IsActionVisible;
+                UpdateActionButtonVisibility(animateActionVisibility);
+            }
+
+            string semanticDescription = SemanticDescription ?? string.Empty;
+            if (!string.Equals(_currentSemanticDescription, semanticDescription, StringComparison.Ordinal))
+            {
+                SemanticProperties.SetDescription(_actionButton, semanticDescription);
+                _currentSemanticDescription = semanticDescription;
+            }
         }
 
         private void UpdateActionButtonVisibility(bool animateActionVisibility)

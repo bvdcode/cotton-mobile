@@ -79,6 +79,9 @@ namespace Cotton.Mobile.Controls
         private readonly Grid _grid;
         private readonly Label _titleLabel;
         private readonly ChipView _trailingChip;
+        private string? _appliedDetailStyleResourceKey;
+        private string? _appliedGridStyleResourceKey;
+        private string? _appliedTitleStyleResourceKey;
         private bool _hasAppliedTrailingChipVisibility;
         private bool _isCurrentTrailingTextVisible;
         private string _currentTrailingText = string.Empty;
@@ -206,7 +209,8 @@ namespace Cotton.Mobile.Controls
             string trailingText,
             bool isTrailingTextVisible,
             string trailingChipStyleResourceKey,
-            string trailingTextStyleResourceKey)
+            string trailingTextStyleResourceKey,
+            bool animateTrailingChipVisibility = true)
         {
             ApplyResolvedVisualState(
                 title,
@@ -218,7 +222,7 @@ namespace Cotton.Mobile.Controls
                 DetailStyleResourceKey,
                 trailingChipStyleResourceKey,
                 trailingTextStyleResourceKey,
-                animateTrailingChipVisibility: true);
+                animateTrailingChipVisibility);
         }
 
         private void ApplyResolvedVisualState(
@@ -252,18 +256,53 @@ namespace Cotton.Mobile.Controls
             string currentDetail = detail ?? string.Empty;
             string currentTrailingText = trailingText ?? string.Empty;
 
-            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _titleLabel.SetDynamicResource(StyleProperty, titleStyleResourceKey);
-            _detailLabel.SetDynamicResource(StyleProperty, detailStyleResourceKey);
-            _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
-            _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
+            ApplyStyleIfChanged(_grid, gridStyleResourceKey, ref _appliedGridStyleResourceKey);
+            ApplyStyleIfChanged(_titleLabel, titleStyleResourceKey, ref _appliedTitleStyleResourceKey);
+            ApplyStyleIfChanged(_detailLabel, detailStyleResourceKey, ref _appliedDetailStyleResourceKey);
+            if (!string.Equals(_titleLabel.Text, currentTitle, StringComparison.Ordinal))
+            {
+                _titleLabel.Text = currentTitle;
+            }
 
-            _titleLabel.Text = currentTitle;
-            _detailLabel.Text = currentDetail;
-            _trailingChip.Text = currentTrailingText;
+            if (!string.Equals(_detailLabel.Text, currentDetail, StringComparison.Ordinal))
+            {
+                _detailLabel.Text = currentDetail;
+            }
+
+            bool wasTrailingChipVisible = IsTrailingChipActuallyVisible(
+                _currentTrailingText,
+                _isCurrentTrailingTextVisible);
+            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(
+                currentTrailingText,
+                isTrailingTextVisible);
+            _trailingChip.ApplyChipState(
+                currentTrailingText,
+                trailingChipStyleResourceKey,
+                trailingTextStyleResourceKey,
+                animateTextVisibility: false);
             _currentTrailingText = currentTrailingText;
             _isCurrentTrailingTextVisible = isTrailingTextVisible;
-            UpdateTrailingChipVisibility(currentTrailingText, isTrailingTextVisible, animateTrailingChipVisibility);
+            if (!_hasAppliedTrailingChipVisibility || wasTrailingChipVisible != isTrailingChipVisible)
+            {
+                UpdateTrailingChipVisibility(
+                    currentTrailingText,
+                    isTrailingTextVisible,
+                    animateTrailingChipVisibility);
+            }
+        }
+
+        private static void ApplyStyleIfChanged(
+            Element target,
+            string styleResourceKey,
+            ref string? appliedStyleResourceKey)
+        {
+            if (string.Equals(appliedStyleResourceKey, styleResourceKey, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            target.SetDynamicResource(StyleProperty, styleResourceKey);
+            appliedStyleResourceKey = styleResourceKey;
         }
 
         private void UpdateTrailingChipVisibility(

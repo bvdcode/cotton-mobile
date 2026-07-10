@@ -23,6 +23,8 @@ namespace Cotton.Mobile.Controls
             propertyChanged: OnVisualPropertyChanged);
 
         private readonly Border _overlay;
+        private string? _appliedOverlayStyleResourceKey;
+        private bool _animateSelectionChanges = true;
         private bool _hasAppliedSelectionState;
 
         public SelectionOverlayView()
@@ -46,6 +48,19 @@ namespace Cotton.Mobile.Controls
             set => SetValue(OverlayStyleResourceKeyProperty, value);
         }
 
+        internal void ApplySelectionState(bool isSelected, bool animateSelection)
+        {
+            _animateSelectionChanges = animateSelection;
+            try
+            {
+                IsSelected = isSelected;
+            }
+            finally
+            {
+                _animateSelectionChanges = true;
+            }
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SelectionOverlayView view = (SelectionOverlayView)bindable;
@@ -55,7 +70,7 @@ namespace Cotton.Mobile.Controls
         private static void OnSelectedPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             SelectionOverlayView view = (SelectionOverlayView)bindable;
-            view.UpdateVisualState(animateSelection: true);
+            view.UpdateVisualState(view._animateSelectionChanges);
         }
 
         private void UpdateVisualState(bool animateSelection)
@@ -64,7 +79,14 @@ namespace Cotton.Mobile.Controls
                 OverlayStyleResourceKey,
                 DefaultOverlayStyleResourceKey);
 
-            _overlay.SetDynamicResource(StyleProperty, overlayStyleResourceKey);
+            if (!string.Equals(
+                    _appliedOverlayStyleResourceKey,
+                    overlayStyleResourceKey,
+                    StringComparison.Ordinal))
+            {
+                _overlay.SetDynamicResource(StyleProperty, overlayStyleResourceKey);
+                _appliedOverlayStyleResourceKey = overlayStyleResourceKey;
+            }
             _overlay.IsVisible = true;
             IsVisible = true;
             UpdateSelectionState(animateSelection);

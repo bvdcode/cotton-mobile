@@ -125,6 +125,10 @@ namespace Cotton.Mobile.Controls
         private readonly Border _selectionMark;
         private readonly IconView _selectionMarkIcon;
         private readonly Border _surface;
+        private string? _appliedBadgeLabelStyleResourceKey;
+        private string? _appliedBadgeStyleResourceKey;
+        private string? _appliedSelectionMarkStyleResourceKey;
+        private string? _appliedSurfaceStyleResourceKey;
         private bool _hasAppliedBadgeVisibility;
         private bool _hasAppliedFolderIconVisibility;
         private bool _hasAppliedLoadingState;
@@ -200,6 +204,10 @@ namespace Cotton.Mobile.Controls
                 },
             };
 
+            _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");
+            _loadingIndicator.SetDynamicResource(StyleProperty, "M3ThumbnailActivityIndicator");
+            _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
+            _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
             Content = root;
             UpdateVisualState(animateSelection: false);
         }
@@ -433,7 +441,8 @@ namespace Cotton.Mobile.Controls
             bool isSelected,
             double folderIconSize = 0d,
             string badgeText = "",
-            bool isBadgeVisible = false)
+            bool isBadgeVisible = false,
+            bool animateChanges = true)
         {
             ApplyResolvedVisualState(
                 thumbnailSource,
@@ -450,12 +459,12 @@ namespace Cotton.Mobile.Controls
                 SelectionMarkStyleResourceKey,
                 BadgeStyleResourceKey,
                 BadgeLabelStyleResourceKey,
-                animatePreviewImageVisibility: true,
-                animateFolderIconVisibility: true,
-                animatePlaceholderVisibility: true,
-                animateLoading: true,
-                animateBadgeVisibility: true,
-                animateSelection: true);
+                animatePreviewImageVisibility: animateChanges,
+                animateFolderIconVisibility: animateChanges,
+                animatePlaceholderVisibility: animateChanges,
+                animateLoading: animateChanges,
+                animateBadgeVisibility: animateChanges,
+                animateSelection: animateChanges);
         }
 
         private void ApplyResolvedVisualState(
@@ -495,32 +504,81 @@ namespace Cotton.Mobile.Controls
             string currentPlaceholderText = placeholderText ?? string.Empty;
             string currentBadgeText = badgeText ?? string.Empty;
 
-            _surface.SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
-            _folderIcon.SetDynamicResource(StyleProperty, "M3FolderThumbnailIcon");
-            _loadingIndicator.SetDynamicResource(StyleProperty, "M3ThumbnailActivityIndicator");
-            _placeholder.SetDynamicResource(StyleProperty, "M3DynamicThumbnailPlaceholder");
-            _selectionMark.SetDynamicResource(StyleProperty, selectionMarkStyleResourceKey);
-            _selectionMarkIcon.SetDynamicResource(StyleProperty, "M3FileSelectionCheckIcon");
-            _image.Source = thumbnailSource;
-            _isCurrentPreviewImageVisible = isPreviewImageVisible;
-            _isCurrentFolderThumbnailVisible = isFolderThumbnailVisible;
-            _isCurrentLoading = isLoading;
-            _currentPlaceholderText = currentPlaceholderText;
-            _isCurrentPlaceholderTextVisible = isPlaceholderTextVisible;
-            _isCurrentSelected = isSelected;
-            _currentBadgeText = currentBadgeText;
-            _isCurrentBadgeVisible = isBadgeVisible;
-            UpdatePreviewImageVisibility(isPreviewImageVisible, animatePreviewImageVisibility);
-            UpdateFolderIconVisibility(isFolderThumbnailVisible, animateFolderIconVisibility);
-            UpdateLoadingState(isLoading, animateLoading);
-            _placeholder.Text = currentPlaceholderText;
-            UpdatePlaceholderVisibility(currentPlaceholderText, isPlaceholderTextVisible, animatePlaceholderVisibility);
+            ApplyStyleIfChanged(_surface, surfaceStyleResourceKey, ref _appliedSurfaceStyleResourceKey);
+            ApplyStyleIfChanged(
+                _selectionMark,
+                selectionMarkStyleResourceKey,
+                ref _appliedSelectionMarkStyleResourceKey);
+            if (!Equals(_image.Source, thumbnailSource))
+            {
+                _image.Source = thumbnailSource;
+            }
+
+            if (!_hasAppliedPreviewImageVisibility || _isCurrentPreviewImageVisible != isPreviewImageVisible)
+            {
+                _isCurrentPreviewImageVisible = isPreviewImageVisible;
+                UpdatePreviewImageVisibility(isPreviewImageVisible, animatePreviewImageVisibility);
+            }
+
+            if (!_hasAppliedFolderIconVisibility || _isCurrentFolderThumbnailVisible != isFolderThumbnailVisible)
+            {
+                _isCurrentFolderThumbnailVisible = isFolderThumbnailVisible;
+                UpdateFolderIconVisibility(isFolderThumbnailVisible, animateFolderIconVisibility);
+            }
+
+            if (!_hasAppliedLoadingState || _isCurrentLoading != isLoading)
+            {
+                _isCurrentLoading = isLoading;
+                UpdateLoadingState(isLoading, animateLoading);
+            }
+
+            if (!string.Equals(_placeholder.Text, currentPlaceholderText, StringComparison.Ordinal))
+            {
+                _placeholder.Text = currentPlaceholderText;
+            }
+
+            if (!_hasAppliedPlaceholderVisibility
+                || _isCurrentPlaceholderTextVisible != isPlaceholderTextVisible
+                || !string.Equals(_currentPlaceholderText, currentPlaceholderText, StringComparison.Ordinal))
+            {
+                _currentPlaceholderText = currentPlaceholderText;
+                _isCurrentPlaceholderTextVisible = isPlaceholderTextVisible;
+                UpdatePlaceholderVisibility(
+                    currentPlaceholderText,
+                    isPlaceholderTextVisible,
+                    animatePlaceholderVisibility);
+            }
+
             _selectionMark.IsVisible = true;
-            UpdateSelectionState(isSelected, animateSelection);
-            _badge.Text = currentBadgeText;
-            _badge.ChipStyleResourceKey = badgeStyleResourceKey;
-            _badge.LabelStyleResourceKey = badgeLabelStyleResourceKey;
-            UpdateBadgeVisibility(currentBadgeText, isBadgeVisible, animateBadgeVisibility);
+            if (!_hasAppliedSelectionState || _isCurrentSelected != isSelected)
+            {
+                _isCurrentSelected = isSelected;
+                UpdateSelectionState(isSelected, animateSelection);
+            }
+
+            bool badgeStyleChanged = !string.Equals(
+                    _appliedBadgeStyleResourceKey,
+                    badgeStyleResourceKey,
+                    StringComparison.Ordinal)
+                || !string.Equals(
+                    _appliedBadgeLabelStyleResourceKey,
+                    badgeLabelStyleResourceKey,
+                    StringComparison.Ordinal);
+            if (badgeStyleChanged
+                || !string.Equals(_currentBadgeText, currentBadgeText, StringComparison.Ordinal)
+                || _isCurrentBadgeVisible != isBadgeVisible)
+            {
+                _badge.ApplyChipState(
+                    currentBadgeText,
+                    badgeStyleResourceKey,
+                    badgeLabelStyleResourceKey,
+                    animateBadgeVisibility);
+                _appliedBadgeStyleResourceKey = badgeStyleResourceKey;
+                _appliedBadgeLabelStyleResourceKey = badgeLabelStyleResourceKey;
+                _currentBadgeText = currentBadgeText;
+                _isCurrentBadgeVisible = isBadgeVisible;
+                UpdateBadgeVisibility(currentBadgeText, isBadgeVisible, animateBadgeVisibility);
+            }
 
             if (folderIconSize > 0)
             {
@@ -529,6 +587,20 @@ namespace Cotton.Mobile.Controls
             }
 
             _folderIcon.ClearValue(IconView.IconSizeProperty);
+        }
+
+        private static void ApplyStyleIfChanged(
+            Element target,
+            string styleResourceKey,
+            ref string? appliedStyleResourceKey)
+        {
+            if (string.Equals(appliedStyleResourceKey, styleResourceKey, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            target.SetDynamicResource(StyleProperty, styleResourceKey);
+            appliedStyleResourceKey = styleResourceKey;
         }
 
         private void UpdatePreviewImageVisibility(

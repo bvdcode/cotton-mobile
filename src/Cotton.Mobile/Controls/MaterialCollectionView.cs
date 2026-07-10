@@ -64,6 +64,7 @@ namespace Cotton.Mobile.Controls
         public MaterialCollectionView()
         {
             _collection = new CollectionView();
+            _collection.HandlerChanged += OnCollectionHandlerChanged;
 
             Content = _collection;
             UpdateVisualState();
@@ -130,6 +131,18 @@ namespace Cotton.Mobile.Controls
             _collection.ItemsLayout = ItemsLayout;
             _collection.ItemSizingStrategy = ItemSizingStrategy;
             _collection.SelectionMode = SelectionMode;
+        }
+
+        private void OnCollectionHandlerChanged(object? sender, EventArgs e)
+        {
+#if ANDROID
+            if (_collection.Handler?.PlatformView is AndroidX.RecyclerView.Widget.RecyclerView recyclerView)
+            {
+                recyclerView.HasFixedSize = true;
+                recyclerView.SetItemViewCacheSize(12);
+                recyclerView.SetItemAnimator(null);
+            }
+#endif
         }
     }
 }

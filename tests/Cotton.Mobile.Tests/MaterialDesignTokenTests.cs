@@ -2565,6 +2565,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Material_collections_disable_android_recycler_churn()
+        {
+            string materialCollectionView = LoadText(
+                Path.Combine(ControlsDirectoryPath, "MaterialCollectionView.cs"));
+
+            Assert.Contains("recyclerView.HasFixedSize = true;", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("recyclerView.SetItemViewCacheSize(12);", materialCollectionView, StringComparison.Ordinal);
+            Assert.Contains("recyclerView.SetItemAnimator(null);", materialCollectionView, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Selection_bars_use_reusable_material_control()
         {
             string mainPage = LoadText(MainPagePath);
@@ -3322,7 +3333,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("!string.IsNullOrWhiteSpace(text)", chipView, StringComparison.Ordinal);
             Assert.Contains("_chip.IsVisible = false", chipView, StringComparison.Ordinal);
             Assert.Contains("_label.Text = text;", chipView, StringComparison.Ordinal);
-            Assert.Contains("_label.Text = Text ?? string.Empty;", chipView, StringComparison.Ordinal);
+            Assert.Contains("_label.Text = _currentText;", chipView, StringComparison.Ordinal);
             Assert.Contains("<x:Int32 x:Key=\"M3MotionStatusDuration\">120</x:Int32>", interaction, StringComparison.Ordinal);
         }
 

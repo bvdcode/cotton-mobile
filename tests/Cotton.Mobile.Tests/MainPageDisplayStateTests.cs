@@ -613,6 +613,43 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Profile_refresh_preserves_visible_cached_files()
+        {
+            MainPageDisplayState display = CreateDisplayWithMixedFiles();
+            display.ShowProfileStatus("Showing saved files.");
+
+            display.RefreshProfile(
+                new MainPageProfile("Updated profile", "updated@example.com", "cloud.example.com"));
+
+            Assert.Equal("Updated profile", display.ProfileName);
+            Assert.Equal("updated@example.com", display.ProfileEmail);
+            Assert.Equal("cloud.example.com", display.ProfileInstance);
+            Assert.Null(display.ProfileStatus);
+            Assert.Equal(4, display.FileEntries.Count);
+            Assert.True(display.IsFileListViewVisible);
+        }
+
+        [Fact]
+        public void Cached_profile_reveals_files_prepared_while_loading()
+        {
+            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
+            display.ShowFiles(
+                CreateContent(CreateFile("cached.txt", "Text", 10, Newer)),
+                isRoot: true,
+                canNavigateUp: false,
+                path: "Files");
+
+            Assert.False(display.IsProfileVisible);
+
+            display.ShowProfileWithCachedFiles(
+                new MainPageProfile("Cached profile", null, "app.cottoncloud.dev"));
+
+            Assert.True(display.IsProfileVisible);
+            Assert.True(display.IsFileListViewVisible);
+            Assert.Equal(["cached.txt"], VisibleNames(display));
+        }
+
+        [Fact]
         public void Folder_loading_hides_previous_collection_until_new_files_arrive()
         {
             MainPageDisplayState display = CreateDisplayWithMixedFiles();

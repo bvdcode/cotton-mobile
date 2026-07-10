@@ -100,6 +100,7 @@ namespace Cotton.Mobile.ViewModels
         private Uri? _instanceUri;
         private string? _accountScopeKey;
         private bool _isFileLoadInProgress;
+        private bool _isFileLoadInteractionBlocking;
         private bool _isFolderNavigationInProgress;
         private bool _lastFileLoadFailed;
         private bool _lastFileLoadDisplayedCachedContent;
@@ -239,19 +240,29 @@ namespace Cotton.Mobile.ViewModels
             await LoadRootFilesAsync();
         }
 
-        public async Task<bool> HasCachedRootAsync(
+        public async Task InitializeAuthenticatedSessionFromCachedRootAsync(
             Uri instanceUri,
-            CancellationToken cancellationToken = default)
+            string? accountScopeKey)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
 
-            CottonCachedFolderContentSnapshot? cachedSnapshot =
-                await _folderContentCache.LoadRootSnapshotAsync(instanceUri, cancellationToken);
-            return cachedSnapshot is not null;
+            _instanceUri = instanceUri;
+            _accountScopeKey = string.IsNullOrWhiteSpace(accountScopeKey) ? null : accountScopeKey.Trim();
+            _display.ApplyFileBrowserPreferences(LoadFileBrowserPreferences());
+            if (_isFolderNavigationInProgress
+                || _isFileLoadInProgress
+                || _fileActionCancellation is not null
+                || !IsDisplayingRootFolder())
+            {
+                return;
+            }
+
+            await LoadRootFilesAsync(isRefresh: true, isSilentRefresh: true);
         }
 
         public async Task<bool> InitializeCachedRootAsync(
             Uri instanceUri,
+            bool showOfflineNotice = true,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
@@ -272,7 +283,11 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 _display.ClearFileSearch();
-                return await ShowCachedRootFilesAsync(instanceUri, cachedSnapshot, fileLoadCancellation);
+                return await ShowCachedRootFilesAsync(
+                    instanceUri,
+                    cachedSnapshot,
+                    fileLoadCancellation,
+                    showOfflineNotice);
             }
             finally
             {
@@ -303,6 +318,7 @@ namespace Cotton.Mobile.ViewModels
             _currentFolder = null;
             _lastFileLoadFailed = false;
             _lastFileLoadDisplayedCachedContent = false;
+            _isFileLoadInteractionBlocking = false;
             _fileLoadRecoveryPendingAfterBusyReason = null;
             _fileNavigation.Clear();
         }
@@ -313,6 +329,7 @@ namespace Cotton.Mobile.ViewModels
             CancelCurrentFileAction();
             ClearFileActionRetry();
             _isFileLoadInProgress = false;
+            _isFileLoadInteractionBlocking = false;
             _isFolderNavigationInProgress = false;
             _lastFileLoadDisplayedCachedContent = false;
             _fileLoadRecoveryPendingAfterBusyReason = null;
@@ -425,6 +442,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task ActivateEntryAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
+            CancelInterruptibleFileLoad();
             CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
             if (currentEntry is null)
             {
@@ -455,6 +473,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task ShowEntryActionsAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
+            CancelInterruptibleFileLoad();
             CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
             if (currentEntry is null)
             {
@@ -485,6 +504,7 @@ namespace Cotton.Mobile.ViewModels
         public Task BeginEntrySelectionAsync(CottonFileBrowserEntry entry)
         {
             ArgumentNullException.ThrowIfNull(entry);
+            CancelInterruptibleFileLoad();
             CottonFileBrowserEntry? currentEntry = GetCurrentVisibleEntry(entry);
             if (currentEntry is null || !_display.IsFileBrowserChromeEnabled)
             {
@@ -1251,7 +1271,9 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task LoadRootFilesAsync(bool isRefresh = false)
+        private async Task LoadRootFilesAsync(
+            bool isRefresh = false,
+            bool isSilentRefresh = false)
         {
             Uri? instanceUri = _instanceUri;
             if (instanceUri is null)
@@ -1259,10 +1281,18 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            CancellationTokenSource fileLoadCancellation = BeginFileLoad();
+            CancellationTokenSource fileLoadCancellation = BeginFileLoad(
+                blocksInteraction: !isSilentRefresh);
             try
             {
-                if (isRefresh)
+                if (isSilentRefresh)
+                {
+                    if (ShowCurrentOfflineNoticeIfNeeded())
+                    {
+                        return;
+                    }
+                }
+                else if (isRefresh)
                 {
                     _display.ShowFilesRefreshing("Refreshing files...");
                     if (ShowCurrentOfflineNoticeIfNeeded())
@@ -1454,7 +1484,8 @@ namespace Cotton.Mobile.ViewModels
         private async Task<bool> ShowCachedRootFilesAsync(
             Uri instanceUri,
             CottonCachedFolderContentSnapshot cachedSnapshot,
-            CancellationTokenSource fileLoadCancellation)
+            CancellationTokenSource fileLoadCancellation,
+            bool showOfflineNotice = true)
         {
             CottonFolderContent cachedContent = await ApplyCachedThumbnailsAsync(
                 instanceUri,
@@ -1474,7 +1505,11 @@ namespace Cotton.Mobile.ViewModels
                 isRoot: true,
                 canNavigateUp: false,
                 CreatePath(cachedContent.FolderName));
-            _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
+            if (showOfflineNotice)
+            {
+                _display.ShowOfflineFilesNotice(isCachedListing: true, cachedSnapshot.CachedAtUtc);
+            }
+
             RefreshLocalFileStateAfterFirstRender(instanceUri);
             return true;
         }
@@ -6165,6 +6200,7 @@ namespace Cotton.Mobile.ViewModels
 
         private CancellationTokenSource BeginFileAction(string status)
         {
+            CancelInterruptibleFileLoad();
             CancelCurrentFileAction();
             ClearFileActionRetry();
             CancellationTokenSource cancellation = new();
@@ -6180,6 +6216,7 @@ namespace Cotton.Mobile.ViewModels
             bool blockBrowserChromeWhilePending = true,
             bool showLoadingAfterDelay = true)
         {
+            CancelInterruptibleFileLoad();
             CancelCurrentFileAction();
             ClearFileActionRetry();
             CancellationTokenSource cancellation = new();
@@ -6227,12 +6264,13 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private CancellationTokenSource BeginFileLoad()
+        private CancellationTokenSource BeginFileLoad(bool blocksInteraction = true)
         {
             CancelCurrentFileLoad();
             CancellationTokenSource cancellation = new();
             _fileLoadCancellation = cancellation;
             _isFileLoadInProgress = true;
+            _isFileLoadInteractionBlocking = blocksInteraction;
             return cancellation;
         }
 
@@ -6272,6 +6310,7 @@ namespace Cotton.Mobile.ViewModels
 
             _fileLoadCancellation = null;
             _isFileLoadInProgress = false;
+            _isFileLoadInteractionBlocking = false;
             cancellation.Dispose();
             QueuePendingFileLoadRecoveryRefreshAfterBusy();
         }
@@ -6291,13 +6330,23 @@ namespace Cotton.Mobile.ViewModels
         private void CancelCurrentFileLoad()
         {
             CancellationTokenSource? cancellation = _fileLoadCancellation;
+            _fileLoadCancellation = null;
+            _isFileLoadInProgress = false;
+            _isFileLoadInteractionBlocking = false;
             if (cancellation is null)
             {
                 return;
             }
 
-            _fileLoadCancellation = null;
             cancellation.Cancel();
+        }
+
+        private void CancelInterruptibleFileLoad()
+        {
+            if (_isFileLoadInProgress && !_isFileLoadInteractionBlocking)
+            {
+                CancelCurrentFileLoad();
+            }
         }
 
         private bool IsActiveFileLoad(CancellationTokenSource cancellation, Uri instanceUri)
@@ -6524,7 +6573,7 @@ namespace Cotton.Mobile.ViewModels
         private bool IsFileBrowserBusy()
         {
             return _isFolderNavigationInProgress
-                || _isFileLoadInProgress
+                || (_isFileLoadInProgress && _isFileLoadInteractionBlocking)
                 || _fileActionCancellation is not null
                 || _display.IsFilesLoading;
         }

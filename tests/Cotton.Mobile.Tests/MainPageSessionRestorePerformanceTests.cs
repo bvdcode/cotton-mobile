@@ -11,18 +11,36 @@ namespace Cotton.Mobile.Tests
 
             Assert.Contains("ShowLoading(string.Empty);", content, StringComparison.Ordinal);
             Assert.DoesNotContain("Restoring session...", content, StringComparison.Ordinal);
+
+            int showCachedSession = content.IndexOf(
+                "didShowCachedSession = await TryShowCachedSessionDuringRestoreAsync();",
+                StringComparison.Ordinal);
+            int restoreSession = content.IndexOf(
+                "CottonSessionResult result = await _sessionService.RestoreAsync();",
+                StringComparison.Ordinal);
+
+            Assert.True(showCachedSession >= 0);
+            Assert.True(restoreSession > showCachedSession);
         }
 
         [Fact]
         public void Authenticated_session_initializes_file_browser_before_session_maintenance()
         {
             string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");
+            int applySessionStart = content.IndexOf(
+                "private async Task ApplySessionResultAsync(",
+                StringComparison.Ordinal);
+            int applySessionEnd = content.IndexOf(
+                "private string ResolveSessionStatusMessage",
+                applySessionStart,
+                StringComparison.Ordinal);
+            string applySession = content[applySessionStart..applySessionEnd];
 
-            int showProfile = content.IndexOf("ShowProfile(profile);", StringComparison.Ordinal);
-            int initializeFiles = content.IndexOf(
+            int showProfile = applySession.IndexOf("ShowProfile(profile);", StringComparison.Ordinal);
+            int initializeFiles = applySession.IndexOf(
                 "await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);",
                 StringComparison.Ordinal);
-            int queueMaintenance = content.IndexOf(
+            int queueMaintenance = applySession.IndexOf(
                 "QueueAuthenticatedSessionMaintenance(result.InstanceUri, \"authenticated session\");",
                 StringComparison.Ordinal);
 
@@ -30,7 +48,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(initializeFiles > showProfile);
             Assert.True(queueMaintenance > initializeFiles);
 
-            string firstFileListPath = content[showProfile..initializeFiles];
+            string firstFileListPath = applySession[showProfile..initializeFiles];
             Assert.DoesNotContain("RestoreTransferQueueBestEffortAsync", firstFileListPath, StringComparison.Ordinal);
             Assert.DoesNotContain("ResumeQueuedBackgroundTransferBestEffortAsync", firstFileListPath, StringComparison.Ordinal);
             Assert.DoesNotContain("RegisterCurrentSessionBestEffortAsync", firstFileListPath, StringComparison.Ordinal);
@@ -38,26 +56,55 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Cached_offline_session_initializes_cached_root_before_transfer_activity_refresh()
+        public void Remembered_session_preserves_cached_root_during_authenticated_refresh()
         {
             string content = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");
 
-            int showCachedStatus = content.IndexOf(
-                "Display.ShowProfileStatus(OfflineCachedSessionStatus);",
+            int refreshProfile = content.IndexOf(
+                "Display.RefreshProfile(profile);",
                 StringComparison.Ordinal);
-            int initializeCachedRoot = content.IndexOf(
-                "if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri))",
+            int refreshCachedRoot = content.IndexOf(
+                "await _fileBrowser.InitializeAuthenticatedSessionFromCachedRootAsync(",
                 StringComparison.Ordinal);
             int queueTransferRefresh = content.IndexOf(
-                "QueueTransferActivityRefresh(instanceUri, \"cached offline session\");",
+                "QueueAuthenticatedSessionMaintenance(result.InstanceUri, \"authenticated session\");",
                 StringComparison.Ordinal);
 
-            Assert.True(showCachedStatus >= 0);
-            Assert.True(initializeCachedRoot > showCachedStatus);
-            Assert.True(queueTransferRefresh > initializeCachedRoot);
+            Assert.True(refreshProfile >= 0);
+            Assert.True(refreshCachedRoot > refreshProfile);
+            Assert.True(queueTransferRefresh > refreshCachedRoot);
+        }
 
-            string firstCachedFilesPath = content[showCachedStatus..initializeCachedRoot];
-            Assert.DoesNotContain("RestoreTransferQueueBestEffortAsync", firstCachedFilesPath, StringComparison.Ordinal);
+        [Fact]
+        public void Cached_session_requires_remembered_credentials_and_loads_before_network_restore()
+        {
+            string viewModel = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");
+            string sessionService = RepositoryPath.ReadText("src/Cotton.Mobile/Services/CottonSessionService.cs");
+            string fileBrowser = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/MainPageFileBrowserController.cs");
+
+            Assert.Contains("_sessionService.GetRememberedSessionInstanceAsync()", viewModel, StringComparison.Ordinal);
+            Assert.Contains("TokenPairDto? tokens = await _tokenStore.GetAsync", sessionService, StringComparison.Ordinal);
+            Assert.Contains("return tokens is null ? null : instanceUri;", sessionService, StringComparison.Ordinal);
+            Assert.Contains(
+                "InitializeCachedRootAsync(instanceUri, showOfflineNotice)",
+                viewModel,
+                StringComparison.Ordinal);
+            int initializeCachedRoot = viewModel.IndexOf(
+                "InitializeCachedRootAsync(instanceUri, showOfflineNotice)",
+                StringComparison.Ordinal);
+            int revealCachedProfile = viewModel.IndexOf(
+                "Display.ShowProfileWithCachedFiles(profile);",
+                StringComparison.Ordinal);
+            Assert.True(revealCachedProfile > initializeCachedRoot);
+            Assert.Contains("isRefresh: true, isSilentRefresh: true", fileBrowser, StringComparison.Ordinal);
+            Assert.Contains("blocksInteraction: !isSilentRefresh", fileBrowser, StringComparison.Ordinal);
+            Assert.Contains("_isFolderNavigationInProgress", fileBrowser, StringComparison.Ordinal);
+            Assert.Contains("|| !IsDisplayingRootFolder()", fileBrowser, StringComparison.Ordinal);
+            Assert.Contains(
+                "(_isFileLoadInProgress && _isFileLoadInteractionBlocking)",
+                fileBrowser,
+                StringComparison.Ordinal);
         }
 
         [Fact]

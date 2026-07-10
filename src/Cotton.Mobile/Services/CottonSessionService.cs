@@ -53,6 +53,19 @@ namespace Cotton.Mobile.Services
             _logger = logger;
         }
 
+        public async Task<Uri?> GetRememberedSessionInstanceAsync(
+            CancellationToken cancellationToken = default)
+        {
+            Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);
+            if (instanceUri is null)
+            {
+                return null;
+            }
+
+            TokenPairDto? tokens = await _tokenStore.GetAsync(cancellationToken).ConfigureAwait(false);
+            return tokens is null ? null : instanceUri;
+        }
+
         public async Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default)
         {
             Uri? instanceUri = await _instanceStore.GetAsync(cancellationToken).ConfigureAwait(false);

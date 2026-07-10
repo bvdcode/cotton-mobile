@@ -17,6 +17,8 @@ namespace Cotton.Mobile.ViewModels
         private const string OfflineAuthorizationPendingStatus = "Offline. Reconnect to finish authorization.";
         private const string OfflineCachedSessionStatus =
             "Offline. Showing saved files until your session can refresh.";
+        private const string SavedSessionRefreshFailedStatus =
+            "Showing saved files. Some actions may be unavailable.";
         private const string ReadyStatus = "";
         private const string AccountCancelAction = "Cancel";
         private const string AccountActivityAction = "Activity";
@@ -490,23 +492,45 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _isSessionRestoreInProgress = true;
+            bool didShowCachedSession = false;
 
             try
             {
                 ShowLoading(string.Empty);
+                didShowCachedSession = await TryShowCachedSessionDuringRestoreAsync();
                 _shouldRetrySessionRestoreWhenOnline = false;
                 _shouldRetrySessionRestoreOnResume = false;
                 CottonSessionResult result = await _sessionService.RestoreAsync();
-                await ApplySessionResultAsync(result, ReadyStatus);
+                await ApplySessionResultAsync(
+                    result,
+                    ReadyStatus,
+                    preserveVisibleCachedRoot: didShowCachedSession);
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to restore Cotton mobile session.");
                 await RestoreStoredInstanceUrlBestEffortAsync("session restore failure");
+                _shouldRetrySessionRestoreWhenOnline = true;
+                _shouldRetrySessionRestoreOnResume = true;
+                if (didShowCachedSession)
+                {
+                    _isShowingCachedOfflineSession = true;
+                    if (!_networkAccess.HasInternetAccess)
+                    {
+                        AnnounceStatus(OfflineCachedSessionStatus);
+                    }
+                    else
+                    {
+                        Display.ShowProfileStatus(SavedSessionRefreshFailedStatus);
+                        AnnounceStatus(SavedSessionRefreshFailedStatus);
+                    }
+
+                    RefreshCommands();
+                    return;
+                }
+
                 if (!_networkAccess.HasInternetAccess)
                 {
-                    _shouldRetrySessionRestoreWhenOnline = true;
-                    _shouldRetrySessionRestoreOnResume = true;
                     if (await TryShowCachedOfflineSessionAsync())
                     {
                         return;
@@ -516,8 +540,6 @@ namespace Cotton.Mobile.ViewModels
                 }
                 else
                 {
-                    _shouldRetrySessionRestoreWhenOnline = true;
-                    _shouldRetrySessionRestoreOnResume = true;
                     ShowSignIn("Session restore failed. Sign in again.");
                 }
             }
@@ -526,6 +548,26 @@ namespace Cotton.Mobile.ViewModels
                 _isSessionRestoreInProgress = false;
                 QueuePendingCaptureInboxOpen("session restore finished");
                 QueuePendingNotificationOpen("session restore finished");
+            }
+        }
+
+        private async Task<bool> TryShowCachedSessionDuringRestoreAsync()
+        {
+            try
+            {
+                Uri? instanceUri = await _sessionService.GetRememberedSessionInstanceAsync();
+                return instanceUri is not null
+                    && await TryShowCachedSessionAsync(
+                        instanceUri,
+                        showOfflineNotice: !_networkAccess.HasInternetAccess);
+            }
+            catch (Exception exception)
+            {
+                _logger.LogDebug(exception, "Failed to pre-load the remembered Cotton mobile session.");
+                _fileBrowser.Clear();
+                _isShowingCachedOfflineSession = false;
+                ShowLoading(string.Empty);
+                return false;
             }
         }
 
@@ -549,34 +591,9 @@ namespace Cotton.Mobile.ViewModels
         {
             try
             {
-                Uri? instanceUri = await _instanceStore.GetAsync();
-                if (instanceUri is null || !await _fileBrowser.HasCachedRootAsync(instanceUri))
-                {
-                    return false;
-                }
-
-                MainPageProfile profile =
-                    await _profileCacheStore.GetAsync(instanceUri)
-                    ?? CreateFallbackOfflineProfile(instanceUri);
-
-                Display.InstanceUrl = instanceUri.AbsoluteUri;
-                Display.ShowProfile(profile);
-                Display.ShowProfileStatus(OfflineCachedSessionStatus);
-                _isShowingCachedOfflineSession = true;
-
-                if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri))
-                {
-                    _fileBrowser.Clear();
-                    _isShowingCachedOfflineSession = false;
-                    return false;
-                }
-
-                QueueTransferActivityRefresh(instanceUri, "cached offline session");
-                RefreshCommands();
-                QueuePendingCaptureInboxOpen("cached offline session");
-                QueuePendingNotificationOpen("cached offline session");
-                AnnounceStatus(OfflineCachedSessionStatus);
-                return true;
+                Uri? instanceUri = await _sessionService.GetRememberedSessionInstanceAsync();
+                return instanceUri is not null
+                    && await TryShowCachedSessionAsync(instanceUri, showOfflineNotice: true);
             }
             catch (Exception exception)
             {
@@ -585,6 +602,36 @@ namespace Cotton.Mobile.ViewModels
                 _isShowingCachedOfflineSession = false;
                 return false;
             }
+        }
+
+        private async Task<bool> TryShowCachedSessionAsync(
+            Uri instanceUri,
+            bool showOfflineNotice)
+        {
+            MainPageProfile profile =
+                await _profileCacheStore.GetAsync(instanceUri)
+                ?? CreateFallbackOfflineProfile(instanceUri);
+
+            if (!await _fileBrowser.InitializeCachedRootAsync(instanceUri, showOfflineNotice))
+            {
+                _fileBrowser.Clear();
+                _isShowingCachedOfflineSession = false;
+                return false;
+            }
+
+            Display.InstanceUrl = instanceUri.AbsoluteUri;
+            Display.ShowProfileWithCachedFiles(profile);
+            _isShowingCachedOfflineSession = showOfflineNotice;
+            QueueTransferActivityRefresh(instanceUri, "cached session");
+            RefreshCommands();
+            QueuePendingCaptureInboxOpen("cached session");
+            QueuePendingNotificationOpen("cached session");
+            if (showOfflineNotice)
+            {
+                AnnounceStatus(OfflineCachedSessionStatus);
+            }
+
+            return true;
         }
 
         private static MainPageProfile CreateFallbackOfflineProfile(Uri instanceUri)
@@ -1743,7 +1790,10 @@ namespace Cotton.Mobile.ViewModels
             return instanceUri;
         }
 
-        private async Task ApplySessionResultAsync(CottonSessionResult result, string unauthenticatedStatus)
+        private async Task ApplySessionResultAsync(
+            CottonSessionResult result,
+            string unauthenticatedStatus,
+            bool preserveVisibleCachedRoot = false)
         {
             if (result.InstanceUri is not null)
             {
@@ -1756,13 +1806,25 @@ namespace Cotton.Mobile.ViewModels
                 ClearSessionRestoreRetry();
                 MainPageProfile profile = _presentationService.CreateProfile(result.InstanceUri, result.User);
                 await SaveCachedProfileBestEffortAsync(result.InstanceUri, profile);
-                ShowProfile(profile);
                 string? accountScopeKey = CottonAccountScopeKey.TryCreateFromUsername(
                     result.User.Username,
                     out string resolvedAccountScopeKey)
                         ? resolvedAccountScopeKey
                         : null;
-                await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
+                if (preserveVisibleCachedRoot && Display.IsProfileVisible)
+                {
+                    Display.RefreshProfile(profile);
+                    RefreshCommands();
+                    await _fileBrowser.InitializeAuthenticatedSessionFromCachedRootAsync(
+                        result.InstanceUri,
+                        accountScopeKey);
+                }
+                else
+                {
+                    ShowProfile(profile);
+                    await _fileBrowser.InitializeAsync(result.InstanceUri, accountScopeKey);
+                }
+
                 QueueAuthenticatedSessionMaintenance(result.InstanceUri, "authenticated session");
                 QueueCloudToDeviceSyncRestore(result.InstanceUri, "authenticated session");
                 _ = ScheduleCloudToDeviceBackgroundSyncBestEffortAsync(result.InstanceUri, "authenticated session");

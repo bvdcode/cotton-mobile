@@ -670,6 +670,41 @@ namespace Cotton.Mobile.ViewModels
             IsInputEnabled = false;
         }
 
+        public void RefreshProfile(MainPageProfile profile)
+        {
+            ArgumentNullException.ThrowIfNull(profile);
+
+            if (!IsProfileVisible)
+            {
+                ShowProfile(profile);
+                return;
+            }
+
+            ProfileName = profile.Name;
+            ProfileEmail = profile.Email;
+            ProfileInstance = profile.Instance;
+            ProfileStatus = null;
+            IsLogoutEnabled = true;
+            IsCancelAuthorizationEnabled = false;
+            IsInputEnabled = false;
+            NotifyFilesEmptyStateChanged();
+        }
+
+        public void ShowProfileWithCachedFiles(MainPageProfile profile)
+        {
+            ArgumentNullException.ThrowIfNull(profile);
+
+            SetState(MainPageViewState.Profile);
+            ProfileName = profile.Name;
+            ProfileEmail = profile.Email;
+            ProfileInstance = profile.Instance;
+            ProfileStatus = null;
+            IsLogoutEnabled = true;
+            IsCancelAuthorizationEnabled = false;
+            IsInputEnabled = false;
+            NotifyFilesEmptyStateChanged();
+        }
+
         private void ClearSignedOutPresentationState()
         {
             ProfileName = string.Empty;

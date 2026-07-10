@@ -5,6 +5,8 @@ namespace Cotton.Mobile.Services
 {
     public interface ICottonSessionService
     {
+        Task<Uri?> GetRememberedSessionInstanceAsync(CancellationToken cancellationToken = default);
+
         Task<CottonSessionResult> RestoreAsync(CancellationToken cancellationToken = default);
 
         Task<CottonSessionResult> SignInWithBrowserAsync(Uri instanceUri, CancellationToken cancellationToken = default);

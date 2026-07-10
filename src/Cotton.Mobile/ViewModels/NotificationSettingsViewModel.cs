@@ -85,16 +85,16 @@ namespace Cotton.Mobile.ViewModels
 
         public bool HasRemotePushPreferences => _remotePushPreferences is not null;
 
-        public bool IsRemotePushUnavailable => _remotePushPreferences is null;
+        public bool IsRemotePushUnavailable => _remotePushFailureStatus is not null;
 
-        public string RemotePushUnavailableTitle => _remotePushFailureStatus ?? "Server alerts not loaded.";
+        public string RemotePushUnavailableTitle => _remotePushFailureStatus ?? "Cloud alerts not loaded";
 
         public string RemotePushUnavailableDetail => _remotePushFailureStatus is null
-            ? "Retry to load server alerts."
-            : "Notifications on this device still work. Retry when Cotton Cloud is reachable.";
+            ? "Retry to load cloud alerts."
+            : "Device notifications still work. Check your connection and retry.";
 
         public string RemotePushStatusText => _remotePushPreferences is null
-            ? _remotePushFailureStatus ?? "Server alerts not loaded."
+            ? _remotePushFailureStatus ?? "Cloud alerts not loaded"
             : CreateRemotePushDisplay().SummaryText;
 
         public bool IsRemotePushStatusVisible => HasRemotePushPreferences;
@@ -130,12 +130,7 @@ namespace Cotton.Mobile.ViewModels
                     failureStatus = "Could not inspect notification permission.";
                 }
 
-                if (!await TryLoadRemotePushPreferencesAsync())
-                {
-                    failureStatus = failureStatus is null
-                        ? "Could not load notification settings."
-                        : "Could not inspect notifications.";
-                }
+                await TryLoadRemotePushPreferencesAsync();
 
                 ShowStatus(failureStatus, failureStatus is not null);
             }
@@ -191,7 +186,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile push notification preferences.");
                 _remotePushPreferences = null;
-                _remotePushFailureStatus = "Server alerts unavailable.";
+                _remotePushFailureStatus = "Cloud alerts unavailable";
                 RemotePushPreferences.ReplaceWith([]);
                 RaiseRemotePushPresentationChanged();
                 return false;

@@ -460,6 +460,12 @@
 
     <Style TargetType="controls:IconFrame" x:Key="M3ActionListItemIconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
+    <Style TargetType="controls:IconFrame" x:Key="M3AttentionActionListItemIconFrame" BasedOn="{StaticResource M3ActionListItemIconFrame}">
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
+        <Setter Property="FrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightErrorContainer}, Dark={StaticResource M3DarkErrorContainer}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnErrorContainer}, Dark={StaticResource M3DarkOnErrorContainer}}" />
+    </Style>
+
     <Style TargetType="controls:IconFrame" x:Key="M3ActivityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
 
     <Style TargetType="controls:IconFrame" x:Key="M3TransferThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />

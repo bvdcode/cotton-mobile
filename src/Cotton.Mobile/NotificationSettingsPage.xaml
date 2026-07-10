@@ -32,7 +32,7 @@
                                        IsStatusVisible="{Binding IsNeutralStatusVisible}" />
 
             <controls:SettingsCardView>
-                <controls:SettingsSummaryHeaderView Title="{Binding PermissionTitle}"
+                <controls:SettingsSummaryHeaderView Title="On this device"
                                                     StatusText="{Binding PermissionStatusText}"
                                                     DetailText="{Binding PermissionDetailText}"
                                                     StatusStyleResourceKey="M3CardTitle" />
@@ -50,24 +50,22 @@
             </controls:SettingsCardView>
 
             <controls:SettingsCardView>
-                <controls:SettingsSummaryHeaderView Title="Server push"
+                <controls:SettingsSummaryHeaderView Title="Cloud alerts"
                                                     StatusText="{Binding RemotePushStatusText}"
                                                     IsStatusVisible="{Binding IsRemotePushStatusVisible}"
                                                     IsDetailVisible="False" />
 
-                <controls:NoticePanelView IsPanelVisible="{Binding IsRemotePushUnavailable}"
-                                          Title="{Binding RemotePushUnavailableTitle}"
-                                          Message="{Binding RemotePushUnavailableDetail}"
-                                          IconData="{x:Static controls:IconPathData.Error}"
-                                          PanelStyleResourceKey="M3AttentionStatusPanel"
-                                          IconFrameStyleResourceKey="M3AttentionNoticeIconFrame"
-                                          IconStyleResourceKey="M3AttentionStatusIconTop"
-                                          TitleStyleResourceKey="M3CardTitle"
-                                          MessageStyleResourceKey="M3CardSupportingBlock"
-                                          ActionText="Retry server push"
-                                          ActionIconData="{x:Static controls:IconPathData.Refresh}"
-                                          ActionCommand="{Binding LoadCommand}"
-                                          ActionSemanticDescription="Retry server push" />
+                <controls:ActionListItemView Text="{Binding RemotePushUnavailableTitle}"
+                                             SupportingText="{Binding RemotePushUnavailableDetail}"
+                                             IsItemVisible="{Binding IsRemotePushUnavailable}"
+                                             LeadingIconData="{x:Static controls:IconPathData.Error}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3AttentionActionListItemIconFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Refresh}"
+                                             Command="{Binding LoadCommand}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             TextStyleResourceKey="M3CardTitle"
+                                             ActionSemanticDescription="Retry cloud alerts" />
 
                 <controls:StackedItemsView IsContentVisible="{Binding HasRemotePushPreferences}"
                                            ItemsSource="{Binding RemotePushPreferences}">

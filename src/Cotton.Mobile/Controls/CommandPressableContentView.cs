@@ -59,13 +59,13 @@ namespace Cotton.Mobile.Controls
             ICommand? newCommand = newValue as ICommand;
 
             commandPressableContentView.ObserveCommand(oldCommand, newCommand);
-            commandPressableContentView.OnCommandStateChanged();
+            commandPressableContentView.NotifyCommandStateChanged();
         }
 
         private static void OnCommandStatePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             CommandPressableContentView commandPressableContentView = (CommandPressableContentView)bindable;
-            commandPressableContentView.OnCommandStateChanged();
+            commandPressableContentView.NotifyCommandStateChanged();
         }
 
         private bool CanExecuteCommand()
@@ -96,6 +96,12 @@ namespace Cotton.Mobile.Controls
 
         private void OnCommandCanExecuteChanged(object? sender, EventArgs e)
         {
+            NotifyCommandStateChanged();
+        }
+
+        private void NotifyCommandStateChanged()
+        {
+            UpdatePlatformPressability();
             OnCommandStateChanged();
         }
     }

@@ -105,6 +105,20 @@ namespace Cotton.Mobile.Controls
         {
         }
 
+        protected void UpdatePlatformPressability()
+        {
+#if ANDROID
+            if (_platformView is null)
+            {
+                return;
+            }
+
+            bool canHandlePress = CanHandlePress();
+            _platformView.Enabled = canHandlePress;
+            _platformView.Clickable = canHandlePress;
+#endif
+        }
+
         protected abstract void ExecutePress();
 
         private static void OnInteractionMetricChanged(BindableObject bindable, object oldValue, object newValue)
@@ -119,10 +133,17 @@ namespace Cotton.Mobile.Controls
         {
             base.OnPropertyChanged(propertyName);
 
-            if (string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal) && IsPressed)
+            if (!string.Equals(propertyName, nameof(IsEnabled), StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            if (IsPressed)
             {
                 SetPressed(false);
             }
+
+            UpdatePlatformPressability();
         }
 
         private void HandleTapped(object? sender, TappedEventArgs e)
@@ -184,8 +205,8 @@ namespace Cotton.Mobile.Controls
             _touchSlop = context is null
                 ? 8
                 : Android.Views.ViewConfiguration.Get(context)?.ScaledTouchSlop ?? 8;
-            _platformView.Clickable = true;
             _platformView.Touch += OnPlatformTouch;
+            UpdatePlatformPressability();
         }
 
         private void DetachPlatformTouch()

@@ -692,6 +692,25 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Android_command_controls_expose_real_command_availability()
+        {
+            string pressableContentView = LoadText(Path.Combine(ControlsDirectoryPath, "PressableContentView.cs"));
+            string commandPressableContentView =
+                LoadText(Path.Combine(ControlsDirectoryPath, "CommandPressableContentView.cs"));
+
+            Assert.Contains("protected void UpdatePlatformPressability()", pressableContentView, StringComparison.Ordinal);
+            Assert.Contains("bool canHandlePress = CanHandlePress();", pressableContentView, StringComparison.Ordinal);
+            Assert.Contains("_platformView.Enabled = canHandlePress;", pressableContentView, StringComparison.Ordinal);
+            Assert.Contains("_platformView.Clickable = canHandlePress;", pressableContentView, StringComparison.Ordinal);
+            Assert.Contains("_platformView.Touch += OnPlatformTouch;\n            UpdatePlatformPressability();", pressableContentView, StringComparison.Ordinal);
+            Assert.DoesNotContain("_platformView.Clickable = true;", pressableContentView, StringComparison.Ordinal);
+
+            Assert.Contains("private void NotifyCommandStateChanged()", commandPressableContentView, StringComparison.Ordinal);
+            Assert.Contains("UpdatePlatformPressability();\n            OnCommandStateChanged();", commandPressableContentView, StringComparison.Ordinal);
+            Assert.Equal(3, CountOccurrences(commandPressableContentView, "NotifyCommandStateChanged();"));
+        }
+
+        [Fact]
         public void Android_system_bars_apply_theme_appearance_after_r()
         {
             string mainActivity = LoadText(MainActivityPath);

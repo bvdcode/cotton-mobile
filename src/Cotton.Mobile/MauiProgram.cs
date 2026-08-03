@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using CommunityToolkit.Maui;
@@ -7,322 +7,113 @@ using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
-using Microsoft.Maui.ApplicationModel.DataTransfer;
-using Microsoft.Maui.Media;
 using Microsoft.Maui.Networking;
 using Microsoft.Maui.Storage;
 
 namespace Cotton.Mobile
 {
-	public static class MauiProgram
-	{
-		public static MauiApp CreateMauiApp()
-		{
-			MauiAppBuilder builder = MauiApp.CreateBuilder();
-			builder
-				.UseMauiApp<App>()
-				.UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
-				.UseCottonDesignSystem();
+    public static class MauiProgram
+    {
+        public static MauiApp CreateMauiApp()
+        {
+            MauiAppBuilder builder = MauiApp.CreateBuilder();
+            builder
+                .UseMauiApp<App>()
+                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
+                .UseCottonDesignSystem();
 
-			builder.Services.AddSingleton<ISecureStorage>(SecureStorage.Default);
-			builder.Services.AddSingleton<IPreferences>(Preferences.Default);
-			builder.Services.AddSingleton<IBrowser>(Browser.Default);
-			builder.Services.AddSingleton<IClipboard>(Clipboard.Default);
-			builder.Services.AddSingleton<ILauncher>(Launcher.Default);
-			builder.Services.AddSingleton<IShare>(Share.Default);
-			builder.Services.AddSingleton<IConnectivity>(Connectivity.Current);
-			builder.Services.AddSingleton<IFilePicker>(FilePicker.Default);
-			builder.Services.AddSingleton<IMediaPicker>(MediaPicker.Default);
-			builder.Services.AddSingleton(_ => new HttpClient());
-			builder.Services.AddSingleton(FileThumbnailCacheOptions.Default);
-			builder.Services.AddSingleton(FileDownloadCacheOptions.Default);
-			builder.Services.AddSingleton(CottonRecentFileStoreOptions.Default);
-			builder.Services.AddSingleton(
-				new CottonMobileOptions(
-					"Cotton Cloud",
-					new Uri("https://app.cottoncloud.dev"),
-					new Uri("https://cottoncloud.dev/privacy-policy"),
-					"cotton-play-market-support@belov.us"));
-			builder.Services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
-			builder.Services.AddSingleton<ICottonMobileApplicationMetadata, CottonMobileApplicationMetadata>();
-			builder.Services.AddSingleton<IUserDialogService, UserDialogService>();
-			builder.Services.AddSingleton<IScreenReaderService, ScreenReaderService>();
-			builder.Services.AddSingleton<INetworkAccessService, NetworkAccessService>();
-			builder.Services.AddSingleton<IFeedbackService, FeedbackService>();
-			builder.Services.AddSingleton<IDiagnosticsPageService, DiagnosticsPageService>();
-			builder.Services.AddSingleton<IStorageManagementService, StorageManagementService>();
-			builder.Services.AddSingleton<IDeviceStorageSpaceService, DeviceStorageSpaceService>();
-			builder.Services.AddSingleton<IStorageSettingsPageService, StorageSettingsPageService>();
-			builder.Services.AddSingleton<ISyncSettingsPageService, SyncSettingsPageService>();
-			builder.Services.AddSingleton<ISecuritySettingsPageService, SecuritySettingsPageService>();
-			builder.Services.AddSingleton<INotificationSettingsPageService, NotificationSettingsPageService>();
-			builder.Services.AddSingleton<IActivityFeedPageService, ActivityFeedPageService>();
-			builder.Services.AddSingleton<IRecentFilesPageService, RecentFilesPageService>();
-			builder.Services.AddSingleton<ITrashPageService, TrashPageService>();
-			builder.Services.AddSingleton<IFileVersionHistoryPageService, FileVersionHistoryPageService>();
-			builder.Services.AddSingleton<ITransfersPageService, TransfersPageService>();
-			builder.Services.AddSingleton<IBackupSetupPageService, BackupSetupPageService>();
-			builder.Services.AddSingleton<ICaptureInboxPageService, CaptureInboxPageService>();
-			builder.Services.AddSingleton<ICaptureDestinationPickerPageService, CaptureDestinationPickerPageService>();
-			builder.Services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
-			builder.Services.AddSingleton<ICottonFolderContentCache, FileSystemCottonFolderContentCache>();
-			builder.Services.AddSingleton<ICottonTransferMetadataPathProvider, CottonTransferMetadataPathProvider>();
-			builder.Services.AddSingleton<ICottonTransferMetadataStore, FileSystemCottonTransferMetadataStore>();
-			builder.Services.AddSingleton<ICottonTransferActivitySignal, CottonTransferActivitySignal>();
-			builder.Services.AddSingleton<ICottonTransferProgressSignal, CottonTransferProgressSignal>();
-			builder.Services.AddSingleton<ICottonCameraBackupMetadataPathProvider, CottonCameraBackupMetadataPathProvider>();
-			builder.Services.AddSingleton<ICottonCameraBackupUploadedMediaStore, FileSystemCottonCameraBackupUploadedMediaStore>();
-			builder.Services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
-			builder.Services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
-			builder.Services.AddSingleton<ICottonRecentFileMetadataPathProvider, CottonRecentFileMetadataPathProvider>();
-			builder.Services.AddSingleton<ICottonRecentFileStore, FileSystemCottonRecentFileStore>();
-			builder.Services.AddSingleton<ICottonSyncRootMetadataPathProvider, CottonSyncRootMetadataPathProvider>();
-			builder.Services.AddSingleton<ICottonSyncRootStore, FileSystemCottonSyncRootStore>();
-			builder.Services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
-			builder.Services.AddSingleton<CottonCloudToDeviceSyncRootSetupService>();
-			builder.Services.AddSingleton<CottonDeviceToCloudSyncRootSetupService>();
-			builder.Services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
-			builder.Services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
-			builder.Services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
-#if ANDROID
-			builder.Services.AddSingleton<IViewerSystemChromeService, AndroidViewerSystemChromeService>();
-			builder.Services.AddSingleton<IAndroidApiLevelProvider, AndroidApiLevelProvider>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost, AndroidBackgroundSyncHost>();
-			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, AndroidNotificationChannelProvisioningService>();
-			builder.Services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
-			builder.Services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
-			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, AndroidCameraBackupMediaAccessPolicy>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost, AndroidBackgroundTransferHost>();
-			builder.Services.AddSingleton<IPdfPreviewRenderer, AndroidPdfPreviewRenderer>();
-			builder.Services.AddSingleton<AndroidCameraBackupMediaSource>();
-			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
-				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
-			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
-				services => services.GetRequiredService<AndroidCameraBackupMediaSource>());
-#else
-			builder.Services.AddSingleton<IViewerSystemChromeService, DisabledViewerSystemChromeService>();
-			builder.Services.AddSingleton<IAndroidApiLevelProvider, DisabledAndroidApiLevelProvider>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncHost>(_ => DisabledCottonAndroidBackgroundSyncHost.Instance);
-			builder.Services.AddSingleton<ICottonNotificationChannelProvisioningService, DisabledCottonNotificationChannelProvisioningService>();
-			builder.Services.AddSingleton<ICottonNotificationPermissionService, DisabledCottonNotificationPermissionService>();
-			builder.Services.AddSingleton<ICottonLocalNotificationService>(_ => NullCottonLocalNotificationService.Instance);
-			builder.Services.AddSingleton<ICottonCameraBackupMediaAccessPolicy, DisabledCottonCameraBackupMediaAccessPolicy>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferHost>(_ => DisabledCottonAndroidBackgroundTransferHost.Instance);
-			builder.Services.AddSingleton<IPdfPreviewRenderer, UnavailablePdfPreviewRenderer>();
-			builder.Services.AddSingleton<DisabledCottonCameraBackupMediaSource>();
-			builder.Services.AddSingleton<ICottonCameraBackupMediaSource>(
-				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
-			builder.Services.AddSingleton<ICottonCameraBackupMediaContentSource>(
-				services => services.GetRequiredService<DisabledCottonCameraBackupMediaSource>());
-#endif
-			builder.Services.AddSingleton<ICottonCameraBackupScanner, CottonCameraBackupScanner>();
-			builder.Services.AddSingleton<ICottonCameraBackupPlanningService, CottonCameraBackupPlanningService>();
-			builder.Services.AddSingleton<ICottonCameraBackupTransferEnqueueCoordinator, CottonCameraBackupTransferEnqueueCoordinator>();
-			builder.Services.AddSingleton<
-				ICottonSelectedMediaTransferEnqueueCoordinator,
-				CottonSelectedMediaTransferEnqueueCoordinator>();
-			builder.Services.AddSingleton<ICottonTransferStagingPathProvider, CottonTransferStagingPathProvider>();
-			builder.Services.AddSingleton<ICottonTransferStagingStore, FileSystemCottonTransferStagingStore>();
-			builder.Services.AddSingleton<ICottonTransferQueueRestoreCoordinator, CottonTransferQueueRestoreCoordinator>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferCoordinator, CottonAndroidBackgroundTransferCoordinator>();
-			builder.Services.AddSingleton<ICottonQueuedUploadClient, CottonQueuedUploadClient>();
-			builder.Services.AddSingleton<ICottonQueuedUploadExecutor>(
-				services => new CottonQueuedUploadExecutor(
-					services.GetRequiredService<ICottonTransferMetadataStore>(),
-					services.GetRequiredService<ICottonTransferStagingStore>(),
-					services.GetRequiredService<ICottonQueuedUploadClient>(),
-					services.GetRequiredService<ICottonCameraBackupUploadedMediaStore>(),
-					services.GetRequiredService<ICottonLocalNotificationService>(),
-					timeProvider: null,
-					transferActivitySignal: services.GetRequiredService<ICottonTransferActivitySignal>(),
-					transferProgressSignal: services.GetRequiredService<ICottonTransferProgressSignal>()));
-			builder.Services.AddSingleton<ICottonAndroidBackgroundTransferJobRunner, CottonAndroidBackgroundTransferJobRunner>();
-			builder.Services.AddSingleton<ICottonShareIntakePathProvider, CottonShareIntakePathProvider>();
-			builder.Services.AddSingleton<ICottonShareLaunchState, CottonShareLaunchState>();
-			builder.Services.AddSingleton<ICottonNotificationLaunchState, CottonNotificationLaunchState>();
-			builder.Services.AddSingleton<ICottonShareIntakeStore, FileSystemCottonShareIntakeStore>();
-			builder.Services.AddSingleton<ICottonShareContentStagingStore, FileSystemCottonShareContentStagingStore>();
-			builder.Services.AddSingleton<ICottonShareTransferEnqueueCoordinator, CottonShareTransferEnqueueCoordinator>();
-#if ANDROID
-			builder.Services.AddSingleton<IAndroidShareIntentStagingService, AndroidShareIntentStagingService>();
-			builder.Services.AddSingleton<IAndroidDocumentScanActivityResultBridge, AndroidDocumentScanActivityResultBridge>();
-			builder.Services.AddSingleton<IDocumentScanService, AndroidDocumentScanService>();
-			builder.Services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
-			builder.Services.AddSingleton<
-				ICottonSyncLocalRootPickerService,
-				AndroidDocumentTreeSyncLocalRootPickerService>();
-			builder.Services.AddSingleton<
-				ICottonDeviceToCloudLocalTreeReader,
-				AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
-			builder.Services.AddSingleton<
-				ICottonDeviceToCloudLocalFileContentSource,
-				AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
-			builder.Services.AddSingleton<
-				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
-				AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
-#else
-			builder.Services.AddSingleton<IDocumentScanService, DisabledDocumentScanService>();
-			builder.Services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
-			builder.Services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
-			builder.Services.AddSingleton<
-				ICottonDeviceToCloudLocalFileContentSource,
-				DisabledCottonDeviceToCloudLocalFileContentSource>();
-			builder.Services.AddSingleton<
-				ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator,
-				DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
-#endif
-			builder.Services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
-			builder.Services.AddSingleton<
-				ICottonCloudToDeviceSyncFolderContentSource,
-				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
-			builder.Services.AddSingleton<
-				ICottonDeviceToCloudRemoteFolderContentSource,
-				CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
-			builder.Services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
-			builder.Services.AddSingleton<
-				ICottonCloudToDeviceSyncFileOperator,
-				CottonCloudToDeviceSyncFileOperatorRouter>();
-			builder.Services.AddSingleton<
-				ICottonDeviceToCloudSyncFileOperator,
-				CottonDeviceToCloudSyncFileOperator>();
-			builder.Services.AddSingleton(services =>
-				new CottonCloudToDeviceSyncPlanExecutor(
-					services.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
-					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
-			builder.Services.AddSingleton(services =>
-				new CottonDeviceToCloudSyncPlanExecutor(
-					services.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
-					services.GetRequiredService<ICottonSyncedFileManifestStore>()));
-			builder.Services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
-			builder.Services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
-			builder.Services.AddSingleton<CottonBidirectionalSyncCoordinator>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncCoordinator, CottonAndroidBackgroundSyncCoordinator>();
-			builder.Services.AddSingleton<ICottonAndroidBackgroundSyncJobRunner, CottonAndroidBackgroundSyncJobRunner>();
-			builder.Services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
-			builder.Services.AddSingleton<ICottonCameraBackupSettingsStore, PreferencesCottonCameraBackupSettingsStore>();
-			builder.Services.AddSingleton<IFileBrowserPreferenceStore, PreferencesFileBrowserPreferenceStore>();
-			builder.Services.AddSingleton<IFileUploadPickerService, FileUploadPickerService>();
-			builder.Services.AddSingleton<IPhotoUploadPickerService, PhotoUploadPickerService>();
-			builder.Services.AddSingleton<IVideoUploadPickerService, VideoUploadPickerService>();
-			builder.Services.AddSingleton<IUploadDestinationPickerPageService, UploadDestinationPickerPageService>();
-			builder.Services.AddSingleton<IFileInteractionService, FileInteractionService>();
-			builder.Services.AddSingleton<IFilePreviewService, FilePreviewService>();
-			builder.Services.AddSingleton<ICloudShareLinkInteractionService, CloudShareLinkInteractionService>();
-			builder.Services.AddSingleton<IFileThumbnailCache, FileThumbnailCache>();
-			builder.Services.AddSingleton<IFileThumbnailProvider, FileThumbnailProvider>();
-			builder.Services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
-			builder.Services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
-			builder.Services.AddSingleton<ICottonAppLockSettingsStore, PreferencesCottonAppLockSettingsStore>();
-			builder.Services.AddSingleton<ICottonAppLockRuntimeStateStore, PreferencesCottonAppLockRuntimeStateStore>();
-			builder.Services.AddSingleton<
-				ICottonLogoutCacheCleanupSettingsStore,
-				PreferencesCottonLogoutCacheCleanupSettingsStore>();
-			builder.Services.AddSingleton(CottonAppLockPolicy.Default);
-			builder.Services.AddSingleton<CottonAppSwitcherPrivacyPolicy>();
-			builder.Services.AddSingleton<ICottonAppLockCapabilityService, DeviceUnlockCottonAppLockCapabilityService>();
-			builder.Services.AddSingleton<IAppLockGateService, AppLockGateService>();
-			builder.Services.AddSingleton<ICottonAppLockCoordinator, CottonAppLockCoordinator>();
-#if ANDROID
-			builder.Services.AddSingleton<
-				IAndroidDeviceCredentialUnlockActivityResultBridge,
-				AndroidDeviceCredentialUnlockActivityResultBridge>();
-			builder.Services.AddSingleton<ICottonDeviceUnlockService, AndroidDeviceUnlockService>();
-			builder.Services.AddSingleton<ICottonWindowPrivacyService, AndroidCottonWindowPrivacyService>();
-#else
-			builder.Services.AddSingleton<ICottonDeviceUnlockService, UnavailableCottonDeviceUnlockService>();
-			builder.Services.AddSingleton<ICottonWindowPrivacyService, DisabledCottonWindowPrivacyService>();
-#endif
-			builder.Services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
-			builder.Services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
-			builder.Services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
-			builder.Services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
-			builder.Services.AddSingleton(services =>
-			{
-				ICottonMobileApplicationMetadata metadata = services.GetRequiredService<ICottonMobileApplicationMetadata>();
-				return new CottonAuthenticatedApiClient(
-					services.GetRequiredService<HttpClient>(),
-					services.GetRequiredService<ICottonTokenStore>(),
-					new CottonAuthenticatedApiHttpOptions(metadata.UserAgent, metadata.DeviceName));
-			});
-			builder.Services.AddSingleton<ICottonCloudShareLinkService, CottonCloudShareLinkService>();
-			builder.Services.AddSingleton<ICottonFileTrashClient, CottonApiFileTrashClient>();
-			builder.Services.AddSingleton<ICottonFileTrashService, CottonFileTrashService>();
-			builder.Services.AddSingleton<ICottonFolderTrashClient, CottonApiFolderTrashClient>();
-			builder.Services.AddSingleton<ICottonFolderTrashService, CottonFolderTrashService>();
-			builder.Services.AddSingleton<ICottonTrashRestoreClient, CottonApiTrashRestoreClient>();
-			builder.Services.AddSingleton<ICottonTrashRestoreService, CottonTrashRestoreService>();
-			builder.Services.AddSingleton<ICottonTrashBrowserClient, CottonApiTrashBrowserClient>();
-			builder.Services.AddSingleton<ICottonTrashBrowserService, CottonTrashBrowserService>();
-			builder.Services.AddSingleton<ICottonTrashPermanentDeleteClient, CottonApiTrashPermanentDeleteClient>();
-			builder.Services.AddSingleton<ICottonTrashPermanentDeleteService, CottonTrashPermanentDeleteService>();
-			builder.Services.AddSingleton<ICottonFileVersionHistoryClient, CottonSdkFileVersionHistoryClient>();
-			builder.Services.AddSingleton<ICottonFileVersionHistoryService, CottonFileVersionHistoryService>();
-			builder.Services.AddSingleton<ICottonCloudStorageQuotaService, CottonCloudStorageQuotaService>();
-			builder.Services.AddSingleton<ICottonActivityFeedService, CottonActivityFeedService>();
-			builder.Services.AddSingleton<ICottonAccountSessionService, CottonAccountSessionService>();
-			builder.Services.AddSingleton<ICottonRemotePushDeviceTokenService, CottonRemotePushDeviceTokenService>();
-			builder.Services.AddSingleton<ICottonRemotePushPreferenceService, CottonRemotePushPreferenceService>();
-#if ANDROID
-			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider, AndroidFirebaseMessagingTokenProvider>();
-			builder.Services.AddSingleton<ICottonAndroidRemotePushTokenRefreshHost, AndroidRemotePushTokenRefreshHost>();
-#else
-			builder.Services.AddSingleton<ICottonRemotePushPlatformTokenProvider>(_ =>
-				new CottonStaticRemotePushPlatformTokenProvider(
-					CottonRemotePushPlatformTokenSnapshot.NotConfigured(
-						CottonRemotePushProviderKind.FirebaseCloudMessaging,
-						CottonRemotePushMobilePlatform.Ios,
-						"Remote push token provider is not configured for this platform.")));
-			builder.Services.AddSingleton<ICottonAndroidRemotePushTokenRefreshHost>(_ =>
-				DisabledCottonAndroidRemotePushTokenRefreshHost.Instance);
-#endif
-			builder.Services.AddSingleton<CottonRemotePushRegistrationCoordinator>();
-			builder.Services.AddSingleton<CottonAndroidRemotePushTokenRefreshCoordinator>();
-			builder.Services.AddSingleton<CottonRemotePushSessionRegistrationService>();
-			builder.Services.AddSingleton<ICottonRemotePushSessionRegistrationService>(services =>
-				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
-			builder.Services.AddSingleton<ICottonRemotePushTokenRefreshHandler>(services =>
-				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
-			builder.Services.AddSingleton<ICottonRemotePushSessionRegistrationStatusProvider>(services =>
-				services.GetRequiredService<CottonRemotePushSessionRegistrationService>());
-			builder.Services.AddSingleton<ICottonRemotePushDiagnosticsService, CottonRemotePushDiagnosticsService>();
-			builder.Services.AddSingleton<ICottonSessionService, CottonSessionService>();
-			builder.Services.AddSingleton<AppShell>();
-			builder.Services.AddTransient<MainPageViewModel>();
-			builder.Services.AddTransient<MainPage>();
-			builder.Services.AddTransient<AppLockGateViewModel>();
-			builder.Services.AddTransient<AppLockGatePage>();
-			builder.Services.AddTransient<StorageSettingsViewModel>();
-			builder.Services.AddTransient<StoragePage>();
-			builder.Services.AddTransient<SyncSettingsViewModel>();
-			builder.Services.AddTransient<SyncSettingsPage>();
-			builder.Services.AddTransient<SecuritySettingsViewModel>();
-			builder.Services.AddTransient<SecuritySettingsPage>();
-			builder.Services.AddTransient<NotificationSettingsViewModel>();
-			builder.Services.AddTransient<NotificationSettingsPage>();
-			builder.Services.AddTransient<ActivityFeedViewModel>();
-			builder.Services.AddTransient<ActivityFeedPage>();
-			builder.Services.AddTransient<RecentFilesViewModel>();
-			builder.Services.AddTransient<RecentFilesPage>();
-			builder.Services.AddTransient<TrashViewModel>();
-			builder.Services.AddTransient<TrashPage>();
-			builder.Services.AddTransient<FileVersionHistoryViewModel>();
-			builder.Services.AddTransient<FileVersionHistoryPage>();
-			builder.Services.AddTransient<BackupSetupViewModel>();
-			builder.Services.AddTransient<BackupSetupPage>();
-			builder.Services.AddTransient<TransfersViewModel>();
-			builder.Services.AddTransient<TransfersPage>();
-			builder.Services.AddTransient<CaptureInboxViewModel>();
-			builder.Services.AddTransient<CaptureInboxPage>();
-			builder.Services.AddTransient<CaptureDestinationPickerViewModel>();
-			builder.Services.AddTransient<CaptureDestinationPickerPage>();
-			builder.Services.AddTransient<PdfViewerPage>();
-			builder.Services.AddTransient<MediaViewerPage>();
+            RegisterPlatformServices(builder.Services);
+            RegisterApplicationServices(builder.Services);
+            RegisterSyncServices(builder.Services);
+            RegisterPresentation(builder.Services);
 
 #if DEBUG
-			builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
-			return builder.Build();
-		}
-	}
+            return builder.Build();
+        }
+
+        private static void RegisterPlatformServices(IServiceCollection services)
+        {
+            services.AddSingleton<ISecureStorage>(SecureStorage.Default);
+            services.AddSingleton<IPreferences>(Preferences.Default);
+            services.AddSingleton<IBrowser>(Browser.Default);
+            services.AddSingleton<IConnectivity>(Connectivity.Current);
+            services.AddSingleton(_ => new HttpClient());
+
+#if ANDROID
+            services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
+#else
+            services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, DisabledCottonDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
+#endif
+        }
+
+        private static void RegisterApplicationServices(IServiceCollection services)
+        {
+            services.AddSingleton(
+                new CottonMobileOptions(
+                    "Cotton Cloud",
+                    new Uri("https://app.cottoncloud.dev"),
+                    new Uri("https://cottoncloud.dev/privacy-policy"),
+                    "cotton-play-market-support@belov.us"));
+            services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
+            services.AddSingleton<ICottonMobileApplicationMetadata, CottonMobileApplicationMetadata>();
+            services.AddSingleton<IUserDialogService, UserDialogService>();
+            services.AddSingleton<INetworkAccessService, NetworkAccessService>();
+
+            services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
+            services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
+            services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
+            services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
+            services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
+            services.AddSingleton<ICottonSessionService, CottonSessionService>();
+        }
+
+        private static void RegisterSyncServices(IServiceCollection services)
+        {
+            services.AddSingleton<ICottonSyncRootMetadataPathProvider, CottonSyncRootMetadataPathProvider>();
+            services.AddSingleton<ICottonSyncRootStore, FileSystemCottonSyncRootStore>();
+            services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
+            services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
+            services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
+
+            services.AddSingleton(FileDownloadCacheOptions.Default);
+            services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
+            services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
+            services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
+            services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
+            services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
+            services.AddSingleton<ICottonCloudToDeviceSyncFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+            services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+
+            services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
+            services.AddSingleton<ICottonCloudToDeviceSyncFileOperator, CottonCloudToDeviceSyncFileOperatorRouter>();
+            services.AddSingleton<ICottonDeviceToCloudSyncFileOperator, CottonDeviceToCloudSyncFileOperator>();
+            services.AddSingleton(serviceProvider =>
+                new CottonCloudToDeviceSyncPlanExecutor(
+                    serviceProvider.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
+                    serviceProvider.GetRequiredService<ICottonSyncedFileManifestStore>()));
+            services.AddSingleton(serviceProvider =>
+                new CottonDeviceToCloudSyncPlanExecutor(
+                    serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
+                    serviceProvider.GetRequiredService<ICottonSyncedFileManifestStore>()));
+            services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
+            services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
+            services.AddSingleton<CottonBidirectionalSyncCoordinator>();
+        }
+
+        private static void RegisterPresentation(IServiceCollection services)
+        {
+            services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
+            services.AddSingleton<SyncSettingsViewModel>();
+            services.AddSingleton<MainPageViewModel>();
+            services.AddSingleton<MainPage>();
+            services.AddSingleton<AppShell>();
+        }
+    }
 }

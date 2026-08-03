@@ -1,302 +1,87 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public class SettingsSectionHeaderView : MaterialAnimatedContentView
+    public class SettingsSectionHeaderView : ContentView
     {
-        private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
-        private const string DefaultGridStyleResourceKey = "M3SettingsListItemGrid";
-        private const string DefaultLeadingIconFrameStyleResourceKey = "M3CardUtilityThumbnailFrame";
-        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
-        private const string DefaultTitleStyleResourceKey = "M3CardTitle";
-        private const string DefaultTrailingChipStyleResourceKey = "M3NeutralChip";
-        private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
-        private const string LeadingIconOpacityAnimationName = "M3SettingsSectionLeadingIconOpacity";
-        private const string PrimaryDetailTextOpacityAnimationName = "M3SettingsSectionPrimaryDetailOpacity";
-        private const string ProgressOpacityAnimationName = "M3SettingsSectionProgressOpacity";
-        private const string SecondaryDetailTextOpacityAnimationName = "M3SettingsSectionSecondaryDetailOpacity";
-        private const string TertiaryDetailTextOpacityAnimationName = "M3SettingsSectionTertiaryDetailOpacity";
-        private const string QuaternaryDetailTextOpacityAnimationName = "M3SettingsSectionQuaternaryDetailOpacity";
-        private const string TrailingContentOpacityAnimationName = "M3SettingsSectionTrailingContentOpacity";
+        private const string DetailTextStyle = "M3CardSupportingBlock";
+        private const string GridStyle = "M3SettingsListItemGrid";
+        private const string TextStackStyle = "M3CardTextStack";
+        private const string TitleStyle = "M3CardTitle";
+        private const string DefaultLeadingIconStyle = "M3CardUtilityThumbnailFrame";
 
-        public static readonly BindableProperty TitleProperty = BindableProperty.Create(
-            nameof(Title),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty IsHeaderVisibleProperty = BindableProperty.Create(
-            nameof(IsHeaderVisible),
-            typeof(bool),
-            typeof(SettingsSectionHeaderView),
-            true,
-            propertyChanged: OnHeaderVisiblePropertyChanged);
-
-        public static readonly BindableProperty PrimaryDetailTextProperty = BindableProperty.Create(
-            nameof(PrimaryDetailText),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnPrimaryDetailTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty SecondaryDetailTextProperty = BindableProperty.Create(
-            nameof(SecondaryDetailText),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnSecondaryDetailTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty TertiaryDetailTextProperty = BindableProperty.Create(
-            nameof(TertiaryDetailText),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnTertiaryDetailTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty QuaternaryDetailTextProperty = BindableProperty.Create(
-            nameof(QuaternaryDetailText),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnQuaternaryDetailTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty ProgressProperty = BindableProperty.Create(
-            nameof(Progress),
-            typeof(double),
-            typeof(SettingsSectionHeaderView),
-            0d,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty IsProgressVisibleProperty = BindableProperty.Create(
-            nameof(IsProgressVisible),
-            typeof(bool),
-            typeof(SettingsSectionHeaderView),
-            false,
-            propertyChanged: OnProgressVisibilityPropertyChanged);
+        public static readonly BindableProperty TitleProperty = CreateTextProperty(nameof(Title));
+        public static readonly BindableProperty PrimaryDetailTextProperty =
+            CreateTextProperty(nameof(PrimaryDetailText));
+        public static readonly BindableProperty SecondaryDetailTextProperty =
+            CreateTextProperty(nameof(SecondaryDetailText));
 
         public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
             nameof(LeadingIconData),
             typeof(Geometry),
             typeof(SettingsSectionHeaderView),
             default(Geometry),
-            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
-
-        public static readonly BindableProperty TrailingContentProperty = BindableProperty.Create(
-            nameof(TrailingContent),
-            typeof(View),
-            typeof(SettingsSectionHeaderView),
-            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
-
-        public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
-            nameof(TrailingText),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            string.Empty,
-            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
-
-        public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
-            nameof(IsTrailingTextVisible),
-            typeof(bool),
-            typeof(SettingsSectionHeaderView),
-            false,
-            propertyChanged: OnTrailingContentVisibilityPropertyChanged);
-
-        public static readonly BindableProperty TapCommandProperty = BindableProperty.Create(
-            nameof(TapCommand),
-            typeof(ICommand),
-            typeof(SettingsSectionHeaderView),
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TapCommandParameterProperty = BindableProperty.Create(
-            nameof(TapCommandParameter),
-            typeof(object),
-            typeof(SettingsSectionHeaderView),
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty IsTapEnabledProperty = BindableProperty.Create(
-            nameof(IsTapEnabled),
-            typeof(bool),
-            typeof(SettingsSectionHeaderView),
-            true,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(GridStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultGridStyleResourceKey,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty = BindableProperty.Create(
             nameof(LeadingIconFrameStyleResourceKey),
             typeof(string),
             typeof(SettingsSectionHeaderView),
-            DefaultLeadingIconFrameStyleResourceKey,
+            DefaultLeadingIconStyle,
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TextStackStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultTextStackStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TitleTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TitleTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultTitleStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty PrimaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(PrimaryDetailTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultDetailTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty SecondaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(SecondaryDetailTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultDetailTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TertiaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TertiaryDetailTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultDetailTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty QuaternaryDetailTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(QuaternaryDetailTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultDetailTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TrailingChipStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TrailingChipStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultTrailingChipStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TrailingTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TrailingTextStyleResourceKey),
-            typeof(string),
-            typeof(SettingsSectionHeaderView),
-            DefaultTrailingTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        private readonly Label _primaryDetailText;
-        private readonly Label _quaternaryDetailText;
         private readonly Grid _grid;
         private readonly IconFrame _leadingIcon;
-        private readonly LinearProgressView _progress;
-        private readonly Label _secondaryDetailText;
-        private readonly Label _tertiaryDetailText;
+        private readonly Label _primaryDetail;
+        private readonly Label _secondaryDetail;
         private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
-        private readonly TouchSurfaceView _touchSurface;
-        private readonly ChipView _trailingChip;
-        private readonly ContentView _trailingContentHost;
-        private bool _hasAppliedLeadingIconVisibility;
-        private bool _hasAppliedPrimaryDetailTextVisibility;
-        private bool _hasAppliedProgressVisibility;
-        private bool _hasAppliedSecondaryDetailTextVisibility;
-        private bool _hasAppliedTertiaryDetailTextVisibility;
-        private bool _hasAppliedQuaternaryDetailTextVisibility;
-        private bool _hasAppliedTrailingContentVisibility;
 
         public SettingsSectionHeaderView()
         {
             _leadingIcon = new IconFrame();
-            _title = new Label();
-            _primaryDetailText = new Label();
-            _secondaryDetailText = new Label();
-            _tertiaryDetailText = new Label();
-            _quaternaryDetailText = new Label();
-            _progress = new LinearProgressView();
-            _touchSurface = new TouchSurfaceView();
-            _trailingChip = new ChipView();
-            _trailingContentHost = new ContentView
-            {
-                HorizontalOptions = LayoutOptions.End,
-                VerticalOptions = LayoutOptions.Center,
-            };
+            _title = StyledLabel(TitleStyle);
+            _primaryDetail = StyledLabel(DetailTextStyle);
+            _secondaryDetail = StyledLabel(DetailTextStyle);
+
             _textStack = new VerticalStackLayout
             {
                 Children =
                 {
                     _title,
-                    _primaryDetailText,
-                    _secondaryDetailText,
-                    _tertiaryDetailText,
-                    _quaternaryDetailText,
+                    _primaryDetail,
+                    _secondaryDetail,
                 },
             };
-
-            Grid.SetColumn(_textStack, 1);
-            Grid.SetRow(_progress, 1);
-            Grid.SetColumn(_progress, 1);
-            Grid.SetColumn(_trailingContentHost, 2);
-            Grid.SetRowSpan(_touchSurface, 2);
-            Grid.SetColumnSpan(_touchSurface, 3);
+            _textStack.SetDynamicResource(StyleProperty, TextStackStyle);
 
             _grid = new Grid
             {
-                RowDefinitions =
-                {
-                    new RowDefinition { Height = GridLength.Auto },
-                    new RowDefinition { Height = GridLength.Auto },
-                },
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition { Width = GridLength.Auto },
-                    new ColumnDefinition { Width = GridLength.Star },
-                    new ColumnDefinition { Width = GridLength.Auto },
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Star),
                 },
                 Children =
                 {
                     _leadingIcon,
                     _textStack,
-                    _progress,
-                    _touchSurface,
-                    _trailingContentHost,
                 },
             };
+            _grid.SetDynamicResource(StyleProperty, GridStyle);
+            Grid.SetColumn(_textStack, 1);
 
             Content = _grid;
-            UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
+            UpdateVisualState();
         }
 
         public string Title
         {
             get => (string)GetValue(TitleProperty);
             set => SetValue(TitleProperty, value);
-        }
-
-        public bool IsHeaderVisible
-        {
-            get => (bool)GetValue(IsHeaderVisibleProperty);
-            set => SetValue(IsHeaderVisibleProperty, value);
         }
 
         public string PrimaryDetailText
@@ -311,76 +96,10 @@ namespace Cotton.Mobile.Controls
             set => SetValue(SecondaryDetailTextProperty, value);
         }
 
-        public string TertiaryDetailText
-        {
-            get => (string)GetValue(TertiaryDetailTextProperty);
-            set => SetValue(TertiaryDetailTextProperty, value);
-        }
-
-        public string QuaternaryDetailText
-        {
-            get => (string)GetValue(QuaternaryDetailTextProperty);
-            set => SetValue(QuaternaryDetailTextProperty, value);
-        }
-
-        public double Progress
-        {
-            get => (double)GetValue(ProgressProperty);
-            set => SetValue(ProgressProperty, value);
-        }
-
-        public bool IsProgressVisible
-        {
-            get => (bool)GetValue(IsProgressVisibleProperty);
-            set => SetValue(IsProgressVisibleProperty, value);
-        }
-
         public Geometry? LeadingIconData
         {
             get => (Geometry?)GetValue(LeadingIconDataProperty);
             set => SetValue(LeadingIconDataProperty, value);
-        }
-
-        public View? TrailingContent
-        {
-            get => (View?)GetValue(TrailingContentProperty);
-            set => SetValue(TrailingContentProperty, value);
-        }
-
-        public string TrailingText
-        {
-            get => (string)GetValue(TrailingTextProperty);
-            set => SetValue(TrailingTextProperty, value);
-        }
-
-        public bool IsTrailingTextVisible
-        {
-            get => (bool)GetValue(IsTrailingTextVisibleProperty);
-            set => SetValue(IsTrailingTextVisibleProperty, value);
-        }
-
-        public ICommand? TapCommand
-        {
-            get => (ICommand?)GetValue(TapCommandProperty);
-            set => SetValue(TapCommandProperty, value);
-        }
-
-        public object? TapCommandParameter
-        {
-            get => GetValue(TapCommandParameterProperty);
-            set => SetValue(TapCommandParameterProperty, value);
-        }
-
-        public bool IsTapEnabled
-        {
-            get => (bool)GetValue(IsTapEnabledProperty);
-            set => SetValue(IsTapEnabledProperty, value);
-        }
-
-        public string GridStyleResourceKey
-        {
-            get => (string)GetValue(GridStyleResourceKeyProperty);
-            set => SetValue(GridStyleResourceKeyProperty, value);
         }
 
         public string LeadingIconFrameStyleResourceKey
@@ -389,581 +108,65 @@ namespace Cotton.Mobile.Controls
             set => SetValue(LeadingIconFrameStyleResourceKeyProperty, value);
         }
 
-        public string TextStackStyleResourceKey
+        private static BindableProperty CreateTextProperty(string name)
         {
-            get => (string)GetValue(TextStackStyleResourceKeyProperty);
-            set => SetValue(TextStackStyleResourceKeyProperty, value);
+            return BindableProperty.Create(
+                name,
+                typeof(string),
+                typeof(SettingsSectionHeaderView),
+                string.Empty,
+                propertyChanged: OnVisualPropertyChanged);
         }
 
-        public string TitleTextStyleResourceKey
+        private static Label StyledLabel(string styleResourceKey)
         {
-            get => (string)GetValue(TitleTextStyleResourceKeyProperty);
-            set => SetValue(TitleTextStyleResourceKeyProperty, value);
-        }
-
-        public string PrimaryDetailTextStyleResourceKey
-        {
-            get => (string)GetValue(PrimaryDetailTextStyleResourceKeyProperty);
-            set => SetValue(PrimaryDetailTextStyleResourceKeyProperty, value);
-        }
-
-        public string SecondaryDetailTextStyleResourceKey
-        {
-            get => (string)GetValue(SecondaryDetailTextStyleResourceKeyProperty);
-            set => SetValue(SecondaryDetailTextStyleResourceKeyProperty, value);
-        }
-
-        public string TertiaryDetailTextStyleResourceKey
-        {
-            get => (string)GetValue(TertiaryDetailTextStyleResourceKeyProperty);
-            set => SetValue(TertiaryDetailTextStyleResourceKeyProperty, value);
-        }
-
-        public string QuaternaryDetailTextStyleResourceKey
-        {
-            get => (string)GetValue(QuaternaryDetailTextStyleResourceKeyProperty);
-            set => SetValue(QuaternaryDetailTextStyleResourceKeyProperty, value);
-        }
-
-        public string TrailingChipStyleResourceKey
-        {
-            get => (string)GetValue(TrailingChipStyleResourceKeyProperty);
-            set => SetValue(TrailingChipStyleResourceKeyProperty, value);
-        }
-
-        public string TrailingTextStyleResourceKey
-        {
-            get => (string)GetValue(TrailingTextStyleResourceKeyProperty);
-            set => SetValue(TrailingTextStyleResourceKeyProperty, value);
+            var label = new Label();
+            label.SetDynamicResource(StyleProperty, styleResourceKey);
+            return label;
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
+            ((SettingsSectionHeaderView)bindable).UpdateVisualState();
         }
 
-        private static void OnHeaderVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        private void UpdateVisualState()
         {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.IsContentVisible = (bool)newValue;
-        }
+            if (_grid is null)
+            {
+                return;
+            }
 
-        private static void OnLeadingIconVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: true,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnPrimaryDetailTextVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: true,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnProgressVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: true,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnSecondaryDetailTextVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: true,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnTertiaryDetailTextVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: true,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnQuaternaryDetailTextVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: true,
-                animateTrailingContentVisibility: false);
-        }
-
-        private static void OnTrailingContentVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            SettingsSectionHeaderView view = (SettingsSectionHeaderView)bindable;
-            view.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animatePrimaryDetailTextVisibility: false,
-                animateProgressVisibility: false,
-                animateSecondaryDetailTextVisibility: false,
-                animateTertiaryDetailTextVisibility: false,
-                animateQuaternaryDetailTextVisibility: false,
-                animateTrailingContentVisibility: true);
-        }
-
-        private void UpdateVisualState(
-            bool animateLeadingIconVisibility,
-            bool animatePrimaryDetailTextVisibility,
-            bool animateProgressVisibility,
-            bool animateSecondaryDetailTextVisibility,
-            bool animateTertiaryDetailTextVisibility,
-            bool animateQuaternaryDetailTextVisibility,
-            bool animateTrailingContentVisibility)
-        {
             string title = Title ?? string.Empty;
-            string primaryDetailText = PrimaryDetailText ?? string.Empty;
-            string secondaryDetailText = SecondaryDetailText ?? string.Empty;
-            string tertiaryDetailText = TertiaryDetailText ?? string.Empty;
-            string quaternaryDetailText = QuaternaryDetailText ?? string.Empty;
-            string trailingText = TrailingText ?? string.Empty;
-            string gridStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyleResourceKey);
-            string leadingIconFrameStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(LeadingIconFrameStyleResourceKey, DefaultLeadingIconFrameStyleResourceKey);
-            string textStackStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(TextStackStyleResourceKey, DefaultTextStackStyleResourceKey);
-            string titleTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(TitleTextStyleResourceKey, DefaultTitleStyleResourceKey);
-            string primaryDetailTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(PrimaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
-            string secondaryDetailTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(SecondaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
-            string tertiaryDetailTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(TertiaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
-            string quaternaryDetailTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(QuaternaryDetailTextStyleResourceKey, DefaultDetailTextStyleResourceKey);
-            string trailingChipStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(TrailingChipStyleResourceKey, DefaultTrailingChipStyleResourceKey);
-            string trailingTextStyleResourceKey =
-                MaterialResources.ResolveStyleResourceKey(TrailingTextStyleResourceKey, DefaultTrailingTextStyleResourceKey);
-            bool isLeadingIconVisible = LeadingIconData is not null;
-            bool isLeadingIconLayoutVisible = ResolveLeadingIconLayoutVisibility(
-                isLeadingIconVisible,
-                animateLeadingIconVisibility);
-            View? trailingContent = ResolveTrailingContent(trailingText);
-            bool isTrailingContentVisible = trailingContent is not null;
-            bool hasTrailingContentLayout = ResolveTrailingContentLayoutVisibility(
-                isTrailingContentVisible,
-                animateTrailingContentVisibility);
-            ICommand? tapCommand = TapCommand;
+            string primaryDetail = PrimaryDetailText ?? string.Empty;
+            string secondaryDetail = SecondaryDetailText ?? string.Empty;
+            bool hasLeadingIcon = LeadingIconData is not null;
 
-            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
-            if (isLeadingIconVisible)
-            {
-                _leadingIcon.IconData = LeadingIconData;
-            }
-
-            UpdateLeadingIconVisibility(isLeadingIconVisible, animateLeadingIconVisibility);
-            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
-            _title.SetDynamicResource(StyleProperty, titleTextStyleResourceKey);
             _title.Text = title;
-            _primaryDetailText.SetDynamicResource(StyleProperty, primaryDetailTextStyleResourceKey);
-            _primaryDetailText.Text = primaryDetailText;
-            UpdateDetailTextVisibility(
-                _primaryDetailText,
-                primaryDetailText,
-                animatePrimaryDetailTextVisibility,
-                ref _hasAppliedPrimaryDetailTextVisibility,
-                PrimaryDetailTextOpacityAnimationName,
-                CompletePrimaryDetailTextVisibility);
-            _secondaryDetailText.SetDynamicResource(StyleProperty, secondaryDetailTextStyleResourceKey);
-            _secondaryDetailText.Text = secondaryDetailText;
-            UpdateDetailTextVisibility(
-                _secondaryDetailText,
-                secondaryDetailText,
-                animateSecondaryDetailTextVisibility,
-                ref _hasAppliedSecondaryDetailTextVisibility,
-                SecondaryDetailTextOpacityAnimationName,
-                CompleteSecondaryDetailTextVisibility);
-            _tertiaryDetailText.SetDynamicResource(StyleProperty, tertiaryDetailTextStyleResourceKey);
-            _tertiaryDetailText.Text = tertiaryDetailText;
-            UpdateDetailTextVisibility(
-                _tertiaryDetailText,
-                tertiaryDetailText,
-                animateTertiaryDetailTextVisibility,
-                ref _hasAppliedTertiaryDetailTextVisibility,
-                TertiaryDetailTextOpacityAnimationName,
-                CompleteTertiaryDetailTextVisibility);
-            _quaternaryDetailText.SetDynamicResource(StyleProperty, quaternaryDetailTextStyleResourceKey);
-            _quaternaryDetailText.Text = quaternaryDetailText;
-            UpdateDetailTextVisibility(
-                _quaternaryDetailText,
-                quaternaryDetailText,
-                animateQuaternaryDetailTextVisibility,
-                ref _hasAppliedQuaternaryDetailTextVisibility,
-                QuaternaryDetailTextOpacityAnimationName,
-                CompleteQuaternaryDetailTextVisibility);
-            _progress.Progress = Progress;
-            UpdateProgressVisibility(animateProgressVisibility);
-            _touchSurface.TapCommand = IsTapEnabled ? tapCommand : null;
-            _touchSurface.TapCommandParameter = TapCommandParameter;
-            _touchSurface.IsVisible = IsTapEnabled && tapCommand is not null;
-            _trailingChip.Text = trailingText;
-            _trailingChip.ChipStyleResourceKey = trailingChipStyleResourceKey;
-            _trailingChip.LabelStyleResourceKey = trailingTextStyleResourceKey;
+            SetOptionalText(_primaryDetail, primaryDetail);
+            SetOptionalText(_secondaryDetail, secondaryDetail);
 
-            if (isTrailingContentVisible && _trailingContentHost.Content != trailingContent)
-            {
-                _trailingContentHost.Content = trailingContent;
-            }
+            _leadingIcon.IconData = LeadingIconData;
+            _leadingIcon.IsVisible = hasLeadingIcon;
+            _leadingIcon.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(
+                    LeadingIconFrameStyleResourceKey,
+                    DefaultLeadingIconStyle));
 
-            UpdateTrailingContentVisibility(isTrailingContentVisible, animateTrailingContentVisibility);
-
-            Grid.SetColumn(_textStack, isLeadingIconLayoutVisible ? 1 : 0);
-            Grid.SetColumnSpan(
-                _textStack,
-                ResolveContentColumnSpan(isLeadingIconLayoutVisible, hasTrailingContentLayout));
-            Grid.SetColumn(_progress, isLeadingIconLayoutVisible ? 1 : 0);
-            Grid.SetColumnSpan(
-                _progress,
-                ResolveContentColumnSpan(isLeadingIconLayoutVisible, hasTrailingContentLayout));
+            Grid.SetColumn(_textStack, hasLeadingIcon ? 1 : 0);
+            Grid.SetColumnSpan(_textStack, hasLeadingIcon ? 1 : 2);
 
             SemanticProperties.SetDescription(
                 this,
-                CreateSemanticDescription(
-                    title,
-                    primaryDetailText,
-                    secondaryDetailText,
-                    tertiaryDetailText,
-                    quaternaryDetailText));
+                string.Join(", ", new[] { title, primaryDetail, secondaryDetail }
+                    .Where(value => !string.IsNullOrWhiteSpace(value))));
         }
 
-        private void UpdateDetailTextVisibility(
-            Label detailTextLabel,
-            string detailText,
-            bool animateDetailTextVisibility,
-            ref bool hasAppliedDetailTextVisibility,
-            string animationName,
-            Action completeVisibility)
+        private static void SetOptionalText(Label label, string text)
         {
-            bool isDetailTextVisible = IsDetailTextActuallyVisible(detailText);
-            bool shouldAnimate = animateDetailTextVisibility && hasAppliedDetailTextVisibility;
-            double targetOpacity = isDetailTextVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isDetailTextVisible)
-            {
-                detailTextLabel.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                detailTextLabel,
-                detailTextLabel.Opacity,
-                targetOpacity,
-                duration,
-                animationName,
-                shouldAnimate,
-                opacity => detailTextLabel.Opacity = opacity,
-                completeVisibility);
-            hasAppliedDetailTextVisibility = true;
-        }
-
-        private void UpdateLeadingIconVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
-        {
-            bool shouldAnimate = animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility;
-            double targetOpacity = isLeadingIconVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isLeadingIconVisible)
-            {
-                _leadingIcon.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _leadingIcon,
-                _leadingIcon.Opacity,
-                targetOpacity,
-                duration,
-                LeadingIconOpacityAnimationName,
-                shouldAnimate,
-                opacity => _leadingIcon.Opacity = opacity,
-                CompleteLeadingIconVisibility);
-            _hasAppliedLeadingIconVisibility = true;
-        }
-
-        private void UpdateProgressVisibility(bool animateProgressVisibility)
-        {
-            bool shouldAnimate = animateProgressVisibility && _hasAppliedProgressVisibility;
-            double targetOpacity = IsProgressVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (IsProgressVisible)
-            {
-                _progress.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _progress,
-                _progress.Opacity,
-                targetOpacity,
-                duration,
-                ProgressOpacityAnimationName,
-                shouldAnimate,
-                opacity => _progress.Opacity = opacity,
-                CompleteProgressVisibility);
-            _hasAppliedProgressVisibility = true;
-        }
-
-        private void UpdateTrailingContentVisibility(
-            bool isTrailingContentVisible,
-            bool animateTrailingContentVisibility)
-        {
-            bool shouldAnimate = animateTrailingContentVisibility && _hasAppliedTrailingContentVisibility;
-            double targetOpacity = isTrailingContentVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isTrailingContentVisible)
-            {
-                _trailingContentHost.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _trailingContentHost,
-                _trailingContentHost.Opacity,
-                targetOpacity,
-                duration,
-                TrailingContentOpacityAnimationName,
-                shouldAnimate,
-                opacity => _trailingContentHost.Opacity = opacity,
-                CompleteTrailingContentVisibility);
-            _hasAppliedTrailingContentVisibility = true;
-        }
-
-        private void CompleteProgressVisibility()
-        {
-            if (IsProgressVisible)
-            {
-                _progress.IsVisible = true;
-                return;
-            }
-
-            _progress.IsVisible = false;
-        }
-
-        private void CompleteLeadingIconVisibility()
-        {
-            if (LeadingIconData is not null)
-            {
-                _leadingIcon.IconData = LeadingIconData;
-                _leadingIcon.IsVisible = true;
-                return;
-            }
-
-            _leadingIcon.IconData = null;
-            _leadingIcon.IsVisible = false;
-            bool hasTrailingContentLayout = ResolveTrailingContent(TrailingText ?? string.Empty) is not null
-                || _trailingContentHost.IsVisible;
-            Grid.SetColumn(_textStack, 0);
-            Grid.SetColumnSpan(_textStack, ResolveContentColumnSpan(false, hasTrailingContentLayout));
-            Grid.SetColumn(_progress, 0);
-            Grid.SetColumnSpan(_progress, ResolveContentColumnSpan(false, hasTrailingContentLayout));
-        }
-
-        private void CompleteTrailingContentVisibility()
-        {
-            View? trailingContent = ResolveTrailingContent(TrailingText ?? string.Empty);
-            if (trailingContent is not null)
-            {
-                if (_trailingContentHost.Content != trailingContent)
-                {
-                    _trailingContentHost.Content = trailingContent;
-                }
-
-                _trailingContentHost.IsVisible = true;
-                return;
-            }
-
-            _trailingContentHost.Content = null;
-            _trailingContentHost.IsVisible = false;
-        }
-
-        private void CompletePrimaryDetailTextVisibility()
-        {
-            if (IsDetailTextActuallyVisible(PrimaryDetailText ?? string.Empty))
-            {
-                _primaryDetailText.IsVisible = true;
-                return;
-            }
-
-            _primaryDetailText.IsVisible = false;
-        }
-
-        private void CompleteSecondaryDetailTextVisibility()
-        {
-            if (IsDetailTextActuallyVisible(SecondaryDetailText ?? string.Empty))
-            {
-                _secondaryDetailText.IsVisible = true;
-                return;
-            }
-
-            _secondaryDetailText.IsVisible = false;
-        }
-
-        private void CompleteTertiaryDetailTextVisibility()
-        {
-            if (IsDetailTextActuallyVisible(TertiaryDetailText ?? string.Empty))
-            {
-                _tertiaryDetailText.IsVisible = true;
-                return;
-            }
-
-            _tertiaryDetailText.IsVisible = false;
-        }
-
-        private void CompleteQuaternaryDetailTextVisibility()
-        {
-            if (IsDetailTextActuallyVisible(QuaternaryDetailText ?? string.Empty))
-            {
-                _quaternaryDetailText.IsVisible = true;
-                return;
-            }
-
-            _quaternaryDetailText.IsVisible = false;
-        }
-
-        private static bool IsDetailTextActuallyVisible(string detailText)
-        {
-            return !string.IsNullOrWhiteSpace(detailText);
-        }
-
-        private View? ResolveTrailingContent(string trailingText)
-        {
-            if (TrailingContent is not null)
-            {
-                return TrailingContent;
-            }
-
-            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText) ? _trailingChip : null;
-        }
-
-        private bool ResolveLeadingIconLayoutVisibility(
-            bool isLeadingIconVisible,
-            bool animateLeadingIconVisibility)
-        {
-            if (isLeadingIconVisible)
-            {
-                return true;
-            }
-
-            return animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility && _leadingIcon.IsVisible;
-        }
-
-        private bool ResolveTrailingContentLayoutVisibility(
-            bool isTrailingContentVisible,
-            bool animateTrailingContentVisibility)
-        {
-            if (isTrailingContentVisible)
-            {
-                return true;
-            }
-
-            return animateTrailingContentVisibility
-                && _hasAppliedTrailingContentVisibility
-                && _trailingContentHost.IsVisible;
-        }
-
-        private static int ResolveContentColumnSpan(bool isLeadingIconVisible, bool isTrailingContentVisible)
-        {
-            if (isLeadingIconVisible)
-            {
-                return isTrailingContentVisible ? 1 : 2;
-            }
-
-            return isTrailingContentVisible ? 2 : 3;
-        }
-
-        private static string CreateSemanticDescription(
-            string title,
-            string primaryDetailText,
-            string secondaryDetailText,
-            string tertiaryDetailText,
-            string quaternaryDetailText)
-        {
-            List<string> parts =
-            [
-                title,
-                primaryDetailText,
-                secondaryDetailText,
-                tertiaryDetailText,
-                quaternaryDetailText,
-            ];
-            return string.Join(". ", parts.Where(part => !string.IsNullOrWhiteSpace(part)));
+            label.Text = text;
+            label.IsVisible = !string.IsNullOrWhiteSpace(text);
         }
     }
 }

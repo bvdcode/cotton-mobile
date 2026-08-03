@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
-using System;
-using System.Collections.Generic;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -10,73 +8,26 @@ namespace Cotton.Mobile.Controls
 {
     public class ActionListItemView : ContentView
     {
-        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
-        private const string DefaultGridStyleResourceKey = "M3ActionListItemGrid";
-        private const string DefaultLeadingIconFrameStyleResourceKey = "M3ActionListItemIconFrame";
-        private const string DefaultSupportingTextStyleResourceKey = "M3CardSupportingBlock";
-        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
-        private const string DefaultTextStyleResourceKey = "M3ActionListItemLabel";
-        private const string DefaultTrailingChipStyleResourceKey = "M3RowActionChip";
-        private const string DefaultTrailingTextStyleResourceKey = "M3ChipLabel";
-        private const string ItemOpacityAnimationName = "M3ActionListItemOpacity";
-        private const string LeadingIconOpacityAnimationName = "M3ActionListLeadingIconOpacity";
-        private const string SupportingTextOpacityAnimationName = "M3ActionListSupportingTextOpacity";
-        private const string TrailingChipOpacityAnimationName = "M3ActionListTrailingChipOpacity";
+        private const string DefaultActionIconButtonStyle = "M3DefaultIconButton";
+        private const string DefaultGridStyle = "M3ActionListItemGrid";
+        private const string DefaultLeadingIconStyle = "M3ActionListItemIconFrame";
+        private const string DefaultTextStyle = "M3ActionListItemLabel";
+        private const string SupportingTextStyle = "M3CardSupportingBlock";
+        private const string TextStackStyle = "M3CardTextStack";
 
-        public static readonly BindableProperty TextProperty = BindableProperty.Create(
-            nameof(Text),
-            typeof(string),
-            typeof(ActionListItemView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
+        public static readonly BindableProperty TextProperty = CreateTextProperty(nameof(Text));
+        public static readonly BindableProperty SupportingTextProperty = CreateTextProperty(nameof(SupportingText));
+        public static readonly BindableProperty SemanticDescriptionProperty =
+            CreateTextProperty(nameof(SemanticDescription));
 
-        public static readonly BindableProperty SupportingTextProperty = BindableProperty.Create(
-            nameof(SupportingText),
-            typeof(string),
-            typeof(ActionListItemView),
-            string.Empty,
-            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty IsSupportingTextVisibleProperty = BindableProperty.Create(
-            nameof(IsSupportingTextVisible),
-            typeof(bool),
-            typeof(ActionListItemView),
-            true,
-            propertyChanged: OnSupportingTextVisibilityPropertyChanged);
-
-        public static readonly BindableProperty TrailingTextProperty = BindableProperty.Create(
-            nameof(TrailingText),
-            typeof(string),
-            typeof(ActionListItemView),
-            string.Empty,
-            propertyChanged: OnTrailingChipVisibilityPropertyChanged);
-
-        public static readonly BindableProperty IsTrailingTextVisibleProperty = BindableProperty.Create(
-            nameof(IsTrailingTextVisible),
-            typeof(bool),
-            typeof(ActionListItemView),
-            true,
-            propertyChanged: OnTrailingChipVisibilityPropertyChanged);
-
-        public static readonly BindableProperty LeadingIconDataProperty = BindableProperty.Create(
-            nameof(LeadingIconData),
-            typeof(Geometry),
-            typeof(ActionListItemView),
-            default(Geometry),
-            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
+        public static readonly BindableProperty LeadingIconDataProperty = CreateGeometryProperty(nameof(LeadingIconData));
+        public static readonly BindableProperty ActionIconDataProperty = CreateGeometryProperty(nameof(ActionIconData));
 
         public static readonly BindableProperty IsLeadingIconVisibleProperty = BindableProperty.Create(
             nameof(IsLeadingIconVisible),
             typeof(bool),
             typeof(ActionListItemView),
             false,
-            propertyChanged: OnLeadingIconVisibilityPropertyChanged);
-
-        public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
-            nameof(ActionIconData),
-            typeof(Geometry),
-            typeof(ActionListItemView),
-            default(Geometry),
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty CommandProperty = BindableProperty.Create(
@@ -91,18 +42,6 @@ namespace Cotton.Mobile.Controls
             typeof(ActionListItemView),
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty RowTapCommandProperty = BindableProperty.Create(
-            nameof(RowTapCommand),
-            typeof(ICommand),
-            typeof(ActionListItemView),
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty RowTapCommandParameterProperty = BindableProperty.Create(
-            nameof(RowTapCommandParameter),
-            typeof(object),
-            typeof(ActionListItemView),
-            propertyChanged: OnVisualPropertyChanged);
-
         public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
             nameof(IsActionEnabled),
             typeof(bool),
@@ -110,112 +49,29 @@ namespace Cotton.Mobile.Controls
             true,
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty IsItemVisibleProperty = BindableProperty.Create(
-            nameof(IsItemVisible),
-            typeof(bool),
-            typeof(ActionListItemView),
-            true,
-            propertyChanged: OnItemVisiblePropertyChanged);
-
-        public static readonly BindableProperty IsRowTapEnabledProperty = BindableProperty.Create(
-            nameof(IsRowTapEnabled),
-            typeof(bool),
-            typeof(ActionListItemView),
-            true,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty SemanticDescriptionProperty = BindableProperty.Create(
-            nameof(SemanticDescription),
-            typeof(string),
-            typeof(ActionListItemView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
-            nameof(ActionSemanticDescription),
-            typeof(string),
-            typeof(ActionListItemView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(GridStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultGridStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TextStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty SupportingTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(SupportingTextStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultSupportingTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TextStackStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultTextStackStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TrailingChipStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TrailingChipStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultTrailingChipStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TrailingTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TrailingTextStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultTrailingTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(LeadingIconFrameStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultLeadingIconFrameStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(ActionIconButtonStyleResourceKey),
-            typeof(string),
-            typeof(ActionListItemView),
-            DefaultActionIconButtonStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
+        public static readonly BindableProperty GridStyleResourceKeyProperty =
+            CreateStyleProperty(nameof(GridStyleResourceKey), DefaultGridStyle);
+        public static readonly BindableProperty TextStyleResourceKeyProperty =
+            CreateStyleProperty(nameof(TextStyleResourceKey), DefaultTextStyle);
+        public static readonly BindableProperty LeadingIconFrameStyleResourceKeyProperty =
+            CreateStyleProperty(nameof(LeadingIconFrameStyleResourceKey), DefaultLeadingIconStyle);
+        public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty =
+            CreateStyleProperty(nameof(ActionIconButtonStyleResourceKey), DefaultActionIconButtonStyle);
 
         private readonly IconButton _actionButton;
         private readonly Grid _container;
         private readonly IconFrame _leadingIcon;
         private readonly Label _supportingText;
+        private readonly TapGestureRecognizer _tapGesture;
         private readonly Label _text;
         private readonly VerticalStackLayout _textStack;
-        private readonly TouchSurfaceView _touchSurface;
-        private readonly Border _trailingChip;
-        private readonly Label _trailingText;
-        private bool _hasAppliedLeadingIconVisibility;
-        private bool _hasAppliedItemVisibility;
-        private bool _hasAppliedSupportingTextVisibility;
-        private bool _hasAppliedTrailingChipVisibility;
 
         public ActionListItemView()
         {
             _leadingIcon = new IconFrame();
-
             _text = new Label();
             _supportingText = new Label();
-            _trailingText = new Label();
-
+            _supportingText.SetDynamicResource(StyleProperty, SupportingTextStyle);
             _textStack = new VerticalStackLayout
             {
                 VerticalOptions = LayoutOptions.Center,
@@ -225,56 +81,32 @@ namespace Cotton.Mobile.Controls
                     _supportingText,
                 },
             };
-
-            _touchSurface = new TouchSurfaceView();
-            Grid.SetColumnSpan(_touchSurface, 4);
-
-            _trailingChip = new Border
-            {
-                Content = _trailingText,
-            };
-            Grid.SetColumn(_trailingChip, 2);
+            _textStack.SetDynamicResource(StyleProperty, TextStackStyle);
 
             _actionButton = new IconButton();
-            Grid.SetColumn(_actionButton, 3);
-
             _container = new Grid
             {
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Star,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Auto),
                 },
                 Children =
                 {
                     _leadingIcon,
                     _textStack,
-                    _trailingChip,
-                    _touchSurface,
                     _actionButton,
                 },
             };
+            Grid.SetColumn(_textStack, 1);
+            Grid.SetColumn(_actionButton, 2);
+
+            _tapGesture = new TapGestureRecognizer();
+            _container.GestureRecognizers.Add(_tapGesture);
 
             Content = _container;
-            UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animateSupportingTextVisibility: false,
-                animateTrailingChipVisibility: false);
-            UpdateItemVisibility(animateItemVisibility: false);
+            UpdateVisualState();
         }
 
         public string Text
@@ -287,24 +119,6 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(SupportingTextProperty);
             set => SetValue(SupportingTextProperty, value);
-        }
-
-        public bool IsSupportingTextVisible
-        {
-            get => (bool)GetValue(IsSupportingTextVisibleProperty);
-            set => SetValue(IsSupportingTextVisibleProperty, value);
-        }
-
-        public string TrailingText
-        {
-            get => (string)GetValue(TrailingTextProperty);
-            set => SetValue(TrailingTextProperty, value);
-        }
-
-        public bool IsTrailingTextVisible
-        {
-            get => (bool)GetValue(IsTrailingTextVisibleProperty);
-            set => SetValue(IsTrailingTextVisibleProperty, value);
         }
 
         public Geometry? LeadingIconData
@@ -337,46 +151,16 @@ namespace Cotton.Mobile.Controls
             set => SetValue(CommandParameterProperty, value);
         }
 
-        public ICommand? RowTapCommand
-        {
-            get => (ICommand?)GetValue(RowTapCommandProperty);
-            set => SetValue(RowTapCommandProperty, value);
-        }
-
-        public object? RowTapCommandParameter
-        {
-            get => GetValue(RowTapCommandParameterProperty);
-            set => SetValue(RowTapCommandParameterProperty, value);
-        }
-
         public bool IsActionEnabled
         {
             get => (bool)GetValue(IsActionEnabledProperty);
             set => SetValue(IsActionEnabledProperty, value);
         }
 
-        public bool IsItemVisible
-        {
-            get => (bool)GetValue(IsItemVisibleProperty);
-            set => SetValue(IsItemVisibleProperty, value);
-        }
-
-        public bool IsRowTapEnabled
-        {
-            get => (bool)GetValue(IsRowTapEnabledProperty);
-            set => SetValue(IsRowTapEnabledProperty, value);
-        }
-
         public string SemanticDescription
         {
             get => (string)GetValue(SemanticDescriptionProperty);
             set => SetValue(SemanticDescriptionProperty, value);
-        }
-
-        public string ActionSemanticDescription
-        {
-            get => (string)GetValue(ActionSemanticDescriptionProperty);
-            set => SetValue(ActionSemanticDescriptionProperty, value);
         }
 
         public string GridStyleResourceKey
@@ -391,30 +175,6 @@ namespace Cotton.Mobile.Controls
             set => SetValue(TextStyleResourceKeyProperty, value);
         }
 
-        public string SupportingTextStyleResourceKey
-        {
-            get => (string)GetValue(SupportingTextStyleResourceKeyProperty);
-            set => SetValue(SupportingTextStyleResourceKeyProperty, value);
-        }
-
-        public string TextStackStyleResourceKey
-        {
-            get => (string)GetValue(TextStackStyleResourceKeyProperty);
-            set => SetValue(TextStackStyleResourceKeyProperty, value);
-        }
-
-        public string TrailingChipStyleResourceKey
-        {
-            get => (string)GetValue(TrailingChipStyleResourceKeyProperty);
-            set => SetValue(TrailingChipStyleResourceKeyProperty, value);
-        }
-
-        public string TrailingTextStyleResourceKey
-        {
-            get => (string)GetValue(TrailingTextStyleResourceKeyProperty);
-            set => SetValue(TrailingTextStyleResourceKeyProperty, value);
-        }
-
         public string LeadingIconFrameStyleResourceKey
         {
             get => (string)GetValue(LeadingIconFrameStyleResourceKeyProperty);
@@ -427,365 +187,96 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ActionIconButtonStyleResourceKeyProperty, value);
         }
 
+        private static BindableProperty CreateTextProperty(string name)
+        {
+            return BindableProperty.Create(
+                name,
+                typeof(string),
+                typeof(ActionListItemView),
+                string.Empty,
+                propertyChanged: OnVisualPropertyChanged);
+        }
+
+        private static BindableProperty CreateGeometryProperty(string name)
+        {
+            return BindableProperty.Create(
+                name,
+                typeof(Geometry),
+                typeof(ActionListItemView),
+                default(Geometry),
+                propertyChanged: OnVisualPropertyChanged);
+        }
+
+        private static BindableProperty CreateStyleProperty(string name, string defaultValue)
+        {
+            return BindableProperty.Create(
+                name,
+                typeof(string),
+                typeof(ActionListItemView),
+                defaultValue,
+                propertyChanged: OnVisualPropertyChanged);
+        }
+
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animateSupportingTextVisibility: false,
-                animateTrailingChipVisibility: false);
+            ((ActionListItemView)bindable).UpdateVisualState();
         }
 
-        private static void OnLeadingIconVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
+        private void UpdateVisualState()
         {
-            ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateVisualState(
-                animateLeadingIconVisibility: true,
-                animateSupportingTextVisibility: false,
-                animateTrailingChipVisibility: false);
-        }
+            if (_container is null)
+            {
+                return;
+            }
 
-        private static void OnItemVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateItemVisibility(animateItemVisibility: true);
-        }
-
-        private static void OnSupportingTextVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animateSupportingTextVisibility: true,
-                animateTrailingChipVisibility: false);
-        }
-
-        private static void OnTrailingChipVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            ActionListItemView actionListItemView = (ActionListItemView)bindable;
-            actionListItemView.UpdateVisualState(
-                animateLeadingIconVisibility: false,
-                animateSupportingTextVisibility: false,
-                animateTrailingChipVisibility: true);
-        }
-
-        private void UpdateVisualState(
-            bool animateLeadingIconVisibility,
-            bool animateSupportingTextVisibility,
-            bool animateTrailingChipVisibility)
-        {
             string text = Text ?? string.Empty;
             string supportingText = SupportingText ?? string.Empty;
-            string trailingText = TrailingText ?? string.Empty;
+            bool hasLeadingIcon = IsLeadingIconVisible && LeadingIconData is not null;
+            bool hasAction = ActionIconData is not null;
             string semanticDescription = string.IsNullOrWhiteSpace(SemanticDescription)
-                ? CreateSemanticDescription(text, supportingText, trailingText)
+                ? string.Join(", ", new[] { text, supportingText }
+                    .Where(value => !string.IsNullOrWhiteSpace(value)))
                 : SemanticDescription;
-            string actionSemanticDescription = string.IsNullOrWhiteSpace(ActionSemanticDescription)
-                ? semanticDescription
-                : ActionSemanticDescription;
-            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                GridStyleResourceKey,
-                DefaultGridStyleResourceKey);
-            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TextStyleResourceKey,
-                DefaultTextStyleResourceKey);
-            string supportingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                SupportingTextStyleResourceKey,
-                DefaultSupportingTextStyleResourceKey);
-            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TextStackStyleResourceKey,
-                DefaultTextStackStyleResourceKey);
-            string trailingChipStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TrailingChipStyleResourceKey,
-                DefaultTrailingChipStyleResourceKey);
-            string trailingTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TrailingTextStyleResourceKey,
-                DefaultTrailingTextStyleResourceKey);
-            string leadingIconFrameStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                LeadingIconFrameStyleResourceKey,
-                DefaultLeadingIconFrameStyleResourceKey);
-            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                ActionIconButtonStyleResourceKey,
-                DefaultActionIconButtonStyleResourceKey);
-            bool isLeadingIconVisible = IsLeadingIconVisible && LeadingIconData is not null;
-            bool isLeadingIconLayoutVisible = ResolveLeadingIconLayoutVisibility(
-                isLeadingIconVisible,
-                animateLeadingIconVisibility);
-            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText);
-            bool isTrailingChipLayoutVisible = ResolveTrailingChipLayoutVisibility(
-                isTrailingChipVisible,
-                animateTrailingChipVisibility);
-            ICommand? actionCommand = Command;
-            object? actionCommandParameter = CommandParameter;
-            ICommand? rowTapCommand = RowTapCommand ?? actionCommand;
-            object? rowTapCommandParameter = RowTapCommand is null
-                ? actionCommandParameter
-                : RowTapCommandParameter;
 
-            _container.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _leadingIcon.SetDynamicResource(StyleProperty, leadingIconFrameStyleResourceKey);
-            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
-            _text.SetDynamicResource(StyleProperty, textStyleResourceKey);
-            _supportingText.SetDynamicResource(StyleProperty, supportingTextStyleResourceKey);
-            _trailingChip.SetDynamicResource(StyleProperty, trailingChipStyleResourceKey);
-            _trailingText.SetDynamicResource(StyleProperty, trailingTextStyleResourceKey);
-            _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
+            _container.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(GridStyleResourceKey, DefaultGridStyle));
+            _text.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(TextStyleResourceKey, DefaultTextStyle));
+            _leadingIcon.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(
+                    LeadingIconFrameStyleResourceKey,
+                    DefaultLeadingIconStyle));
+            _actionButton.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(
+                    ActionIconButtonStyleResourceKey,
+                    DefaultActionIconButtonStyle));
 
-            if (isLeadingIconVisible)
-            {
-                _leadingIcon.IconData = LeadingIconData;
-            }
-
-            UpdateLeadingIconVisibility(isLeadingIconVisible, animateLeadingIconVisibility);
             _text.Text = text;
             _supportingText.Text = supportingText;
-            UpdateSupportingTextVisibility(supportingText, animateSupportingTextVisibility);
-            Grid.SetColumn(_textStack, isLeadingIconLayoutVisible ? 1 : 0);
-            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(isLeadingIconLayoutVisible, isTrailingChipLayoutVisible));
+            _supportingText.IsVisible = !string.IsNullOrWhiteSpace(supportingText);
 
-            _trailingText.Text = trailingText;
-            UpdateTrailingChipVisibility(trailingText, animateTrailingChipVisibility);
+            _leadingIcon.IconData = LeadingIconData;
+            _leadingIcon.IsVisible = hasLeadingIcon;
 
             _actionButton.IconData = ActionIconData;
-            _actionButton.Command = actionCommand;
-            _actionButton.CommandParameter = actionCommandParameter;
+            _actionButton.Command = Command;
+            _actionButton.CommandParameter = CommandParameter;
             _actionButton.IsEnabled = IsActionEnabled;
-            SemanticProperties.SetDescription(_actionButton, actionSemanticDescription);
+            _actionButton.IsVisible = hasAction;
 
-            _touchSurface.TapCommand = IsActionEnabled ? rowTapCommand : null;
-            _touchSurface.TapCommandParameter = rowTapCommandParameter;
-            _touchSurface.IsVisible = IsRowTapEnabled && IsActionEnabled && rowTapCommand is not null;
+            int textColumn = hasLeadingIcon ? 1 : 0;
+            Grid.SetColumn(_textStack, textColumn);
+            Grid.SetColumnSpan(_textStack, 3 - textColumn - (hasAction ? 1 : 0));
+
+            _tapGesture.Command = IsActionEnabled ? Command : null;
+            _tapGesture.CommandParameter = CommandParameter;
+
             SemanticProperties.SetDescription(_container, semanticDescription);
-        }
-
-        private void UpdateItemVisibility(bool animateItemVisibility)
-        {
-            bool isItemVisible = IsItemVisible;
-            bool shouldAnimate = animateItemVisibility && _hasAppliedItemVisibility;
-            double targetOpacity = isItemVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            InputTransparent = !isItemVisible;
-            if (isItemVisible)
-            {
-                IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                this,
-                Opacity,
-                targetOpacity,
-                duration,
-                ItemOpacityAnimationName,
-                shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteItemVisibility);
-            _hasAppliedItemVisibility = true;
-        }
-
-        private void UpdateLeadingIconVisibility(bool isLeadingIconVisible, bool animateLeadingIconVisibility)
-        {
-            bool shouldAnimate = animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility;
-            double targetOpacity = isLeadingIconVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isLeadingIconVisible)
-            {
-                _leadingIcon.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _leadingIcon,
-                _leadingIcon.Opacity,
-                targetOpacity,
-                duration,
-                LeadingIconOpacityAnimationName,
-                shouldAnimate,
-                opacity => _leadingIcon.Opacity = opacity,
-                CompleteLeadingIconVisibility);
-            _hasAppliedLeadingIconVisibility = true;
-        }
-
-        private void UpdateSupportingTextVisibility(string supportingText, bool animateSupportingTextVisibility)
-        {
-            bool isSupportingTextVisible = IsSupportingTextActuallyVisible(supportingText);
-            bool shouldAnimate = animateSupportingTextVisibility && _hasAppliedSupportingTextVisibility;
-            double targetOpacity = isSupportingTextVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isSupportingTextVisible)
-            {
-                _supportingText.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _supportingText,
-                _supportingText.Opacity,
-                targetOpacity,
-                duration,
-                SupportingTextOpacityAnimationName,
-                shouldAnimate,
-                opacity => _supportingText.Opacity = opacity,
-                CompleteSupportingTextVisibility);
-            _hasAppliedSupportingTextVisibility = true;
-        }
-
-        private void UpdateTrailingChipVisibility(string trailingText, bool animateTrailingChipVisibility)
-        {
-            bool isTrailingChipVisible = IsTrailingChipActuallyVisible(trailingText);
-            bool shouldAnimate = animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility;
-            double targetOpacity = isTrailingChipVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isTrailingChipVisible)
-            {
-                _trailingChip.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _trailingChip,
-                _trailingChip.Opacity,
-                targetOpacity,
-                duration,
-                TrailingChipOpacityAnimationName,
-                shouldAnimate,
-                opacity => _trailingChip.Opacity = opacity,
-                CompleteTrailingChipVisibility);
-            _hasAppliedTrailingChipVisibility = true;
-        }
-
-        private void CompleteSupportingTextVisibility()
-        {
-            if (IsSupportingTextActuallyVisible(SupportingText ?? string.Empty))
-            {
-                _supportingText.IsVisible = true;
-                return;
-            }
-
-            _supportingText.IsVisible = false;
-        }
-
-        private void CompleteLeadingIconVisibility()
-        {
-            if (IsLeadingIconActuallyVisible())
-            {
-                _leadingIcon.IconData = LeadingIconData;
-                _leadingIcon.IsVisible = true;
-                return;
-            }
-
-            _leadingIcon.IconData = null;
-            _leadingIcon.IsVisible = false;
-            bool isTrailingChipLayoutVisible =
-                IsTrailingChipActuallyVisible(TrailingText ?? string.Empty) || _trailingChip.IsVisible;
-            Grid.SetColumn(_textStack, 0);
-            Grid.SetColumnSpan(_textStack, ResolveTextColumnSpan(false, isTrailingChipLayoutVisible));
-        }
-
-        private void CompleteTrailingChipVisibility()
-        {
-            if (IsTrailingChipActuallyVisible(TrailingText ?? string.Empty))
-            {
-                _trailingChip.IsVisible = true;
-                return;
-            }
-
-            _trailingChip.IsVisible = false;
-            Grid.SetColumnSpan(
-                _textStack,
-                ResolveTextColumnSpan(_leadingIcon.IsVisible, isTrailingTextVisible: false));
-        }
-
-        private bool IsSupportingTextActuallyVisible(string supportingText)
-        {
-            return IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
-        }
-
-        private void CompleteItemVisibility()
-        {
-            IsVisible = IsItemVisible;
-        }
-
-        private bool ResolveTrailingChipLayoutVisibility(
-            bool isTrailingChipVisible,
-            bool animateTrailingChipVisibility)
-        {
-            if (isTrailingChipVisible)
-            {
-                return true;
-            }
-
-            return animateTrailingChipVisibility && _hasAppliedTrailingChipVisibility && _trailingChip.IsVisible;
-        }
-
-        private bool ResolveLeadingIconLayoutVisibility(
-            bool isLeadingIconVisible,
-            bool animateLeadingIconVisibility)
-        {
-            if (isLeadingIconVisible)
-            {
-                return true;
-            }
-
-            return animateLeadingIconVisibility && _hasAppliedLeadingIconVisibility && _leadingIcon.IsVisible;
-        }
-
-        private bool IsLeadingIconActuallyVisible()
-        {
-            return IsLeadingIconVisible && LeadingIconData is not null;
-        }
-
-        private bool IsTrailingChipActuallyVisible(string trailingText)
-        {
-            return IsTrailingTextVisible && !string.IsNullOrWhiteSpace(trailingText);
-        }
-
-        private int ResolveTextColumnSpan(bool isLeadingIconVisible, bool isTrailingTextVisible)
-        {
-            if (isLeadingIconVisible)
-            {
-                return isTrailingTextVisible ? 1 : 2;
-            }
-
-            return isTrailingTextVisible ? 2 : 3;
-        }
-
-        private string CreateSemanticDescription(string text, string supportingText, string trailingText)
-        {
-            List<string> semanticParts = [];
-            if (!string.IsNullOrWhiteSpace(text))
-            {
-                semanticParts.Add(text);
-            }
-
-            if (!string.IsNullOrWhiteSpace(supportingText))
-            {
-                semanticParts.Add(supportingText);
-            }
-
-            if (!string.IsNullOrWhiteSpace(trailingText))
-            {
-                semanticParts.Add(trailingText);
-            }
-
-            return string.Join(". ", semanticParts);
+            SemanticProperties.SetDescription(_actionButton, semanticDescription);
         }
     }
 }

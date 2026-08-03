@@ -10,8 +10,6 @@ namespace Cotton.Mobile.Controls
 {
     public class OutlinedInputField : ContentView
     {
-        private const string FieldVisibilityAnimationName = "M3OutlinedInputFieldVisibility";
-
         public static readonly BindableProperty TextProperty = BindableProperty.Create(
             nameof(Text),
             typeof(string),
@@ -87,8 +85,6 @@ namespace Cotton.Mobile.Controls
         private readonly Border _iconFrame;
         private readonly IconView _icon;
         private readonly Entry _entry;
-        private bool _hasAppliedFieldVisibility;
-
         public OutlinedInputField()
         {
             _icon = new IconView();
@@ -130,7 +126,7 @@ namespace Cotton.Mobile.Controls
 
             Content = _field;
             UpdateVisualState();
-            UpdateFieldVisibility(animateFieldVisibility: false);
+            UpdateFieldVisibility();
             UpdateInputTransparency();
         }
 
@@ -225,7 +221,7 @@ namespace Cotton.Mobile.Controls
         private static void OnFieldVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             OutlinedInputField field = (OutlinedInputField)bindable;
-            field.UpdateFieldVisibility(animateFieldVisibility: true);
+            field.UpdateFieldVisibility();
         }
 
         private void OnEntryTextChanged(object? sender, TextChangedEventArgs e)
@@ -259,39 +255,10 @@ namespace Cotton.Mobile.Controls
             UpdateInputTransparency();
         }
 
-        private void UpdateFieldVisibility(bool animateFieldVisibility)
-        {
-            bool isFieldVisible = IsFieldVisible;
-            bool shouldAnimate = animateFieldVisibility && _hasAppliedFieldVisibility;
-            double targetOpacity = isFieldVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isFieldVisible)
-            {
-                IsVisible = true;
-            }
-            else
-            {
-                UpdateInputTransparency();
-            }
-
-            MaterialMotion.UpdateDouble(
-                this,
-                Opacity,
-                targetOpacity,
-                duration,
-                FieldVisibilityAnimationName,
-                shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteFieldVisibility);
-            _hasAppliedFieldVisibility = true;
-        }
-
-        private void CompleteFieldVisibility()
+        private void UpdateFieldVisibility()
         {
             IsVisible = IsFieldVisible;
+            Opacity = 1d;
             UpdateInputTransparency();
         }
 

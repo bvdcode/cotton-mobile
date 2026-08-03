@@ -112,6 +112,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Outlined_input_visibility_updates_atomically()
+        {
+            string input = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Controls/OutlinedInputField.cs");
+
+            Assert.Contains("IsVisible = IsFieldVisible;", input, StringComparison.Ordinal);
+            Assert.Contains("Opacity = 1d;", input, StringComparison.Ordinal);
+            Assert.DoesNotContain("FieldVisibilityAnimationName", input, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void App_loads_theme_resources_before_creating_the_shell()
         {
             string app = RepositoryPath.ReadText("src/Cotton.Mobile/App.xaml.cs");

@@ -118,6 +118,8 @@ namespace Cotton.Mobile
             services.AddSingleton<MainPageViewModel>();
             services.AddSingleton<MainPage>();
             services.AddSingleton<AppShell>();
+            services.AddSingleton<Func<AppShell>>(serviceProvider =>
+                () => serviceProvider.GetRequiredService<AppShell>());
         }
     }
 }

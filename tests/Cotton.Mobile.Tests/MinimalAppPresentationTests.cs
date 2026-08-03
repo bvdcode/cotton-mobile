@@ -88,6 +88,19 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("BackCommandProperty", topAppBarCode, StringComparison.Ordinal);
         }
 
+        [Fact]
+        public void App_loads_theme_resources_before_creating_the_shell()
+        {
+            string app = RepositoryPath.ReadText("src/Cotton.Mobile/App.xaml.cs");
+
+            int resourcesLoaded = app.IndexOf("InitializeComponent();", StringComparison.Ordinal);
+            int shellCreated = app.IndexOf("_appShellFactory()", StringComparison.Ordinal);
+
+            Assert.True(resourcesLoaded >= 0);
+            Assert.True(shellCreated > resourcesLoaded);
+            Assert.Contains("Func<AppShell>", app, StringComparison.Ordinal);
+        }
+
         private static XDocument ReadXaml(string relativePath)
         {
             return XDocument.Parse(RepositoryPath.ReadText(relativePath));

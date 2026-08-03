@@ -5,19 +5,19 @@ namespace Cotton.Mobile
 {
     public partial class App : Application
     {
-        private readonly AppShell _appShell;
+        private readonly Func<AppShell> _appShellFactory;
 
-        public App(AppShell appShell)
+        public App(Func<AppShell> appShellFactory)
         {
-            ArgumentNullException.ThrowIfNull(appShell);
+            ArgumentNullException.ThrowIfNull(appShellFactory);
 
             InitializeComponent();
-            _appShell = appShell;
+            _appShellFactory = appShellFactory;
         }
 
         protected override Window CreateWindow(IActivationState? activationState)
         {
-            return new Window(_appShell);
+            return new Window(_appShellFactory());
         }
     }
 }

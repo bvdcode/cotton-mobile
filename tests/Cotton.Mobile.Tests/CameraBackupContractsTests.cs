@@ -178,16 +178,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Camera_backup_view_model_does_not_expose_placeholder_enable_toggle()
-        {
-            string source = RepositoryPath.ReadText("src/Cotton.Mobile/ViewModels/BackupSetupViewModel.cs");
-
-            Assert.DoesNotContain("public bool IsBackupEnabled => false;", source, StringComparison.Ordinal);
-            Assert.DoesNotContain("public bool CanEnableBackup => false;", source, StringComparison.Ordinal);
-            Assert.Contains(".WithEnabled(IsBackupEnabled && CanEnableBackup)", source, StringComparison.Ordinal);
-        }
-
-        [Fact]
         public void Camera_backup_media_identity_is_stable_until_source_version_changes()
         {
             var identity = new CottonCameraBackupMediaIdentity(

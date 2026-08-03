@@ -173,13 +173,6 @@ namespace Cotton.Mobile.Services
             return Path.Combine(CreateTemporaryDownloadsDirectory(), $"{Guid.NewGuid():N}{TemporaryDownloadFileExtension}");
         }
 
-        public static string CreateThumbnailCacheDirectory(FileThumbnailCacheOptions options)
-        {
-            ArgumentNullException.ThrowIfNull(options);
-
-            return Path.Combine(FileSystem.AppDataDirectory, options.DirectoryName);
-        }
-
         public static bool IsTemporaryDownloadPath(string path)
         {
             string temporaryDownloadsDirectory = Path.GetFullPath(CreateTemporaryDownloadsDirectory());

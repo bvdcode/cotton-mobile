@@ -4,7 +4,10 @@ namespace Cotton.Mobile.Tests
     {
         public static string ReadText(string relativePath)
         {
-            return File.ReadAllText(Path.Combine(FindRoot(), relativePath));
+            string content = File.ReadAllText(Path.Combine(FindRoot(), relativePath));
+            return content
+                .Replace("\r\n", "\n", StringComparison.Ordinal)
+                .Replace('\r', '\n');
         }
 
         public static IReadOnlyList<string> EnumerateFiles(string relativePath, string searchPattern)

@@ -29,7 +29,10 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(IntakeId, staged.IntakeId);
             Assert.Equal(ItemId, staged.ItemId);
-            Assert.Equal("photo?.jpg", staged.FileName);
+            string expectedFileName = Path.GetInvalidFileNameChars().Contains('?')
+                ? "photo_.jpg"
+                : "photo?.jpg";
+            Assert.Equal(expectedFileName, staged.FileName);
             Assert.Equal("hello from share", await File.ReadAllTextAsync(staged.Path));
             Assert.Equal(16, staged.SizeBytes);
             Assert.StartsWith(

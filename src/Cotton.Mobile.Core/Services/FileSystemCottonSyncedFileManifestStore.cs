@@ -39,18 +39,21 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                await using var stream = new FileStream(
+                CottonStoredSyncedFileManifest? stored;
+                await using (var stream = new FileStream(
                     filePath,
                     FileMode.Open,
                     FileAccess.Read,
                     FileShare.Read,
                     bufferSize: 16384,
-                    useAsync: true);
-                CottonStoredSyncedFileManifest? stored =
-                    await JsonSerializer.DeserializeAsync<CottonStoredSyncedFileManifest>(
+                    useAsync: true))
+                {
+                    stored = await JsonSerializer.DeserializeAsync<CottonStoredSyncedFileManifest>(
                         stream,
                         SerializerOptions,
                         cancellationToken).ConfigureAwait(false);
+                }
+
                 if (stored is null
                     || stored.SchemaVersion != SchemaVersion
                     || !string.Equals(stored.SyncRootStableKey, root.StableKey, StringComparison.Ordinal)

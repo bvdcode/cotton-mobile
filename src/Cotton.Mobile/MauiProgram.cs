@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using CommunityToolkit.Maui;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
@@ -19,7 +18,6 @@ namespace Cotton.Mobile
             MauiAppBuilder builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseMauiCommunityToolkitMediaElement(isAndroidForegroundServiceEnabled: false)
                 .UseCottonDesignSystem();
 
             RegisterPlatformServices(builder.Services);

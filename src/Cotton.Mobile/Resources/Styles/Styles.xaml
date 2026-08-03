@@ -2,8 +2,7 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
-    xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit">
+    xmlns:controls="clr-namespace:Cotton.Mobile.Controls">
 
     <Style TargetType="ActivityIndicator">
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkPrimary}}" />
@@ -153,22 +152,6 @@
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3SkeletonBlock">
-        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
-        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
-        <Setter Property="StrokeShape">
-            <Setter.Value>
-                <RoundRectangle CornerRadius="{StaticResource ShapeMedium}" />
-            </Setter.Value>
-        </Setter>
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
-        <Setter Property="IdleOpacity" Value="{StaticResource M3SkeletonIdleOpacity}" />
-        <Setter Property="PulseOpacity" Value="{StaticResource M3SkeletonPulseOpacity}" />
-        <Setter Property="PulseDuration" Value="{StaticResource M3MotionSkeletonPulseDuration}" />
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" BasedOn="{StaticResource M3SkeletonBlock}" />
 
     <Style TargetType="Label" x:Key="M3LoadingMessage" BasedOn="{StaticResource M3CardSupportingStrong}">
         <Setter Property="MaxLines" Value="2" />
@@ -667,12 +650,6 @@
         <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
     </Style>
 
-    <Style TargetType="controls:FileBrowserContentGridView" x:Key="M3FileBrowserContentGrid">
-        <Setter Property="RowSpacing" Value="{StaticResource Space12}" />
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="VerticalOptions" Value="Fill" />
-    </Style>
-
     <Style TargetType="VerticalStackLayout" x:Key="M3FileBrowserContentStack">
         <Setter Property="Spacing" Value="{StaticResource Space12}" />
         <Setter Property="HorizontalOptions" Value="Fill" />
@@ -707,18 +684,6 @@
         <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
     </Style>
 
-    <Style TargetType="controls:FileListSkeletonView" x:Key="M3FileListSkeletonView">
-        <Setter Property="Spacing" Value="{StaticResource SpaceNone}" />
-        <Setter Property="InputTransparent" Value="True" />
-        <Setter Property="AppearanceDuration" Value="{StaticResource M3MotionSkeletonEnterDuration}" />
-    </Style>
-
-    <Style TargetType="controls:MetadataListSkeletonView" x:Key="M3MetadataListSkeletonView">
-        <Setter Property="Spacing" Value="{StaticResource M3CardListItemSpacing}" />
-        <Setter Property="InputTransparent" Value="True" />
-        <Setter Property="AppearanceDuration" Value="{StaticResource M3MotionSkeletonEnterDuration}" />
-    </Style>
-
     <Style TargetType="Grid" x:Key="M3FileSkeletonRowGrid">
         <Setter Property="Padding" Value="{StaticResource M3FileRowPadding}" />
         <Setter Property="HeightRequest" Value="{StaticResource M3FileRowHeight}" />
@@ -728,40 +693,6 @@
     <Style TargetType="VerticalStackLayout" x:Key="M3FileSkeletonTextStack">
         <Setter Property="Spacing" Value="{StaticResource Space8}" />
         <Setter Property="VerticalOptions" Value="Center" />
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3FileSkeletonThumbnailBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3FileThumbnailSize}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FileThumbnailSize}" />
-        <Setter Property="VerticalOptions" Value="Center" />
-        <Setter Property="StrokeShape">
-            <Setter.Value>
-                <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3FileSkeletonPrimaryLineBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3FileSkeletonPrimaryLineWidth}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FileSkeletonLineHeight}" />
-        <Setter Property="HorizontalOptions" Value="Start" />
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3FileSkeletonSecondaryLineBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3FileSkeletonSecondaryLineWidth}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FileSkeletonSecondaryLineHeight}" />
-        <Setter Property="HorizontalOptions" Value="Start" />
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3FileSkeletonActionBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3FileActionSize}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FileActionSize}" />
-        <Setter Property="VerticalOptions" Value="Center" />
-        <Setter Property="StrokeShape">
-            <Setter.Value>
-                <RoundRectangle CornerRadius="{StaticResource ShapeExtraLarge}" />
-            </Setter.Value>
-        </Setter>
     </Style>
 
     <Style TargetType="Border" x:Key="M3MetadataSkeletonCard" BasedOn="{StaticResource M3ContentCard}" />
@@ -775,31 +706,7 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonThumbnailBlock" BasedOn="{StaticResource M3FileSkeletonThumbnailBlock}">
-        <Setter Property="VerticalOptions" Value="Start" />
-    </Style>
 
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonPrimaryLineBlock" BasedOn="{StaticResource M3FileSkeletonPrimaryLineBlock}" />
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonSecondaryLineBlock" BasedOn="{StaticResource M3FileSkeletonSecondaryLineBlock}" />
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonChipBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3MetadataSkeletonChipWidth}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3MetadataSkeletonChipHeight}" />
-        <Setter Property="VerticalOptions" Value="Start" />
-        <Setter Property="HorizontalOptions" Value="End" />
-        <Setter Property="StrokeShape">
-            <Setter.Value>
-                <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
-            </Setter.Value>
-        </Setter>
-    </Style>
-
-    <Style TargetType="controls:SkeletonBlock" x:Key="M3MetadataSkeletonBodyLineBlock" BasedOn="{StaticResource M3SkeletonBlock}">
-        <Setter Property="WidthRequest" Value="{StaticResource M3MetadataSkeletonBodyLineWidth}" />
-        <Setter Property="HeightRequest" Value="{StaticResource M3FileSkeletonSecondaryLineHeight}" />
-        <Setter Property="HorizontalOptions" Value="Start" />
-    </Style>
 
     <LinearItemsLayout x:Key="M3VerticalCardListItemsLayout"
                        Orientation="Vertical"
@@ -944,11 +851,6 @@
     </Style>
 
     <Style TargetType="Image" x:Key="M3ViewerImage">
-        <Setter Property="HorizontalOptions" Value="Fill" />
-        <Setter Property="VerticalOptions" Value="Fill" />
-    </Style>
-
-    <Style TargetType="toolkit:MediaElement" x:Key="M3ViewerMediaElement">
         <Setter Property="HorizontalOptions" Value="Fill" />
         <Setter Property="VerticalOptions" Value="Fill" />
     </Style>
@@ -1377,66 +1279,10 @@
 
     <Style TargetType="controls:IconButton" BasedOn="{StaticResource M3DefaultIconButton}" />
 
-    <Style TargetType="controls:ToggleSwitch" x:Key="M3Switch">
-        <Setter Property="HorizontalOptions" Value="End" />
-        <Setter Property="VerticalOptions" Value="Center" />
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
-        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionEnabledOpacity}" />
-        <Setter Property="TrackWidth" Value="{StaticResource M3SwitchTrackWidth}" />
-        <Setter Property="TrackHeight" Value="{StaticResource M3SwitchTrackHeight}" />
-        <Setter Property="TrackCornerRadius" Value="{StaticResource M3SwitchTrackCornerRadius}" />
-        <Setter Property="TrackBorderWidth" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="ThumbSize" Value="{StaticResource M3SwitchThumbSize}" />
-        <Setter Property="ThumbCornerRadius" Value="{StaticResource M3SwitchThumbCornerRadius}" />
-        <Setter Property="ThumbInset" Value="{StaticResource M3SwitchThumbInset}" />
-        <Setter Property="TouchTargetSize" Value="{StaticResource TouchTarget}" />
-        <Setter Property="TrackOnColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
-        <Setter Property="TrackOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHighest}, Dark={StaticResource M3DarkSurfaceContainerHighest}}" />
-        <Setter Property="TrackOnPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimaryPressed}, Dark={StaticResource M3DarkActionPressed}}" />
-        <Setter Property="TrackOffPressedColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
-        <Setter Property="TrackDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
-        <Setter Property="TrackOnBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
-        <Setter Property="TrackOffBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutline}}" />
-        <Setter Property="TrackDisabledBorderColor" Value="{StaticResource M3Transparent}" />
-        <Setter Property="ThumbOnColor" Value="{AppThemeBinding Light={StaticResource M3LightOnPrimary}, Dark={StaticResource M3DarkOnAction}}" />
-        <Setter Property="ThumbOffColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLowest}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="ThumbDisabledColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
-    </Style>
-
-    <Style TargetType="controls:ToggleSwitch" BasedOn="{StaticResource M3Switch}" />
-
-    <Style TargetType="controls:InitialsButton" x:Key="M3AccountInitialsButton">
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
-        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
-        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
-        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
-        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
-        <Setter Property="ButtonSize" Value="{StaticResource M3FileActionSize}" />
-        <Setter Property="TextFontSize" Value="{StaticResource M3ButtonFontSize}" />
-        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
-        <Setter Property="TextFontAttributes" Value="None" />
-        <Setter Property="ButtonCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnActionContainer}, Dark={StaticResource M3DarkOnActionContainer}}" />
-        <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
-        <Setter Property="PressedButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainerPressed}, Dark={StaticResource M3DarkActionContainerPressed}}" />
-        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightActionContainer}, Dark={StaticResource M3DarkActionContainer}}" />
-        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
-    </Style>
-
-    <Style TargetType="controls:InitialsButton" BasedOn="{StaticResource M3AccountInitialsButton}" />
-
     <Style TargetType="controls:IconView">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="IconSize" Value="{StaticResource M3FileInlineIconSize}" />
     </Style>
-
-    <Style TargetType="controls:FloatingActionButtonView" x:Key="M3FloatingActionButtonOverlay">
-        <Setter Property="HorizontalOptions" Value="End" />
-        <Setter Property="VerticalOptions" Value="End" />
-        <Setter Property="Margin" Value="{StaticResource M3FloatingActionButtonMargin}" />
-    </Style>
-
-    <Style TargetType="controls:FloatingActionButtonView" BasedOn="{StaticResource M3FloatingActionButtonOverlay}" />
 
     <Style TargetType="controls:IconButton" x:Key="M3FloatingActionIconButton" BasedOn="{StaticResource M3IconButtonBase}">
         <Setter Property="ButtonSize" Value="{StaticResource M3FloatingActionButtonSize}" />
@@ -1561,39 +1407,6 @@
         <Setter Property="HeightRequest" Value="{StaticResource M3StrokeThin}" />
         <Setter Property="Margin" Value="{StaticResource M3ActionSheetDividerMargin}" />
         <Setter Property="Color" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
-    </Style>
-
-    <Style TargetType="controls:ActionSheetItemView" x:Key="M3ActionSheetItem">
-        <Setter Property="RowCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
-        <Setter Property="RowPadding" Value="{StaticResource M3ActionSheetRowPadding}" />
-        <Setter Property="RowMinHeight" Value="{StaticResource M3ActionSheetRowMinHeight}" />
-        <Setter Property="IconFrameSize" Value="{StaticResource M3ActionSheetRowIconFrameSize}" />
-        <Setter Property="IconSize" Value="{StaticResource M3ActionSheetRowIconSize}" />
-        <Setter Property="IconFrameBorderWidth" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="TextFontSize" Value="{StaticResource M3LabelLargeFontSize}" />
-        <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
-        <Setter Property="TextLineHeight" Value="{StaticResource M3LabelLargeLineHeight}" />
-        <Setter Property="ContentSpacing" Value="{StaticResource Space12}" />
-        <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />
-        <Setter Property="PressedScale" Value="{StaticResource M3InteractionPressedScale}" />
-        <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
-        <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
-        <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
-        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}" />
-        <Setter Property="RowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3Transparent}, Dark={StaticResource M3Transparent}}" />
-        <Setter Property="PressedRowBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
-        <Setter Property="IconFrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
-        <Setter Property="IconFrameBorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
-    </Style>
-
-    <Style TargetType="controls:ActionSheetItemView" BasedOn="{StaticResource M3ActionSheetItem}" />
-
-    <Style TargetType="controls:ActionSheetItemView" x:Key="M3ActionSheetDestructiveItem" BasedOn="{StaticResource M3ActionSheetItem}">
-        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
-        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
-        <Setter Property="SelectedIconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
     </Style>
 
     <Style TargetType="controls:TextAction" x:Key="M3FooterTextAction">

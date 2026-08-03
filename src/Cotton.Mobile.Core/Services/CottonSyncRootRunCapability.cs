@@ -38,6 +38,18 @@ namespace Cotton.Mobile.Services
             };
         }
 
+        public static IReadOnlyList<CottonSyncRootSnapshot> GetRunnableRoots(
+            IReadOnlyList<CottonSyncRootSnapshot> roots,
+            IReadOnlySet<Guid> pausedRootIds)
+        {
+            ArgumentNullException.ThrowIfNull(roots);
+            ArgumentNullException.ThrowIfNull(pausedRootIds);
+
+            return roots
+                .Where(root => !pausedRootIds.Contains(root.Id) && CanRun(root))
+                .ToArray();
+        }
+
         public static string CreateUnsupportedLocalRootStatusText(CottonSyncRootSnapshot root)
         {
             ArgumentNullException.ThrowIfNull(root);

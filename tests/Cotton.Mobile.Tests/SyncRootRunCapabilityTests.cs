@@ -68,16 +68,44 @@ namespace Cotton.Mobile.Tests
             Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.CanRun(null!));
             Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.HasUnsupportedLocalRoot(null!));
             Assert.Throws<ArgumentNullException>(
+                () => CottonSyncRootRunCapability.GetRunnableRoots(null!, new HashSet<Guid>()));
+            Assert.Throws<ArgumentNullException>(
+                () => CottonSyncRootRunCapability.GetRunnableRoots([], null!));
+            Assert.Throws<ArgumentNullException>(
                 () => CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(null!));
+        }
+
+        [Fact]
+        public void Runnable_roots_exclude_paused_and_unsupported_roots()
+        {
+            CottonSyncRootSnapshot runnable = CreateRoot(
+                CottonSyncDirection.Bidirectional,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"));
+            CottonSyncRootSnapshot paused = CreateRoot(
+                CottonSyncDirection.CloudToDevice,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"));
+            CottonSyncRootSnapshot unsupported = CreateRoot(
+                CottonSyncDirection.DeviceToCloud,
+                CottonSyncRootStorageKind.AppPrivateDirectory,
+                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"));
+
+            IReadOnlyList<CottonSyncRootSnapshot> result = CottonSyncRootRunCapability.GetRunnableRoots(
+                [runnable, paused, unsupported],
+                new HashSet<Guid> { paused.Id });
+
+            Assert.Equal([runnable], result);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(
             CottonSyncDirection direction,
             CottonSyncRootStorageKind storageKind,
-            CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available)
+            CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available,
+            Guid? rootId = null)
         {
             return new CottonSyncRootSnapshot(
-                RootId,
+                rootId ?? RootId,
                 InstanceUri,
                 "account-1",
                 new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),

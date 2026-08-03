@@ -334,10 +334,13 @@ namespace Cotton.Mobile.ViewModels
             {
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
+                IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> runnableRoots =
+                    CottonSyncRootRunCapability.GetRunnableRoots(roots, pausedRootIds);
                 (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
                     CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
                     CottonBidirectionalSyncRunSummary BidirectionalSummary) summaries =
-                    await RunAllRootsAsync(instanceUri, roots);
+                    await RunAllRootsAsync(instanceUri, runnableRoots);
                 IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 ShowRoots(refreshedRoots, refreshedPausedIds);

@@ -68,6 +68,29 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Sync_settings_delegates_storage_and_execution_workflows()
+        {
+            string viewModel = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+
+            Assert.Contains("SyncRootManager", viewModel, StringComparison.Ordinal);
+            Assert.Contains("SyncExecutionWorkflow", viewModel, StringComparison.Ordinal);
+            Assert.DoesNotContain("private readonly ICottonSyncRootStore", viewModel, StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "private readonly CottonCloudToDeviceSyncCoordinator",
+                viewModel,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "private readonly CottonDeviceToCloudSyncCoordinator",
+                viewModel,
+                StringComparison.Ordinal);
+            Assert.DoesNotContain(
+                "private readonly CottonBidirectionalSyncCoordinator",
+                viewModel,
+                StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Profile_surface_keeps_account_privacy_and_sign_out_together()
         {
             string profile = RepositoryPath.ReadText("src/Cotton.Mobile/ProfileView.xaml");

@@ -9,6 +9,7 @@
         <controls:IconButton x:Name="BackButton"
                              IconData="{x:Static controls:IconPathData.ArrowBack}"
                              Command="{Binding Source={x:Reference Root}, Path=BackCommand}"
+                             IsVisible="{Binding Source={x:Reference Root}, Path=IsBackActionVisible}"
                              SemanticProperties.Description="Back" />
 
         <controls:TopAppBarTitleLabel Grid.Column="1"

@@ -156,6 +156,24 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = instanceUri;
         }
 
+        public async Task LoadForInstanceAsync(Uri instanceUri)
+        {
+            Configure(instanceUri);
+            await LoadAsync();
+        }
+
+        public void Clear()
+        {
+            _instanceUri = null;
+            Roots.ReplaceWith([]);
+            SummaryText = "No folders syncing";
+            Status = null;
+            IsEmptyVisible = true;
+            _canRunAll = false;
+            OnPropertyChanged(nameof(IsRunAllVisible));
+            RunAllCommand.RaiseCanExecuteChanged();
+        }
+
         private async Task LoadAsync()
         {
             Uri? instanceUri = _instanceUri;

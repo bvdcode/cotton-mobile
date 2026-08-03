@@ -22,6 +22,12 @@ namespace Cotton.Mobile.Controls
             typeof(TopAppBar),
             string.Empty);
 
+        public static readonly BindableProperty IsBackActionVisibleProperty = BindableProperty.Create(
+            nameof(IsBackActionVisible),
+            typeof(bool),
+            typeof(TopAppBar),
+            true);
+
         public static readonly BindableProperty UseDarkThemeProperty = BindableProperty.Create(
             nameof(UseDarkTheme),
             typeof(bool),
@@ -125,6 +131,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (string)GetValue(TitleTextProperty);
             set => SetValue(TitleTextProperty, value);
+        }
+
+        public bool IsBackActionVisible
+        {
+            get => (bool)GetValue(IsBackActionVisibleProperty);
+            set => SetValue(IsBackActionVisibleProperty, value);
         }
 
         public bool UseDarkTheme

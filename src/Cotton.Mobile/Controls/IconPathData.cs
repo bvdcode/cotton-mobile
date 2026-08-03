@@ -49,6 +49,8 @@ namespace Cotton.Mobile.Controls
 
         public static Geometry Image => Create("M4 5 L20 5 L20 19 L4 19 Z M6 7 L6 17 L18 17 L18 7 Z M8 9.5 C8 8.7 8.7 8 9.5 8 C10.3 8 11 8.7 11 9.5 C11 10.3 10.3 11 9.5 11 C8.7 11 8 10.3 8 9.5 Z M7 16 L11 12 L13.2 14.2 L14.5 13 L17 16 Z");
 
+        public static Geometry Info => Create("M12 2 C6.5 2 2 6.5 2 12 C2 17.5 6.5 22 12 22 C17.5 22 22 17.5 22 12 C22 6.5 17.5 2 12 2 Z M12 4 C16.4 4 20 7.6 20 12 C20 16.4 16.4 20 12 20 C7.6 20 4 16.4 4 12 C4 7.6 7.6 4 12 4 Z M11 7 L13 7 L13 9 L11 9 Z M11 11 L13 11 L13 17 L11 17 Z");
+
         public static Geometry MoreVertical => Create("M11 5 L13 5 L13 7 L11 7 Z M11 11 L13 11 L13 13 L11 13 Z M11 17 L13 17 L13 19 L11 19 Z");
 
         public static Geometry OpenInNew => Create("M5 5 L13 5 L13 7 L7 7 L7 17 L17 17 L17 11 L19 11 L19 19 L5 19 Z M15 5 L20 5 L20 10 L18 10 L18.6 8.4 L11.4 15.6 L10 14.2 L17.2 7 L15 7 Z");
@@ -56,6 +58,8 @@ namespace Cotton.Mobile.Controls
         public static Geometry Pause => Create("M7 5 L10 5 L10 19 L7 19 Z M14 5 L17 5 L17 19 L14 19 Z");
 
         public static Geometry Play => Create("M8 5 L19 12 L8 19 Z");
+
+        public static Geometry Profile => Create("M12 3 C9.8 3 8 4.8 8 7 C8 9.2 9.8 11 12 11 C14.2 11 16 9.2 16 7 C16 4.8 14.2 3 12 3 Z M12 5 C13.1 5 14 5.9 14 7 C14 8.1 13.1 9 12 9 C10.9 9 10 8.1 10 7 C10 5.9 10.9 5 12 5 Z M12 13 C7.6 13 4 15.5 4 19 L4 21 L20 21 L20 19 C20 15.5 16.4 13 12 13 Z M6.2 19 C6.7 16.7 9.1 15 12 15 C14.9 15 17.3 16.7 17.8 19 Z");
 
         public static Geometry Plus => Create("M11 5 L13 5 L13 11 L19 11 L19 13 L13 13 L13 19 L11 19 L11 13 L5 13 L5 11 L11 11 Z");
 

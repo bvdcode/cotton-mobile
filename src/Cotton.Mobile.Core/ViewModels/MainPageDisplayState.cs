@@ -1,51 +1,26 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 namespace Cotton.Mobile.ViewModels
 {
-    using Cotton.Mobile.Services;
-
     public class MainPageDisplayState : ViewModelBase
     {
-        public const string RootFilesTitle = "Files";
+        private const string DefaultAuthorizationMessage =
+            "Approve the request in your browser, then return to Cotton Cloud.";
 
-        private readonly List<CottonFileBrowserEntry> _allFileEntries = [];
-
-        private MainPageViewState _state = MainPageViewState.SignIn;
+        private MainPageViewState _state = MainPageViewState.Loading;
+        private AppNavigationDestination _selectedDestination = AppNavigationDestination.Sync;
         private string _instanceUrl = string.Empty;
         private string _loadingMessage = string.Empty;
         private string? _status;
-        private string _authorizationProgressMessage = "Approve the request in your browser, then return to Cotton Cloud.";
+        private string _authorizationProgressMessage = DefaultAuthorizationMessage;
         private string _profileName = string.Empty;
         private string? _profileEmail;
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
-        private string _filesTitle = "Files";
-        private string _filesPath = string.Empty;
-        private string? _filesStatus;
-        private string _filesEmptyMessage = "No files in this folder.";
-        private string _filesEmptyDetails = string.Empty;
-        private string? _filesNoticeTitle;
-        private string? _filesNoticeMessage;
-        private CottonTransferActivityIndicator _transferActivityIndicator = CottonTransferActivityIndicator.Empty;
-        private CottonCameraBackupActivityIndicator _backupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
-        private CottonOfflinePackProgressSnapshot _offlinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
-        private CottonFileSelectionSnapshot _fileSelection = CottonFileSelectionSnapshot.Empty;
-        private string _fileSearchText = string.Empty;
-        private CottonFileBrowserViewMode _fileViewMode = CottonFileBrowserViewMode.List;
-        private CottonFileBrowserSortMode _fileSortMode = CottonFileBrowserSortMode.Name;
         private bool _isInputEnabled = true;
         private bool _isCancelAuthorizationEnabled;
         private bool _isLogoutEnabled;
-        private bool _isFilesLoading;
-        private bool _isFilesRefreshing;
-        private bool _isFileActionInProgress;
-        private bool _isFileActionStatusPanelVisible;
-        private bool _isFileSearchOpen;
-        private bool _canNavigateFilesUp;
-        private bool _canCancelFileAction;
-        private bool _canRetryFileAction;
-        private string _fileRetryActionText = "Retry";
 
         public MainPageDisplayState(string defaultInstanceUrl)
         {
@@ -56,23 +31,6 @@ namespace Cotton.Mobile.ViewModels
 
             DefaultInstanceUrl = defaultInstanceUrl.Trim();
         }
-
-        public event EventHandler? FileSearchTextChanged;
-
-        public CottonFilesShellNavigationItem FilesNavigation { get; } =
-            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Files);
-
-        public CottonFilesShellNavigationItem TransfersNavigation { get; } =
-            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Transfers);
-
-        public CottonFilesShellNavigationItem InboxNavigation { get; } =
-            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Inbox);
-
-        public CottonFilesShellNavigationItem BackupNavigation { get; } =
-            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Backup);
-
-        public CottonFilesShellNavigationItem SettingsNavigation { get; } =
-            CottonFilesShellNavigationCatalog.Get(CottonFilesShellNavigationDestination.Settings);
 
         public string InstanceUrl
         {
@@ -123,16 +81,8 @@ namespace Cotton.Mobile.ViewModels
         public string ProfileName
         {
             get => _profileName;
-            private set
-            {
-                if (SetProperty(ref _profileName, value))
-                {
-                    OnPropertyChanged(nameof(ProfileInitials));
-                }
-            }
+            private set => SetProperty(ref _profileName, value);
         }
-
-        public string ProfileInitials => CreateProfileInitials(ProfileName);
 
         public string? ProfileEmail
         {
@@ -141,38 +91,17 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _profileEmail, value))
                 {
-                    OnPropertyChanged(nameof(ProfileSummary));
+                    OnPropertyChanged(nameof(IsProfileEmailVisible));
                 }
             }
         }
+
+        public bool IsProfileEmailVisible => !string.IsNullOrWhiteSpace(ProfileEmail);
 
         public string ProfileInstance
         {
             get => _profileInstance;
-            private set
-            {
-                if (SetProperty(ref _profileInstance, value))
-                {
-                    OnPropertyChanged(nameof(ProfileSummary));
-                }
-            }
-        }
-
-        public string ProfileSummary
-        {
-            get
-            {
-                string[] parts =
-                [
-                    ProfileEmail ?? string.Empty,
-                    ProfileInstance,
-                ];
-
-                string summary = string.Join(
-                    " · ",
-                    parts.Where(part => !string.IsNullOrWhiteSpace(part)));
-                return string.IsNullOrWhiteSpace(summary) ? "Signed in" : summary;
-            }
+            private set => SetProperty(ref _profileInstance, value);
         }
 
         public string? ProfileStatus
@@ -189,344 +118,18 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsProfileStatusVisible => !string.IsNullOrWhiteSpace(ProfileStatus);
 
-        public string FilesTitle
+        public AppNavigationDestination SelectedDestination
         {
-            get => _filesTitle;
-            private set => SetProperty(ref _filesTitle, value);
-        }
-
-        public string? FilesStatus
-        {
-            get => _filesStatus;
+            get => _selectedDestination;
             private set
             {
-                if (SetProperty(ref _filesStatus, value))
+                if (SetProperty(ref _selectedDestination, value))
                 {
-                    OnPropertyChanged(nameof(IsFilesStatusVisible));
+                    OnPropertyChanged(nameof(IsSyncDestinationVisible));
+                    OnPropertyChanged(nameof(IsProfileDestinationVisible));
                 }
             }
         }
-
-        public bool IsFilesStatusVisible => !string.IsNullOrWhiteSpace(FilesStatus);
-
-        public string FilesPath
-        {
-            get => _filesPath;
-            private set
-            {
-                if (SetProperty(ref _filesPath, value))
-                {
-                    OnPropertyChanged(nameof(IsFilesPathVisible));
-                }
-            }
-        }
-
-        public bool IsFilesPathVisible => !string.IsNullOrWhiteSpace(FilesPath);
-
-        public RangeObservableCollection<CottonFileBrowserEntry> FileEntries { get; } = [];
-
-        public IReadOnlyList<CottonFileBrowserEntry> AllFileEntries => _allFileEntries;
-
-        public int TotalFileEntryCount => _allFileEntries.Count;
-
-        public int VisibleFileEntryCount => FileEntries.Count;
-
-        public string FilesEmptyMessage
-        {
-            get => _filesEmptyMessage;
-            private set => SetProperty(ref _filesEmptyMessage, value);
-        }
-
-        public string FilesEmptyDetails
-        {
-            get => _filesEmptyDetails;
-            private set
-            {
-                if (SetProperty(ref _filesEmptyDetails, value))
-                {
-                    OnPropertyChanged(nameof(IsFilesEmptyDetailsVisible));
-                }
-            }
-        }
-
-        public bool IsFilesEmptyDetailsVisible => !string.IsNullOrWhiteSpace(FilesEmptyDetails);
-
-        public string? FilesNoticeTitle
-        {
-            get => _filesNoticeTitle;
-            private set
-            {
-                if (SetProperty(ref _filesNoticeTitle, value))
-                {
-                    OnPropertyChanged(nameof(IsFilesNoticeVisible));
-                    NotifyFilesEmptyStateChanged();
-                }
-            }
-        }
-
-        public string? FilesNoticeMessage
-        {
-            get => _filesNoticeMessage;
-            private set
-            {
-                if (SetProperty(ref _filesNoticeMessage, value))
-                {
-                    OnPropertyChanged(nameof(IsFilesNoticeVisible));
-                    NotifyFilesEmptyStateChanged();
-                }
-            }
-        }
-
-        public bool IsFilesNoticeVisible =>
-            !string.IsNullOrWhiteSpace(FilesNoticeTitle)
-            || !string.IsNullOrWhiteSpace(FilesNoticeMessage);
-
-        public CottonTransferActivityIndicator TransferActivityIndicator
-        {
-            get => _transferActivityIndicator;
-            private set
-            {
-                if (SetProperty(ref _transferActivityIndicator, value))
-                {
-                    OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
-                }
-            }
-        }
-
-        public bool IsTransferActivityIndicatorVisible =>
-            IsProfileVisible && !IsFileSearchVisible && TransferActivityIndicator.IsVisible;
-
-        public CottonCameraBackupActivityIndicator BackupActivityIndicator
-        {
-            get => _backupActivityIndicator;
-            private set
-            {
-                if (SetProperty(ref _backupActivityIndicator, value))
-                {
-                    OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
-                }
-            }
-        }
-
-        public bool IsBackupActivityIndicatorVisible =>
-            IsProfileVisible && !IsFileSearchVisible && BackupActivityIndicator.IsVisible;
-
-        public CottonOfflinePackProgressSnapshot OfflinePackProgress
-        {
-            get => _offlinePackProgress;
-            private set
-            {
-                if (SetProperty(ref _offlinePackProgress, value))
-                {
-                    OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
-                }
-            }
-        }
-
-        public bool IsOfflinePackProgressVisible =>
-            IsProfileVisible && !IsFileSearchVisible && OfflinePackProgress.IsVisible;
-
-        public CottonFileSelectionSnapshot FileSelection
-        {
-            get => _fileSelection;
-            private set
-            {
-                if (SetProperty(ref _fileSelection, value))
-                {
-                    OnPropertyChanged(nameof(IsFileSelectionActive));
-                    OnPropertyChanged(nameof(IsFileSelectionBarVisible));
-                    OnPropertyChanged(nameof(IsFileEntryActionsVisible));
-                    OnPropertyChanged(nameof(IsFileAddButtonVisible));
-                    NotifyFilesEmptyStateChanged();
-                }
-            }
-        }
-
-        public bool IsFileSelectionActive => FileSelection.IsActive;
-
-        public bool IsFileSelectionBarVisible => IsProfileVisible && IsFileSelectionActive;
-
-        public string FileSearchText
-        {
-            get => _fileSearchText;
-            set
-            {
-                if (SetProperty(ref _fileSearchText, value ?? string.Empty))
-                {
-                    NotifyFileSearchStateChanged();
-                    FileSearchTextChanged?.Invoke(this, EventArgs.Empty);
-                    ApplyFileFilters();
-                }
-            }
-        }
-
-        public bool IsFileSearchVisible => _isFileSearchOpen || !string.IsNullOrWhiteSpace(FileSearchText);
-
-        public bool IsFileSearchOpen => _isFileSearchOpen;
-
-        public bool IsFileSearchActive => !string.IsNullOrWhiteSpace(FileSearchText);
-
-        public string FileSearchButtonDescription
-        {
-            get
-            {
-                if (!string.IsNullOrWhiteSpace(FileSearchText))
-                {
-                    return "Clear file search";
-                }
-
-                return _isFileSearchOpen ? "Close file search" : "Search files";
-            }
-        }
-
-        public CottonFileBrowserViewMode FileViewMode
-        {
-            get => _fileViewMode;
-            private set
-            {
-                if (SetProperty(ref _fileViewMode, value))
-                {
-                    OnPropertyChanged(nameof(IsFileListViewVisible));
-                    OnPropertyChanged(nameof(IsFileTileViewVisible));
-                }
-            }
-        }
-
-        public CottonFileBrowserSortMode FileSortMode
-        {
-            get => _fileSortMode;
-            private set
-            {
-                if (SetProperty(ref _fileSortMode, value))
-                {
-                    OnPropertyChanged(nameof(FileSortButtonText));
-                }
-            }
-        }
-
-        public bool IsFileListViewVisible =>
-            FileViewMode == CottonFileBrowserViewMode.List && !IsInlineFilesLoadingVisible;
-
-        public bool IsFileTileViewVisible =>
-            FileViewMode == CottonFileBrowserViewMode.Tiles && !IsInlineFilesLoadingVisible;
-
-        public bool IsFileUpButtonVisible => CanNavigateFilesUp;
-
-        public string FileSortButtonText => FileSortMode switch
-        {
-            CottonFileBrowserSortMode.Name => "A-Z",
-            CottonFileBrowserSortMode.Updated => "New",
-            CottonFileBrowserSortMode.Type => "Type",
-            CottonFileBrowserSortMode.Size => "Size",
-            _ => FileSortMode.ToString(),
-        };
-
-        public bool IsFileSortButtonVisible => !IsFileSearchVisible;
-
-        public bool IsFileViewButtonVisible => !IsFileSearchVisible;
-
-        public bool IsFilesLoading
-        {
-            get => _isFilesLoading;
-            private set
-            {
-                if (SetProperty(ref _isFilesLoading, value))
-                {
-                    OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
-                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
-                    OnPropertyChanged(nameof(IsFileListViewVisible));
-                    OnPropertyChanged(nameof(IsFileTileViewVisible));
-                    NotifyFileBrowserChromeStateChanged();
-                    NotifyFilesEmptyStateChanged();
-                }
-            }
-        }
-
-        public bool IsInlineFilesLoadingVisible => IsFilesLoading && !IsFileActionInProgress;
-
-        public bool IsFilesLoadingPanelVisible =>
-            IsFilesLoading && IsFileActionInProgress && IsFileActionStatusPanelVisible;
-
-        public bool IsFileActionStatusPanelVisible
-        {
-            get => _isFileActionStatusPanelVisible;
-            private set
-            {
-                if (SetProperty(ref _isFileActionStatusPanelVisible, value))
-                {
-                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
-                }
-            }
-        }
-
-        public bool IsFilesRefreshing
-        {
-            get => _isFilesRefreshing;
-            set
-            {
-                bool nextValue = value && IsProfileVisible;
-                if (SetProperty(ref _isFilesRefreshing, nextValue))
-                {
-                    NotifyFileBrowserChromeStateChanged();
-                }
-                else if (value != nextValue)
-                {
-                    OnPropertyChanged(nameof(IsFilesRefreshing));
-                }
-            }
-        }
-
-        public bool CanNavigateFilesUp
-        {
-            get => _canNavigateFilesUp;
-            private set
-            {
-                if (SetProperty(ref _canNavigateFilesUp, value))
-                {
-                    OnPropertyChanged(nameof(FileUpButtonOpacity));
-                    OnPropertyChanged(nameof(IsFileUpButtonVisible));
-                    OnPropertyChanged(nameof(IsFileUpButtonEnabled));
-                }
-            }
-        }
-
-        public bool IsFileUpButtonEnabled => CanNavigateFilesUp && IsFileBrowserChromeEnabled;
-
-        public double FileUpButtonOpacity => IsFileUpButtonEnabled ? 1 : 0.35;
-
-        public bool CanCancelFileAction
-        {
-            get => _canCancelFileAction;
-            private set => SetProperty(ref _canCancelFileAction, value);
-        }
-
-        public bool CanRetryFileAction
-        {
-            get => _canRetryFileAction;
-            private set => SetProperty(ref _canRetryFileAction, value);
-        }
-
-        public string FileRetryActionText
-        {
-            get => _fileRetryActionText;
-            private set => SetProperty(ref _fileRetryActionText, value);
-        }
-
-        public bool IsFilesEmptyVisible =>
-            !IsFilesLoading
-            && FileEntries.Count == 0
-            && (!IsFilesNoticeVisible || ShouldShowEmptyStateWithNotice);
-
-        public bool IsFilesEmptyAddActionVisible =>
-            IsFilesEmptyVisible
-            && !IsFilesNoticeVisible
-            && !IsFileSearchActive
-            && !IsFileSelectionActive
-            && IsFileBrowserChromeEnabled;
-
-        private bool ShouldShowEmptyStateWithNotice => IsFilesNoticeVisible && _allFileEntries.Count == 0;
-
-        public bool IsFileAddButtonVisible => IsProfileVisible && !IsFileSelectionActive;
 
         public bool IsInputEnabled
         {
@@ -548,663 +151,100 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsLoadingVisible => _state == MainPageViewState.Loading;
 
+        public bool IsLoadingIndicatorRunning => IsLoadingVisible;
+
         public bool IsSignInVisible => _state == MainPageViewState.SignIn;
 
         public bool IsAuthorizationProgressVisible => _state == MainPageViewState.AuthorizationProgress;
 
-        public bool IsProfileVisible => _state == MainPageViewState.Profile;
+        public bool IsAuthorizationProgressIndicatorRunning =>
+            IsAuthorizationProgressVisible && IsCancelAuthorizationEnabled;
 
-        public bool IsAccountActionEnabled => IsProfileVisible && !IsFileActionInProgress;
+        public bool IsAuthenticatedVisible => _state == MainPageViewState.Authenticated;
 
-        public bool IsFileBrowserChromeEnabled => IsProfileVisible && !IsFileBrowserBusy;
+        public bool IsBrandHeaderVisible => !IsAuthenticatedVisible;
 
-        public bool IsFileEntryActionsVisible => IsFileBrowserChromeEnabled && !IsFileSelectionActive;
+        public bool IsLegalFooterVisible => IsSignInVisible;
 
-        public bool IsFileBrowserQuickNavigationVisible => IsProfileVisible && !IsFileSearchVisible;
+        public bool IsSyncDestinationVisible =>
+            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Sync;
 
-        public bool CanRefreshFiles => IsProfileVisible && !IsFilesLoading && !IsFileActionInProgress;
-
-        public bool IsBrandHeaderVisible => _state != MainPageViewState.Profile;
-
-        public bool IsLegalFooterVisible => _state != MainPageViewState.Profile;
-
-        public bool IsLoadingIndicatorRunning => _state == MainPageViewState.Loading;
-
-        public bool IsAuthorizationProgressIndicatorRunning => _state == MainPageViewState.AuthorizationProgress;
-
-        private bool IsFileActionInProgress
-        {
-            get => _isFileActionInProgress;
-            set
-            {
-                if (SetProperty(ref _isFileActionInProgress, value))
-                {
-                    if (!value)
-                    {
-                        IsFileActionStatusPanelVisible = false;
-                    }
-
-                    OnPropertyChanged(nameof(IsInlineFilesLoadingVisible));
-                    OnPropertyChanged(nameof(IsFilesLoadingPanelVisible));
-                    OnPropertyChanged(nameof(IsFileListViewVisible));
-                    OnPropertyChanged(nameof(IsFileTileViewVisible));
-                    OnPropertyChanged(nameof(IsAccountActionEnabled));
-                    NotifyFileBrowserChromeStateChanged();
-                }
-            }
-        }
+        public bool IsProfileDestinationVisible =>
+            IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Profile;
 
         public void ShowLoading(string message)
         {
-            SetState(MainPageViewState.Loading);
-            LoadingMessage = message;
+            LoadingMessage = message ?? string.Empty;
+            Status = null;
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            ProfileStatus = null;
-            TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
-            BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
-            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
-            ClearFileSelection();
+            SetState(MainPageViewState.Loading);
         }
 
         public void ShowSignIn(string? status)
         {
-            ClearSignedOutPresentationState();
-            SetState(MainPageViewState.SignIn);
+            LoadingMessage = string.Empty;
+            Status = status;
+            ProfileStatus = null;
             IsInputEnabled = true;
-            SetStatus(status);
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = false;
+            SetState(MainPageViewState.SignIn);
         }
 
-        public void ShowAuthorizationProgress(Uri instanceUri)
+        public void ShowAuthorizationProgress()
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            SetState(MainPageViewState.AuthorizationProgress);
+            LoadingMessage = string.Empty;
+            Status = null;
+            AuthorizationProgressMessage = DefaultAuthorizationMessage;
+            IsInputEnabled = false;
             IsCancelAuthorizationEnabled = true;
             IsLogoutEnabled = false;
-            IsFileActionInProgress = false;
-            AuthorizationProgressMessage = $"Approve the request for {instanceUri.Host}, then return to Cotton Cloud.";
-            IsInputEnabled = false;
+            SetState(MainPageViewState.AuthorizationProgress);
         }
 
         public void ShowAuthorizationCancelling()
         {
+            AuthorizationProgressMessage = "Cancelling authorization…";
             IsCancelAuthorizationEnabled = false;
-            AuthorizationProgressMessage = "Cancelling authorization...";
         }
 
-        public void ShowProfile(MainPageProfile profile)
+        public void ShowAuthenticated(MainPageProfile profile, string? status = null)
         {
             ArgumentNullException.ThrowIfNull(profile);
 
-            SetState(MainPageViewState.Profile);
+            LoadingMessage = string.Empty;
+            Status = null;
             ProfileName = profile.Name;
             ProfileEmail = profile.Email;
             ProfileInstance = profile.Instance;
-            ProfileStatus = null;
-            FilesTitle = RootFilesTitle;
-            FilesPath = string.Empty;
-            FilesStatus = "Loading files...";
-            ClearFilesNotice();
-            IsFilesLoading = true;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            CanNavigateFilesUp = false;
-            TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
-            BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
-            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
-            ClearFileSelection();
-            _allFileEntries.Clear();
-            FileEntries.ReplaceWith([]);
-            NotifyFilesEmptyStateChanged();
-            IsLogoutEnabled = true;
-            IsCancelAuthorizationEnabled = false;
-            IsInputEnabled = false;
-        }
-
-        public void RefreshProfile(MainPageProfile profile)
-        {
-            ArgumentNullException.ThrowIfNull(profile);
-
-            if (!IsProfileVisible)
-            {
-                ShowProfile(profile);
-                return;
-            }
-
-            ProfileName = profile.Name;
-            ProfileEmail = profile.Email;
-            ProfileInstance = profile.Instance;
-            ProfileStatus = null;
-            IsLogoutEnabled = true;
-            IsCancelAuthorizationEnabled = false;
-            IsInputEnabled = false;
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowProfileWithCachedFiles(MainPageProfile profile)
-        {
-            ArgumentNullException.ThrowIfNull(profile);
-
-            SetState(MainPageViewState.Profile);
-            ProfileName = profile.Name;
-            ProfileEmail = profile.Email;
-            ProfileInstance = profile.Instance;
-            ProfileStatus = null;
-            IsLogoutEnabled = true;
-            IsCancelAuthorizationEnabled = false;
-            IsInputEnabled = false;
-            NotifyFilesEmptyStateChanged();
-        }
-
-        private void ClearSignedOutPresentationState()
-        {
-            ProfileName = string.Empty;
-            ProfileEmail = null;
-            ProfileInstance = string.Empty;
-            ProfileStatus = null;
-            TransferActivityIndicator = CottonTransferActivityIndicator.Empty;
-            BackupActivityIndicator = CottonCameraBackupActivityIndicator.Empty;
-            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
-            ClearFileSelection();
-            FilesTitle = RootFilesTitle;
-            FilesPath = string.Empty;
-            FilesStatus = null;
-            FilesEmptyMessage = "No files in this folder.";
-            FilesEmptyDetails = string.Empty;
-            ClearFilesNotice();
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            CanNavigateFilesUp = false;
-            IsCancelAuthorizationEnabled = false;
-            IsLogoutEnabled = false;
-            _allFileEntries.Clear();
-            FileEntries.ReplaceWith([]);
-            ClearFileSearch();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowProfileError(string status)
-        {
-            ShowProfileStatus(status);
-        }
-
-        public void ShowProfileStatus(string status)
-        {
-            SetState(MainPageViewState.Profile);
             ProfileStatus = status;
-            IsLogoutEnabled = true;
-            IsCancelAuthorizationEnabled = false;
-            IsFileActionInProgress = false;
             IsInputEnabled = false;
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = true;
+            SelectedDestination = AppNavigationDestination.Sync;
+            SetState(MainPageViewState.Authenticated);
         }
 
-        public void ShowFilesLoading(string status)
+        public void ShowProfileStatus(string? status)
         {
-            ClearFileSelection();
-            IsFilesLoading = true;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = status;
-            ClearFilesNotice();
-            ResolveFilesEmptyState(FileEntries.Count);
-            NotifyFilesEmptyStateChanged();
+            ProfileStatus = status;
         }
 
-        public void ShowFileActionLoading(
-            string status,
-            bool showStatusPanel = true,
-            bool showStatusText = true)
+        public void ShowDestination(AppNavigationDestination destination)
         {
-            ClearFileSelection();
-            IsFileActionStatusPanelVisible = showStatusPanel;
-            IsFilesLoading = true;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = true;
-            CanCancelFileAction = true;
-            CanRetryFileAction = false;
-            FilesStatus = showStatusText ? status : CreateFilesStatus();
-            ClearFilesNotice();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFileActionPending(bool blockBrowserChrome = true)
-        {
-            ClearFileSelection();
-            IsFileActionStatusPanelVisible = false;
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = blockBrowserChrome;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = CreateFilesStatus();
-            ClearFilesNotice();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFileActionAwaitingFollowUp()
-        {
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = true;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = CreateFilesStatus();
-            ClearFilesNotice();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFileActionCancelling(string status)
-        {
-            CanCancelFileAction = false;
-            FilesStatus = status;
-        }
-
-        public void ShowFileActionRetry(string status, string actionText = "Retry")
-        {
-            ArgumentException.ThrowIfNullOrWhiteSpace(actionText);
-
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = true;
-            FileRetryActionText = actionText.Trim();
-            FilesStatus = status;
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ClearFileActionRetry()
-        {
-            bool wasRetryVisible = CanRetryFileAction;
-            CanRetryFileAction = false;
-            FileRetryActionText = "Retry";
-            if (wasRetryVisible && !IsFileBrowserBusy)
+            if (!Enum.IsDefined(destination))
             {
-                FilesStatus = CreateFilesStatus();
-            }
-        }
-
-        public void ShowFilesRefreshing(string status)
-        {
-            ClearFileSelection();
-            IsFilesLoading = false;
-            IsFilesRefreshing = true;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = status;
-            ClearFilesNotice();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void StopFilesRefreshing()
-        {
-            IsFilesRefreshing = false;
-        }
-
-        public void ShowFiles(CottonFolderContent content, bool isRoot, bool canNavigateUp, string path)
-        {
-            ArgumentNullException.ThrowIfNull(content);
-
-            ClearFileSelection();
-            FilesTitle = isRoot ? RootFilesTitle : content.FolderName;
-            FilesPath = isRoot || string.Equals(path, FilesTitle, StringComparison.OrdinalIgnoreCase)
-                ? string.Empty
-                : path;
-            _allFileEntries.Clear();
-            foreach (CottonFileBrowserEntry entry in content.Entries)
-            {
-                _allFileEntries.Add(entry);
+                throw new ArgumentOutOfRangeException(nameof(destination));
             }
 
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            CanNavigateFilesUp = canNavigateUp;
-            ClearFilesNotice();
-            ApplyFileFilters();
-            FilesStatus = CreateFilesStatus();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFilesStatus(string status)
-        {
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = status;
-            ClearFilesNotice();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowTransferActivity(CottonTransferActivityIndicator indicator)
-        {
-            ArgumentNullException.ThrowIfNull(indicator);
-
-            TransferActivityIndicator = indicator;
-        }
-
-        public void ShowBackupActivity(CottonCameraBackupActivityIndicator indicator)
-        {
-            ArgumentNullException.ThrowIfNull(indicator);
-
-            BackupActivityIndicator = indicator;
-        }
-
-        public void ShowOfflinePackProgress(CottonOfflinePackProgressSnapshot progress)
-        {
-            ArgumentNullException.ThrowIfNull(progress);
-
-            OfflinePackProgress = progress;
-        }
-
-        public void ClearOfflinePackProgress()
-        {
-            OfflinePackProgress = CottonOfflinePackProgressSnapshot.Empty;
-        }
-
-        public void SelectFileEntry(CottonFileBrowserEntry entry)
-        {
-            ArgumentNullException.ThrowIfNull(entry);
-
-            if (FindEntryIndex(_allFileEntries, entry.Id) < 0)
+            if (!IsAuthenticatedVisible)
             {
                 return;
             }
 
-            HashSet<Guid> selectedIds = CreateSelectedFileEntryIdSet();
-            selectedIds.Add(entry.Id);
-            ApplyFileSelection(selectedIds);
-        }
-
-        public void ToggleFileEntrySelection(CottonFileBrowserEntry entry)
-        {
-            ArgumentNullException.ThrowIfNull(entry);
-
-            if (FindEntryIndex(_allFileEntries, entry.Id) < 0)
-            {
-                return;
-            }
-
-            HashSet<Guid> selectedIds = CreateSelectedFileEntryIdSet();
-            if (!selectedIds.Add(entry.Id))
-            {
-                selectedIds.Remove(entry.Id);
-            }
-
-            ApplyFileSelection(selectedIds);
-        }
-
-        public void ClearFileSelection()
-        {
-            if (!IsFileSelectionActive)
-            {
-                return;
-            }
-
-            ApplyFileSelection(new HashSet<Guid>());
-        }
-
-        public void ShowOfflineFilesNotice(
-            bool isCachedListing = false,
-            DateTime? cachedAtUtc = null)
-        {
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = CreateFilesStatus();
-            FilesNoticeTitle = "Offline";
-            FilesNoticeMessage = CreateOfflineFilesNoticeMessage(isCachedListing, cachedAtUtc);
-            ResolveOfflineFilesEmptyState(isCachedListing);
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFilesSummary()
-        {
-            IsFilesLoading = false;
-            IsFilesRefreshing = false;
-            IsFileActionInProgress = false;
-            CanCancelFileAction = false;
-            CanRetryFileAction = false;
-            FilesStatus = CreateFilesStatus();
-            ClearFilesNotice();
-            ResolveFilesEmptyState(FileEntries.Count);
-            NotifyFilesEmptyStateChanged();
-        }
-
-        public void ShowFileLocalCopy(CottonFileBrowserEntry file, CottonLocalFileSnapshot localFile)
-        {
-            ArgumentNullException.ThrowIfNull(file);
-            ArgumentNullException.ThrowIfNull(localFile);
-
-            int allIndex = FindEntryIndex(_allFileEntries, file.Id);
-            if (allIndex < 0)
-            {
-                return;
-            }
-
-            CottonFileBrowserEntry updatedEntry = _allFileEntries[allIndex].WithLocalFile(localFile);
-            _allFileEntries[allIndex] = updatedEntry;
-
-            int visibleIndex = FindEntryIndex(FileEntries, file.Id);
-            if (visibleIndex >= 0)
-            {
-                FileEntries[visibleIndex] = updatedEntry;
-            }
-        }
-
-        public bool ClearFileLocalCopy(CottonFileBrowserEntry file)
-        {
-            ArgumentNullException.ThrowIfNull(file);
-
-            int allIndex = FindEntryIndex(_allFileEntries, file.Id);
-            if (allIndex < 0 || _allFileEntries[allIndex].LocalFile is null)
-            {
-                return false;
-            }
-
-            CottonFileBrowserEntry updatedEntry = _allFileEntries[allIndex].WithoutLocalFile();
-            _allFileEntries[allIndex] = updatedEntry;
-
-            int visibleIndex = FindEntryIndex(FileEntries, file.Id);
-            if (visibleIndex >= 0)
-            {
-                FileEntries[visibleIndex] = updatedEntry;
-            }
-
-            return true;
-        }
-
-        public bool RefreshFileLocalCopies(Func<CottonFileBrowserEntry, CottonLocalFileSnapshot?> resolveLocalFile)
-        {
-            ArgumentNullException.ThrowIfNull(resolveLocalFile);
-
-            bool changed = false;
-            for (int index = 0; index < _allFileEntries.Count; index++)
-            {
-                CottonFileBrowserEntry entry = _allFileEntries[index];
-                if (entry.Type != CottonFileBrowserEntryType.File)
-                {
-                    continue;
-                }
-
-                CottonLocalFileSnapshot? localFile = resolveLocalFile(entry);
-                if (HasSameLocalFile(entry.LocalFile, localFile))
-                {
-                    continue;
-                }
-
-                _allFileEntries[index] = localFile is null
-                    ? entry.WithoutLocalFile()
-                    : entry.WithLocalFile(localFile);
-                changed = true;
-            }
-
-            if (changed)
-            {
-                ApplyFileFilters();
-            }
-
-            return changed;
-        }
-
-        public bool RefreshFileLocalStates(Func<CottonFileBrowserEntry, CottonFileBrowserEntry> refreshEntry)
-        {
-            ArgumentNullException.ThrowIfNull(refreshEntry);
-
-            List<CottonFileBrowserEntry> changedEntries = [];
-            for (int index = 0; index < _allFileEntries.Count; index++)
-            {
-                CottonFileBrowserEntry entry = _allFileEntries[index];
-                if (entry.Type != CottonFileBrowserEntryType.File)
-                {
-                    continue;
-                }
-
-                CottonFileBrowserEntry updatedEntry = refreshEntry(entry);
-                if (HasSameLocalState(entry, updatedEntry))
-                {
-                    continue;
-                }
-
-                _allFileEntries[index] = updatedEntry;
-                changedEntries.Add(updatedEntry);
-            }
-
-            foreach (CottonFileBrowserEntry updatedEntry in changedEntries)
-            {
-                int visibleIndex = FindEntryIndex(FileEntries, updatedEntry.Id);
-                if (visibleIndex >= 0)
-                {
-                    FileEntries[visibleIndex] = updatedEntry;
-                }
-            }
-
-            return changedEntries.Count > 0;
-        }
-
-        public void ClearFileLocalCopies()
-        {
-            bool changed = false;
-            for (int index = 0; index < _allFileEntries.Count; index++)
-            {
-                CottonFileBrowserEntry entry = _allFileEntries[index];
-                if (entry.LocalFile is null)
-                {
-                    continue;
-                }
-
-                _allFileEntries[index] = entry.WithoutLocalFile();
-                changed = true;
-            }
-
-            if (changed)
-            {
-                ApplyFileFilters();
-            }
-        }
-
-        public void ApplyFileBrowserPreferences(CottonFileBrowserPreferences preferences)
-        {
-            ArgumentNullException.ThrowIfNull(preferences);
-
-            FileViewMode = preferences.ViewMode;
-            FileSortMode = preferences.SortMode;
-            ApplyFileFilters();
-        }
-
-        public void ShowFileViewMode(CottonFileBrowserViewMode viewMode)
-        {
-            FileViewMode = viewMode;
-        }
-
-        public void ShowFileSortMode(CottonFileBrowserSortMode sortMode)
-        {
-            FileSortMode = sortMode;
-            ApplyFileFilters();
-            FilesStatus = CreateFilesStatus();
-        }
-
-        public void ToggleFileSearch()
-        {
-            if (!string.IsNullOrWhiteSpace(FileSearchText))
-            {
-                FileSearchText = string.Empty;
-                return;
-            }
-
-            if (_isFileSearchOpen)
-            {
-                _isFileSearchOpen = false;
-            }
-            else
-            {
-                _isFileSearchOpen = true;
-            }
-
-            NotifyFileSearchStateChanged();
-        }
-
-        public void ClearFileSearch()
-        {
-            bool wasFileSearchOpen = _isFileSearchOpen;
-            _isFileSearchOpen = false;
-
-            if (!string.IsNullOrWhiteSpace(FileSearchText))
-            {
-                FileSearchText = string.Empty;
-                return;
-            }
-
-            if (wasFileSearchOpen)
-            {
-                NotifyFileSearchStateChanged();
-            }
-        }
-
-        public void RestoreFileSearch(string? searchText, bool isOpen)
-        {
-            string? previousFilesStatus = FilesStatus;
-            bool wasFileSearchOpen = _isFileSearchOpen;
-            _isFileSearchOpen = isOpen;
-
-            string normalizedSearchText = searchText ?? string.Empty;
-            if (!string.Equals(FileSearchText, normalizedSearchText, StringComparison.Ordinal))
-            {
-                FileSearchText = normalizedSearchText;
-                FilesStatus = previousFilesStatus;
-                return;
-            }
-
-            if (wasFileSearchOpen != isOpen)
-            {
-                NotifyFileSearchStateChanged();
-            }
-        }
-
-        private void SetStatus(string? status)
-        {
-            Status = status;
+            SelectedDestination = destination;
         }
 
         private void SetState(MainPageViewState state)
@@ -1216,287 +256,15 @@ namespace Cotton.Mobile.ViewModels
 
             _state = state;
             OnPropertyChanged(nameof(IsLoadingVisible));
+            OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
             OnPropertyChanged(nameof(IsSignInVisible));
             OnPropertyChanged(nameof(IsAuthorizationProgressVisible));
-            OnPropertyChanged(nameof(IsProfileVisible));
-            OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
-            OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
-            OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
-            OnPropertyChanged(nameof(IsFileBrowserQuickNavigationVisible));
-            OnPropertyChanged(nameof(IsFileSelectionBarVisible));
-            OnPropertyChanged(nameof(IsAccountActionEnabled));
-            OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
-            OnPropertyChanged(nameof(IsFileEntryActionsVisible));
-            OnPropertyChanged(nameof(CanRefreshFiles));
-            OnPropertyChanged(nameof(IsFileUpButtonEnabled));
-            OnPropertyChanged(nameof(IsFileAddButtonVisible));
+            OnPropertyChanged(nameof(IsAuthorizationProgressIndicatorRunning));
+            OnPropertyChanged(nameof(IsAuthenticatedVisible));
             OnPropertyChanged(nameof(IsBrandHeaderVisible));
             OnPropertyChanged(nameof(IsLegalFooterVisible));
-            OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
-            OnPropertyChanged(nameof(IsAuthorizationProgressIndicatorRunning));
-        }
-
-        private void ApplyFileFilters()
-        {
-            List<CottonFileBrowserEntry> visibleEntries = SortEntries(
-                    _allFileEntries.Where(entry => entry.Matches(FileSearchText)))
-                .ToList();
-
-            FileEntries.ReplaceWith(visibleEntries);
-
-            ResolveFilesEmptyState(visibleEntries.Count);
-            if (!IsFileBrowserBusy)
-            {
-                FilesStatus = CreateFilesStatus();
-            }
-
-            RefreshFileSelectionSnapshot();
-            NotifyFilesEmptyStateChanged();
-        }
-
-        private HashSet<Guid> CreateSelectedFileEntryIdSet()
-        {
-            return _allFileEntries
-                .Where(entry => entry.IsSelected)
-                .Select(entry => entry.Id)
-                .ToHashSet();
-        }
-
-        private void ApplyFileSelection(IReadOnlySet<Guid> selectedIds)
-        {
-            bool changed = false;
-            for (int index = 0; index < _allFileEntries.Count; index++)
-            {
-                CottonFileBrowserEntry entry = _allFileEntries[index];
-                bool shouldBeSelected = selectedIds.Contains(entry.Id);
-                if (entry.IsSelected == shouldBeSelected)
-                {
-                    continue;
-                }
-
-                _allFileEntries[index] = entry.WithSelection(shouldBeSelected);
-                changed = true;
-            }
-
-            if (changed)
-            {
-                ApplyFileFilters();
-                return;
-            }
-
-            RefreshFileSelectionSnapshot();
-        }
-
-        private void RefreshFileSelectionSnapshot()
-        {
-            FileSelection = CottonFileSelectionSnapshot.Create(_allFileEntries.Where(entry => entry.IsSelected));
-        }
-
-        private void NotifyFileSearchStateChanged()
-        {
-            OnPropertyChanged(nameof(IsFileSearchVisible));
-            OnPropertyChanged(nameof(IsFileSearchOpen));
-            OnPropertyChanged(nameof(IsFileSearchActive));
-            OnPropertyChanged(nameof(FileSearchButtonDescription));
-            OnPropertyChanged(nameof(IsFileSortButtonVisible));
-            OnPropertyChanged(nameof(IsFileViewButtonVisible));
-            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
-            OnPropertyChanged(nameof(IsFileBrowserQuickNavigationVisible));
-            OnPropertyChanged(nameof(IsTransferActivityIndicatorVisible));
-            OnPropertyChanged(nameof(IsBackupActivityIndicatorVisible));
-            OnPropertyChanged(nameof(IsOfflinePackProgressVisible));
-        }
-
-        private void NotifyFileBrowserChromeStateChanged()
-        {
-            OnPropertyChanged(nameof(IsFileBrowserChromeEnabled));
-            OnPropertyChanged(nameof(IsFileEntryActionsVisible));
-            OnPropertyChanged(nameof(CanRefreshFiles));
-            OnPropertyChanged(nameof(IsFileUpButtonEnabled));
-            OnPropertyChanged(nameof(FileUpButtonOpacity));
-            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
-            OnPropertyChanged(nameof(IsFileAddButtonVisible));
-        }
-
-        private void NotifyFilesEmptyStateChanged()
-        {
-            OnPropertyChanged(nameof(IsFilesEmptyVisible));
-            OnPropertyChanged(nameof(IsFilesEmptyAddActionVisible));
-        }
-
-        private bool IsFileBrowserBusy => IsFilesLoading || IsFilesRefreshing || IsFileActionInProgress;
-
-        private IEnumerable<CottonFileBrowserEntry> SortEntries(IEnumerable<CottonFileBrowserEntry> entries)
-        {
-            return FileSortMode switch
-            {
-                CottonFileBrowserSortMode.Type => entries
-                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
-                    .ThenBy(entry => entry.Kind, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
-                CottonFileBrowserSortMode.Updated => entries
-                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
-                    .ThenByDescending(entry => entry.UpdatedAtUtc)
-                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
-                CottonFileBrowserSortMode.Size => entries
-                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
-                    .ThenBy(entry => entry.IsFolder ? entry.Name : string.Empty, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(entry => entry.SizeBytes.HasValue ? 0 : 1)
-                    .ThenByDescending(entry => entry.SizeBytes ?? 0)
-                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
-                _ => entries
-                    .OrderBy(entry => entry.IsFolder ? 0 : 1)
-                    .ThenBy(entry => entry.Name, StringComparer.OrdinalIgnoreCase),
-            };
-        }
-
-        private string CreateFilesStatus()
-        {
-            int totalCount = _allFileEntries.Count;
-            int visibleCount = FileEntries.Count;
-            if (totalCount == 0)
-            {
-                return string.Empty;
-            }
-
-            string count = visibleCount == totalCount
-                ? FormatItemCount(totalCount)
-                : CreateFilteredCount(visibleCount);
-            return $"{count} · {FormatSortStatus(FileSortMode)}";
-        }
-
-        private string CreateFilteredCount(int visibleCount)
-        {
-            if (IsFileSearchActive)
-            {
-                return visibleCount == 1 ? "1 match" : $"{visibleCount:N0} matches";
-            }
-
-            return $"{FormatItemCount(visibleCount)} shown";
-        }
-
-        private static string FormatItemCount(int count)
-        {
-            return count == 1 ? "1 item" : $"{count} items";
-        }
-
-        private static string FormatSortStatus(CottonFileBrowserSortMode sortMode)
-        {
-            return sortMode switch
-            {
-                CottonFileBrowserSortMode.Name => "A-Z",
-                CottonFileBrowserSortMode.Updated => "Newest",
-                CottonFileBrowserSortMode.Type => "Type",
-                CottonFileBrowserSortMode.Size => "Size",
-                _ => sortMode.ToString(),
-            };
-        }
-
-        private string CreateOfflineFilesNoticeMessage(bool isCachedListing, DateTime? cachedAtUtc)
-        {
-            if (isCachedListing)
-            {
-                return CottonCachedFolderListingNoticeText.CreateMessage(
-                    _allFileEntries.Count,
-                    cachedAtUtc,
-                    DateTime.UtcNow);
-            }
-
-            return CottonCachedFolderListingNoticeText.CreateMessage(
-                _allFileEntries.Count,
-                cachedAtUtc: null,
-                DateTime.UtcNow);
-        }
-
-        private static bool HasSameLocalFile(CottonLocalFileSnapshot? current, CottonLocalFileSnapshot? next)
-        {
-            if (current is null || next is null)
-            {
-                return current is null && next is null;
-            }
-
-            return current.SizeBytes == next.SizeBytes
-                && current.UpdatedAtUtc == next.UpdatedAtUtc
-                && string.Equals(current.FileName, next.FileName, StringComparison.Ordinal);
-        }
-
-        private static bool HasSameLocalState(CottonFileBrowserEntry current, CottonFileBrowserEntry next)
-        {
-            return current.Id == next.Id
-                && HasSameLocalFile(current.LocalFile, next.LocalFile)
-                && current.OfflineAvailability.Status == next.OfflineAvailability.Status;
-        }
-
-        private static int FindEntryIndex(IList<CottonFileBrowserEntry> entries, Guid id)
-        {
-            for (int index = 0; index < entries.Count; index++)
-            {
-                if (entries[index].Id == id)
-                {
-                    return index;
-                }
-            }
-
-            return -1;
-        }
-
-        private static string CreateProfileInitials(string profileName)
-        {
-            string[] parts = profileName
-                .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-            if (parts.Length >= 2)
-            {
-                return string.Concat(parts.Take(2).Select(part => char.ToUpperInvariant(part[0])));
-            }
-
-            if (parts.Length == 1)
-            {
-                return parts[0].Length == 1
-                    ? parts[0].ToUpperInvariant()
-                    : parts[0][..2].ToUpperInvariant();
-            }
-
-            return "CC";
-        }
-
-        private void ResolveFilesEmptyState(int visibleCount)
-        {
-            if (_allFileEntries.Count == 0)
-            {
-                FilesEmptyMessage = "This folder is empty";
-                FilesEmptyDetails = "Files added here will appear automatically.";
-                return;
-            }
-
-            if (visibleCount == 0)
-            {
-                FilesEmptyMessage = "No matching files";
-                FilesEmptyDetails = "Try another name, type, or extension.";
-                return;
-            }
-
-            FilesEmptyMessage = string.Empty;
-            FilesEmptyDetails = string.Empty;
-        }
-
-        private void ResolveOfflineFilesEmptyState(bool isCachedListing)
-        {
-            if (_allFileEntries.Count != 0)
-            {
-                ResolveFilesEmptyState(FileEntries.Count);
-                return;
-            }
-
-            FilesEmptyMessage = "No saved files here";
-            FilesEmptyDetails = isCachedListing
-                ? "Reconnect to refresh this folder."
-                : "Files marked On device will appear here offline.";
-        }
-
-        private void ClearFilesNotice()
-        {
-            FilesNoticeTitle = null;
-            FilesNoticeMessage = null;
+            OnPropertyChanged(nameof(IsSyncDestinationVisible));
+            OnPropertyChanged(nameof(IsProfileDestinationVisible));
         }
     }
 }

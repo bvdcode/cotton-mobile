@@ -8,6 +8,6 @@ namespace Cotton.Mobile.ViewModels
         Loading = 0,
         SignIn = 1,
         AuthorizationProgress = 2,
-        Profile = 3,
+        Authenticated = 3,
     }
 }

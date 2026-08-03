@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+             xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.SyncDashboardView"
+             x:Name="SyncViewRoot"
+             x:DataType="viewModels:SyncSettingsViewModel">
+
+    <controls:ScreenShellView>
+        <controls:TopAppBar IsBackActionVisible="False"
+                            PrimaryIconData="{x:Static controls:IconPathData.Play}"
+                            PrimaryCommand="{Binding RunAllCommand}"
+                            PrimaryDescription="Run all sync folders"
+                            IsPrimaryActionVisible="{Binding IsRunAllVisible}"
+                            SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
+                            SecondaryCommand="{Binding LoadCommand}"
+                            SecondaryDescription="Refresh sync folders" />
+
+        <controls:ScreenContentGridView Grid.Row="1">
+            <controls:ScreenHeaderView Title="Sync"
+                                       SupportingText="{Binding SummaryText}"
+                                       IsSupportingTextVisible="{Binding IsSummaryVisible}"
+                                       IsBusy="{Binding IsBusy}" />
+
+            <controls:ScreenStatusView Grid.Row="1"
+                                       Text="{Binding Status}"
+                                       IsStatusVisible="{Binding IsStatusVisible}" />
+
+            <controls:EmptyStateView Grid.Row="2"
+                                     IsStateVisible="{Binding IsEmptyVisible}"
+                                     IconData="{x:Static controls:IconPathData.Folder}"
+                                     Title="No sync folders"
+                                     Body="Add a folder when you are ready to start syncing."
+                                     IsActionVisible="False" />
+
+            <controls:MaterialCollectionView Grid.Row="2"
+                                             IsContentVisible="{Binding IsListVisible}"
+                                             ItemsSource="{Binding Roots}"
+                                             ItemSizingStrategy="MeasureAllItems"
+                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
+                <controls:MaterialCollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="services:CottonSyncRootListItem">
+                        <controls:ContentCardView>
+                            <controls:StackedContentView StackStyleResourceKey="M3SettingsDenseStack">
+                                <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Folder}"
+                                                               AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
+                                                               IsAttentionState="{Binding IsAttentionVisible}"
+                                                               LeadingIconFrameStyleResourceKey="M3CardSyncThumbnailFrame"
+                                                               Title="{Binding Title}"
+                                                               TitleTextStyleResourceKey="M3CardTitle"
+                                                               PrimaryDetailText="{Binding PathText}"
+                                                               SecondaryDetailText="{Binding DetailText}"
+                                                               TrailingText="{Binding StatusText}" />
+
+                                <controls:ActionClusterView ClusterStyleResourceKey="M3PanelActionCluster"
+                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                            PrimaryActionCommand="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                            PrimaryActionCommandParameter="{Binding .}"
+                                                            PrimaryActionSemanticDescription="{Binding RunNowActionText}"
+                                                            IsPrimaryActionEnabled="{Binding CanRunNow}"
+                                                            IsPrimaryActionVisible="{Binding CanRunNow}"
+                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Pause}"
+                                                            SecondaryActionCommand="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                            SecondaryActionCommandParameter="{Binding .}"
+                                                            SecondaryActionSemanticDescription="{Binding PauseSyncActionText}"
+                                                            IsSecondaryActionEnabled="{Binding CanPauseSync}"
+                                                            IsSecondaryActionVisible="{Binding CanPauseSync}"
+                                                            TertiaryActionIconData="{x:Static controls:IconPathData.Play}"
+                                                            TertiaryActionCommand="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                            TertiaryActionCommandParameter="{Binding .}"
+                                                            TertiaryActionSemanticDescription="{Binding ResumeSyncActionText}"
+                                                            IsTertiaryActionEnabled="{Binding CanResumeSync}"
+                                                            IsTertiaryActionVisible="{Binding CanResumeSync}"
+                                                            QuaternaryActionIconData="{x:Static controls:IconPathData.Delete}"
+                                                            QuaternaryActionCommand="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                            QuaternaryActionCommandParameter="{Binding .}"
+                                                            QuaternaryActionIconButtonStyleResourceKey="M3DestructiveIconButton"
+                                                            QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
+                                                            IsQuaternaryActionEnabled="{Binding CanStopSync}"
+                                                            IsQuaternaryActionVisible="{Binding CanStopSync}" />
+                            </controls:StackedContentView>
+                        </controls:ContentCardView>
+                    </DataTemplate>
+                </controls:MaterialCollectionView.ItemTemplate>
+            </controls:MaterialCollectionView>
+        </controls:ScreenContentGridView>
+    </controls:ScreenShellView>
+</ContentView>

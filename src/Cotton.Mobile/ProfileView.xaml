@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.ProfileView"
+             x:DataType="viewModels:MainPageViewModel">
+
+    <controls:ScreenShellView>
+        <controls:TopAppBar TitleText="Profile"
+                            IsBackActionVisible="False"
+                            IsPrimaryActionVisible="False"
+                            IsSecondaryActionVisible="False" />
+
+        <controls:ScreenScrollBodyView Grid.Row="1">
+            <controls:ScreenHeaderView Title="Account"
+                                       SupportingText="Your Cotton Cloud connection and app settings." />
+
+            <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
+                                       IsStatusVisible="{Binding Display.IsProfileStatusVisible}" />
+
+            <controls:SettingsCardView>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Profile}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                    Title="{Binding Display.ProfileName}"
+                                                    PrimaryDetailText="{Binding Display.ProfileEmail}"
+                                                    SecondaryDetailText="{Binding Display.ProfileInstance}" />
+            </controls:SettingsCardView>
+
+            <controls:SettingsCardView>
+                <controls:ActionListItemView Text="Privacy policy"
+                                             SupportingText="Review how Cotton Cloud handles your data."
+                                             LeadingIconData="{x:Static controls:IconPathData.OpenInNew}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.ChevronRight}"
+                                             Command="{Binding PrivacyPolicyCommand}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             TextStyleResourceKey="M3CardSupportingStrongLine"
+                                             SemanticDescription="Open privacy policy" />
+
+                <controls:ActionListItemView Text="Sign out"
+                                             SupportingText="Disconnect this account from the app."
+                                             LeadingIconData="{x:Static controls:IconPathData.Close}"
+                                             IsLeadingIconVisible="True"
+                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                             ActionIconData="{x:Static controls:IconPathData.Close}"
+                                             Command="{Binding LogoutCommand}"
+                                             IsActionEnabled="{Binding Display.IsLogoutEnabled}"
+                                             GridStyleResourceKey="M3SettingsListItemGrid"
+                                             TextStyleResourceKey="M3CardSupportingStrongLine"
+                                             ActionIconButtonStyleResourceKey="M3DestructiveIconButton"
+                                             SemanticDescription="Sign out" />
+            </controls:SettingsCardView>
+
+            <controls:SettingsCardView>
+                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Info}"
+                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
+                                                    Title="Cotton Cloud"
+                                                    PrimaryDetailText="{Binding ApplicationVersionText}" />
+            </controls:SettingsCardView>
+        </controls:ScreenScrollBodyView>
+    </controls:ScreenShellView>
+</ContentView>

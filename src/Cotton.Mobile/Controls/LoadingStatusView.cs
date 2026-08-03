@@ -78,7 +78,7 @@ namespace Cotton.Mobile.Controls
             _detailMessage = new Label();
             _detailMessage.SetDynamicResource(StyleProperty, "M3CardSupportingBlock");
 
-            var textStack = new VerticalStackLayout
+            VerticalStackLayout textStack = new()
             {
                 Children =
                 {
@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Controls
             _actionButton = new IconButton();
             _actionButton.SetDynamicResource(StyleProperty, "M3DefaultIconButton");
 
-            var grid = new Grid
+            Grid grid = new()
             {
                 ColumnDefinitions =
                 {

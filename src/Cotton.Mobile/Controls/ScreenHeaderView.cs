@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Controls
             _title.SetDynamicResource(StyleProperty, "M3ScreenTitle");
 
             _supportingText = new Label();
-            var textStack = new VerticalStackLayout
+            VerticalStackLayout textStack = new()
             {
                 Children =
                 {

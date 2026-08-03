@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Controls
             _icon = new IconView();
             _icon.SetDynamicResource(StyleProperty, "M3EmptyStateIcon");
 
-            var iconFrame = new Border { Content = _icon };
+            Border iconFrame = new() { Content = _icon };
             iconFrame.SetDynamicResource(StyleProperty, "M3EmptyStateIconFrame");
 
             _title = new Label();
@@ -58,7 +58,7 @@ namespace Cotton.Mobile.Controls
             _actionButton = new IconButton();
             _actionButton.SetDynamicResource(StyleProperty, "M3EmptyStateActionIconButton");
 
-            var stack = new VerticalStackLayout
+            VerticalStackLayout stack = new()
             {
                 Children =
                 {

@@ -82,6 +82,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
             services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
+            services.AddSingleton<SyncRootManager>();
             services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
 
             services.AddSingleton(FileDownloadCacheOptions.Default);
@@ -109,6 +110,7 @@ namespace Cotton.Mobile
             services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
             services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
             services.AddSingleton<CottonBidirectionalSyncCoordinator>();
+            services.AddSingleton<SyncExecutionWorkflow>();
         }
 
         private static void RegisterPresentation(IServiceCollection services)

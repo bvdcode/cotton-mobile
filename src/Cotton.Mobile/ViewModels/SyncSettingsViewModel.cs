@@ -9,12 +9,8 @@ namespace Cotton.Mobile.ViewModels
 {
     public class SyncSettingsViewModel : ViewModelBase
     {
-        private readonly ICottonSyncRootStore _rootStore;
-        private readonly ICottonSyncRootPauseStore _pauseStore;
-        private readonly ICottonSyncedFileManifestStore _manifestStore;
-        private readonly CottonCloudToDeviceSyncCoordinator _syncCoordinator;
-        private readonly CottonDeviceToCloudSyncCoordinator _deviceToCloudSyncCoordinator;
-        private readonly CottonBidirectionalSyncCoordinator _bidirectionalSyncCoordinator;
+        private readonly SyncRootManager _rootManager;
+        private readonly SyncExecutionWorkflow _executionWorkflow;
         private readonly SyncRootSetupCoordinator _rootSetupCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
@@ -28,34 +24,22 @@ namespace Cotton.Mobile.ViewModels
         private bool _isEmptyVisible = true;
 
         public SyncSettingsViewModel(
-            ICottonSyncRootStore rootStore,
-            ICottonSyncRootPauseStore pauseStore,
-            ICottonSyncedFileManifestStore manifestStore,
-            CottonCloudToDeviceSyncCoordinator syncCoordinator,
-            CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
-            CottonBidirectionalSyncCoordinator bidirectionalSyncCoordinator,
+            SyncRootManager rootManager,
+            SyncExecutionWorkflow executionWorkflow,
             SyncRootSetupCoordinator rootSetupCoordinator,
             INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             ILogger<SyncSettingsViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(rootStore);
-            ArgumentNullException.ThrowIfNull(pauseStore);
-            ArgumentNullException.ThrowIfNull(manifestStore);
-            ArgumentNullException.ThrowIfNull(syncCoordinator);
-            ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
-            ArgumentNullException.ThrowIfNull(bidirectionalSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(rootManager);
+            ArgumentNullException.ThrowIfNull(executionWorkflow);
             ArgumentNullException.ThrowIfNull(rootSetupCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
-            _rootStore = rootStore;
-            _pauseStore = pauseStore;
-            _manifestStore = manifestStore;
-            _syncCoordinator = syncCoordinator;
-            _deviceToCloudSyncCoordinator = deviceToCloudSyncCoordinator;
-            _bidirectionalSyncCoordinator = bidirectionalSyncCoordinator;
+            _rootManager = rootManager;
+            _executionWorkflow = executionWorkflow;
             _rootSetupCoordinator = rootSetupCoordinator;
             _networkAccess = networkAccess;
             _dialogService = dialogService;
@@ -277,31 +261,29 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
-                CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
+                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
-                    IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                    ShowRoots(roots, pausedRootIds);
+                    ShowRoots(collection);
                     Status = "Sync folder is no longer configured.";
                     return;
                 }
 
                 statusDirection = root.Direction;
-                IReadOnlySet<Guid> pausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                if (pausedIds.Contains(root.Id))
+                if (collection.PausedRootIds.Contains(root.Id))
                 {
-                    ShowRoots(roots, pausedIds);
+                    ShowRoots(collection);
                     Status = CottonSyncRootManagementText.RootPausedStatus;
                     return;
                 }
 
                 Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
-                string completedStatus = await RunRootAndCreateCompletedStatusAsync(instanceUri, root);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
-                IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                ShowRoots(refreshedRoots, refreshedPausedIds);
-                Status = completedStatus;
+                Status = await _executionWorkflow.RunRootAsync(
+                    instanceUri,
+                    root,
+                    status => Status = status);
+                ShowRoots(await LoadRootCollectionAsync(instanceUri));
             }
             catch (Exception exception)
             {
@@ -333,21 +315,16 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
-                IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
                 IReadOnlyList<CottonSyncRootSnapshot> runnableRoots =
-                    CottonSyncRootRunCapability.GetRunnableRoots(roots, pausedRootIds);
-                (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
-                    CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
-                    CottonBidirectionalSyncRunSummary BidirectionalSummary) summaries =
-                    await RunAllRootsAsync(instanceUri, runnableRoots);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
-                IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                ShowRoots(refreshedRoots, refreshedPausedIds);
-                Status = CottonSyncSettingsRunStatusText.CreateCompletedStatus(
-                    summaries.CloudToDeviceSummary,
-                    summaries.DeviceToCloudSummary,
-                    summaries.BidirectionalSummary);
+                    CottonSyncRootRunCapability.GetRunnableRoots(
+                        collection.Roots,
+                        collection.PausedRootIds);
+                Status = await _executionWorkflow.RunAllAsync(
+                    instanceUri,
+                    runnableRoots,
+                    status => Status = status);
+                ShowRoots(await LoadRootCollectionAsync(instanceUri));
             }
             catch (Exception exception)
             {
@@ -374,12 +351,11 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
-                CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
+                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
-                    IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                    ShowRoots(roots, pausedRootIds);
+                    ShowRoots(collection);
                     Status = CottonSyncRootManagementText.RootMissingStatus;
                     return;
                 }
@@ -395,12 +371,8 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                bool removed = await _rootStore.RemoveAsync(instanceUri, root.Id);
-                await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused: false);
-                await _manifestStore.ClearAsync(instanceUri, root);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
-                IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                ShowRoots(refreshedRoots, refreshedPausedIds);
+                bool removed = await _rootManager.StopAsync(instanceUri, root);
+                ShowRoots(await LoadRootCollectionAsync(instanceUri));
                 Status = removed
                     ? CottonSyncRootManagementText.CreateStoppedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.RootMissingStatus;
@@ -432,19 +404,17 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
-                CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
-                IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
-                    ShowRoots(roots, pausedRootIds);
+                    ShowRoots(collection);
                     Status = CottonSyncRootManagementText.RootMissingStatus;
                     return;
                 }
 
-                await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused);
-                IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-                ShowRoots(roots, refreshedPausedIds);
+                await _rootManager.SetPausedAsync(instanceUri, root, isPaused);
+                ShowRoots(await LoadRootCollectionAsync(instanceUri));
                 Status = isPaused
                     ? CottonSyncRootManagementText.CreatePausedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.CreateResumedStatus(root.CloudFolder.FolderName);
@@ -464,172 +434,21 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task LoadRootsAsync(Uri instanceUri)
         {
-            IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
-            IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
-            ShowRoots(roots, pausedRootIds);
+            ShowRoots(await LoadRootCollectionAsync(instanceUri));
         }
 
-        private async Task<IReadOnlyList<CottonSyncRootSnapshot>> LoadCurrentAccountRootsAsync(
-            Uri instanceUri)
+        private Task<SyncRootCollectionSnapshot> LoadRootCollectionAsync(Uri instanceUri)
         {
             string accountScopeKey = _accountScopeKey
                 ?? throw new InvalidOperationException("Sync account is not configured.");
-            IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
-            return roots
-                .Where(root => string.Equals(
-                    root.AccountScopeKey,
-                    accountScopeKey,
-                    StringComparison.Ordinal))
-                .ToList();
+            return _rootManager.LoadAsync(instanceUri, accountScopeKey);
         }
 
-        private async Task<string> RunRootAndCreateCompletedStatusAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root)
+        private void ShowRoots(SyncRootCollectionSnapshot collection)
         {
-            switch (CottonSyncRootRunRouting.CreateRoute(root))
-            {
-                case CottonSyncRootRunRoute.CloudToDevice:
-                    CottonCloudToDeviceSyncRunSummary cloudSummary =
-                        await _syncCoordinator.RunRootAsync(instanceUri, root);
-                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(cloudSummary);
-
-                case CottonSyncRootRunRoute.DeviceToCloud:
-                    CottonDeviceToCloudSyncRunSummary deviceSummary =
-                        await RunDeviceToCloudRootAsync(instanceUri, root);
-                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary);
-
-                case CottonSyncRootRunRoute.Bidirectional:
-                    CottonBidirectionalSyncRunSummary bidirectionalSummary =
-                        await RunBidirectionalRootAsync(instanceUri, root);
-                    return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(bidirectionalSummary);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported.");
-            }
-        }
-
-        private async Task<(
-            CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
-            CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
-            CottonBidirectionalSyncRunSummary BidirectionalSummary)> RunAllRootsAsync(
-            Uri instanceUri,
-            IReadOnlyList<CottonSyncRootSnapshot> roots)
-        {
-            var cloudResults = new List<CottonCloudToDeviceSyncRootRunResult>();
-            var deviceResults = new List<CottonDeviceToCloudSyncRootRunResult>();
-            var bidirectionalResults = new List<CottonBidirectionalSyncRootRunResult>();
-            foreach (CottonSyncRootSnapshot root in roots)
-            {
-                switch (CottonSyncRootRunRouting.CreateRoute(root))
-                {
-                    case CottonSyncRootRunRoute.CloudToDevice:
-                        CottonCloudToDeviceSyncRunSummary summary =
-                            await _syncCoordinator.RunRootAsync(instanceUri, root);
-                        cloudResults.AddRange(summary.RootResults);
-                        break;
-
-                    case CottonSyncRootRunRoute.DeviceToCloud:
-                        CottonDeviceToCloudSyncRunSummary deviceSummary =
-                            await RunDeviceToCloudRootAsync(instanceUri, root);
-                        deviceResults.AddRange(deviceSummary.RootResults);
-                        break;
-
-                    case CottonSyncRootRunRoute.Bidirectional:
-                        CottonBidirectionalSyncRunSummary bidirectionalSummary =
-                            await RunBidirectionalRootAsync(instanceUri, root);
-                        bidirectionalResults.AddRange(bidirectionalSummary.RootResults);
-                        break;
-
-                    default:
-                        throw new ArgumentOutOfRangeException(
-                            nameof(root),
-                            "Sync run route is not supported.");
-                }
-            }
-
-            return (
-                new CottonCloudToDeviceSyncRunSummary(cloudResults),
-                new CottonDeviceToCloudSyncRunSummary(deviceResults),
-                new CottonBidirectionalSyncRunSummary(bidirectionalResults));
-        }
-
-        private async Task<CottonDeviceToCloudSyncRunSummary> RunDeviceToCloudRootAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root)
-        {
-            CottonDeviceToCloudSyncRunSummary summary =
-                await _deviceToCloudSyncCoordinator.RunRootAsync(instanceUri, root);
-            if (!summary.NeedsDestructiveReview)
-            {
-                return summary;
-            }
-
-            Status = CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus;
-            bool confirmed = await ConfirmDeviceToCloudRemoteDeletesAsync(
-                summary.DestructiveReviewRemoteDeleteCount);
-            if (!confirmed)
-            {
-                return summary;
-            }
-
-            return await _deviceToCloudSyncCoordinator.RunRootAsync(
-                instanceUri,
-                root,
-                CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
-        }
-
-        private async Task<bool> ConfirmDeviceToCloudRemoteDeletesAsync(int fileCount)
-        {
-            return await _dialogService.ShowConfirmationAsync(
-                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
-                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(fileCount),
-                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
-                CottonSyncRootManagementText.CancelAction);
-        }
-
-        private async Task<CottonBidirectionalSyncRunSummary> RunBidirectionalRootAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root)
-        {
-            CottonBidirectionalSyncRunSummary summary =
-                await _bidirectionalSyncCoordinator.RunRootAsync(instanceUri, root);
-            if (!summary.NeedsDestructiveReview)
-            {
-                return summary;
-            }
-
-            Status = CottonBidirectionalSyncStatusText.DestructiveReviewRequiredStatus;
-            bool confirmed = await ConfirmBidirectionalDestructiveChangesAsync(
-                summary.DestructiveReviewLocalDeleteCount,
-                summary.DestructiveReviewRemoteDeleteCount);
-            if (!confirmed)
-            {
-                return summary;
-            }
-
-            return await _bidirectionalSyncCoordinator.RunRootAsync(
-                instanceUri,
-                root,
-                CottonBidirectionalSyncRunOptions.AllowDestructiveDeletes);
-        }
-
-        private async Task<bool> ConfirmBidirectionalDestructiveChangesAsync(
-            int localDeleteCount,
-            int remoteDeleteCount)
-        {
-            return await _dialogService.ShowConfirmationAsync(
-                CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle,
-                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(
-                    localDeleteCount,
-                    remoteDeleteCount),
-                CottonBidirectionalSyncStatusText.ConfirmDestructiveAction,
-                CottonSyncRootManagementText.CancelAction);
-        }
-
-        private void ShowRoots(IReadOnlyList<CottonSyncRootSnapshot> roots, IReadOnlySet<Guid> pausedRootIds)
-        {
-            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create(roots, pausedRootIds);
+            CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create(
+                collection.Roots,
+                collection.PausedRootIds);
             Roots.ReplaceWith(state.Items);
 
             SummaryText = state.SummaryText;

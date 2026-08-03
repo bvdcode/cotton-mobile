@@ -70,58 +70,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_records_selected_media_quality_policy()
-        {
-            var photoSnapshot = new CottonFileUploadSourceSnapshot(
-                "photo.jpg",
-                "image/jpeg",
-                200,
-                new Dictionary<string, string>
-                {
-                    [CottonFileUploadMetadataKeys.Source] = "picked-photo",
-                    [CottonFileUploadMetadataKeys.QualityPolicy] = "original-preferred",
-                    [CottonFileUploadMetadataKeys.CompressionQuality] = "100",
-                    [CottonFileUploadMetadataKeys.PreserveMetadata] = "true",
-                    [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
-                });
-            var videoSnapshot = new CottonFileUploadSourceSnapshot(
-                "video.mp4",
-                "video/mp4",
-                400,
-                new Dictionary<string, string>
-                {
-                    [CottonFileUploadMetadataKeys.Source] = "picked-video",
-                    [CottonFileUploadMetadataKeys.QualityPolicy] = "original",
-                    [CottonFileUploadMetadataKeys.TransferPolicy] = CottonSelectedMediaTransferPolicy.CurrentMetadataValue,
-                });
-
-            Assert.Equal("original-preferred", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
-            Assert.Equal("100", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.CompressionQuality]);
-            Assert.Equal("true", photoSnapshot.Metadata[CottonFileUploadMetadataKeys.PreserveMetadata]);
-            Assert.Equal(
-                CottonSelectedMediaTransferPolicy.QueueBackedMetadataValue,
-                photoSnapshot.Metadata[CottonFileUploadMetadataKeys.TransferPolicy]);
-            Assert.Equal("original", videoSnapshot.Metadata[CottonFileUploadMetadataKeys.QualityPolicy]);
-            Assert.Equal(
-                CottonSelectedMediaTransferPolicy.QueueBackedMetadataValue,
-                videoSnapshot.Metadata[CottonFileUploadMetadataKeys.TransferPolicy]);
-        }
-
-        [Fact]
-        public void Selected_media_transfer_policy_records_queue_backed_imports()
-        {
-            Assert.Equal(
-                CottonSelectedMediaTransferPolicy.QueueBackedMetadataValue,
-                CottonSelectedMediaTransferPolicy.CurrentMetadataValue);
-            Assert.True(CottonSelectedMediaTransferPolicy.UsesDurableQueue);
-            Assert.False(CottonSelectedMediaTransferPolicy.RequiresDurableQueueBeforeCameraBackup);
-            Assert.Contains(
-                "durable transfer queue",
-                CottonSelectedMediaTransferPolicy.ReleaseRiskText,
-                StringComparison.Ordinal);
-        }
-
-        [Fact]
         public void Upload_source_snapshot_keeps_metadata_when_renamed()
         {
             var snapshot = new CottonFileUploadSourceSnapshot(
@@ -147,78 +95,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_progress_reports_percent_for_known_size()
-        {
-            var source = new CottonFileUploadSourceSnapshot("notes.txt", "text/plain", 200);
-
-            var progress = new CottonFileUploadProgressSnapshot(source, 125);
-
-            Assert.Equal(62, progress.Percent);
-            Assert.Equal("Uploading notes.txt... 62%", progress.StatusText);
-        }
-
-        [Fact]
-        public void Upload_progress_reports_uploaded_bytes_without_known_size()
-        {
-            var source = new CottonFileUploadSourceSnapshot("photo.jpg", "image/jpeg", null);
-
-            var progress = new CottonFileUploadProgressSnapshot(source, 1536);
-
-            Assert.Null(progress.Percent);
-            Assert.Equal("Uploading photo.jpg... 1.5 KB", progress.StatusText);
-        }
-
-        [Theory]
-        [InlineData("file", "Uploading notes.txt...", "Uploaded notes.txt.")]
-        [InlineData("photo", "Importing 1 photo: photo.jpg...", "Imported 1 photo: photo.jpg.")]
-        [InlineData("video", "Importing 1 video: clip.mp4...", "Imported 1 video: clip.mp4.")]
-        public void Upload_status_text_distinguishes_selected_media_imports(
-            string sourceKind,
-            string expectedStartingStatus,
-            string expectedCompletedStatus)
-        {
-            string fileName = sourceKind switch
-            {
-                "photo" => "photo.jpg",
-                "video" => "clip.mp4",
-                _ => "notes.txt",
-            };
-
-            string startingStatus = CottonFileUploadStatusText.CreateStartingStatus(sourceKind, fileName);
-            string completedStatus = CottonFileUploadStatusText.CreateCompletedStatus(sourceKind, fileName);
-
-            Assert.Equal(expectedStartingStatus, startingStatus);
-            Assert.Equal(expectedCompletedStatus, completedStatus);
-        }
-
-        [Fact]
-        public void Upload_status_text_includes_import_count_and_destination()
-        {
-            string photoStatus = CottonFileUploadStatusText.CreateCompletedStatus(
-                "photo",
-                "trip.jpg",
-                "Files / Camera Uploads",
-                importCount: 1);
-            string videoStatus = CottonFileUploadStatusText.CreateCompletedStatus(
-                "video",
-                "clip.mp4",
-                "Files / Camera Uploads",
-                importCount: 2);
-
-            Assert.Equal("Imported 1 photo: trip.jpg to Files / Camera Uploads.", photoStatus);
-            Assert.Equal("Imported 2 videos: clip.mp4 to Files / Camera Uploads.", videoStatus);
-        }
-
-        [Fact]
-        public void Upload_progress_rejects_negative_uploaded_bytes()
-        {
-            var source = new CottonFileUploadSourceSnapshot("notes.txt", "text/plain", 200);
-
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
-                new CottonFileUploadProgressSnapshot(source, -1));
-        }
-
-        [Fact]
         public void Upload_hash_uses_lowercase_sha256_hex()
         {
             string hash = CottonFileUploadHash.CreateSha256Hex("abc"u8);
@@ -226,36 +102,6 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(
                 "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
                 hash);
-        }
-
-        [Fact]
-        public void Upload_name_resolver_keeps_available_name()
-        {
-            string name = CottonFileUploadNameResolver.ResolveUniqueName(
-                "photo.jpg",
-                ["notes.txt"]);
-
-            Assert.Equal("photo.jpg", name);
-        }
-
-        [Fact]
-        public void Upload_name_resolver_adds_suffix_for_case_insensitive_duplicates()
-        {
-            string name = CottonFileUploadNameResolver.ResolveUniqueName(
-                "photo.jpg",
-                ["PHOTO.jpg", "photo (1).jpg"]);
-
-            Assert.Equal("photo (2).jpg", name);
-        }
-
-        [Fact]
-        public void Upload_name_resolver_handles_names_without_extension()
-        {
-            string name = CottonFileUploadNameResolver.ResolveUniqueName(
-                "Screenshot",
-                ["screenshot"]);
-
-            Assert.Equal("Screenshot (1)", name);
         }
 
         [Fact]

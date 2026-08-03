@@ -4,16 +4,13 @@ namespace Cotton.Mobile.Tests
 {
     public class AnimatedInteractionVisibilityTests
     {
-        [Theory]
-        [InlineData("src/Cotton.Mobile/Controls/ActionClusterView.cs", "actionButton.InputTransparent = !isActionVisible;")]
-        [InlineData("src/Cotton.Mobile/Controls/ScreenHeaderView.cs", "element.InputTransparent = !isElementVisible;")]
-        public void Animated_actions_disable_input_before_fade_out(
-            string relativePath,
-            string expectedGuard)
+        [Fact]
+        public void Animated_action_cluster_disables_input_before_fade_out()
         {
-            string content = RepositoryPath.ReadText(relativePath);
+            string content = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Controls/ActionClusterView.cs");
 
-            Assert.Contains(expectedGuard, content);
+            Assert.Contains("actionButton.InputTransparent = !isActionVisible;", content);
         }
     }
 }

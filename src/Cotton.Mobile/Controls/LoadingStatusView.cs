@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
-using System;
 using System.Windows.Input;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -9,29 +8,13 @@ namespace Cotton.Mobile.Controls
 {
     public class LoadingStatusView : ContentView
     {
-        private const string ActionButtonOpacityAnimationName = "M3LoadingStatusActionButtonOpacity";
-        private const string DefaultActionIconButtonStyleResourceKey = "M3DefaultIconButton";
-        private const string DefaultContainerStyleResourceKey = "M3LoadingStatusPanel";
-        private const string DefaultDetailTextStyleResourceKey = "M3CardSupportingBlock";
-        private const string DefaultGridStyleResourceKey = "M3LoadingStatusGrid";
-        private const string DefaultTextStackStyleResourceKey = "M3CardTextStack";
-        private const string DefaultTextStyleResourceKey = "M3LoadingMessage";
-        private const string DetailMessageOpacityAnimationName = "M3LoadingStatusDetailMessageOpacity";
-        private const string StatusOpacityAnimationName = "M3LoadingStatusOpacity";
+        private const string DefaultContainerStyle = "M3LoadingStatusPanel";
+        private const string DefaultTextStyle = "M3LoadingMessage";
 
-        public static readonly BindableProperty TextProperty = BindableProperty.Create(
-            nameof(Text),
-            typeof(string),
-            typeof(LoadingStatusView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty DetailTextProperty = BindableProperty.Create(
-            nameof(DetailText),
-            typeof(string),
-            typeof(LoadingStatusView),
-            string.Empty,
-            propertyChanged: OnDetailMessageVisibilityPropertyChanged);
+        public static readonly BindableProperty TextProperty = CreateTextProperty(nameof(Text));
+        public static readonly BindableProperty DetailTextProperty = CreateTextProperty(nameof(DetailText));
+        public static readonly BindableProperty ActionSemanticDescriptionProperty =
+            CreateTextProperty(nameof(ActionSemanticDescription));
 
         public static readonly BindableProperty IsRunningProperty = BindableProperty.Create(
             nameof(IsRunning),
@@ -45,7 +28,7 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(LoadingStatusView),
             true,
-            propertyChanged: OnStatusVisiblePropertyChanged);
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty ActionIconDataProperty = BindableProperty.Create(
             nameof(ActionIconData),
@@ -58,14 +41,14 @@ namespace Cotton.Mobile.Controls
             nameof(ActionCommand),
             typeof(ICommand),
             typeof(LoadingStatusView),
-            propertyChanged: OnActionButtonVisibilityPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IsActionVisibleProperty = BindableProperty.Create(
             nameof(IsActionVisible),
             typeof(bool),
             typeof(LoadingStatusView),
             false,
-            propertyChanged: OnActionButtonVisibilityPropertyChanged);
+            propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty IsActionEnabledProperty = BindableProperty.Create(
             nameof(IsActionEnabled),
@@ -74,74 +57,28 @@ namespace Cotton.Mobile.Controls
             true,
             propertyChanged: OnVisualPropertyChanged);
 
-        public static readonly BindableProperty ActionSemanticDescriptionProperty = BindableProperty.Create(
-            nameof(ActionSemanticDescription),
-            typeof(string),
-            typeof(LoadingStatusView),
-            string.Empty,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty ContainerStyleResourceKeyProperty = BindableProperty.Create(
+        public static readonly BindableProperty ContainerStyleResourceKeyProperty = CreateStyleProperty(
             nameof(ContainerStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultContainerStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
+            DefaultContainerStyle);
 
-        public static readonly BindableProperty GridStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(GridStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultGridStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TextStackStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(TextStackStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultTextStackStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty TextStyleResourceKeyProperty = BindableProperty.Create(
+        public static readonly BindableProperty TextStyleResourceKeyProperty = CreateStyleProperty(
             nameof(TextStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty DetailTextStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(DetailTextStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultDetailTextStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
-
-        public static readonly BindableProperty ActionIconButtonStyleResourceKeyProperty = BindableProperty.Create(
-            nameof(ActionIconButtonStyleResourceKey),
-            typeof(string),
-            typeof(LoadingStatusView),
-            DefaultActionIconButtonStyleResourceKey,
-            propertyChanged: OnVisualPropertyChanged);
+            DefaultTextStyle);
 
         private readonly IconButton _actionButton;
         private readonly Border _container;
         private readonly Label _detailMessage;
-        private readonly Grid _grid;
         private readonly LoadingIndicatorView _loadingIndicator;
         private readonly Label _message;
-        private readonly VerticalStackLayout _textStack;
-        private bool _hasAppliedActionButtonVisibility;
-        private bool _hasAppliedDetailMessageVisibility;
-        private bool _hasAppliedStatusVisibility;
 
         public LoadingStatusView()
         {
             _loadingIndicator = new LoadingIndicatorView();
-
             _message = new Label();
             _detailMessage = new Label();
+            _detailMessage.SetDynamicResource(StyleProperty, "M3CardSupportingBlock");
 
-            _textStack = new VerticalStackLayout
+            var textStack = new VerticalStackLayout
             {
                 Children =
                 {
@@ -149,45 +86,33 @@ namespace Cotton.Mobile.Controls
                     _detailMessage,
                 },
             };
-            Grid.SetColumn(_textStack, 1);
+            textStack.SetDynamicResource(StyleProperty, "M3CardTextStack");
 
             _actionButton = new IconButton();
-            Grid.SetColumn(_actionButton, 2);
+            _actionButton.SetDynamicResource(StyleProperty, "M3DefaultIconButton");
 
-            _grid = new Grid
+            var grid = new Grid
             {
                 ColumnDefinitions =
                 {
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Star,
-                    },
-                    new ColumnDefinition
-                    {
-                        Width = GridLength.Auto,
-                    },
+                    new ColumnDefinition(GridLength.Auto),
+                    new ColumnDefinition(GridLength.Star),
+                    new ColumnDefinition(GridLength.Auto),
                 },
                 Children =
                 {
                     _loadingIndicator,
-                    _textStack,
+                    textStack,
                     _actionButton,
                 },
             };
+            grid.SetDynamicResource(StyleProperty, "M3LoadingStatusGrid");
+            Grid.SetColumn(textStack, 1);
+            Grid.SetColumn(_actionButton, 2);
 
-            _container = new Border
-            {
-                Content = _grid,
-            };
-
+            _container = new Border { Content = grid };
             Content = _container;
-            UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
-            UpdateStatusVisibility(animateStatusVisibility: false);
-            UpdateInputTransparency();
+            UpdateVisualState();
         }
 
         public string Text
@@ -250,239 +175,76 @@ namespace Cotton.Mobile.Controls
             set => SetValue(ContainerStyleResourceKeyProperty, value);
         }
 
-        public string GridStyleResourceKey
-        {
-            get => (string)GetValue(GridStyleResourceKeyProperty);
-            set => SetValue(GridStyleResourceKeyProperty, value);
-        }
-
-        public string TextStackStyleResourceKey
-        {
-            get => (string)GetValue(TextStackStyleResourceKeyProperty);
-            set => SetValue(TextStackStyleResourceKeyProperty, value);
-        }
-
         public string TextStyleResourceKey
         {
             get => (string)GetValue(TextStyleResourceKeyProperty);
             set => SetValue(TextStyleResourceKeyProperty, value);
         }
 
-        public string DetailTextStyleResourceKey
+        private static BindableProperty CreateTextProperty(string name)
         {
-            get => (string)GetValue(DetailTextStyleResourceKeyProperty);
-            set => SetValue(DetailTextStyleResourceKeyProperty, value);
+            return BindableProperty.Create(
+                name,
+                typeof(string),
+                typeof(LoadingStatusView),
+                string.Empty,
+                propertyChanged: OnVisualPropertyChanged);
         }
 
-        public string ActionIconButtonStyleResourceKey
+        private static BindableProperty CreateStyleProperty(string name, string defaultValue)
         {
-            get => (string)GetValue(ActionIconButtonStyleResourceKeyProperty);
-            set => SetValue(ActionIconButtonStyleResourceKeyProperty, value);
+            return BindableProperty.Create(
+                name,
+                typeof(string),
+                typeof(LoadingStatusView),
+                defaultValue,
+                propertyChanged: OnVisualPropertyChanged);
         }
 
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            LoadingStatusView view = (LoadingStatusView)bindable;
-            view.UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: false);
+            ((LoadingStatusView)bindable).UpdateVisualState();
         }
 
-        private static void OnStatusVisiblePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        private void UpdateVisualState()
         {
-            LoadingStatusView view = (LoadingStatusView)bindable;
-            view.UpdateStatusVisibility(animateStatusVisibility: true);
-        }
+            if (_container is null)
+            {
+                return;
+            }
 
-        private static void OnDetailMessageVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            LoadingStatusView view = (LoadingStatusView)bindable;
-            view.UpdateVisualState(animateDetailMessageVisibility: true, animateActionButtonVisibility: false);
-        }
-
-        private static void OnActionButtonVisibilityPropertyChanged(
-            BindableObject bindable,
-            object oldValue,
-            object newValue)
-        {
-            LoadingStatusView view = (LoadingStatusView)bindable;
-            view.UpdateVisualState(animateDetailMessageVisibility: false, animateActionButtonVisibility: true);
-        }
-
-        private void UpdateVisualState(bool animateDetailMessageVisibility, bool animateActionButtonVisibility)
-        {
-            ICommand? actionCommand = ActionCommand;
-            bool isActionVisible = IsActionVisible && actionCommand is not null;
+            string text = Text ?? string.Empty;
             string detailText = DetailText ?? string.Empty;
-            string containerStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                ContainerStyleResourceKey,
-                DefaultContainerStyleResourceKey);
-            string gridStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                GridStyleResourceKey,
-                DefaultGridStyleResourceKey);
-            string textStackStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TextStackStyleResourceKey,
-                DefaultTextStackStyleResourceKey);
-            string textStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                TextStyleResourceKey,
-                DefaultTextStyleResourceKey);
-            string detailTextStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                DetailTextStyleResourceKey,
-                DefaultDetailTextStyleResourceKey);
-            string actionIconButtonStyleResourceKey = MaterialResources.ResolveStyleResourceKey(
-                ActionIconButtonStyleResourceKey,
-                DefaultActionIconButtonStyleResourceKey);
+            bool hasAction = IsActionVisible && ActionCommand is not null && ActionIconData is not null;
 
-            _container.SetDynamicResource(StyleProperty, containerStyleResourceKey);
-            _grid.SetDynamicResource(StyleProperty, gridStyleResourceKey);
-            _textStack.SetDynamicResource(StyleProperty, textStackStyleResourceKey);
-            _message.SetDynamicResource(StyleProperty, textStyleResourceKey);
-            _detailMessage.SetDynamicResource(StyleProperty, detailTextStyleResourceKey);
-            _actionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
+            IsVisible = IsStatusVisible;
+            _container.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(
+                    ContainerStyleResourceKey,
+                    DefaultContainerStyle));
+            _message.SetDynamicResource(
+                StyleProperty,
+                MaterialResources.ResolveStyleResourceKey(TextStyleResourceKey, DefaultTextStyle));
 
             _loadingIndicator.IsRunning = IsRunning;
-            _message.Text = Text ?? string.Empty;
+            _message.Text = text;
             _detailMessage.Text = detailText;
-            UpdateDetailMessageVisibility(detailText, animateDetailMessageVisibility);
+            _detailMessage.IsVisible = !string.IsNullOrWhiteSpace(detailText);
+
             _actionButton.IconData = ActionIconData;
-            _actionButton.Command = actionCommand;
+            _actionButton.Command = ActionCommand;
             _actionButton.IsEnabled = IsActionEnabled;
-            UpdateActionButtonVisibility(isActionVisible, animateActionButtonVisibility);
-            SemanticProperties.SetDescription(_actionButton, ActionSemanticDescription ?? string.Empty);
-            UpdateInputTransparency();
-        }
-
-        private void UpdateStatusVisibility(bool animateStatusVisibility)
-        {
-            bool isStatusVisible = IsStatusVisible;
-            bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
-            double targetOpacity = isStatusVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isStatusVisible)
-            {
-                IsVisible = true;
-            }
-            else
-            {
-                UpdateInputTransparency();
-            }
-
-            MaterialMotion.UpdateDouble(
-                this,
-                Opacity,
-                targetOpacity,
-                duration,
-                StatusOpacityAnimationName,
-                shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteStatusVisibility);
-            _hasAppliedStatusVisibility = true;
-        }
-
-        private void UpdateDetailMessageVisibility(string detailText, bool animateDetailMessageVisibility)
-        {
-            bool isDetailMessageVisible = IsDetailMessageActuallyVisible(detailText);
-            bool shouldAnimate = animateDetailMessageVisibility && _hasAppliedDetailMessageVisibility;
-            double targetOpacity = isDetailMessageVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isDetailMessageVisible)
-            {
-                _detailMessage.IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
-                _detailMessage,
-                _detailMessage.Opacity,
-                targetOpacity,
-                duration,
-                DetailMessageOpacityAnimationName,
-                shouldAnimate,
-                opacity => _detailMessage.Opacity = opacity,
-                CompleteDetailMessageVisibility);
-            _hasAppliedDetailMessageVisibility = true;
-        }
-
-        private void UpdateActionButtonVisibility(bool isActionVisible, bool animateActionButtonVisibility)
-        {
-            bool shouldAnimate = animateActionButtonVisibility && _hasAppliedActionButtonVisibility;
-            double targetOpacity = isActionVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isActionVisible)
-            {
-                _actionButton.IsVisible = true;
-            }
-            else
-            {
-                _actionButton.InputTransparent = true;
-            }
-
-            MaterialMotion.UpdateDouble(
+            _actionButton.IsVisible = hasAction;
+            SemanticProperties.SetDescription(
                 _actionButton,
-                _actionButton.Opacity,
-                targetOpacity,
-                duration,
-                ActionButtonOpacityAnimationName,
-                shouldAnimate,
-                opacity => _actionButton.Opacity = opacity,
-                CompleteActionButtonVisibility);
-            _hasAppliedActionButtonVisibility = true;
-        }
+                ActionSemanticDescription ?? string.Empty);
 
-        private void CompleteStatusVisibility()
-        {
-            IsVisible = IsStatusVisible;
-            UpdateInputTransparency();
-        }
-
-        private void CompleteDetailMessageVisibility()
-        {
-            if (IsDetailMessageActuallyVisible(DetailText ?? string.Empty))
-            {
-                _detailMessage.IsVisible = true;
-                return;
-            }
-
-            _detailMessage.IsVisible = false;
-        }
-
-        private void CompleteActionButtonVisibility()
-        {
-            if (IsActionButtonActuallyVisible(ActionCommand))
-            {
-                _actionButton.IsVisible = true;
-                _actionButton.InputTransparent = false;
-                UpdateInputTransparency();
-                return;
-            }
-
-            _actionButton.IsVisible = false;
-            _actionButton.InputTransparent = true;
-            UpdateInputTransparency();
-        }
-
-        private static bool IsDetailMessageActuallyVisible(string detailText)
-        {
-            return !string.IsNullOrWhiteSpace(detailText);
-        }
-
-        private bool IsActionButtonActuallyVisible(ICommand? actionCommand)
-        {
-            return IsActionVisible && actionCommand is not null;
-        }
-
-        private void UpdateInputTransparency()
-        {
-            InputTransparent = !IsVisible || !IsStatusVisible || !IsActionButtonActuallyVisible(ActionCommand);
+            InputTransparent = !hasAction;
+            SemanticProperties.SetDescription(
+                this,
+                string.Join(", ", new[] { text, detailText }
+                    .Where(value => !string.IsNullOrWhiteSpace(value))));
         }
     }
 }

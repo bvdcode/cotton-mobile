@@ -46,7 +46,7 @@
                                              LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
                                              ActionIconData="{x:Static controls:IconPathData.Close}"
                                              Command="{Binding LogoutCommand}"
-                                             IsActionEnabled="{Binding Display.IsLogoutEnabled}"
+                                             IsActionEnabled="{Binding IsLogoutEnabled}"
                                              GridStyleResourceKey="M3SettingsListItemGrid"
                                              TextStyleResourceKey="M3CardSupportingStrongLine"
                                              ActionIconButtonStyleResourceKey="M3DestructiveIconButton"

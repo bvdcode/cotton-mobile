@@ -9,7 +9,7 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageViewModel
+    public class MainPageViewModel : ViewModelBase
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "";
@@ -65,6 +65,7 @@ namespace Cotton.Mobile.ViewModels
 
             Display = new MainPageDisplayState(options.DefaultInstanceUrl);
             Sync = sync;
+            Sync.PropertyChanged += OnSyncPropertyChanged;
             ApplicationVersionText = CreateApplicationVersionText(applicationMetadata);
 
             ConnectCommand = new AsyncCommand(
@@ -78,7 +79,7 @@ namespace Cotton.Mobile.ViewModels
             LogoutCommand = new AsyncCommand(
                 ConfirmLogoutAsync,
                 LogUnhandledCommandException,
-                () => Display.IsLogoutEnabled);
+                () => IsLogoutEnabled);
             PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
             ShowSyncCommand = new AsyncCommand(ShowSyncAsync, LogUnhandledCommandException);
             ShowProfileCommand = new AsyncCommand(ShowProfileAsync, LogUnhandledCommandException);
@@ -89,6 +90,8 @@ namespace Cotton.Mobile.ViewModels
         public SyncSettingsViewModel Sync { get; }
 
         public string ApplicationVersionText { get; }
+
+        public bool IsLogoutEnabled => Display.IsLogoutEnabled && !Sync.IsBusy;
 
         public AsyncCommand ConnectCommand { get; }
 
@@ -413,6 +416,18 @@ namespace Cotton.Mobile.ViewModels
             ConnectCommand.RaiseCanExecuteChanged();
             CancelAuthorizationCommand.RaiseCanExecuteChanged();
             LogoutCommand.RaiseCanExecuteChanged();
+            OnPropertyChanged(nameof(IsLogoutEnabled));
+        }
+
+        private void OnSyncPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            if (!string.Equals(e.PropertyName, nameof(SyncSettingsViewModel.IsBusy), StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            LogoutCommand.RaiseCanExecuteChanged();
+            OnPropertyChanged(nameof(IsLogoutEnabled));
         }
 
         private void LogUnhandledCommandException(Exception exception)

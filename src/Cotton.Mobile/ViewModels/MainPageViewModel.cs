@@ -291,7 +291,7 @@ namespace Cotton.Mobile.ViewModels
             Display.InstanceUrl = instanceUri.AbsoluteUri;
             Display.ShowAuthenticated(profile, status);
             RefreshCommands();
-            await Sync.LoadForInstanceAsync(instanceUri);
+            await Sync.LoadForInstanceAsync(instanceUri, profile.AccountScopeKey);
         }
 
         private async Task<bool> TryShowCachedSessionAsync(Uri instanceUri)

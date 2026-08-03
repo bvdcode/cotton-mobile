@@ -13,10 +13,12 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(user);
 
+            string displayName = CreateDisplayName(user);
             return new MainPageProfile(
-                CreateDisplayName(user),
+                displayName,
                 string.IsNullOrWhiteSpace(user.Email) ? null : user.Email.Trim(),
-                CreateInstanceDisplayName(instanceUri));
+                CreateInstanceDisplayName(instanceUri),
+                CreateAccountScopeKey(user, displayName));
         }
 
         public string ResolveStatusMessage(CottonSessionResult result, string unauthenticatedStatus)
@@ -78,6 +80,17 @@ namespace Cotton.Mobile.ViewModels
             return string.IsNullOrWhiteSpace(path) || string.Equals(path, "/", StringComparison.Ordinal)
                 ? authority
                 : $"{authority}{path}";
+        }
+
+        private static string CreateAccountScopeKey(UserDto user, string displayName)
+        {
+            string identity = !string.IsNullOrWhiteSpace(user.Username)
+                ? user.Username
+                : !string.IsNullOrWhiteSpace(user.Email)
+                    ? user.Email
+                    : displayName;
+            CottonAccountScopeKey.TryCreateFromUsername(identity, out string accountScopeKey);
+            return accountScopeKey;
         }
     }
 }

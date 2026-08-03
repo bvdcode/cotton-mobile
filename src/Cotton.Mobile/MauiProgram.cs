@@ -41,10 +41,13 @@ namespace Cotton.Mobile
             services.AddSingleton(_ => new HttpClient());
 
 #if ANDROID
+            services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
+            services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidDocumentTreeSyncLocalRootPickerService>();
             services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
 #else
+            services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
             services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, DisabledCottonDeviceToCloudLocalFileContentSource>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
@@ -79,6 +82,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
             services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
+            services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
 
             services.AddSingleton(FileDownloadCacheOptions.Default);
             services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
@@ -86,6 +90,8 @@ namespace Cotton.Mobile
             services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
             services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
             services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
+            services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
+            services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonCloudToDeviceSyncFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
 

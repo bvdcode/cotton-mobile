@@ -15,10 +15,12 @@ namespace Cotton.Mobile.ViewModels
         private readonly CottonCloudToDeviceSyncCoordinator _syncCoordinator;
         private readonly CottonDeviceToCloudSyncCoordinator _deviceToCloudSyncCoordinator;
         private readonly CottonBidirectionalSyncCoordinator _bidirectionalSyncCoordinator;
+        private readonly SyncRootSetupCoordinator _rootSetupCoordinator;
         private readonly INetworkAccessService _networkAccess;
         private readonly IUserDialogService _dialogService;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
+        private string? _accountScopeKey;
         private bool _isBusy;
         private bool _canRunAll;
         private string _summaryText = "No folders syncing";
@@ -32,6 +34,7 @@ namespace Cotton.Mobile.ViewModels
             CottonCloudToDeviceSyncCoordinator syncCoordinator,
             CottonDeviceToCloudSyncCoordinator deviceToCloudSyncCoordinator,
             CottonBidirectionalSyncCoordinator bidirectionalSyncCoordinator,
+            SyncRootSetupCoordinator rootSetupCoordinator,
             INetworkAccessService networkAccess,
             IUserDialogService dialogService,
             ILogger<SyncSettingsViewModel> logger)
@@ -42,6 +45,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(syncCoordinator);
             ArgumentNullException.ThrowIfNull(deviceToCloudSyncCoordinator);
             ArgumentNullException.ThrowIfNull(bidirectionalSyncCoordinator);
+            ArgumentNullException.ThrowIfNull(rootSetupCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
@@ -52,12 +56,13 @@ namespace Cotton.Mobile.ViewModels
             _syncCoordinator = syncCoordinator;
             _deviceToCloudSyncCoordinator = deviceToCloudSyncCoordinator;
             _bidirectionalSyncCoordinator = bidirectionalSyncCoordinator;
+            _rootSetupCoordinator = rootSetupCoordinator;
             _networkAccess = networkAccess;
             _dialogService = dialogService;
             _logger = logger;
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
+            AddRootCommand = new AsyncCommand(AddRootAsync, LogUnhandledCommandException, CanAddRoot);
             RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, CanRunAll);
-            OpenFilesCommand = new AsyncCommand(OpenFilesAsync, LogUnhandledCommandException, () => !IsBusy);
             RunRootCommand = new AsyncCommand<CottonSyncRootListItem>(
                 RunRootAsync,
                 LogUnhandledCommandException,
@@ -78,9 +83,9 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand LoadCommand { get; }
 
-        public AsyncCommand RunAllCommand { get; }
+        public AsyncCommand AddRootCommand { get; }
 
-        public AsyncCommand OpenFilesCommand { get; }
+        public AsyncCommand RunAllCommand { get; }
 
         public AsyncCommand<CottonSyncRootListItem> RunRootCommand { get; }
 
@@ -100,8 +105,8 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     LoadCommand.RaiseCanExecuteChanged();
+                    AddRootCommand.RaiseCanExecuteChanged();
                     RunAllCommand.RaiseCanExecuteChanged();
-                    OpenFilesCommand.RaiseCanExecuteChanged();
                     RunRootCommand.RaiseCanExecuteChanged();
                     StopRootCommand.RaiseCanExecuteChanged();
                     PauseRootCommand.RaiseCanExecuteChanged();
@@ -149,22 +154,26 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsRunAllVisible => _canRunAll;
 
-        public void Configure(Uri instanceUri)
+        public void Configure(Uri instanceUri, string accountScopeKey)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
 
             _instanceUri = instanceUri;
+            _accountScopeKey = accountScopeKey.Trim();
+            AddRootCommand.RaiseCanExecuteChanged();
         }
 
-        public async Task LoadForInstanceAsync(Uri instanceUri)
+        public async Task LoadForInstanceAsync(Uri instanceUri, string accountScopeKey)
         {
-            Configure(instanceUri);
+            Configure(instanceUri, accountScopeKey);
             await LoadAsync();
         }
 
         public void Clear()
         {
             _instanceUri = null;
+            _accountScopeKey = null;
             Roots.ReplaceWith([]);
             SummaryText = "No folders syncing";
             Status = null;
@@ -172,6 +181,53 @@ namespace Cotton.Mobile.ViewModels
             _canRunAll = false;
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.RaiseCanExecuteChanged();
+            AddRootCommand.RaiseCanExecuteChanged();
+        }
+
+        private async Task AddRootAsync()
+        {
+            Uri? instanceUri = _instanceUri;
+            string? accountScopeKey = _accountScopeKey;
+            if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
+            {
+                Status = "Could not add a sync folder for this account.";
+                return;
+            }
+
+            if (!_networkAccess.HasInternetAccess)
+            {
+                Status = "Connect to the internet to add a sync folder.";
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                SyncRootSetupResult result = await _rootSetupCoordinator.AddBidirectionalRootAsync(
+                    instanceUri,
+                    accountScopeKey);
+                if (result.Status == SyncRootSetupStatus.Cancelled)
+                {
+                    Status = null;
+                    return;
+                }
+
+                await LoadRootsAsync(instanceUri);
+                Status = result.Message;
+            }
+            catch (OperationCanceledException)
+            {
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to add Cotton mobile sync root.");
+                Status = "Could not add this sync folder.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private async Task LoadAsync()
@@ -221,7 +277,7 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
                 CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -242,7 +298,7 @@ namespace Cotton.Mobile.ViewModels
 
                 Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
                 string completedStatus = await RunRootAndCreateCompletedStatusAsync(instanceUri, root);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 ShowRoots(refreshedRoots, refreshedPausedIds);
                 Status = completedStatus;
@@ -277,12 +333,12 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
                 (CottonCloudToDeviceSyncRunSummary CloudToDeviceSummary,
                     CottonDeviceToCloudSyncRunSummary DeviceToCloudSummary,
                     CottonBidirectionalSyncRunSummary BidirectionalSummary) summaries =
                     await RunAllRootsAsync(instanceUri, roots);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 ShowRoots(refreshedRoots, refreshedPausedIds);
                 Status = CottonSyncSettingsRunStatusText.CreateCompletedStatus(
@@ -301,26 +357,6 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        private async Task OpenFilesAsync()
-        {
-            INavigation? navigation = Shell.Current?.Navigation;
-            if (navigation is null || navigation.NavigationStack.Count <= 1)
-            {
-                Status = "Open Files from the main screen.";
-                return;
-            }
-
-            try
-            {
-                await navigation.PopAsync();
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Cotton mobile sync settings navigation back failed.");
-                Status = "Could not open Files.";
-            }
-        }
-
         private async Task StopRootAsync(CottonSyncRootListItem item)
         {
             ArgumentNullException.ThrowIfNull(item);
@@ -335,7 +371,7 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
                 CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -359,7 +395,7 @@ namespace Cotton.Mobile.ViewModels
                 bool removed = await _rootStore.RemoveAsync(instanceUri, root.Id);
                 await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused: false);
                 await _manifestStore.ClearAsync(instanceUri, root);
-                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> refreshedRoots = await LoadCurrentAccountRootsAsync(instanceUri);
                 IReadOnlySet<Guid> refreshedPausedIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 ShowRoots(refreshedRoots, refreshedPausedIds);
                 Status = removed
@@ -393,7 +429,7 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+                IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
                 CottonSyncRootSnapshot? root = roots.FirstOrDefault(root => root.Id == item.Id);
                 IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
                 if (root is null)
@@ -425,9 +461,23 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task LoadRootsAsync(Uri instanceUri)
         {
-            IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+            IReadOnlyList<CottonSyncRootSnapshot> roots = await LoadCurrentAccountRootsAsync(instanceUri);
             IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
             ShowRoots(roots, pausedRootIds);
+        }
+
+        private async Task<IReadOnlyList<CottonSyncRootSnapshot>> LoadCurrentAccountRootsAsync(
+            Uri instanceUri)
+        {
+            string accountScopeKey = _accountScopeKey
+                ?? throw new InvalidOperationException("Sync account is not configured.");
+            IReadOnlyList<CottonSyncRootSnapshot> roots = await _rootStore.LoadAsync(instanceUri);
+            return roots
+                .Where(root => string.Equals(
+                    root.AccountScopeKey,
+                    accountScopeKey,
+                    StringComparison.Ordinal))
+                .ToList();
         }
 
         private async Task<string> RunRootAndCreateCompletedStatusAsync(
@@ -594,6 +644,11 @@ namespace Cotton.Mobile.ViewModels
         private bool CanRunAll()
         {
             return !IsBusy && _canRunAll;
+        }
+
+        private bool CanAddRoot()
+        {
+            return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }
 
         private void LogUnhandledCommandException(Exception exception)

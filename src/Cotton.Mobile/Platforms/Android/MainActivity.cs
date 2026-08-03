@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Android.App;
+using Android.Content;
 using Android.Content.PM;
 using Android.Content.Res;
 using Android.OS;
@@ -37,6 +38,18 @@ namespace Cotton.Mobile
             base.OnResume();
             ApplySystemBars();
             GetForegroundService()?.NotifyResumed();
+        }
+
+        protected override void OnActivityResult(int requestCode, Result resultCode, Intent? data)
+        {
+            IAndroidDocumentTreeActivityResultBridge? resultBridge = IPlatformApplication.Current?.Services
+                .GetService<IAndroidDocumentTreeActivityResultBridge>();
+            if (resultBridge?.TryHandleActivityResult(requestCode, resultCode, data) == true)
+            {
+                return;
+            }
+
+            base.OnActivityResult(requestCode, resultCode, data);
         }
 
         protected override void OnStop()

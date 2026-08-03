@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Services
         private const string NameKey = "Cotton.Mobile.Profile.Name";
         private const string EmailKey = "Cotton.Mobile.Profile.Email";
         private const string InstanceDisplayKey = "Cotton.Mobile.Profile.InstanceDisplay";
+        private const string AccountScopeKey = "Cotton.Mobile.Profile.AccountScope";
 
         private readonly IPreferences _preferences;
         private readonly ILogger<PreferencesCottonProfileCacheStore> _logger;
@@ -45,14 +46,17 @@ namespace Cotton.Mobile.Services
                 string name = _preferences.Get(NameKey, string.Empty) ?? string.Empty;
                 string? email = _preferences.Get(EmailKey, string.Empty);
                 string instanceDisplay = _preferences.Get(InstanceDisplayKey, string.Empty) ?? string.Empty;
-                if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(instanceDisplay))
+                string accountScopeKey = _preferences.Get(AccountScopeKey, string.Empty) ?? string.Empty;
+                if (string.IsNullOrWhiteSpace(name)
+                    || string.IsNullOrWhiteSpace(instanceDisplay)
+                    || string.IsNullOrWhiteSpace(accountScopeKey))
                 {
                     ClearBestEffort("incomplete profile cache");
                     return Task.FromResult<MainPageProfile?>(null);
                 }
 
                 return Task.FromResult<MainPageProfile?>(
-                    new MainPageProfile(name, email, instanceDisplay));
+                    new MainPageProfile(name, email, instanceDisplay, accountScopeKey));
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -86,6 +90,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 _preferences.Set(InstanceDisplayKey, profile.Instance);
+                _preferences.Set(AccountScopeKey, profile.AccountScopeKey);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -106,6 +111,7 @@ namespace Cotton.Mobile.Services
             RemoveKey(NameKey, failures);
             RemoveKey(EmailKey, failures);
             RemoveKey(InstanceDisplayKey, failures);
+            RemoveKey(AccountScopeKey, failures);
             if (failures.Count == 1)
             {
                 throw new InvalidOperationException("Failed to clear one Cotton mobile cached profile value.", failures[0]);
@@ -126,6 +132,7 @@ namespace Cotton.Mobile.Services
             RemoveKey(NameKey, failures);
             RemoveKey(EmailKey, failures);
             RemoveKey(InstanceDisplayKey, failures);
+            RemoveKey(AccountScopeKey, failures);
             foreach (Exception exception in failures)
             {
                 _logger.LogWarning(exception, "Failed to clear Cotton mobile cached profile after {Reason}.", reason);

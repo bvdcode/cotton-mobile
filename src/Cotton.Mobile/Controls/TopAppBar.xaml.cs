@@ -13,7 +13,7 @@ namespace Cotton.Mobile.Controls
         private const string DefaultActionClusterStyleResourceKey = "M3TopAppBarActionCluster";
         private const string DefaultActionIconButtonStyleResourceKey = "M3TopAppBarIconButton";
         private const string DefaultSurfaceStyleResourceKey = "M3TopAppBarSurface";
-        private readonly Command _backCommand;
+        private readonly Command _defaultBackCommand;
         private bool _isNavigatingBack;
 
         public static readonly BindableProperty TitleTextProperty = BindableProperty.Create(
@@ -27,6 +27,11 @@ namespace Cotton.Mobile.Controls
             typeof(bool),
             typeof(TopAppBar),
             true);
+
+        public static readonly BindableProperty BackCommandProperty = BindableProperty.Create(
+            nameof(BackCommand),
+            typeof(ICommand),
+            typeof(TopAppBar));
 
         public static readonly BindableProperty UseDarkThemeProperty = BindableProperty.Create(
             nameof(UseDarkTheme),
@@ -115,12 +120,17 @@ namespace Cotton.Mobile.Controls
 
         public TopAppBar()
         {
-            _backCommand = new Command(ExecuteBackCommand, CanNavigateBack);
+            _defaultBackCommand = new Command(ExecuteBackCommand, CanNavigateBack);
+            BackCommand = _defaultBackCommand;
             InitializeComponent();
             UpdateVisualState();
         }
 
-        public ICommand BackCommand => _backCommand;
+        public ICommand BackCommand
+        {
+            get => (ICommand)GetValue(BackCommandProperty);
+            set => SetValue(BackCommandProperty, value);
+        }
 
         public bool IsActionClusterVisible =>
             IsVisibleAction(PrimaryIconData, PrimaryCommand, IsPrimaryActionVisible)
@@ -225,7 +235,7 @@ namespace Cotton.Mobile.Controls
             }
 
             _isNavigatingBack = true;
-            _backCommand.ChangeCanExecute();
+            _defaultBackCommand.ChangeCanExecute();
 
             try
             {
@@ -239,7 +249,7 @@ namespace Cotton.Mobile.Controls
             finally
             {
                 _isNavigatingBack = false;
-                _backCommand.ChangeCanExecute();
+                _defaultBackCommand.ChangeCanExecute();
             }
         }
 

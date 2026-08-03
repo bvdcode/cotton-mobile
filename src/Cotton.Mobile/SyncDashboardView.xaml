@@ -10,13 +10,17 @@
 
     <controls:ScreenShellView>
         <controls:TopAppBar IsBackActionVisible="False"
-                            PrimaryIconData="{x:Static controls:IconPathData.Play}"
-                            PrimaryCommand="{Binding RunAllCommand}"
-                            PrimaryDescription="Run all sync folders"
-                            IsPrimaryActionVisible="{Binding IsRunAllVisible}"
-                            SecondaryIconData="{x:Static controls:IconPathData.Refresh}"
-                            SecondaryCommand="{Binding LoadCommand}"
-                            SecondaryDescription="Refresh sync folders" />
+                            PrimaryIconData="{x:Static controls:IconPathData.Plus}"
+                            PrimaryCommand="{Binding AddRootCommand}"
+                            PrimaryDescription="Add sync folder"
+                            SecondaryIconData="{x:Static controls:IconPathData.Play}"
+                            SecondaryCommand="{Binding RunAllCommand}"
+                            SecondaryDescription="Run all sync folders"
+                            IsSecondaryActionVisible="{Binding IsRunAllVisible}"
+                            TertiaryIconData="{x:Static controls:IconPathData.Refresh}"
+                            TertiaryCommand="{Binding LoadCommand}"
+                            TertiaryDescription="Refresh sync folders"
+                            IsTertiaryActionVisible="True" />
 
         <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="Sync"
@@ -32,8 +36,11 @@
                                      IsStateVisible="{Binding IsEmptyVisible}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
                                      Title="No sync folders"
-                                     Body="Add a folder when you are ready to start syncing."
-                                     IsActionVisible="False" />
+                                     Body="Choose a cloud folder and a folder on this device."
+                                     ActionIconData="{x:Static controls:IconPathData.Plus}"
+                                     ActionCommand="{Binding AddRootCommand}"
+                                     ActionSemanticDescription="Add sync folder"
+                                     IsActionVisible="True" />
 
             <controls:MaterialCollectionView Grid.Row="2"
                                              IsContentVisible="{Binding IsListVisible}"

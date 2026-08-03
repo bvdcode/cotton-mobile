@@ -64,7 +64,8 @@ namespace Cotton.Mobile.Tests
             var profile = new MainPageProfile(
                 "Mobile Demo",
                 "demo@example.com",
-                "app.cottoncloud.dev");
+                "app.cottoncloud.dev",
+                "user:mobile-demo");
 
             display.ShowAuthenticated(profile);
 
@@ -82,7 +83,11 @@ namespace Cotton.Mobile.Tests
         public void Authenticated_navigation_switches_between_two_stable_destinations()
         {
             var display = new MainPageDisplayState("https://app.cottoncloud.dev");
-            display.ShowAuthenticated(new MainPageProfile("Mobile Demo", null, "app.cottoncloud.dev"));
+            display.ShowAuthenticated(new MainPageProfile(
+                "Mobile Demo",
+                null,
+                "app.cottoncloud.dev",
+                "user:mobile-demo"));
 
             display.ShowDestination(AppNavigationDestination.Profile);
 

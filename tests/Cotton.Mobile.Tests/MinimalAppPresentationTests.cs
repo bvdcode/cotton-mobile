@@ -49,6 +49,22 @@ namespace Cotton.Mobile.Tests
             Assert.Single(elements, name => name == "MaterialCollectionView");
             Assert.Single(elements, name => name == "ScreenStatusView");
             Assert.Contains("IsBackActionVisible=\"False\"", page.ToString(), StringComparison.Ordinal);
+            Assert.Contains("ActionCommand=\"{Binding AddRootCommand}\"", page.ToString(), StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public void Sync_setup_selects_cloud_and_device_folders_for_bidirectional_sync()
+        {
+            XDocument picker = ReadXaml("src/Cotton.Mobile/CloudFolderPickerPage.xaml");
+            string coordinator = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Services/SyncRootSetupCoordinator.cs");
+
+            Assert.Single(picker.Descendants(), element => element.Name.LocalName == "MaterialCollectionView");
+            Assert.Contains("PrimaryCommand=\"{Binding ChooseCommand}\"", picker.ToString(), StringComparison.Ordinal);
+            Assert.Contains("_cloudFolderPicker", coordinator, StringComparison.Ordinal);
+            Assert.Contains(".PickAsync(instanceUri", coordinator, StringComparison.Ordinal);
+            Assert.Contains("_localRootPicker", coordinator, StringComparison.Ordinal);
+            Assert.Contains("EnableUserSelectedDocumentTreeRootAsync", coordinator, StringComparison.Ordinal);
         }
 
         [Fact]
@@ -66,8 +82,10 @@ namespace Cotton.Mobile.Tests
         public void Root_top_bars_can_hide_back_navigation()
         {
             string topAppBar = RepositoryPath.ReadText("src/Cotton.Mobile/Controls/TopAppBar.xaml");
+            string topAppBarCode = RepositoryPath.ReadText("src/Cotton.Mobile/Controls/TopAppBar.xaml.cs");
 
             Assert.Contains("Path=IsBackActionVisible", topAppBar, StringComparison.Ordinal);
+            Assert.Contains("BackCommandProperty", topAppBarCode, StringComparison.Ordinal);
         }
 
         private static XDocument ReadXaml(string relativePath)

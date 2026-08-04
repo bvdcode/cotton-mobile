@@ -46,12 +46,14 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncLocalRootPermissionResolver, AndroidDocumentTreeSyncLocalRootPermissionResolver>();
             services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
 #else
             services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
             services.AddSingleton<ICottonSyncLocalRootPermissionResolver, StoredCottonSyncLocalRootPermissionResolver>();
             services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, DisabledCottonDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, DisabledCottonDeviceToCloudLocalFileOperator>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
 #endif
         }
@@ -84,6 +86,8 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
             services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
+            services.AddSingleton<ICottonUploadReceiptPathProvider, CottonUploadReceiptPathProvider>();
+            services.AddSingleton<ICottonUploadReceiptStore, FileSystemCottonUploadReceiptStore>();
             services.AddSingleton<SyncRootManager>();
             services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
             services.AddSingleton<CottonSyncRootReconnectService>();
@@ -110,6 +114,11 @@ namespace Cotton.Mobile
                 new CottonDeviceToCloudSyncPlanExecutor(
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonSyncedFileManifestStore>()));
+            services.AddSingleton(serviceProvider =>
+                new CottonUploadOnlySyncPlanExecutor(
+                    serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
+                    serviceProvider.GetRequiredService<ICottonDeviceToCloudLocalFileOperator>(),
+                    serviceProvider.GetRequiredService<ICottonUploadReceiptStore>()));
             services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
             services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
             services.AddSingleton<CottonBidirectionalSyncCoordinator>();

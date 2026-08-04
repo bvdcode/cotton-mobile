@@ -142,6 +142,12 @@ namespace Cotton.Mobile.Services
                     item.LocalUpdatedAtUtc.Value.ToString("O", CultureInfo.InvariantCulture);
             }
 
+            if (item.UploadOperationId.HasValue)
+            {
+                metadata[CottonFileUploadMetadataKeys.UploadOperationId] =
+                    item.UploadOperationId.Value.ToString("N");
+            }
+
             return metadata;
         }
 

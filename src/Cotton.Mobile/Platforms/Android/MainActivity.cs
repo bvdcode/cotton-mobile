@@ -30,6 +30,12 @@ namespace Cotton.Mobile
         protected override void OnCreate(Bundle? savedInstanceState)
         {
             base.OnCreate(savedInstanceState);
+
+            if (OperatingSystem.IsAndroidVersionAtLeast(31))
+            {
+                SplashScreen.SetOnExitAnimationListener(new ImmediateSplashScreenExitListener(this));
+            }
+
             ApplySystemBars();
         }
 

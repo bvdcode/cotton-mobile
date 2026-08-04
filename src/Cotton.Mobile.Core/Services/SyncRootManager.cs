@@ -8,19 +8,23 @@ namespace Cotton.Mobile.Services
         private readonly ICottonSyncRootStore _rootStore;
         private readonly ICottonSyncRootPauseStore _pauseStore;
         private readonly ICottonSyncedFileManifestStore _manifestStore;
+        private readonly ICottonSyncLocalRootPermissionResolver _permissionResolver;
 
         public SyncRootManager(
             ICottonSyncRootStore rootStore,
             ICottonSyncRootPauseStore pauseStore,
-            ICottonSyncedFileManifestStore manifestStore)
+            ICottonSyncedFileManifestStore manifestStore,
+            ICottonSyncLocalRootPermissionResolver permissionResolver)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
             ArgumentNullException.ThrowIfNull(pauseStore);
             ArgumentNullException.ThrowIfNull(manifestStore);
+            ArgumentNullException.ThrowIfNull(permissionResolver);
 
             _rootStore = rootStore;
             _pauseStore = pauseStore;
             _manifestStore = manifestStore;
+            _permissionResolver = permissionResolver;
         }
 
         public async Task<SyncRootCollectionSnapshot> LoadAsync(
@@ -36,6 +40,7 @@ namespace Cotton.Mobile.Services
                     root.AccountScopeKey,
                     accountScopeKey,
                     StringComparison.Ordinal))
+                .Select(ResolvePermission)
                 .ToList();
             IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
             return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds);
@@ -61,6 +66,28 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(root);
 
             await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused);
+        }
+
+        private CottonSyncRootSnapshot ResolvePermission(CottonSyncRootSnapshot root)
+        {
+            CottonSyncRootPermissionStatus permissionStatus = _permissionResolver.Resolve(root.LocalRoot);
+            if (permissionStatus == root.LocalRoot.PermissionStatus)
+            {
+                return root;
+            }
+
+            CottonSyncLocalRootSnapshot localRoot = new(
+                root.LocalRoot.StorageKind,
+                root.LocalRoot.RootKey,
+                root.LocalRoot.DisplayName,
+                permissionStatus);
+            return new CottonSyncRootSnapshot(
+                root.Id,
+                root.InstanceUri,
+                root.AccountScopeKey,
+                root.CloudFolder,
+                localRoot,
+                root.Direction);
         }
     }
 }

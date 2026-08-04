@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.SyncRootSetupOptionsPage"
+             x:DataType="viewModels:SyncRootSetupOptionsViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static localization:SyncRootSetupResources.PageTitle}">
+
+    <controls:ScreenShellView InputTransparent="{Binding IsInteractionLocked}">
+        <controls:TopAppBar TitleText="{x:Static localization:SyncRootSetupResources.AppBarTitle}"
+                            BackCommand="{Binding CancelCommand}"
+                            PrimaryIconData="{x:Static controls:IconPathData.Check}"
+                            PrimaryCommand="{Binding ContinueCommand}"
+                            PrimaryDescription="{x:Static localization:SyncRootSetupResources.ContinueDescription}" />
+
+        <controls:ScreenScrollBodyView Grid.Row="1">
+            <controls:ScreenHeaderView Title="{x:Static localization:SyncRootSetupResources.Heading}"
+                                       SupportingText="{x:Static localization:SyncRootSetupResources.SupportingText}"
+                                       IsTitleMultiline="True"
+                                       IsSupportingTextMultiline="True" />
+
+            <VerticalStackLayout Spacing="{StaticResource Space12}">
+                <controls:SyncRootModeOptionView Title="{x:Static localization:SyncRootSetupResources.UploadOnlyTitle}"
+                                                 SupportingText="{x:Static localization:SyncRootSetupResources.UploadOnlySupportingText}"
+                                                 IconData="{x:Static controls:IconPathData.Upload}"
+                                                 IsSelected="{Binding IsUploadOnlySelected}"
+                                                 Command="{Binding SelectUploadOnlyCommand}" />
+
+                <controls:SyncRootModeOptionView Title="{x:Static localization:SyncRootSetupResources.BidirectionalTitle}"
+                                                 SupportingText="{x:Static localization:SyncRootSetupResources.BidirectionalSupportingText}"
+                                                 IconData="{x:Static controls:IconPathData.Transfer}"
+                                                 IsSelected="{Binding IsBidirectionalSelected}"
+                                                 Command="{Binding SelectBidirectionalCommand}" />
+            </VerticalStackLayout>
+
+            <Border IsVisible="{Binding IsDeleteOptionVisible}"
+                    Style="{StaticResource M3ContentCard}">
+                <Grid ColumnSpacing="{StaticResource Space12}"
+                      VerticalOptions="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <VerticalStackLayout Style="{StaticResource M3CardTextStack}"
+                                         VerticalOptions="Center">
+                        <Label Text="{x:Static localization:SyncRootSetupResources.DeleteOriginalsTitle}"
+                               Style="{StaticResource M3CardTitle}" />
+                        <Label Text="{x:Static localization:SyncRootSetupResources.DeleteOriginalsSupportingText}"
+                               Style="{StaticResource M3BodyMedium}" />
+                    </VerticalStackLayout>
+
+                    <Switch Grid.Column="1"
+                            IsToggled="{Binding DeleteOriginalsAfterUpload}"
+                            OnColor="{AppThemeBinding Light={StaticResource M3LightPrimary}, Dark={StaticResource M3DarkAction}}"
+                            SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.DeleteOriginalsTitle}"
+                            VerticalOptions="Center" />
+                </Grid>
+            </Border>
+        </controls:ScreenScrollBodyView>
+    </controls:ScreenShellView>
+</ContentPage>

@@ -20,7 +20,7 @@ namespace Cotton.Mobile
 				{
 					Context context = handler.PlatformView.Context
 						?? throw new InvalidOperationException("Entry context was not found.");
-					Resources resources = context.Resources
+					Android.Content.Res.Resources resources = context.Resources
 						?? throw new InvalidOperationException("Entry resources were not found.");
 
 					handler.PlatformView.BackgroundTintList = ColorStateList.ValueOf(

@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Choose sync mode</value>
+  </data>
+  <data name="AppBarTitle" xml:space="preserve">
+    <value>Sync mode</value>
+  </data>
+  <data name="ContinueDescription" xml:space="preserve">
+    <value>Continue sync setup</value>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>How should this folder sync?</value>
+  </data>
+  <data name="SupportingText" xml:space="preserve">
+    <value>Choose how files move between this device and Cotton Cloud.</value>
+  </data>
+  <data name="UploadOnlyTitle" xml:space="preserve">
+    <value>Upload new files</value>
+  </data>
+  <data name="UploadOnlySupportingText" xml:space="preserve">
+    <value>Upload each device file once. Cloud changes never remove or re-upload it.</value>
+  </data>
+  <data name="BidirectionalTitle" xml:space="preserve">
+    <value>Two-way sync</value>
+  </data>
+  <data name="BidirectionalSupportingText" xml:space="preserve">
+    <value>Keep the selected device folder and cloud folder matched.</value>
+  </data>
+  <data name="SelectedModeDescriptionFormat" xml:space="preserve">
+    <value>{0}, selected.</value>
+  </data>
+  <data name="AvailableModeDescriptionFormat" xml:space="preserve">
+    <value>{0}, not selected. Double tap to select.</value>
+  </data>
+  <data name="DeleteOriginalsTitle" xml:space="preserve">
+    <value>Delete originals after upload</value>
+  </data>
+  <data name="DeleteOriginalsSupportingText" xml:space="preserve">
+    <value>Delete the device copy only after Cotton Cloud confirms the upload.</value>
+  </data>
+  <data name="UnavailableMessage" xml:space="preserve">
+    <value>Folder sync is not available on this device.</value>
+  </data>
+  <data name="AlreadyConfiguredMessage" xml:space="preserve">
+    <value>This folder is already configured.</value>
+  </data>
+  <data name="DirectionConflictMessage" xml:space="preserve">
+    <value>This local folder already uses a different sync mode.</value>
+  </data>
+  <data name="UploadOnlyCreatedMessageFormat" xml:space="preserve">
+    <value>Uploading new files to {0}.</value>
+  </data>
+  <data name="BidirectionalCreatedMessageFormat" xml:space="preserve">
+    <value>Syncing {0} both ways.</value>
+  </data>
+  <data name="UploadOnlyUpdatedMessageFormat" xml:space="preserve">
+    <value>Updated uploads to {0}.</value>
+  </data>
+  <data name="BidirectionalUpdatedMessageFormat" xml:space="preserve">
+    <value>Updated two-way sync for {0}.</value>
+  </data>
+  <data name="ReconnectedMessageFormat" xml:space="preserve">
+    <value>Reconnected {0}.</value>
+  </data>
+</root>

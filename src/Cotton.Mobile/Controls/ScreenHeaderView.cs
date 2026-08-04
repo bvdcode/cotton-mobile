@@ -22,6 +22,13 @@ namespace Cotton.Mobile.Controls
             false,
             propertyChanged: OnVisualPropertyChanged);
 
+        public static readonly BindableProperty IsTitleMultilineProperty = BindableProperty.Create(
+            nameof(IsTitleMultiline),
+            typeof(bool),
+            typeof(ScreenHeaderView),
+            false,
+            propertyChanged: OnVisualPropertyChanged);
+
         public static readonly BindableProperty IsBusyProperty = BindableProperty.Create(
             nameof(IsBusy),
             typeof(bool),
@@ -100,6 +107,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsSupportingTextMultilineProperty, value);
         }
 
+        public bool IsTitleMultiline
+        {
+            get => (bool)GetValue(IsTitleMultilineProperty);
+            set => SetValue(IsTitleMultilineProperty, value);
+        }
+
         public bool IsBusy
         {
             get => (bool)GetValue(IsBusyProperty);
@@ -132,6 +145,10 @@ namespace Cotton.Mobile.Controls
             string supportingText = SupportingText ?? string.Empty;
 
             _title.Text = title;
+            _title.MaxLines = IsTitleMultiline ? 2 : 1;
+            _title.LineBreakMode = IsTitleMultiline
+                ? LineBreakMode.WordWrap
+                : LineBreakMode.TailTruncation;
             _supportingText.Text = supportingText;
             _supportingText.IsVisible = IsSupportingTextVisible && !string.IsNullOrWhiteSpace(supportingText);
             _supportingText.SetDynamicResource(

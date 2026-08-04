@@ -131,7 +131,7 @@ namespace Cotton.Mobile.Tests
             Assert.True(state.CanRunAny);
             Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
             Assert.Equal(CottonSyncDirection.DeviceToCloud, state.Items[0].Direction);
-            Assert.Equal("Device to cloud · On this device", state.Items[0].DetailText);
+            Assert.Equal("Upload new files · On this device", state.Items[0].DetailText);
             Assert.False(state.Items[0].CanRunNow);
         }
 
@@ -200,7 +200,7 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
-            Assert.Equal("Device to cloud · Device folder", item.DetailText);
+            Assert.Equal("Upload new files · Device folder", item.DetailText);
             Assert.Equal("Ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.IsReady);

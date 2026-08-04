@@ -126,7 +126,7 @@ namespace Cotton.Mobile.Services
             return direction switch
             {
                 CottonSyncDirection.CloudToDevice => "Cloud to device",
-                CottonSyncDirection.DeviceToCloud => "Device to cloud",
+                CottonSyncDirection.DeviceToCloud => "Upload new files",
                 CottonSyncDirection.Bidirectional => "Bidirectional",
                 _ => throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported."),
             };

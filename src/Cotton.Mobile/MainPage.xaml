@@ -46,7 +46,7 @@
             </controls:StackedContentView>
         </controls:ScreenScrollBodyView>
 
-        <controls:AuthLegalFooterView Grid.Row="0"
+        <controls:AuthLegalFooterView Grid.Row="1"
                                       IsFooterVisible="{Binding Display.IsLegalFooterVisible}"
                                       PrivacyCommand="{Binding PrivacyPolicyCommand}" />
 

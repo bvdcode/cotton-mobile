@@ -24,6 +24,20 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Auth_legal_footer_uses_its_own_layout_row()
+        {
+            XDocument page = ReadXaml("src/Cotton.Mobile/MainPage.xaml");
+            XElement footer = page
+                .Descendants()
+                .Single(element => element.Name.LocalName == "AuthLegalFooterView");
+            XAttribute row = footer
+                .Attributes()
+                .Single(attribute => attribute.Name.LocalName == "Grid.Row");
+
+            Assert.Equal("1", row.Value);
+        }
+
+        [Fact]
         public void App_navigation_bar_has_exactly_two_destinations()
         {
             string navigation = RepositoryPath.ReadText(

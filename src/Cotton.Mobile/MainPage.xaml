@@ -59,7 +59,7 @@
 
             <local:SyncDashboardView Grid.Row="0"
                                      BindingContext="{Binding Sync}"
-                                     IsVisible="{Binding Display.IsSyncDestinationVisible, Source={x:Reference RootPage}}" />
+                                     IsVisible="{Binding BindingContext.Display.IsSyncDestinationVisible, Source={x:Reference RootPage}}" />
 
             <local:ProfileView Grid.Row="0"
                                IsVisible="{Binding Display.IsProfileDestinationVisible}" />

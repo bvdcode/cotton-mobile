@@ -18,7 +18,7 @@ namespace Cotton.Mobile.Tests
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
         private readonly FileSystemCottonSyncRootPauseStore _pauseStore;
-        private readonly FileSystemCottonSyncedFileManifestStore _manifestStore;
+        private readonly FakeUploadReceiptStore _uploadReceiptStore;
         private readonly FakeDeviceToCloudLocalTreeReader _localTreeReader;
         private readonly FakeDeviceToCloudRemoteFolderContentSource _remoteFolderContentSource;
         private readonly FakeDeviceToCloudFileOperator _fileOperator;
@@ -34,19 +34,19 @@ namespace Cotton.Mobile.Tests
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
             _pauseStore = new FileSystemCottonSyncRootPauseStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
-            _manifestStore = new FileSystemCottonSyncedFileManifestStore(
-                new FixedSyncedFileManifestPathProvider(Path.Combine(_directory, "manifest")));
+            _uploadReceiptStore = new FakeUploadReceiptStore();
             _localTreeReader = new FakeDeviceToCloudLocalTreeReader();
             _remoteFolderContentSource = new FakeDeviceToCloudRemoteFolderContentSource();
             _fileOperator = new FakeDeviceToCloudFileOperator();
-            var executor = new CottonDeviceToCloudSyncPlanExecutor(
+            CottonUploadOnlySyncPlanExecutor executor = new(
                 _fileOperator,
-                _manifestStore,
+                new FakeDeviceToCloudLocalFileOperator(),
+                _uploadReceiptStore,
                 new FixedTimeProvider(SyncedAt));
             _coordinator = new CottonDeviceToCloudSyncCoordinator(
                 _rootStore,
                 _pauseStore,
-                _manifestStore,
+                _uploadReceiptStore,
                 _localTreeReader,
                 _remoteFolderContentSource,
                 executor);
@@ -65,30 +65,67 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_uploads_new_local_file_and_updates_manifest()
+        public async Task Run_uploads_new_local_file_and_records_uploaded_receipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _rootStore.SaveAsync(InstanceUri, [root]);
             _localTreeReader.SetContent(
                 root.Id,
-                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt")));
+                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", "document:alpha")));
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
-            _fileOperator.UploadedNewFiles["alpha.txt"] = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
+            _fileOperator.SetUploadResult("alpha.txt", FirstFileId, "\"etag-1\"");
 
             CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
 
             Assert.Equal(1, summary.RootCount);
             Assert.Equal(1, summary.CompletedRootCount);
             Assert.Equal(1, summary.UploadedCount);
+            Assert.Equal(0, summary.ConfirmedUploadCount);
             Assert.True(summary.HasAppliedChanges);
             Assert.Equal([root.Id], _localTreeReader.ReadRootIds);
             Assert.Equal([FolderId], _remoteFolderContentSource.RequestedFolderIds);
-            Assert.Equal(["alpha.txt"], _fileOperator.UploadedNewRelativePaths);
+            CottonDeviceToCloudSyncPlanItem uploadedItem = Assert.Single(_fileOperator.UploadedItems);
+            Assert.Equal("alpha.txt", uploadedItem.RelativePath);
+            Guid uploadOperationId = Assert.IsType<Guid>(uploadedItem.UploadOperationId);
 
-            CottonSyncedFileSnapshot manifestItem = Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
-            Assert.Equal(FirstFileId, manifestItem.FileId);
-            Assert.Equal("\"etag-1\"", manifestItem.ETag);
-            Assert.Equal(SyncedAt, manifestItem.SyncedAtUtc);
+            CottonUploadReceiptSnapshot receipt = Assert.Single(
+                await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+            Assert.True(receipt.IsUploaded);
+            Assert.Equal("document:alpha", receipt.LocalSourceId);
+            Assert.Equal(uploadOperationId, receipt.OperationId);
+            Assert.Equal(FirstFileId, receipt.RemoteFileId);
+            Assert.Equal("\"etag-1\"", receipt.RemoteETag);
+            Assert.Equal(SyncedAt, receipt.RecordedAtUtc);
+            Assert.Collection(
+                _uploadReceiptStore.SavedReceipts,
+                pending => Assert.True(pending.IsPending),
+                uploaded => Assert.True(uploaded.IsUploaded));
+        }
+
+        [Fact]
+        public async Task Run_does_not_upload_same_local_source_again_when_remote_file_disappears()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            await _rootStore.SaveAsync(InstanceUri, [root]);
+            _localTreeReader.SetContent(
+                root.Id,
+                CreateLocalContent(CreateLocalFile("photo.jpg", "photo.jpg", "document:photo")));
+            _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
+            _fileOperator.SetUploadResult("photo.jpg", FirstFileId, "\"etag-photo\"");
+
+            CottonDeviceToCloudSyncRunSummary firstRun = await _coordinator.RunAsync(InstanceUri);
+            _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
+            CottonDeviceToCloudSyncRunSummary secondRun = await _coordinator.RunAsync(InstanceUri);
+
+            Assert.Equal(1, firstRun.UploadedCount);
+            Assert.Equal(0, secondRun.UploadedCount);
+            Assert.Equal(1, secondRun.SkippedItemCount);
+            Assert.False(secondRun.HasAppliedChanges);
+            Assert.Single(_fileOperator.UploadedItems);
+            CottonUploadReceiptSnapshot receipt = Assert.Single(
+                await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+            Assert.True(receipt.IsUploaded);
+            Assert.Equal(FirstFileId, receipt.RemoteFileId);
         }
 
         [Fact]
@@ -99,25 +136,24 @@ namespace Cotton.Mobile.Tests
             await _rootStore.SaveAsync(InstanceUri, [root, secondRoot]);
             _localTreeReader.SetContent(
                 root.Id,
-                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt")));
+                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", "document:alpha")));
             _localTreeReader.SetContent(
                 secondRoot.Id,
-                CreateLocalContent(CreateLocalFile("beta.txt", "beta.txt")));
+                CreateLocalContent(CreateLocalFile("beta.txt", "beta.txt", "document:beta")));
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
             _remoteFolderContentSource.SetContent(secondRoot.CloudFolder.FolderId, CreateContent(secondRoot));
-            _fileOperator.UploadedNewFiles["alpha.txt"] = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
-            _fileOperator.UploadedNewFiles["beta.txt"] = CreateFile(SecondFileId, "beta.txt", "\"etag-2\"");
+            _fileOperator.SetUploadResult("alpha.txt", FirstFileId, "\"etag-1\"");
+            _fileOperator.SetUploadResult("beta.txt", SecondFileId, "\"etag-2\"");
 
             CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
 
             Assert.Equal(1, summary.RootCount);
-            Assert.Equal(1, summary.CompletedRootCount);
             Assert.Equal(1, summary.UploadedCount);
             Assert.Equal([root.Id], _localTreeReader.ReadRootIds);
             Assert.Equal([FolderId], _remoteFolderContentSource.RequestedFolderIds);
-            Assert.Equal(["alpha.txt"], _fileOperator.UploadedNewRelativePaths);
-            Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
-            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, secondRoot));
+            Assert.Equal("alpha.txt", Assert.Single(_fileOperator.UploadedItems).RelativePath);
+            Assert.Single(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, secondRoot));
         }
 
         [Fact]
@@ -187,7 +223,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_bidirectional_roots_until_shared_executor_is_available()
+        public async Task Run_root_skips_bidirectional_root_without_reads()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -200,10 +236,10 @@ namespace Cotton.Mobile.Tests
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection, result.Status);
-            Assert.Equal(CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus, result.StatusText);
+            Assert.Equal(CottonDeviceToCloudSyncStatusText.UnsupportedDirectionStatus, result.StatusText);
             Assert.Empty(_localTreeReader.ReadRootIds);
             Assert.Empty(_remoteFolderContentSource.RequestedFolderIds);
-            Assert.Empty(_fileOperator.UploadedNewRelativePaths);
+            Assert.Empty(_fileOperator.UploadedItems);
         }
 
         [Fact]
@@ -215,22 +251,8 @@ namespace Cotton.Mobile.Tests
                 Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"),
                 "summer.jpg",
                 "\"etag-summer\"");
-            CottonSyncedFileSnapshot manifestItem = new(
-                nestedFile.Id,
-                nestedFile.Name,
-                nestedFile.ETag!,
-                nestedFile.UpdatedAtUtc,
-                nestedFile.SizeBytes,
-                nestedFile.ContentType,
-                SyncedAt,
-                "Photos/summer.jpg");
             await _rootStore.SaveAsync(InstanceUri, [root]);
-            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
-            _localTreeReader.SetContent(
-                root.Id,
-                CreateLocalContent(
-                    CreateLocalFolder("Photos", "Photos"),
-                    CreateLocalFile("summer.jpg", "Photos/summer.jpg")));
+            _localTreeReader.SetContent(root.Id, CreateLocalContent());
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, folder));
             _remoteFolderContentSource.SetContent(
                 folder.Id,
@@ -240,130 +262,20 @@ namespace Cotton.Mobile.Tests
 
             CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
             Assert.True(result.IsCompleted);
-            Assert.Equal(2, summary.SkippedItemCount);
             Assert.Equal([FolderId, folder.Id], _remoteFolderContentSource.RequestedFolderIds);
-            Assert.Empty(_fileOperator.UploadedNewRelativePaths);
+            Assert.Empty(_fileOperator.UploadedItems);
             Assert.False(summary.HasAppliedChanges);
-        }
-
-        [Fact]
-        public async Task Run_root_requires_review_before_destructive_remote_delete()
-        {
-            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            CottonSyncedFileSnapshot manifestItem = new(
-                FirstFileId,
-                "old.txt",
-                "\"etag-old\"",
-                UpdatedAt,
-                42,
-                "text/plain",
-                SyncedAt,
-                "old.txt");
-            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
-            _localTreeReader.SetContent(root.Id, CreateLocalContent());
-            _remoteFolderContentSource.SetContent(
-                root.CloudFolder.FolderId,
-                CreateContent(root, CreateFile(FirstFileId, "old.txt", "\"etag-old\"")));
-
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
-
-            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired, result.Status);
-            Assert.Equal(CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus, result.StatusText);
-            Assert.NotNull(result.Plan);
-            Assert.Equal(1, result.Plan.RemoteDeleteCount);
-            Assert.Equal(1, summary.SkippedRootCount);
-            Assert.Equal(0, summary.DeletedRemoteFileCount);
-            Assert.True(summary.NeedsDestructiveReview);
-            Assert.Equal(1, summary.DestructiveReviewRemoteDeleteCount);
-            Assert.True(summary.HasBlockedItems);
-            Assert.Empty(_fileOperator.DeletedFileIds);
-            Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
-        }
-
-        [Fact]
-        public async Task Run_root_reports_blocked_remote_revision_without_mutation()
-        {
-            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            CottonSyncedFileSnapshot manifestItem = new(
-                FirstFileId,
-                "alpha.txt",
-                "\"etag-1\"",
-                UpdatedAt.AddMinutes(-10),
-                42,
-                "text/plain",
-                UpdatedAt.AddMinutes(-10),
-                "alpha.txt");
-            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
-            _localTreeReader.SetContent(
-                root.Id,
-                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt")));
-            _remoteFolderContentSource.SetContent(
-                root.CloudFolder.FolderId,
-                CreateContent(root, CreateFile(FirstFileId, "alpha.txt", "\"etag-2\"")));
-
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
-
-            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
-            Assert.Equal(1, result.Plan?.BlockedCount);
-            Assert.Equal(1, summary.BlockedItemCount);
-            Assert.True(summary.HasBlockedItems);
-            Assert.False(summary.HasAppliedChanges);
-            Assert.Empty(_fileOperator.UploadedNewRelativePaths);
-            Assert.Empty(_fileOperator.DeletedFileIds);
-
-            CottonSyncedFileSnapshot savedManifestItem =
-                Assert.Single(await _manifestStore.LoadAsync(InstanceUri, root));
-            Assert.Equal("\"etag-1\"", savedManifestItem.ETag);
-        }
-
-        [Fact]
-        public async Task Run_root_executes_destructive_remote_delete_when_explicitly_allowed()
-        {
-            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
-            CottonSyncedFileSnapshot manifestItem = new(
-                FirstFileId,
-                "old.txt",
-                "\"etag-old\"",
-                UpdatedAt,
-                42,
-                "text/plain",
-                SyncedAt,
-                "old.txt");
-            await _manifestStore.SaveAsync(InstanceUri, root, [manifestItem]);
-            _localTreeReader.SetContent(root.Id, CreateLocalContent());
-            _remoteFolderContentSource.SetContent(
-                root.CloudFolder.FolderId,
-                CreateContent(root, CreateFile(FirstFileId, "old.txt", "\"etag-old\"")));
-
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(
-                InstanceUri,
-                root,
-                CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
-
-            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.Completed, result.Status);
-            Assert.Equal(1, summary.DeletedRemoteFileCount);
-            Assert.False(summary.NeedsDestructiveReview);
-            Assert.Equal(0, summary.DestructiveReviewRemoteDeleteCount);
-            Assert.True(summary.HasAppliedChanges);
-            Assert.Equal([FirstFileId], _fileOperator.DeletedFileIds);
-            Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
         }
 
         [Fact]
         public async Task Run_root_rejects_root_from_another_instance()
         {
-            var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
+            Uri otherInstanceUri = new("https://files.cottoncloud.dev");
             CottonSyncRootSnapshot root = new(
                 SyncRootId,
                 otherInstanceUri,
                 "account-1",
-                new CottonUploadDestinationSnapshot(
-                    FolderId,
-                    "Projects",
-                    "Files / Projects"),
+                new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
                 new CottonSyncLocalRootSnapshot(
                     CottonSyncRootStorageKind.UserSelectedDocumentTree,
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
@@ -392,23 +304,26 @@ namespace Cotton.Mobile.Tests
             CottonSyncDirection direction = CottonSyncDirection.DeviceToCloud,
             CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree)
         {
+            string localRootId = storageKind switch
+            {
+                CottonSyncRootStorageKind.AppPrivateDirectory => $"app-private-sync-root-{folderId:N}",
+                CottonSyncRootStorageKind.UserSelectedDocumentTree =>
+                    $"content://com.android.externalstorage.documents/tree/primary%3A{folderName}",
+                _ => throw new ArgumentOutOfRangeException(nameof(storageKind)),
+            };
+            string localRootName = storageKind switch
+            {
+                CottonSyncRootStorageKind.AppPrivateDirectory => "On this device",
+                CottonSyncRootStorageKind.UserSelectedDocumentTree => "Device folder",
+                _ => throw new ArgumentOutOfRangeException(nameof(storageKind)),
+            };
+
             return new CottonSyncRootSnapshot(
                 syncRootId,
                 InstanceUri,
                 "account-1",
-                new CottonUploadDestinationSnapshot(
-                    folderId,
-                    folderName,
-                    $"Files / {folderName}"),
-                new CottonSyncLocalRootSnapshot(
-                    storageKind,
-                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
-                        ? $"app-private-sync-root-{folderId:N}"
-                        : $"content://com.android.externalstorage.documents/tree/primary%3A{folderName}",
-                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
-                        ? "On this device"
-                        : "Device folder",
-                    permissionStatus),
+                new CottonUploadDestinationSnapshot(folderId, folderName, $"Files / {folderName}"),
+                new CottonSyncLocalRootSnapshot(storageKind, localRootId, localRootName, permissionStatus),
                 direction,
                 CottonUploadOriginalRetention.KeepOriginals);
         }
@@ -419,19 +334,18 @@ namespace Cotton.Mobile.Tests
             return new CottonDeviceToCloudLocalContentSnapshot("Device folder", items, problems: []);
         }
 
-        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFile(string name, string relativePath)
+        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFile(
+            string name,
+            string relativePath,
+            string localSourceId)
         {
             return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                 name,
                 relativePath,
                 UpdatedAt,
                 42,
-                "text/plain");
-        }
-
-        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFolder(string name, string relativePath)
-        {
-            return CottonDeviceToCloudLocalItemSnapshot.CreateFolder(name, relativePath, UpdatedAt);
+                "text/plain",
+                localSourceId);
         }
 
         private static CottonFolderContent CreateContent(
@@ -441,21 +355,21 @@ namespace Cotton.Mobile.Tests
             return new CottonFolderContent(root.CloudFolder.FolderId, root.CloudFolder.FolderName, entries);
         }
 
-        private static CottonFileBrowserEntry CreateFile(Guid id, string name, string? eTag)
+        private static CottonFileBrowserEntry CreateFile(
+            Guid id,
+            string name,
+            string? eTag,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
-            return CottonFileBrowserEntry.CreateCached(
+            return CottonFileBrowserEntry.CreateFile(
                 id,
-                CottonFileBrowserEntryType.File,
                 name,
-                "Text",
-                "42 B · Text",
-                "More",
-                "TXT",
                 UpdatedAt,
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
-                eTag);
+                eTag: eTag,
+                metadata: metadata);
         }
 
         private static CottonFileBrowserEntry CreateFolder(Guid id, string name)
@@ -490,18 +404,56 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private class FixedSyncedFileManifestPathProvider : ICottonSyncedFileManifestPathProvider
+        private class FakeUploadReceiptStore : ICottonUploadReceiptStore
         {
-            private readonly string _rootDirectory;
+            private readonly Dictionary<Guid, Dictionary<string, CottonUploadReceiptSnapshot>> _receiptsByRootId = [];
 
-            public FixedSyncedFileManifestPathProvider(string rootDirectory)
+            public List<CottonUploadReceiptSnapshot> SavedReceipts { get; } = [];
+
+            public Task<IReadOnlyList<CottonUploadReceiptSnapshot>> LoadAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CancellationToken cancellationToken = default)
             {
-                _rootDirectory = rootDirectory;
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!_receiptsByRootId.TryGetValue(
+                    root.Id,
+                    out Dictionary<string, CottonUploadReceiptSnapshot>? receipts))
+                {
+                    return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>([]);
+                }
+
+                return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>(receipts.Values.ToArray());
             }
 
-            public string CreateSyncedFileManifestDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
+            public Task SaveAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CottonUploadReceiptSnapshot receipt,
+                CancellationToken cancellationToken = default)
             {
-                return Path.Combine(_rootDirectory, instanceUri.Host, root.StableKey);
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!_receiptsByRootId.TryGetValue(
+                    root.Id,
+                    out Dictionary<string, CottonUploadReceiptSnapshot>? receipts))
+                {
+                    receipts = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
+                    _receiptsByRootId.Add(root.Id, receipts);
+                }
+
+                receipts[receipt.LocalSourceId] = receipt;
+                SavedReceipts.Add(receipt);
+                return Task.CompletedTask;
+            }
+
+            public Task ClearAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                _receiptsByRootId.Remove(root.Id);
+                return Task.CompletedTask;
             }
         }
 
@@ -549,12 +501,15 @@ namespace Cotton.Mobile.Tests
 
         private class FakeDeviceToCloudFileOperator : ICottonDeviceToCloudSyncFileOperator
         {
-            public Dictionary<string, CottonFileBrowserEntry> UploadedNewFiles { get; } =
+            private readonly Dictionary<string, (Guid FileId, string ETag)> _uploadResults =
                 new(StringComparer.Ordinal);
 
-            public List<string> UploadedNewRelativePaths { get; } = [];
+            public List<CottonDeviceToCloudSyncPlanItem> UploadedItems { get; } = [];
 
-            public List<Guid> DeletedFileIds { get; } = [];
+            public void SetUploadResult(string relativePath, Guid fileId, string eTag)
+            {
+                _uploadResults[relativePath] = (fileId, eTag);
+            }
 
             public Task<CottonFileBrowserEntry> UploadNewFileAsync(
                 Uri instanceUri,
@@ -563,8 +518,15 @@ namespace Cotton.Mobile.Tests
                 CottonFolderHandle parentFolder,
                 CancellationToken cancellationToken = default)
             {
-                UploadedNewRelativePaths.Add(item.RelativePath);
-                return Task.FromResult(UploadedNewFiles[item.RelativePath]);
+                Guid operationId = item.UploadOperationId
+                    ?? throw new InvalidOperationException("Upload operation id was not assigned.");
+                (Guid fileId, string eTag) = _uploadResults[item.RelativePath];
+                var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+                {
+                    [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.ToString("N"),
+                };
+                UploadedItems.Add(item);
+                return Task.FromResult(CreateFile(fileId, item.DisplayName, eTag, metadata));
             }
 
             public Task<CottonFileBrowserEntry> UploadChangedFileAsync(
@@ -574,7 +536,7 @@ namespace Cotton.Mobile.Tests
                 CottonFolderHandle parentFolder,
                 CancellationToken cancellationToken = default)
             {
-                throw new NotSupportedException("Changed uploads are not used by these tests.");
+                throw new NotSupportedException("Changed uploads are not used by upload-only sync.");
             }
 
             public Task<CottonFileBrowserEntry> CreateFolderAsync(
@@ -593,12 +555,19 @@ namespace Cotton.Mobile.Tests
                 CottonDeviceToCloudSyncPlanItem item,
                 CancellationToken cancellationToken = default)
             {
-                if (item.CloudItemId.HasValue)
-                {
-                    DeletedFileIds.Add(item.CloudItemId.Value);
-                }
+                throw new NotSupportedException("Remote deletes are not supported by upload-only sync.");
+            }
+        }
 
-                return Task.CompletedTask;
+        private class FakeDeviceToCloudLocalFileOperator : ICottonDeviceToCloudLocalFileOperator
+        {
+            public Task<CottonDeviceToCloudLocalFileDeleteStatus> DeleteIfUnchangedAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CottonDeviceToCloudSyncPlanItem item,
+                CancellationToken cancellationToken = default)
+            {
+                return Task.FromResult(CottonDeviceToCloudLocalFileDeleteStatus.Unsupported);
             }
         }
 

@@ -23,21 +23,17 @@ namespace Cotton.Mobile.Services
 
         public int UploadedCount => RootResults.Sum(result => result.ExecutionResult?.UploadedCount ?? 0);
 
-        public int RefreshedCount => RootResults.Sum(result => result.ExecutionResult?.RefreshedCount ?? 0);
+        public int ConfirmedUploadCount => RootResults.Sum(
+            result => result.ExecutionResult?.ConfirmedUploadCount ?? 0);
 
         public int CreatedFolderCount => RootResults.Sum(result => result.ExecutionResult?.CreatedFolderCount ?? 0);
 
-        public int DeletedRemoteFileCount => RootResults.Sum(result => result.ExecutionResult?.DeletedRemoteFileCount ?? 0);
-
-        public int RemovedManifestCount => RootResults.Sum(result => result.ExecutionResult?.RemovedManifestCount ?? 0);
+        public int DeletedLocalFileCount => RootResults.Sum(
+            result => result.ExecutionResult?.DeletedLocalFileCount ?? 0);
 
         public int SkippedItemCount => RootResults.Sum(result => result.ExecutionResult?.SkippedCount ?? 0);
 
         public int BlockedItemCount => RootResults.Sum(result => result.ExecutionResult?.BlockedCount ?? 0);
-
-        public int DestructiveReviewRemoteDeleteCount => RootResults
-            .Where(result => result.Status == CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired)
-            .Sum(result => result.Plan?.RemoteDeleteCount ?? 0);
 
         public bool HasAppliedChanges => RootResults.Any(result => result.HasAppliedChanges);
 
@@ -45,6 +41,5 @@ namespace Cotton.Mobile.Services
 
         public bool HasSkippedRoots => SkippedRootCount > 0;
 
-        public bool NeedsDestructiveReview => DestructiveReviewRemoteDeleteCount > 0;
     }
 }

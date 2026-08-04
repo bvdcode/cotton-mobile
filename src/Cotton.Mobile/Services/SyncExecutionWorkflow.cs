@@ -45,7 +45,7 @@ namespace Cotton.Mobile.Services
 
                 case CottonSyncRootRunRoute.DeviceToCloud:
                     CottonDeviceToCloudSyncRunSummary deviceSummary =
-                        await RunDeviceToCloudRootAsync(instanceUri, root, reportStatus);
+                        await _deviceToCloudCoordinator.RunRootAsync(instanceUri, root);
                     return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary);
 
                 case CottonSyncRootRunRoute.Bidirectional:
@@ -82,7 +82,7 @@ namespace Cotton.Mobile.Services
 
                     case CottonSyncRootRunRoute.DeviceToCloud:
                         CottonDeviceToCloudSyncRunSummary deviceSummary =
-                            await RunDeviceToCloudRootAsync(instanceUri, root, reportStatus);
+                            await _deviceToCloudCoordinator.RunRootAsync(instanceUri, root);
                         deviceResults.AddRange(deviceSummary.RootResults);
                         break;
 
@@ -103,36 +103,6 @@ namespace Cotton.Mobile.Services
                 new CottonCloudToDeviceSyncRunSummary(cloudResults),
                 new CottonDeviceToCloudSyncRunSummary(deviceResults),
                 new CottonBidirectionalSyncRunSummary(bidirectionalResults));
-        }
-
-        private async Task<CottonDeviceToCloudSyncRunSummary> RunDeviceToCloudRootAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            Action<string> reportStatus)
-        {
-            CottonDeviceToCloudSyncRunSummary summary =
-                await _deviceToCloudCoordinator.RunRootAsync(instanceUri, root);
-            if (!summary.NeedsDestructiveReview)
-            {
-                return summary;
-            }
-
-            reportStatus(CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus);
-            bool confirmed = await _dialogService.ShowConfirmationAsync(
-                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteTitle,
-                CottonDeviceToCloudSyncStatusText.CreateConfirmRemoteDeleteMessage(
-                    summary.DestructiveReviewRemoteDeleteCount),
-                CottonDeviceToCloudSyncStatusText.ConfirmRemoteDeleteAction,
-                CottonSyncRootManagementText.CancelAction);
-            if (!confirmed)
-            {
-                return summary;
-            }
-
-            return await _deviceToCloudCoordinator.RunRootAsync(
-                instanceUri,
-                root,
-                CottonDeviceToCloudSyncRunOptions.AllowRemoteDeletes);
         }
 
         private async Task<CottonBidirectionalSyncRunSummary> RunBidirectionalRootAsync(

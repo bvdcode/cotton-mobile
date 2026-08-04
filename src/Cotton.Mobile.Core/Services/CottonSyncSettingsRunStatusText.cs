@@ -35,7 +35,8 @@ namespace Cotton.Mobile.Services
             AddCount(parts, cloudToDeviceSummary.RenamedCount, "renamed");
             AddCount(parts, cloudToDeviceSummary.RemovedCount, "removed");
             AddCount(parts, deviceToCloudSummary.UploadedCount, "uploaded");
-            AddCount(parts, deviceToCloudSummary.RefreshedCount, "updated");
+            AddCount(parts, deviceToCloudSummary.ConfirmedUploadCount, "upload confirmed", "uploads confirmed");
+            AddCount(parts, deviceToCloudSummary.DeletedLocalFileCount, "original removed", "originals removed");
             AddCount(parts, bidirectionalSummary?.DownloadedCount ?? 0, "bidirectional downloaded");
             AddCount(parts, bidirectionalSummary?.RefreshedLocalCount ?? 0, "bidirectional refreshed locally");
             AddCount(parts, bidirectionalSummary?.RenamedLocalCount ?? 0, "bidirectional renamed locally");
@@ -49,19 +50,14 @@ namespace Cotton.Mobile.Services
                 "folders created");
             AddCount(
                 parts,
-                deviceToCloudSummary.DeletedRemoteFileCount + (bidirectionalSummary?.DeletedRemoteFileCount ?? 0),
+                bidirectionalSummary?.DeletedRemoteFileCount ?? 0,
                 "remote file removed",
                 "remote files removed");
             AddCount(
                 parts,
-                deviceToCloudSummary.RemovedManifestCount + (bidirectionalSummary?.RemovedManifestCount ?? 0),
+                bidirectionalSummary?.RemovedManifestCount ?? 0,
                 "record cleaned",
                 "records cleaned");
-            AddCount(
-                parts,
-                deviceToCloudSummary.DestructiveReviewRemoteDeleteCount,
-                "cloud removal needs review",
-                "cloud removals need review");
             AddCount(
                 parts,
                 bidirectionalSummary?.ConflictReviewCount ?? 0,

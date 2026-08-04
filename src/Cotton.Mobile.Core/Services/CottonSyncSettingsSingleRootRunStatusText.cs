@@ -16,9 +16,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(summary);
 
-            return summary.NeedsDestructiveReview
-                ? CottonDeviceToCloudSyncStatusText.CancelledStatus
-                : CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary);
+            return CottonDeviceToCloudSyncStatusText.CreateCompletedStatus(summary);
         }
 
         public static string CreateFinishedStatus(CottonBidirectionalSyncRunSummary summary)

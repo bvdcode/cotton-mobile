@@ -70,8 +70,7 @@ namespace Cotton.Mobile.Services
 
         public bool HasBlockedItems =>
             ExecutionResult?.HasBlockedItems == true
-            || Plan?.HasBlockingItems == true
-            || Status == CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired;
+            || Plan?.HasBlockingItems == true;
 
         public static CottonDeviceToCloudSyncRootRunResult Completed(
             CottonSyncRootSnapshot root,
@@ -143,28 +142,10 @@ namespace Cotton.Mobile.Services
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection,
-                root.Direction == CottonSyncDirection.Bidirectional
-                    ? CottonBidirectionalSyncStatusText.ExecutionUnavailableStatus
-                    : "Sync direction is not device-to-cloud",
+                CottonDeviceToCloudSyncStatusText.UnsupportedDirectionStatus,
                 null,
                 null);
         }
 
-        public static CottonDeviceToCloudSyncRootRunResult SkippedDestructiveReviewRequired(
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanSnapshot plan)
-        {
-            ArgumentNullException.ThrowIfNull(root);
-            ArgumentNullException.ThrowIfNull(plan);
-
-            return new CottonDeviceToCloudSyncRootRunResult(
-                root.Id,
-                root.CloudFolder.FolderId,
-                root.CloudFolder.FolderName,
-                CottonDeviceToCloudSyncRootRunStatus.SkippedDestructiveReviewRequired,
-                CottonDeviceToCloudSyncStatusText.DestructiveReviewRequiredStatus,
-                plan,
-                null);
-        }
     }
 }

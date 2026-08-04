@@ -89,7 +89,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonUploadReceiptPathProvider, CottonUploadReceiptPathProvider>();
             services.AddSingleton<ICottonUploadReceiptStore, FileSystemCottonUploadReceiptStore>();
             services.AddSingleton<SyncRootManager>();
-            services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
+            services.AddSingleton<CottonSyncRootConfigurationService>();
             services.AddSingleton<CottonSyncRootReconnectService>();
 
             services.AddSingleton(FileDownloadCacheOptions.Default);

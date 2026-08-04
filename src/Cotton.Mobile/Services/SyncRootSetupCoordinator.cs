@@ -7,23 +7,23 @@ namespace Cotton.Mobile.Services
     {
         private readonly ICloudFolderPickerService _cloudFolderPicker;
         private readonly ICottonSyncLocalRootPickerService _localRootPicker;
-        private readonly CottonBidirectionalSyncRootSetupService _setupService;
+        private readonly CottonSyncRootConfigurationService _configurationService;
         private readonly CottonSyncRootReconnectService _reconnectService;
 
         public SyncRootSetupCoordinator(
             ICloudFolderPickerService cloudFolderPicker,
             ICottonSyncLocalRootPickerService localRootPicker,
-            CottonBidirectionalSyncRootSetupService setupService,
+            CottonSyncRootConfigurationService configurationService,
             CottonSyncRootReconnectService reconnectService)
         {
             ArgumentNullException.ThrowIfNull(cloudFolderPicker);
             ArgumentNullException.ThrowIfNull(localRootPicker);
-            ArgumentNullException.ThrowIfNull(setupService);
+            ArgumentNullException.ThrowIfNull(configurationService);
             ArgumentNullException.ThrowIfNull(reconnectService);
 
             _cloudFolderPicker = cloudFolderPicker;
             _localRootPicker = localRootPicker;
-            _setupService = setupService;
+            _configurationService = configurationService;
             _reconnectService = reconnectService;
         }
 
@@ -58,23 +58,25 @@ namespace Cotton.Mobile.Services
                 return Cancelled();
             }
 
-            CottonBidirectionalSyncRootSetupResult result = await _setupService
-                .EnableUserSelectedDocumentTreeRootAsync(
+            CottonSyncRootConfigurationResult result = await _configurationService
+                .ConfigureUserSelectedDocumentTreeRootAsync(
                     instanceUri,
                     accountScopeKey,
                     cloudFolder,
                     localRoot,
+                    CottonSyncDirection.Bidirectional,
+                    CottonUploadOriginalRetention.KeepOriginals,
                     cancellationToken)
                 .ConfigureAwait(false);
             return result.Status switch
             {
-                CottonBidirectionalSyncRootSetupStatus.Created => new SyncRootSetupResult(
+                CottonSyncRootConfigurationStatus.Created => new SyncRootSetupResult(
                     SyncRootSetupStatus.Created,
                     $"Syncing {cloudFolder.Path}."),
-                CottonBidirectionalSyncRootSetupStatus.Updated => new SyncRootSetupResult(
+                CottonSyncRootConfigurationStatus.Updated => new SyncRootSetupResult(
                     SyncRootSetupStatus.Updated,
                     $"Updated sync for {cloudFolder.Path}."),
-                CottonBidirectionalSyncRootSetupStatus.AlreadyConfigured => new SyncRootSetupResult(
+                CottonSyncRootConfigurationStatus.AlreadyConfigured => new SyncRootSetupResult(
                     SyncRootSetupStatus.AlreadyConfigured,
                     $"{cloudFolder.Path} is already syncing."),
                 _ => throw new ArgumentOutOfRangeException(

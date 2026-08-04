@@ -102,7 +102,9 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("_cloudFolderPicker", coordinator, StringComparison.Ordinal);
             Assert.Contains(".PickAsync(instanceUri", coordinator, StringComparison.Ordinal);
             Assert.Contains("_localRootPicker", coordinator, StringComparison.Ordinal);
-            Assert.Contains("EnableUserSelectedDocumentTreeRootAsync", coordinator, StringComparison.Ordinal);
+            Assert.Contains("ConfigureUserSelectedDocumentTreeRootAsync", coordinator, StringComparison.Ordinal);
+            Assert.Contains("CottonSyncDirection.Bidirectional", coordinator, StringComparison.Ordinal);
+            Assert.Contains("CottonUploadOriginalRetention.KeepOriginals", coordinator, StringComparison.Ordinal);
         }
 
         [Fact]

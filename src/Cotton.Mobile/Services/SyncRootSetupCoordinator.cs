@@ -8,19 +8,23 @@ namespace Cotton.Mobile.Services
         private readonly ICloudFolderPickerService _cloudFolderPicker;
         private readonly ICottonSyncLocalRootPickerService _localRootPicker;
         private readonly CottonBidirectionalSyncRootSetupService _setupService;
+        private readonly CottonSyncRootReconnectService _reconnectService;
 
         public SyncRootSetupCoordinator(
             ICloudFolderPickerService cloudFolderPicker,
             ICottonSyncLocalRootPickerService localRootPicker,
-            CottonBidirectionalSyncRootSetupService setupService)
+            CottonBidirectionalSyncRootSetupService setupService,
+            CottonSyncRootReconnectService reconnectService)
         {
             ArgumentNullException.ThrowIfNull(cloudFolderPicker);
             ArgumentNullException.ThrowIfNull(localRootPicker);
             ArgumentNullException.ThrowIfNull(setupService);
+            ArgumentNullException.ThrowIfNull(reconnectService);
 
             _cloudFolderPicker = cloudFolderPicker;
             _localRootPicker = localRootPicker;
             _setupService = setupService;
+            _reconnectService = reconnectService;
         }
 
         public async Task<SyncRootSetupResult> AddBidirectionalRootAsync(
@@ -77,6 +81,35 @@ namespace Cotton.Mobile.Services
                     nameof(result),
                     "Sync root setup status is not supported."),
             };
+        }
+
+        public async Task<SyncRootSetupResult> ReconnectLocalRootAsync(
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(root);
+
+            if (!_localRootPicker.IsAvailable)
+            {
+                return new SyncRootSetupResult(
+                    SyncRootSetupStatus.Unavailable,
+                    "Folder sync is not available on this device.");
+            }
+
+            CottonSyncLocalRootSnapshot? localRoot = await _localRootPicker
+                .PickUserSelectedDocumentTreeAsync(cancellationToken)
+                .ConfigureAwait(false);
+            if (localRoot is null)
+            {
+                return Cancelled();
+            }
+
+            CottonSyncRootSnapshot reconnectedRoot = await _reconnectService
+                .ReconnectUserSelectedDocumentTreeAsync(root, localRoot, cancellationToken)
+                .ConfigureAwait(false);
+            return new SyncRootSetupResult(
+                SyncRootSetupStatus.Updated,
+                $"Reconnected {reconnectedRoot.CloudFolder.Path}.");
         }
 
         private static SyncRootSetupResult Cancelled()

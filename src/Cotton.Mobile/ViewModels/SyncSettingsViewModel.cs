@@ -47,10 +47,10 @@ namespace Cotton.Mobile.ViewModels
             LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
             AddRootCommand = new AsyncCommand(AddRootAsync, LogUnhandledCommandException, CanAddRoot);
             RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, CanRunAll);
-            RunRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                RunRootAsync,
+            RootPrimaryActionCommand = new AsyncCommand<CottonSyncRootListItem>(
+                ExecuteRootPrimaryActionAsync,
                 LogUnhandledCommandException,
-                item => !IsBusy && item.CanRunNow);
+                item => !IsBusy && item.CanUsePrimaryAction);
             StopRootCommand = new AsyncCommand<CottonSyncRootListItem>(
                 StopRootAsync,
                 LogUnhandledCommandException,
@@ -71,7 +71,7 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand RunAllCommand { get; }
 
-        public AsyncCommand<CottonSyncRootListItem> RunRootCommand { get; }
+        public AsyncCommand<CottonSyncRootListItem> RootPrimaryActionCommand { get; }
 
         public AsyncCommand<CottonSyncRootListItem> StopRootCommand { get; }
 
@@ -91,7 +91,7 @@ namespace Cotton.Mobile.ViewModels
                     LoadCommand.RaiseCanExecuteChanged();
                     AddRootCommand.RaiseCanExecuteChanged();
                     RunAllCommand.RaiseCanExecuteChanged();
-                    RunRootCommand.RaiseCanExecuteChanged();
+                    RootPrimaryActionCommand.RaiseCanExecuteChanged();
                     StopRootCommand.RaiseCanExecuteChanged();
                     PauseRootCommand.RaiseCanExecuteChanged();
                     ResumeRootCommand.RaiseCanExecuteChanged();
@@ -435,6 +435,80 @@ namespace Cotton.Mobile.ViewModels
         private async Task LoadRootsAsync(Uri instanceUri)
         {
             ShowRoots(await LoadRootCollectionAsync(instanceUri));
+        }
+
+        private Task ExecuteRootPrimaryActionAsync(CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+
+            if (item.CanReconnect)
+            {
+                return ReconnectRootAsync(item);
+            }
+
+            if (item.CanRunNow)
+            {
+                return RunRootAsync(item);
+            }
+
+            throw new InvalidOperationException("Sync root does not have a primary action.");
+        }
+
+        private async Task ReconnectRootAsync(CottonSyncRootListItem item)
+        {
+            Uri? instanceUri = _instanceUri;
+            if (instanceUri is null)
+            {
+                Status = "Could not reconnect this local folder.";
+                return;
+            }
+
+            IsBusy = true;
+            try
+            {
+                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
+                if (root is null)
+                {
+                    ShowRoots(collection);
+                    Status = CottonSyncRootManagementText.RootMissingStatus;
+                    return;
+                }
+
+                if (!root.LocalRoot.RequiresPersistedUserGrant || !root.NeedsUserAction)
+                {
+                    ShowRoots(collection);
+                    Status = "Local folder access is already available.";
+                    return;
+                }
+
+                SyncRootSetupResult result = await _rootSetupCoordinator.ReconnectLocalRootAsync(root);
+                if (result.Status == SyncRootSetupStatus.Cancelled)
+                {
+                    Status = null;
+                    return;
+                }
+
+                if (result.DidChangeRoots)
+                {
+                    ShowRoots(await LoadRootCollectionAsync(instanceUri));
+                }
+
+                Status = result.Message;
+            }
+            catch (OperationCanceledException)
+            {
+                Status = null;
+            }
+            catch (Exception exception)
+            {
+                _logger.LogWarning(exception, "Failed to reconnect Cotton mobile sync root.");
+                Status = "Could not reconnect this local folder.";
+            }
+            finally
+            {
+                IsBusy = false;
+            }
         }
 
         private Task<SyncRootCollectionSnapshot> LoadRootCollectionAsync(Uri instanceUri)

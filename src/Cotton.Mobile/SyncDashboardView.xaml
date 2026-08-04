@@ -63,11 +63,11 @@
 
                                 <controls:ActionClusterView ClusterStyleResourceKey="M3PanelActionCluster"
                                                             PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
-                                                            PrimaryActionCommand="{Binding BindingContext.RunRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                            PrimaryActionCommand="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
                                                             PrimaryActionCommandParameter="{Binding .}"
-                                                            PrimaryActionSemanticDescription="{Binding RunNowActionText}"
-                                                            IsPrimaryActionEnabled="{Binding CanRunNow}"
-                                                            IsPrimaryActionVisible="{Binding CanRunNow}"
+                                                            PrimaryActionSemanticDescription="{Binding PrimaryActionText}"
+                                                            IsPrimaryActionEnabled="{Binding CanUsePrimaryAction}"
+                                                            IsPrimaryActionVisible="{Binding CanUsePrimaryAction}"
                                                             SecondaryActionIconData="{x:Static controls:IconPathData.Pause}"
                                                             SecondaryActionCommand="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
                                                             SecondaryActionCommandParameter="{Binding .}"
@@ -86,7 +86,16 @@
                                                             QuaternaryActionIconButtonStyleResourceKey="M3DestructiveIconButton"
                                                             QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
                                                             IsQuaternaryActionEnabled="{Binding CanStopSync}"
-                                                            IsQuaternaryActionVisible="{Binding CanStopSync}" />
+                                                            IsQuaternaryActionVisible="{Binding CanStopSync}">
+                                    <controls:ActionClusterView.Triggers>
+                                        <DataTrigger TargetType="controls:ActionClusterView"
+                                                     Binding="{Binding CanReconnect}"
+                                                     Value="True">
+                                            <Setter Property="PrimaryActionIconData"
+                                                    Value="{x:Static controls:IconPathData.Folder}" />
+                                        </DataTrigger>
+                                    </controls:ActionClusterView.Triggers>
+                                </controls:ActionClusterView>
                             </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>

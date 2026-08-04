@@ -43,11 +43,13 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Projects", item.Title);
             Assert.Equal("Files / Projects", item.PathText);
             Assert.Equal("Cloud to device · On this device", item.DetailText);
-            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.Equal("Ready", item.StatusText);
             Assert.True(item.IsReady);
             Assert.False(item.IsAttentionVisible);
             Assert.True(item.CanRunNow);
-            Assert.Equal("Run now", item.RunNowActionText);
+            Assert.False(item.CanReconnect);
+            Assert.True(item.CanUsePrimaryAction);
+            Assert.Equal("Run now", item.PrimaryActionText);
             Assert.False(item.IsPaused);
             Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.CanPauseSync);
@@ -75,10 +77,34 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListItem item = Assert.Single(state.Items);
 
             Assert.False(state.CanRunAny);
-            Assert.Equal("Choose local folder", item.StatusText);
+            Assert.Equal("Choose folder", item.StatusText);
             Assert.False(item.IsReady);
             Assert.True(item.IsAttentionVisible);
             Assert.False(item.CanRunNow);
+            Assert.True(item.CanReconnect);
+            Assert.True(item.CanUsePrimaryAction);
+            Assert.Equal("Choose local folder", item.PrimaryActionText);
+        }
+
+        [Fact]
+        public void Revoked_document_tree_uses_compact_status_and_explicit_reconnect_action()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Revoked,
+                CottonSyncDirection.Bidirectional,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Equal("Reconnect", item.StatusText);
+            Assert.True(item.CanReconnect);
+            Assert.True(item.CanUsePrimaryAction);
+            Assert.Equal("Reconnect local folder", item.PrimaryActionText);
         }
 
         [Fact]
@@ -150,7 +176,7 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
-            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.Equal("Ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.IsReady);
             Assert.False(item.IsAttentionVisible);
@@ -175,7 +201,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
             Assert.Equal("Device to cloud · Device folder", item.DetailText);
-            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.Equal("Ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.IsReady);
             Assert.False(item.IsAttentionVisible);
@@ -201,7 +227,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal(CottonSyncDirection.Bidirectional, item.Direction);
             Assert.Equal("Bidirectional · Device folder", item.DetailText);
-            Assert.Equal("Sync root ready", item.StatusText);
+            Assert.Equal("Ready", item.StatusText);
             Assert.False(item.IsUnsupportedLocalRoot);
             Assert.True(item.IsReady);
             Assert.False(item.IsAttentionVisible);
@@ -225,7 +251,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootListItem item = Assert.Single(state.Items);
 
             Assert.False(state.CanRunAny);
-            Assert.Equal("Local sync source unsupported", item.StatusText);
+            Assert.Equal("Unsupported", item.StatusText);
             Assert.True(item.IsUnsupportedLocalRoot);
             Assert.False(item.IsReady);
             Assert.True(item.IsAttentionVisible);
@@ -248,7 +274,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(state.CanRunAny);
             Assert.Equal("Bidirectional · On this device", item.DetailText);
-            Assert.Equal("Local sync source unsupported", item.StatusText);
+            Assert.Equal("Unsupported", item.StatusText);
             Assert.True(item.IsUnsupportedLocalRoot);
             Assert.False(item.IsReady);
             Assert.True(item.IsAttentionVisible);

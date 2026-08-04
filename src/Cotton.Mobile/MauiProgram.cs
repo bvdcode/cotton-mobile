@@ -86,6 +86,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
             services.AddSingleton<SyncRootManager>();
             services.AddSingleton<CottonBidirectionalSyncRootSetupService>();
+            services.AddSingleton<CottonSyncRootReconnectService>();
 
             services.AddSingleton(FileDownloadCacheOptions.Default);
             services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();

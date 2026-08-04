@@ -129,6 +129,22 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Sync_root_primary_action_switches_between_run_and_local_folder_reconnect()
+        {
+            XDocument page = ReadXaml("src/Cotton.Mobile/SyncDashboardView.xaml");
+            string coordinator = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Services/SyncRootSetupCoordinator.cs");
+            string viewModel = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+
+            Assert.Contains("RootPrimaryActionCommand", page.ToString(), StringComparison.Ordinal);
+            Assert.Contains("Binding=\"{Binding CanReconnect}\"", page.ToString(), StringComparison.Ordinal);
+            Assert.Contains("ReconnectLocalRootAsync", coordinator, StringComparison.Ordinal);
+            Assert.Contains("ReconnectRootAsync", viewModel, StringComparison.Ordinal);
+            Assert.DoesNotContain("RunRootCommand", page.ToString(), StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Profile_surface_keeps_account_privacy_and_sign_out_together()
         {
             string profile = RepositoryPath.ReadText("src/Cotton.Mobile/ProfileView.xaml");

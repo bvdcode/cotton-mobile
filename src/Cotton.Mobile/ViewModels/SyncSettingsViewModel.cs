@@ -339,20 +339,31 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
+            IReadOnlyList<CottonSyncRootListItem> runningItems = [];
             IsBusy = true;
             try
             {
-                Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
                 IReadOnlyList<CottonSyncRootSnapshot> runnableRoots =
                     CottonSyncRootRunCapability.GetRunnableRoots(
                         collection.Roots,
                         collection.PausedRootIds);
+                IReadOnlySet<Guid> runnableRootIds = runnableRoots
+                    .Select(root => root.Id)
+                    .ToHashSet();
+                runningItems = Roots
+                    .Where(item => runnableRootIds.Contains(item.Id))
+                    .ToList();
+                foreach (CottonSyncRootListItem runningItem in runningItems)
+                {
+                    runningItem.SetRunning(isRunning: true);
+                }
+
+                Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 Status = await _executionWorkflow.RunAllAsync(
                     instanceUri,
                     runnableRoots,
                     status => Status = status);
-                ShowRoots(await LoadRootCollectionAsync(instanceUri));
             }
             catch (Exception exception)
             {
@@ -361,6 +372,11 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
+                foreach (CottonSyncRootListItem runningItem in runningItems)
+                {
+                    runningItem.SetRunning(isRunning: false);
+                }
+
                 IsBusy = false;
             }
         }

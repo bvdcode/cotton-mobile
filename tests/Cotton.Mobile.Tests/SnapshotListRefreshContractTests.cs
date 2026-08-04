@@ -32,5 +32,21 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("item.SetRunning(isRunning: false);", runRoot, StringComparison.Ordinal);
             Assert.DoesNotContain("ShowRoots(await", runRoot, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Run_all_runtime_progress_updates_existing_items_without_a_reset()
+        {
+            string source = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+            int runAllStart = source.IndexOf("private async Task RunAllAsync", StringComparison.Ordinal);
+            int stopRootStart = source.IndexOf("private async Task StopRootAsync", runAllStart, StringComparison.Ordinal);
+
+            Assert.True(runAllStart >= 0);
+            Assert.True(stopRootStart > runAllStart);
+            string runAll = source[runAllStart..stopRootStart];
+            Assert.Contains("runningItem.SetRunning(isRunning: true);", runAll, StringComparison.Ordinal);
+            Assert.Contains("runningItem.SetRunning(isRunning: false);", runAll, StringComparison.Ordinal);
+            Assert.DoesNotContain("ShowRoots(await", runAll, StringComparison.Ordinal);
+        }
     }
 }

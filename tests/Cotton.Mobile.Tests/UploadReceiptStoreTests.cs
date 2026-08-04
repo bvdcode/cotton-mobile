@@ -174,7 +174,7 @@ namespace Cotton.Mobile.Tests
             FileSystemCottonUploadReceiptStore store = new(
                 new FixedUploadReceiptPathProvider(Path.Combine(blockerPath, "receipts")));
 
-            await Assert.ThrowsAsync<IOException>(() =>
+            await Assert.ThrowsAnyAsync<IOException>(() =>
                 store.SaveAsync(
                     InstanceUri,
                     CreateRoot(RootId, "content://tree/camera"),

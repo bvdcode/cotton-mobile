@@ -12,6 +12,15 @@ namespace Cotton.Mobile.Controls
         private const string BorderColorAnimationName = "M3NavigationBarItemBorderColor";
         private const string LabelTextColorAnimationName = "M3NavigationBarItemTextColor";
         private const string OpacityAnimationName = "M3NavigationBarItemOpacity";
+        private const string SelectedItemStyleResourceKey = "M3NavigationBarItemSelected";
+        private const string UnselectedItemStyleResourceKey = "M3NavigationBarItemUnselected";
+
+        public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(
+            nameof(IsSelected),
+            typeof(bool),
+            typeof(NavigationBarItem),
+            false,
+            propertyChanged: OnSelectionChanged);
 
         public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
             nameof(IconData),
@@ -141,6 +150,7 @@ namespace Cotton.Mobile.Controls
         private readonly VerticalStackLayout _content;
         private readonly IconView _icon;
         private readonly Label _label;
+        private bool _isApplyingSelection;
         private bool _hasAppliedVisualState;
         private ICommand? _observedCommand;
 
@@ -192,6 +202,12 @@ namespace Cotton.Mobile.Controls
         {
             get => (Geometry?)GetValue(IconDataProperty);
             set => SetValue(IconDataProperty, value);
+        }
+
+        public bool IsSelected
+        {
+            get => (bool)GetValue(IsSelectedProperty);
+            set => SetValue(IsSelectedProperty, value);
         }
 
         public Color IconColor
@@ -321,7 +337,13 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             NavigationBarItem item = (NavigationBarItem)bindable;
-            item.UpdateVisualState(true);
+            item.UpdateVisualState(!item._isApplyingSelection);
+        }
+
+        private static void OnSelectionChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NavigationBarItem item = (NavigationBarItem)bindable;
+            item.ApplySelectionStyle();
         }
 
         private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -444,6 +466,23 @@ namespace Cotton.Mobile.Controls
             _label.FontAttributes = TextFontAttributes;
             _label.FontFamily = TextFontFamily;
             _hasAppliedVisualState = true;
+        }
+
+        private void ApplySelectionStyle()
+        {
+            _isApplyingSelection = true;
+            try
+            {
+                SetDynamicResource(
+                    StyleProperty,
+                    IsSelected ? SelectedItemStyleResourceKey : UnselectedItemStyleResourceKey);
+            }
+            finally
+            {
+                _isApplyingSelection = false;
+            }
+
+            UpdateVisualState(false);
         }
 
         private Color ResolveCurrentBorderColor()

@@ -9,9 +9,6 @@ namespace Cotton.Mobile.Controls
 {
     public class AppNavigationBarView : ContentView
     {
-        private const string SelectedItemStyleResourceKey = "M3NavigationBarItemSelected";
-        private const string UnselectedItemStyleResourceKey = "M3NavigationBarItemUnselected";
-
         public static readonly BindableProperty SelectedDestinationProperty = BindableProperty.Create(
             nameof(SelectedDestination),
             typeof(AppNavigationDestination),
@@ -100,8 +97,8 @@ namespace Cotton.Mobile.Controls
             switch (SelectedDestination)
             {
                 case AppNavigationDestination.Sync:
-                    ApplySelection(_syncItem, isSelected: true);
                     ApplySelection(_profileItem, isSelected: false);
+                    ApplySelection(_syncItem, isSelected: true);
                     break;
                 case AppNavigationDestination.Profile:
                     ApplySelection(_syncItem, isSelected: false);
@@ -116,9 +113,7 @@ namespace Cotton.Mobile.Controls
 
         private static void ApplySelection(NavigationBarItem item, bool isSelected)
         {
-            item.SetDynamicResource(
-                StyleProperty,
-                isSelected ? SelectedItemStyleResourceKey : UnselectedItemStyleResourceKey);
+            item.IsSelected = isSelected;
         }
     }
 }

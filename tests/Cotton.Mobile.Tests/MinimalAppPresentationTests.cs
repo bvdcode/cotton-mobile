@@ -37,6 +37,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void App_navigation_selection_style_updates_without_transition_frames()
+        {
+            string navigation = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Controls/AppNavigationBarView.cs");
+            string item = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Controls/NavigationBarItem.cs");
+
+            Assert.Contains("item.IsSelected = isSelected;", navigation, StringComparison.Ordinal);
+            Assert.Contains("UpdateVisualState(false);", item, StringComparison.Ordinal);
+            Assert.Contains("_isApplyingSelection", item, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Sync_dashboard_uses_explicit_empty_and_list_states()
         {
             XDocument page = ReadXaml("src/Cotton.Mobile/SyncDashboardView.xaml");

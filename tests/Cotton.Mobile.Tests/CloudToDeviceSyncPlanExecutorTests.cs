@@ -222,7 +222,8 @@ namespace Cotton.Mobile.Tests
                     "app-private-sync-root",
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonFolderContent CreateContent(params CottonFileBrowserEntry[] entries)

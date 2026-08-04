@@ -81,7 +81,8 @@ namespace Cotton.Mobile.Services
                 accountScopeKey,
                 cloudFolder,
                 localRoot,
-                CottonSyncDirection.Bidirectional);
+                CottonSyncDirection.Bidirectional,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
     }
 }

@@ -32,7 +32,8 @@ namespace Cotton.Mobile.Tests
                 "content://tree/primary%3AOld",
                 "Old",
                 CottonSyncRootPermissionStatus.Revoked,
-                CottonSyncDirection.DeviceToCloud);
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             await _rootStore.SaveAsync(InstanceUri, [root]);
             CottonSyncLocalRootSnapshot replacement = CreateLocalRoot(
                 "content://tree/primary%3ANew",
@@ -47,11 +48,13 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(root.AccountScopeKey, result.AccountScopeKey);
             Assert.Same(root.CloudFolder, result.CloudFolder);
             Assert.Equal(root.Direction, result.Direction);
+            Assert.Equal(root.UploadOriginalRetention, result.UploadOriginalRetention);
             Assert.Same(replacement, result.LocalRoot);
             Assert.True(result.CanRunSync);
             CottonSyncRootSnapshot saved = Assert.Single(await _rootStore.LoadAsync(InstanceUri));
             Assert.Equal(result.Id, saved.Id);
             Assert.Equal(replacement.RootKey, saved.LocalRoot.RootKey);
+            Assert.Equal(root.UploadOriginalRetention, saved.UploadOriginalRetention);
             Assert.NotEqual(root.StableKey, saved.StableKey);
         }
 
@@ -136,7 +139,9 @@ namespace Cotton.Mobile.Tests
             string localRootKey,
             string localRootDisplayName,
             CottonSyncRootPermissionStatus permissionStatus,
-            CottonSyncDirection direction)
+            CottonSyncDirection direction,
+            CottonUploadOriginalRetention uploadOriginalRetention =
+                CottonUploadOriginalRetention.KeepOriginals)
         {
             return new CottonSyncRootSnapshot(
                 rootId,
@@ -144,7 +149,8 @@ namespace Cotton.Mobile.Tests
                 "account-1",
                 new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
                 CreateLocalRoot(localRootKey, localRootDisplayName, permissionStatus),
-                direction);
+                direction,
+                uploadOriginalRetention);
         }
 
         private static CottonSyncLocalRootSnapshot CreateLocalRoot(

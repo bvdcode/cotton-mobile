@@ -279,7 +279,8 @@ namespace Cotton.Mobile.Tests
                     "content://tree/projects",
                     "Projects",
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonSyncedFileSnapshot CreateManifest(string eTag, long sizeBytes)

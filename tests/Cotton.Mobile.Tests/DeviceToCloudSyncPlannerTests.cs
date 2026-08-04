@@ -442,7 +442,8 @@ namespace Cotton.Mobile.Tests
                     "content://tree/primary%3AProjects",
                     "Projects",
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(

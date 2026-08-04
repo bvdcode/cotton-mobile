@@ -255,7 +255,8 @@ namespace Cotton.Mobile.Tests
                 "account-1",
                 folder,
                 localRoot,
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider

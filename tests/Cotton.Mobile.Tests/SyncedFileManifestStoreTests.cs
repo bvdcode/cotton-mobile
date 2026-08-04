@@ -294,7 +294,8 @@ namespace Cotton.Mobile.Tests
                     localRootKey,
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private string CreateMetadataPath(Uri instanceUri, CottonSyncRootSnapshot root)

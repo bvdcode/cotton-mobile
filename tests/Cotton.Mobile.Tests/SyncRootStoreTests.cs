@@ -41,6 +41,32 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_and_load_roundtrips_upload_original_retention()
+        {
+            CottonSyncRootSnapshot root = new(
+                RootId,
+                InstanceUri,
+                "account-1",
+                new CottonUploadDestinationSnapshot(FolderId, "Camera", "Files / Camera"),
+                new CottonSyncLocalRootSnapshot(
+                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                    "content://tree/primary%3ADCIM",
+                    "DCIM",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+
+            await _store.SaveAsync(InstanceUri, [root]);
+
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            Assert.Equal(CottonSyncDirection.DeviceToCloud, loaded.Direction);
+            Assert.Equal(
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload,
+                loaded.UploadOriginalRetention);
+            Assert.True(loaded.DeletesOriginalsAfterUpload);
+        }
+
+        [Fact]
         public async Task Add_or_replace_replaces_existing_root_by_id()
         {
             CottonSyncRootSnapshot original = CreateRoot(RootId, FolderId, "Projects");
@@ -265,7 +291,8 @@ namespace Cotton.Mobile.Tests
                     "app-private-sync-root",
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private string CreateMetadataPath()

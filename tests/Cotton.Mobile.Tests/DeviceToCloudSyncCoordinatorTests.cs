@@ -369,7 +369,8 @@ namespace Cotton.Mobile.Tests
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
                     "Device folder",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.DeviceToCloud);
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.KeepOriginals);
 
             await Assert.ThrowsAsync<ArgumentException>(
                 () => _coordinator.RunRootAsync(InstanceUri, root));
@@ -408,7 +409,8 @@ namespace Cotton.Mobile.Tests
                         ? "On this device"
                         : "Device folder",
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(

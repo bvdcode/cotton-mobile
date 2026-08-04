@@ -538,7 +538,8 @@ namespace Cotton.Mobile.Tests
                     "app-private-cloud-to-device",
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonSyncRootSnapshot CreateDeviceRoot(Guid rootId)
@@ -556,7 +557,8 @@ namespace Cotton.Mobile.Tests
                     "content://tree/camera",
                     "Camera",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.DeviceToCloud);
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonSyncRootSnapshot CreateBidirectionalRoot()
@@ -574,7 +576,8 @@ namespace Cotton.Mobile.Tests
                     "content://tree/projects",
                     "Projects",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.Bidirectional);
+                CottonSyncDirection.Bidirectional,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
     }
 }

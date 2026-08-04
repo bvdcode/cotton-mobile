@@ -87,7 +87,8 @@ namespace Cotton.Mobile.Services
                 root.AccountScopeKey,
                 root.CloudFolder,
                 localRoot,
-                root.Direction);
+                root.Direction,
+                root.UploadOriginalRetention);
         }
     }
 }

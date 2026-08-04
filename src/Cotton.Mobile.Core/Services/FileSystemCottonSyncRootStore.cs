@@ -206,6 +206,7 @@ namespace Cotton.Mobile.Services
                 LocalRootDisplayName = root.LocalRoot.DisplayName,
                 LocalPermissionStatus = root.LocalRoot.PermissionStatus,
                 Direction = root.Direction,
+                UploadOriginalRetention = root.UploadOriginalRetention,
                 StableKey = root.StableKey,
             };
         }
@@ -233,7 +234,8 @@ namespace Cotton.Mobile.Services
                         item.LocalRootKey ?? string.Empty,
                         item.LocalRootDisplayName ?? string.Empty,
                         item.LocalPermissionStatus),
-                    item.Direction);
+                    item.Direction,
+                    item.UploadOriginalRetention);
                 if (!IsSameInstance(root.InstanceUri, expectedInstanceUri)
                     || string.IsNullOrWhiteSpace(item.StableKey)
                     || !string.Equals(root.StableKey, item.StableKey.Trim(), StringComparison.Ordinal))

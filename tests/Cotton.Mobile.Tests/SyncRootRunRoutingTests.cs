@@ -78,7 +78,8 @@ namespace Cotton.Mobile.Tests
                     "content://tree/projects",
                     "Projects",
                     CottonSyncRootPermissionStatus.Available),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
     }
 }

@@ -79,6 +79,44 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Device_to_cloud_root_can_delete_originals_after_confirmed_upload()
+        {
+            CottonSyncRootSnapshot root = new(
+                SyncRootId,
+                new Uri("https://app.cottoncloud.dev"),
+                "account-1",
+                CreateCloudFolder(),
+                new CottonSyncLocalRootSnapshot(
+                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                    "content://tree/primary%3ACamera",
+                    "Camera",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+
+            Assert.Equal(
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload,
+                root.UploadOriginalRetention);
+            Assert.True(root.DeletesOriginalsAfterUpload);
+        }
+
+        [Theory]
+        [InlineData(CottonSyncDirection.CloudToDevice)]
+        [InlineData(CottonSyncDirection.Bidirectional)]
+        public void Non_upload_root_rejects_delete_originals_policy(CottonSyncDirection direction)
+        {
+            Assert.Throws<ArgumentException>(() =>
+                new CottonSyncRootSnapshot(
+                    SyncRootId,
+                    new Uri("https://app.cottoncloud.dev"),
+                    "account-1",
+                    CreateCloudFolder(),
+                    CreateAppPrivateLocalRoot(),
+                    direction,
+                    CottonUploadOriginalRetention.DeleteAfterConfirmedUpload));
+        }
+
+        [Fact]
         public void Stable_key_normalizes_instance_uri_and_binds_account_cloud_folder_and_local_root()
         {
             CottonSyncLocalRootSnapshot localRoot = CreateAppPrivateLocalRoot();
@@ -95,11 +133,20 @@ namespace Cotton.Mobile.Tests
                 new Uri("https://app.cottoncloud.dev/mobile"),
                 "account-2",
                 localRoot);
+            CottonSyncRootSnapshot deleteOriginalsRoot = new(
+                root.Id,
+                root.InstanceUri,
+                root.AccountScopeKey,
+                root.CloudFolder,
+                root.LocalRoot,
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
 
             Assert.Equal("https://app.cottoncloud.dev/mobile", root.InstanceUri.AbsoluteUri.TrimEnd('/'));
             Assert.Equal(64, root.StableKey.Length);
             Assert.Equal(root.StableKey, equivalentRoot.StableKey);
             Assert.NotEqual(root.StableKey, differentAccountRoot.StableKey);
+            Assert.Equal(root.StableKey, deleteOriginalsRoot.StableKey);
         }
 
         [Fact]
@@ -143,7 +190,8 @@ namespace Cotton.Mobile.Tests
                 "account-1",
                 CreateCloudFolder(),
                 localRoot,
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(
@@ -157,7 +205,8 @@ namespace Cotton.Mobile.Tests
                 accountScopeKey,
                 CreateCloudFolder(),
                 localRoot,
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonSyncLocalRootSnapshot CreateAppPrivateLocalRoot()

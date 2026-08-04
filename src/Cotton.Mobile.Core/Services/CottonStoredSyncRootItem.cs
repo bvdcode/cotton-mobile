@@ -27,6 +27,8 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncDirection Direction { get; set; }
 
+        public CottonUploadOriginalRetention UploadOriginalRetention { get; set; }
+
         public string? StableKey { get; set; }
     }
 }

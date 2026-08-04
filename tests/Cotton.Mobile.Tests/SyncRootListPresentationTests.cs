@@ -325,7 +325,8 @@ namespace Cotton.Mobile.Tests
                     "app-private-cloud-to-device",
                     displayName,
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
     }
 }

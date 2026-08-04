@@ -44,6 +44,9 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonSyncRootPermissionStatus.Revoked, resolvedRoot.LocalRoot.PermissionStatus);
             Assert.Equal(CottonSyncRootReadinessStatus.GrantRevoked, resolvedRoot.ReadinessStatus);
             Assert.False(resolvedRoot.CanRunSync);
+            Assert.Equal(
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload,
+                resolvedRoot.UploadOriginalRetention);
             CottonSyncRootSnapshot persistedRoot = Assert.Single(await _rootStore.LoadAsync(InstanceUri));
             Assert.Equal(CottonSyncRootPermissionStatus.Available, persistedRoot.LocalRoot.PermissionStatus);
         }
@@ -83,7 +86,8 @@ namespace Cotton.Mobile.Tests
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
                     "Projects",
                     permissionStatus),
-                CottonSyncDirection.Bidirectional);
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
         }
 
         private class TestPermissionResolver : ICottonSyncLocalRootPermissionResolver

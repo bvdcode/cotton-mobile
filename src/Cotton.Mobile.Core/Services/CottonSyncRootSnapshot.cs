@@ -14,7 +14,8 @@ namespace Cotton.Mobile.Services
             string accountScopeKey,
             CottonUploadDestinationSnapshot cloudFolder,
             CottonSyncLocalRootSnapshot localRoot,
-            CottonSyncDirection direction)
+            CottonSyncDirection direction,
+            CottonUploadOriginalRetention uploadOriginalRetention)
         {
             if (id == Guid.Empty)
             {
@@ -39,12 +40,28 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
             }
 
+            if (!Enum.IsDefined(uploadOriginalRetention))
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(uploadOriginalRetention),
+                    "Upload original retention is not supported.");
+            }
+
+            if (direction != CottonSyncDirection.DeviceToCloud
+                && uploadOriginalRetention != CottonUploadOriginalRetention.KeepOriginals)
+            {
+                throw new ArgumentException(
+                    "Only device-to-cloud sync roots can delete originals after upload.",
+                    nameof(uploadOriginalRetention));
+            }
+
             Id = id;
             InstanceUri = NormalizeInstanceUri(instanceUri);
             AccountScopeKey = accountScopeKey.Trim();
             CloudFolder = cloudFolder;
             LocalRoot = localRoot;
             Direction = direction;
+            UploadOriginalRetention = uploadOriginalRetention;
             StableKey = CreateStableKey(InstanceUri, AccountScopeKey, CloudFolder, LocalRoot);
             ReadinessStatus = ResolveReadinessStatus(LocalRoot.PermissionStatus);
             StatusText = CreateStatusText(ReadinessStatus);
@@ -62,6 +79,8 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncDirection Direction { get; }
 
+        public CottonUploadOriginalRetention UploadOriginalRetention { get; }
+
         public string StableKey { get; }
 
         public CottonSyncRootReadinessStatus ReadinessStatus { get; }
@@ -71,6 +90,9 @@ namespace Cotton.Mobile.Services
         public bool CanRunSync => ReadinessStatus == CottonSyncRootReadinessStatus.Ready;
 
         public bool IsBidirectional => Direction == CottonSyncDirection.Bidirectional;
+
+        public bool DeletesOriginalsAfterUpload =>
+            UploadOriginalRetention == CottonUploadOriginalRetention.DeleteAfterConfirmedUpload;
 
         public bool NeedsUserAction => LocalRoot.NeedsUserAction;
 

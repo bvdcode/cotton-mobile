@@ -189,7 +189,8 @@ namespace Cotton.Mobile.Tests
                     $"app-private-sync-root-{FolderId:N}",
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice);
+                CottonSyncDirection.CloudToDevice,
+                CottonUploadOriginalRetention.KeepOriginals);
 
             await Assert.ThrowsAsync<ArgumentException>(
                 () => _coordinator.RunRootAsync(InstanceUri, root));
@@ -350,7 +351,8 @@ namespace Cotton.Mobile.Tests
                         ? "On this device"
                         : "Device folder",
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonFolderContent CreateContent(

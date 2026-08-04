@@ -286,7 +286,8 @@ namespace Cotton.Mobile.Tests
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
                     "Projects",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.DeviceToCloud);
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(

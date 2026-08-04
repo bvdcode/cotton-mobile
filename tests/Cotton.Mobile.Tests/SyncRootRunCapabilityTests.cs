@@ -118,7 +118,8 @@ namespace Cotton.Mobile.Tests
                         ? "On this device"
                         : "Projects",
                     permissionStatus),
-                direction);
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
     }
 }

@@ -135,7 +135,7 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        public Task ClearAsync(
+        public async Task ClearAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)
@@ -143,15 +143,19 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
             EnsureSupportedRoot(instanceUri, root);
-            cancellationToken.ThrowIfCancellationRequested();
-
-            string directory = _pathProvider.CreateUploadReceiptDirectory(instanceUri, root);
-            if (Directory.Exists(directory))
+            await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
+            try
             {
-                Directory.Delete(directory, recursive: true);
+                string directory = _pathProvider.CreateUploadReceiptDirectory(instanceUri, root);
+                if (Directory.Exists(directory))
+                {
+                    Directory.Delete(directory, recursive: true);
+                }
             }
-
-            return Task.CompletedTask;
+            finally
+            {
+                _writeLock.Release();
+            }
         }
 
         private static async Task<CottonUploadReceiptSnapshot> LoadReceiptAsync(

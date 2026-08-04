@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Tests
 
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
+        private readonly TestUploadReceiptStore _uploadReceiptStore;
         private readonly TestPermissionResolver _permissionResolver;
         private readonly SyncRootManager _manager;
 
@@ -22,12 +23,14 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             TestSyncRootMetadataPathProvider metadataPathProvider = new(_directory);
             _rootStore = new FileSystemCottonSyncRootStore(metadataPathProvider);
+            _uploadReceiptStore = new TestUploadReceiptStore();
             _permissionResolver = new TestPermissionResolver();
             _manager = new SyncRootManager(
                 _rootStore,
                 new FileSystemCottonSyncRootPauseStore(metadataPathProvider),
                 new FileSystemCottonSyncedFileManifestStore(
                     new TestSyncedFileManifestPathProvider(_directory)),
+                _uploadReceiptStore,
                 _permissionResolver);
         }
 
@@ -66,6 +69,39 @@ namespace Cotton.Mobile.Tests
             Assert.True(resolvedRoot.CanRunSync);
         }
 
+        [Fact]
+        public async Task Stop_clears_upload_receipts_for_device_to_cloud_root()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
+            await _rootStore.SaveAsync(InstanceUri, [root]);
+            await _uploadReceiptStore.SaveAsync(InstanceUri, root, CreatePendingReceipt());
+
+            bool removed = await _manager.StopAsync(InstanceUri, root);
+
+            Assert.True(removed);
+            Assert.Empty(await _rootStore.LoadAsync(InstanceUri));
+            Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+            Assert.Equal([root.Id], _uploadReceiptStore.ClearedRootIds);
+        }
+
+        [Theory]
+        [InlineData(CottonSyncDirection.CloudToDevice)]
+        [InlineData(CottonSyncDirection.Bidirectional)]
+        public async Task Stop_does_not_clear_upload_receipts_for_other_directions(
+            CottonSyncDirection direction)
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                CottonSyncRootPermissionStatus.Available,
+                direction,
+                CottonUploadOriginalRetention.KeepOriginals);
+            await _rootStore.SaveAsync(InstanceUri, [root]);
+
+            bool removed = await _manager.StopAsync(InstanceUri, root);
+
+            Assert.True(removed);
+            Assert.Empty(_uploadReceiptStore.ClearedRootIds);
+        }
+
         public void Dispose()
         {
             if (Directory.Exists(_directory))
@@ -75,6 +111,17 @@ namespace Cotton.Mobile.Tests
         }
 
         private static CottonSyncRootSnapshot CreateRoot(CottonSyncRootPermissionStatus permissionStatus)
+        {
+            return CreateRoot(
+                permissionStatus,
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+        }
+
+        private static CottonSyncRootSnapshot CreateRoot(
+            CottonSyncRootPermissionStatus permissionStatus,
+            CottonSyncDirection direction,
+            CottonUploadOriginalRetention uploadOriginalRetention)
         {
             return new CottonSyncRootSnapshot(
                 RootId,
@@ -86,8 +133,27 @@ namespace Cotton.Mobile.Tests
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
                     "Projects",
                     permissionStatus),
-                CottonSyncDirection.DeviceToCloud,
-                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+                direction,
+                uploadOriginalRetention);
+        }
+
+        private static CottonUploadReceiptSnapshot CreatePendingReceipt()
+        {
+            CottonDeviceToCloudSyncPlanItem item = new(
+                CottonDeviceToCloudSyncActionKind.UploadNewFile,
+                CottonFileBrowserEntryType.File,
+                "photo.jpg",
+                "photo.jpg",
+                cloudItemId: null,
+                expectedRemoteETag: null,
+                new DateTime(2026, 8, 4, 10, 0, 0, DateTimeKind.Utc),
+                sizeBytes: 42,
+                contentType: "image/jpeg",
+                localSourceId: "primary:DCIM/Camera/photo.jpg");
+            return CottonUploadReceiptSnapshot.CreatePending(
+                item,
+                Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
+                new DateTime(2026, 8, 4, 10, 1, 0, DateTimeKind.Utc));
         }
 
         private class TestPermissionResolver : ICottonSyncLocalRootPermissionResolver
@@ -131,6 +197,63 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootSnapshot root)
             {
                 return Path.Combine(_directory, "manifests", root.Id.ToString("N"));
+            }
+        }
+
+        private class TestUploadReceiptStore : ICottonUploadReceiptStore
+        {
+            private readonly Dictionary<Guid, List<CottonUploadReceiptSnapshot>> _receiptsByRootId = [];
+
+            public List<Guid> ClearedRootIds { get; } = [];
+
+            public Task<IReadOnlyList<CottonUploadReceiptSnapshot>> LoadAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                IReadOnlyList<CottonUploadReceiptSnapshot> receipts = _receiptsByRootId.TryGetValue(
+                    root.Id,
+                    out List<CottonUploadReceiptSnapshot>? storedReceipts)
+                    ? storedReceipts.ToArray()
+                    : [];
+                return Task.FromResult(receipts);
+            }
+
+            public Task SaveAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CottonUploadReceiptSnapshot receipt,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (!_receiptsByRootId.TryGetValue(
+                    root.Id,
+                    out List<CottonUploadReceiptSnapshot>? receipts))
+                {
+                    receipts = [];
+                    _receiptsByRootId[root.Id] = receipts;
+                }
+
+                receipts.RemoveAll(item => item.LocalSourceId == receipt.LocalSourceId);
+                receipts.Add(receipt);
+                return Task.CompletedTask;
+            }
+
+            public Task ClearAsync(
+                Uri instanceUri,
+                CottonSyncRootSnapshot root,
+                CancellationToken cancellationToken = default)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (root.Direction != CottonSyncDirection.DeviceToCloud)
+                {
+                    throw new InvalidOperationException("Upload receipts are unsupported for this sync direction.");
+                }
+
+                ClearedRootIds.Add(root.Id);
+                _receiptsByRootId.Remove(root.Id);
+                return Task.CompletedTask;
             }
         }
     }

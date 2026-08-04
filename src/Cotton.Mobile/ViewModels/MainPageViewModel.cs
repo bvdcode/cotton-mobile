@@ -13,6 +13,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
         private const string ReadyStatus = "";
+        private const string AuthorizationCancelledStatus = "Authorization cancelled.";
 
         private readonly ICottonSessionService _sessionService;
         private readonly ICottonInstanceStore _instanceStore;
@@ -152,6 +153,7 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task SignInAsync()
         {
+            string instanceUrlInput = Display.InstanceUrl;
             Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.EffectiveInstanceUrl);
             if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
             {
@@ -160,8 +162,11 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            Display.InstanceUrl = instanceUri.AbsoluteUri;
-            using var authorizationCancellation = new CancellationTokenSource();
+            string signInInstanceUrl = string.IsNullOrWhiteSpace(instanceUrlInput)
+                ? string.Empty
+                : instanceUri.AbsoluteUri;
+            Display.InstanceUrl = signInInstanceUrl;
+            using CancellationTokenSource authorizationCancellation = new();
             _authorizationCancellation = authorizationCancellation;
             Display.ShowAuthorizationProgress();
             RefreshCommands();
@@ -171,14 +176,18 @@ namespace Cotton.Mobile.ViewModels
                 CottonSessionResult result = await _sessionService.SignInWithBrowserAsync(
                     instanceUri,
                     authorizationCancellation.Token);
+                if (authorizationCancellation.IsCancellationRequested)
+                {
+                    await CompleteAuthorizationCancellationAsync(signInInstanceUrl);
+                    return;
+                }
+
                 await ApplySessionResultAsync(result, ReadyStatus);
             }
-            catch (OperationCanceledException exception) when (authorizationCancellation.IsCancellationRequested)
+            catch (Exception exception) when (authorizationCancellation.IsCancellationRequested)
             {
                 _logger.LogInformation(exception, "Cotton mobile browser authorization was cancelled.");
-                await ClearLocalSessionBestEffortAsync("authorization cancellation");
-                Display.ShowSignIn("Authorization cancelled.");
-                RefreshCommands();
+                await CompleteAuthorizationCancellationAsync(signInInstanceUrl);
             }
             catch (Exception exception)
             {
@@ -198,10 +207,24 @@ namespace Cotton.Mobile.ViewModels
 
         private Task CancelAuthorizationAsync()
         {
+            CancellationTokenSource? authorizationCancellation = _authorizationCancellation;
+            if (authorizationCancellation is null)
+            {
+                return Task.CompletedTask;
+            }
+
             Display.ShowAuthorizationCancelling();
             RefreshCommands();
-            _authorizationCancellation?.Cancel();
+            authorizationCancellation.Cancel();
             return Task.CompletedTask;
+        }
+
+        private async Task CompleteAuthorizationCancellationAsync(string signInInstanceUrl)
+        {
+            await ClearLocalSessionBestEffortAsync("authorization cancellation");
+            Display.InstanceUrl = signInInstanceUrl;
+            Display.ShowSignIn(AuthorizationCancelledStatus);
+            RefreshCommands();
         }
 
         private async Task ConfirmLogoutAsync()

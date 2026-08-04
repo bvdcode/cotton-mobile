@@ -9,11 +9,11 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid FolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
         private static readonly Guid FirstFileId = Guid.Parse("11111111-1111-1111-1111-111111111111");
         private static readonly Guid SecondFileId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        private static readonly Guid RemoteFolderId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+        private static readonly Guid OperationId = Guid.Parse("33333333-3333-3333-3333-333333333333");
         private static readonly DateTime SyncedAt = new(2026, 6, 20, 14, 0, 0, DateTimeKind.Utc);
 
         [Fact]
-        public void Planner_uploads_new_local_files()
+        public void Planner_uploads_new_local_file()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -26,221 +26,156 @@ namespace Cotton.Mobile.Tests
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
             Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadNewFile, item.Action);
-            Assert.True(item.RequiresUpload);
-            Assert.True(item.RequiresServerMutation);
-            Assert.Null(item.CloudItemId);
-            Assert.Null(item.ExpectedRemoteETag);
             Assert.Equal("alpha.txt", item.RelativePath);
             Assert.Equal("document-alpha", item.LocalSourceId);
+            Assert.Null(item.UploadOperationId);
+            Assert.True(item.RequiresUpload);
             Assert.Equal(1, plan.UploadCount);
             Assert.True(plan.HasExecutableChanges);
             Assert.False(plan.HasBlockingItems);
         }
 
         [Fact]
-        public void Planner_keeps_matching_manifest_file()
+        public void Planner_keeps_uploaded_receipt_when_remote_is_missing_or_changed()
         {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
+            CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(1), 42));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                local,
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFile, item.Action);
-            Assert.True(item.IsNoOp);
-            Assert.Equal(FirstFileId, item.CloudItemId);
-            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
-            Assert.Equal(1, plan.NoOpCount);
-            Assert.False(plan.HasExecutableChanges);
-        }
-
-        [Fact]
-        public void Planner_uploads_changed_manifest_file_when_remote_revision_matches()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(3), 42));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                local,
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadChangedFile, item.Action);
-            Assert.True(item.RequiresUpload);
-            Assert.Equal(FirstFileId, item.CloudItemId);
-            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
-            Assert.Equal(1, plan.UploadCount);
-        }
-
-        [Fact]
-        public void Planner_uploads_changed_manifest_file_when_size_changes()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 43));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                local,
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadChangedFile, item.Action);
-            Assert.True(item.RequiresUpload);
-        }
-
-        [Fact]
-        public void Planner_blocks_changed_file_when_remote_revision_changed()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(3), 42));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-2\""));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                local,
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoteRevisionChanged, item.Action);
-            Assert.True(item.IsBlocked);
-            Assert.False(item.RequiresUpload);
-            Assert.Equal(1, plan.BlockedCount);
-            Assert.True(plan.HasBlockingItems);
-        }
-
-        [Fact]
-        public void Planner_blocks_remote_replacement_at_same_path_without_upload_or_delete()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(1), 42));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonDeviceToCloudRemoteContentSnapshot changedRemote = CreateRemoteContent(
                 CreateRemoteFile(SecondFileId, "alpha.txt", "alpha.txt", "\"etag-2\""));
 
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+            CottonDeviceToCloudSyncPlanSnapshot missingRemotePlan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
                 local,
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoteTargetMissing, item.Action);
-            Assert.True(item.IsBlocked);
-            Assert.False(item.RequiresUpload);
-            Assert.False(item.RequiresRemoteDelete);
-            Assert.Equal(FirstFileId, item.CloudItemId);
-            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
-            Assert.Equal(1, plan.BlockedCount);
-            Assert.Equal(0, plan.RemoteDeleteCount);
-        }
-
-        [Fact]
-        public void Planner_marks_missing_remote_etag_as_fresh_revision_needed()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(3), 42));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", eTag: null));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateRemoteContent(),
+                [receipt]);
+            CottonDeviceToCloudSyncPlanSnapshot changedRemotePlan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
                 local,
-                remote,
-                [manifest]);
+                changedRemote,
+                [receipt]);
 
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision, item.Action);
-            Assert.True(item.IsBlocked);
+            AssertUploadedReceiptIsKept(missingRemotePlan);
+            AssertUploadedReceiptIsKept(changedRemotePlan);
         }
 
         [Fact]
-        public void Planner_deletes_remote_file_when_manifest_file_is_missing_locally()
+        public void Planner_ignores_receipt_when_local_file_is_missing()
         {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                CreateLocalContent(),
-                remote,
-                [manifest]);
-
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.DeleteRemoteFile, item.Action);
-            Assert.True(item.RequiresRemoteDelete);
-            Assert.True(item.IsDestructive);
-            Assert.Equal(FirstFileId, item.CloudItemId);
-            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
-            Assert.Equal(1, plan.RemoteDeleteCount);
-            Assert.True(plan.HasDestructiveChanges);
-        }
-
-        [Fact]
-        public void Planner_removes_manifest_orphan_when_remote_file_is_already_missing()
-        {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
+            CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
                 CreateLocalContent(),
                 CreateRemoteContent(),
-                [manifest]);
+                [receipt]);
 
-            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan, item.Action);
-            Assert.True(item.RemovesManifestOnly);
-            Assert.False(item.RequiresServerMutation);
-            Assert.Equal(1, plan.ManifestRemovalCount);
+            Assert.Empty(plan.Items);
+            Assert.False(plan.HasExecutableChanges);
         }
 
         [Fact]
-        public void Planner_removes_manifest_only_when_remote_replacement_exists_for_missing_local_file()
+        public void Planner_deletes_local_file_only_for_uploaded_receipt_and_delete_retention()
         {
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFile(SecondFileId, "alpha.txt", "alpha.txt", "\"etag-2\""));
+            CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload),
+                local,
+                CreateRemoteContent(),
+                [receipt]);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile, item.Action);
+            Assert.Equal(OperationId, item.UploadOperationId);
+            Assert.True(item.RequiresLocalDelete);
+            Assert.False(item.RequiresUpload);
+            Assert.Equal(1, plan.LocalDeleteCount);
+            Assert.True(plan.HasExecutableChanges);
+        }
+
+        [Fact]
+        public void Planner_retries_pending_receipt_with_same_operation_id_when_remote_is_missing()
+        {
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
-                CreateLocalContent(),
-                remote,
-                [manifest]);
+                local,
+                CreateRemoteContent(),
+                [receipt]);
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan, item.Action);
-            Assert.True(item.RemovesManifestOnly);
-            Assert.False(item.RequiresRemoteDelete);
-            Assert.Equal(0, plan.RemoteDeleteCount);
-            Assert.Equal(1, plan.ManifestRemovalCount);
-            Assert.False(plan.HasDestructiveChanges);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadNewFile, item.Action);
+            Assert.Equal(OperationId, item.UploadOperationId);
+            Assert.Equal("document-alpha", item.LocalSourceId);
+            Assert.True(item.RequiresUpload);
+            Assert.Equal(1, plan.UploadCount);
+        }
+
+        [Fact]
+        public void Planner_confirms_pending_receipt_from_remote_operation_metadata()
+        {
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(
+                    FirstFileId,
+                    "alpha.txt",
+                    "alpha.txt",
+                    "\"etag-1\"",
+                    OperationId));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                [receipt]);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.ConfirmPendingUpload, item.Action);
+            Assert.Equal(OperationId, item.UploadOperationId);
+            Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
+            Assert.True(item.ConfirmsPendingUpload);
+            Assert.Equal(1, plan.ConfirmedUploadCount);
+            Assert.True(plan.HasExecutableChanges);
+        }
+
+        [Fact]
+        public void Planner_blocks_pending_receipt_when_local_version_or_path_changes()
+        {
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
+            CottonDeviceToCloudLocalContentSnapshot changedVersion = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(1), 43, "document-alpha"));
+            CottonDeviceToCloudLocalContentSnapshot changedPath = CreateLocalContent(
+                CreateLocalFile("renamed.txt", "renamed.txt", SyncedAt, 42, "document-alpha"));
+
+            CottonDeviceToCloudSyncPlanSnapshot changedVersionPlan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                changedVersion,
+                CreateRemoteContent(),
+                [receipt]);
+            CottonDeviceToCloudSyncPlanSnapshot changedPathPlan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                changedPath,
+                CreateRemoteContent(),
+                [receipt]);
+
+            AssertPendingLocalChangeIsBlocked(changedVersionPlan);
+            AssertPendingLocalChangeIsBlocked(changedPathPlan);
         }
 
         [Fact]
         public void Planner_blocks_new_local_file_when_remote_path_exists()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42));
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
 
@@ -252,198 +187,136 @@ namespace Cotton.Mobile.Tests
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
             Assert.Equal(CottonDeviceToCloudSyncActionKind.RemotePathConflict, item.Action);
-            Assert.True(item.IsBlocked);
             Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresUpload);
         }
 
         [Fact]
-        public void Planner_blocks_invalid_local_problem_without_skipping_valid_siblings()
+        public void Planner_includes_only_parent_folders_needed_by_pending_uploads()
         {
-            var invalidName = new CottonDeviceToCloudLocalProblemSnapshot(
-                CottonDeviceToCloudLocalProblemKind.InvalidCloudName,
-                CottonFileBrowserEntryType.File,
-                "bad:name.txt",
-                "bad:name.txt",
-                "Name cannot be synced to the cloud.");
-            var local = new CottonDeviceToCloudLocalContentSnapshot(
-                "Projects",
-                [CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42)],
-                [invalidName]);
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt(
+                relativePath: "Pending/alpha.txt");
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFolder("Pending", "Pending"),
+                CreateLocalFile("alpha.txt", "Pending/alpha.txt", SyncedAt, 42, "document-alpha"),
+                CreateLocalFolder("Unused", "Unused"));
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
                 local,
                 CreateRemoteContent(),
-                []);
+                [receipt]);
 
             Assert.Equal(2, plan.Items.Count);
-            CottonDeviceToCloudSyncPlanItem blocked =
-                Assert.Single(plan.Items, item => item.Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName);
-            CottonDeviceToCloudSyncPlanItem upload =
-                Assert.Single(plan.Items, item => item.Action == CottonDeviceToCloudSyncActionKind.UploadNewFile);
-            Assert.True(blocked.IsBlocked);
-            Assert.True(blocked.IsLocalProblem);
-            Assert.Equal("bad:name.txt", blocked.DisplayName);
-            Assert.Equal("bad:name.txt", blocked.RelativePath);
-            Assert.True(upload.RequiresUpload);
-            Assert.Equal(1, plan.BlockedCount);
-            Assert.Equal(1, plan.LocalProblemCount);
-            Assert.Equal(1, plan.UploadCount);
+            CottonDeviceToCloudSyncPlanItem folder = plan.Items[0];
+            CottonDeviceToCloudSyncPlanItem upload = plan.Items[1];
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.CreateRemoteFolder, folder.Action);
+            Assert.Equal("Pending", folder.RelativePath);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadNewFile, upload.Action);
+            Assert.Equal("Pending/alpha.txt", upload.RelativePath);
+            Assert.Equal(OperationId, upload.UploadOperationId);
+            Assert.DoesNotContain(plan.Items, item => item.RelativePath == "Unused");
         }
 
         [Fact]
-        public void Planner_creates_remote_folders_before_nested_uploads()
+        public void Planner_blocks_local_file_without_source_id()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFolder("Nested", "Nested"),
-                CreateLocalFile("alpha.txt", "Nested/alpha.txt", SyncedAt, 42));
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, localSourceId: null));
 
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(),
                 local,
                 CreateRemoteContent(),
-                []);
-
-            Assert.Equal(2, plan.Items.Count);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.CreateRemoteFolder, plan.Items[0].Action);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.UploadNewFile, plan.Items[1].Action);
-            Assert.True(plan.Items[0].RequiresRemoteFolderCreate);
-            Assert.Equal(1, plan.RemoteFolderCreateCount);
-            Assert.Equal(1, plan.UploadCount);
-        }
-
-        [Fact]
-        public void Planner_keeps_existing_remote_folder()
-        {
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFolder("Nested", "Nested"));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
-                CreateRemoteFolder(RemoteFolderId, "Nested", "Nested"));
-
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                CreateReadyRoot(),
-                local,
-                remote,
                 []);
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
-            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFolder, item.Action);
-            Assert.True(item.IsNoOp);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.BlockedLocalSource, item.Action);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresUpload);
+            Assert.Equal(1, plan.BlockedCount);
         }
 
         [Fact]
-        public void Planner_rejects_wrong_roots_and_remote_content()
+        public void Planner_ignores_remote_only_files()
+        {
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                CreateLocalContent(),
+                remote,
+                []);
+
+            Assert.Empty(plan.Items);
+            Assert.False(plan.HasExecutableChanges);
+            Assert.False(plan.HasBlockingItems);
+        }
+
+        [Fact]
+        public void Planner_rejects_non_upload_only_direction()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42));
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent();
 
-            Assert.Throws<InvalidOperationException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(CreateCloudToDeviceRoot(), local, remote, []));
-
-            Assert.Throws<InvalidOperationException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateRoot(CottonSyncDirection.DeviceToCloud, CottonSyncRootPermissionStatus.Unavailable),
-                    local,
-                    remote,
-                    []));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    local,
-                    new CottonDeviceToCloudRemoteContentSnapshot(
-                        Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                        "Other",
-                        []),
-                    []));
+            Assert.Throws<InvalidOperationException>(() => CottonDeviceToCloudSyncPlanner.Create(
+                CreateRoot(CottonSyncDirection.CloudToDevice),
+                local,
+                remote,
+                []));
+            Assert.Throws<InvalidOperationException>(() => CottonDeviceToCloudSyncPlanner.Create(
+                CreateRoot(CottonSyncDirection.Bidirectional),
+                local,
+                remote,
+                []));
         }
 
-        [Fact]
-        public void Planner_rejects_duplicate_paths_and_remote_file_ids()
+        private static void AssertUploadedReceiptIsKept(CottonDeviceToCloudSyncPlanSnapshot plan)
         {
-            CottonDeviceToCloudLocalContentSnapshot duplicateLocal = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42),
-                CreateLocalFile("ALPHA.txt", "ALPHA.txt", SyncedAt, 43));
-            CottonDeviceToCloudRemoteContentSnapshot duplicateRemotePath = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""),
-                CreateRemoteFile(SecondFileId, "ALPHA.txt", "ALPHA.txt", "\"etag-2\""));
-            CottonDeviceToCloudRemoteContentSnapshot duplicateRemoteId = CreateRemoteContent(
-                CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""),
-                CreateRemoteFile(FirstFileId, "beta.txt", "beta.txt", "\"etag-2\""));
-            CottonSyncedFileSnapshot manifest = CreateManifestFile(FirstFileId, "alpha.txt", "\"etag-1\"", SyncedAt);
-            CottonSyncedFileSnapshot duplicateManifestPath = CreateManifestFile(
-                SecondFileId,
-                "ALPHA.txt",
-                "\"etag-2\"",
-                SyncedAt);
-            CottonSyncedFileSnapshot duplicateManifestId = CreateManifestFile(
-                FirstFileId,
-                "beta.txt",
-                "\"etag-2\"",
-                SyncedAt);
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(CreateReadyRoot(), duplicateLocal, CreateRemoteContent(), []));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateLocalContent(),
-                    duplicateRemotePath,
-                    []));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateLocalContent(),
-                    duplicateRemoteId,
-                    []));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateLocalContent(),
-                    CreateRemoteContent(),
-                    [manifest, duplicateManifestPath]));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonDeviceToCloudSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateLocalContent(),
-                    CreateRemoteContent(),
-                    [manifest, duplicateManifestId]));
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.KeepExistingFile, item.Action);
+            Assert.Equal(FirstFileId, item.CloudItemId);
+            Assert.Equal("\"etag-1\"", item.ExpectedRemoteETag);
+            Assert.Equal(OperationId, item.UploadOperationId);
+            Assert.True(item.IsNoOp);
+            Assert.False(plan.HasExecutableChanges);
         }
 
-        private static CottonSyncRootSnapshot CreateReadyRoot()
+        private static void AssertPendingLocalChangeIsBlocked(CottonDeviceToCloudSyncPlanSnapshot plan)
         {
-            return CreateRoot(CottonSyncDirection.DeviceToCloud, CottonSyncRootPermissionStatus.Available);
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, item.Action);
+            Assert.Equal(OperationId, item.UploadOperationId);
+            Assert.True(item.IsBlocked);
+            Assert.False(item.RequiresUpload);
+            Assert.True(plan.HasBlockingItems);
         }
 
-        private static CottonSyncRootSnapshot CreateCloudToDeviceRoot()
+        private static CottonSyncRootSnapshot CreateReadyRoot(
+            CottonUploadOriginalRetention retention = CottonUploadOriginalRetention.KeepOriginals)
         {
-            return CreateRoot(CottonSyncDirection.CloudToDevice, CottonSyncRootPermissionStatus.Available);
+            return CreateRoot(CottonSyncDirection.DeviceToCloud, retention);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(
             CottonSyncDirection direction,
-            CottonSyncRootPermissionStatus permissionStatus)
+            CottonUploadOriginalRetention retention = CottonUploadOriginalRetention.KeepOriginals)
         {
             return new CottonSyncRootSnapshot(
                 SyncRootId,
                 new Uri("https://app.cottoncloud.dev"),
                 "account-1",
-                new CottonUploadDestinationSnapshot(
-                    FolderId,
-                    "Projects",
-                    "Files / Projects"),
+                new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
                 new CottonSyncLocalRootSnapshot(
                     CottonSyncRootStorageKind.UserSelectedDocumentTree,
                     "content://tree/primary%3AProjects",
                     "Projects",
-                    permissionStatus),
+                    CottonSyncRootPermissionStatus.Available),
                 direction,
-                CottonUploadOriginalRetention.KeepOriginals);
+                retention);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(
@@ -457,7 +330,7 @@ namespace Cotton.Mobile.Tests
             string relativePath,
             DateTime updatedAt,
             long sizeBytes,
-            string? localSourceId = null)
+            string? localSourceId)
         {
             return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                 name,
@@ -483,58 +356,56 @@ namespace Cotton.Mobile.Tests
             Guid id,
             string name,
             string relativePath,
-            string? eTag)
-        {
-            return new CottonDeviceToCloudRemoteItemSnapshot(
-                CreateRemoteEntry(id, CottonFileBrowserEntryType.File, name, eTag),
-                relativePath);
-        }
-
-        private static CottonDeviceToCloudRemoteItemSnapshot CreateRemoteFolder(
-            Guid id,
-            string name,
-            string relativePath)
-        {
-            return new CottonDeviceToCloudRemoteItemSnapshot(
-                CreateRemoteEntry(id, CottonFileBrowserEntryType.Folder, name, eTag: null),
-                relativePath);
-        }
-
-        private static CottonFileBrowserEntry CreateRemoteEntry(
-            Guid id,
-            CottonFileBrowserEntryType type,
-            string name,
-            string? eTag)
-        {
-            return CottonFileBrowserEntry.CreateCached(
-                id,
-                type,
-                name,
-                type == CottonFileBrowserEntryType.File ? "Text" : "Folder",
-                type == CottonFileBrowserEntryType.File ? "42 B · Text" : "Folder",
-                type == CottonFileBrowserEntryType.File ? "More" : "Open",
-                type == CottonFileBrowserEntryType.File ? "TXT" : "Folder",
-                SyncedAt,
-                type == CottonFileBrowserEntryType.File ? 42 : null,
-                type == CottonFileBrowserEntryType.File ? "text/plain" : null,
-                previewHashEncryptedHex: null,
-                eTag);
-        }
-
-        private static CottonSyncedFileSnapshot CreateManifestFile(
-            Guid id,
-            string name,
             string eTag,
-            DateTime syncedAt)
+            Guid? operationId = null)
         {
-            return new CottonSyncedFileSnapshot(
+            IReadOnlyDictionary<string, string>? metadata = operationId.HasValue
+                ? new Dictionary<string, string>
+                {
+                    [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.Value.ToString("N"),
+                }
+                : null;
+            CottonFileBrowserEntry entry = CottonFileBrowserEntry.CreateFile(
                 id,
                 name,
-                eTag,
                 SyncedAt,
                 42,
                 "text/plain",
-                syncedAt);
+                previewHashEncryptedHex: null,
+                eTag,
+                metadata);
+            return new CottonDeviceToCloudRemoteItemSnapshot(entry, relativePath);
+        }
+
+        private static CottonUploadReceiptSnapshot CreatePendingReceipt(
+            string relativePath = "alpha.txt")
+        {
+            return new CottonUploadReceiptSnapshot(
+                "document-alpha",
+                relativePath,
+                SyncedAt,
+                42,
+                "text/plain",
+                OperationId,
+                CottonUploadReceiptStatus.Pending,
+                SyncedAt.AddMinutes(1),
+                remoteFileId: null,
+                remoteETag: null);
+        }
+
+        private static CottonUploadReceiptSnapshot CreateUploadedReceipt()
+        {
+            return new CottonUploadReceiptSnapshot(
+                "document-alpha",
+                "alpha.txt",
+                SyncedAt,
+                42,
+                "text/plain",
+                OperationId,
+                CottonUploadReceiptStatus.Uploaded,
+                SyncedAt.AddMinutes(1),
+                FirstFileId,
+                "\"etag-1\"");
         }
     }
 }

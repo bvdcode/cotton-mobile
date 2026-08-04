@@ -7,15 +7,17 @@ namespace Cotton.Mobile.Services
     {
         CreateRemoteFolder,
         UploadNewFile,
+        ConfirmPendingUpload,
+        DeleteUploadedLocalFile,
         UploadChangedFile,
         KeepExistingFile,
         KeepExistingFolder,
         DeleteRemoteFile,
         RemoveManifestOrphan,
         RemotePathConflict,
-        RemoteRevisionChanged,
-        RemoteTargetMissing,
         NeedsFreshServerRevision,
         BlockedLocalItemName,
+        BlockedLocalSource,
+        PendingLocalVersionChanged,
     }
 }

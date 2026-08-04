@@ -15,7 +15,8 @@ namespace Cotton.Mobile.Services
             DateTime? localUpdatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            string? localSourceId = null)
+            string? localSourceId = null,
+            Guid? uploadOperationId = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -42,6 +43,11 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(sizeBytes), "Device-to-cloud sync item size cannot be negative.");
             }
 
+            if (uploadOperationId == Guid.Empty)
+            {
+                throw new ArgumentException("Upload operation id cannot be empty.", nameof(uploadOperationId));
+            }
+
             Action = action;
             TargetType = targetType;
             DisplayName = displayName.Trim();
@@ -54,6 +60,7 @@ namespace Cotton.Mobile.Services
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
+            UploadOperationId = uploadOperationId;
         }
 
         public CottonDeviceToCloudSyncActionKind Action { get; }
@@ -76,11 +83,17 @@ namespace Cotton.Mobile.Services
 
         public string? LocalSourceId { get; }
 
+        public Guid? UploadOperationId { get; }
+
         public bool RequiresUpload =>
             Action is CottonDeviceToCloudSyncActionKind.UploadNewFile
                 or CottonDeviceToCloudSyncActionKind.UploadChangedFile;
 
         public bool RequiresRemoteFolderCreate => Action == CottonDeviceToCloudSyncActionKind.CreateRemoteFolder;
+
+        public bool ConfirmsPendingUpload => Action == CottonDeviceToCloudSyncActionKind.ConfirmPendingUpload;
+
+        public bool RequiresLocalDelete => Action == CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile;
 
         public bool RequiresRemoteDelete => Action == CottonDeviceToCloudSyncActionKind.DeleteRemoteFile;
 
@@ -88,7 +101,7 @@ namespace Cotton.Mobile.Services
 
         public bool RequiresServerMutation => RequiresUpload || RequiresRemoteFolderCreate || RequiresRemoteDelete;
 
-        public bool IsDestructive => RequiresRemoteDelete;
+        public bool RequiresLocalMutation => ConfirmsPendingUpload || RequiresLocalDelete;
 
         public bool IsNoOp =>
             Action is CottonDeviceToCloudSyncActionKind.KeepExistingFile
@@ -96,10 +109,10 @@ namespace Cotton.Mobile.Services
 
         public bool IsBlocked =>
             Action is CottonDeviceToCloudSyncActionKind.RemotePathConflict
-                or CottonDeviceToCloudSyncActionKind.RemoteRevisionChanged
-                or CottonDeviceToCloudSyncActionKind.RemoteTargetMissing
                 or CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision
-                or CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
+                or CottonDeviceToCloudSyncActionKind.BlockedLocalItemName
+                or CottonDeviceToCloudSyncActionKind.BlockedLocalSource
+                or CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged;
 
         public bool IsLocalProblem => Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
 
@@ -146,12 +159,34 @@ namespace Cotton.Mobile.Services
                 RelativePath);
         }
 
+        public CottonDeviceToCloudSyncPlanItem WithUploadOperationId(Guid uploadOperationId)
+        {
+            if (uploadOperationId == Guid.Empty)
+            {
+                throw new ArgumentException("Upload operation id is required.", nameof(uploadOperationId));
+            }
+
+            return new CottonDeviceToCloudSyncPlanItem(
+                Action,
+                TargetType,
+                DisplayName,
+                RelativePath,
+                CloudItemId,
+                ExpectedRemoteETag,
+                LocalUpdatedAtUtc,
+                SizeBytes,
+                ContentType,
+                LocalSourceId,
+                uploadOperationId);
+        }
+
         private static string NormalizeRelativePath(
             CottonDeviceToCloudSyncActionKind action,
             string displayName,
             string relativePath)
         {
-            if (action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName)
+            if (action is CottonDeviceToCloudSyncActionKind.BlockedLocalItemName
+                or CottonDeviceToCloudSyncActionKind.BlockedLocalSource)
             {
                 if (string.IsNullOrWhiteSpace(relativePath))
                 {

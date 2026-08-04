@@ -46,9 +46,9 @@ namespace Cotton.Mobile.Services
 
         public int RemoteFolderCreateCount => Items.Count(item => item.RequiresRemoteFolderCreate);
 
-        public int RemoteDeleteCount => Items.Count(item => item.RequiresRemoteDelete);
+        public int ConfirmedUploadCount => Items.Count(item => item.ConfirmsPendingUpload);
 
-        public int ManifestRemovalCount => Items.Count(item => item.RemovesManifestOnly);
+        public int LocalDeleteCount => Items.Count(item => item.RequiresLocalDelete);
 
         public int BlockedCount => Items.Count(item => item.IsBlocked);
 
@@ -57,9 +57,7 @@ namespace Cotton.Mobile.Services
         public int NoOpCount => Items.Count(item => item.IsNoOp);
 
         public bool HasExecutableChanges => Items.Any(item =>
-            item.RequiresServerMutation || item.RemovesManifestOnly);
-
-        public bool HasDestructiveChanges => Items.Any(item => item.IsDestructive);
+            item.RequiresServerMutation || item.RequiresLocalMutation || item.RemovesManifestOnly);
 
         public bool HasBlockingItems => BlockedCount > 0;
     }

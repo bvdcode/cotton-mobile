@@ -67,6 +67,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void From_file_preserves_an_immutable_metadata_snapshot()
+        {
+            var sourceMetadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            {
+                [CottonFileUploadMetadataKeys.UploadOperationId] = "operation-1",
+            };
+            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(
+                CreateFile("photo.jpg", "image/jpeg", 42, metadata: sourceMetadata));
+
+            sourceMetadata[CottonFileUploadMetadataKeys.UploadOperationId] = "changed";
+            CottonFileBrowserEntry selected = entry.WithSelection(true);
+
+            Assert.Equal(
+                "operation-1",
+                entry.Metadata[CottonFileUploadMetadataKeys.UploadOperationId]);
+            Assert.Equal(entry.Metadata, selected.Metadata);
+            Assert.Throws<NotSupportedException>(() =>
+                ((IDictionary<string, string>)entry.Metadata).Add("other", "value"));
+        }
+
+        [Fact]
         public void From_node_creates_folder_entry_with_open_action()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromNode(
@@ -282,7 +303,8 @@ namespace Cotton.Mobile.Tests
             string contentType,
             long sizeBytes,
             string? previewHashEncryptedHex = null,
-            string? eTag = null)
+            string? eTag = null,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
             return new NodeFileManifestDto
             {
@@ -293,6 +315,9 @@ namespace Cotton.Mobile.Tests
                 PreviewHashEncryptedHex = previewHashEncryptedHex ?? string.Empty,
                 ETag = eTag ?? string.Empty,
                 UpdatedAt = UpdatedAt,
+                Metadata = metadata is null
+                    ? []
+                    : new Dictionary<string, string>(metadata, StringComparer.Ordinal),
             };
         }
     }

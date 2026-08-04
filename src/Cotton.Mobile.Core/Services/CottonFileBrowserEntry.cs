@@ -3,6 +3,7 @@
 
 using Cotton.Files;
 using Cotton.Nodes;
+using System.Collections.ObjectModel;
 
 namespace Cotton.Mobile.Services
 {
@@ -26,7 +27,8 @@ namespace Cotton.Mobile.Services
             CottonOfflineFileAvailabilitySnapshot? offlineAvailability = null,
             CottonLocalFileSnapshot? localFile = null,
             CottonFileThumbnailSnapshot? thumbnail = null,
-            bool isSelected = false)
+            bool isSelected = false,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
             Id = id;
             Type = type;
@@ -46,6 +48,7 @@ namespace Cotton.Mobile.Services
             LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(BadgeText, CreateFallbackThumbnailCacheKey());
             IsSelected = isSelected;
+            Metadata = CreateMetadata(metadata);
         }
 
         public Guid Id { get; }
@@ -96,6 +99,8 @@ namespace Cotton.Mobile.Services
         public string? PreviewHashEncryptedHex { get; }
 
         public string? ETag { get; }
+
+        public IReadOnlyDictionary<string, string> Metadata { get; }
 
         public CottonLocalFileSnapshot? LocalFile { get; }
 
@@ -159,8 +164,7 @@ namespace Cotton.Mobile.Services
                 contentType,
                 file.PreviewHashEncryptedHex,
                 file.ETag,
-                null,
-                null);
+                metadata: file.Metadata);
         }
 
         public static CottonFileBrowserEntry CreateFile(
@@ -170,7 +174,8 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
-            string? eTag)
+            string? eTag,
+            IReadOnlyDictionary<string, string>? metadata = null)
         {
             string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
             string details = sizeBytes.HasValue
@@ -190,7 +195,8 @@ namespace Cotton.Mobile.Services
                 previewHashEncryptedHex,
                 eTag,
                 null,
-                null);
+                null,
+                metadata: metadata);
         }
 
         public static CottonFileBrowserEntry CreateCached(
@@ -258,7 +264,8 @@ namespace Cotton.Mobile.Services
                 OfflineAvailability,
                 LocalFile,
                 thumbnail,
-                IsSelected);
+                IsSelected,
+                Metadata);
         }
 
         public CottonFileBrowserEntry WithLocalFile(CottonLocalFileSnapshot localFile)
@@ -281,7 +288,8 @@ namespace Cotton.Mobile.Services
                 OfflineAvailability,
                 localFile,
                 Thumbnail,
-                IsSelected);
+                IsSelected,
+                Metadata);
         }
 
         public CottonFileBrowserEntry WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot offlineAvailability)
@@ -304,7 +312,8 @@ namespace Cotton.Mobile.Services
                 offlineAvailability,
                 LocalFile,
                 Thumbnail,
-                IsSelected);
+                IsSelected,
+                Metadata);
         }
 
         public CottonFileBrowserEntry WithoutLocalFile()
@@ -330,7 +339,8 @@ namespace Cotton.Mobile.Services
                 OfflineAvailability,
                 null,
                 Thumbnail,
-                IsSelected);
+                IsSelected,
+                Metadata);
         }
 
         public CottonFileBrowserEntry WithSelection(bool isSelected)
@@ -356,12 +366,22 @@ namespace Cotton.Mobile.Services
                 OfflineAvailability,
                 LocalFile,
                 Thumbnail,
-                isSelected);
+                isSelected,
+                Metadata);
         }
 
         private string CreateFallbackThumbnailCacheKey()
         {
             return $"{Type}:{Id:N}:placeholder";
+        }
+
+        private static IReadOnlyDictionary<string, string> CreateMetadata(
+            IReadOnlyDictionary<string, string>? metadata)
+        {
+            Dictionary<string, string> values = metadata is null
+                ? new Dictionary<string, string>(StringComparer.Ordinal)
+                : new Dictionary<string, string>(metadata, StringComparer.Ordinal);
+            return new ReadOnlyDictionary<string, string>(values);
         }
 
         private static string ResolveBadgeText(string kind)

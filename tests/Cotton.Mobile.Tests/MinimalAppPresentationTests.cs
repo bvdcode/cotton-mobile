@@ -74,7 +74,11 @@ namespace Cotton.Mobile.Tests
 
             Assert.Single(elements, name => name == "EmptyStateView");
             Assert.Single(elements, name => name == "MaterialCollectionView");
-            Assert.Single(elements, name => name == "ScreenStatusView");
+            Assert.DoesNotContain("ScreenStatusView", elements);
+            Assert.Contains(
+                "SupportingText=\"{Binding HeaderSupportingText}\"",
+                page.ToString(),
+                StringComparison.Ordinal);
             Assert.Contains("IsBackActionVisible=\"False\"", page.ToString(), StringComparison.Ordinal);
             Assert.Contains("ActionCommand=\"{Binding AddRootCommand}\"", page.ToString(), StringComparison.Ordinal);
         }

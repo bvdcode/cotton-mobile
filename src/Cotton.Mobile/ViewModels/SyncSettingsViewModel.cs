@@ -102,7 +102,13 @@ namespace Cotton.Mobile.ViewModels
         public string SummaryText
         {
             get => _summaryText;
-            private set => SetProperty(ref _summaryText, value);
+            private set
+            {
+                if (SetProperty(ref _summaryText, value))
+                {
+                    OnPropertyChanged(nameof(HeaderSupportingText));
+                }
+            }
         }
 
         public string? Status
@@ -113,11 +119,24 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _status, value))
                 {
                     OnPropertyChanged(nameof(IsStatusVisible));
+                    OnPropertyChanged(nameof(HeaderSupportingText));
+                    OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
 
         public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
+
+        public string HeaderSupportingText
+        {
+            get
+            {
+                string? status = Status;
+                return string.IsNullOrWhiteSpace(status) ? SummaryText : status;
+            }
+        }
+
+        public bool IsHeaderSupportingTextVisible => IsStatusVisible || IsSummaryVisible;
 
         public bool IsEmptyVisible
         {
@@ -128,6 +147,7 @@ namespace Cotton.Mobile.ViewModels
                 {
                     OnPropertyChanged(nameof(IsSummaryVisible));
                     OnPropertyChanged(nameof(IsListVisible));
+                    OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
@@ -278,12 +298,19 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                if (!CottonSyncRootRunCapability.CanRun(root))
+                {
+                    ShowRoots(collection);
+                    Status = "Sync folder is not ready.";
+                    return;
+                }
+
                 Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
+                item.SetRunning(isRunning: true);
                 Status = await _executionWorkflow.RunRootAsync(
                     instanceUri,
                     root,
                     status => Status = status);
-                ShowRoots(await LoadRootCollectionAsync(instanceUri));
             }
             catch (Exception exception)
             {
@@ -292,6 +319,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
+                item.SetRunning(isRunning: false);
                 IsBusy = false;
             }
         }

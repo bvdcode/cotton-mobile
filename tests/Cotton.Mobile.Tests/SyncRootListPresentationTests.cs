@@ -60,6 +60,57 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Stop syncing", item.StopSyncActionText);
         }
 
+        [Theory]
+        [InlineData(CottonSyncDirection.CloudToDevice, "Syncing")]
+        [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading")]
+        [InlineData(CottonSyncDirection.Bidirectional, "Syncing")]
+        public void Running_root_updates_status_in_place(
+            CottonSyncDirection direction,
+            string expectedStatus)
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Available,
+                direction,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+            List<string?> changedProperties = [];
+            item.PropertyChanged += (_, eventArgs) => changedProperties.Add(eventArgs.PropertyName);
+
+            item.SetRunning(isRunning: true);
+
+            Assert.True(item.IsRunning);
+            Assert.Equal(expectedStatus, item.StatusText);
+            Assert.Contains(nameof(item.IsRunning), changedProperties);
+            Assert.Contains(nameof(item.StatusText), changedProperties);
+
+            item.SetRunning(isRunning: false);
+
+            Assert.False(item.IsRunning);
+            Assert.Equal("Ready", item.StatusText);
+        }
+
+        [Fact]
+        public void Non_runnable_root_cannot_enter_running_state()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(
+                FirstRootId,
+                FirstFolderId,
+                "Projects",
+                "Files / Projects",
+                CottonSyncRootPermissionStatus.Revoked,
+                CottonSyncDirection.Bidirectional,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                "Device folder");
+            CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
+
+            Assert.Throws<InvalidOperationException>(() => item.SetRunning(isRunning: true));
+        }
+
         [Fact]
         public void Attention_state_is_visible_for_roots_needing_user_action()
         {

@@ -16,5 +16,21 @@ namespace Cotton.Mobile.Tests
                 StringComparison.Ordinal);
             Assert.Contains("Roots.ReplaceWith(state.Items);", source, StringComparison.Ordinal);
         }
+
+        [Fact]
+        public void Single_root_runtime_progress_does_not_reset_the_collection()
+        {
+            string source = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+            int runRootStart = source.IndexOf("private async Task RunRootAsync", StringComparison.Ordinal);
+            int runAllStart = source.IndexOf("private async Task RunAllAsync", runRootStart, StringComparison.Ordinal);
+
+            Assert.True(runRootStart >= 0);
+            Assert.True(runAllStart > runRootStart);
+            string runRoot = source[runRootStart..runAllStart];
+            Assert.Contains("item.SetRunning(isRunning: true);", runRoot, StringComparison.Ordinal);
+            Assert.Contains("item.SetRunning(isRunning: false);", runRoot, StringComparison.Ordinal);
+            Assert.DoesNotContain("ShowRoots(await", runRoot, StringComparison.Ordinal);
+        }
     }
 }

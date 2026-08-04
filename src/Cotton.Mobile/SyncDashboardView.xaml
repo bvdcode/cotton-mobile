@@ -24,13 +24,9 @@
 
         <controls:ScreenContentGridView Grid.Row="1">
             <controls:ScreenHeaderView Title="Sync"
-                                       SupportingText="{Binding SummaryText}"
-                                       IsSupportingTextVisible="{Binding IsSummaryVisible}"
+                                       SupportingText="{Binding HeaderSupportingText}"
+                                       IsSupportingTextVisible="{Binding IsHeaderSupportingTextVisible}"
                                        IsBusy="{Binding IsBusy}" />
-
-            <controls:ScreenStatusView Grid.Row="1"
-                                       Text="{Binding Status}"
-                                       IsStatusVisible="{Binding IsStatusVisible}" />
 
             <controls:EmptyStateView Grid.Row="2"
                                      IsStateVisible="{Binding IsEmptyVisible}"

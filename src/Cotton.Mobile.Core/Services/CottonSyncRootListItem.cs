@@ -1,10 +1,16 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.ViewModels;
+
 namespace Cotton.Mobile.Services
 {
-    public class CottonSyncRootListItem
+    public class CottonSyncRootListItem : ViewModelBase
     {
+        private readonly string _idleStatusText;
+        private readonly string _runningStatusText;
+        private bool _isRunning;
+
         public CottonSyncRootListItem(CottonSyncRootSnapshot root, bool isPaused = false)
         {
             ArgumentNullException.ThrowIfNull(root);
@@ -20,7 +26,8 @@ namespace Cotton.Mobile.Services
             CanReconnect = root.LocalRoot.RequiresPersistedUserGrant && root.NeedsUserAction;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
             PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
-            StatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot, CanRunNow);
+            _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot, CanRunNow);
+            _runningStatusText = CreateRunningStatusText(root.Direction);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
             IsAttentionVisible = !isPaused
                 && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
@@ -39,7 +46,19 @@ namespace Cotton.Mobile.Services
 
         public string DetailText { get; }
 
-        public string StatusText { get; }
+        public string StatusText => IsRunning ? _runningStatusText : _idleStatusText;
+
+        public bool IsRunning
+        {
+            get => _isRunning;
+            private set
+            {
+                if (SetProperty(ref _isRunning, value))
+                {
+                    OnPropertyChanged(nameof(StatusText));
+                }
+            }
+        }
 
         public bool IsReady { get; }
 
@@ -68,6 +87,16 @@ namespace Cotton.Mobile.Services
         public bool CanStopSync { get; }
 
         public string StopSyncActionText => CottonSyncRootManagementText.StopAction;
+
+        public void SetRunning(bool isRunning)
+        {
+            if (isRunning && !CanRunNow)
+            {
+                throw new InvalidOperationException("Only a runnable sync root can enter the running state.");
+            }
+
+            IsRunning = isRunning;
+        }
 
         private static string CreatePrimaryActionText(
             CottonSyncRootSnapshot root,
@@ -118,6 +147,19 @@ namespace Cotton.Mobile.Services
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(readinessStatus),
                     "Sync root readiness status is not supported."),
+            };
+        }
+
+        private static string CreateRunningStatusText(CottonSyncDirection direction)
+        {
+            return direction switch
+            {
+                CottonSyncDirection.CloudToDevice => "Syncing",
+                CottonSyncDirection.DeviceToCloud => "Uploading",
+                CottonSyncDirection.Bidirectional => "Syncing",
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(direction),
+                    "Sync direction is not supported."),
             };
         }
 

@@ -187,7 +187,7 @@ namespace Cotton.Mobile.ViewModels
             IsBusy = true;
             try
             {
-                SyncRootSetupResult result = await _rootSetupCoordinator.AddBidirectionalRootAsync(
+                SyncRootSetupResult result = await _rootSetupCoordinator.AddRootAsync(
                     instanceUri,
                     accountScopeKey);
                 if (result.Status == SyncRootSetupStatus.Cancelled)

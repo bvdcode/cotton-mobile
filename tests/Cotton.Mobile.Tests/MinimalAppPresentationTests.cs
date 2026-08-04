@@ -91,20 +91,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sync_setup_selects_cloud_and_device_folders_for_bidirectional_sync()
+        public void Sync_setup_chooses_mode_before_cloud_and_device_folders()
         {
+            XDocument optionsPage = ReadXaml("src/Cotton.Mobile/SyncRootSetupOptionsPage.xaml");
             XDocument picker = ReadXaml("src/Cotton.Mobile/CloudFolderPickerPage.xaml");
             string coordinator = RepositoryPath.ReadText(
                 "src/Cotton.Mobile/Services/SyncRootSetupCoordinator.cs");
 
+            Assert.Equal(
+                2,
+                optionsPage.Descendants().Count(element => element.Name.LocalName == "SyncRootModeOptionView"));
+            Assert.Single(optionsPage.Descendants(), element => element.Name.LocalName == "Switch");
+            Assert.Contains("IsVisible=\"{Binding IsDeleteOptionVisible}\"", optionsPage.ToString(), StringComparison.Ordinal);
             Assert.Single(picker.Descendants(), element => element.Name.LocalName == "MaterialCollectionView");
             Assert.Contains("PrimaryCommand=\"{Binding ChooseCommand}\"", picker.ToString(), StringComparison.Ordinal);
+            Assert.Contains("_optionsPicker", coordinator, StringComparison.Ordinal);
+            Assert.Contains(".PickAsync(cancellationToken)", coordinator, StringComparison.Ordinal);
             Assert.Contains("_cloudFolderPicker", coordinator, StringComparison.Ordinal);
             Assert.Contains(".PickAsync(instanceUri", coordinator, StringComparison.Ordinal);
             Assert.Contains("_localRootPicker", coordinator, StringComparison.Ordinal);
             Assert.Contains("ConfigureUserSelectedDocumentTreeRootAsync", coordinator, StringComparison.Ordinal);
-            Assert.Contains("CottonSyncDirection.Bidirectional", coordinator, StringComparison.Ordinal);
-            Assert.Contains("CottonUploadOriginalRetention.KeepOriginals", coordinator, StringComparison.Ordinal);
+            Assert.Contains("options.UploadOriginalRetention", coordinator, StringComparison.Ordinal);
         }
 
         [Fact]

@@ -99,6 +99,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
             services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
+            services.AddSingleton<ISyncRootSetupOptionsPickerService, SyncRootSetupOptionsPickerService>();
             services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonCloudToDeviceSyncFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();

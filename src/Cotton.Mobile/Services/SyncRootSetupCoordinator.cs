@@ -1,33 +1,39 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class SyncRootSetupCoordinator
     {
+        private readonly ISyncRootSetupOptionsPickerService _optionsPicker;
         private readonly ICloudFolderPickerService _cloudFolderPicker;
         private readonly ICottonSyncLocalRootPickerService _localRootPicker;
         private readonly CottonSyncRootConfigurationService _configurationService;
         private readonly CottonSyncRootReconnectService _reconnectService;
 
         public SyncRootSetupCoordinator(
+            ISyncRootSetupOptionsPickerService optionsPicker,
             ICloudFolderPickerService cloudFolderPicker,
             ICottonSyncLocalRootPickerService localRootPicker,
             CottonSyncRootConfigurationService configurationService,
             CottonSyncRootReconnectService reconnectService)
         {
+            ArgumentNullException.ThrowIfNull(optionsPicker);
             ArgumentNullException.ThrowIfNull(cloudFolderPicker);
             ArgumentNullException.ThrowIfNull(localRootPicker);
             ArgumentNullException.ThrowIfNull(configurationService);
             ArgumentNullException.ThrowIfNull(reconnectService);
 
+            _optionsPicker = optionsPicker;
             _cloudFolderPicker = cloudFolderPicker;
             _localRootPicker = localRootPicker;
             _configurationService = configurationService;
             _reconnectService = reconnectService;
         }
 
-        public async Task<SyncRootSetupResult> AddBidirectionalRootAsync(
+        public async Task<SyncRootSetupResult> AddRootAsync(
             Uri instanceUri,
             string accountScopeKey,
             CancellationToken cancellationToken = default)
@@ -39,8 +45,17 @@ namespace Cotton.Mobile.Services
             {
                 return new SyncRootSetupResult(
                     SyncRootSetupStatus.Unavailable,
-                    "Folder sync is not available on this device.");
+                    SyncRootSetupResources.UnavailableMessage);
             }
+
+            await using SyncRootSetupOptionsSession? optionsSession = await _optionsPicker
+                .PickAsync(cancellationToken);
+            if (optionsSession is null)
+            {
+                return Cancelled();
+            }
+
+            SyncRootSetupOptions options = optionsSession.Options;
 
             CottonUploadDestinationSnapshot? cloudFolder = await _cloudFolderPicker
                 .PickAsync(instanceUri, cancellationToken)
@@ -64,21 +79,21 @@ namespace Cotton.Mobile.Services
                     accountScopeKey,
                     cloudFolder,
                     localRoot,
-                    CottonSyncDirection.Bidirectional,
-                    CottonUploadOriginalRetention.KeepOriginals,
+                    options.Direction,
+                    options.UploadOriginalRetention,
                     cancellationToken)
                 .ConfigureAwait(false);
             return result.Status switch
             {
                 CottonSyncRootConfigurationStatus.Created => new SyncRootSetupResult(
                     SyncRootSetupStatus.Created,
-                    $"Syncing {cloudFolder.Path}."),
+                    SyncRootSetupResources.CreateCreatedMessage(options.Direction, cloudFolder.Path)),
                 CottonSyncRootConfigurationStatus.Updated => new SyncRootSetupResult(
                     SyncRootSetupStatus.Updated,
-                    $"Updated sync for {cloudFolder.Path}."),
+                    SyncRootSetupResources.CreateUpdatedMessage(options.Direction, cloudFolder.Path)),
                 CottonSyncRootConfigurationStatus.AlreadyConfigured => new SyncRootSetupResult(
                     SyncRootSetupStatus.AlreadyConfigured,
-                    $"{cloudFolder.Path} is already syncing."),
+                    ResolveAlreadyConfiguredMessage(result.Root, options)),
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(result),
                     "Sync root setup status is not supported."),
@@ -95,7 +110,7 @@ namespace Cotton.Mobile.Services
             {
                 return new SyncRootSetupResult(
                     SyncRootSetupStatus.Unavailable,
-                    "Folder sync is not available on this device.");
+                    SyncRootSetupResources.UnavailableMessage);
             }
 
             CottonSyncLocalRootSnapshot? localRoot = await _localRootPicker
@@ -111,12 +126,24 @@ namespace Cotton.Mobile.Services
                 .ConfigureAwait(false);
             return new SyncRootSetupResult(
                 SyncRootSetupStatus.Updated,
-                $"Reconnected {reconnectedRoot.CloudFolder.Path}.");
+                SyncRootSetupResources.CreateReconnectedMessage(reconnectedRoot.CloudFolder.Path));
         }
 
         private static SyncRootSetupResult Cancelled()
         {
             return new SyncRootSetupResult(SyncRootSetupStatus.Cancelled, string.Empty);
+        }
+
+        private static string ResolveAlreadyConfiguredMessage(
+            CottonSyncRootSnapshot root,
+            SyncRootSetupOptions options)
+        {
+            if (root.Direction == options.Direction)
+            {
+                return SyncRootSetupResources.AlreadyConfiguredMessage;
+            }
+
+            return SyncRootSetupResources.DirectionConflictMessage;
         }
     }
 }

@@ -201,7 +201,7 @@
             </Setter.Value>
         </Setter>
         <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainer}, Dark={StaticResource M3DarkSurfaceContainer}}" />
+        <Setter Property="BackgroundColor" Value="{StaticResource M3BrandSurface}" />
         <Setter Property="HorizontalOptions" Value="Center" />
         <Setter Property="VerticalOptions" Value="Center" />
     </Style>

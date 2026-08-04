@@ -231,6 +231,21 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Func<AppShell>", app, StringComparison.Ordinal);
         }
 
+        [Fact]
+        public void Brand_mark_uses_a_dark_backplate_without_recoloring_the_artwork()
+        {
+            string mark = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Resources/AppIcon/cotton_brand_mark.svg");
+            string splashMark = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Platforms/Android/Resources/drawable/cotton_splash_mark.xml");
+            string styles = RepositoryPath.ReadText("src/Cotton.Mobile/Resources/Styles/Styles.xaml");
+
+            Assert.Contains("fill:#C6FF00", mark, StringComparison.Ordinal);
+            Assert.Contains("android:shape=\"oval\"", splashMark, StringComparison.Ordinal);
+            Assert.Contains("@color/cotton_brand_surface", splashMark, StringComparison.Ordinal);
+            Assert.Contains("{StaticResource M3BrandSurface}", styles, StringComparison.Ordinal);
+        }
+
         private static XDocument ReadXaml(string relativePath)
         {
             return XDocument.Parse(RepositoryPath.ReadText(relativePath));

@@ -80,6 +80,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Empty_state_supports_short_viewports()
+        {
+            string emptyState = RepositoryPath.ReadText(
+                "src/Cotton.Mobile/Controls/EmptyStateView.cs");
+
+            Assert.Contains("UpdateLayout(width > height);", emptyState, StringComparison.Ordinal);
+            Assert.Contains("M3EmptyStateCompactLayout", emptyState, StringComparison.Ordinal);
+            Assert.Contains("M3EmptyStateCompactSurface", emptyState, StringComparison.Ordinal);
+        }
+
+        [Fact]
         public void Sync_setup_selects_cloud_and_device_folders_for_bidirectional_sync()
         {
             XDocument picker = ReadXaml("src/Cotton.Mobile/CloudFolderPickerPage.xaml");
@@ -126,6 +137,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Text=\"Privacy policy\"", profile, StringComparison.Ordinal);
             Assert.Contains("Text=\"Sign out\"", profile, StringComparison.Ordinal);
             Assert.Contains("Command=\"{Binding LogoutCommand}\"", profile, StringComparison.Ordinal);
+            Assert.Contains("IsSupportingTextMultiline=\"True\"", profile, StringComparison.Ordinal);
         }
 
         [Fact]

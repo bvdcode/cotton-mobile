@@ -38,16 +38,20 @@ namespace Cotton.Mobile.Controls
         private readonly IconButton _actionButton;
         private readonly Label _body;
         private readonly Border _card;
+        private readonly Border _iconFrame;
         private readonly IconView _icon;
+        private readonly Grid _layout;
+        private readonly VerticalStackLayout _textStack;
         private readonly Label _title;
+        private bool? _isCompact;
 
         public EmptyStateView()
         {
             _icon = new IconView();
             _icon.SetDynamicResource(StyleProperty, "M3EmptyStateIcon");
 
-            Border iconFrame = new() { Content = _icon };
-            iconFrame.SetDynamicResource(StyleProperty, "M3EmptyStateIconFrame");
+            _iconFrame = new Border { Content = _icon };
+            _iconFrame.SetDynamicResource(StyleProperty, "M3EmptyStateIconFrame");
 
             _title = new Label();
             _title.SetDynamicResource(StyleProperty, "M3EmptyTitle");
@@ -58,22 +62,30 @@ namespace Cotton.Mobile.Controls
             _actionButton = new IconButton();
             _actionButton.SetDynamicResource(StyleProperty, "M3EmptyStateActionIconButton");
 
-            VerticalStackLayout stack = new()
+            _textStack = new VerticalStackLayout
             {
                 Children =
                 {
-                    iconFrame,
                     _title,
                     _body,
+                },
+            };
+            _textStack.SetDynamicResource(StyleProperty, "M3EmptyStateTextStack");
+
+            _layout = new Grid
+            {
+                Children =
+                {
+                    _iconFrame,
+                    _textStack,
                     _actionButton,
                 },
             };
-            stack.SetDynamicResource(StyleProperty, "M3EmptyStateStack");
 
-            _card = new Border { Content = stack };
-            _card.SetDynamicResource(StyleProperty, "M3EmptyStateSurface");
+            _card = new Border { Content = _layout };
             Content = _card;
 
+            UpdateLayout(false);
             UpdateVisualState();
         }
 
@@ -125,6 +137,12 @@ namespace Cotton.Mobile.Controls
             set => SetValue(IsStateVisibleProperty, value);
         }
 
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height);
+            UpdateLayout(width > height);
+        }
+
         private static BindableProperty CreateTextProperty(string name)
         {
             return BindableProperty.Create(
@@ -148,6 +166,56 @@ namespace Cotton.Mobile.Controls
         private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
             ((EmptyStateView)bindable).UpdateVisualState();
+        }
+
+        private void UpdateLayout(bool isCompact)
+        {
+            if (_isCompact == isCompact)
+            {
+                return;
+            }
+
+            _isCompact = isCompact;
+            _layout.RowDefinitions.Clear();
+            _layout.ColumnDefinitions.Clear();
+
+            if (isCompact)
+            {
+                _layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
+                _layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+                _layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+                _layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+
+                Grid.SetRow(_iconFrame, 0);
+                Grid.SetColumn(_iconFrame, 0);
+                Grid.SetRow(_textStack, 0);
+                Grid.SetColumn(_textStack, 1);
+                Grid.SetRow(_actionButton, 0);
+                Grid.SetColumn(_actionButton, 2);
+
+                _layout.SetDynamicResource(StyleProperty, "M3EmptyStateCompactLayout");
+                _card.SetDynamicResource(StyleProperty, "M3EmptyStateCompactSurface");
+                _title.SetDynamicResource(StyleProperty, "M3EmptyTitleCompact");
+                _body.SetDynamicResource(StyleProperty, "M3EmptyBodyCompact");
+                return;
+            }
+
+            _layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            _layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            _layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            _layout.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+            Grid.SetRow(_iconFrame, 0);
+            Grid.SetColumn(_iconFrame, 0);
+            Grid.SetRow(_textStack, 1);
+            Grid.SetColumn(_textStack, 0);
+            Grid.SetRow(_actionButton, 2);
+            Grid.SetColumn(_actionButton, 0);
+
+            _layout.SetDynamicResource(StyleProperty, "M3EmptyStateLayout");
+            _card.SetDynamicResource(StyleProperty, "M3EmptyStateSurface");
+            _title.SetDynamicResource(StyleProperty, "M3EmptyTitle");
+            _body.SetDynamicResource(StyleProperty, "M3EmptyBody");
         }
 
         private void UpdateVisualState()

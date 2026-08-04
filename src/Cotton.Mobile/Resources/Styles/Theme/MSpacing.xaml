@@ -97,6 +97,7 @@
     <Thickness x:Key="M3CompactChipPadding">6,2</Thickness>
     <Thickness x:Key="M3ContentCardPadding">16</Thickness>
     <Thickness x:Key="M3EmptyStateCardPadding">28,36</Thickness>
+    <Thickness x:Key="M3EmptyStateCompactCardPadding">12,8</Thickness>
     <Thickness x:Key="M3FileNoticePadding">16</Thickness>
     <Thickness x:Key="M3FileRowPadding">0,8</Thickness>
     <Thickness x:Key="M3FileStatusPanelPadding">12,8</Thickness>

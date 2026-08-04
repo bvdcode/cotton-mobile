@@ -14,7 +14,8 @@
 
         <controls:ScreenScrollBodyView Grid.Row="1">
             <controls:ScreenHeaderView Title="Account"
-                                       SupportingText="Your Cotton Cloud connection and app settings." />
+                                       SupportingText="Your Cotton Cloud connection and app settings."
+                                       IsSupportingTextMultiline="True" />
 
             <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
                                        IsStatusVisible="{Binding Display.IsProfileStatusVisible}" />

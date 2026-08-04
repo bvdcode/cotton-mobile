@@ -89,6 +89,10 @@
         <Setter Property="HorizontalTextAlignment" Value="Center" />
     </Style>
 
+    <Style TargetType="Label" x:Key="M3EmptyTitleCompact" BasedOn="{StaticResource M3EmptyTitle}">
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
+    </Style>
+
     <Style TargetType="Label" x:Key="M3BrowserTitle">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurface}, Dark={StaticResource M3DarkOnSurface}}" />
         <Setter Property="FontSize" Value="{StaticResource M3BrowserTitleFontSize}" />
@@ -206,6 +210,10 @@
         <Setter Property="MaxLines" Value="2" />
         <Setter Property="LineBreakMode" Value="WordWrap" />
         <Setter Property="HorizontalTextAlignment" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3EmptyBodyCompact" BasedOn="{StaticResource M3EmptyBody}">
+        <Setter Property="HorizontalTextAlignment" Value="Start" />
     </Style>
 
     <Style TargetType="Label" x:Key="M3CardSupportingPrimary" BasedOn="{StaticResource M3LabelMedium}">

@@ -107,6 +107,40 @@ namespace Cotton.Mobile.Services
                 remoteETag: null);
         }
 
+        public static CottonUploadReceiptSnapshot CreateUploadedFromConfirmation(
+            CottonDeviceToCloudSyncPlanItem item,
+            DateTime recordedAtUtc)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            if (!item.ConfirmsPendingUpload || item.TargetType != CottonFileBrowserEntryType.File)
+            {
+                throw new ArgumentException("Uploaded receipt confirmation requires a matching file item.", nameof(item));
+            }
+
+            string localSourceId = item.LocalSourceId
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires a local source id.", nameof(item));
+            DateTime localUpdatedAtUtc = item.LocalUpdatedAtUtc
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires a local update time.", nameof(item));
+            Guid operationId = item.UploadOperationId
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires an operation id.", nameof(item));
+            Guid remoteFileId = item.CloudItemId
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires a remote file id.", nameof(item));
+            string remoteETag = item.ExpectedRemoteETag
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires a remote ETag.", nameof(item));
+
+            return new CottonUploadReceiptSnapshot(
+                localSourceId,
+                item.RelativePath,
+                localUpdatedAtUtc,
+                item.SizeBytes,
+                item.ContentType,
+                operationId,
+                CottonUploadReceiptStatus.Uploaded,
+                recordedAtUtc,
+                remoteFileId,
+                remoteETag);
+        }
+
         public CottonUploadReceiptSnapshot MarkUploaded(
             CottonFileBrowserEntry remoteFile,
             DateTime recordedAtUtc)

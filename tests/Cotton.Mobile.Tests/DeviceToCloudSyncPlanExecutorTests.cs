@@ -41,11 +41,8 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Executor_uploads_new_file_to_root_and_writes_manifest()
         {
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", UpdatedAt)),
-                CreateRemoteContent(),
-                []);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateUploadNewFile("alpha.txt", "alpha.txt"));
             _fileOperator.UploadedNewFiles["alpha.txt"] = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
 
             CottonDeviceToCloudSyncExecutionResult result =
@@ -69,13 +66,9 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Executor_creates_nested_folder_before_uploading_nested_file()
         {
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(
-                    CreateLocalFolder("Photos", "Photos"),
-                    CreateLocalFile("summer.jpg", "Photos/summer.jpg", UpdatedAt)),
-                CreateRemoteContent(),
-                []);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateRemoteFolder("Photos", "Photos"),
+                CreateUploadNewFile("summer.jpg", "Photos/summer.jpg"));
             _fileOperator.CreatedFolders["Photos"] = CreateFolder(CreatedFolderId, "Photos");
             _fileOperator.UploadedNewFiles["Photos/summer.jpg"] =
                 CreateFile(FirstFileId, "summer.jpg", "\"etag-summer\"");
@@ -98,13 +91,9 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Executor_uses_existing_nested_folder_for_upload_parent()
         {
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(
-                    CreateLocalFolder("Photos", "Photos"),
-                    CreateLocalFile("summer.jpg", "Photos/summer.jpg", UpdatedAt)),
-                CreateRemoteContent(CreateRemoteFolder(ExistingFolderId, "Photos", "Photos")),
-                []);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateExistingRemoteFolder(ExistingFolderId, "Photos", "Photos"),
+                CreateUploadNewFile("summer.jpg", "Photos/summer.jpg"));
             _fileOperator.UploadedNewFiles["Photos/summer.jpg"] =
                 CreateFile(FirstFileId, "summer.jpg", "\"etag-summer\"");
 
@@ -130,11 +119,8 @@ namespace Cotton.Mobile.Tests
                 "text/plain",
                 UpdatedAt.AddMinutes(-30));
             await _manifestStore.SaveAsync(InstanceUri, _syncRoot, [oldManifest]);
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(CreateLocalFile("notes.txt", "notes.txt", UpdatedAt)),
-                CreateRemoteContent(CreateRemoteFile(SecondFileId, "notes.txt", "notes.txt", "\"etag-old\"")),
-                [oldManifest]);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateUploadChangedFile(SecondFileId, "notes.txt", "notes.txt", "\"etag-old\""));
             _fileOperator.UploadedChangedFiles["notes.txt"] =
                 CreateFile(SecondFileId, "notes.txt", "\"etag-new\"");
 
@@ -165,11 +151,8 @@ namespace Cotton.Mobile.Tests
                 "text/plain",
                 UpdatedAt);
             await _manifestStore.SaveAsync(InstanceUri, _syncRoot, [manifestItem]);
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(),
-                CreateRemoteContent(CreateRemoteFile(ThirdFileId, "old.txt", "old.txt", "\"etag-old\"")),
-                [manifestItem]);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateRemoteFileDelete(ThirdFileId, "old.txt", "old.txt", "\"etag-old\""));
 
             CottonDeviceToCloudSyncExecutionResult result =
                 await _executor.ExecuteAsync(InstanceUri, _syncRoot, plan);
@@ -191,11 +174,8 @@ namespace Cotton.Mobile.Tests
                 "text/plain",
                 UpdatedAt);
             await _manifestStore.SaveAsync(InstanceUri, _syncRoot, [manifestItem]);
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(),
-                CreateRemoteContent(),
-                [manifestItem]);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateManifestOrphanRemoval(ThirdFileId, "old.txt", "old.txt", "\"etag-old\""));
 
             CottonDeviceToCloudSyncExecutionResult result =
                 await _executor.ExecuteAsync(InstanceUri, _syncRoot, plan);
@@ -208,34 +188,16 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Executor_counts_noop_and_blocked_items_without_mutation()
         {
-            CottonSyncedFileSnapshot manifestItem = new(
-                FirstFileId,
-                "alpha.txt",
-                "\"etag-1\"",
-                UpdatedAt,
-                42,
-                "text/plain",
-                UpdatedAt);
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                new CottonDeviceToCloudLocalContentSnapshot(
-                    "Projects",
-                    [
-                        CreateLocalFile("alpha.txt", "alpha.txt", UpdatedAt),
-                        CreateLocalFile("server.txt", "server.txt", UpdatedAt)
-                    ],
-                    [
-                        new CottonDeviceToCloudLocalProblemSnapshot(
-                            CottonDeviceToCloudLocalProblemKind.InvalidCloudName,
-                            CottonFileBrowserEntryType.File,
-                            "bad:name.txt",
-                            "bad:name.txt",
-                            "Cloud item name is not supported.")
-                    ]),
-                CreateRemoteContent(
-                    CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""),
-                    CreateRemoteFile(SecondFileId, "server.txt", "server.txt", "\"etag-server\"")),
-                [manifestItem]);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateExistingFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""),
+                CreateBlockedItem(
+                    CottonDeviceToCloudSyncActionKind.RemotePathConflict,
+                    "server.txt",
+                    "server.txt"),
+                CreateBlockedItem(
+                    CottonDeviceToCloudSyncActionKind.BlockedLocalItemName,
+                    "bad:name.txt",
+                    "bad:name.txt"));
 
             CottonDeviceToCloudSyncExecutionResult result =
                 await _executor.ExecuteAsync(InstanceUri, _syncRoot, plan);
@@ -252,11 +214,8 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Executor_rejects_plan_for_different_root_or_folder()
         {
-            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
-                _syncRoot,
-                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", UpdatedAt)),
-                CreateRemoteContent(),
-                []);
+            CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
+                CreateUploadNewFile("alpha.txt", "alpha.txt"));
             CottonSyncRootSnapshot wrongRoot = CreateRoot(Guid.Parse("eeeeeeee-eeee-eeee-eeee-eeeeeeeeeeee"));
 
             await Assert.ThrowsAsync<ArgumentException>(() =>
@@ -286,59 +245,178 @@ namespace Cotton.Mobile.Tests
                     "content://com.android.externalstorage.documents/tree/primary%3AProjects",
                     "Projects",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.DeviceToCloud,
+                CottonSyncDirection.Bidirectional,
                 CottonUploadOriginalRetention.KeepOriginals);
         }
 
-        private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(
-            params CottonDeviceToCloudLocalItemSnapshot[] items)
+        private static CottonDeviceToCloudSyncPlanSnapshot CreatePlan(
+            params CottonDeviceToCloudSyncPlanItem[] items)
         {
-            return new CottonDeviceToCloudLocalContentSnapshot("Projects", items, problems: []);
+            return new CottonDeviceToCloudSyncPlanSnapshot(
+                SyncRootId,
+                RootFolderId,
+                "Projects",
+                items);
         }
 
-        private static CottonDeviceToCloudRemoteContentSnapshot CreateRemoteContent(
-            params CottonDeviceToCloudRemoteItemSnapshot[] items)
-        {
-            return new CottonDeviceToCloudRemoteContentSnapshot(RootFolderId, "Projects", items);
-        }
-
-        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFile(
-            string name,
-            string relativePath,
-            DateTime updatedAtUtc)
-        {
-            return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
-                name,
-                relativePath,
-                updatedAtUtc,
-                42,
-                "text/plain");
-        }
-
-        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFolder(string name, string relativePath)
-        {
-            return CottonDeviceToCloudLocalItemSnapshot.CreateFolder(name, relativePath, UpdatedAt);
-        }
-
-        private static CottonDeviceToCloudRemoteItemSnapshot CreateRemoteFile(
-            Guid id,
-            string name,
-            string relativePath,
-            string? eTag)
-        {
-            return new CottonDeviceToCloudRemoteItemSnapshot(
-                CreateFile(id, name, eTag),
-                relativePath);
-        }
-
-        private static CottonDeviceToCloudRemoteItemSnapshot CreateRemoteFolder(
-            Guid id,
+        private static CottonDeviceToCloudSyncPlanItem CreateUploadNewFile(
             string name,
             string relativePath)
         {
-            return new CottonDeviceToCloudRemoteItemSnapshot(
-                CreateFolder(id, name),
-                relativePath);
+            return CreateFilePlanItem(
+                CottonDeviceToCloudSyncActionKind.UploadNewFile,
+                name,
+                relativePath,
+                cloudItemId: null,
+                expectedRemoteETag: null,
+                localUpdatedAtUtc: UpdatedAt,
+                localSourceId: $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateUploadChangedFile(
+            Guid cloudItemId,
+            string name,
+            string relativePath,
+            string expectedRemoteETag)
+        {
+            return CreateFilePlanItem(
+                CottonDeviceToCloudSyncActionKind.UploadChangedFile,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag,
+                UpdatedAt,
+                $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateExistingFile(
+            Guid cloudItemId,
+            string name,
+            string relativePath,
+            string expectedRemoteETag)
+        {
+            return CreateFilePlanItem(
+                CottonDeviceToCloudSyncActionKind.KeepExistingFile,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag,
+                UpdatedAt,
+                $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateRemoteFileDelete(
+            Guid cloudItemId,
+            string name,
+            string relativePath,
+            string expectedRemoteETag)
+        {
+            return CreateFilePlanItem(
+                CottonDeviceToCloudSyncActionKind.DeleteRemoteFile,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag,
+                localUpdatedAtUtc: null,
+                localSourceId: null);
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateManifestOrphanRemoval(
+            Guid cloudItemId,
+            string name,
+            string relativePath,
+            string expectedRemoteETag)
+        {
+            return CreateFilePlanItem(
+                CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag,
+                localUpdatedAtUtc: null,
+                localSourceId: null);
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateBlockedItem(
+            CottonDeviceToCloudSyncActionKind action,
+            string name,
+            string relativePath)
+        {
+            return CreateFilePlanItem(
+                action,
+                name,
+                relativePath,
+                cloudItemId: null,
+                expectedRemoteETag: null,
+                localUpdatedAtUtc: UpdatedAt,
+                localSourceId: $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateFilePlanItem(
+            CottonDeviceToCloudSyncActionKind action,
+            string name,
+            string relativePath,
+            Guid? cloudItemId,
+            string? expectedRemoteETag,
+            DateTime? localUpdatedAtUtc,
+            string? localSourceId)
+        {
+            return new CottonDeviceToCloudSyncPlanItem(
+                action,
+                CottonFileBrowserEntryType.File,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag,
+                localUpdatedAtUtc,
+                42,
+                "text/plain",
+                localSourceId);
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateRemoteFolder(
+            string name,
+            string relativePath)
+        {
+            return CreateFolderPlanItem(
+                CottonDeviceToCloudSyncActionKind.CreateRemoteFolder,
+                name,
+                relativePath,
+                cloudItemId: null,
+                localSourceId: $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateExistingRemoteFolder(
+            Guid cloudItemId,
+            string name,
+            string relativePath)
+        {
+            return CreateFolderPlanItem(
+                CottonDeviceToCloudSyncActionKind.KeepExistingFolder,
+                name,
+                relativePath,
+                cloudItemId,
+                localSourceId: $"source:{relativePath}");
+        }
+
+        private static CottonDeviceToCloudSyncPlanItem CreateFolderPlanItem(
+            CottonDeviceToCloudSyncActionKind action,
+            string name,
+            string relativePath,
+            Guid? cloudItemId,
+            string? localSourceId)
+        {
+            return new CottonDeviceToCloudSyncPlanItem(
+                action,
+                CottonFileBrowserEntryType.Folder,
+                name,
+                relativePath,
+                cloudItemId,
+                expectedRemoteETag: null,
+                UpdatedAt,
+                sizeBytes: null,
+                contentType: null,
+                localSourceId);
         }
 
         private static CottonFileBrowserEntry CreateFile(Guid id, string name, string? eTag)

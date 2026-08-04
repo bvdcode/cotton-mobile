@@ -7,8 +7,10 @@ namespace Cotton.Mobile.Services
     {
         public CottonDeviceToCloudSyncExecutionResult(
             int uploadedCount,
+            int confirmedUploadCount,
             int refreshedCount,
             int createdFolderCount,
+            int deletedLocalFileCount,
             int deletedRemoteFileCount,
             int removedManifestCount,
             int skippedCount,
@@ -24,6 +26,13 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(refreshedCount), "Refreshed count cannot be negative.");
             }
 
+            if (confirmedUploadCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(confirmedUploadCount),
+                    "Confirmed upload count cannot be negative.");
+            }
+
             if (createdFolderCount < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(createdFolderCount), "Created folder count cannot be negative.");
@@ -32,6 +41,13 @@ namespace Cotton.Mobile.Services
             if (deletedRemoteFileCount < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(deletedRemoteFileCount), "Deleted remote file count cannot be negative.");
+            }
+
+            if (deletedLocalFileCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(deletedLocalFileCount),
+                    "Deleted local file count cannot be negative.");
             }
 
             if (removedManifestCount < 0)
@@ -50,8 +66,10 @@ namespace Cotton.Mobile.Services
             }
 
             UploadedCount = uploadedCount;
+            ConfirmedUploadCount = confirmedUploadCount;
             RefreshedCount = refreshedCount;
             CreatedFolderCount = createdFolderCount;
+            DeletedLocalFileCount = deletedLocalFileCount;
             DeletedRemoteFileCount = deletedRemoteFileCount;
             RemovedManifestCount = removedManifestCount;
             SkippedCount = skippedCount;
@@ -60,9 +78,13 @@ namespace Cotton.Mobile.Services
 
         public int UploadedCount { get; }
 
+        public int ConfirmedUploadCount { get; }
+
         public int RefreshedCount { get; }
 
         public int CreatedFolderCount { get; }
+
+        public int DeletedLocalFileCount { get; }
 
         public int DeletedRemoteFileCount { get; }
 
@@ -74,8 +96,10 @@ namespace Cotton.Mobile.Services
 
         public bool HasAppliedChanges =>
             UploadedCount > 0
+            || ConfirmedUploadCount > 0
             || RefreshedCount > 0
             || CreatedFolderCount > 0
+            || DeletedLocalFileCount > 0
             || DeletedRemoteFileCount > 0
             || RemovedManifestCount > 0;
 

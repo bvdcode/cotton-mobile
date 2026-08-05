@@ -86,33 +86,13 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateStatusVisibility(bool animateStatusVisibility)
         {
-            bool isStatusVisible = IsStatusVisible;
             bool shouldAnimate = animateStatusVisibility && _hasAppliedStatusVisibility;
-            double targetOpacity = isStatusVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isStatusVisible)
-            {
-                IsVisible = true;
-            }
-
-            MaterialMotion.UpdateDouble(
+            MaterialVisibility.Update(
                 this,
-                Opacity,
-                targetOpacity,
-                duration,
+                IsStatusVisible,
                 StatusOpacityAnimationName,
-                shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteStatusVisibility);
+                shouldAnimate);
             _hasAppliedStatusVisibility = true;
-        }
-
-        private void CompleteStatusVisibility()
-        {
-            IsVisible = IsStatusVisible;
         }
     }
 }

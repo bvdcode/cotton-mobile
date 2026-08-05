@@ -112,38 +112,14 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateFooterVisibility(bool animateFooterVisibility)
         {
-            bool isFooterVisible = IsFooterVisible;
             bool shouldAnimate = animateFooterVisibility && _hasAppliedFooterVisibility;
-            double targetOpacity = isFooterVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isFooterVisible)
-            {
-                IsVisible = true;
-            }
-            else
-            {
-                UpdateInputTransparency();
-            }
-
-            MaterialMotion.UpdateDouble(
+            MaterialVisibility.Update(
                 this,
-                Opacity,
-                targetOpacity,
-                duration,
+                IsFooterVisible,
                 FooterOpacityAnimationName,
                 shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteFooterVisibility);
+                UpdateInputTransparency);
             _hasAppliedFooterVisibility = true;
-        }
-
-        private void CompleteFooterVisibility()
-        {
-            IsVisible = IsFooterVisible;
-            UpdateInputTransparency();
         }
 
         private void UpdateInputTransparency()

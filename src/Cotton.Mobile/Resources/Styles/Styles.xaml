@@ -462,7 +462,7 @@
         <Setter Property="Spacing" Value="{StaticResource Space2}" />
     </Style>
 
-    <Style TargetType="controls:FilledButton" x:Key="M3FilledButton">
+    <Style TargetType="controls:FilledButtonVisual" x:Key="M3FilledButtonVisual">
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="DisabledTextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="ButtonBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
@@ -476,6 +476,9 @@
         <Setter Property="FontAttributes" Value="None" />
         <Setter Property="ButtonCornerRadius" Value="{StaticResource M3ButtonCornerRadius}" />
         <Setter Property="ContentPadding" Value="{StaticResource M3FilledButtonPadding}" />
+    </Style>
+
+    <Style TargetType="controls:FilledButton" x:Key="M3FilledButton">
         <Setter Property="MinimumHeightRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="MinimumWidthRequest" Value="{StaticResource M3ButtonMinSize}" />
         <Setter Property="PressedOpacityMultiplier" Value="{StaticResource M3InteractionEnabledOpacity}" />

@@ -271,38 +271,14 @@ namespace Cotton.Mobile.Controls
 
         private void UpdatePanelVisibility(bool animatePanelVisibility)
         {
-            bool isPanelVisible = IsPanelVisible;
             bool shouldAnimate = animatePanelVisibility && _hasAppliedPanelVisibility;
-            double targetOpacity = isPanelVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isPanelVisible)
-            {
-                IsVisible = true;
-            }
-            else
-            {
-                UpdateInputTransparency();
-            }
-
-            MaterialMotion.UpdateDouble(
+            MaterialVisibility.Update(
                 this,
-                Opacity,
-                targetOpacity,
-                duration,
+                IsPanelVisible,
                 PanelOpacityAnimationName,
                 shouldAnimate,
-                opacity => Opacity = opacity,
-                CompletePanelVisibility);
+                UpdateInputTransparency);
             _hasAppliedPanelVisibility = true;
-        }
-
-        private void CompletePanelVisibility()
-        {
-            IsVisible = IsPanelVisible;
-            UpdateInputTransparency();
         }
 
         private void UpdateInputTransparency()

@@ -88,40 +88,19 @@ namespace Cotton.Mobile.Controls
 
         private void UpdateCardVisibility(bool animateCardVisibility)
         {
-            bool isCardVisible = IsCardVisible;
             bool shouldAnimate = animateCardVisibility && _hasAppliedCardVisibility;
-            double targetOpacity = isCardVisible
-                ? MaterialMotion.Value("M3MotionVisibleOpacity")
-                : MaterialMotion.Value("M3MotionHiddenOpacity");
-            int duration = MaterialResources.Get<int>("M3MotionStatusDuration");
-
-            if (isCardVisible)
-            {
-                IsVisible = true;
-            }
-
-            UpdateInputTransparency(isCardVisible);
-            MaterialMotion.UpdateDouble(
+            MaterialVisibility.Update(
                 this,
-                Opacity,
-                targetOpacity,
-                duration,
+                IsCardVisible,
                 CardOpacityAnimationName,
                 shouldAnimate,
-                opacity => Opacity = opacity,
-                CompleteCardVisibility);
+                UpdateInputTransparency);
             _hasAppliedCardVisibility = true;
         }
 
-        private void CompleteCardVisibility()
+        private void UpdateInputTransparency()
         {
-            IsVisible = IsCardVisible;
-            UpdateInputTransparency(IsCardVisible);
-        }
-
-        private void UpdateInputTransparency(bool isCardVisible)
-        {
-            InputTransparent = !isCardVisible;
+            InputTransparent = !IsCardVisible;
         }
     }
 }

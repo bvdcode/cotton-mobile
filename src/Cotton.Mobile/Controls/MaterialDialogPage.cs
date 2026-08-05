@@ -2,7 +2,6 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Microsoft.Maui.ApplicationModel;
-using System.Windows.Input;
 
 namespace Cotton.Mobile.Controls
 {
@@ -39,13 +38,19 @@ namespace Cotton.Mobile.Controls
             Shell.SetNavBarIsVisible(this, false);
             NavigationPage.SetHasNavigationBar(this, false);
             ApplyPageStyle();
-            _scrim = CreateScrim();
-            _dialog = CreateDialogSurface();
+            MaterialDialogContent dialogContent = new(
+                title,
+                message,
+                primaryAction,
+                secondaryAction,
+                promptInitialValue,
+                promptMaxLength,
+                CompleteAsync);
+            _scrim = dialogContent.Scrim;
+            _dialog = dialogContent.Dialog;
+            _promptEntry = dialogContent.PromptEntry;
             PrepareInitialMotionState();
-            _promptEntry = promptInitialValue is null
-                ? null
-                : CreatePromptEntry(message, promptInitialValue, promptMaxLength);
-            Content = CreateContent(title, message, primaryAction, secondaryAction);
+            Content = dialogContent.Root;
         }
 
         public static MaterialDialogPage Alert(string title, string message, string cancel)
@@ -113,145 +118,6 @@ namespace Cotton.Mobile.Controls
         {
             MainThread.BeginInvokeOnMainThread(async () => await CompleteAsync(null));
             return true;
-        }
-
-        private Grid CreateContent(
-            string title,
-            string message,
-            string primaryAction,
-            string? secondaryAction)
-        {
-            Grid root = new()
-            {
-                RowDefinitions =
-                {
-                    new RowDefinition { Height = GridLength.Star },
-                },
-            };
-
-            root.Add(_scrim, 0, 0);
-
-            VerticalStackLayout stack = ApplyStyle(new VerticalStackLayout(), "M3DialogStack");
-            stack.Add(CreateTitle(title));
-
-            if (ShouldShowMessage(message, isPrompt: _promptEntry is not null))
-            {
-                stack.Add(CreateMessage(message));
-            }
-
-            if (_promptEntry is not null)
-            {
-                stack.Add(_promptEntry);
-            }
-
-            stack.Add(CreateButtonRow(primaryAction, secondaryAction));
-            _dialog.Content = stack;
-            root.Add(_dialog, 0, 0);
-            return root;
-        }
-
-        private BoxView CreateScrim()
-        {
-            BoxView scrim = ApplyStyle(new BoxView(), "M3ModalScrim");
-            scrim.GestureRecognizers.Add(new TapGestureRecognizer
-            {
-                Command = CreateDismissCommand((string?)null),
-            });
-            return scrim;
-        }
-
-        private Border CreateDialogSurface()
-        {
-            return ApplyStyle(new Border(), "M3DialogSurface");
-        }
-
-        private static Label CreateTitle(string title)
-        {
-            return ApplyStyle(new Label
-            {
-                Text = title,
-            }, "M3DialogTitle");
-        }
-
-        private static Label CreateMessage(string message)
-        {
-            return ApplyStyle(new Label
-            {
-                Text = message,
-            }, "M3DialogMessage");
-        }
-
-        private OutlinedInputField CreatePromptEntry(string message, string initialValue, int maxLength)
-        {
-            OutlinedInputField field = new()
-            {
-                Text = initialValue,
-                Placeholder = ShouldShowMessage(message, isPrompt: true) ? string.Empty : message,
-                IconData = IconPathData.Edit,
-                ReturnType = ReturnType.Done,
-                ClearButtonVisibility = ClearButtonVisibility.WhileEditing,
-                ReturnCommand = CreateDismissCommand(() => _promptEntry?.Text ?? string.Empty),
-                SemanticHint = message,
-            };
-            if (maxLength >= 0)
-            {
-                field.MaxLength = maxLength;
-            }
-
-            return field;
-        }
-
-        private HorizontalStackLayout CreateButtonRow(string primaryAction, string? secondaryAction)
-        {
-            HorizontalStackLayout row = ApplyStyle(new HorizontalStackLayout(), "M3DialogButtonRow");
-
-            if (!string.IsNullOrWhiteSpace(secondaryAction))
-            {
-                row.Add(CreateSecondaryButton(secondaryAction));
-            }
-
-            row.Add(CreatePrimaryButton(primaryAction));
-            return row;
-        }
-
-        private TextAction CreateSecondaryButton(string text)
-        {
-            return ApplyStyle(new TextAction
-            {
-                Text = text,
-                Command = CreateDismissCommand((string?)null),
-            }, "M3DialogTextAction");
-        }
-
-        private FilledButton CreatePrimaryButton(string text)
-        {
-            return ApplyStyle(new FilledButton
-            {
-                Text = text,
-                Command = CreateDismissCommand(CreatePrimaryResult),
-            }, "M3DialogFilledButton");
-        }
-
-        private static T ApplyStyle<T>(T view, string styleResourceKey)
-            where T : VisualElement
-        {
-            view.SetDynamicResource(StyleProperty, styleResourceKey);
-            return view;
-        }
-
-        private ICommand CreateDismissCommand(string? result)
-        {
-            return new Command(async () => await CompleteAsync(result));
-        }
-
-        private ICommand CreateDismissCommand(Func<string?> resultFactory)
-        {
-            return new Command(async () => await CompleteAsync(resultFactory()));
-        }
-
-        private string? CreatePrimaryResult()
-        {
-            return _promptEntry is null ? string.Empty : _promptEntry.Text ?? string.Empty;
         }
 
         private async Task CompleteAsync(string? result)
@@ -327,14 +193,5 @@ namespace Cotton.Mobile.Controls
                 _dialog.ScaleToAsync(MaterialMotion.Value("M3MotionDialogExitScale"), duration, Easing.CubicIn));
         }
 
-        private static bool ShouldShowMessage(string message, bool isPrompt)
-        {
-            if (string.IsNullOrWhiteSpace(message))
-            {
-                return false;
-            }
-
-            return !isPrompt || message.TrimEnd().EndsWith(".", StringComparison.Ordinal);
-        }
     }
 }

@@ -7,7 +7,7 @@ using Android.Content;
 
 namespace Cotton.Mobile.Services
 {
-    public class AndroidDocumentTreeActivityResultBridge : IAndroidDocumentTreeActivityResultBridge
+    public class AndroidDocumentTreeActivityResultBridge : IAndroidDocumentTreeActivityResultBridge, IDisposable
     {
         private const int RequestCode = 61029;
 
@@ -76,6 +76,14 @@ namespace Cotton.Mobile.Services
             return true;
         }
 
+        public void Dispose()
+        {
+            PendingDocumentTreePick? pendingPick = ClearPending();
+            pendingPick?.Dispose();
+            pendingPick?.Completion.TrySetCanceled();
+            GC.SuppressFinalize(this);
+        }
+
         private void CancelPending(TaskCompletionSource<Intent?> completion)
         {
             PendingDocumentTreePick? pendingPick = ClearPending(completion);
@@ -108,25 +116,6 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private class PendingDocumentTreePick
-        {
-            private readonly CancellationTokenRegistration _cancellationRegistration;
-
-            public PendingDocumentTreePick(
-                TaskCompletionSource<Intent?> completion,
-                CancellationTokenRegistration cancellationRegistration)
-            {
-                Completion = completion;
-                _cancellationRegistration = cancellationRegistration;
-            }
-
-            public TaskCompletionSource<Intent?> Completion { get; }
-
-            public void Dispose()
-            {
-                _cancellationRegistration.Dispose();
-            }
-        }
     }
 }
 #endif

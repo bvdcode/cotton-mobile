@@ -266,19 +266,5 @@ namespace Cotton.Mobile.Tests
             return Path.Combine(_rootDirectory, instanceUri.Host);
         }
 
-        private class FixedOfflineFileMetadataPathProvider : ICottonOfflineFileMetadataPathProvider
-        {
-            private readonly string _rootDirectory;
-
-            public FixedOfflineFileMetadataPathProvider(string rootDirectory)
-            {
-                _rootDirectory = rootDirectory;
-            }
-
-            public string CreateOfflineFileMetadataDirectory(Uri instanceUri)
-            {
-                return Path.Combine(_rootDirectory, instanceUri.Host);
-            }
-        }
     }
 }

@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         private readonly string _rootDirectory;
         private readonly CottonSyncRootSnapshot _syncRoot;
         private readonly FileSystemCottonSyncedFileManifestStore _manifestStore;
-        private readonly FakeCloudToDeviceFileOperator _fileOperator;
+        private readonly CloudToDevicePlanExecutorFileOperator _fileOperator;
         private readonly CottonCloudToDeviceSyncPlanExecutor _executor;
 
         public CloudToDeviceSyncPlanExecutorTests()
@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Tests
             _syncRoot = CreateRoot(FolderId);
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(_rootDirectory));
-            _fileOperator = new FakeCloudToDeviceFileOperator();
+            _fileOperator = new CloudToDevicePlanExecutorFileOperator();
             _executor = new CottonCloudToDeviceSyncPlanExecutor(
                 _fileOperator,
                 _manifestStore,
@@ -196,54 +196,6 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_rootDirectory))
             {
                 Directory.Delete(_rootDirectory, recursive: true);
-            }
-        }
-
-        private class FakeCloudToDeviceFileOperator : ICottonCloudToDeviceSyncFileOperator
-        {
-            public List<Guid> DownloadedIds { get; } = [];
-
-            public List<Uri> DownloadedInstanceUris { get; } = [];
-
-            public List<Guid> RenamedIds { get; } = [];
-
-            public List<Uri> RenamedInstanceUris { get; } = [];
-
-            public List<Guid> RemovedIds { get; } = [];
-
-            public List<Uri> RemovedInstanceUris { get; } = [];
-
-            public Task DownloadOrReplaceAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonCloudToDeviceSyncPlanItem item,
-                CancellationToken cancellationToken = default)
-            {
-                DownloadedInstanceUris.Add(instanceUri);
-                DownloadedIds.Add(item.TargetId);
-                return Task.CompletedTask;
-            }
-
-            public Task RenameAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonCloudToDeviceSyncPlanItem item,
-                CancellationToken cancellationToken = default)
-            {
-                RenamedInstanceUris.Add(instanceUri);
-                RenamedIds.Add(item.TargetId);
-                return Task.CompletedTask;
-            }
-
-            public Task RemoveAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonCloudToDeviceSyncPlanItem item,
-                CancellationToken cancellationToken = default)
-            {
-                RemovedInstanceUris.Add(instanceUri);
-                RemovedIds.Add(item.TargetId);
-                return Task.CompletedTask;
             }
         }
 

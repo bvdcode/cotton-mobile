@@ -16,6 +16,12 @@ MAX_LOGICAL_LINES = 300
 
 SEALED_TYPE_PATTERN = re.compile(r"\bsealed\s+(?:class|record)\b")
 SILENT_SWITCH_FALLBACK_PATTERN = re.compile(r"^\s*_\s*=>(?!\s*throw\b)", re.MULTILINE)
+TYPE_DECLARATION_PATTERN = re.compile(
+    r"^\s*(?:(?:public|internal|private|protected)\s+)?"
+    r"(?:(?:abstract|partial|static)\s+)?"
+    r"(?:class|enum|interface|record(?:\s+struct)?)\s+\w+",
+    re.MULTILINE,
+)
 VIEWPORT_UNIT_PATTERN = re.compile(r"(?<![A-Za-z0-9_.])\d+(?:\.\d+)?d?v[hw]\b", re.IGNORECASE)
 TYPESCRIPT_FORBIDDEN_PATTERNS: tuple[tuple[str, Pattern[str]], ...] = (
     ("any", re.compile(r"\bany\b")),
@@ -73,6 +79,11 @@ def validate_file_size(path: Path, content: str) -> list[str]:
 
 def validate_csharp(path: Path, content: str) -> list[str]:
     violations: list[str] = []
+    type_declarations = TYPE_DECLARATION_PATTERN.findall(content)
+    if len(type_declarations) > 1:
+        violations.append(
+            f"{relative_path(path)} declares {len(type_declarations)} types; maximum is one."
+        )
     for label, pattern in (
         ("sealed type", SEALED_TYPE_PATTERN),
         ("non-throwing switch fallback", SILENT_SWITCH_FALLBACK_PATTERN),

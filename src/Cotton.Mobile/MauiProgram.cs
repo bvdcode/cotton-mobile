@@ -9,6 +9,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Networking;
 using Microsoft.Maui.Storage;
+using UraniumUI;
+using UraniumUI.Icons.MaterialSymbols;
 
 namespace Cotton.Mobile
 {
@@ -19,7 +21,12 @@ namespace Cotton.Mobile
             MauiAppBuilder builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
-                .UseCottonDesignSystem();
+                .UseUraniumUI()
+                .UseUraniumUIMaterial()
+                .ConfigureFonts(fonts =>
+                {
+                    fonts.AddMaterialSymbolsFonts();
+                });
 
             RegisterPlatformServices(builder.Services);
             RegisterApplicationServices(builder.Services);

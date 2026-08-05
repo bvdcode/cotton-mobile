@@ -149,7 +149,8 @@ namespace Cotton.Mobile.Tests
                 new DateTime(2026, 8, 4, 10, 0, 0, DateTimeKind.Utc),
                 sizeBytes: 42,
                 contentType: "image/jpeg",
-                localSourceId: "primary:DCIM/Camera/photo.jpg");
+                localSourceId: "primary:DCIM/Camera/photo.jpg",
+                contentHash: TestContentHashes.First);
             return CottonUploadReceiptSnapshot.CreatePending(
                 item,
                 Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),

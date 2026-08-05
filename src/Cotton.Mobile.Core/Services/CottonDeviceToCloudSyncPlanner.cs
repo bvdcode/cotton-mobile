@@ -105,6 +105,12 @@ namespace Cotton.Mobile.Services
                     : CreateLocalItem(CottonDeviceToCloudSyncActionKind.UploadNewFile, localFile);
             }
 
+            if (!receipt.MatchesLocalVersion(localFile)
+                || !string.Equals(receipt.RelativePath, localFile.RelativePath, StringComparison.Ordinal))
+            {
+                return CreateReceiptItem(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, receipt);
+            }
+
             if (receipt.IsUploaded)
             {
                 return CreateUploadedReceiptItem(root, receipt, remoteByPath);
@@ -115,12 +121,6 @@ namespace Cotton.Mobile.Services
                 out CottonDeviceToCloudRemoteItemSnapshot? uploadedRemote))
             {
                 return CreatePendingConfirmationItem(receipt, uploadedRemote);
-            }
-
-            if (!receipt.MatchesLocalVersion(localFile)
-                || !string.Equals(receipt.RelativePath, localFile.RelativePath, StringComparison.Ordinal))
-            {
-                return CreateReceiptItem(CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged, receipt);
             }
 
             if (remoteByPath.TryGetValue(
@@ -144,6 +144,16 @@ namespace Cotton.Mobile.Services
             }
 
             if (receipt.SizeBytes.HasValue && remoteItem.Entry.SizeBytes != receipt.SizeBytes)
+            {
+                return CreateReceiptItem(
+                    CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision,
+                    receipt,
+                    remoteItem.Entry.Id,
+                    remoteItem.Entry.ETag);
+            }
+
+            if (receipt.ContentHash is null
+                || !string.Equals(remoteItem.Entry.ContentHash, receipt.ContentHash, StringComparison.Ordinal))
             {
                 return CreateReceiptItem(
                     CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision,
@@ -196,7 +206,9 @@ namespace Cotton.Mobile.Services
             return remoteFile.Type == CottonFileBrowserEntryType.File
                 && remoteFile.Id == receipt.RemoteFileId
                 && string.Equals(remoteFile.ETag, receipt.RemoteETag, StringComparison.Ordinal)
-                && (!receipt.SizeBytes.HasValue || remoteFile.SizeBytes == receipt.SizeBytes);
+                && (!receipt.SizeBytes.HasValue || remoteFile.SizeBytes == receipt.SizeBytes)
+                && receipt.ContentHash is not null
+                && string.Equals(remoteFile.ContentHash, receipt.ContentHash, StringComparison.Ordinal);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateLocalProblemItem(
@@ -248,7 +260,8 @@ namespace Cotton.Mobile.Services
                 fileItem.SizeBytes,
                 fileItem.ContentType,
                 fileItem.LocalSourceId,
-                fileItem.UploadOperationId);
+                fileItem.UploadOperationId,
+                fileItem.ContentHash);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateRemoteConflictItem(
@@ -289,7 +302,9 @@ namespace Cotton.Mobile.Services
                 localItem.LocalUpdatedAtUtc,
                 localItem.SizeBytes,
                 localItem.ContentType,
-                localItem.LocalSourceId);
+                localItem.LocalSourceId,
+                uploadOperationId: null,
+                localItem.ContentHash);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateReceiptItem(
@@ -309,7 +324,8 @@ namespace Cotton.Mobile.Services
                 receipt.SizeBytes,
                 receipt.ContentType,
                 receipt.LocalSourceId,
-                receipt.OperationId);
+                receipt.OperationId,
+                receipt.ContentHash);
         }
 
     }

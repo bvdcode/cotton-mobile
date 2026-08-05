@@ -192,7 +192,8 @@ namespace Cotton.Mobile.Services
                     stored.Status,
                     stored.RecordedAtUtc,
                     stored.RemoteFileId,
-                    stored.RemoteETag);
+                    stored.RemoteETag,
+                    stored.ContentHash);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException)
@@ -219,6 +220,7 @@ namespace Cotton.Mobile.Services
                 RecordedAtUtc = receipt.RecordedAtUtc,
                 RemoteFileId = receipt.RemoteFileId,
                 RemoteETag = receipt.RemoteETag,
+                ContentHash = receipt.ContentHash,
             };
         }
 
@@ -236,6 +238,7 @@ namespace Cotton.Mobile.Services
                 || previous.LocalUpdatedAtUtc != next.LocalUpdatedAtUtc
                 || previous.SizeBytes != next.SizeBytes
                 || !string.Equals(previous.ContentType, next.ContentType, StringComparison.Ordinal)
+                || !string.Equals(previous.ContentHash, next.ContentHash, StringComparison.Ordinal)
                 || previous.OperationId != next.OperationId)
             {
                 throw new InvalidDataException("Upload receipt identity changed during confirmation.");

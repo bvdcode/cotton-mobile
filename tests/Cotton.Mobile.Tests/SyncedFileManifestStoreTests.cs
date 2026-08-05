@@ -43,6 +43,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(2048, loaded.SizeBytes);
             Assert.Equal("application/pdf", loaded.ContentType);
             Assert.Equal(SyncedAt, loaded.SyncedAtUtc);
+            Assert.Equal(TestContentHashes.First, loaded.ContentHash);
         }
 
         [Fact]
@@ -276,7 +277,9 @@ namespace Cotton.Mobile.Tests
                 RemoteUpdatedAt,
                 2048,
                 "application/pdf",
-                SyncedAt);
+                SyncedAt,
+                relativePath: null,
+                TestContentHashes.First);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(string localRootKey)

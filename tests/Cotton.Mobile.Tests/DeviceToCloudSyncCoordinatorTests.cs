@@ -345,7 +345,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 42,
                 "text/plain",
-                localSourceId);
+                localSourceId,
+                TestContentHashes.First);
         }
 
         private static CottonFolderContent CreateContent(
@@ -369,7 +370,8 @@ namespace Cotton.Mobile.Tests
                 "text/plain",
                 previewHashEncryptedHex: null,
                 eTag: eTag,
-                metadata: metadata);
+                metadata: metadata,
+                contentHash: TestContentHashes.First);
         }
 
         private static CottonFileBrowserEntry CreateFolder(Guid id, string name)

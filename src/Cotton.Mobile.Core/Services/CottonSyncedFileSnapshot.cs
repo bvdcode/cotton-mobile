@@ -13,7 +13,8 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             DateTime syncedAtUtc,
-            string? relativePath = null)
+            string? relativePath = null,
+            string? contentHash = null)
         {
             if (fileId == Guid.Empty)
             {
@@ -50,6 +51,7 @@ namespace Cotton.Mobile.Services
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             SyncedAtUtc = CottonLocalFileFreshness.NormalizeUtc(syncedAtUtc);
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
         }
 
         public Guid FileId { get; }
@@ -68,6 +70,8 @@ namespace Cotton.Mobile.Services
 
         public DateTime SyncedAtUtc { get; }
 
+        public string? ContentHash { get; }
+
         public static CottonSyncedFileSnapshot Create(CottonFileBrowserEntry file, DateTime syncedAtUtc)
         {
             ArgumentNullException.ThrowIfNull(file);
@@ -81,6 +85,9 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Synced file metadata requires a file ETag.", nameof(file));
             }
 
+            string contentHash = file.ContentHash
+                ?? throw new ArgumentException("Synced file metadata requires a content hash.", nameof(file));
+
             return new CottonSyncedFileSnapshot(
                 file.Id,
                 file.Name,
@@ -88,7 +95,9 @@ namespace Cotton.Mobile.Services
                 file.UpdatedAtUtc,
                 file.SizeBytes,
                 file.ContentType,
-                syncedAtUtc);
+                syncedAtUtc,
+                relativePath: null,
+                contentHash);
         }
 
         private static string NormalizeRelativePath(string fileName, string? relativePath)

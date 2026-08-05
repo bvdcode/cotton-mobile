@@ -72,7 +72,9 @@ namespace Cotton.Mobile.Services
                     localFile.RemoteUpdatedAtUtc,
                     localFile.SizeBytes,
                     localFile.ContentType,
-                    localFile.RelativePath));
+                    localFile.RelativePath,
+                    previousRelativePath: null,
+                    localFile.ContentHash));
             }
 
             return new CottonCloudToDeviceSyncPlanSnapshot(
@@ -102,7 +104,7 @@ namespace Cotton.Mobile.Services
                     remoteItem.RelativePath);
             }
 
-            if (string.IsNullOrWhiteSpace(entry.ETag))
+            if (string.IsNullOrWhiteSpace(entry.ETag) || entry.ContentHash is null)
             {
                 return new CottonCloudToDeviceSyncPlanItem(
                     CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision,
@@ -113,7 +115,9 @@ namespace Cotton.Mobile.Services
                     entry.UpdatedAtUtc,
                     entry.SizeBytes,
                     entry.ContentType,
-                    remoteItem.RelativePath);
+                    remoteItem.RelativePath,
+                    previousRelativePath: null,
+                    entry.ContentHash);
             }
 
             if (!localByFileId.TryGetValue(entry.Id, out CottonSyncedFileSnapshot? localFile))
@@ -159,7 +163,8 @@ namespace Cotton.Mobile.Services
                 entry.SizeBytes,
                 entry.ContentType,
                 remoteItem.RelativePath,
-                previousRelativePath);
+                previousRelativePath,
+                entry.ContentHash);
         }
 
         private static void MarkHandledLocalFile(

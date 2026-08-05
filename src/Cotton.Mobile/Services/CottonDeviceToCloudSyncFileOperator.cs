@@ -125,7 +125,8 @@ namespace Cotton.Mobile.Services
                     item.DisplayName,
                     item.ContentType,
                     item.SizeBytes,
-                    CreateUploadMetadata(item)),
+                    CreateUploadMetadata(item),
+                    item.ContentHash),
                 token => _localContentSource.OpenReadAsync(instanceUri, root, item, token));
         }
 

@@ -20,5 +20,7 @@ namespace Cotton.Mobile.Services
         public string? ContentType { get; set; }
 
         public DateTime SyncedAtUtc { get; set; }
+
+        public string? ContentHash { get; set; }
     }
 }

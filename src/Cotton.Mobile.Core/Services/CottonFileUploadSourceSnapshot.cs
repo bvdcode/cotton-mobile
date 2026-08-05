@@ -12,7 +12,8 @@ namespace Cotton.Mobile.Services
             string? name,
             string? contentType,
             long? sizeBytes,
-            IReadOnlyDictionary<string, string>? metadata = null)
+            IReadOnlyDictionary<string, string>? metadata = null,
+            string? contentHash = null)
         {
             if (sizeBytes < 0)
             {
@@ -23,6 +24,7 @@ namespace Cotton.Mobile.Services
             ContentType = NormalizeContentType(contentType);
             SizeBytes = sizeBytes;
             Metadata = NormalizeMetadata(metadata);
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
         }
 
         public string Name { get; }
@@ -33,14 +35,16 @@ namespace Cotton.Mobile.Services
 
         public IReadOnlyDictionary<string, string> Metadata { get; }
 
+        public string? ContentHash { get; }
+
         public CottonFileUploadSourceSnapshot WithName(string? name)
         {
-            return new CottonFileUploadSourceSnapshot(name, ContentType, SizeBytes, Metadata);
+            return new CottonFileUploadSourceSnapshot(name, ContentType, SizeBytes, Metadata, ContentHash);
         }
 
         public CottonFileUploadSourceSnapshot WithMetadata(IReadOnlyDictionary<string, string>? metadata)
         {
-            return new CottonFileUploadSourceSnapshot(Name, ContentType, SizeBytes, metadata);
+            return new CottonFileUploadSourceSnapshot(Name, ContentType, SizeBytes, metadata, ContentHash);
         }
 
         private static string NormalizeName(string? name)

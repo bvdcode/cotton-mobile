@@ -123,6 +123,23 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_blocks_local_delete_for_legacy_receipt_without_content_hash()
+        {
+            CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt(contentHash: null);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload),
+                local,
+                CreateRemoteContent(
+                    CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\"")),
+                [receipt]);
+
+            AssertPendingLocalChangeIsBlocked(plan);
+        }
+
+        [Fact]
         public void Planner_retries_pending_receipt_with_same_operation_id_when_remote_is_missing()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
@@ -200,11 +217,42 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Planner_blocks_pending_confirmation_when_remote_hash_differs()
+        {
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(
+                    FirstFileId,
+                    "alpha.txt",
+                    "alpha.txt",
+                    "\"etag-1\"",
+                    OperationId,
+                    contentHash: TestContentHashes.Second));
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                [receipt]).Items);
+
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision, item.Action);
+            Assert.True(item.IsBlocked);
+        }
+
+        [Fact]
         public void Planner_blocks_pending_receipt_when_local_version_or_path_changes()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot changedVersion = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt.AddSeconds(1), 43, "document-alpha"));
+                CreateLocalFile(
+                    "alpha.txt",
+                    "alpha.txt",
+                    SyncedAt,
+                    42,
+                    "document-alpha",
+                    TestContentHashes.Second));
             CottonDeviceToCloudLocalContentSnapshot changedPath = CreateLocalContent(
                 CreateLocalFile("renamed.txt", "renamed.txt", SyncedAt, 42, "document-alpha"));
 
@@ -390,7 +438,8 @@ namespace Cotton.Mobile.Tests
             string relativePath,
             DateTime updatedAt,
             long sizeBytes,
-            string? localSourceId)
+            string? localSourceId,
+            string contentHash = TestContentHashes.First)
         {
             return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                 name,
@@ -398,7 +447,8 @@ namespace Cotton.Mobile.Tests
                 updatedAt,
                 sizeBytes,
                 "text/plain",
-                localSourceId);
+                localSourceId,
+                contentHash);
         }
 
         private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFolder(string name, string relativePath)
@@ -418,7 +468,8 @@ namespace Cotton.Mobile.Tests
             string relativePath,
             string eTag,
             Guid? operationId = null,
-            long sizeBytes = 42)
+            long sizeBytes = 42,
+            string contentHash = TestContentHashes.First)
         {
             IReadOnlyDictionary<string, string>? metadata = operationId.HasValue
                 ? new Dictionary<string, string>
@@ -434,7 +485,8 @@ namespace Cotton.Mobile.Tests
                 "text/plain",
                 previewHashEncryptedHex: null,
                 eTag,
-                metadata);
+                metadata,
+                contentHash);
             return new CottonDeviceToCloudRemoteItemSnapshot(entry, relativePath);
         }
 
@@ -451,10 +503,12 @@ namespace Cotton.Mobile.Tests
                 CottonUploadReceiptStatus.Pending,
                 SyncedAt.AddMinutes(1),
                 remoteFileId: null,
-                remoteETag: null);
+                remoteETag: null,
+                TestContentHashes.First);
         }
 
-        private static CottonUploadReceiptSnapshot CreateUploadedReceipt()
+        private static CottonUploadReceiptSnapshot CreateUploadedReceipt(
+            string? contentHash = TestContentHashes.First)
         {
             return new CottonUploadReceiptSnapshot(
                 "document-alpha",
@@ -466,7 +520,8 @@ namespace Cotton.Mobile.Tests
                 CottonUploadReceiptStatus.Uploaded,
                 SyncedAt.AddMinutes(1),
                 FirstFileId,
-                "\"etag-1\"");
+                "\"etag-1\"",
+                contentHash);
         }
     }
 }

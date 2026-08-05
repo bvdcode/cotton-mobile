@@ -110,6 +110,12 @@ namespace Cotton.Mobile.Services
                     $"Upload source size changed: expected {source.Snapshot.SizeBytes.Value} bytes, read {result.SizeBytes} bytes.");
             }
 
+            if (source.Snapshot.ContentHash is not null
+                && !string.Equals(source.Snapshot.ContentHash, result.ContentHash, StringComparison.Ordinal))
+            {
+                throw new InvalidDataException("Upload source content changed after the sync scan.");
+            }
+
             return result;
         }
 
@@ -153,7 +159,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 contentHash.TransformBlock(buffer, 0, bytesRead, null, 0);
-                string chunkHash = CottonFileUploadHash.CreateSha256Hex(buffer.AsSpan(0, bytesRead));
+                string chunkHash = CottonContentHash.ComputeSha256(buffer.AsSpan(0, bytesRead));
                 chunkHashes.Add(chunkHash);
 
                 if (!await client.Chunks.ExistsAsync(chunkHash, cancellationToken).ConfigureAwait(false))
@@ -176,7 +182,7 @@ namespace Cotton.Mobile.Services
                 ?? throw new InvalidOperationException("Upload content hash was not finalized.");
             return new CottonFileUploadResult(
                 chunkHashes,
-                CottonFileUploadHash.FormatHex(fileHash),
+                CottonContentHash.FormatSha256(fileHash),
                 uploadedBytes);
         }
 

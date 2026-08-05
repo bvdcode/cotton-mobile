@@ -12,7 +12,8 @@ namespace Cotton.Mobile.Services
             DateTime localUpdatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            string? localSourceId = null)
+            string? localSourceId = null,
+            string? contentHash = null)
         {
             if (!Enum.IsDefined(itemType))
             {
@@ -43,6 +44,11 @@ namespace Cotton.Mobile.Services
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
+            if (ItemType == CottonFileBrowserEntryType.File && ContentHash is null)
+            {
+                throw new ArgumentException("Local file snapshots require a content hash.", nameof(contentHash));
+            }
         }
 
         public CottonFileBrowserEntryType ItemType { get; }
@@ -59,13 +65,16 @@ namespace Cotton.Mobile.Services
 
         public string? LocalSourceId { get; }
 
+        public string? ContentHash { get; }
+
         public static CottonDeviceToCloudLocalItemSnapshot CreateFile(
             string displayName,
             string relativePath,
             DateTime localUpdatedAtUtc,
             long? sizeBytes,
             string? contentType = null,
-            string? localSourceId = null)
+            string? localSourceId = null,
+            string? contentHash = null)
         {
             return new CottonDeviceToCloudLocalItemSnapshot(
                 CottonFileBrowserEntryType.File,
@@ -74,7 +83,8 @@ namespace Cotton.Mobile.Services
                 localUpdatedAtUtc,
                 sizeBytes,
                 contentType,
-                localSourceId);
+                localSourceId,
+                contentHash);
         }
 
         public static CottonDeviceToCloudLocalItemSnapshot CreateFolder(
@@ -90,7 +100,8 @@ namespace Cotton.Mobile.Services
                 localUpdatedAtUtc,
                 sizeBytes: null,
                 contentType: null,
-                localSourceId);
+                localSourceId,
+                contentHash: null);
         }
 
         private static string NormalizeRelativePath(string displayName, string relativePath)

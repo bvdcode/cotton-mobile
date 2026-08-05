@@ -240,6 +240,7 @@ namespace Cotton.Mobile.Services
                 SizeBytes = item.SizeBytes,
                 ContentType = item.ContentType,
                 SyncedAtUtc = item.SyncedAtUtc,
+                ContentHash = item.ContentHash,
             };
         }
 
@@ -255,7 +256,8 @@ namespace Cotton.Mobile.Services
                     item.SizeBytes,
                     item.ContentType,
                     item.SyncedAtUtc,
-                    item.RelativePath ?? string.Empty);
+                    item.RelativePath ?? string.Empty,
+                    item.ContentHash);
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException)

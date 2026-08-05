@@ -16,7 +16,8 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? localSourceId = null,
-            Guid? uploadOperationId = null)
+            Guid? uploadOperationId = null,
+            string? contentHash = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -61,6 +62,7 @@ namespace Cotton.Mobile.Services
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
             UploadOperationId = uploadOperationId;
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
         }
 
         public CottonDeviceToCloudSyncActionKind Action { get; }
@@ -84,6 +86,8 @@ namespace Cotton.Mobile.Services
         public string? LocalSourceId { get; }
 
         public Guid? UploadOperationId { get; }
+
+        public string? ContentHash { get; }
 
         public bool RequiresUpload =>
             Action is CottonDeviceToCloudSyncActionKind.UploadNewFile
@@ -148,6 +152,13 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Synced-file metadata requires an uploaded file ETag.");
             }
 
+            string uploadedContentHash = uploadedFile.ContentHash
+                ?? throw new InvalidOperationException("Synced-file metadata requires an uploaded file content hash.");
+            if (ContentHash is null || !string.Equals(uploadedContentHash, ContentHash, StringComparison.Ordinal))
+            {
+                throw new InvalidOperationException("Uploaded file content hash does not match the local file.");
+            }
+
             return new CottonSyncedFileSnapshot(
                 uploadedFile.Id,
                 uploadedFile.Name,
@@ -156,7 +167,8 @@ namespace Cotton.Mobile.Services
                 uploadedFile.SizeBytes,
                 uploadedFile.ContentType,
                 syncedAtUtc,
-                RelativePath);
+                RelativePath,
+                uploadedContentHash);
         }
 
         public CottonDeviceToCloudSyncPlanItem WithUploadOperationId(Guid uploadOperationId)
@@ -177,7 +189,8 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 LocalSourceId,
-                uploadOperationId);
+                uploadOperationId,
+                ContentHash);
         }
 
         private static string NormalizeRelativePath(

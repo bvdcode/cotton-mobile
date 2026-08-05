@@ -109,8 +109,10 @@ namespace Cotton.Mobile.Services
                     await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
                     cancellationToken.ThrowIfCancellationRequested();
                     sizeBytes = destination.Length;
-                    ValidateDownloadedSize(file, sizeBytes);
                 }
+
+                await ValidateDownloadedContentAsync(file, tempFilePath, sizeBytes, cancellationToken)
+                    .ConfigureAwait(false);
 
                 cancellationToken.ThrowIfCancellationRequested();
                 try
@@ -304,19 +306,50 @@ namespace Cotton.Mobile.Services
                 CottonLocalFileFreshness.NormalizeUtc(info.LastWriteTimeUtc));
         }
 
-        private static void ValidateDownloadedSize(CottonFileBrowserEntry file, long downloadedSizeBytes)
+        private static async Task ValidateDownloadedContentAsync(
+            CottonFileBrowserEntry file,
+            string filePath,
+            long downloadedSizeBytes,
+            CancellationToken cancellationToken)
         {
             if (file.SizeBytes.HasValue && downloadedSizeBytes != file.SizeBytes.Value)
             {
                 throw new IOException(
                     $"Downloaded file size mismatch for {file.Id}: expected {file.SizeBytes.Value} bytes, got {downloadedSizeBytes} bytes.");
             }
+
+            if (file.ContentHash is null)
+            {
+                throw new IOException($"Downloaded file manifest does not contain a content hash for {file.Id}.");
+            }
+
+            await using var content = new FileStream(
+                filePath,
+                FileMode.Open,
+                FileAccess.Read,
+                FileShare.Read,
+                bufferSize: 81920,
+                useAsync: true);
+            string contentHash = await CottonContentHash.ComputeSha256Async(content, cancellationToken)
+                .ConfigureAwait(false);
+            if (!string.Equals(contentHash, file.ContentHash, StringComparison.Ordinal))
+            {
+                throw new IOException($"Downloaded file content hash mismatch for {file.Id}.");
+            }
         }
 
         private static bool IsReusableLocalDownload(CottonFileBrowserEntry file, FileInfo info)
         {
-            return (!file.SizeBytes.HasValue || file.SizeBytes.Value == info.Length)
-                && CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc);
+            if ((file.SizeBytes.HasValue && file.SizeBytes.Value != info.Length)
+                || !CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc)
+                || file.ContentHash is null)
+            {
+                return false;
+            }
+
+            using FileStream content = info.OpenRead();
+            string contentHash = CottonContentHash.ComputeSha256(content);
+            return string.Equals(contentHash, file.ContentHash, StringComparison.Ordinal);
         }
 
         private T? InspectLocalDownload<T>(

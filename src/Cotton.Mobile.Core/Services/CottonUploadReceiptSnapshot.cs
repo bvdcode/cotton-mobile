@@ -15,7 +15,8 @@ namespace Cotton.Mobile.Services
             CottonUploadReceiptStatus status,
             DateTime recordedAtUtc,
             Guid? remoteFileId,
-            string? remoteETag)
+            string? remoteETag,
+            string? contentHash = null)
         {
             if (string.IsNullOrWhiteSpace(localSourceId))
             {
@@ -49,6 +50,7 @@ namespace Cotton.Mobile.Services
             RecordedAtUtc = CottonLocalFileFreshness.NormalizeUtc(recordedAtUtc);
             RemoteFileId = remoteFileId;
             RemoteETag = string.IsNullOrWhiteSpace(remoteETag) ? null : remoteETag.Trim();
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
         }
 
         public string LocalSourceId { get; }
@@ -70,6 +72,8 @@ namespace Cotton.Mobile.Services
         public Guid? RemoteFileId { get; }
 
         public string? RemoteETag { get; }
+
+        public string? ContentHash { get; }
 
         public bool IsPending => Status == CottonUploadReceiptStatus.Pending;
 
@@ -93,6 +97,8 @@ namespace Cotton.Mobile.Services
                 ?? throw new ArgumentException("Pending upload receipts require a local source id.", nameof(item));
             DateTime localUpdatedAtUtc = item.LocalUpdatedAtUtc
                 ?? throw new ArgumentException("Pending upload receipts require a local update time.", nameof(item));
+            string contentHash = item.ContentHash
+                ?? throw new ArgumentException("Pending upload receipts require a local content hash.", nameof(item));
 
             return new CottonUploadReceiptSnapshot(
                 localSourceId,
@@ -104,7 +110,8 @@ namespace Cotton.Mobile.Services
                 CottonUploadReceiptStatus.Pending,
                 recordedAtUtc,
                 remoteFileId: null,
-                remoteETag: null);
+                remoteETag: null,
+                contentHash);
         }
 
         public static CottonUploadReceiptSnapshot CreateUploadedFromConfirmation(
@@ -127,6 +134,8 @@ namespace Cotton.Mobile.Services
                 ?? throw new ArgumentException("Uploaded receipt confirmation requires a remote file id.", nameof(item));
             string remoteETag = item.ExpectedRemoteETag
                 ?? throw new ArgumentException("Uploaded receipt confirmation requires a remote ETag.", nameof(item));
+            string contentHash = item.ContentHash
+                ?? throw new ArgumentException("Uploaded receipt confirmation requires a local content hash.", nameof(item));
 
             return new CottonUploadReceiptSnapshot(
                 localSourceId,
@@ -138,7 +147,8 @@ namespace Cotton.Mobile.Services
                 CottonUploadReceiptStatus.Uploaded,
                 recordedAtUtc,
                 remoteFileId,
-                remoteETag);
+                remoteETag,
+                contentHash);
         }
 
         public CottonUploadReceiptSnapshot MarkUploaded(
@@ -182,6 +192,12 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Uploaded receipt revision has a different file size.", nameof(remoteFile));
             }
 
+            if (ContentHash is null
+                || !string.Equals(remoteFile.ContentHash, ContentHash, StringComparison.Ordinal))
+            {
+                throw new ArgumentException("Uploaded receipt revision has a different content hash.", nameof(remoteFile));
+            }
+
             return new CottonUploadReceiptSnapshot(
                 LocalSourceId,
                 RelativePath,
@@ -192,7 +208,8 @@ namespace Cotton.Mobile.Services
                 CottonUploadReceiptStatus.Uploaded,
                 recordedAtUtc,
                 remoteFile.Id,
-                remoteFile.ETag);
+                remoteFile.ETag,
+                ContentHash);
         }
 
         public bool MatchesLocalSource(CottonDeviceToCloudLocalItemSnapshot localItem)
@@ -206,7 +223,10 @@ namespace Cotton.Mobile.Services
         {
             return MatchesLocalSource(localItem)
                 && SizeBytes == localItem.SizeBytes
-                && LocalUpdatedAtUtc == localItem.LocalUpdatedAtUtc;
+                && LocalUpdatedAtUtc == localItem.LocalUpdatedAtUtc
+                && ContentHash is not null
+                && localItem.ContentHash is not null
+                && string.Equals(ContentHash, localItem.ContentHash, StringComparison.Ordinal);
         }
 
         private static void ValidateRemoteRevision(

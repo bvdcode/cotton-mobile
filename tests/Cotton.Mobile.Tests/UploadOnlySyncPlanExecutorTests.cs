@@ -215,7 +215,9 @@ namespace Cotton.Mobile.Tests
                 LocalUpdatedAt,
                 42,
                 "image/jpeg",
-                "primary:DCIM/Camera/photo.jpg");
+                "primary:DCIM/Camera/photo.jpg",
+                uploadOperationId: null,
+                TestContentHashes.First);
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => harness.Executor.ExecuteAsync(
                 InstanceUri,
@@ -266,7 +268,8 @@ namespace Cotton.Mobile.Tests
                 sizeBytes: 42,
                 contentType: "image/jpeg",
                 localSourceId: "primary:DCIM/Camera/photo.jpg",
-                uploadOperationId: operationId);
+                uploadOperationId: operationId,
+                contentHash: TestContentHashes.First);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateConfirmationItem()
@@ -282,7 +285,8 @@ namespace Cotton.Mobile.Tests
                 42,
                 "image/jpeg",
                 "primary:DCIM/Camera/photo.jpg",
-                OperationId);
+                OperationId,
+                TestContentHashes.First);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateCleanupItem()
@@ -298,7 +302,8 @@ namespace Cotton.Mobile.Tests
                 42,
                 "image/jpeg",
                 "primary:DCIM/Camera/photo.jpg",
-                OperationId);
+                OperationId,
+                TestContentHashes.First);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(CottonUploadOriginalRetention retention)
@@ -473,7 +478,8 @@ namespace Cotton.Mobile.Tests
                     item.ContentType,
                     previewHashEncryptedHex: null,
                     eTag: "etag-remote",
-                    metadata);
+                    metadata,
+                    TestContentHashes.First);
                 return Task.FromResult(uploaded);
             }
 

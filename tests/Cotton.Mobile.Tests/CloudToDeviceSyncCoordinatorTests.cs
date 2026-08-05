@@ -376,7 +376,8 @@ namespace Cotton.Mobile.Tests
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
-                eTag);
+                eTag,
+                TestContentHashes.First);
         }
 
         private static CottonFileBrowserEntry CreateFolder(Guid id, string name)

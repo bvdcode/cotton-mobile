@@ -106,7 +106,8 @@ namespace Cotton.Mobile.Services
                 item.SizeBytes,
                 item.ContentType,
                 item.RelativePath,
-                item.PreviousRelativePath);
+                item.PreviousRelativePath,
+                item.RemoteContentHash);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateDeviceToCloudItem(
@@ -123,7 +124,9 @@ namespace Cotton.Mobile.Services
                 item.LocalUpdatedAtUtc,
                 item.SizeBytes,
                 item.ContentType,
-                item.LocalSourceId);
+                item.LocalSourceId,
+                uploadOperationId: null,
+                item.LocalContentHash);
         }
 
         private static CottonCloudToDeviceSyncPlanSnapshot CreateCloudToDevicePlan(

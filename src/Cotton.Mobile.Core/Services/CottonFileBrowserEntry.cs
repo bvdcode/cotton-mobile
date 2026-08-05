@@ -22,6 +22,7 @@ namespace Cotton.Mobile.Services
             DateTime updatedAtUtc,
             long? sizeBytes,
             string? contentType,
+            string? contentHash,
             string? previewHashEncryptedHex,
             string? eTag,
             CottonOfflineFileAvailabilitySnapshot? offlineAvailability = null,
@@ -40,6 +41,7 @@ namespace Cotton.Mobile.Services
             UpdatedAtUtc = updatedAtUtc;
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
             PreviewHashEncryptedHex = string.IsNullOrWhiteSpace(previewHashEncryptedHex)
                 ? null
                 : previewHashEncryptedHex.Trim();
@@ -95,6 +97,8 @@ namespace Cotton.Mobile.Services
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
+
+        public string? ContentHash { get; }
 
         public string? PreviewHashEncryptedHex { get; }
 
@@ -162,6 +166,7 @@ namespace Cotton.Mobile.Services
                 file.UpdatedAt,
                 file.SizeBytes,
                 contentType,
+                file.ContentHash,
                 file.PreviewHashEncryptedHex,
                 file.ETag,
                 metadata: file.Metadata);
@@ -175,7 +180,8 @@ namespace Cotton.Mobile.Services
             string? contentType,
             string? previewHashEncryptedHex,
             string? eTag,
-            IReadOnlyDictionary<string, string>? metadata = null)
+            IReadOnlyDictionary<string, string>? metadata = null,
+            string? contentHash = null)
         {
             string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
             string details = sizeBytes.HasValue
@@ -192,6 +198,7 @@ namespace Cotton.Mobile.Services
                 updatedAtUtc,
                 sizeBytes,
                 contentType,
+                contentHash,
                 previewHashEncryptedHex,
                 eTag,
                 null,
@@ -211,7 +218,8 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
-            string? eTag)
+            string? eTag,
+            string? contentHash = null)
         {
             return new CottonFileBrowserEntry(
                 id,
@@ -224,6 +232,7 @@ namespace Cotton.Mobile.Services
                 updatedAtUtc,
                 sizeBytes,
                 contentType,
+                contentHash,
                 previewHashEncryptedHex,
                 eTag,
                 null,
@@ -259,6 +268,7 @@ namespace Cotton.Mobile.Services
                 UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
+                ContentHash,
                 PreviewHashEncryptedHex,
                 ETag,
                 OfflineAvailability,
@@ -283,6 +293,7 @@ namespace Cotton.Mobile.Services
                 UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
+                ContentHash,
                 PreviewHashEncryptedHex,
                 ETag,
                 OfflineAvailability,
@@ -307,6 +318,7 @@ namespace Cotton.Mobile.Services
                 UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
+                ContentHash,
                 PreviewHashEncryptedHex,
                 ETag,
                 offlineAvailability,
@@ -334,6 +346,7 @@ namespace Cotton.Mobile.Services
                 UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
+                ContentHash,
                 PreviewHashEncryptedHex,
                 ETag,
                 OfflineAvailability,
@@ -361,6 +374,7 @@ namespace Cotton.Mobile.Services
                 UpdatedAtUtc,
                 SizeBytes,
                 ContentType,
+                ContentHash,
                 PreviewHashEncryptedHex,
                 ETag,
                 OfflineAvailability,

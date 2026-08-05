@@ -15,7 +15,8 @@ namespace Cotton.Mobile.Services
             long? sizeBytes,
             string? contentType,
             string? relativePath = null,
-            string? previousRelativePath = null)
+            string? previousRelativePath = null,
+            string? contentHash = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -54,6 +55,7 @@ namespace Cotton.Mobile.Services
                 : null;
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
+            ContentHash = CottonContentHash.NormalizeOptionalSha256(contentHash, nameof(contentHash));
         }
 
         public CottonCloudToDeviceSyncActionKind Action { get; }
@@ -75,6 +77,8 @@ namespace Cotton.Mobile.Services
         public long? SizeBytes { get; }
 
         public string? ContentType { get; }
+
+        public string? ContentHash { get; }
 
         public bool RequiresDownload =>
             Action is CottonCloudToDeviceSyncActionKind.DownloadNewFile
@@ -107,6 +111,11 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Synced-file metadata requires a remote ETag and updated timestamp.");
             }
 
+            if (ContentHash is null)
+            {
+                throw new InvalidOperationException("Synced-file metadata requires a remote content hash.");
+            }
+
             return new CottonSyncedFileSnapshot(
                 TargetId,
                 DisplayName,
@@ -115,7 +124,8 @@ namespace Cotton.Mobile.Services
                 SizeBytes,
                 ContentType,
                 syncedAtUtc,
-                RelativePath);
+                RelativePath,
+                ContentHash);
         }
 
         private static string NormalizeRelativePath(

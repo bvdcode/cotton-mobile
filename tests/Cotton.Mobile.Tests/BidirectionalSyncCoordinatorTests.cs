@@ -258,7 +258,8 @@ namespace Cotton.Mobile.Tests
                 UpdatedAt,
                 42,
                 "text/plain",
-                localSourceId);
+                localSourceId,
+                TestContentHashes.First);
         }
 
         private static CottonFolderContent CreateContent(
@@ -282,7 +283,8 @@ namespace Cotton.Mobile.Tests
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
-                eTag);
+                eTag,
+                TestContentHashes.First);
         }
 
         private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider

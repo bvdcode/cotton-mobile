@@ -168,7 +168,8 @@ namespace Cotton.Mobile.Services
                     remoteItem.Entry.Id,
                     remoteItem.Entry.ETag,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             CottonBidirectionalSyncActionKind? remoteMismatch = CreateRemoteMismatchAction(remoteItem, manifestItem);
@@ -184,7 +185,8 @@ namespace Cotton.Mobile.Services
                         remoteItem.Entry.Id,
                         remoteItem.Entry.ETag,
                         localItem,
-                        remoteItem.Entry.UpdatedAtUtc);
+                        remoteItem.Entry.UpdatedAtUtc,
+                        remoteItem.Entry.ContentHash);
                 }
 
                 return CreateRemoteFileItem(
@@ -203,7 +205,8 @@ namespace Cotton.Mobile.Services
                     manifestItem.FileId,
                     manifestItem.ETag,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             return CreateRemoteFileItem(CottonBidirectionalSyncActionKind.KeepExistingFile, remoteItem);
@@ -224,7 +227,8 @@ namespace Cotton.Mobile.Services
                     remoteItem.Entry.Id,
                     remoteItem.Entry.ETag,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             if (localChanged)
@@ -237,10 +241,11 @@ namespace Cotton.Mobile.Services
                     remoteItem.Entry.Id,
                     remoteItem.Entry.ETag,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
-            return string.IsNullOrWhiteSpace(remoteItem.Entry.ETag)
+            return string.IsNullOrWhiteSpace(remoteItem.Entry.ETag) || remoteItem.Entry.ContentHash is null
                 ? CreateRemoteFileItem(CottonBidirectionalSyncActionKind.NeedsFreshServerRevision, remoteItem)
                 : CreateRemoteFileItem(CottonBidirectionalSyncActionKind.RefreshLocalFile, remoteItem);
         }
@@ -272,7 +277,8 @@ namespace Cotton.Mobile.Services
                     remoteItem.Entry.Id,
                     expectedRemoteETag: null,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             return CreatePlanItem(
@@ -283,7 +289,8 @@ namespace Cotton.Mobile.Services
                 remoteItem.Entry.Id,
                 remoteItem.Entry.ETag,
                 localItem,
-                remoteItem.Entry.UpdatedAtUtc);
+                remoteItem.Entry.UpdatedAtUtc,
+                remoteItem.Entry.ContentHash);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateNewLocalFileItem(
@@ -300,7 +307,8 @@ namespace Cotton.Mobile.Services
                     remoteItem.Entry.Id,
                     remoteItem.Entry.ETag,
                     localItem,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             return CreatePlanItem(
@@ -336,14 +344,16 @@ namespace Cotton.Mobile.Services
                         : CottonBidirectionalSyncActionKind.RemoteTargetMissing,
                     manifestItem,
                     remoteItem.Entry.ETag,
-                    remoteItem.Entry.UpdatedAtUtc);
+                    remoteItem.Entry.UpdatedAtUtc,
+                    remoteItem.Entry.ContentHash);
             }
 
             return CreateManifestItem(
                 CottonBidirectionalSyncActionKind.DeleteRemoteFile,
                 manifestItem,
                 manifestItem.ETag,
-                remoteItem.Entry.UpdatedAtUtc);
+                remoteItem.Entry.UpdatedAtUtc,
+                remoteItem.Entry.ContentHash);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateRemoteOnlyItem(
@@ -354,7 +364,7 @@ namespace Cotton.Mobile.Services
                 return CreateRemoteFileItem(CottonBidirectionalSyncActionKind.BlockedRemoteFolder, remoteItem);
             }
 
-            return string.IsNullOrWhiteSpace(remoteItem.Entry.ETag)
+            return string.IsNullOrWhiteSpace(remoteItem.Entry.ETag) || remoteItem.Entry.ContentHash is null
                 ? CreateRemoteFileItem(CottonBidirectionalSyncActionKind.NeedsFreshServerRevision, remoteItem)
                 : CreateRemoteFileItem(CottonBidirectionalSyncActionKind.DownloadNewFile, remoteItem);
         }
@@ -367,7 +377,8 @@ namespace Cotton.Mobile.Services
             Guid? cloudItemId,
             string? expectedRemoteETag,
             CottonDeviceToCloudLocalItemSnapshot localItem,
-            DateTime? remoteUpdatedAtUtc)
+            DateTime? remoteUpdatedAtUtc,
+            string? remoteContentHash = null)
         {
             return new CottonBidirectionalSyncPlanItem(
                 action,
@@ -381,14 +392,17 @@ namespace Cotton.Mobile.Services
                 remoteUpdatedAtUtc,
                 localItem.SizeBytes,
                 localItem.ContentType,
-                localItem.LocalSourceId);
+                localItem.LocalSourceId,
+                localItem.ContentHash,
+                remoteContentHash);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateManifestItem(
             CottonBidirectionalSyncActionKind action,
             CottonSyncedFileSnapshot manifestItem,
             string? expectedRemoteETag,
-            DateTime? remoteUpdatedAtUtc)
+            DateTime? remoteUpdatedAtUtc,
+            string? remoteContentHash = null)
         {
             return new CottonBidirectionalSyncPlanItem(
                 action,
@@ -401,7 +415,10 @@ namespace Cotton.Mobile.Services
                 localUpdatedAtUtc: null,
                 remoteUpdatedAtUtc,
                 manifestItem.SizeBytes,
-                manifestItem.ContentType);
+                manifestItem.ContentType,
+                localSourceId: null,
+                localContentHash: null,
+                remoteContentHash);
         }
 
         private static CottonBidirectionalSyncPlanItem CreateRemoteFileItem(
@@ -421,15 +438,19 @@ namespace Cotton.Mobile.Services
                 localUpdatedAtUtc: null,
                 entry.UpdatedAtUtc,
                 entry.SizeBytes,
-                entry.ContentType);
+                entry.ContentType,
+                localSourceId: null,
+                localContentHash: null,
+                entry.ContentHash);
         }
 
         private static bool LocalMatchesManifest(
             CottonDeviceToCloudLocalItemSnapshot localItem,
             CottonSyncedFileSnapshot manifestItem)
         {
-            return localItem.SizeBytes == manifestItem.SizeBytes
-                && CottonLocalFileFreshness.IsFresh(manifestItem.SyncedAtUtc, localItem.LocalUpdatedAtUtc);
+            return localItem.ContentHash is not null
+                && manifestItem.ContentHash is not null
+                && string.Equals(localItem.ContentHash, manifestItem.ContentHash, StringComparison.Ordinal);
         }
 
         private static CottonBidirectionalSyncActionKind? CreateRemoteMismatchAction(
@@ -442,7 +463,7 @@ namespace Cotton.Mobile.Services
                 return CottonBidirectionalSyncActionKind.RemotePathConflict;
             }
 
-            if (string.IsNullOrWhiteSpace(remoteItem.Entry.ETag))
+            if (string.IsNullOrWhiteSpace(remoteItem.Entry.ETag) || remoteItem.Entry.ContentHash is null)
             {
                 return CottonBidirectionalSyncActionKind.NeedsFreshServerRevision;
             }
@@ -460,14 +481,24 @@ namespace Cotton.Mobile.Services
         private static CottonBidirectionalSyncActionKind CreateLocalRemoteMismatchAction(
             CottonBidirectionalSyncActionKind remoteMismatchAction)
         {
-            return remoteMismatchAction switch
+            switch (remoteMismatchAction)
             {
-                CottonBidirectionalSyncActionKind.NeedsFreshServerRevision =>
-                    CottonBidirectionalSyncActionKind.NeedsFreshServerRevision,
-                CottonBidirectionalSyncActionKind.RenameLocalFile =>
-                    CottonBidirectionalSyncActionKind.RenameLocalFile,
-                _ => CottonBidirectionalSyncActionKind.RefreshLocalFile,
-            };
+                case CottonBidirectionalSyncActionKind.NeedsFreshServerRevision:
+                    return CottonBidirectionalSyncActionKind.NeedsFreshServerRevision;
+
+                case CottonBidirectionalSyncActionKind.RenameLocalFile:
+                    return CottonBidirectionalSyncActionKind.RenameLocalFile;
+
+                case CottonBidirectionalSyncActionKind.RemotePathConflict:
+                case CottonBidirectionalSyncActionKind.RefreshLocalFile:
+                    return CottonBidirectionalSyncActionKind.RefreshLocalFile;
+
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        nameof(remoteMismatchAction),
+                        remoteMismatchAction,
+                        "Remote mismatch action is not supported.");
+            }
         }
 
         private static Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> CreateLocalItemMap(

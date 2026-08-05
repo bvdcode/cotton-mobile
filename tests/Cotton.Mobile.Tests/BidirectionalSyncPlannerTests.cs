@@ -42,7 +42,12 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 84, updatedAtUtc: SyncedAt.AddMinutes(1)));
+                CreateLocalFile(
+                    "notes.txt",
+                    "notes.txt",
+                    sizeBytes: 84,
+                    updatedAtUtc: SyncedAt.AddMinutes(1),
+                    TestContentHashes.Second));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(FileId, "notes.txt", "notes.txt", "\"etag-1\"", sizeBytes: 42));
 
@@ -59,6 +64,30 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("local:notes.txt", item.LocalSourceId);
             Assert.False(item.IsBlocked);
             Assert.Equal(1, plan.UploadCount);
+        }
+
+        [Fact]
+        public void Same_size_and_timestamp_content_change_uploads_file()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile(
+                    "notes.txt",
+                    "notes.txt",
+                    sizeBytes: 42,
+                    updatedAtUtc: SyncedAt,
+                    TestContentHashes.Second));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(FileId, "notes.txt", "notes.txt", "\"etag-1\"", sizeBytes: 42));
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                remote,
+                [manifest]).Items);
+
+            Assert.Equal(CottonBidirectionalSyncActionKind.UploadChangedFile, item.Action);
+            Assert.Equal(TestContentHashes.Second, item.LocalContentHash);
         }
 
         [Fact]
@@ -117,7 +146,12 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 84, updatedAtUtc: SyncedAt.AddMinutes(1)));
+                CreateLocalFile(
+                    "notes.txt",
+                    "notes.txt",
+                    sizeBytes: 84,
+                    updatedAtUtc: SyncedAt.AddMinutes(1),
+                    TestContentHashes.Second));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(NewRemoteFileId, "notes.txt", "notes.txt", "\"etag-new\"", sizeBytes: 99));
 
@@ -163,7 +197,12 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 84, updatedAtUtc: SyncedAt.AddMinutes(1)));
+                CreateLocalFile(
+                    "notes.txt",
+                    "notes.txt",
+                    sizeBytes: 84,
+                    updatedAtUtc: SyncedAt.AddMinutes(1),
+                    TestContentHashes.Second));
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(FileId, "notes.txt", "notes.txt", "\"etag-2\"", sizeBytes: 99));
 
@@ -181,6 +220,38 @@ namespace Cotton.Mobile.Tests
             Assert.False(item.RequiresUpload);
             Assert.Equal(1, plan.ConflictCount);
             Assert.True(plan.HasBlockingItems);
+        }
+
+        [Fact]
+        public void Same_size_and_timestamp_content_change_blocks_when_remote_also_changed()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile(
+                    "notes.txt",
+                    "notes.txt",
+                    sizeBytes: 42,
+                    updatedAtUtc: SyncedAt,
+                    TestContentHashes.Second));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(
+                    FileId,
+                    "notes.txt",
+                    "notes.txt",
+                    "\"etag-2\"",
+                    sizeBytes: 42,
+                    TestContentHashes.Third));
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                remote,
+                [manifest]).Items);
+
+            Assert.Equal(CottonBidirectionalSyncActionKind.FileChangedOnBothSides, item.Action);
+            Assert.True(item.IsBlocked);
+            Assert.Equal(TestContentHashes.Second, item.LocalContentHash);
+            Assert.Equal(TestContentHashes.Third, item.RemoteContentHash);
         }
 
         [Fact]
@@ -293,7 +364,8 @@ namespace Cotton.Mobile.Tests
                 sizeBytes,
                 "text/plain",
                 SyncedAt,
-                "notes.txt");
+                "notes.txt",
+                TestContentHashes.First);
         }
 
         private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(
@@ -306,7 +378,8 @@ namespace Cotton.Mobile.Tests
             string name,
             string relativePath,
             long sizeBytes,
-            DateTime updatedAtUtc)
+            DateTime updatedAtUtc,
+            string contentHash = TestContentHashes.First)
         {
             return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                 name,
@@ -314,7 +387,8 @@ namespace Cotton.Mobile.Tests
                 updatedAtUtc,
                 sizeBytes,
                 "text/plain",
-                $"local:{relativePath}");
+                $"local:{relativePath}",
+                contentHash);
         }
 
         private static CottonDeviceToCloudRemoteContentSnapshot CreateRemoteContent(
@@ -328,7 +402,8 @@ namespace Cotton.Mobile.Tests
             string name,
             string relativePath,
             string? eTag,
-            long sizeBytes)
+            long sizeBytes,
+            string contentHash = TestContentHashes.First)
         {
             return new CottonDeviceToCloudRemoteItemSnapshot(
                 CottonFileBrowserEntry.CreateCached(
@@ -343,7 +418,8 @@ namespace Cotton.Mobile.Tests
                     sizeBytes,
                     "text/plain",
                     previewHashEncryptedHex: null,
-                    eTag),
+                    eTag,
+                    contentHash),
                 relativePath);
         }
     }

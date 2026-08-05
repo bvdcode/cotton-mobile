@@ -68,7 +68,12 @@ namespace Cotton.Mobile.Services
                     return CottonDeviceToCloudLocalFileDeleteStatus.AlreadyMissing;
                 }
 
-                CottonDeviceToCloudLocalFileDeleteStatus? blocker = FindDeleteBlocker(cursor, item);
+                CottonDeviceToCloudLocalFileDeleteStatus? blocker = FindDeleteBlocker(
+                    resolver,
+                    documentUri,
+                    cursor,
+                    item,
+                    cancellationToken);
                 if (blocker.HasValue)
                 {
                     return blocker.Value;
@@ -93,8 +98,11 @@ namespace Cotton.Mobile.Services
         }
 
         private static CottonDeviceToCloudLocalFileDeleteStatus? FindDeleteBlocker(
+            ContentResolver resolver,
+            AndroidUri documentUri,
             ICursor cursor,
-            CottonDeviceToCloudSyncPlanItem item)
+            CottonDeviceToCloudSyncPlanItem item,
+            CancellationToken cancellationToken)
         {
             string? documentId = cursor.GetString(DocumentIdColumnIndex);
             string? displayName = cursor.GetString(DisplayNameColumnIndex);
@@ -137,6 +145,14 @@ namespace Cotton.Mobile.Services
                 return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;
             }
 
+            using Stream content = resolver.OpenInputStream(documentUri)
+                ?? throw new IOException("Could not open local document content before deletion.");
+            string contentHash = CottonContentHash.ComputeSha256(content, cancellationToken);
+            if (!string.Equals(contentHash, item.ContentHash, StringComparison.Ordinal))
+            {
+                return CottonDeviceToCloudLocalFileDeleteStatus.Changed;
+            }
+
             return null;
         }
 
@@ -175,7 +191,8 @@ namespace Cotton.Mobile.Services
 
             if (item.TargetType != CottonFileBrowserEntryType.File
                 || string.IsNullOrWhiteSpace(item.LocalSourceId)
-                || !item.LocalUpdatedAtUtc.HasValue)
+                || !item.LocalUpdatedAtUtc.HasValue
+                || item.ContentHash is null)
             {
                 throw new InvalidOperationException("Local file deletion requires an exact local file revision.");
             }

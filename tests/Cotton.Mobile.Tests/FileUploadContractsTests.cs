@@ -97,7 +97,19 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Upload_hash_uses_lowercase_sha256_hex()
         {
-            string hash = CottonFileUploadHash.CreateSha256Hex("abc"u8);
+            string hash = CottonContentHash.ComputeSha256("abc"u8);
+
+            Assert.Equal(
+                "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+                hash);
+        }
+
+        [Fact]
+        public async Task Upload_hash_streaming_uses_lowercase_sha256_hex()
+        {
+            await using var content = new MemoryStream("abc"u8.ToArray());
+
+            string hash = await CottonContentHash.ComputeSha256Async(content);
 
             Assert.Equal(
                 "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",

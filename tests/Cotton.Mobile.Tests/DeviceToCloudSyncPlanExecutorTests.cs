@@ -371,7 +371,9 @@ namespace Cotton.Mobile.Tests
                 localUpdatedAtUtc,
                 42,
                 "text/plain",
-                localSourceId);
+                localSourceId,
+                uploadOperationId: null,
+                TestContentHashes.First);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateRemoteFolder(
@@ -433,7 +435,8 @@ namespace Cotton.Mobile.Tests
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
-                eTag);
+                eTag,
+                TestContentHashes.First);
         }
 
         private static CottonFileBrowserEntry CreateFolder(Guid id, string name)

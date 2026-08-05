@@ -40,6 +40,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(receipt.LocalUpdatedAtUtc, loaded.LocalUpdatedAtUtc);
             Assert.Equal(receipt.SizeBytes, loaded.SizeBytes);
             Assert.Equal(receipt.ContentType, loaded.ContentType);
+            Assert.Equal(receipt.ContentHash, loaded.ContentHash);
             Assert.Equal(receipt.OperationId, loaded.OperationId);
             Assert.Equal(CottonUploadReceiptStatus.Pending, loaded.Status);
             Assert.True(loaded.IsPending);
@@ -61,7 +62,8 @@ namespace Cotton.Mobile.Tests
                     "image/jpeg",
                     previewHashEncryptedHex: null,
                     eTag: "etag-uploaded",
-                    CreateOperationMetadata()),
+                    CreateOperationMetadata(),
+                    TestContentHashes.First),
                 RecordedAtUtc);
 
             await _store.SaveAsync(InstanceUri, root, pending);
@@ -89,7 +91,8 @@ namespace Cotton.Mobile.Tests
                 "image/jpeg",
                 previewHashEncryptedHex: null,
                 eTag: "etag-uploaded",
-                CreateOperationMetadata());
+                CreateOperationMetadata(),
+                TestContentHashes.First);
 
             Assert.Throws<ArgumentException>(() => pending.MarkUploaded(wrongSize, RecordedAtUtc));
         }
@@ -249,7 +252,8 @@ namespace Cotton.Mobile.Tests
                 LocalUpdatedAtUtc,
                 sizeBytes: 42,
                 contentType: "image/jpeg",
-                localSourceId: "primary:DCIM/Camera/photo.jpg");
+                localSourceId: "primary:DCIM/Camera/photo.jpg",
+                contentHash: TestContentHashes.First);
             return CottonUploadReceiptSnapshot.CreatePending(item, OperationId, RecordedAtUtc);
         }
 
@@ -263,7 +267,8 @@ namespace Cotton.Mobile.Tests
                 "image/jpeg",
                 previewHashEncryptedHex: null,
                 eTag: "etag-uploaded",
-                CreateOperationMetadata());
+                CreateOperationMetadata(),
+                TestContentHashes.First);
         }
 
         private static IReadOnlyDictionary<string, string> CreateOperationMetadata()

@@ -17,7 +17,9 @@ namespace Cotton.Mobile.Services
             DateTime? remoteUpdatedAtUtc,
             long? sizeBytes,
             string? contentType,
-            string? localSourceId = null)
+            string? localSourceId = null,
+            string? localContentHash = null,
+            string? remoteContentHash = null)
         {
             if (!Enum.IsDefined(action))
             {
@@ -60,6 +62,8 @@ namespace Cotton.Mobile.Services
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
             LocalSourceId = string.IsNullOrWhiteSpace(localSourceId) ? null : localSourceId.Trim();
+            LocalContentHash = CottonContentHash.NormalizeOptionalSha256(localContentHash, nameof(localContentHash));
+            RemoteContentHash = CottonContentHash.NormalizeOptionalSha256(remoteContentHash, nameof(remoteContentHash));
         }
 
         public CottonBidirectionalSyncActionKind Action { get; }
@@ -85,6 +89,10 @@ namespace Cotton.Mobile.Services
         public string? ContentType { get; }
 
         public string? LocalSourceId { get; }
+
+        public string? LocalContentHash { get; }
+
+        public string? RemoteContentHash { get; }
 
         public bool RequiresDownload =>
             Action is CottonBidirectionalSyncActionKind.DownloadNewFile

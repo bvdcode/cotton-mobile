@@ -109,13 +109,15 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
+                string contentHash = ComputeContentHash(resolver, child.Uri, cancellationToken);
                 items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                     child.DisplayName,
                     relativePath!,
                     updatedAtUtc,
                     ReadSizeBytes(cursor),
                     child.MimeType,
-                    child.DocumentId));
+                    child.DocumentId,
+                    contentHash));
             }
         }
 
@@ -192,6 +194,16 @@ namespace Cotton.Mobile.Services
 
             long sizeBytes = cursor.GetLong(4);
             return sizeBytes < 0 ? null : sizeBytes;
+        }
+
+        private static string ComputeContentHash(
+            ContentResolver resolver,
+            AndroidUri documentUri,
+            CancellationToken cancellationToken)
+        {
+            using Stream content = resolver.OpenInputStream(documentUri)
+                ?? throw new IOException("Could not open document-tree file content.");
+            return CottonContentHash.ComputeSha256(content, cancellationToken);
         }
 
         private static AndroidUri ParseTreeUri(CottonSyncRootSnapshot root)

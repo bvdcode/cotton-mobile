@@ -496,7 +496,8 @@ namespace Cotton.Mobile.Services
                 item.SizeBytes,
                 item.ContentType,
                 previewHashEncryptedHex: null,
-                item.RemoteETag);
+                item.RemoteETag,
+                contentHash: item.ContentHash);
         }
 
     }

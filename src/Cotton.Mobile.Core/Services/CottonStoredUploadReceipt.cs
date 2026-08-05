@@ -28,5 +28,7 @@ namespace Cotton.Mobile.Services
         public Guid? RemoteFileId { get; set; }
 
         public string? RemoteETag { get; set; }
+
+        public string? ContentHash { get; set; }
     }
 }

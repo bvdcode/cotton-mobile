@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<ResourceDictionary
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:controls="clr-namespace:Cotton.Mobile.Controls">
+    <Style TargetType="Border" x:Key="M3OutlinedInputField">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutline}, Dark={StaticResource M3DarkOutline}}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3OutlinedInputCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="Padding" Value="{StaticResource M3OutlinedInputPadding}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3InputGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3InputIconFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource M3InputIconFrameSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3InputIconFrameSize}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3DefaultBorderCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:IconView" x:Key="M3InputIcon">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+        <Setter Property="IconSize" Value="{StaticResource M3InputIconSize}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3NeutralChip">
+        <Setter Property="Stroke" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3ProminentCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="Padding" Value="{StaticResource M3NeutralChipPadding}" />
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3TrailingChip" BasedOn="{StaticResource M3NeutralChip}">
+        <Setter Property="HorizontalOptions" Value="End" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3ThumbnailIconFrame">
+        <Setter Property="FrameSize" Value="{StaticResource M3FileThumbnailSize}" />
+        <Setter Property="IconSize" Value="{StaticResource M3FolderThumbnailIconSize}" />
+        <Setter Property="FrameCornerRadius" Value="{StaticResource M3ThumbnailFrameCornerRadius}" />
+        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+        <Setter Property="FrameBackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceVariant}, Dark={StaticResource M3DarkSurfaceVariant}}" />
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3FolderThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightTertiary}, Dark={StaticResource M3DarkTertiary}}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3NeutralThumbnailFrame" BasedOn="{StaticResource M3ThumbnailIconFrame}" />
+
+    <Style TargetType="controls:IconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardUtilityThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3ActionListItemIconFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3SyncThumbnailFrame" BasedOn="{StaticResource M3FolderThumbnailFrame}" />
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardSyncThumbnailFrame" BasedOn="{StaticResource M3SyncThumbnailFrame}">
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="controls:IconFrame" x:Key="M3CardErrorThumbnailFrame" BasedOn="{StaticResource M3NeutralThumbnailFrame}">
+        <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightError}, Dark={StaticResource M3DarkError}}" />
+        <Setter Property="VerticalOptions" Value="Start" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3RowActionCluster">
+        <Setter Property="Spacing" Value="{StaticResource Space8}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="HorizontalStackLayout" x:Key="M3PanelActionCluster" BasedOn="{StaticResource M3RowActionCluster}">
+        <Setter Property="Margin" Value="{StaticResource M3PanelActionTopMargin}" />
+    </Style>
+
+    <LinearItemsLayout x:Key="M3VerticalCardListItemsLayout"
+                       Orientation="Vertical"
+                       ItemSpacing="{StaticResource M3CardListItemSpacing}" />
+
+    <Style TargetType="CollectionView" x:Key="M3MaterialCollectionView">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="controls:TouchSurfaceView" x:Key="M3ListItemTouchSurface">
+        <Setter Property="BackgroundColor" Value="{StaticResource M3Transparent}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource M3DefaultBorderCornerRadius}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3NavigationBarSurface" BasedOn="{StaticResource M3SurfaceCard}">
+        <Setter Property="Padding" Value="{StaticResource M3NavigationBarPadding}" />
+        <Setter Property="Margin" Value="{StaticResource M3NavigationBarMargin}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3NavigationBarGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space8}" />
+    </Style>
+
+    <Style TargetType="BoxView">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightOutlineVariant}, Dark={StaticResource M3DarkOutlineVariant}}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3SettingsListItemGrid">
+        <Setter Property="RowSpacing" Value="{StaticResource Space4}" />
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3ActionListItemGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3ActionListItemLabel" BasedOn="{StaticResource M3CardSupportingStrongLine}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Label" x:Key="M3SingleLineListItemTitle" BasedOn="{StaticResource M3CardTitle}">
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3SettingsSectionStack">
+        <Setter Property="Spacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3SettingsDenseStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3ScreenShell">
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceBright}, Dark={StaticResource M3DarkSurfaceDim}}" />
+    </Style>
+
+    <Style TargetType="controls:ScreenScrollBodyView">
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3ScreenReadingContentMaxWidth}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="controls:ScreenContentGridView">
+        <Setter Property="MaximumWidthRequest" Value="{StaticResource M3ScreenCollectionContentMaxWidth}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3ScreenContentStack">
+        <Setter Property="Padding" Value="{StaticResource M3ScreenPadding}" />
+        <Setter Property="Spacing" Value="{StaticResource Space16}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3ScreenContentGrid">
+        <Setter Property="Padding" Value="{StaticResource M3ScreenPadding}" />
+        <Setter Property="RowSpacing" Value="{StaticResource Space16}" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3ScreenHeaderGrid">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space12}" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3ScreenHeaderTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+    <Style TargetType="ActivityIndicator" x:Key="M3ScreenHeaderActivityIndicator" BasedOn="{StaticResource M3StatusActivityIndicator}">
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+        <Setter Property="WidthRequest" Value="{StaticResource M3ScreenHeaderActivityIndicatorSize}" />
+        <Setter Property="HeightRequest" Value="{StaticResource M3ScreenHeaderActivityIndicatorSize}" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="M3ScreenHeaderBusyFrame">
+        <Setter Property="WidthRequest" Value="{StaticResource TouchTarget}" />
+        <Setter Property="HeightRequest" Value="{StaticResource TouchTarget}" />
+        <Setter Property="Stroke" Value="{StaticResource M3Transparent}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeNone}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource ShapeExtraLarge}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerLow}, Dark={StaticResource M3DarkSurfaceContainerLow}}" />
+        <Setter Property="HorizontalOptions" Value="End" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3EmptyStateLayout">
+        <Setter Property="RowSpacing" Value="{StaticResource Space8}" />
+        <Setter Property="HorizontalOptions" Value="Center" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="Grid" x:Key="M3EmptyStateCompactLayout">
+        <Setter Property="ColumnSpacing" Value="{StaticResource Space16}" />
+        <Setter Property="HorizontalOptions" Value="Fill" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3EmptyStateTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+        <Setter Property="VerticalOptions" Value="Center" />
+    </Style>
+
+    <Style TargetType="VerticalStackLayout" x:Key="M3CardTextStack">
+        <Setter Property="Spacing" Value="{StaticResource Space2}" />
+    </Style>
+
+
+</ResourceDictionary>

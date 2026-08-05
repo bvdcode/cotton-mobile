@@ -287,10 +287,10 @@ namespace Cotton.Mobile.Controls
 
             SetDynamicResource(StyleProperty, surfaceStyleResourceKey);
             BackButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
-            Actions.ClusterStyleResourceKey = DefaultActionClusterStyleResourceKey;
-            Actions.PrimaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
-            Actions.SecondaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
-            Actions.TertiaryActionIconButtonStyleResourceKey = actionIconButtonStyleResourceKey;
+            Actions.SetDynamicResource(StyleProperty, DefaultActionClusterStyleResourceKey);
+            PrimaryActionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
+            SecondaryActionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
+            TertiaryActionButton.SetDynamicResource(StyleProperty, actionIconButtonStyleResourceKey);
         }
     }
 }

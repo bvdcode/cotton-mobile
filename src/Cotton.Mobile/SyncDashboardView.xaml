@@ -57,41 +57,42 @@
                                                                SecondaryDetailText="{Binding DetailText}"
                                                                TrailingText="{Binding StatusText}" />
 
-                                <controls:ActionClusterView ClusterStyleResourceKey="M3PanelActionCluster"
-                                                            PrimaryActionIconData="{x:Static controls:IconPathData.Play}"
-                                                            PrimaryActionCommand="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                            PrimaryActionCommandParameter="{Binding .}"
-                                                            PrimaryActionSemanticDescription="{Binding PrimaryActionText}"
-                                                            IsPrimaryActionEnabled="{Binding CanUsePrimaryAction}"
-                                                            IsPrimaryActionVisible="{Binding CanUsePrimaryAction}"
-                                                            SecondaryActionIconData="{x:Static controls:IconPathData.Pause}"
-                                                            SecondaryActionCommand="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                            SecondaryActionCommandParameter="{Binding .}"
-                                                            SecondaryActionSemanticDescription="{Binding PauseSyncActionText}"
-                                                            IsSecondaryActionEnabled="{Binding CanPauseSync}"
-                                                            IsSecondaryActionVisible="{Binding CanPauseSync}"
-                                                            TertiaryActionIconData="{x:Static controls:IconPathData.Play}"
-                                                            TertiaryActionCommand="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                            TertiaryActionCommandParameter="{Binding .}"
-                                                            TertiaryActionSemanticDescription="{Binding ResumeSyncActionText}"
-                                                            IsTertiaryActionEnabled="{Binding CanResumeSync}"
-                                                            IsTertiaryActionVisible="{Binding CanResumeSync}"
-                                                            QuaternaryActionIconData="{x:Static controls:IconPathData.Delete}"
-                                                            QuaternaryActionCommand="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                            QuaternaryActionCommandParameter="{Binding .}"
-                                                            QuaternaryActionIconButtonStyleResourceKey="M3DestructiveIconButton"
-                                                            QuaternaryActionSemanticDescription="{Binding StopSyncActionText}"
-                                                            IsQuaternaryActionEnabled="{Binding CanStopSync}"
-                                                            IsQuaternaryActionVisible="{Binding CanStopSync}">
-                                    <controls:ActionClusterView.Triggers>
-                                        <DataTrigger TargetType="controls:ActionClusterView"
-                                                     Binding="{Binding CanReconnect}"
-                                                     Value="True">
-                                            <Setter Property="PrimaryActionIconData"
-                                                    Value="{x:Static controls:IconPathData.Folder}" />
-                                        </DataTrigger>
-                                    </controls:ActionClusterView.Triggers>
-                                </controls:ActionClusterView>
+                                <HorizontalStackLayout Style="{StaticResource M3PanelActionCluster}">
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                                         Command="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         SemanticProperties.Description="{Binding PrimaryActionText}"
+                                                         IsEnabled="{Binding CanUsePrimaryAction}"
+                                                         IsVisible="{Binding CanUsePrimaryAction}">
+                                        <controls:IconButton.Triggers>
+                                            <DataTrigger TargetType="controls:IconButton"
+                                                         Binding="{Binding CanReconnect}"
+                                                         Value="True">
+                                                <Setter Property="IconData"
+                                                        Value="{x:Static controls:IconPathData.Folder}" />
+                                            </DataTrigger>
+                                        </controls:IconButton.Triggers>
+                                    </controls:IconButton>
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Pause}"
+                                                         Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         SemanticProperties.Description="{Binding PauseSyncActionText}"
+                                                         IsEnabled="{Binding CanPauseSync}"
+                                                         IsVisible="{Binding CanPauseSync}" />
+                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
+                                                         Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         SemanticProperties.Description="{Binding ResumeSyncActionText}"
+                                                         IsEnabled="{Binding CanResumeSync}"
+                                                         IsVisible="{Binding CanResumeSync}" />
+                                    <controls:IconButton Style="{StaticResource M3DestructiveIconButton}"
+                                                         IconData="{x:Static controls:IconPathData.Delete}"
+                                                         Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
+                                                         CommandParameter="{Binding .}"
+                                                         SemanticProperties.Description="{Binding StopSyncActionText}"
+                                                         IsEnabled="{Binding CanStopSync}"
+                                                         IsVisible="{Binding CanStopSync}" />
+                                </HorizontalStackLayout>
                             </controls:StackedContentView>
                         </controls:ContentCardView>
                     </DataTemplate>

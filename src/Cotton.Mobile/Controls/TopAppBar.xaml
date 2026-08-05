@@ -16,20 +16,25 @@
                                       Text="{Binding Source={x:Reference Root}, Path=TitleText}"
                                       UseDarkTheme="{Binding Source={x:Reference Root}, Path=UseDarkTheme}" />
 
-        <controls:ActionClusterView x:Name="Actions"
-                                    Grid.Column="2"
-                                    IsClusterVisible="{Binding Source={x:Reference Root}, Path=IsActionClusterVisible}"
-                                    PrimaryActionIconData="{Binding Source={x:Reference Root}, Path=PrimaryIconData}"
-                                    PrimaryActionCommand="{Binding Source={x:Reference Root}, Path=PrimaryCommand}"
-                                    PrimaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=PrimaryDescription}"
-                                    IsPrimaryActionVisible="{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}"
-                                    SecondaryActionIconData="{Binding Source={x:Reference Root}, Path=SecondaryIconData}"
-                                    SecondaryActionCommand="{Binding Source={x:Reference Root}, Path=SecondaryCommand}"
-                                    SecondaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=SecondaryDescription}"
-                                    IsSecondaryActionVisible="{Binding Source={x:Reference Root}, Path=IsSecondaryActionVisible}"
-                                    TertiaryActionIconData="{Binding Source={x:Reference Root}, Path=TertiaryIconData}"
-                                    TertiaryActionCommand="{Binding Source={x:Reference Root}, Path=TertiaryCommand}"
-                                    TertiaryActionSemanticDescription="{Binding Source={x:Reference Root}, Path=TertiaryDescription}"
-                                    IsTertiaryActionVisible="{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}" />
+        <HorizontalStackLayout x:Name="Actions"
+                               Grid.Column="2"
+                               Style="{StaticResource M3TopAppBarActionCluster}"
+                               IsVisible="{Binding Source={x:Reference Root}, Path=IsActionClusterVisible}">
+            <controls:IconButton x:Name="PrimaryActionButton"
+                                 IconData="{Binding Source={x:Reference Root}, Path=PrimaryIconData}"
+                                 Command="{Binding Source={x:Reference Root}, Path=PrimaryCommand}"
+                                 IsVisible="{Binding Source={x:Reference Root}, Path=IsPrimaryActionVisible}"
+                                 SemanticProperties.Description="{Binding Source={x:Reference Root}, Path=PrimaryDescription}" />
+            <controls:IconButton x:Name="SecondaryActionButton"
+                                 IconData="{Binding Source={x:Reference Root}, Path=SecondaryIconData}"
+                                 Command="{Binding Source={x:Reference Root}, Path=SecondaryCommand}"
+                                 IsVisible="{Binding Source={x:Reference Root}, Path=IsSecondaryActionVisible}"
+                                 SemanticProperties.Description="{Binding Source={x:Reference Root}, Path=SecondaryDescription}" />
+            <controls:IconButton x:Name="TertiaryActionButton"
+                                 IconData="{Binding Source={x:Reference Root}, Path=TertiaryIconData}"
+                                 Command="{Binding Source={x:Reference Root}, Path=TertiaryCommand}"
+                                 IsVisible="{Binding Source={x:Reference Root}, Path=IsTertiaryActionVisible}"
+                                 SemanticProperties.Description="{Binding Source={x:Reference Root}, Path=TertiaryDescription}" />
+        </HorizontalStackLayout>
     </controls:TopAppBarContentGridView>
 </ContentView>

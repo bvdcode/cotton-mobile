@@ -134,6 +134,11 @@ namespace Cotton.Mobile
             services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
             services.AddSingleton<MainPageSessionCoordinator>();
             services.AddSingleton<MainPageUserInteractionService>();
+            services.AddSingleton<SyncSettingsRootProvider>();
+            services.AddSingleton<SyncSettingsLoadingHandler>();
+            services.AddSingleton<SyncSettingsExecutionHandler>();
+            services.AddSingleton<SyncSettingsSetupHandler>();
+            services.AddSingleton<SyncSettingsManagementHandler>();
             services.AddSingleton<SyncSettingsViewModel>();
             services.AddSingleton<MainPageViewModel>();
             services.AddSingleton<MainPage>();

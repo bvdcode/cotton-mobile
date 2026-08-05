@@ -7,13 +7,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public partial class SyncSettingsViewModel : ViewModelBase
+    public class SyncSettingsViewModel : ViewModelBase, ISyncSettingsViewState
     {
-        private readonly SyncRootManager _rootManager;
-        private readonly SyncExecutionWorkflow _executionWorkflow;
-        private readonly SyncRootSetupCoordinator _rootSetupCoordinator;
-        private readonly INetworkAccessService _networkAccess;
-        private readonly IUserDialogService _dialogService;
+        private readonly SyncSettingsLoadingHandler _loadingHandler;
+        private readonly SyncSettingsExecutionHandler _executionHandler;
+        private readonly SyncSettingsSetupHandler _setupHandler;
+        private readonly SyncSettingsManagementHandler _managementHandler;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private string? _accountScopeKey;
@@ -24,43 +23,49 @@ namespace Cotton.Mobile.ViewModels
         private bool _isEmptyVisible = true;
 
         public SyncSettingsViewModel(
-            SyncRootManager rootManager,
-            SyncExecutionWorkflow executionWorkflow,
-            SyncRootSetupCoordinator rootSetupCoordinator,
-            INetworkAccessService networkAccess,
-            IUserDialogService dialogService,
+            SyncSettingsLoadingHandler loadingHandler,
+            SyncSettingsExecutionHandler executionHandler,
+            SyncSettingsSetupHandler setupHandler,
+            SyncSettingsManagementHandler managementHandler,
             ILogger<SyncSettingsViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(rootManager);
-            ArgumentNullException.ThrowIfNull(executionWorkflow);
-            ArgumentNullException.ThrowIfNull(rootSetupCoordinator);
-            ArgumentNullException.ThrowIfNull(networkAccess);
-            ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(loadingHandler);
+            ArgumentNullException.ThrowIfNull(executionHandler);
+            ArgumentNullException.ThrowIfNull(setupHandler);
+            ArgumentNullException.ThrowIfNull(managementHandler);
             ArgumentNullException.ThrowIfNull(logger);
 
-            _rootManager = rootManager;
-            _executionWorkflow = executionWorkflow;
-            _rootSetupCoordinator = rootSetupCoordinator;
-            _networkAccess = networkAccess;
-            _dialogService = dialogService;
+            _loadingHandler = loadingHandler;
+            _executionHandler = executionHandler;
+            _setupHandler = setupHandler;
+            _managementHandler = managementHandler;
             _logger = logger;
-            LoadCommand = new AsyncCommand(LoadAsync, LogUnhandledCommandException, () => !IsBusy);
-            AddRootCommand = new AsyncCommand(AddRootAsync, LogUnhandledCommandException, CanAddRoot);
-            RunAllCommand = new AsyncCommand(RunAllAsync, LogUnhandledCommandException, CanRunAll);
+            LoadCommand = new AsyncCommand(
+                () => _loadingHandler.LoadAsync(this),
+                LogUnhandledCommandException,
+                () => !IsBusy);
+            AddRootCommand = new AsyncCommand(
+                () => _setupHandler.AddRootAsync(this),
+                LogUnhandledCommandException,
+                CanAddRoot);
+            RunAllCommand = new AsyncCommand(
+                () => _executionHandler.RunAllAsync(this),
+                LogUnhandledCommandException,
+                CanRunAll);
             RootPrimaryActionCommand = new AsyncCommand<CottonSyncRootListItem>(
                 ExecuteRootPrimaryActionAsync,
                 LogUnhandledCommandException,
                 item => !IsBusy && item.CanUsePrimaryAction);
             StopRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                StopRootAsync,
+                item => _managementHandler.StopRootAsync(this, item),
                 LogUnhandledCommandException,
                 item => !IsBusy && item.CanStopSync);
             PauseRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                item => SetRootPausedAsync(item, isPaused: true),
+                item => _managementHandler.SetRootPausedAsync(this, item, isPaused: true),
                 LogUnhandledCommandException,
                 item => !IsBusy && item.CanPauseSync);
             ResumeRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                item => SetRootPausedAsync(item, isPaused: false),
+                item => _managementHandler.SetRootPausedAsync(this, item, isPaused: false),
                 LogUnhandledCommandException,
                 item => !IsBusy && item.CanResumeSync);
         }
@@ -171,7 +176,7 @@ namespace Cotton.Mobile.ViewModels
         public async Task LoadForInstanceAsync(Uri instanceUri, string accountScopeKey)
         {
             Configure(instanceUri, accountScopeKey);
-            await LoadAsync();
+            await _loadingHandler.LoadAsync(this);
         }
 
         public void Clear()
@@ -186,13 +191,6 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.RaiseCanExecuteChanged();
             AddRootCommand.RaiseCanExecuteChanged();
-        }
-
-        private Task<SyncRootCollectionSnapshot> LoadRootCollectionAsync(Uri instanceUri)
-        {
-            string accountScopeKey = _accountScopeKey
-                ?? throw new InvalidOperationException("Sync account is not configured.");
-            return _rootManager.LoadAsync(instanceUri, accountScopeKey);
         }
 
         private void ShowRoots(SyncRootCollectionSnapshot collection)
@@ -224,10 +222,44 @@ namespace Cotton.Mobile.ViewModels
             return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }
 
+        private Task ExecuteRootPrimaryActionAsync(CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            if (item.CanReconnect)
+            {
+                return _setupHandler.ReconnectRootAsync(this, item);
+            }
+
+            return _executionHandler.ExecutePrimaryActionAsync(this, item);
+        }
+
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled Cotton mobile sync settings command failure.");
             Status = "Could not update sync settings.";
+        }
+
+        Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;
+
+        string? ISyncSettingsViewState.AccountScopeKey => _accountScopeKey;
+
+        bool ISyncSettingsViewState.IsBusy
+        {
+            get => IsBusy;
+            set => IsBusy = value;
+        }
+
+        string? ISyncSettingsViewState.Status
+        {
+            get => Status;
+            set => Status = value;
+        }
+
+        IReadOnlyList<CottonSyncRootListItem> ISyncSettingsViewState.Roots => Roots;
+
+        void ISyncSettingsViewState.ShowRoots(SyncRootCollectionSnapshot collection)
+        {
+            ShowRoots(collection);
         }
     }
 }

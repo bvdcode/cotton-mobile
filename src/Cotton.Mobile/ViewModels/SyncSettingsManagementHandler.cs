@@ -6,28 +6,52 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public partial class SyncSettingsViewModel
+    public class SyncSettingsManagementHandler
     {
-        private async Task StopRootAsync(CottonSyncRootListItem item)
-        {
-            ArgumentNullException.ThrowIfNull(item);
+        private readonly SyncSettingsRootProvider _rootProvider;
+        private readonly SyncRootManager _rootManager;
+        private readonly IUserDialogService _dialogService;
+        private readonly ILogger<SyncSettingsManagementHandler> _logger;
 
-            Uri? instanceUri = _instanceUri;
+        public SyncSettingsManagementHandler(
+            SyncSettingsRootProvider rootProvider,
+            SyncRootManager rootManager,
+            IUserDialogService dialogService,
+            ILogger<SyncSettingsManagementHandler> logger)
+        {
+            ArgumentNullException.ThrowIfNull(rootProvider);
+            ArgumentNullException.ThrowIfNull(rootManager);
+            ArgumentNullException.ThrowIfNull(dialogService);
+            ArgumentNullException.ThrowIfNull(logger);
+
+            _rootProvider = rootProvider;
+            _rootManager = rootManager;
+            _dialogService = dialogService;
+            _logger = logger;
+        }
+
+        public async Task StopRootAsync(
+            ISyncSettingsViewState state,
+            CottonSyncRootListItem item)
+        {
+            ArgumentNullException.ThrowIfNull(state);
+            ArgumentNullException.ThrowIfNull(item);
+            Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                Status = CottonSyncRootManagementText.StopFailedStatus;
+                state.Status = CottonSyncRootManagementText.StopFailedStatus;
                 return;
             }
 
-            IsBusy = true;
+            state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
-                    ShowRoots(collection);
-                    Status = CottonSyncRootManagementText.RootMissingStatus;
+                    state.ShowRoots(collection);
+                    state.Status = CottonSyncRootManagementText.RootMissingStatus;
                     return;
                 }
 
@@ -38,68 +62,71 @@ namespace Cotton.Mobile.ViewModels
                     CottonSyncRootManagementText.CancelAction);
                 if (!confirmed)
                 {
-                    Status = null;
+                    state.Status = null;
                     return;
                 }
 
                 bool removed = await _rootManager.StopAsync(instanceUri, root);
-                ShowRoots(await LoadRootCollectionAsync(instanceUri));
-                Status = removed
+                state.ShowRoots(await _rootProvider.LoadAsync(state));
+                state.Status = removed
                     ? CottonSyncRootManagementText.CreateStoppedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.RootMissingStatus;
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to stop Cotton mobile sync root.");
-                Status = CottonSyncRootManagementText.StopFailedStatus;
+                state.Status = CottonSyncRootManagementText.StopFailedStatus;
             }
             finally
             {
-                IsBusy = false;
+                state.IsBusy = false;
             }
         }
 
-        private async Task SetRootPausedAsync(CottonSyncRootListItem item, bool isPaused)
+        public async Task SetRootPausedAsync(
+            ISyncSettingsViewState state,
+            CottonSyncRootListItem item,
+            bool isPaused)
         {
+            ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(item);
-
-            Uri? instanceUri = _instanceUri;
+            Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                Status = isPaused
+                state.Status = isPaused
                     ? CottonSyncRootManagementText.PauseFailedStatus
                     : CottonSyncRootManagementText.ResumeFailedStatus;
                 return;
             }
 
-            IsBusy = true;
+            state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await LoadRootCollectionAsync(instanceUri);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
-                    ShowRoots(collection);
-                    Status = CottonSyncRootManagementText.RootMissingStatus;
+                    state.ShowRoots(collection);
+                    state.Status = CottonSyncRootManagementText.RootMissingStatus;
                     return;
                 }
 
                 await _rootManager.SetPausedAsync(instanceUri, root, isPaused);
-                ShowRoots(await LoadRootCollectionAsync(instanceUri));
-                Status = isPaused
+                state.ShowRoots(await _rootProvider.LoadAsync(state));
+                state.Status = isPaused
                     ? CottonSyncRootManagementText.CreatePausedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.CreateResumedStatus(root.CloudFolder.FolderName);
             }
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to update Cotton mobile sync root pause state.");
-                Status = isPaused
+                state.Status = isPaused
                     ? CottonSyncRootManagementText.PauseFailedStatus
                     : CottonSyncRootManagementText.ResumeFailedStatus;
             }
             finally
             {
-                IsBusy = false;
+                state.IsBusy = false;
             }
         }
     }

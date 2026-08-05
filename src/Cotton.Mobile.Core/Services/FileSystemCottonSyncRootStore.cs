@@ -57,8 +57,8 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                return Deduplicate(stored.Items
-                    .Select(item => TryCreateSyncRoot(instanceUri, item))
+                return CottonSyncRootStoreMapper.Deduplicate(stored.Items
+                    .Select(item => CottonSyncRootStoreMapper.TryCreateSyncRoot(instanceUri, item))
                     .Where(item => item is not null)
                     .Select(item => item!)
                     .ToList());
@@ -82,7 +82,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(roots);
-            EnsureRootsMatchInstance(instanceUri, roots);
+            CottonSyncRootStoreMapper.EnsureRootsMatchInstance(instanceUri, roots);
 
             string directory = _pathProvider.CreateSyncRootMetadataDirectory(instanceUri);
             string filePath = Path.Combine(directory, MetadataFileName);
@@ -101,7 +101,7 @@ namespace Cotton.Mobile.Services
                 {
                     await JsonSerializer.SerializeAsync(
                         stream,
-                        CreateStoredCollection(roots),
+                        CottonSyncRootStoreMapper.CreateStoredCollection(roots, SchemaVersion),
                         SerializerOptions,
                         cancellationToken).ConfigureAwait(false);
                     await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(root);
-            EnsureRootsMatchInstance(instanceUri, [root]);
+            CottonSyncRootStoreMapper.EnsureRootsMatchInstance(instanceUri, [root]);
 
             IReadOnlyList<CottonSyncRootSnapshot> current =
                 await LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
@@ -176,140 +176,6 @@ namespace Cotton.Mobile.Services
         private string CreateMetadataFilePath(Uri instanceUri)
         {
             return Path.Combine(_pathProvider.CreateSyncRootMetadataDirectory(instanceUri), MetadataFileName);
-        }
-
-        private static CottonStoredSyncRootCollection CreateStoredCollection(
-            IReadOnlyCollection<CottonSyncRootSnapshot> roots)
-        {
-            return new CottonStoredSyncRootCollection
-            {
-                SchemaVersion = SchemaVersion,
-                SavedAtUtc = DateTime.UtcNow,
-                Items = Deduplicate(roots)
-                    .Select(CreateStoredItem)
-                    .ToList(),
-            };
-        }
-
-        private static CottonStoredSyncRootItem CreateStoredItem(CottonSyncRootSnapshot root)
-        {
-            return new CottonStoredSyncRootItem
-            {
-                Id = root.Id,
-                InstanceUri = root.InstanceUri.AbsoluteUri,
-                AccountScopeKey = root.AccountScopeKey,
-                CloudFolderId = root.CloudFolder.FolderId,
-                CloudFolderName = root.CloudFolder.FolderName,
-                CloudFolderPath = root.CloudFolder.Path,
-                LocalStorageKind = root.LocalRoot.StorageKind,
-                LocalRootKey = root.LocalRoot.RootKey,
-                LocalRootDisplayName = root.LocalRoot.DisplayName,
-                LocalPermissionStatus = root.LocalRoot.PermissionStatus,
-                Direction = root.Direction,
-                UploadOriginalRetention = root.UploadOriginalRetention,
-                StableKey = root.StableKey,
-            };
-        }
-
-        private static CottonSyncRootSnapshot? TryCreateSyncRoot(Uri expectedInstanceUri, CottonStoredSyncRootItem item)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(item.InstanceUri)
-                    || !Uri.TryCreate(item.InstanceUri, UriKind.Absolute, out Uri? storedInstanceUri))
-                {
-                    return null;
-                }
-
-                var root = new CottonSyncRootSnapshot(
-                    item.Id,
-                    storedInstanceUri,
-                    item.AccountScopeKey ?? string.Empty,
-                    new CottonUploadDestinationSnapshot(
-                        item.CloudFolderId,
-                        item.CloudFolderName ?? string.Empty,
-                        item.CloudFolderPath),
-                    new CottonSyncLocalRootSnapshot(
-                        item.LocalStorageKind,
-                        item.LocalRootKey ?? string.Empty,
-                        item.LocalRootDisplayName ?? string.Empty,
-                        item.LocalPermissionStatus),
-                    item.Direction,
-                    item.UploadOriginalRetention);
-                if (!IsSameInstance(root.InstanceUri, expectedInstanceUri)
-                    || string.IsNullOrWhiteSpace(item.StableKey)
-                    || !string.Equals(root.StableKey, item.StableKey.Trim(), StringComparison.Ordinal))
-                {
-                    return null;
-                }
-
-                return root;
-            }
-            catch (Exception exception)
-                when (exception is ArgumentException or ArgumentOutOfRangeException or UriFormatException)
-            {
-                return null;
-            }
-        }
-
-        private static void EnsureRootsMatchInstance(
-            Uri instanceUri,
-            IReadOnlyCollection<CottonSyncRootSnapshot> roots)
-        {
-            foreach (CottonSyncRootSnapshot root in roots)
-            {
-                if (!IsSameInstance(root.InstanceUri, instanceUri))
-                {
-                    throw new ArgumentException("Sync roots must match the metadata instance.", nameof(roots));
-                }
-            }
-        }
-
-        private static List<CottonSyncRootSnapshot> Deduplicate(
-            IReadOnlyCollection<CottonSyncRootSnapshot> roots)
-        {
-            return roots
-                .GroupBy(root => root.Id)
-                .Select(group => group.Last())
-                .GroupBy(root => root.StableKey, StringComparer.Ordinal)
-                .Select(group => group.Last())
-                .ToList();
-        }
-
-        private static bool IsSameInstance(Uri first, Uri second)
-        {
-            return string.Equals(
-                NormalizeInstanceUri(first).AbsoluteUri,
-                NormalizeInstanceUri(second).AbsoluteUri,
-                StringComparison.Ordinal);
-        }
-
-        private static Uri NormalizeInstanceUri(Uri instanceUri)
-        {
-            if (!instanceUri.IsAbsoluteUri
-                || !string.Equals(instanceUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
-                || string.IsNullOrWhiteSpace(instanceUri.Host)
-                || !string.IsNullOrWhiteSpace(instanceUri.UserInfo)
-                || !string.IsNullOrWhiteSpace(instanceUri.Query)
-                || !string.IsNullOrWhiteSpace(instanceUri.Fragment))
-            {
-                throw new ArgumentException("Sync root instance URI must be an absolute HTTPS URL.", nameof(instanceUri));
-            }
-
-            var builder = new UriBuilder(instanceUri)
-            {
-                Scheme = instanceUri.Scheme.ToLowerInvariant(),
-                Host = instanceUri.Host.ToLowerInvariant(),
-            };
-
-            if (builder.Uri.IsDefaultPort)
-            {
-                builder.Port = -1;
-            }
-
-            string path = builder.Path.TrimEnd('/');
-            builder.Path = string.IsNullOrWhiteSpace(path) ? "/" : path;
-            return builder.Uri;
         }
 
         private static string CreateTemporaryFilePath(string filePath)

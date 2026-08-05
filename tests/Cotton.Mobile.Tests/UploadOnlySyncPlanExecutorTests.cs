@@ -105,6 +105,27 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Execute_retry_rejects_pending_receipt_for_different_content()
+        {
+            CottonDeviceToCloudSyncPlanItem staleItem = CreateUploadItem(OperationId, TestContentHashes.Second);
+            CottonUploadReceiptSnapshot staleReceipt = CottonUploadReceiptSnapshot.CreatePending(
+                staleItem,
+                OperationId,
+                RecordedAt.AddMinutes(-1));
+            ExecutionHarness harness = new(
+                CottonUploadOriginalRetention.KeepOriginals,
+                [staleReceipt]);
+
+            await Assert.ThrowsAsync<InvalidDataException>(() => harness.Executor.ExecuteAsync(
+                InstanceUri,
+                harness.Root,
+                CreatePlan(CreateUploadItem(OperationId))));
+
+            Assert.Equal(new[] { "receipt:load" }, harness.Events);
+            Assert.Empty(harness.FileOperator.UploadCalls);
+        }
+
+        [Fact]
         public async Task Execute_upload_failure_leaves_pending_receipt_and_does_not_delete()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
@@ -255,7 +276,9 @@ namespace Cotton.Mobile.Tests
                 items);
         }
 
-        private static CottonDeviceToCloudSyncPlanItem CreateUploadItem(Guid? operationId = null)
+        private static CottonDeviceToCloudSyncPlanItem CreateUploadItem(
+            Guid? operationId = null,
+            string contentHash = TestContentHashes.First)
         {
             return new CottonDeviceToCloudSyncPlanItem(
                 CottonDeviceToCloudSyncActionKind.UploadNewFile,
@@ -269,7 +292,7 @@ namespace Cotton.Mobile.Tests
                 contentType: "image/jpeg",
                 localSourceId: "primary:DCIM/Camera/photo.jpg",
                 uploadOperationId: operationId,
-                contentHash: TestContentHashes.First);
+                contentHash);
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateConfirmationItem()

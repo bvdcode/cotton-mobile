@@ -54,6 +54,17 @@ namespace Cotton.Mobile.Services
                     string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, item.TargetId);
                     if (Directory.Exists(directory))
                     {
+                        FileInfo[] localFiles = GetLocalFiles(directory);
+                        if (localFiles.Length > 1)
+                        {
+                            throw new IOException($"Synced local file directory is ambiguous for {item.TargetId}.");
+                        }
+
+                        if (localFiles.Length == 1)
+                        {
+                            ValidateLocalFile(localFiles[0], item);
+                        }
+
                         Directory.Delete(directory, recursive: true);
                     }
                 },
@@ -97,9 +108,12 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Only files can be written by cloud-to-device sync.");
             }
 
-            if (string.IsNullOrWhiteSpace(item.RemoteETag) || !item.RemoteUpdatedAtUtc.HasValue)
+            if (string.IsNullOrWhiteSpace(item.RemoteETag)
+                || !item.RemoteUpdatedAtUtc.HasValue
+                || item.ContentHash is null)
             {
-                throw new InvalidOperationException("Cloud-to-device file writes require a remote ETag and update time.");
+                throw new InvalidOperationException(
+                    "Cloud-to-device file writes require a remote ETag, update time, and content hash.");
             }
 
             return CottonFileBrowserEntry.CreateFile(
@@ -128,12 +142,7 @@ namespace Cotton.Mobile.Services
             }
 
             string targetPath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
-            FileInfo[] localFiles = Directory
-                .EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
-                .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
-                .Select(path => new FileInfo(path))
-                .Where(info => info.Exists)
-                .ToArray();
+            FileInfo[] localFiles = GetLocalFiles(directory);
             FileInfo? targetFile = localFiles
                 .FirstOrDefault(info => string.Equals(info.FullName, targetPath, StringComparison.Ordinal));
 
@@ -144,7 +153,7 @@ namespace Cotton.Mobile.Services
                     throw new IOException($"Synced local file directory is ambiguous for {file.Id}.");
                 }
 
-                ValidateLocalFileSize(targetFile, item);
+                ValidateLocalFile(targetFile, item);
                 StampLocalFile(targetFile.FullName, item);
                 return;
             }
@@ -160,18 +169,37 @@ namespace Cotton.Mobile.Services
             }
 
             FileInfo sourceFile = localFiles[0];
-            ValidateLocalFileSize(sourceFile, item);
+            ValidateLocalFile(sourceFile, item);
             cancellationToken.ThrowIfCancellationRequested();
             File.Move(sourceFile.FullName, targetPath, overwrite: true);
             StampLocalFile(targetPath, item);
         }
 
-        private static void ValidateLocalFileSize(FileInfo file, CottonCloudToDeviceSyncPlanItem item)
+        private static FileInfo[] GetLocalFiles(string directory)
+        {
+            return Directory
+                .EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
+                .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
+                .Select(path => new FileInfo(path))
+                .Where(info => info.Exists)
+                .ToArray();
+        }
+
+        private static void ValidateLocalFile(FileInfo file, CottonCloudToDeviceSyncPlanItem item)
         {
             if (item.SizeBytes.HasValue && file.Length != item.SizeBytes.Value)
             {
                 throw new IOException(
                     $"Synced local file size mismatch for {item.TargetId}: expected {item.SizeBytes.Value} bytes, got {file.Length} bytes.");
+            }
+
+            string expectedContentHash = item.ContentHash
+                ?? throw new InvalidOperationException("Synced local file validation requires a content hash.");
+            using FileStream content = file.OpenRead();
+            string contentHash = CottonContentHash.ComputeSha256(content);
+            if (!string.Equals(contentHash, expectedContentHash, StringComparison.Ordinal))
+            {
+                throw new IOException($"Synced local file content hash mismatch for {item.TargetId}.");
             }
         }
 

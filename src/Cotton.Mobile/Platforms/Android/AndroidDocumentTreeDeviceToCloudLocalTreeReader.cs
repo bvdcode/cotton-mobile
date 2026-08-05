@@ -82,6 +82,11 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AndroidDocumentTreeChild child = ReadChild(treeUri, cursor);
+                if (CottonSyncWorkingFileName.IsWorkingFile(child.DisplayName))
+                {
+                    continue;
+                }
+
                 DateTime updatedAtUtc = ReadLastModifiedUtc(cursor, scanStartedAtUtc);
                 string rawRelativePath = CreateRawRelativePath(parentPath, child.DisplayName);
                 if (!TryCreateRelativePath(parentPath, child.DisplayName, out string? relativePath))

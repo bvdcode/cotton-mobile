@@ -117,6 +117,17 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Sync_working_file_names_are_reserved_for_temporary_state()
+        {
+            string temporary = CottonSyncWorkingFileName.CreateTemporary("report.pdf");
+            string backup = CottonSyncWorkingFileName.CreateBackup("report.pdf");
+
+            Assert.True(CottonSyncWorkingFileName.IsWorkingFile(temporary));
+            Assert.True(CottonSyncWorkingFileName.IsWorkingFile(backup));
+            Assert.False(CottonSyncWorkingFileName.IsWorkingFile("report.pdf"));
+        }
+
+        [Fact]
         public void Upload_destination_snapshot_normalizes_folder_copy()
         {
             Guid folderId = Guid.Parse("11111111-2222-3333-4444-555555555555");

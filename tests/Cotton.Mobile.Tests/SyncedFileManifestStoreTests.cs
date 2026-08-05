@@ -1,5 +1,7 @@
 using Cotton.Mobile.Services;
 using Xunit;
+using static Cotton.Mobile.Tests.SyncedFileManifestTestData;
+using static Cotton.Mobile.Tests.TestFilePaths;
 
 namespace Cotton.Mobile.Tests
 {
@@ -22,7 +24,11 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-synced-file-manifest-tests",
                 Guid.NewGuid().ToString("N"));
-            _syncRoot = CreateRoot("app-private-sync-root");
+            _syncRoot = CreateManifestRoot(
+                InstanceUri,
+                SyncRootId,
+                CloudFolderId,
+                "app-private-sync-root");
             _store = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(_rootDirectory));
         }
@@ -123,7 +129,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Load_deletes_corrupt_metadata_and_returns_empty()
         {
-            string metadataPath = CreateMetadataPath(InstanceUri, _syncRoot);
+            string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
             await File.WriteAllTextAsync(metadataPath, "{ not valid json");
 
@@ -136,7 +142,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Load_deletes_manifest_for_wrong_sync_root()
         {
-            string metadataPath = CreateMetadataPath(InstanceUri, _syncRoot);
+            string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
             await File.WriteAllTextAsync(
                 metadataPath,
@@ -158,7 +164,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Load_filters_invalid_records_without_discarding_valid_items()
         {
-            string metadataPath = CreateMetadataPath(InstanceUri, _syncRoot);
+            string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
             await File.WriteAllTextAsync(
                 metadataPath,
@@ -230,7 +236,11 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Store_isolates_manifest_by_sync_root()
         {
-            CottonSyncRootSnapshot otherRoot = CreateRoot("other-sync-root");
+            CottonSyncRootSnapshot otherRoot = CreateManifestRoot(
+                InstanceUri,
+                SyncRootId,
+                CloudFolderId,
+                "other-sync-root");
             await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
             await _store.SaveAsync(InstanceUri, otherRoot, [
                 CreateSyncedFile(
@@ -245,8 +255,8 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("report.pdf", first.FileName);
             Assert.Equal("other.pdf", second.FileName);
             Assert.NotEqual(
-                Path.GetDirectoryName(CreateMetadataPath(InstanceUri, _syncRoot)),
-                Path.GetDirectoryName(CreateMetadataPath(InstanceUri, otherRoot)));
+                Path.GetDirectoryName(CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot)),
+                Path.GetDirectoryName(CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, otherRoot)));
         }
 
         [Fact]
@@ -256,7 +266,7 @@ namespace Cotton.Mobile.Tests
 
             await _store.ClearAsync(InstanceUri, _syncRoot);
 
-            Assert.False(File.Exists(CreateMetadataPath(InstanceUri, _syncRoot)));
+            Assert.False(File.Exists(CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot)));
             Assert.Empty(await _store.LoadAsync(InstanceUri, _syncRoot));
         }
 
@@ -282,48 +292,5 @@ namespace Cotton.Mobile.Tests
                 TestContentHashes.First);
         }
 
-        private static CottonSyncRootSnapshot CreateRoot(string localRootKey)
-        {
-            return new CottonSyncRootSnapshot(
-                SyncRootId,
-                InstanceUri,
-                "account-1",
-                new CottonUploadDestinationSnapshot(
-                    CloudFolderId,
-                    "Projects",
-                    "Files / Projects"),
-                new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.AppPrivateDirectory,
-                    localRootKey,
-                    "On this device",
-                    CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice,
-                CottonUploadOriginalRetention.KeepOriginals);
-        }
-
-        private string CreateMetadataPath(Uri instanceUri, CottonSyncRootSnapshot root)
-        {
-            return Path.Combine(CreateRootDirectory(instanceUri, root), FileSystemCottonSyncedFileManifestStore.MetadataFileName);
-        }
-
-        private string CreateRootDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
-        {
-            return Path.Combine(_rootDirectory, instanceUri.Host, root.StableKey);
-        }
-
-        private class FixedSyncedFileManifestPathProvider : ICottonSyncedFileManifestPathProvider
-        {
-            private readonly string _rootDirectory;
-
-            public FixedSyncedFileManifestPathProvider(string rootDirectory)
-            {
-                _rootDirectory = rootDirectory;
-            }
-
-            public string CreateSyncedFileManifestDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
-            {
-                return Path.Combine(_rootDirectory, instanceUri.Host, root.StableKey);
-            }
-        }
     }
 }

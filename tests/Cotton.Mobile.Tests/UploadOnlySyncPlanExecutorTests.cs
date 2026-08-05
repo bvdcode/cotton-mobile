@@ -562,19 +562,5 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private class FixedTimeProvider : TimeProvider
-        {
-            private readonly DateTimeOffset _utcNow;
-
-            public FixedTimeProvider(DateTime utcNow)
-            {
-                _utcNow = new DateTimeOffset(DateTime.SpecifyKind(utcNow, DateTimeKind.Utc));
-            }
-
-            public override DateTimeOffset GetUtcNow()
-            {
-                return _utcNow;
-            }
-        }
     }
 }

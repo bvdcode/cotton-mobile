@@ -287,36 +287,6 @@ namespace Cotton.Mobile.Tests
                 TestContentHashes.First);
         }
 
-        private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider
-        {
-            private readonly string _directory;
-
-            public FixedSyncRootMetadataPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateSyncRootMetadataDirectory(Uri instanceUri)
-            {
-                return _directory;
-            }
-        }
-
-        private class FixedSyncedFileManifestPathProvider : ICottonSyncedFileManifestPathProvider
-        {
-            private readonly string _rootDirectory;
-
-            public FixedSyncedFileManifestPathProvider(string rootDirectory)
-            {
-                _rootDirectory = rootDirectory;
-            }
-
-            public string CreateSyncedFileManifestDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
-            {
-                return Path.Combine(_rootDirectory, instanceUri.Host, root.StableKey);
-            }
-        }
-
         private class FakeLocalTreeReader : ICottonDeviceToCloudLocalTreeReader
         {
             private readonly Dictionary<Guid, CottonDeviceToCloudLocalContentSnapshot> _contentByRootId = [];
@@ -444,19 +414,5 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private class FixedTimeProvider : TimeProvider
-        {
-            private readonly DateTime _utcNow;
-
-            public FixedTimeProvider(DateTime utcNow)
-            {
-                _utcNow = DateTime.SpecifyKind(utcNow, DateTimeKind.Utc);
-            }
-
-            public override DateTimeOffset GetUtcNow()
-            {
-                return new DateTimeOffset(_utcNow);
-            }
-        }
     }
 }

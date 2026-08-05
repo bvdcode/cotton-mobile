@@ -166,19 +166,5 @@ namespace Cotton.Mobile.Tests
                 permissionStatus);
         }
 
-        private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider
-        {
-            private readonly string _directory;
-
-            public FixedSyncRootMetadataPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateSyncRootMetadataDirectory(Uri instanceUri)
-            {
-                return _directory;
-            }
-        }
     }
 }

@@ -1,5 +1,6 @@
 using Cotton.Mobile.Services;
 using Xunit;
+using static Cotton.Mobile.Tests.TestFilePaths;
 
 namespace Cotton.Mobile.Tests
 {
@@ -132,7 +133,7 @@ namespace Cotton.Mobile.Tests
         public async Task Load_deletes_corrupt_metadata_file_and_returns_empty_list()
         {
             Directory.CreateDirectory(_directory);
-            string metadataPath = CreateMetadataPath();
+            string metadataPath = CreateSyncRootMetadataPath(_directory);
             await File.WriteAllTextAsync(metadataPath, "{ not valid json");
 
             IReadOnlyList<CottonSyncRootSnapshot> loaded = await _store.LoadAsync(InstanceUri);
@@ -147,7 +148,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
             Directory.CreateDirectory(_directory);
             await File.WriteAllTextAsync(
-                CreateMetadataPath(),
+                CreateSyncRootMetadataPath(_directory),
                 $$"""
                 {
                   "schemaVersion": 1,
@@ -202,7 +203,7 @@ namespace Cotton.Mobile.Tests
                 OtherInstanceUri);
             Directory.CreateDirectory(_directory);
             await File.WriteAllTextAsync(
-                CreateMetadataPath(),
+                CreateSyncRootMetadataPath(_directory),
                 $$"""
                 {
                   "schemaVersion": 1,
@@ -260,7 +261,7 @@ namespace Cotton.Mobile.Tests
 
             await _store.ClearAsync(InstanceUri);
 
-            Assert.False(File.Exists(CreateMetadataPath()));
+            Assert.False(File.Exists(CreateSyncRootMetadataPath(_directory)));
             Assert.Empty(await _store.LoadAsync(InstanceUri));
         }
 
@@ -295,24 +296,5 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.KeepOriginals);
         }
 
-        private string CreateMetadataPath()
-        {
-            return Path.Combine(_directory, FileSystemCottonSyncRootStore.MetadataFileName);
-        }
-
-        private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider
-        {
-            private readonly string _directory;
-
-            public FixedSyncRootMetadataPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateSyncRootMetadataDirectory(Uri instanceUri)
-            {
-                return _directory;
-            }
-        }
     }
 }

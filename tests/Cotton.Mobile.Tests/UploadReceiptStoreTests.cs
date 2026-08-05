@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-upload-receipt-store-tests",
                 Guid.NewGuid().ToString("N"));
-            _store = new FileSystemCottonUploadReceiptStore(new TestUploadReceiptPathProvider(_directory));
+            _store = new FileSystemCottonUploadReceiptStore(new ScopedUploadReceiptPathProvider(_directory));
         }
 
         [Fact]
@@ -74,7 +74,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(RemoteFileId, loaded.RemoteFileId);
             Assert.Equal("etag-uploaded", loaded.RemoteETag);
             Assert.Equal(OperationId, loaded.OperationId);
-            string receiptDirectory = new TestUploadReceiptPathProvider(_directory)
+            string receiptDirectory = new ScopedUploadReceiptPathProvider(_directory)
                 .CreateUploadReceiptDirectory(InstanceUri, root);
             Assert.Single(Directory.GetFiles(receiptDirectory, "*.json"));
         }
@@ -190,7 +190,7 @@ namespace Cotton.Mobile.Tests
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             await _store.SaveAsync(InstanceUri, root, CreatePendingReceipt());
-            string receiptDirectory = new TestUploadReceiptPathProvider(_directory)
+            string receiptDirectory = new ScopedUploadReceiptPathProvider(_directory)
                 .CreateUploadReceiptDirectory(InstanceUri, root);
             string receiptPath = Assert.Single(Directory.GetFiles(receiptDirectory, "*.json"));
             await File.WriteAllTextAsync(receiptPath, "{ not valid json");
@@ -295,34 +295,5 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.KeepOriginals);
         }
 
-        private class TestUploadReceiptPathProvider : ICottonUploadReceiptPathProvider
-        {
-            private readonly string _directory;
-
-            public TestUploadReceiptPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateUploadReceiptDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
-            {
-                return Path.Combine(_directory, root.StableKey);
-            }
-        }
-
-        private class FixedUploadReceiptPathProvider : ICottonUploadReceiptPathProvider
-        {
-            private readonly string _directory;
-
-            public FixedUploadReceiptPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateUploadReceiptDirectory(Uri instanceUri, CottonSyncRootSnapshot root)
-            {
-                return _directory;
-            }
-        }
     }
 }

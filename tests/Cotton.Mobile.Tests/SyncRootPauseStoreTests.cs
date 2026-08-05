@@ -112,19 +112,5 @@ namespace Cotton.Mobile.Tests
             return Path.Combine(_directory, FileSystemCottonSyncRootPauseStore.MetadataFileName);
         }
 
-        private class FixedSyncRootMetadataPathProvider : ICottonSyncRootMetadataPathProvider
-        {
-            private readonly string _directory;
-
-            public FixedSyncRootMetadataPathProvider(string directory)
-            {
-                _directory = directory;
-            }
-
-            public string CreateSyncRootMetadataDirectory(Uri instanceUri)
-            {
-                return _directory;
-            }
-        }
     }
 }

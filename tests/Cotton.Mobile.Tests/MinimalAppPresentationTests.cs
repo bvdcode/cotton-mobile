@@ -191,34 +191,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Authorization_cancel_wins_over_a_late_service_result()
-        {
-            string viewModel = RepositoryPath.ReadText(
-                "src/Cotton.Mobile/ViewModels/MainPageViewModel.cs");
-
-            int resultReceived = viewModel.IndexOf(
-                "CottonSessionResult result = await _sessionService.SignInWithBrowserAsync",
-                StringComparison.Ordinal);
-            int cancellationChecked = viewModel.IndexOf(
-                "if (authorizationCancellation.IsCancellationRequested)",
-                resultReceived,
-                StringComparison.Ordinal);
-            int resultApplied = viewModel.IndexOf(
-                "await ApplySessionResultAsync(result, ReadyStatus);",
-                resultReceived,
-                StringComparison.Ordinal);
-
-            Assert.True(resultReceived >= 0);
-            Assert.True(cancellationChecked > resultReceived);
-            Assert.True(resultApplied > cancellationChecked);
-            Assert.Contains(
-                "catch (Exception exception) when (authorizationCancellation.IsCancellationRequested)",
-                viewModel,
-                StringComparison.Ordinal);
-            Assert.Contains("Display.InstanceUrl = signInInstanceUrl;", viewModel, StringComparison.Ordinal);
-        }
-
-        [Fact]
         public void App_loads_theme_resources_before_creating_the_shell()
         {
             string app = RepositoryPath.ReadText("src/Cotton.Mobile/App.xaml.cs");

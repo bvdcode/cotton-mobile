@@ -5,24 +5,15 @@ using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public partial class MainPageViewModel : ViewModelBase
+    public class MainPageViewModel : ViewModelBase
     {
         private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
-        private const string ReadyStatus = "";
-        private const string AuthorizationCancelledStatus = "Authorization cancelled.";
 
-        private readonly ICottonSessionService _sessionService;
-        private readonly ICottonInstanceStore _instanceStore;
-        private readonly ICottonProfileCacheStore _profileCacheStore;
-        private readonly IBrowser _browser;
-        private readonly CottonMobileOptions _options;
-        private readonly IUserDialogService _dialogService;
-        private readonly INetworkAccessService _networkAccess;
-        private readonly IMainPagePresentationService _presentationService;
+        private readonly MainPageSessionCoordinator _sessionCoordinator;
+        private readonly MainPageUserInteractionService _userInteractionService;
         private readonly ILogger<MainPageViewModel> _logger;
 
         private CancellationTokenSource? _authorizationCancellation;
@@ -30,58 +21,36 @@ namespace Cotton.Mobile.ViewModels
         private bool _didRestoreSession;
 
         public MainPageViewModel(
-            ICottonSessionService sessionService,
-            ICottonInstanceStore instanceStore,
-            ICottonProfileCacheStore profileCacheStore,
-            IBrowser browser,
-            CottonMobileOptions options,
-            IUserDialogService dialogService,
-            INetworkAccessService networkAccess,
-            IMainPagePresentationService presentationService,
+            MainPageSessionCoordinator sessionCoordinator,
+            MainPageUserInteractionService userInteractionService,
             ICottonMobileApplicationMetadata applicationMetadata,
             SyncSettingsViewModel sync,
             ILogger<MainPageViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(sessionService);
-            ArgumentNullException.ThrowIfNull(instanceStore);
-            ArgumentNullException.ThrowIfNull(profileCacheStore);
-            ArgumentNullException.ThrowIfNull(browser);
-            ArgumentNullException.ThrowIfNull(options);
-            ArgumentNullException.ThrowIfNull(dialogService);
-            ArgumentNullException.ThrowIfNull(networkAccess);
-            ArgumentNullException.ThrowIfNull(presentationService);
+            ArgumentNullException.ThrowIfNull(sessionCoordinator);
+            ArgumentNullException.ThrowIfNull(userInteractionService);
             ArgumentNullException.ThrowIfNull(applicationMetadata);
             ArgumentNullException.ThrowIfNull(sync);
             ArgumentNullException.ThrowIfNull(logger);
 
-            _sessionService = sessionService;
-            _instanceStore = instanceStore;
-            _profileCacheStore = profileCacheStore;
-            _browser = browser;
-            _options = options;
-            _dialogService = dialogService;
-            _networkAccess = networkAccess;
-            _presentationService = presentationService;
+            _sessionCoordinator = sessionCoordinator;
+            _userInteractionService = userInteractionService;
             _logger = logger;
 
-            Display = new MainPageDisplayState(options.DefaultInstanceUrl);
+            Display = new MainPageDisplayState(sessionCoordinator.DefaultInstanceUrl);
             Sync = sync;
             Sync.PropertyChanged += OnSyncPropertyChanged;
             ApplicationVersionText = CreateApplicationVersionText(applicationMetadata);
 
-            ConnectCommand = new AsyncCommand(
-                SignInAsync,
-                LogUnhandledCommandException,
-                () => Display.IsInputEnabled);
+            ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
             CancelAuthorizationCommand = new AsyncCommand(
                 CancelAuthorizationAsync,
                 LogUnhandledCommandException,
                 () => Display.IsCancelAuthorizationEnabled);
-            LogoutCommand = new AsyncCommand(
-                ConfirmLogoutAsync,
-                LogUnhandledCommandException,
-                () => IsLogoutEnabled);
-            PrivacyPolicyCommand = new AsyncCommand(OpenPrivacyPolicyAsync, LogUnhandledCommandException);
+            LogoutCommand = new AsyncCommand(ConfirmLogoutAsync, LogUnhandledCommandException, () => IsLogoutEnabled);
+            PrivacyPolicyCommand = new AsyncCommand(
+                _userInteractionService.OpenPrivacyPolicyAsync,
+                LogUnhandledCommandException);
             ShowSyncCommand = new AsyncCommand(ShowSyncAsync, LogUnhandledCommandException);
             ShowProfileCommand = new AsyncCommand(ShowProfileAsync, LogUnhandledCommandException);
         }
@@ -106,6 +75,20 @@ namespace Cotton.Mobile.ViewModels
 
         public AsyncCommand ShowProfileCommand { get; }
 
+        public async Task RestoreSessionOnceAsync()
+        {
+            if (_didRestoreSession)
+            {
+                return;
+            }
+
+            _didRestoreSession = true;
+            Display.ShowLoading(string.Empty);
+            RefreshCommands();
+            MainPageSessionState state = await _sessionCoordinator.RestoreAsync();
+            await ApplySessionStateAsync(state);
+        }
+
         private async Task SignInAsync()
         {
             string instanceUrlInput = Display.InstanceUrl;
@@ -128,28 +111,11 @@ namespace Cotton.Mobile.ViewModels
 
             try
             {
-                CottonSessionResult result = await _sessionService.SignInWithBrowserAsync(
+                MainPageSessionState state = await _sessionCoordinator.SignInAsync(
                     instanceUri,
+                    signInInstanceUrl,
                     authorizationCancellation.Token);
-                if (authorizationCancellation.IsCancellationRequested)
-                {
-                    await CompleteAuthorizationCancellationAsync(signInInstanceUrl);
-                    return;
-                }
-
-                await ApplySessionResultAsync(result, ReadyStatus);
-            }
-            catch (Exception exception) when (authorizationCancellation.IsCancellationRequested)
-            {
-                _logger.LogInformation(exception, "Cotton mobile browser authorization was cancelled.");
-                await CompleteAuthorizationCancellationAsync(signInInstanceUrl);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "Cotton mobile browser authorization failed.");
-                await ClearLocalSessionBestEffortAsync("authorization failure");
-                Display.ShowSignIn(_presentationService.CreateAuthorizationFailureStatus(exception));
-                RefreshCommands();
+                await ApplySessionStateAsync(state);
             }
             finally
             {
@@ -174,59 +140,42 @@ namespace Cotton.Mobile.ViewModels
             return Task.CompletedTask;
         }
 
-        private async Task CompleteAuthorizationCancellationAsync(string signInInstanceUrl)
-        {
-            await ClearLocalSessionBestEffortAsync("authorization cancellation");
-            Display.InstanceUrl = signInInstanceUrl;
-            Display.ShowSignIn(AuthorizationCancelledStatus);
-            RefreshCommands();
-        }
-
         private async Task ConfirmLogoutAsync()
         {
-            bool confirmed = await _dialogService.ShowConfirmationAsync(
-                "Sign out?",
-                "You will need to approve this device again to reconnect.",
-                "Sign out",
-                "Cancel");
-            if (!confirmed)
+            if (!await _userInteractionService.ConfirmSignOutAsync())
             {
                 return;
             }
 
-            await LogoutAsync();
-        }
-
-        private async Task LogoutAsync()
-        {
             MainPageProfile? profile = _currentProfile;
+            Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.InstanceUrl);
             Display.ShowLoading("Signing out…");
             RefreshCommands();
+            MainPageSessionState state = await _sessionCoordinator.LogoutAsync(profile, instanceUri);
+            await ApplySessionStateAsync(state);
+        }
 
-            try
+        private async Task ApplySessionStateAsync(MainPageSessionState state)
+        {
+            _currentProfile = state.Profile;
+            Display.InstanceUrl = state.InstanceUrl;
+            if (state.IsAuthenticated)
             {
-                await _sessionService.LogoutAsync();
-                await _profileCacheStore.ClearAsync();
-                ClearAuthenticatedSession();
-                Display.InstanceUrl = string.Empty;
-                Display.ShowSignIn("Signed out.");
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError(exception, "Cotton mobile logout failed.");
-                if (profile is not null)
-                {
-                    Display.ShowAuthenticated(profile, "Could not sign out. Try again.");
-                }
-                else
-                {
-                    Display.ShowSignIn("Could not finish signing out. Try again.");
-                }
-            }
-            finally
-            {
+                MainPageProfile profile = state.Profile
+                    ?? throw new InvalidOperationException("Authenticated session requires a profile.");
+                Display.ShowAuthenticated(profile, state.Status);
                 RefreshCommands();
+                if (state.ReloadSync)
+                {
+                    await Sync.LoadForInstanceAsync(state.InstanceUriValue, profile.AccountScopeKey);
+                }
+
+                return;
             }
+
+            Sync.Clear();
+            Display.ShowSignIn(state.Status);
+            RefreshCommands();
         }
 
         private Task ShowSyncAsync()
@@ -239,30 +188,6 @@ namespace Cotton.Mobile.ViewModels
         {
             Display.ShowDestination(AppNavigationDestination.Profile);
             return Task.CompletedTask;
-        }
-
-        private async Task OpenPrivacyPolicyAsync()
-        {
-            try
-            {
-                bool opened = await MainThread.InvokeOnMainThreadAsync(
-                    () => _browser.OpenAsync(
-                        _options.PrivacyPolicyUri,
-                        CottonBrowserLaunchOptions.SystemPreferred()));
-                if (opened)
-                {
-                    return;
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to open the Cotton Cloud privacy policy.");
-            }
-
-            await _dialogService.ShowAlertAsync(
-                "Privacy Policy",
-                "Could not open the privacy policy.",
-                "OK");
         }
 
         private void RefreshCommands()

@@ -132,6 +132,8 @@ namespace Cotton.Mobile
         private static void RegisterPresentation(IServiceCollection services)
         {
             services.AddSingleton<IMainPagePresentationService, MainPagePresentationService>();
+            services.AddSingleton<MainPageSessionCoordinator>();
+            services.AddSingleton<MainPageUserInteractionService>();
             services.AddSingleton<SyncSettingsViewModel>();
             services.AddSingleton<MainPageViewModel>();
             services.AddSingleton<MainPage>();

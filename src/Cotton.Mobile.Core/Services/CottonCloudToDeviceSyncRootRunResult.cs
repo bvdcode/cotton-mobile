@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonCloudToDeviceSyncRootRunResult
@@ -84,7 +86,7 @@ namespace Cotton.Mobile.Services
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 CottonCloudToDeviceSyncRootRunStatus.Completed,
-                "Sync root completed",
+                CoreResources.SyncRootCompleted,
                 plan,
                 executionResult);
         }
@@ -140,7 +142,7 @@ namespace Cotton.Mobile.Services
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 CottonCloudToDeviceSyncRootRunStatus.SkippedUnsupportedDirection,
-                "Sync direction is not cloud-to-device",
+                CoreResources.NotCloudToDeviceDirection,
                 null,
                 null);
         }

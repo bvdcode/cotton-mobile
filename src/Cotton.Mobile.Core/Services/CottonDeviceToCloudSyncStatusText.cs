@@ -1,13 +1,13 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonDeviceToCloudSyncStatusText
     {
-        private const string DefaultFolderName = "Folder";
-
-        public const string ActionLabel = "Upload new files";
+        public static string ActionLabel => CoreResources.UploadNewFilesAction;
 
         public static string OfflineUnavailableStatus { get; } =
             CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
@@ -16,11 +16,13 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncStatusText.FailedStatus;
 
         public static string UnsupportedDirectionStatus { get; } =
-            "Sync root is not configured to upload new files.";
+            CoreResources.UploadDirectionUnsupported;
 
         public static string CreateStartingStatus(string folderName)
         {
-            return $"Uploading new files from {NormalizeFolderName(folderName)}...";
+            return CoreResources.Format(
+                CoreResources.UploadingFolderFormat,
+                NormalizeFolderName(folderName));
         }
 
         public static string CreateCompletedStatus(CottonDeviceToCloudSyncRunSummary summary)
@@ -34,7 +36,7 @@ namespace Cotton.Mobile.Services
 
         private static string NormalizeFolderName(string folderName)
         {
-            return string.IsNullOrWhiteSpace(folderName) ? DefaultFolderName : folderName.Trim();
+            return string.IsNullOrWhiteSpace(folderName) ? CoreResources.DefaultFolderName : folderName.Trim();
         }
     }
 }

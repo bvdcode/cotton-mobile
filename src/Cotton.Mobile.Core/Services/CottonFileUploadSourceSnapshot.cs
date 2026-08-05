@@ -1,12 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonFileUploadSourceSnapshot
     {
         public const string DefaultContentType = "application/octet-stream";
-        public const string DefaultFileName = "Uploaded file";
+        public static string DefaultFileName => CoreResources.UploadedFileName;
 
         public CottonFileUploadSourceSnapshot(
             string? name,

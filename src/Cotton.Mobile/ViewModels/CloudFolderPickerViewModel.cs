@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Commands;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -18,8 +19,8 @@ namespace Cotton.Mobile.ViewModels
         private CottonFolderHandle? _currentFolder;
         private bool _didLoad;
         private bool _isBusy;
-        private string _currentFolderName = "Files";
-        private string _pathText = "Files";
+        private string _currentFolderName = AppResources.FilesTitle;
+        private string _pathText = AppResources.FilesTitle;
         private string? _status;
 
         public CloudFolderPickerViewModel(
@@ -203,7 +204,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton cloud folders for sync setup.");
-                Status = "Could not load cloud folders.";
+                Status = AppResources.CloudFoldersLoadFailed;
             }
             finally
             {
@@ -259,7 +260,7 @@ namespace Cotton.Mobile.ViewModels
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled cloud folder picker command failure.");
-            Status = "Could not open this folder.";
+            Status = AppResources.CloudFolderOpenFailed;
         }
     }
 }

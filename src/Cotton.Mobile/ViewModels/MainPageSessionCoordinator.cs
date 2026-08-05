@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -62,8 +63,8 @@ namespace Cotton.Mobile.ViewModels
 
                 Uri? storedInstanceUri = await GetStoredInstanceBestEffortAsync();
                 string status = _networkAccess.HasInternetAccess
-                    ? "Session restore failed. Sign in again."
-                    : "Offline. Reconnect to restore your session.";
+                    ? AppResources.SessionRestoreFailed
+                    : AppResources.SessionRestoreOffline;
                 return MainPageSessionState.SignedOut(
                     (storedInstanceUri ?? rememberedInstanceUri)?.AbsoluteUri ?? string.Empty,
                     status);
@@ -113,7 +114,7 @@ namespace Cotton.Mobile.ViewModels
             {
                 await _sessionService.LogoutAsync();
                 await _profileCacheStore.ClearAsync();
-                return MainPageSessionState.SignedOut(string.Empty, "Signed out.");
+                return MainPageSessionState.SignedOut(string.Empty, AppResources.SignedOutStatus);
             }
             catch (Exception exception)
             {
@@ -125,14 +126,14 @@ namespace Cotton.Mobile.ViewModels
                         return MainPageSessionState.Authenticated(
                             currentInstanceUri,
                             currentProfile,
-                            "Could not sign out. Try again.",
+                            AppResources.SignOutFailed,
                             reloadSync: false);
                     }
                 }
 
                 return MainPageSessionState.SignedOut(
                     string.Empty,
-                    "Could not finish signing out. Try again.");
+                    AppResources.SignOutCompletionFailed);
             }
         }
 
@@ -170,8 +171,8 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 string status = _networkAccess.HasInternetAccess
-                    ? "Could not verify the session. Some actions may be unavailable."
-                    : "Offline. Sync is available again after reconnecting.";
+                    ? AppResources.SessionVerificationFailed
+                    : AppResources.SessionOffline;
                 return MainPageSessionState.Authenticated(instanceUri, profile, status);
             }
             catch (Exception exception)
@@ -184,7 +185,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task<MainPageSessionState> CompleteAuthorizationCancellationAsync(string instanceUrl)
         {
             await ClearLocalSessionBestEffortAsync("authorization cancellation");
-            return MainPageSessionState.SignedOut(instanceUrl, "Authorization cancelled.");
+            return MainPageSessionState.SignedOut(instanceUrl, AppResources.AuthorizationCancelled);
         }
 
         private async Task<Uri?> GetRememberedInstanceBestEffortAsync()

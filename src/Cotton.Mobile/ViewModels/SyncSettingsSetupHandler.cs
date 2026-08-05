@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -37,13 +38,13 @@ namespace Cotton.Mobile.ViewModels
             string? accountScopeKey = state.AccountScopeKey;
             if (instanceUri is null || string.IsNullOrWhiteSpace(accountScopeKey))
             {
-                state.Status = "Could not add a sync folder for this account.";
+                state.Status = AppResources.SyncFolderAccountUnavailable;
                 return;
             }
 
             if (!_networkAccess.HasInternetAccess)
             {
-                state.Status = "Connect to the internet to add a sync folder.";
+                state.Status = AppResources.SyncFolderAddOffline;
                 return;
             }
 
@@ -69,7 +70,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to add Cotton mobile sync root.");
-                state.Status = "Could not add this sync folder.";
+                state.Status = AppResources.SyncFolderAddFailed;
             }
             finally
             {
@@ -86,7 +87,7 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                state.Status = "Could not reconnect this local folder.";
+                state.Status = AppResources.LocalFolderReconnectFailed;
                 return;
             }
 
@@ -105,7 +106,7 @@ namespace Cotton.Mobile.ViewModels
                 if (!root.LocalRoot.RequiresPersistedUserGrant || !root.NeedsUserAction)
                 {
                     state.ShowRoots(collection);
-                    state.Status = "Local folder access is already available.";
+                    state.Status = AppResources.LocalFolderAccessAvailable;
                     return;
                 }
 
@@ -130,7 +131,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to reconnect Cotton mobile sync root.");
-                state.Status = "Could not reconnect this local folder.";
+                state.Status = AppResources.LocalFolderReconnectFailed;
             }
             finally
             {

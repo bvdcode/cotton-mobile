@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudSyncRootRunResult
@@ -86,7 +88,7 @@ namespace Cotton.Mobile.Services
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 CottonDeviceToCloudSyncRootRunStatus.Completed,
-                "Sync root completed",
+                CoreResources.SyncRootCompleted,
                 plan,
                 executionResult);
         }

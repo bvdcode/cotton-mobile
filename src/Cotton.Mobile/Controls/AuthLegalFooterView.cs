@@ -2,6 +2,7 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Controls
 {
@@ -9,14 +10,13 @@ namespace Cotton.Mobile.Controls
     {
         private const string DefaultContainerStyleResourceKey = "M3AuthLegalFooterContainer";
         private const string DefaultFooterStyleResourceKey = "M3LegalFooterBar";
-        private const string DefaultPrivacyText = "Privacy";
         private const string FooterOpacityAnimationName = "M3AuthLegalFooterOpacity";
 
         public static readonly BindableProperty PrivacyTextProperty = BindableProperty.Create(
             nameof(PrivacyText),
             typeof(string),
             typeof(AuthLegalFooterView),
-            DefaultPrivacyText,
+            AppResources.PrivacyText,
             propertyChanged: OnVisualPropertyChanged);
 
         public static readonly BindableProperty PrivacyCommandProperty = BindableProperty.Create(

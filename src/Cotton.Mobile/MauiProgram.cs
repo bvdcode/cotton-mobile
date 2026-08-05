@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
 using Cotton.Sdk.Auth;
@@ -62,7 +63,7 @@ namespace Cotton.Mobile
         {
             services.AddSingleton(
                 new CottonMobileOptions(
-                    "Cotton Cloud",
+                    AppResources.AppTitle,
                     new Uri("https://app.cottoncloud.dev"),
                     new Uri("https://cottoncloud.dev/privacy-policy"),
                     "cotton-play-market-support@belov.us"));

@@ -3,6 +3,7 @@
 
 using System.Security.Cryptography;
 using System.Text;
+using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Services
 {
@@ -159,10 +160,10 @@ namespace Cotton.Mobile.Services
         {
             return status switch
             {
-                CottonSyncRootReadinessStatus.Ready => "Sync root ready",
-                CottonSyncRootReadinessStatus.NeedsUserGrant => "Choose local folder",
-                CottonSyncRootReadinessStatus.GrantRevoked => "Reconnect local folder",
-                CottonSyncRootReadinessStatus.LocalRootUnavailable => "Local folder unavailable",
+                CottonSyncRootReadinessStatus.Ready => CoreResources.SyncRootReady,
+                CottonSyncRootReadinessStatus.NeedsUserGrant => CoreResources.ChooseLocalFolder,
+                CottonSyncRootReadinessStatus.GrantRevoked => CoreResources.ReconnectLocalFolder,
+                CottonSyncRootReadinessStatus.LocalRootUnavailable => CoreResources.LocalFolderUnavailable,
                 _ => throw new ArgumentOutOfRangeException(nameof(status), "Sync root status is not supported."),
             };
         }

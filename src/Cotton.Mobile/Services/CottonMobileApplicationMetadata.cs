@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
@@ -11,11 +12,6 @@ namespace Cotton.Mobile.Services
     {
         private const string DebugApplicationIdSuffix = ".debug";
         private const string ReleaseApplicationId = "dev.cottoncloud.app";
-        private const string UnknownInstallChannel = "Unknown";
-        private const string DebugInstallChannel = "Debug APK";
-        private const string ReleaseInstallChannel = "Release package";
-        private const string CustomInstallChannel = "Custom package";
-        private const string UnknownValue = "Unknown";
         private const string UnknownApplicationVersion = "unknown";
         private const string UserAgentFallbackProduct = "Cotton-Mobile";
 
@@ -52,17 +48,17 @@ namespace Cotton.Mobile.Services
 
         public string InstallChannel => ResolveInstallChannel(PackageName);
 
-        public string DeviceName => ReadMetadata("device name", CreateDeviceName, UnknownValue);
+        public string DeviceName => ReadMetadata("device name", CreateDeviceName, AppResources.UnknownText);
 
         public string OperatingSystem => ReadMetadata(
             "operating system",
             () => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}",
-            UnknownValue);
+            AppResources.UnknownText);
 
         public string ScreenDetails => ReadMetadata(
             "screen details",
             () => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo),
-            UnknownValue);
+            AppResources.UnknownText);
 
         public string UserAgent =>
             $"{CreateUserAgentToken(ApplicationName, UserAgentFallbackProduct)}/{CreateUserAgentToken(ApplicationVersion, UnknownApplicationVersion)}";
@@ -145,20 +141,20 @@ namespace Cotton.Mobile.Services
         {
             if (string.IsNullOrWhiteSpace(packageName))
             {
-                return UnknownInstallChannel;
+                return AppResources.UnknownText;
             }
 
             if (packageName.EndsWith(DebugApplicationIdSuffix, StringComparison.OrdinalIgnoreCase))
             {
-                return DebugInstallChannel;
+                return AppResources.DebugInstallChannel;
             }
 
             if (string.Equals(packageName, ReleaseApplicationId, StringComparison.OrdinalIgnoreCase))
             {
-                return ReleaseInstallChannel;
+                return AppResources.ReleaseInstallChannel;
             }
 
-            return CustomInstallChannel;
+            return AppResources.CustomInstallChannel;
         }
     }
 }

@@ -1,11 +1,13 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonDeviceToCloudSyncRootCapability
     {
-        public const string UnsupportedLocalRootStatusText = "Local sync source unsupported";
+        public static string UnsupportedLocalRootStatusText => CoreResources.LocalSyncSourceUnsupported;
 
         public static bool CanRun(CottonSyncRootSnapshot root)
         {

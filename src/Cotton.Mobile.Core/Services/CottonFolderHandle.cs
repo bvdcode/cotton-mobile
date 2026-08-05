@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonFolderHandle
@@ -8,7 +10,7 @@ namespace Cotton.Mobile.Services
         public CottonFolderHandle(Guid id, string name)
         {
             Id = id;
-            Name = string.IsNullOrWhiteSpace(name) ? "Files" : name.Trim();
+            Name = string.IsNullOrWhiteSpace(name) ? CoreResources.FilesName : name.Trim();
         }
 
         public Guid Id { get; }

@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Auth;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 
 namespace Cotton.Mobile.ViewModels
@@ -27,15 +28,17 @@ namespace Cotton.Mobile.ViewModels
 
             return result.Status switch
             {
-                CottonSessionResultStatus.AuthorizationDenied => "Authorization was denied.",
-                CottonSessionResultStatus.AuthorizationExpired => "Authorization expired. Try again.",
-                CottonSessionResultStatus.AuthorizationNotFound => "Authorization request was not found. Try again.",
-                CottonSessionResultStatus.BrowserUnavailable => "Could not open the browser.",
-                CottonSessionResultStatus.TimedOut => "Authorization timed out. Try again.",
-                CottonSessionResultStatus.AuthorizationFailed => "Authorization failed. Try again.",
-                CottonSessionResultStatus.SessionExpired => "Session expired. Sign in again.",
-                CottonSessionResultStatus.AuthorizationPending => "Authorization is still pending. Return after approving in your browser.",
-                _ => unauthenticatedStatus,
+                CottonSessionResultStatus.Unauthenticated => unauthenticatedStatus,
+                CottonSessionResultStatus.Authenticated => unauthenticatedStatus,
+                CottonSessionResultStatus.AuthorizationDenied => AppResources.AuthorizationDenied,
+                CottonSessionResultStatus.AuthorizationExpired => AppResources.AuthorizationExpired,
+                CottonSessionResultStatus.AuthorizationNotFound => AppResources.AuthorizationNotFound,
+                CottonSessionResultStatus.BrowserUnavailable => AppResources.BrowserUnavailable,
+                CottonSessionResultStatus.TimedOut => AppResources.AuthorizationTimedOut,
+                CottonSessionResultStatus.AuthorizationFailed => AppResources.AuthorizationFailed,
+                CottonSessionResultStatus.SessionExpired => AppResources.SessionExpired,
+                CottonSessionResultStatus.AuthorizationPending => AppResources.AuthorizationPending,
+                _ => throw new ArgumentOutOfRangeException(nameof(result), result.Status, "Session result status is not supported."),
             };
         }
 
@@ -43,7 +46,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(exception);
 
-            return "Authorization failed. Check the instance URL and try again.";
+            return AppResources.AuthorizationFailure;
         }
 
         private static string CreateDisplayName(UserDto user)
@@ -68,7 +71,7 @@ namespace Cotton.Mobile.ViewModels
                 return user.Email.Trim();
             }
 
-            return "Cotton user";
+            return AppResources.DefaultUserName;
         }
 
         private static string CreateInstanceDisplayName(Uri instanceUri)

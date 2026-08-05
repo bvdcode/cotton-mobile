@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonOfflineFileAvailabilitySnapshot
@@ -77,10 +79,11 @@ namespace Cotton.Mobile.Services
         {
             return status switch
             {
-                CottonOfflineFileAvailabilityStatus.Available => "On device",
-                CottonOfflineFileAvailabilityStatus.Missing => "Offline missing",
-                CottonOfflineFileAvailabilityStatus.Stale => "Offline stale",
-                _ => string.Empty,
+                CottonOfflineFileAvailabilityStatus.NotPinned => string.Empty,
+                CottonOfflineFileAvailabilityStatus.Available => CoreResources.OnDeviceStatus,
+                CottonOfflineFileAvailabilityStatus.Missing => CoreResources.OfflineMissingStatus,
+                CottonOfflineFileAvailabilityStatus.Stale => CoreResources.OfflineStaleStatus,
+                _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Offline file availability status is unknown."),
             };
         }
 
@@ -88,10 +91,11 @@ namespace Cotton.Mobile.Services
         {
             return status switch
             {
-                CottonOfflineFileAvailabilityStatus.Available => "Available offline.",
-                CottonOfflineFileAvailabilityStatus.Missing => "Kept offline, but missing on this device.",
-                CottonOfflineFileAvailabilityStatus.Stale => "Kept offline, refresh to match the cloud version.",
-                _ => string.Empty,
+                CottonOfflineFileAvailabilityStatus.NotPinned => string.Empty,
+                CottonOfflineFileAvailabilityStatus.Available => CoreResources.AvailableOfflineDetails,
+                CottonOfflineFileAvailabilityStatus.Missing => CoreResources.MissingOfflineDetails,
+                CottonOfflineFileAvailabilityStatus.Stale => CoreResources.StaleOfflineDetails,
+                _ => throw new ArgumentOutOfRangeException(nameof(status), status, "Offline file availability status is unknown."),
             };
         }
     }

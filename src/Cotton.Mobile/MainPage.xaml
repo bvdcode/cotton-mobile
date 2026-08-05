@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:local="clr-namespace:Cotton.Mobile"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
@@ -16,8 +17,8 @@
             <controls:StackedContentView IsContentVisible="{Binding Display.IsBrandHeaderVisible}"
                                          StackStyleResourceKey="M3AuthShellStack">
                 <controls:BrandHeaderView Source="cotton_brand_mark.svg"
-                                          Title="Cotton Cloud"
-                                          SemanticDescription="Cotton Cloud" />
+                                          Title="{x:Static localization:AppResources.AppTitle}"
+                                          SemanticDescription="{x:Static localization:AppResources.AppTitle}" />
 
                 <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsLoadingVisible}"
                                             IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
@@ -34,13 +35,13 @@
 
                 <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsAuthorizationProgressVisible}"
                                             IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                            Text="Waiting for browser approval"
+                                            Text="{x:Static localization:AppResources.WaitingForBrowserApproval}"
                                             DetailText="{Binding Display.AuthorizationProgressMessage}"
                                             ActionIconData="{x:Static controls:IconPathData.Close}"
                                             ActionCommand="{Binding CancelAuthorizationCommand}"
                                             IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
                                             IsActionVisible="True"
-                                            ActionSemanticDescription="Cancel browser approval"
+                                            ActionSemanticDescription="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
                                             ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
                                             TextStyleResourceKey="M3CardSupportingStrong" />
             </controls:StackedContentView>

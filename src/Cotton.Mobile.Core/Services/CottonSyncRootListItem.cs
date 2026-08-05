@@ -1,6 +1,7 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.ViewModels;
 
 namespace Cotton.Mobile.Services
@@ -110,7 +111,7 @@ namespace Cotton.Mobile.Services
 
             if (canRunNow)
             {
-                return "Run now";
+                return CoreResources.RunNowAction;
             }
 
             return string.Empty;
@@ -129,21 +130,21 @@ namespace Cotton.Mobile.Services
 
             if (isUnsupportedLocalRoot)
             {
-                return "Unsupported";
+                return CoreResources.UnsupportedStatus;
             }
 
             if (!canRunNow && root.Direction == CottonSyncDirection.Bidirectional && root.CanRunSync)
             {
-                return "Unavailable";
+                return CoreResources.UnavailableStatus;
             }
 
             CottonSyncRootReadinessStatus readinessStatus = root.ReadinessStatus;
             return readinessStatus switch
             {
-                CottonSyncRootReadinessStatus.Ready => "Ready",
-                CottonSyncRootReadinessStatus.NeedsUserGrant => "Choose folder",
-                CottonSyncRootReadinessStatus.GrantRevoked => "Reconnect",
-                CottonSyncRootReadinessStatus.LocalRootUnavailable => "Unavailable",
+                CottonSyncRootReadinessStatus.Ready => CoreResources.ReadyStatus,
+                CottonSyncRootReadinessStatus.NeedsUserGrant => CoreResources.ChooseFolderStatus,
+                CottonSyncRootReadinessStatus.GrantRevoked => CoreResources.ReconnectStatus,
+                CottonSyncRootReadinessStatus.LocalRootUnavailable => CoreResources.UnavailableStatus,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(readinessStatus),
                     "Sync root readiness status is not supported."),
@@ -154,9 +155,9 @@ namespace Cotton.Mobile.Services
         {
             return direction switch
             {
-                CottonSyncDirection.CloudToDevice => "Syncing",
-                CottonSyncDirection.DeviceToCloud => "Uploading",
-                CottonSyncDirection.Bidirectional => "Syncing",
+                CottonSyncDirection.CloudToDevice => CoreResources.SyncingStatus,
+                CottonSyncDirection.DeviceToCloud => CoreResources.UploadingStatus,
+                CottonSyncDirection.Bidirectional => CoreResources.SyncingStatus,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(direction),
                     "Sync direction is not supported."),
@@ -167,9 +168,9 @@ namespace Cotton.Mobile.Services
         {
             return direction switch
             {
-                CottonSyncDirection.CloudToDevice => "Cloud to device",
-                CottonSyncDirection.DeviceToCloud => "Upload new files",
-                CottonSyncDirection.Bidirectional => "Bidirectional",
+                CottonSyncDirection.CloudToDevice => CoreResources.CloudToDeviceDirection,
+                CottonSyncDirection.DeviceToCloud => CoreResources.UploadNewFilesAction,
+                CottonSyncDirection.Bidirectional => CoreResources.BidirectionalDirection,
                 _ => throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported."),
             };
         }

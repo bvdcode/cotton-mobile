@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonBidirectionalSyncRootRunResult
@@ -98,7 +100,7 @@ namespace Cotton.Mobile.Services
             return Create(
                 root,
                 CottonBidirectionalSyncRootRunStatus.Completed,
-                "Bidirectional sync root completed",
+                CoreResources.BidirectionalSyncRootCompleted,
                 executionPlan,
                 cloudToDeviceExecutionResult,
                 deviceToCloudExecutionResult);
@@ -131,7 +133,7 @@ namespace Cotton.Mobile.Services
             return Create(
                 root,
                 CottonBidirectionalSyncRootRunStatus.SkippedUnsupportedDirection,
-                "Sync direction is not bidirectional");
+                CoreResources.NotBidirectionalDirection);
         }
 
         public static CottonBidirectionalSyncRootRunResult SkippedConflictReviewRequired(

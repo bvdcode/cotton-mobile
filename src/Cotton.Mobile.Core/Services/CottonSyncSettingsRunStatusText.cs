@@ -1,11 +1,13 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonSyncSettingsRunStatusText
     {
-        public const string StartingAllStatus = "Syncing folders...";
+        public static string StartingAllStatus => CoreResources.SyncingFolders;
 
         public static string OfflineUnavailableStatus { get; } =
             CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
@@ -26,59 +28,59 @@ namespace Cotton.Mobile.Services
                 + (bidirectionalSummary?.RootCount ?? 0);
             if (rootCount == 0)
             {
-                return "No folders are set to sync.";
+                return CoreResources.NoSyncFolders;
             }
 
             List<string> parts = [];
-            AddCount(parts, cloudToDeviceSummary.DownloadedCount, "downloaded");
-            AddCount(parts, cloudToDeviceSummary.RefreshedCount, "refreshed");
-            AddCount(parts, cloudToDeviceSummary.RenamedCount, "renamed");
-            AddCount(parts, cloudToDeviceSummary.RemovedCount, "removed");
-            AddCount(parts, deviceToCloudSummary.UploadedCount, "uploaded");
-            AddCount(parts, deviceToCloudSummary.ConfirmedUploadCount, "upload confirmed", "uploads confirmed");
-            AddCount(parts, deviceToCloudSummary.DeletedLocalFileCount, "original removed", "originals removed");
-            AddCount(parts, bidirectionalSummary?.DownloadedCount ?? 0, "bidirectional downloaded");
-            AddCount(parts, bidirectionalSummary?.RefreshedLocalCount ?? 0, "bidirectional refreshed locally");
-            AddCount(parts, bidirectionalSummary?.RenamedLocalCount ?? 0, "bidirectional renamed locally");
-            AddCount(parts, bidirectionalSummary?.RemovedLocalCount ?? 0, "bidirectional removed locally");
-            AddCount(parts, bidirectionalSummary?.UploadedCount ?? 0, "bidirectional uploaded");
-            AddCount(parts, bidirectionalSummary?.RefreshedRemoteCount ?? 0, "bidirectional updated in cloud");
+            AddCount(parts, cloudToDeviceSummary.DownloadedCount, CoreResources.DownloadedLabel);
+            AddCount(parts, cloudToDeviceSummary.RefreshedCount, CoreResources.RefreshedLabel);
+            AddCount(parts, cloudToDeviceSummary.RenamedCount, CoreResources.RenamedLabel);
+            AddCount(parts, cloudToDeviceSummary.RemovedCount, CoreResources.RemovedLabel);
+            AddCount(parts, deviceToCloudSummary.UploadedCount, CoreResources.UploadedLabel);
+            AddCount(parts, deviceToCloudSummary.ConfirmedUploadCount, CoreResources.UploadConfirmedSingular, CoreResources.UploadConfirmedPlural);
+            AddCount(parts, deviceToCloudSummary.DeletedLocalFileCount, CoreResources.OriginalRemovedSingular, CoreResources.OriginalRemovedPlural);
+            AddCount(parts, bidirectionalSummary?.DownloadedCount ?? 0, CoreResources.BidirectionalDownloadedLabel);
+            AddCount(parts, bidirectionalSummary?.RefreshedLocalCount ?? 0, CoreResources.BidirectionalRefreshedLocallyLabel);
+            AddCount(parts, bidirectionalSummary?.RenamedLocalCount ?? 0, CoreResources.BidirectionalRenamedLocallyLabel);
+            AddCount(parts, bidirectionalSummary?.RemovedLocalCount ?? 0, CoreResources.BidirectionalRemovedLocallyLabel);
+            AddCount(parts, bidirectionalSummary?.UploadedCount ?? 0, CoreResources.BidirectionalUploadedLabel);
+            AddCount(parts, bidirectionalSummary?.RefreshedRemoteCount ?? 0, CoreResources.BidirectionalUpdatedInCloudLabel);
             AddCount(
                 parts,
                 deviceToCloudSummary.CreatedFolderCount + (bidirectionalSummary?.CreatedFolderCount ?? 0),
-                "folder created",
-                "folders created");
+                CoreResources.FolderCreatedSingular,
+                CoreResources.FolderCreatedPlural);
             AddCount(
                 parts,
                 bidirectionalSummary?.DeletedRemoteFileCount ?? 0,
-                "remote file removed",
-                "remote files removed");
+                CoreResources.RemoteFileRemovedSingular,
+                CoreResources.RemoteFileRemovedPlural);
             AddCount(
                 parts,
                 bidirectionalSummary?.RemovedManifestCount ?? 0,
-                "record cleaned",
-                "records cleaned");
+                CoreResources.RecordCleanedSingular,
+                CoreResources.RecordCleanedPlural);
             AddCount(
                 parts,
                 bidirectionalSummary?.ConflictReviewCount ?? 0,
-                "bidirectional conflict needs review",
-                "bidirectional conflicts need review");
+                CoreResources.BidirectionalConflictReviewSingular,
+                CoreResources.BidirectionalConflictReviewPlural);
             AddCount(
                 parts,
                 bidirectionalSummary?.DestructiveReviewLocalDeleteCount ?? 0,
-                "bidirectional local removal needs review",
-                "bidirectional local removals need review");
+                CoreResources.BidirectionalLocalRemovalReviewSingular,
+                CoreResources.BidirectionalLocalRemovalReviewPlural);
             AddCount(
                 parts,
                 bidirectionalSummary?.DestructiveReviewRemoteDeleteCount ?? 0,
-                "bidirectional cloud removal needs review",
-                "bidirectional cloud removals need review");
+                CoreResources.BidirectionalCloudRemovalReviewSingular,
+                CoreResources.BidirectionalCloudRemovalReviewPlural);
             AddCount(
                 parts,
                 cloudToDeviceSummary.BlockedItemCount
                     + deviceToCloudSummary.BlockedItemCount
                     + (bidirectionalSummary?.BlockedItemCount ?? 0),
-                "blocked");
+                CoreResources.BlockedLabel);
             AddRootCount(
                 parts,
                 cloudToDeviceSummary.SkippedRootCount
@@ -87,10 +89,10 @@ namespace Cotton.Mobile.Services
 
             if (parts.Count == 0)
             {
-                return "Sync complete. Everything is up to date.";
+                return CoreResources.SyncCurrent;
             }
 
-            return $"Sync complete. {string.Join(", ", parts)}.";
+            return CoreResources.Format(CoreResources.SyncCompletedFormat, string.Join(", ", parts));
         }
 
         private static void AddCount(List<string> parts, int count, string label)
@@ -120,7 +122,9 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
-            parts.Add(count == 1 ? "1 root skipped" : $"{count} roots skipped");
+            parts.Add(count == 1
+                ? $"1 {CoreResources.RootSkippedSingular}"
+                : $"{count} {CoreResources.RootSkippedPlural}");
         }
     }
 }

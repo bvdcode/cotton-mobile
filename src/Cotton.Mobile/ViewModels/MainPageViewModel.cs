@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Commands;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
 using Microsoft.Extensions.Logging;
@@ -10,8 +11,6 @@ namespace Cotton.Mobile.ViewModels
 {
     public class MainPageViewModel : ViewModelBase
     {
-        private const string InvalidUrlStatus = "Enter a valid HTTPS URL.";
-
         private readonly MainPageSessionCoordinator _sessionCoordinator;
         private readonly MainPageUserInteractionService _userInteractionService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -95,7 +94,7 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.EffectiveInstanceUrl);
             if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
             {
-                Display.ShowSignIn(InvalidUrlStatus);
+                Display.ShowSignIn(AppResources.InvalidServerUrl);
                 RefreshCommands();
                 return;
             }
@@ -149,7 +148,7 @@ namespace Cotton.Mobile.ViewModels
 
             MainPageProfile? profile = _currentProfile;
             Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.InstanceUrl);
-            Display.ShowLoading("Signing out…");
+            Display.ShowLoading(AppResources.SigningOut);
             RefreshCommands();
             MainPageSessionState state = await _sessionCoordinator.LogoutAsync(profile, instanceUri);
             await ApplySessionStateAsync(state);
@@ -214,22 +213,19 @@ namespace Cotton.Mobile.ViewModels
             _logger.LogError(exception, "Unhandled Cotton mobile command failure.");
             if (Display.IsAuthenticatedVisible)
             {
-                Display.ShowProfileStatus("Something went wrong. Try again.");
+                Display.ShowProfileStatus(AppResources.UnexpectedError);
                 return;
             }
 
-            Display.ShowSignIn("Something went wrong. Try again.");
+            Display.ShowSignIn(AppResources.UnexpectedError);
             RefreshCommands();
         }
 
         private static string CreateApplicationVersionText(ICottonMobileApplicationMetadata metadata)
         {
-            if (string.IsNullOrWhiteSpace(metadata.ApplicationBuild))
-            {
-                return $"Version {metadata.ApplicationVersion}";
-            }
-
-            return $"Version {metadata.ApplicationVersion} ({metadata.ApplicationBuild})";
+            return AppResources.CreateVersionText(
+                metadata.ApplicationVersion,
+                metadata.ApplicationBuild);
         }
     }
 }

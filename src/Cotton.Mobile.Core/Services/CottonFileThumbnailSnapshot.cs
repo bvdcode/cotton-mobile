@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonFileThumbnailSnapshot
@@ -23,7 +25,7 @@ namespace Cotton.Mobile.Services
 
             State = state;
             PlaceholderText = string.IsNullOrWhiteSpace(placeholderText)
-                ? "FILE"
+                ? CoreResources.FileBadge
                 : placeholderText.Trim();
             Source = string.IsNullOrWhiteSpace(source) ? null : source.Trim();
             CacheKey = cacheKey.Trim();

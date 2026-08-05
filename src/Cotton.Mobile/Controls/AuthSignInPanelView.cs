@@ -2,6 +2,7 @@
 // Copyright (c) 2025-2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Controls
 {
@@ -14,8 +15,6 @@ namespace Cotton.Mobile.Controls
         private const string DefaultStatusTextStyleResourceKey = "M3AuthStatus";
         private const string DefaultButtonStyleResourceKey = "M3AuthFilledButton";
         private const string DefaultServerActionStyleResourceKey = "M3AuthServerTextAction";
-        private const string ChangeServerActionText = "Change server";
-        private const string UseDefaultServerActionText = "Use default server";
         private const string PanelOpacityAnimationName = "M3AuthSignInPanelOpacity";
 
         public static readonly BindableProperty PlaceholderProperty = BindableProperty.Create(
@@ -89,7 +88,7 @@ namespace Cotton.Mobile.Controls
                 Keyboard = Keyboard.Url,
                 ReturnType = ReturnType.Go,
                 ClearButtonVisibility = ClearButtonVisibility.WhileEditing,
-                SemanticHint = "Cotton Cloud address",
+                SemanticHint = AppResources.CottonCloudAddressHint,
             };
             _urlField.SetBinding(OutlinedInputField.TextProperty, new Binding(nameof(InstanceUrl), BindingMode.TwoWay, source: this));
 
@@ -100,7 +99,7 @@ namespace Cotton.Mobile.Controls
 
             _button = new FilledButton
             {
-                Text = "Connect",
+                Text = AppResources.ConnectText,
             };
             _button.SetDynamicResource(StyleProperty, DefaultButtonStyleResourceKey);
 
@@ -245,15 +244,15 @@ namespace Cotton.Mobile.Controls
             bool isServerFieldVisible = IsServerFieldVisible();
             _urlField.IsFieldVisible = isServerFieldVisible;
             string serverActionText = isServerFieldVisible
-                ? UseDefaultServerActionText
-                : ChangeServerActionText;
+                ? AppResources.UseDefaultServerText
+                : AppResources.ChangeServerText;
             _serverAction.Text = serverActionText;
             SemanticProperties.SetDescription(
                 _serverAction,
                 serverActionText);
             SemanticProperties.SetHint(
                 _serverAction,
-                "Choose the default Cotton Cloud server or enter a custom address.");
+                AppResources.ServerChoiceHint);
             _card.CardStyleResourceKey = ShouldUseFramedPanel()
                 ? DefaultCardStyleResourceKey
                 : DefaultFlatCardStyleResourceKey;

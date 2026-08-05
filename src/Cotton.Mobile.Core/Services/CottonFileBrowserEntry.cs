@@ -4,13 +4,12 @@
 using Cotton.Files;
 using Cotton.Nodes;
 using System.Collections.ObjectModel;
+using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserEntry
     {
-        private const string LocalCopyStatusText = "On device";
-
         internal CottonFileBrowserEntry(
             Guid id,
             CottonFileBrowserEntryType type,
@@ -33,11 +32,11 @@ namespace Cotton.Mobile.Services
         {
             Id = id;
             Type = type;
-            Name = string.IsNullOrWhiteSpace(name) ? "(unnamed)" : name.Trim();
+            Name = string.IsNullOrWhiteSpace(name) ? CoreResources.UnnamedItem : name.Trim();
             Kind = string.IsNullOrWhiteSpace(kind) ? "File" : kind.Trim();
             Details = details;
             ActionLabel = actionLabel;
-            BadgeText = string.IsNullOrWhiteSpace(badgeText) ? "FILE" : badgeText.Trim();
+            BadgeText = string.IsNullOrWhiteSpace(badgeText) ? CoreResources.FileBadge : badgeText.Trim();
             UpdatedAtUtc = updatedAtUtc;
             SizeBytes = sizeBytes;
             ContentType = string.IsNullOrWhiteSpace(contentType) ? null : contentType.Trim();
@@ -69,7 +68,7 @@ namespace Cotton.Mobile.Services
             {
                 if (LocalFile is not null)
                 {
-                    return $"{Details} · {LocalCopyStatusText}";
+                    return $"{Details} · {CoreResources.OnDeviceStatus}";
                 }
 
                 return IsOfflineAttentionVisible
@@ -80,7 +79,7 @@ namespace Cotton.Mobile.Services
 
         public bool HasLocalCopy => LocalFile is not null;
 
-        public string LocalCopyStatus => HasLocalCopy ? LocalCopyStatusText : string.Empty;
+        public string LocalCopyStatus => HasLocalCopy ? CoreResources.OnDeviceStatus : string.Empty;
 
         public CottonOfflineFileAvailabilitySnapshot OfflineAvailability { get; }
 

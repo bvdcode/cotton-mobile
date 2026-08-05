@@ -1,6 +1,8 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public class CottonDeviceToCloudLocalContentSnapshot
@@ -12,7 +14,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(items);
 
-            LocalRootName = string.IsNullOrWhiteSpace(localRootName) ? "Local folder" : localRootName.Trim();
+            LocalRootName = string.IsNullOrWhiteSpace(localRootName) ? CoreResources.LocalFolderName : localRootName.Trim();
             Items = items;
             Problems = problems ?? [];
         }

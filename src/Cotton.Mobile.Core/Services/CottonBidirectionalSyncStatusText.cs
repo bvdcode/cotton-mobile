@@ -1,17 +1,19 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonBidirectionalSyncStatusText
     {
-        public const string ActionLabel = "Sync both ways";
+        public static string ActionLabel => CoreResources.SyncBothWaysAction;
 
-        public const string ConflictReviewRequiredStatus = "Bidirectional sync needs conflict review.";
-        public const string BlockedReviewRequiredStatus = "Bidirectional sync needs review before it can run.";
-        public const string DestructiveReviewRequiredStatus = "Bidirectional sync needs review before removing files.";
-        public const string ConfirmDestructiveTitle = "Run bidirectional sync?";
-        public const string ConfirmDestructiveAction = "Sync";
+        public static string ConflictReviewRequiredStatus => CoreResources.ConflictReviewRequired;
+        public static string BlockedReviewRequiredStatus => CoreResources.BlockedReviewRequired;
+        public static string DestructiveReviewRequiredStatus => CoreResources.DestructiveReviewRequired;
+        public static string ConfirmDestructiveTitle => CoreResources.ConfirmBidirectionalSyncTitle;
+        public static string ConfirmDestructiveAction => CoreResources.SyncAction;
 
         public static string AccountUnavailableStatus { get; } =
             CottonCloudToDeviceSyncStatusText.AccountUnavailableStatus;
@@ -27,8 +29,10 @@ namespace Cotton.Mobile.Services
 
         public static string CreateStartingStatus(string folderName)
         {
-            string name = string.IsNullOrWhiteSpace(folderName) ? "folder" : folderName.Trim();
-            return $"Syncing {name} both ways...";
+            string name = string.IsNullOrWhiteSpace(folderName)
+                ? CoreResources.DefaultFolderNameLower
+                : folderName.Trim();
+            return CoreResources.Format(CoreResources.SyncingBothWaysFormat, name);
         }
 
         public static string CreateConfirmDestructiveMessage(int localDeleteCount, int remoteDeleteCount)
@@ -44,16 +48,20 @@ namespace Cotton.Mobile.Services
             }
 
             List<string> parts = [];
-            AddConfirmAction(parts, localDeleteCount, "remove 1 local file", $"remove {localDeleteCount} local files");
+            AddConfirmAction(
+                parts,
+                localDeleteCount,
+                CoreResources.RemoveOneLocalFile,
+                CoreResources.Format(CoreResources.RemoveLocalFilesFormat, localDeleteCount));
             AddConfirmAction(
                 parts,
                 remoteDeleteCount,
-                "move 1 cloud file to trash",
-                $"move {remoteDeleteCount} cloud files to trash");
+                CoreResources.TrashOneCloudFile,
+                CoreResources.Format(CoreResources.TrashCloudFilesFormat, remoteDeleteCount));
 
             return parts.Count == 0
-                ? "This sync will not remove local or cloud files."
-                : $"This sync will {string.Join(" and ", parts)} based on the selected folder and cloud state.";
+                ? CoreResources.NoDestructiveChanges
+                : CoreResources.Format(CoreResources.DestructiveChangesFormat, string.Join(" and ", parts));
         }
 
         public static string CreateCompletedStatus(CottonBidirectionalSyncRunSummary summary)
@@ -62,39 +70,41 @@ namespace Cotton.Mobile.Services
 
             if (summary.RootCount == 0)
             {
-                return "No bidirectional folders are set to sync.";
+                return CoreResources.NoBidirectionalFolders;
             }
 
             List<string> parts = [];
-            AddCount(parts, summary.DownloadedCount, "downloaded");
-            AddCount(parts, summary.RefreshedLocalCount, "refreshed locally");
-            AddCount(parts, summary.RenamedLocalCount, "renamed locally");
-            AddCount(parts, summary.RemovedLocalCount, "removed locally");
-            AddCount(parts, summary.UploadedCount, "uploaded");
-            AddCount(parts, summary.RefreshedRemoteCount, "updated in cloud");
-            AddCount(parts, summary.CreatedFolderCount, "folder created", "folders created");
-            AddCount(parts, summary.DeletedRemoteFileCount, "remote file removed", "remote files removed");
-            AddCount(parts, summary.RemovedManifestCount, "record cleaned", "records cleaned");
-            AddCount(parts, summary.ConflictReviewCount, "conflict needs review", "conflicts need review");
+            AddCount(parts, summary.DownloadedCount, CoreResources.DownloadedLabel);
+            AddCount(parts, summary.RefreshedLocalCount, CoreResources.RefreshedLocallyLabel);
+            AddCount(parts, summary.RenamedLocalCount, CoreResources.RenamedLocallyLabel);
+            AddCount(parts, summary.RemovedLocalCount, CoreResources.RemovedLocallyLabel);
+            AddCount(parts, summary.UploadedCount, CoreResources.UploadedLabel);
+            AddCount(parts, summary.RefreshedRemoteCount, CoreResources.UpdatedInCloudLabel);
+            AddCount(parts, summary.CreatedFolderCount, CoreResources.FolderCreatedSingular, CoreResources.FolderCreatedPlural);
+            AddCount(parts, summary.DeletedRemoteFileCount, CoreResources.RemoteFileRemovedSingular, CoreResources.RemoteFileRemovedPlural);
+            AddCount(parts, summary.RemovedManifestCount, CoreResources.RecordCleanedSingular, CoreResources.RecordCleanedPlural);
+            AddCount(parts, summary.ConflictReviewCount, CoreResources.ConflictReviewSingular, CoreResources.ConflictReviewPlural);
             AddCount(
                 parts,
                 summary.DestructiveReviewLocalDeleteCount,
-                "local removal needs review",
-                "local removals need review");
+                CoreResources.LocalRemovalReviewSingular,
+                CoreResources.LocalRemovalReviewPlural);
             AddCount(
                 parts,
                 summary.DestructiveReviewRemoteDeleteCount,
-                "cloud removal needs review",
-                "cloud removals need review");
-            AddCount(parts, summary.BlockedItemCount, "blocked");
+                CoreResources.CloudRemovalReviewSingular,
+                CoreResources.CloudRemovalReviewPlural);
+            AddCount(parts, summary.BlockedItemCount, CoreResources.BlockedLabel);
             AddRootCount(parts, summary.SkippedRootCount);
 
             if (parts.Count == 0)
             {
-                return "Bidirectional sync complete. Everything is up to date.";
+                return CoreResources.BidirectionalSyncCurrent;
             }
 
-            return $"Bidirectional sync complete. {string.Join(", ", parts)}.";
+            return CoreResources.Format(
+                CoreResources.BidirectionalSyncCompletedFormat,
+                string.Join(", ", parts));
         }
 
         private static void AddCount(List<string> parts, int count, string label)
@@ -134,7 +144,9 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
-            parts.Add(count == 1 ? "1 root skipped" : $"{count} roots skipped");
+            parts.Add(count == 1
+                ? $"1 {CoreResources.RootSkippedSingular}"
+                : $"{count} {CoreResources.RootSkippedPlural}");
         }
     }
 }

@@ -2,22 +2,23 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.CloudFolderPickerPage"
              x:Name="RootPage"
              x:DataType="viewModels:CloudFolderPickerViewModel"
              Shell.NavBarIsVisible="False"
-             Title="Choose cloud folder">
+             Title="{x:Static localization:AppResources.ChooseCloudFolderPageTitle}">
 
     <controls:ScreenShellView>
-        <controls:TopAppBar TitleText="Cloud folder"
+        <controls:TopAppBar TitleText="{x:Static localization:AppResources.CloudFolderAppBarTitle}"
                             BackCommand="{Binding CancelCommand}"
                             PrimaryIconData="{x:Static controls:IconPathData.Check}"
                             PrimaryCommand="{Binding ChooseCommand}"
-                            PrimaryDescription="Use current cloud folder"
+                            PrimaryDescription="{x:Static localization:AppResources.UseCurrentCloudFolderDescription}"
                             SecondaryIconData="{x:Static controls:IconPathData.ArrowUp}"
                             SecondaryCommand="{Binding UpCommand}"
-                            SecondaryDescription="Go to parent folder"
+                            SecondaryDescription="{x:Static localization:AppResources.GoToParentFolderDescription}"
                             IsSecondaryActionVisible="{Binding CanNavigateUp}" />
 
         <controls:ScreenContentGridView Grid.Row="1">
@@ -34,8 +35,8 @@
             <controls:EmptyStateView Grid.Row="2"
                                      IsStateVisible="{Binding IsEmptyVisible}"
                                      IconData="{x:Static controls:IconPathData.Folder}"
-                                     Title="No subfolders"
-                                     Body="Use this folder or go back."
+                                     Title="{x:Static localization:AppResources.NoSubfoldersTitle}"
+                                     Body="{x:Static localization:AppResources.NoSubfoldersBody}"
                                      IsActionVisible="False" />
 
             <controls:MaterialCollectionView Grid.Row="2"

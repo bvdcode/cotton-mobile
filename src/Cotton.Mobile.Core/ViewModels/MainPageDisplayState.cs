@@ -1,19 +1,18 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.ViewModels
 {
     public class MainPageDisplayState : ViewModelBase
     {
-        private const string DefaultAuthorizationMessage =
-            "Approve the request in your browser, then return to Cotton Cloud.";
-
         private MainPageViewState _state = MainPageViewState.Loading;
         private AppNavigationDestination _selectedDestination = AppNavigationDestination.Sync;
         private string _instanceUrl = string.Empty;
         private string _loadingMessage = string.Empty;
         private string? _status;
-        private string _authorizationProgressMessage = DefaultAuthorizationMessage;
+        private string _authorizationProgressMessage = CoreResources.AuthorizationInstruction;
         private string _profileName = string.Empty;
         private string? _profileEmail;
         private string _profileInstance = string.Empty;
@@ -46,7 +45,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string DefaultInstanceUrl { get; }
 
-        public string InstanceUrlPlaceholder => "Custom server URL";
+        public string InstanceUrlPlaceholder => CoreResources.CustomServerUrl;
 
         public string EffectiveInstanceUrl => string.IsNullOrWhiteSpace(InstanceUrl)
             ? DefaultInstanceUrl
@@ -197,7 +196,7 @@ namespace Cotton.Mobile.ViewModels
         {
             LoadingMessage = string.Empty;
             Status = null;
-            AuthorizationProgressMessage = DefaultAuthorizationMessage;
+            AuthorizationProgressMessage = CoreResources.AuthorizationInstruction;
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = true;
             IsLogoutEnabled = false;
@@ -206,7 +205,7 @@ namespace Cotton.Mobile.ViewModels
 
         public void ShowAuthorizationCancelling()
         {
-            AuthorizationProgressMessage = "Cancelling authorization…";
+            AuthorizationProgressMessage = CoreResources.CancellingAuthorization;
             IsCancelAuthorizationEnabled = false;
         }
 

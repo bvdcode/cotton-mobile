@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -51,7 +52,7 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                state.Status = "Could not run sync for this instance.";
+                state.Status = AppResources.SyncRunInstanceUnavailable;
                 return;
             }
 
@@ -103,7 +104,7 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                state.Status = "Could not run sync for this instance.";
+                state.Status = AppResources.SyncRunInstanceUnavailable;
                 return;
             }
 
@@ -122,7 +123,7 @@ namespace Cotton.Mobile.ViewModels
                 if (root is null)
                 {
                     state.ShowRoots(collection);
-                    state.Status = "Sync folder is no longer configured.";
+                    state.Status = AppResources.SyncFolderMissing;
                     return;
                 }
 
@@ -137,7 +138,7 @@ namespace Cotton.Mobile.ViewModels
                 if (!CottonSyncRootRunCapability.CanRun(root))
                 {
                     state.ShowRoots(collection);
-                    state.Status = "Sync folder is not ready.";
+                    state.Status = AppResources.SyncFolderNotReady;
                     return;
                 }
 

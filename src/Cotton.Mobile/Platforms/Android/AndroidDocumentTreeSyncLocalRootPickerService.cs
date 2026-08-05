@@ -5,6 +5,7 @@
 using Android.App;
 using Android.Content;
 using Android.Provider;
+using Cotton.Mobile.Resources.Localization;
 using Microsoft.Maui.ApplicationModel;
 using AndroidUri = Android.Net.Uri;
 
@@ -12,8 +13,6 @@ namespace Cotton.Mobile.Services
 {
     public class AndroidDocumentTreeSyncLocalRootPickerService : ICottonSyncLocalRootPickerService
     {
-        private const string DefaultDisplayName = "Selected folder";
-
         private static readonly ActivityFlags PersistableGrantFlags =
             ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission;
 
@@ -88,7 +87,7 @@ namespace Cotton.Mobile.Services
             }
 
             name = NormalizeDisplayName(uri.LastPathSegment);
-            return string.IsNullOrWhiteSpace(name) ? DefaultDisplayName : name;
+            return string.IsNullOrWhiteSpace(name) ? AppResources.SelectedFolder : name;
         }
 
         private static string NormalizeDisplayName(string? value)

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -20,7 +21,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(state);
             if (state.InstanceUri is null)
             {
-                state.Status = "Could not inspect sync folders.";
+                state.Status = AppResources.SyncFoldersInspectFailed;
                 return;
             }
 
@@ -33,7 +34,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception)
             {
                 _logger.LogWarning(exception, "Failed to load Cotton mobile sync roots.");
-                state.Status = "Could not inspect sync folders.";
+                state.Status = AppResources.SyncFoldersInspectFailed;
             }
             finally
             {

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AppTitle" xml:space="preserve"><value>Cotton Cloud</value></data>
+  <data name="FilesTitle" xml:space="preserve"><value>Files</value></data>
+  <data name="ChooseCloudFolderPageTitle" xml:space="preserve"><value>Choose cloud folder</value></data>
+  <data name="CloudFolderAppBarTitle" xml:space="preserve"><value>Cloud folder</value></data>
+  <data name="UseCurrentCloudFolderDescription" xml:space="preserve"><value>Use current cloud folder</value></data>
+  <data name="GoToParentFolderDescription" xml:space="preserve"><value>Go to parent folder</value></data>
+  <data name="NoSubfoldersTitle" xml:space="preserve"><value>No subfolders</value></data>
+  <data name="NoSubfoldersBody" xml:space="preserve"><value>Use this folder or go back.</value></data>
+  <data name="ProfileTitle" xml:space="preserve"><value>Profile</value></data>
+  <data name="AccountTitle" xml:space="preserve"><value>Account</value></data>
+  <data name="AccountSupportingText" xml:space="preserve"><value>Your Cotton Cloud connection and app settings.</value></data>
+  <data name="PrivacyPolicyText" xml:space="preserve"><value>Privacy policy</value></data>
+  <data name="PrivacyPolicySupportingText" xml:space="preserve"><value>Review how Cotton Cloud handles your data.</value></data>
+  <data name="OpenPrivacyPolicyDescription" xml:space="preserve"><value>Open privacy policy</value></data>
+  <data name="SignOutText" xml:space="preserve"><value>Sign out</value></data>
+  <data name="SignOutSupportingText" xml:space="preserve"><value>Disconnect this account from the app.</value></data>
+  <data name="WaitingForBrowserApproval" xml:space="preserve"><value>Waiting for browser approval</value></data>
+  <data name="CancelBrowserApprovalDescription" xml:space="preserve"><value>Cancel browser approval</value></data>
+  <data name="BackDescription" xml:space="preserve"><value>Back</value></data>
+  <data name="AddSyncFolderDescription" xml:space="preserve"><value>Add sync folder</value></data>
+  <data name="RunAllSyncFoldersDescription" xml:space="preserve"><value>Run all sync folders</value></data>
+  <data name="RefreshSyncFoldersDescription" xml:space="preserve"><value>Refresh sync folders</value></data>
+  <data name="SyncTitle" xml:space="preserve"><value>Sync</value></data>
+  <data name="NoSyncFoldersTitle" xml:space="preserve"><value>No sync folders</value></data>
+  <data name="NoSyncFoldersBody" xml:space="preserve"><value>Choose a cloud folder and a folder on this device.</value></data>
+  <data name="ConnectText" xml:space="preserve"><value>Connect</value></data>
+  <data name="ChangeServerText" xml:space="preserve"><value>Change server</value></data>
+  <data name="UseDefaultServerText" xml:space="preserve"><value>Use default server</value></data>
+  <data name="CottonCloudAddressHint" xml:space="preserve"><value>Cotton Cloud address</value></data>
+  <data name="ServerChoiceHint" xml:space="preserve"><value>Choose the default Cotton Cloud server or enter a custom address.</value></data>
+  <data name="OpenSyncDescription" xml:space="preserve"><value>Open sync</value></data>
+  <data name="OpenProfileDescription" xml:space="preserve"><value>Open profile</value></data>
+  <data name="PrimaryActionDescription" xml:space="preserve"><value>Primary action</value></data>
+  <data name="SecondaryActionDescription" xml:space="preserve"><value>Secondary action</value></data>
+  <data name="TertiaryActionDescription" xml:space="preserve"><value>Tertiary action</value></data>
+  <data name="PrivacyText" xml:space="preserve"><value>Privacy</value></data>
+  <data name="CloudFoldersLoadFailed" xml:space="preserve"><value>Could not load cloud folders.</value></data>
+  <data name="CloudFolderOpenFailed" xml:space="preserve"><value>Could not open this folder.</value></data>
+  <data name="NoFoldersSyncing" xml:space="preserve"><value>No folders syncing</value></data>
+  <data name="SyncSettingsUpdateFailed" xml:space="preserve"><value>Could not update sync settings.</value></data>
+  <data name="SyncFoldersInspectFailed" xml:space="preserve"><value>Could not inspect sync folders.</value></data>
+  <data name="SyncFolderAccountUnavailable" xml:space="preserve"><value>Could not add a sync folder for this account.</value></data>
+  <data name="SyncFolderAddOffline" xml:space="preserve"><value>Connect to the internet to add a sync folder.</value></data>
+  <data name="SyncFolderAddFailed" xml:space="preserve"><value>Could not add this sync folder.</value></data>
+  <data name="LocalFolderReconnectFailed" xml:space="preserve"><value>Could not reconnect this local folder.</value></data>
+  <data name="LocalFolderAccessAvailable" xml:space="preserve"><value>Local folder access is already available.</value></data>
+  <data name="SyncRunInstanceUnavailable" xml:space="preserve"><value>Could not run sync for this instance.</value></data>
+  <data name="SyncFolderMissing" xml:space="preserve"><value>Sync folder is no longer configured.</value></data>
+  <data name="SyncFolderNotReady" xml:space="preserve"><value>Sync folder is not ready.</value></data>
+  <data name="InvalidServerUrl" xml:space="preserve"><value>Enter a valid HTTPS URL.</value></data>
+  <data name="SigningOut" xml:space="preserve"><value>Signing out…</value></data>
+  <data name="UnexpectedError" xml:space="preserve"><value>Something went wrong. Try again.</value></data>
+  <data name="SignOutQuestion" xml:space="preserve"><value>Sign out?</value></data>
+  <data name="SignOutConfirmation" xml:space="preserve"><value>You will need to approve this device again to reconnect.</value></data>
+  <data name="CancelText" xml:space="preserve"><value>Cancel</value></data>
+  <data name="PrivacyPolicyTitle" xml:space="preserve"><value>Privacy Policy</value></data>
+  <data name="PrivacyPolicyOpenFailed" xml:space="preserve"><value>Could not open the privacy policy.</value></data>
+  <data name="OkText" xml:space="preserve"><value>OK</value></data>
+  <data name="SessionRestoreFailed" xml:space="preserve"><value>Session restore failed. Sign in again.</value></data>
+  <data name="SessionRestoreOffline" xml:space="preserve"><value>Offline. Reconnect to restore your session.</value></data>
+  <data name="SignedOutStatus" xml:space="preserve"><value>Signed out.</value></data>
+  <data name="SignOutFailed" xml:space="preserve"><value>Could not sign out. Try again.</value></data>
+  <data name="SignOutCompletionFailed" xml:space="preserve"><value>Could not finish signing out. Try again.</value></data>
+  <data name="SessionVerificationFailed" xml:space="preserve"><value>Could not verify the session. Some actions may be unavailable.</value></data>
+  <data name="SessionOffline" xml:space="preserve"><value>Offline. Sync is available again after reconnecting.</value></data>
+  <data name="AuthorizationCancelled" xml:space="preserve"><value>Authorization cancelled.</value></data>
+  <data name="AuthorizationDenied" xml:space="preserve"><value>Authorization was denied.</value></data>
+  <data name="AuthorizationExpired" xml:space="preserve"><value>Authorization expired. Try again.</value></data>
+  <data name="AuthorizationNotFound" xml:space="preserve"><value>Authorization request was not found. Try again.</value></data>
+  <data name="BrowserUnavailable" xml:space="preserve"><value>Could not open the browser.</value></data>
+  <data name="AuthorizationTimedOut" xml:space="preserve"><value>Authorization timed out. Try again.</value></data>
+  <data name="AuthorizationFailed" xml:space="preserve"><value>Authorization failed. Try again.</value></data>
+  <data name="SessionExpired" xml:space="preserve"><value>Session expired. Sign in again.</value></data>
+  <data name="AuthorizationPending" xml:space="preserve"><value>Authorization is still pending. Return after approving in your browser.</value></data>
+  <data name="AuthorizationFailure" xml:space="preserve"><value>Authorization failed. Check the instance URL and try again.</value></data>
+  <data name="DefaultUserName" xml:space="preserve"><value>Cotton user</value></data>
+  <data name="VersionFormat" xml:space="preserve"><value>Version {0}</value></data>
+  <data name="VersionWithBuildFormat" xml:space="preserve"><value>Version {0} ({1})</value></data>
+  <data name="UnknownText" xml:space="preserve"><value>Unknown</value></data>
+  <data name="DebugInstallChannel" xml:space="preserve"><value>Debug APK</value></data>
+  <data name="ReleaseInstallChannel" xml:space="preserve"><value>Release package</value></data>
+  <data name="CustomInstallChannel" xml:space="preserve"><value>Custom package</value></data>
+  <data name="SelectedFolder" xml:space="preserve"><value>Selected folder</value></data>
+</root>

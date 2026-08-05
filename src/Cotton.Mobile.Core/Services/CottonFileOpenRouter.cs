@@ -1,21 +1,23 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonFileOpenRouter
     {
         public const long MaxTextPreviewBytes = 512 * 1024;
-        public const string OpenActionLabel = "Open";
-        public const string OpenWithSystemAppActionLabel = "Open with system app";
-        public const string OpenUnavailableStatus = "No app can open this file.";
-        public const string PdfOpenUnavailableStatus = "No PDF app can open this file.";
-        public const string DocumentOpenUnavailableStatus = "No document app can open this file.";
-        public const string AudioOpenUnavailableStatus = "No audio app can open this file.";
-        public const string VideoOpenUnavailableStatus = "No video app can open this file.";
-        public const string ArchiveOpenUnavailableStatus = "No archive app can open this file.";
-        public const string SvgOpenUnavailableStatus = "No SVG app can open this file.";
-        public const string UnknownOpenUnavailableStatus = "No app can open this file type.";
+        public static string OpenActionLabel => CoreResources.OpenAction;
+        public static string OpenWithSystemAppActionLabel => CoreResources.OpenWithSystemAppAction;
+        public static string OpenUnavailableStatus => CoreResources.OpenUnavailable;
+        public static string PdfOpenUnavailableStatus => CoreResources.PdfOpenUnavailable;
+        public static string DocumentOpenUnavailableStatus => CoreResources.DocumentOpenUnavailable;
+        public static string AudioOpenUnavailableStatus => CoreResources.AudioOpenUnavailable;
+        public static string VideoOpenUnavailableStatus => CoreResources.VideoOpenUnavailable;
+        public static string ArchiveOpenUnavailableStatus => CoreResources.ArchiveOpenUnavailable;
+        public static string SvgOpenUnavailableStatus => CoreResources.SvgOpenUnavailable;
+        public static string UnknownOpenUnavailableStatus => CoreResources.UnknownOpenUnavailable;
 
         private static readonly Dictionary<string, string> ExtensionContentTypes =
             new(StringComparer.OrdinalIgnoreCase)
@@ -247,16 +249,17 @@ namespace Cotton.Mobile.Services
                 "Video" => CottonSystemFileOpenKind.Video,
                 "SVG" => CottonSystemFileOpenKind.Svg,
                 "Image" => CottonSystemFileOpenKind.Image,
-                _ when ArchiveFileExtensions.Contains(extension) => CottonSystemFileOpenKind.Archive,
-                _ when string.Equals(mediaType, "application/pdf", StringComparison.OrdinalIgnoreCase) =>
+                "File" when ArchiveFileExtensions.Contains(extension) => CottonSystemFileOpenKind.Archive,
+                "File" when string.Equals(mediaType, "application/pdf", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Pdf,
-                _ when mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) =>
+                "File" when mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Audio,
-                _ when mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) =>
+                "File" when mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Video,
-                _ when mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) =>
+                "File" when mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Image,
-                _ => CottonSystemFileOpenKind.File,
+                "File" => CottonSystemFileOpenKind.File,
+                _ => throw new ArgumentOutOfRangeException(nameof(file), file.Kind, "File kind is not supported."),
             };
         }
 
@@ -270,8 +273,11 @@ namespace Cotton.Mobile.Services
                 CottonSystemFileOpenKind.Video => VideoOpenUnavailableStatus,
                 CottonSystemFileOpenKind.Archive => ArchiveOpenUnavailableStatus,
                 CottonSystemFileOpenKind.Svg => SvgOpenUnavailableStatus,
+                CottonSystemFileOpenKind.None => OpenUnavailableStatus,
+                CottonSystemFileOpenKind.Text => OpenUnavailableStatus,
+                CottonSystemFileOpenKind.Image => OpenUnavailableStatus,
                 CottonSystemFileOpenKind.File => UnknownOpenUnavailableStatus,
-                _ => OpenUnavailableStatus,
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "System file open kind is not supported."),
             };
         }
     }

@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.ViewModels;
 using Microsoft.Maui.Controls.Shapes;
 
@@ -33,8 +34,16 @@ namespace Cotton.Mobile.Controls
 
         public AppNavigationBarView()
         {
-            _syncItem = CreateItem("Sync", IconPathData.Transfer, 0, "Open sync");
-            _profileItem = CreateItem("Profile", IconPathData.Profile, 1, "Open profile");
+            _syncItem = CreateItem(
+                AppResources.SyncTitle,
+                IconPathData.Transfer,
+                0,
+                AppResources.OpenSyncDescription);
+            _profileItem = CreateItem(
+                AppResources.ProfileTitle,
+                IconPathData.Profile,
+                1,
+                AppResources.OpenProfileDescription);
 
             Content = new NavigationBarView
             {

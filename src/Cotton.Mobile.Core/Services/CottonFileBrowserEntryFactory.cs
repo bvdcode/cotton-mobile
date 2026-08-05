@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Files;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Nodes;
 
 namespace Cotton.Mobile.Services
@@ -17,9 +18,9 @@ namespace Cotton.Mobile.Services
                 CottonFileBrowserEntryType.Folder,
                 node.Name,
                 "Folder",
-                "Folder",
-                "Open",
-                "Folder",
+                CoreResources.FolderKind,
+                CoreResources.OpenAction,
+                CoreResources.FolderKind,
                 node.UpdatedAt,
                 sizeBytes: null,
                 contentType: null,
@@ -36,13 +37,14 @@ namespace Cotton.Mobile.Services
                 ? string.Empty
                 : file.ContentType.Trim();
             string kind = CottonFileKindClassifier.ResolveKind(file.Name, contentType);
+            string displayKind = CottonFileKindDisplayName.Create(kind);
             return new CottonFileBrowserEntry(
                 file.Id,
                 CottonFileBrowserEntryType.File,
                 file.Name,
                 kind,
-                $"{CottonFileSizeFormatter.Format(file.SizeBytes)} · {kind}",
-                "More",
+                $"{CottonFileSizeFormatter.Format(file.SizeBytes)} · {displayKind}",
+                CoreResources.MoreAction,
                 ResolveBadgeText(kind),
                 file.UpdatedAt,
                 file.SizeBytes,
@@ -65,16 +67,17 @@ namespace Cotton.Mobile.Services
             string? contentHash)
         {
             string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
+            string displayKind = CottonFileKindDisplayName.Create(kind);
             string details = sizeBytes.HasValue
-                ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {kind}"
-                : kind;
+                ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {displayKind}"
+                : displayKind;
             return new CottonFileBrowserEntry(
                 id,
                 CottonFileBrowserEntryType.File,
                 name,
                 kind,
                 details,
-                "More",
+                CoreResources.MoreAction,
                 ResolveBadgeText(kind),
                 updatedAtUtc,
                 sizeBytes,
@@ -120,14 +123,15 @@ namespace Cotton.Mobile.Services
         {
             return kind switch
             {
-                "Image" => "IMG",
+                "Image" => CoreResources.ImageBadge,
                 "PDF" => "PDF",
-                "Document" => "DOC",
-                "Video" => "VID",
-                "Audio" => "AUD",
+                "Document" => CoreResources.DocumentBadge,
+                "Video" => CoreResources.VideoBadge,
+                "Audio" => CoreResources.AudioBadge,
                 "SVG" => "SVG",
-                "Text" => "TXT",
-                _ => "FILE",
+                "Text" => CoreResources.TextBadge,
+                "File" => CoreResources.FileBadge,
+                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "File kind is not supported."),
             };
         }
     }

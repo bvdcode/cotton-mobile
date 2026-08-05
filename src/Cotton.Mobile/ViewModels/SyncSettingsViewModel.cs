@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Commands;
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 
@@ -18,7 +19,7 @@ namespace Cotton.Mobile.ViewModels
         private string? _accountScopeKey;
         private bool _isBusy;
         private bool _canRunAll;
-        private string _summaryText = "No folders syncing";
+        private string _summaryText = AppResources.NoFoldersSyncing;
         private string? _status;
         private bool _isEmptyVisible = true;
 
@@ -184,7 +185,7 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = null;
             _accountScopeKey = null;
             Roots.ReplaceWith([]);
-            SummaryText = "No folders syncing";
+            SummaryText = AppResources.NoFoldersSyncing;
             Status = null;
             IsEmptyVisible = true;
             _canRunAll = false;
@@ -236,7 +237,7 @@ namespace Cotton.Mobile.ViewModels
         private void LogUnhandledCommandException(Exception exception)
         {
             _logger.LogError(exception, "Unhandled Cotton mobile sync settings command failure.");
-            Status = "Could not update sync settings.";
+            Status = AppResources.SyncSettingsUpdateFailed;
         }
 
         Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
@@ -34,10 +35,10 @@ namespace Cotton.Mobile.ViewModels
         public Task<bool> ConfirmSignOutAsync()
         {
             return _dialogService.ShowConfirmationAsync(
-                "Sign out?",
-                "You will need to approve this device again to reconnect.",
-                "Sign out",
-                "Cancel");
+                AppResources.SignOutQuestion,
+                AppResources.SignOutConfirmation,
+                AppResources.SignOutText,
+                AppResources.CancelText);
         }
 
         public async Task OpenPrivacyPolicyAsync()
@@ -59,9 +60,9 @@ namespace Cotton.Mobile.ViewModels
             }
 
             await _dialogService.ShowAlertAsync(
-                "Privacy Policy",
-                "Could not open the privacy policy.",
-                "OK");
+                AppResources.PrivacyPolicyTitle,
+                AppResources.PrivacyPolicyOpenFailed,
+                AppResources.OkText);
         }
     }
 }

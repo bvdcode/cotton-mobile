@@ -3,11 +3,12 @@
     x:Class="Cotton.Mobile.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    Title="Cotton Cloud">
+    xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+    Title="{x:Static localization:AppResources.AppTitle}">
 
     <ShellContent
         x:Name="MainContent"
-        Title="Files"
+        Title="{x:Static localization:AppResources.FilesTitle}"
         Route="MainPage"
         Shell.NavBarIsVisible="False" />
 

@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Windows.Input;
+using Cotton.Mobile.Resources.Localization;
 using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
@@ -57,7 +58,7 @@ namespace Cotton.Mobile.Controls
             nameof(PrimaryDescription),
             typeof(string),
             typeof(TopAppBar),
-            "Primary action");
+            AppResources.PrimaryActionDescription);
 
         public static readonly BindableProperty IsPrimaryActionVisibleProperty = BindableProperty.Create(
             nameof(IsPrimaryActionVisible),
@@ -83,7 +84,7 @@ namespace Cotton.Mobile.Controls
             nameof(SecondaryDescription),
             typeof(string),
             typeof(TopAppBar),
-            "Secondary action");
+            AppResources.SecondaryActionDescription);
 
         public static readonly BindableProperty IsSecondaryActionVisibleProperty = BindableProperty.Create(
             nameof(IsSecondaryActionVisible),
@@ -109,7 +110,7 @@ namespace Cotton.Mobile.Controls
             nameof(TertiaryDescription),
             typeof(string),
             typeof(TopAppBar),
-            "Tertiary action");
+            AppResources.TertiaryActionDescription);
 
         public static readonly BindableProperty IsTertiaryActionVisibleProperty = BindableProperty.Create(
             nameof(IsTertiaryActionVisible),

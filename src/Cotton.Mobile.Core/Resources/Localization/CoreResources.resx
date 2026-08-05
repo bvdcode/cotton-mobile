@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="AuthorizationInstruction" xml:space="preserve"><value>Approve the request in your browser, then return to Cotton Cloud.</value></data>
+  <data name="CustomServerUrl" xml:space="preserve"><value>Custom server URL</value></data>
+  <data name="CancellingAuthorization" xml:space="preserve"><value>Cancelling authorization…</value></data>
+  <data name="DefaultFolderName" xml:space="preserve"><value>Folder</value></data>
+  <data name="DefaultFolderNameLower" xml:space="preserve"><value>folder</value></data>
+  <data name="DefaultFolderReference" xml:space="preserve"><value>this folder</value></data>
+  <data name="SyncBothWaysAction" xml:space="preserve"><value>Sync both ways</value></data>
+  <data name="ConflictReviewRequired" xml:space="preserve"><value>Bidirectional sync needs conflict review.</value></data>
+  <data name="BlockedReviewRequired" xml:space="preserve"><value>Bidirectional sync needs review before it can run.</value></data>
+  <data name="DestructiveReviewRequired" xml:space="preserve"><value>Bidirectional sync needs review before removing files.</value></data>
+  <data name="ConfirmBidirectionalSyncTitle" xml:space="preserve"><value>Run bidirectional sync?</value></data>
+  <data name="SyncAction" xml:space="preserve"><value>Sync</value></data>
+  <data name="SyncingBothWaysFormat" xml:space="preserve"><value>Syncing {0} both ways...</value></data>
+  <data name="NoBidirectionalFolders" xml:space="preserve"><value>No bidirectional folders are set to sync.</value></data>
+  <data name="BidirectionalSyncCurrent" xml:space="preserve"><value>Bidirectional sync complete. Everything is up to date.</value></data>
+  <data name="BidirectionalSyncCompletedFormat" xml:space="preserve"><value>Bidirectional sync complete. {0}.</value></data>
+  <data name="NoDestructiveChanges" xml:space="preserve"><value>This sync will not remove local or cloud files.</value></data>
+  <data name="DestructiveChangesFormat" xml:space="preserve"><value>This sync will {0} based on the selected folder and cloud state.</value></data>
+  <data name="RemoveOneLocalFile" xml:space="preserve"><value>remove 1 local file</value></data>
+  <data name="RemoveLocalFilesFormat" xml:space="preserve"><value>remove {0} local files</value></data>
+  <data name="TrashOneCloudFile" xml:space="preserve"><value>move 1 cloud file to trash</value></data>
+  <data name="TrashCloudFilesFormat" xml:space="preserve"><value>move {0} cloud files to trash</value></data>
+  <data name="SyncToDeviceAction" xml:space="preserve"><value>Sync to this device</value></data>
+  <data name="SyncToFolderAction" xml:space="preserve"><value>Sync to folder</value></data>
+  <data name="SyncingFolders" xml:space="preserve"><value>Syncing folders...</value></data>
+  <data name="AccountSessionRequired" xml:space="preserve"><value>Sync needs a fresh account session.</value></data>
+  <data name="SyncOffline" xml:space="preserve"><value>Offline. Sync needs internet.</value></data>
+  <data name="SyncCancelled" xml:space="preserve"><value>Sync cancelled.</value></data>
+  <data name="SyncFailed" xml:space="preserve"><value>Sync failed.</value></data>
+  <data name="SyncingFolderFormat" xml:space="preserve"><value>Syncing {0}...</value></data>
+  <data name="NoSyncFolders" xml:space="preserve"><value>No folders are set to sync.</value></data>
+  <data name="SyncCurrent" xml:space="preserve"><value>Sync complete. Everything is up to date.</value></data>
+  <data name="SyncCompletedFormat" xml:space="preserve"><value>Sync complete. {0}.</value></data>
+  <data name="UploadNewFilesAction" xml:space="preserve"><value>Upload new files</value></data>
+  <data name="UploadDirectionUnsupported" xml:space="preserve"><value>Sync root is not configured to upload new files.</value></data>
+  <data name="UploadingFolderFormat" xml:space="preserve"><value>Uploading new files from {0}...</value></data>
+  <data name="StopSyncingAction" xml:space="preserve"><value>Stop syncing</value></data>
+  <data name="PauseAction" xml:space="preserve"><value>Pause</value></data>
+  <data name="ResumeAction" xml:space="preserve"><value>Resume</value></data>
+  <data name="CancelAction" xml:space="preserve"><value>Cancel</value></data>
+  <data name="StopSyncingMessage" xml:space="preserve"><value>This stops future sync for this folder. Files already on this device are not deleted.</value></data>
+  <data name="PausedStatus" xml:space="preserve"><value>Paused</value></data>
+  <data name="RootPausedStatus" xml:space="preserve"><value>Sync paused. Resume this folder first.</value></data>
+  <data name="RootMissingStatus" xml:space="preserve"><value>Sync folder is no longer configured.</value></data>
+  <data name="PauseFailedStatus" xml:space="preserve"><value>Could not pause syncing this folder.</value></data>
+  <data name="ResumeFailedStatus" xml:space="preserve"><value>Could not resume syncing this folder.</value></data>
+  <data name="StopFailedStatus" xml:space="preserve"><value>Could not stop syncing this folder.</value></data>
+  <data name="StopSyncingTitleFormat" xml:space="preserve"><value>Stop syncing {0}?</value></data>
+  <data name="StoppedSyncingFormat" xml:space="preserve"><value>Stopped syncing {0}.</value></data>
+  <data name="PausedSyncingFormat" xml:space="preserve"><value>Paused syncing {0}.</value></data>
+  <data name="ResumedSyncingFormat" xml:space="preserve"><value>Resumed syncing {0}.</value></data>
+  <data name="NoFoldersSyncing" xml:space="preserve"><value>No folders syncing</value></data>
+  <data name="OneFolderSyncing" xml:space="preserve"><value>1 folder set to sync</value></data>
+  <data name="FoldersSyncingFormat" xml:space="preserve"><value>{0} folders set to sync</value></data>
+  <data name="RunNowAction" xml:space="preserve"><value>Run now</value></data>
+  <data name="UnsupportedStatus" xml:space="preserve"><value>Unsupported</value></data>
+  <data name="UnavailableStatus" xml:space="preserve"><value>Unavailable</value></data>
+  <data name="ReadyStatus" xml:space="preserve"><value>Ready</value></data>
+  <data name="ChooseFolderStatus" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="ReconnectStatus" xml:space="preserve"><value>Reconnect</value></data>
+  <data name="SyncingStatus" xml:space="preserve"><value>Syncing</value></data>
+  <data name="UploadingStatus" xml:space="preserve"><value>Uploading</value></data>
+  <data name="CloudToDeviceDirection" xml:space="preserve"><value>Cloud to device</value></data>
+  <data name="BidirectionalDirection" xml:space="preserve"><value>Bidirectional</value></data>
+  <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
+  <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>
+  <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>
+  <data name="LocalFolderUnavailable" xml:space="preserve"><value>Local folder unavailable</value></data>
+  <data name="LocalSyncTargetUnsupported" xml:space="preserve"><value>Local sync target unsupported</value></data>
+  <data name="LocalSyncSourceUnsupported" xml:space="preserve"><value>Local sync source unsupported</value></data>
+  <data name="OnDeviceStatus" xml:space="preserve"><value>On device</value></data>
+  <data name="OfflineMissingStatus" xml:space="preserve"><value>Offline missing</value></data>
+  <data name="OfflineStaleStatus" xml:space="preserve"><value>Offline stale</value></data>
+  <data name="AvailableOfflineDetails" xml:space="preserve"><value>Available offline.</value></data>
+  <data name="MissingOfflineDetails" xml:space="preserve"><value>Kept offline, but missing on this device.</value></data>
+  <data name="StaleOfflineDetails" xml:space="preserve"><value>Kept offline, refresh to match the cloud version.</value></data>
+  <data name="OpenAction" xml:space="preserve"><value>Open</value></data>
+  <data name="MoreAction" xml:space="preserve"><value>More</value></data>
+  <data name="OpenWithSystemAppAction" xml:space="preserve"><value>Open with system app</value></data>
+  <data name="OpenUnavailable" xml:space="preserve"><value>No app can open this file.</value></data>
+  <data name="PdfOpenUnavailable" xml:space="preserve"><value>No PDF app can open this file.</value></data>
+  <data name="DocumentOpenUnavailable" xml:space="preserve"><value>No document app can open this file.</value></data>
+  <data name="AudioOpenUnavailable" xml:space="preserve"><value>No audio app can open this file.</value></data>
+  <data name="VideoOpenUnavailable" xml:space="preserve"><value>No video app can open this file.</value></data>
+  <data name="ArchiveOpenUnavailable" xml:space="preserve"><value>No archive app can open this file.</value></data>
+  <data name="SvgOpenUnavailable" xml:space="preserve"><value>No SVG app can open this file.</value></data>
+  <data name="UnknownOpenUnavailable" xml:space="preserve"><value>No app can open this file type.</value></data>
+  <data name="UnnamedItem" xml:space="preserve"><value>(unnamed)</value></data>
+  <data name="FolderKind" xml:space="preserve"><value>Folder</value></data>
+  <data name="FileKind" xml:space="preserve"><value>File</value></data>
+  <data name="UploadedFileName" xml:space="preserve"><value>Uploaded file</value></data>
+  <data name="DownloadedLabel" xml:space="preserve"><value>downloaded</value></data>
+  <data name="RefreshedLabel" xml:space="preserve"><value>refreshed</value></data>
+  <data name="RenamedLabel" xml:space="preserve"><value>renamed</value></data>
+  <data name="RemovedLabel" xml:space="preserve"><value>removed</value></data>
+  <data name="BlockedLabel" xml:space="preserve"><value>blocked</value></data>
+  <data name="UploadedLabel" xml:space="preserve"><value>uploaded</value></data>
+  <data name="RefreshedLocallyLabel" xml:space="preserve"><value>refreshed locally</value></data>
+  <data name="RenamedLocallyLabel" xml:space="preserve"><value>renamed locally</value></data>
+  <data name="RemovedLocallyLabel" xml:space="preserve"><value>removed locally</value></data>
+  <data name="UpdatedInCloudLabel" xml:space="preserve"><value>updated in cloud</value></data>
+  <data name="FolderCreatedSingular" xml:space="preserve"><value>folder created</value></data>
+  <data name="FolderCreatedPlural" xml:space="preserve"><value>folders created</value></data>
+  <data name="RemoteFileRemovedSingular" xml:space="preserve"><value>remote file removed</value></data>
+  <data name="RemoteFileRemovedPlural" xml:space="preserve"><value>remote files removed</value></data>
+  <data name="RecordCleanedSingular" xml:space="preserve"><value>record cleaned</value></data>
+  <data name="RecordCleanedPlural" xml:space="preserve"><value>records cleaned</value></data>
+  <data name="ConflictReviewSingular" xml:space="preserve"><value>conflict needs review</value></data>
+  <data name="ConflictReviewPlural" xml:space="preserve"><value>conflicts need review</value></data>
+  <data name="LocalRemovalReviewSingular" xml:space="preserve"><value>local removal needs review</value></data>
+  <data name="LocalRemovalReviewPlural" xml:space="preserve"><value>local removals need review</value></data>
+  <data name="CloudRemovalReviewSingular" xml:space="preserve"><value>cloud removal needs review</value></data>
+  <data name="CloudRemovalReviewPlural" xml:space="preserve"><value>cloud removals need review</value></data>
+  <data name="RootSkippedSingular" xml:space="preserve"><value>root skipped</value></data>
+  <data name="RootSkippedPlural" xml:space="preserve"><value>roots skipped</value></data>
+  <data name="UploadConfirmedSingular" xml:space="preserve"><value>upload confirmed</value></data>
+  <data name="UploadConfirmedPlural" xml:space="preserve"><value>uploads confirmed</value></data>
+  <data name="OriginalRemovedSingular" xml:space="preserve"><value>original removed</value></data>
+  <data name="OriginalRemovedPlural" xml:space="preserve"><value>originals removed</value></data>
+  <data name="BidirectionalDownloadedLabel" xml:space="preserve"><value>bidirectional downloaded</value></data>
+  <data name="BidirectionalRefreshedLocallyLabel" xml:space="preserve"><value>bidirectional refreshed locally</value></data>
+  <data name="BidirectionalRenamedLocallyLabel" xml:space="preserve"><value>bidirectional renamed locally</value></data>
+  <data name="BidirectionalRemovedLocallyLabel" xml:space="preserve"><value>bidirectional removed locally</value></data>
+  <data name="BidirectionalUploadedLabel" xml:space="preserve"><value>bidirectional uploaded</value></data>
+  <data name="BidirectionalUpdatedInCloudLabel" xml:space="preserve"><value>bidirectional updated in cloud</value></data>
+  <data name="BidirectionalConflictReviewSingular" xml:space="preserve"><value>bidirectional conflict needs review</value></data>
+  <data name="BidirectionalConflictReviewPlural" xml:space="preserve"><value>bidirectional conflicts need review</value></data>
+  <data name="BidirectionalLocalRemovalReviewSingular" xml:space="preserve"><value>bidirectional local removal needs review</value></data>
+  <data name="BidirectionalLocalRemovalReviewPlural" xml:space="preserve"><value>bidirectional local removals need review</value></data>
+  <data name="BidirectionalCloudRemovalReviewSingular" xml:space="preserve"><value>bidirectional cloud removal needs review</value></data>
+  <data name="BidirectionalCloudRemovalReviewPlural" xml:space="preserve"><value>bidirectional cloud removals need review</value></data>
+  <data name="FilesName" xml:space="preserve"><value>Files</value></data>
+  <data name="LocalFolderName" xml:space="preserve"><value>Local folder</value></data>
+  <data name="SyncRootCompleted" xml:space="preserve"><value>Sync root completed</value></data>
+  <data name="BidirectionalSyncRootCompleted" xml:space="preserve"><value>Bidirectional sync root completed</value></data>
+  <data name="NotBidirectionalDirection" xml:space="preserve"><value>Sync direction is not bidirectional</value></data>
+  <data name="NotCloudToDeviceDirection" xml:space="preserve"><value>Sync direction is not cloud-to-device</value></data>
+  <data name="UnsyncableName" xml:space="preserve"><value>Name cannot be synced to the cloud.</value></data>
+  <data name="UnnamedName" xml:space="preserve"><value>Unnamed</value></data>
+  <data name="ImageKind" xml:space="preserve"><value>Image</value></data>
+  <data name="PdfKind" xml:space="preserve"><value>PDF</value></data>
+  <data name="DocumentKind" xml:space="preserve"><value>Document</value></data>
+  <data name="VideoKind" xml:space="preserve"><value>Video</value></data>
+  <data name="AudioKind" xml:space="preserve"><value>Audio</value></data>
+  <data name="SvgKind" xml:space="preserve"><value>SVG</value></data>
+  <data name="TextKind" xml:space="preserve"><value>Text</value></data>
+  <data name="FileBadge" xml:space="preserve"><value>FILE</value></data>
+  <data name="ImageBadge" xml:space="preserve"><value>IMG</value></data>
+  <data name="DocumentBadge" xml:space="preserve"><value>DOC</value></data>
+  <data name="VideoBadge" xml:space="preserve"><value>VID</value></data>
+  <data name="AudioBadge" xml:space="preserve"><value>AUD</value></data>
+  <data name="TextBadge" xml:space="preserve"><value>TXT</value></data>
+</root>

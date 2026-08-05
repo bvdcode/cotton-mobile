@@ -1,29 +1,31 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonCloudToDeviceSyncStatusText
     {
-        private const string DefaultFolderName = "Folder";
+        public static string ActionLabel => CoreResources.SyncToDeviceAction;
 
-        public const string ActionLabel = "Sync to this device";
+        public static string ChooseFolderActionLabel => CoreResources.SyncToFolderAction;
 
-        public const string ChooseFolderActionLabel = "Sync to folder";
+        public static string StartingAllStatus => CoreResources.SyncingFolders;
 
-        public const string StartingAllStatus = "Syncing folders...";
+        public static string AccountUnavailableStatus => CoreResources.AccountSessionRequired;
 
-        public static string AccountUnavailableStatus { get; } = "Sync needs a fresh account session.";
+        public static string OfflineUnavailableStatus => CoreResources.SyncOffline;
 
-        public static string OfflineUnavailableStatus { get; } = "Offline. Sync needs internet.";
+        public static string CancelledStatus => CoreResources.SyncCancelled;
 
-        public static string CancelledStatus { get; } = "Sync cancelled.";
-
-        public static string FailedStatus { get; } = "Sync failed.";
+        public static string FailedStatus => CoreResources.SyncFailed;
 
         public static string CreateStartingStatus(string folderName)
         {
-            return $"Syncing {NormalizeFolderName(folderName)}...";
+            return CoreResources.Format(
+                CoreResources.SyncingFolderFormat,
+                NormalizeFolderName(folderName));
         }
 
         public static string CreateCompletedStatus(CottonCloudToDeviceSyncRunSummary summary)
@@ -32,23 +34,23 @@ namespace Cotton.Mobile.Services
 
             if (summary.RootCount == 0)
             {
-                return "No folders are set to sync.";
+                return CoreResources.NoSyncFolders;
             }
 
             List<string> parts = [];
-            AddCount(parts, summary.DownloadedCount, "downloaded");
-            AddCount(parts, summary.RefreshedCount, "refreshed");
-            AddCount(parts, summary.RenamedCount, "renamed");
-            AddCount(parts, summary.RemovedCount, "removed");
-            AddCount(parts, summary.BlockedItemCount, "blocked");
+            AddCount(parts, summary.DownloadedCount, CoreResources.DownloadedLabel);
+            AddCount(parts, summary.RefreshedCount, CoreResources.RefreshedLabel);
+            AddCount(parts, summary.RenamedCount, CoreResources.RenamedLabel);
+            AddCount(parts, summary.RemovedCount, CoreResources.RemovedLabel);
+            AddCount(parts, summary.BlockedItemCount, CoreResources.BlockedLabel);
             AddRootCount(parts, summary.SkippedRootCount);
 
             if (parts.Count == 0)
             {
-                return "Sync complete. Everything is up to date.";
+                return CoreResources.SyncCurrent;
             }
 
-            return $"Sync complete. {string.Join(", ", parts)}.";
+            return CoreResources.Format(CoreResources.SyncCompletedFormat, string.Join(", ", parts));
         }
 
         private static void AddCount(List<string> parts, int count, string label)
@@ -68,12 +70,14 @@ namespace Cotton.Mobile.Services
                 return;
             }
 
-            parts.Add(count == 1 ? "1 root skipped" : $"{count} roots skipped");
+            parts.Add(count == 1
+                ? $"1 {CoreResources.RootSkippedSingular}"
+                : $"{count} {CoreResources.RootSkippedPlural}");
         }
 
         private static string NormalizeFolderName(string folderName)
         {
-            return string.IsNullOrWhiteSpace(folderName) ? DefaultFolderName : folderName.Trim();
+            return string.IsNullOrWhiteSpace(folderName) ? CoreResources.DefaultFolderName : folderName.Trim();
         }
     }
 }

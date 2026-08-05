@@ -1,46 +1,48 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonSyncRootManagementText
     {
-        public const string StopAction = "Stop syncing";
-        public const string PauseAction = "Pause";
-        public const string ResumeAction = "Resume";
-        public const string CancelAction = "Cancel";
-        public const string StopMessage = "This stops future sync for this folder. Files already on this device are not deleted.";
-        public const string PausedStatusText = "Paused";
-        public const string RootPausedStatus = "Sync paused. Resume this folder first.";
-        public const string RootMissingStatus = "Sync folder is no longer configured.";
-        public const string PauseFailedStatus = "Could not pause syncing this folder.";
-        public const string ResumeFailedStatus = "Could not resume syncing this folder.";
-        public const string StopFailedStatus = "Could not stop syncing this folder.";
+        public static string StopAction => CoreResources.StopSyncingAction;
+        public static string PauseAction => CoreResources.PauseAction;
+        public static string ResumeAction => CoreResources.ResumeAction;
+        public static string CancelAction => CoreResources.CancelAction;
+        public static string StopMessage => CoreResources.StopSyncingMessage;
+        public static string PausedStatusText => CoreResources.PausedStatus;
+        public static string RootPausedStatus => CoreResources.RootPausedStatus;
+        public static string RootMissingStatus => CoreResources.RootMissingStatus;
+        public static string PauseFailedStatus => CoreResources.PauseFailedStatus;
+        public static string ResumeFailedStatus => CoreResources.ResumeFailedStatus;
+        public static string StopFailedStatus => CoreResources.StopFailedStatus;
 
         public static string CreateStopTitle(string folderName)
         {
-            return $"Stop syncing {NormalizeFolderName(folderName)}?";
+            return CoreResources.Format(CoreResources.StopSyncingTitleFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreateStoppedStatus(string folderName)
         {
-            return $"Stopped syncing {NormalizeFolderName(folderName)}.";
+            return CoreResources.Format(CoreResources.StoppedSyncingFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreatePausedStatus(string folderName)
         {
-            return $"Paused syncing {NormalizeFolderName(folderName)}.";
+            return CoreResources.Format(CoreResources.PausedSyncingFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreateResumedStatus(string folderName)
         {
-            return $"Resumed syncing {NormalizeFolderName(folderName)}.";
+            return CoreResources.Format(CoreResources.ResumedSyncingFormat, NormalizeFolderName(folderName));
         }
 
         private static string NormalizeFolderName(string folderName)
         {
             return string.IsNullOrWhiteSpace(folderName)
-                ? "this folder"
+                ? CoreResources.DefaultFolderReference
                 : folderName.Trim();
         }
     }

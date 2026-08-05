@@ -5,6 +5,7 @@
 using Android.Content;
 using Android.Database;
 using Android.Provider;
+using Cotton.Mobile.Resources.Localization;
 using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
@@ -149,12 +150,12 @@ namespace Cotton.Mobile.Services
                 child.IsDirectory ? CottonFileBrowserEntryType.Folder : CottonFileBrowserEntryType.File,
                 CreateProblemDisplayName(child.DisplayName),
                 rawRelativePath,
-                "Name cannot be synced to the cloud.");
+                CoreResources.UnsyncableName);
         }
 
         private static string CreateProblemDisplayName(string displayName)
         {
-            return string.IsNullOrWhiteSpace(displayName) ? "Unnamed" : displayName.Trim();
+            return string.IsNullOrWhiteSpace(displayName) ? CoreResources.UnnamedName : displayName.Trim();
         }
 
         private static string CreateRawRelativePath(string parentPath, string displayName)

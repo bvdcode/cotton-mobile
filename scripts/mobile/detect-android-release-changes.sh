@@ -2,13 +2,14 @@
 
 set -euo pipefail
 
-if (( $# != 2 )); then
-  printf 'Usage: %s BASE_REF HEAD_REF\n' "$0" >&2
+if (( $# < 2 || $# > 3 )); then
+  printf 'Usage: %s BASE_REF HEAD_REF [PUBLISHED_RELEASE_REF]\n' "$0" >&2
   exit 1
 fi
 
 base_ref="$1"
 head_ref="$2"
+published_release_ref="${3:-}"
 release_required="false"
 
 requires_android_release() {
@@ -28,10 +29,18 @@ requires_android_release() {
   esac
 }
 
-if [[ "$base_ref" =~ ^0+$ ]]; then
+comparison_base="$base_ref"
+if [[ -n "$published_release_ref" ]] \
+  && git merge-base --is-ancestor "$published_release_ref" "$head_ref"; then
+  comparison_base="$published_release_ref"
+fi
+
+if [[ "$comparison_base" == "$head_ref" ]]; then
+  changed_paths=""
+elif [[ "$comparison_base" =~ ^0+$ ]]; then
   changed_paths="$(git ls-tree -r --name-only "$head_ref")"
 else
-  changed_paths="$(git diff --name-only "$base_ref" "$head_ref")"
+  changed_paths="$(git diff --name-only "$comparison_base" "$head_ref")"
 fi
 
 while IFS= read -r path; do
@@ -46,3 +55,4 @@ if [[ -n "${GITHUB_OUTPUT:-}" ]]; then
 fi
 
 printf 'Android release required: %s\n' "$release_required"
+printf 'Android release comparison base: %s\n' "$comparison_base"

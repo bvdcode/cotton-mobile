@@ -37,7 +37,7 @@ write_config() {
 run_checker() {
   local config_file="$1"
 
-  "$checker" \
+  python3 "$checker" \
     --configuration Debug \
     --package-id dev.cottoncloud.app.debug \
     --config-file "$config_file"

@@ -76,6 +76,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
             services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
             services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
+            services.AddSingleton<ICottonAppCodeAuthorizationService, CottonAppCodeAuthorizationService>();
             services.AddSingleton<ICottonSessionService, CottonSessionService>();
         }
 
@@ -96,6 +97,8 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonOfflineFileMetadataPathProvider, CottonOfflineFileMetadataPathProvider>();
             services.AddSingleton<ICottonOfflineFilePinStore, FileSystemCottonOfflineFilePinStore>();
             services.AddSingleton<IFileDownloadCachePruner, FileDownloadCachePruner>();
+            services.AddSingleton<ICottonLocalDownloadCache, CottonLocalDownloadCache>();
+            services.AddSingleton<ICottonFileDownloadService, CottonFileDownloadService>();
             services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
             services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();

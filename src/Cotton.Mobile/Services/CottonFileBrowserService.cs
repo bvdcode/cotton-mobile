@@ -1,10 +1,9 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Files;
 using Cotton.Nodes;
 using Cotton.Sdk;
-using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
@@ -13,21 +12,17 @@ namespace Cotton.Mobile.Services
         private const int PageSize = 100;
 
         private readonly ICottonClientFactory _clientFactory;
-        private readonly IFileDownloadCachePruner _downloadCachePruner;
-        private readonly ILogger<CottonFileBrowserService> _logger;
+        private readonly ICottonFileDownloadService _downloadService;
 
         public CottonFileBrowserService(
             ICottonClientFactory clientFactory,
-            IFileDownloadCachePruner downloadCachePruner,
-            ILogger<CottonFileBrowserService> logger)
+            ICottonFileDownloadService downloadService)
         {
             ArgumentNullException.ThrowIfNull(clientFactory);
-            ArgumentNullException.ThrowIfNull(downloadCachePruner);
-            ArgumentNullException.ThrowIfNull(logger);
+            ArgumentNullException.ThrowIfNull(downloadService);
 
             _clientFactory = clientFactory;
-            _downloadCachePruner = downloadCachePruner;
-            _logger = logger;
+            _downloadService = downloadService;
         }
 
         public async Task<CottonFolderContent> GetRootAsync(
@@ -70,140 +65,32 @@ namespace Cotton.Mobile.Services
             return CottonFileBrowserEntry.FromNode(node);
         }
 
-        public async Task<CottonFileDownloadResult> DownloadAsync(
+        public Task<CottonFileDownloadResult> DownloadAsync(
             Uri instanceUri,
             CottonFileBrowserEntry file,
             IProgress<long>? progress = null,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(file);
-            if (file.Type != CottonFileBrowserEntryType.File)
-            {
-                throw new ArgumentException("Only files can be downloaded.", nameof(file));
-            }
-
-            string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
-            Directory.CreateDirectory(directory);
-            Directory.CreateDirectory(CottonMobileStoragePaths.CreateTemporaryDownloadsDirectory());
-            string filePath = CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file);
-            string tempFilePath = CottonMobileStoragePaths.CreateTemporaryDownloadPath();
-            long sizeBytes = 0;
-            bool finalFileReady = false;
-
-            try
-            {
-                await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-                await using (var destination = new FileStream(
-                    tempFilePath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    bufferSize: 81920,
-                    useAsync: true))
-                {
-                    Stream downloadTarget = progress is null
-                        ? destination
-                        : new ProgressReportingStream(destination, progress);
-                    await client.Files.DownloadContentAsync(file.Id, downloadTarget, download: true, cancellationToken: cancellationToken)
-                        .ConfigureAwait(false);
-                    await destination.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    cancellationToken.ThrowIfCancellationRequested();
-                    sizeBytes = destination.Length;
-                }
-
-                await ValidateDownloadedContentAsync(file, tempFilePath, sizeBytes, cancellationToken)
-                    .ConfigureAwait(false);
-
-                cancellationToken.ThrowIfCancellationRequested();
-                try
-                {
-                    StampLocalDownload(tempFilePath, file);
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogWarning(exception, "Failed to stamp Cotton mobile temporary download file {Path}.", tempFilePath);
-                    throw;
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                try
-                {
-                    File.Move(tempFilePath, filePath, overwrite: true);
-                    finalFileReady = true;
-                }
-                catch (Exception exception)
-                {
-                    _logger.LogWarning(exception, "Failed to replace Cotton mobile download file {Path}.", filePath);
-                    throw;
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                TouchLocalDownload(new FileInfo(filePath));
-                DeleteStaleSiblingDownloads(directory, filePath);
-
-                await _downloadCachePruner.PruneAsync(instanceUri, filePath, cancellationToken).ConfigureAwait(false);
-                cancellationToken.ThrowIfCancellationRequested();
-
-                return new CottonFileDownloadResult(file.Name, filePath, sizeBytes, file.ContentType);
-            }
-            finally
-            {
-                if (!finalFileReady)
-                {
-                    DeleteTemporaryDownload(tempFilePath);
-                }
-            }
+            return _downloadService.DownloadAsync(instanceUri, file, progress, cancellationToken);
         }
 
         public CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(file);
-
-            return InspectLocalDownload(
-                file,
-                "local download snapshot",
-                () =>
-                {
-                    FileInfo? info = GetLocalDownloadFile(instanceUri, file);
-                    return info is null ? null : CreateLocalFileSnapshot(info);
-                });
+            return _downloadService.GetLocalDownload(instanceUri, file);
         }
 
-        public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(Uri instanceUri, CottonFileBrowserEntry file)
+        public CottonLocalFileSnapshot? GetReusableLocalDownloadSnapshot(
+            Uri instanceUri,
+            CottonFileBrowserEntry file)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(file);
-
-            return InspectLocalDownload(
-                file,
-                "reusable local download snapshot",
-                () =>
-                {
-                    FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
-                    return info is null ? null : CreateLocalFileSnapshot(info);
-                });
+            return _downloadService.GetReusableLocalDownloadSnapshot(instanceUri, file);
         }
 
-        public CottonFileDownloadResult? GetReusableLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
+        public CottonFileDownloadResult? GetReusableLocalDownload(
+            Uri instanceUri,
+            CottonFileBrowserEntry file)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(file);
-
-            return InspectLocalDownload(
-                file,
-                "reusable local download",
-                () =>
-                {
-                    FileInfo? info = GetReusableLocalDownloadFile(instanceUri, file);
-                    if (info is null)
-                    {
-                        return null;
-                    }
-
-                    TouchLocalDownload(info);
-                    return new CottonFileDownloadResult(file.Name, info.FullName, info.Length, file.ContentType);
-                });
+            return _downloadService.GetReusableLocalDownload(instanceUri, file);
         }
 
         public Task<bool> DeleteLocalDownloadAsync(
@@ -211,23 +98,7 @@ namespace Cotton.Mobile.Services
             CottonFileBrowserEntry file,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(file);
-
-            return Task.Run(
-                () =>
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    string directory = CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, file);
-                    if (!Directory.Exists(directory))
-                    {
-                        return false;
-                    }
-
-                    Directory.Delete(directory, recursive: true);
-                    return true;
-                },
-                cancellationToken);
+            return _downloadService.DeleteLocalDownloadAsync(instanceUri, file, cancellationToken);
         }
 
         private static async Task<CottonFolderContent> LoadFolderAsync(
@@ -242,11 +113,9 @@ namespace Cotton.Mobile.Services
                 pageSize: PageSize,
                 depth: 0,
                 cancellationToken).ConfigureAwait(false);
-
             var nodes = new List<NodeDto>(firstPage.Nodes);
             var files = new List<NodeFileManifestDto>(firstPage.Files);
             int totalPages = (int)Math.Ceiling(firstPage.TotalCount / (double)PageSize);
-
             for (int page = 2; page <= totalPages; page++)
             {
                 NodeContentDto content = await client.Nodes.GetChildrenAsync(
@@ -267,185 +136,7 @@ namespace Cotton.Mobile.Services
                         .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
                         .Select(CottonFileBrowserEntry.FromFile))
                 .ToList();
-
             return new CottonFolderContent(folderId, folderName, entries);
-        }
-
-        private static FileInfo? GetLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
-        {
-            if (file.Type != CottonFileBrowserEntryType.File)
-            {
-                return null;
-            }
-
-            var info = new FileInfo(CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file));
-            return info.Exists ? info : null;
-        }
-
-        private static FileInfo? GetReusableLocalDownloadFile(Uri instanceUri, CottonFileBrowserEntry file)
-        {
-            if (!CottonSensitiveFileCachePolicy.CanReuseUnpinnedLocalCopy(file))
-            {
-                return null;
-            }
-
-            FileInfo? info = GetLocalDownloadFile(instanceUri, file);
-            if (info is null || !IsReusableLocalDownload(file, info))
-            {
-                return null;
-            }
-
-            return info;
-        }
-
-        private static CottonLocalFileSnapshot CreateLocalFileSnapshot(FileInfo info)
-        {
-            return new CottonLocalFileSnapshot(
-                info.Name,
-                info.Length,
-                CottonLocalFileFreshness.NormalizeUtc(info.LastWriteTimeUtc));
-        }
-
-        private static async Task ValidateDownloadedContentAsync(
-            CottonFileBrowserEntry file,
-            string filePath,
-            long downloadedSizeBytes,
-            CancellationToken cancellationToken)
-        {
-            if (file.SizeBytes.HasValue && downloadedSizeBytes != file.SizeBytes.Value)
-            {
-                throw new IOException(
-                    $"Downloaded file size mismatch for {file.Id}: expected {file.SizeBytes.Value} bytes, got {downloadedSizeBytes} bytes.");
-            }
-
-            if (file.ContentHash is null)
-            {
-                throw new IOException($"Downloaded file manifest does not contain a content hash for {file.Id}.");
-            }
-
-            await using var content = new FileStream(
-                filePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read,
-                bufferSize: 81920,
-                useAsync: true);
-            string contentHash = await CottonContentHash.ComputeSha256Async(content, cancellationToken)
-                .ConfigureAwait(false);
-            if (!string.Equals(contentHash, file.ContentHash, StringComparison.Ordinal))
-            {
-                throw new IOException($"Downloaded file content hash mismatch for {file.Id}.");
-            }
-        }
-
-        private static bool IsReusableLocalDownload(CottonFileBrowserEntry file, FileInfo info)
-        {
-            if ((file.SizeBytes.HasValue && file.SizeBytes.Value != info.Length)
-                || !CottonLocalFileFreshness.IsFresh(info.LastWriteTimeUtc, file.UpdatedAtUtc)
-                || file.ContentHash is null)
-            {
-                return false;
-            }
-
-            using FileStream content = info.OpenRead();
-            string contentHash = CottonContentHash.ComputeSha256(content);
-            return string.Equals(contentHash, file.ContentHash, StringComparison.Ordinal);
-        }
-
-        private T? InspectLocalDownload<T>(
-            CottonFileBrowserEntry file,
-            string operation,
-            Func<T?> inspect)
-            where T : class
-        {
-            try
-            {
-                return inspect();
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                _logger.LogDebug(
-                    exception,
-                    "Failed to inspect Cotton mobile {Operation} for file {FileId}.",
-                    operation,
-                    file.Id);
-                return null;
-            }
-        }
-
-        private void StampLocalDownload(string filePath, CottonFileBrowserEntry file)
-        {
-            File.SetLastWriteTimeUtc(
-                filePath,
-                CottonLocalFileFreshness.NormalizeUtc(file.UpdatedAtUtc));
-        }
-
-        private void TouchLocalDownload(FileInfo info)
-        {
-            try
-            {
-                info.LastAccessTimeUtc = DateTime.UtcNow;
-            }
-            catch (Exception exception)
-                when (exception is IOException
-                    or UnauthorizedAccessException
-                    or PlatformNotSupportedException
-                    or ArgumentException)
-            {
-                _logger.LogDebug(exception, "Failed to update Cotton mobile local file timestamp {Path}.", info.FullName);
-            }
-        }
-
-        private void DeleteStaleSiblingDownloads(string directory, string protectedPath)
-        {
-            string normalizedProtectedPath = Path.GetFullPath(protectedPath);
-            try
-            {
-                foreach (string path in Directory.EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly))
-                {
-                    if (CottonMobileStoragePaths.IsTemporaryDownloadPath(path)
-                        || string.Equals(Path.GetFullPath(path), normalizedProtectedPath, StringComparison.Ordinal))
-                    {
-                        continue;
-                    }
-
-                    DeleteDownload(path);
-                }
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                _logger.LogDebug(exception, "Failed to inspect stale Cotton mobile download files in {Directory}.", directory);
-            }
-        }
-
-        private void DeleteDownload(string filePath)
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to delete Cotton mobile download file {Path}.", filePath);
-            }
-        }
-
-        private void DeleteTemporaryDownload(string tempFilePath)
-        {
-            try
-            {
-                if (File.Exists(tempFilePath))
-                {
-                    File.Delete(tempFilePath);
-                }
-            }
-            catch (Exception exception)
-            {
-                _logger.LogWarning(exception, "Failed to delete temporary Cotton mobile download file {Path}.", tempFilePath);
-            }
         }
     }
 }

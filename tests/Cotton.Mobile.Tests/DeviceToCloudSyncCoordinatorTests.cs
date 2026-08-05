@@ -1,27 +1,18 @@
 using Cotton.Mobile.Services;
+using static Cotton.Mobile.Tests.DeviceToCloudSyncCoordinatorTestData;
 using Xunit;
 
 namespace Cotton.Mobile.Tests
 {
     public class DeviceToCloudSyncCoordinatorTests : IDisposable
     {
-        private static readonly Uri InstanceUri = new("https://app.cottoncloud.dev");
-        private static readonly Guid SyncRootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        private static readonly Guid SecondSyncRootId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
-        private static readonly Guid FolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-        private static readonly Guid SecondFolderId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
-        private static readonly Guid FirstFileId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        private static readonly Guid SecondFileId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        private static readonly DateTime UpdatedAt = new(2026, 6, 20, 17, 0, 0, DateTimeKind.Utc);
-        private static readonly DateTime SyncedAt = new(2026, 6, 20, 17, 5, 0, DateTimeKind.Utc);
-
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
         private readonly FileSystemCottonSyncRootPauseStore _pauseStore;
-        private readonly FakeUploadReceiptStore _uploadReceiptStore;
-        private readonly FakeDeviceToCloudLocalTreeReader _localTreeReader;
-        private readonly FakeDeviceToCloudRemoteFolderContentSource _remoteFolderContentSource;
-        private readonly FakeDeviceToCloudFileOperator _fileOperator;
+        private readonly DeviceToCloudCoordinatorUploadReceiptStore _uploadReceiptStore;
+        private readonly DeviceToCloudCoordinatorLocalTreeReader _localTreeReader;
+        private readonly DeviceToCloudCoordinatorRemoteFolderContentSource _remoteFolderContentSource;
+        private readonly DeviceToCloudCoordinatorFileOperator _fileOperator;
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
 
         public DeviceToCloudSyncCoordinatorTests()
@@ -34,13 +25,13 @@ namespace Cotton.Mobile.Tests
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
             _pauseStore = new FileSystemCottonSyncRootPauseStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
-            _uploadReceiptStore = new FakeUploadReceiptStore();
-            _localTreeReader = new FakeDeviceToCloudLocalTreeReader();
-            _remoteFolderContentSource = new FakeDeviceToCloudRemoteFolderContentSource();
-            _fileOperator = new FakeDeviceToCloudFileOperator();
+            _uploadReceiptStore = new DeviceToCloudCoordinatorUploadReceiptStore();
+            _localTreeReader = new DeviceToCloudCoordinatorLocalTreeReader();
+            _remoteFolderContentSource = new DeviceToCloudCoordinatorRemoteFolderContentSource();
+            _fileOperator = new DeviceToCloudCoordinatorFileOperator();
             CottonUploadOnlySyncPlanExecutor executor = new(
                 _fileOperator,
-                new FakeDeviceToCloudLocalFileOperator(),
+                new DeviceToCloudCoordinatorLocalFileOperator(),
                 _uploadReceiptStore,
                 new FixedTimeProvider(SyncedAt));
             _coordinator = new CottonDeviceToCloudSyncCoordinator(
@@ -293,268 +284,6 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);
-            }
-        }
-
-        private static CottonSyncRootSnapshot CreateRoot(
-            Guid syncRootId,
-            Guid folderId,
-            string folderName,
-            CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available,
-            CottonSyncDirection direction = CottonSyncDirection.DeviceToCloud,
-            CottonSyncRootStorageKind storageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree)
-        {
-            string localRootId = storageKind switch
-            {
-                CottonSyncRootStorageKind.AppPrivateDirectory => $"app-private-sync-root-{folderId:N}",
-                CottonSyncRootStorageKind.UserSelectedDocumentTree =>
-                    $"content://com.android.externalstorage.documents/tree/primary%3A{folderName}",
-                _ => throw new ArgumentOutOfRangeException(nameof(storageKind)),
-            };
-            string localRootName = storageKind switch
-            {
-                CottonSyncRootStorageKind.AppPrivateDirectory => "On this device",
-                CottonSyncRootStorageKind.UserSelectedDocumentTree => "Device folder",
-                _ => throw new ArgumentOutOfRangeException(nameof(storageKind)),
-            };
-
-            return new CottonSyncRootSnapshot(
-                syncRootId,
-                InstanceUri,
-                "account-1",
-                new CottonUploadDestinationSnapshot(folderId, folderName, $"Files / {folderName}"),
-                new CottonSyncLocalRootSnapshot(storageKind, localRootId, localRootName, permissionStatus),
-                direction,
-                CottonUploadOriginalRetention.KeepOriginals);
-        }
-
-        private static CottonDeviceToCloudLocalContentSnapshot CreateLocalContent(
-            params CottonDeviceToCloudLocalItemSnapshot[] items)
-        {
-            return new CottonDeviceToCloudLocalContentSnapshot("Device folder", items, problems: []);
-        }
-
-        private static CottonDeviceToCloudLocalItemSnapshot CreateLocalFile(
-            string name,
-            string relativePath,
-            string localSourceId)
-        {
-            return CottonDeviceToCloudLocalItemSnapshot.CreateFile(
-                name,
-                relativePath,
-                UpdatedAt,
-                42,
-                "text/plain",
-                localSourceId,
-                TestContentHashes.First);
-        }
-
-        private static CottonFolderContent CreateContent(
-            CottonSyncRootSnapshot root,
-            params CottonFileBrowserEntry[] entries)
-        {
-            return new CottonFolderContent(root.CloudFolder.FolderId, root.CloudFolder.FolderName, entries);
-        }
-
-        private static CottonFileBrowserEntry CreateFile(
-            Guid id,
-            string name,
-            string? eTag,
-            IReadOnlyDictionary<string, string>? metadata = null)
-        {
-            return CottonFileBrowserEntry.CreateFile(
-                id,
-                name,
-                UpdatedAt,
-                42,
-                "text/plain",
-                previewHashEncryptedHex: null,
-                eTag: eTag,
-                metadata: metadata,
-                contentHash: TestContentHashes.First);
-        }
-
-        private static CottonFileBrowserEntry CreateFolder(Guid id, string name)
-        {
-            return CottonFileBrowserEntry.CreateCached(
-                id,
-                CottonFileBrowserEntryType.Folder,
-                name,
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                UpdatedAt,
-                sizeBytes: null,
-                contentType: null,
-                previewHashEncryptedHex: null,
-                eTag: null);
-        }
-
-        private class FakeUploadReceiptStore : ICottonUploadReceiptStore
-        {
-            private readonly Dictionary<Guid, Dictionary<string, CottonUploadReceiptSnapshot>> _receiptsByRootId = [];
-
-            public List<CottonUploadReceiptSnapshot> SavedReceipts { get; } = [];
-
-            public Task<IReadOnlyList<CottonUploadReceiptSnapshot>> LoadAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CancellationToken cancellationToken = default)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!_receiptsByRootId.TryGetValue(
-                    root.Id,
-                    out Dictionary<string, CottonUploadReceiptSnapshot>? receipts))
-                {
-                    return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>([]);
-                }
-
-                return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>(receipts.Values.ToArray());
-            }
-
-            public Task SaveAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonUploadReceiptSnapshot receipt,
-                CancellationToken cancellationToken = default)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!_receiptsByRootId.TryGetValue(
-                    root.Id,
-                    out Dictionary<string, CottonUploadReceiptSnapshot>? receipts))
-                {
-                    receipts = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
-                    _receiptsByRootId.Add(root.Id, receipts);
-                }
-
-                receipts[receipt.LocalSourceId] = receipt;
-                SavedReceipts.Add(receipt);
-                return Task.CompletedTask;
-            }
-
-            public Task ClearAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CancellationToken cancellationToken = default)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                _receiptsByRootId.Remove(root.Id);
-                return Task.CompletedTask;
-            }
-        }
-
-        private class FakeDeviceToCloudLocalTreeReader : ICottonDeviceToCloudLocalTreeReader
-        {
-            private readonly Dictionary<Guid, CottonDeviceToCloudLocalContentSnapshot> _contentByRootId = [];
-
-            public List<Guid> ReadRootIds { get; } = [];
-
-            public void SetContent(Guid rootId, CottonDeviceToCloudLocalContentSnapshot content)
-            {
-                _contentByRootId[rootId] = content;
-            }
-
-            public Task<CottonDeviceToCloudLocalContentSnapshot> ReadAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CancellationToken cancellationToken = default)
-            {
-                ReadRootIds.Add(root.Id);
-                return Task.FromResult(_contentByRootId[root.Id]);
-            }
-        }
-
-        private class FakeDeviceToCloudRemoteFolderContentSource : ICottonDeviceToCloudRemoteFolderContentSource
-        {
-            private readonly Dictionary<Guid, CottonFolderContent> _contentByFolderId = [];
-
-            public List<Guid> RequestedFolderIds { get; } = [];
-
-            public void SetContent(Guid folderId, CottonFolderContent content)
-            {
-                _contentByFolderId[folderId] = content;
-            }
-
-            public Task<CottonFolderContent> LoadAsync(
-                Uri instanceUri,
-                CottonFolderHandle folder,
-                CancellationToken cancellationToken = default)
-            {
-                RequestedFolderIds.Add(folder.Id);
-                return Task.FromResult(_contentByFolderId[folder.Id]);
-            }
-        }
-
-        private class FakeDeviceToCloudFileOperator : ICottonDeviceToCloudSyncFileOperator
-        {
-            private readonly Dictionary<string, (Guid FileId, string ETag)> _uploadResults =
-                new(StringComparer.Ordinal);
-
-            public List<CottonDeviceToCloudSyncPlanItem> UploadedItems { get; } = [];
-
-            public void SetUploadResult(string relativePath, Guid fileId, string eTag)
-            {
-                _uploadResults[relativePath] = (fileId, eTag);
-            }
-
-            public Task<CottonFileBrowserEntry> UploadNewFileAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonDeviceToCloudSyncPlanItem item,
-                CottonFolderHandle parentFolder,
-                CancellationToken cancellationToken = default)
-            {
-                Guid operationId = item.UploadOperationId
-                    ?? throw new InvalidOperationException("Upload operation id was not assigned.");
-                (Guid fileId, string eTag) = _uploadResults[item.RelativePath];
-                var metadata = new Dictionary<string, string>(StringComparer.Ordinal)
-                {
-                    [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.ToString("N"),
-                };
-                UploadedItems.Add(item);
-                return Task.FromResult(CreateFile(fileId, item.DisplayName, eTag, metadata));
-            }
-
-            public Task<CottonFileBrowserEntry> UploadChangedFileAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonDeviceToCloudSyncPlanItem item,
-                CottonFolderHandle parentFolder,
-                CancellationToken cancellationToken = default)
-            {
-                throw new NotSupportedException("Changed uploads are not used by upload-only sync.");
-            }
-
-            public Task<CottonFileBrowserEntry> CreateFolderAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonDeviceToCloudSyncPlanItem item,
-                CottonFolderHandle parentFolder,
-                CancellationToken cancellationToken = default)
-            {
-                throw new NotSupportedException("Folder creation is not used by these tests.");
-            }
-
-            public Task DeleteRemoteFileAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonDeviceToCloudSyncPlanItem item,
-                CancellationToken cancellationToken = default)
-            {
-                throw new NotSupportedException("Remote deletes are not supported by upload-only sync.");
-            }
-        }
-
-        private class FakeDeviceToCloudLocalFileOperator : ICottonDeviceToCloudLocalFileOperator
-        {
-            public Task<CottonDeviceToCloudLocalFileDeleteStatus> DeleteIfUnchangedAsync(
-                Uri instanceUri,
-                CottonSyncRootSnapshot root,
-                CottonDeviceToCloudSyncPlanItem item,
-                CancellationToken cancellationToken = default)
-            {
-                return Task.FromResult(CottonDeviceToCloudLocalFileDeleteStatus.Unsupported);
             }
         }
 

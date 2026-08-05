@@ -2,10 +2,11 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Resources.Localization;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageDisplayState : ViewModelBase
+    public class MainPageDisplayState : ObservableObject
     {
         private MainPageViewState _state = MainPageViewState.Loading;
         private AppNavigationDestination _selectedDestination = AppNavigationDestination.Sync;

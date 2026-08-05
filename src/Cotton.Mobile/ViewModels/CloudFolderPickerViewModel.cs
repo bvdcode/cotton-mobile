@@ -4,11 +4,13 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class CloudFolderPickerViewModel : ViewModelBase
+    public class CloudFolderPickerViewModel : ObservableObject
     {
         private readonly Uri _instanceUri;
         private readonly ICottonFileBrowserService _fileBrowserService;
@@ -39,21 +41,28 @@ namespace Cotton.Mobile.ViewModels
             _complete = complete;
             _logger = logger;
 
-            LoadCommand = new AsyncCommand(LoadCurrentAsync, LogUnhandledCommandException, () => !IsBusy);
-            UpCommand = new AsyncCommand(NavigateUpAsync, LogUnhandledCommandException, () => !IsBusy && CanNavigateUp);
-            ChooseCommand = new AsyncCommand(ChooseCurrentAsync, LogUnhandledCommandException, () => !IsBusy && _currentFolder is not null);
-            CancelCommand = new AsyncCommand(CancelAsync, LogUnhandledCommandException);
+            LoadCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(LoadCurrentAsync, LogUnhandledCommandException),
+                () => !IsBusy);
+            UpCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(NavigateUpAsync, LogUnhandledCommandException),
+                () => !IsBusy && CanNavigateUp);
+            ChooseCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ChooseCurrentAsync, LogUnhandledCommandException),
+                () => !IsBusy && _currentFolder is not null);
+            CancelCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(CancelAsync, LogUnhandledCommandException));
         }
 
         public RangeObservableCollection<CloudFolderItemViewModel> Folders { get; } = [];
 
-        public AsyncCommand LoadCommand { get; }
+        public IAsyncRelayCommand LoadCommand { get; }
 
-        public AsyncCommand UpCommand { get; }
+        public IAsyncRelayCommand UpCommand { get; }
 
-        public AsyncCommand ChooseCommand { get; }
+        public IAsyncRelayCommand ChooseCommand { get; }
 
-        public AsyncCommand CancelCommand { get; }
+        public IAsyncRelayCommand CancelCommand { get; }
 
         public bool IsBusy
         {
@@ -63,9 +72,9 @@ namespace Cotton.Mobile.ViewModels
                 if (SetProperty(ref _isBusy, value))
                 {
                     OnPropertyChanged(nameof(IsEmptyVisible));
-                    LoadCommand.RaiseCanExecuteChanged();
-                    UpCommand.RaiseCanExecuteChanged();
-                    ChooseCommand.RaiseCanExecuteChanged();
+                    LoadCommand.NotifyCanExecuteChanged();
+                    UpCommand.NotifyCanExecuteChanged();
+                    ChooseCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -253,8 +262,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsEmptyVisible));
             OnPropertyChanged(nameof(IsListVisible));
             OnPropertyChanged(nameof(CanNavigateUp));
-            UpCommand.RaiseCanExecuteChanged();
-            ChooseCommand.RaiseCanExecuteChanged();
+            UpCommand.NotifyCanExecuteChanged();
+            ChooseCommand.NotifyCanExecuteChanged();
         }
 
         private void LogUnhandledCommandException(Exception exception)

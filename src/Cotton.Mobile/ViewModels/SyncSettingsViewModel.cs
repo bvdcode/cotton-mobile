@@ -4,11 +4,13 @@
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class SyncSettingsViewModel : ViewModelBase, ISyncSettingsViewState
+    public class SyncSettingsViewModel : ObservableObject, ISyncSettingsViewState
     {
         private readonly SyncSettingsLoadingHandler _loadingHandler;
         private readonly SyncSettingsExecutionHandler _executionHandler;
@@ -41,49 +43,60 @@ namespace Cotton.Mobile.ViewModels
             _setupHandler = setupHandler;
             _managementHandler = managementHandler;
             _logger = logger;
-            LoadCommand = new AsyncCommand(
-                () => _loadingHandler.LoadAsync(this),
-                LogUnhandledCommandException,
+            LoadCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(
+                    () => _loadingHandler.LoadAsync(this),
+                    LogUnhandledCommandException),
                 () => !IsBusy);
-            AddRootCommand = new AsyncCommand(
-                () => _setupHandler.AddRootAsync(this),
-                LogUnhandledCommandException,
+            AddRootCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(
+                    () => _setupHandler.AddRootAsync(this),
+                    LogUnhandledCommandException),
                 CanAddRoot);
-            RunAllCommand = new AsyncCommand(
-                () => _executionHandler.RunAllAsync(this),
-                LogUnhandledCommandException,
+            RunAllCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(
+                    () => _executionHandler.RunAllAsync(this),
+                    LogUnhandledCommandException),
                 CanRunAll);
-            RootPrimaryActionCommand = new AsyncCommand<CottonSyncRootListItem>(
-                ExecuteRootPrimaryActionAsync,
-                LogUnhandledCommandException,
-                item => !IsBusy && item.CanUsePrimaryAction);
-            StopRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                item => _managementHandler.StopRootAsync(this, item),
-                LogUnhandledCommandException,
-                item => !IsBusy && item.CanStopSync);
-            PauseRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                item => _managementHandler.SetRootPausedAsync(this, item, isPaused: true),
-                LogUnhandledCommandException,
-                item => !IsBusy && item.CanPauseSync);
-            ResumeRootCommand = new AsyncCommand<CottonSyncRootListItem>(
-                item => _managementHandler.SetRootPausedAsync(this, item, isPaused: false),
-                LogUnhandledCommandException,
-                item => !IsBusy && item.CanResumeSync);
+            RootPrimaryActionCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+                item => AsyncCommandExecution.RunAsync(
+                    item,
+                    ExecuteRootPrimaryActionAsync,
+                    LogUnhandledCommandException),
+                item => !IsBusy && item is not null && item.CanUsePrimaryAction);
+            StopRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+                item => AsyncCommandExecution.RunAsync(
+                    item,
+                    root => _managementHandler.StopRootAsync(this, root),
+                    LogUnhandledCommandException),
+                item => !IsBusy && item is not null && item.CanStopSync);
+            PauseRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+                item => AsyncCommandExecution.RunAsync(
+                    item,
+                    root => _managementHandler.SetRootPausedAsync(this, root, isPaused: true),
+                    LogUnhandledCommandException),
+                item => !IsBusy && item is not null && item.CanPauseSync);
+            ResumeRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+                item => AsyncCommandExecution.RunAsync(
+                    item,
+                    root => _managementHandler.SetRootPausedAsync(this, root, isPaused: false),
+                    LogUnhandledCommandException),
+                item => !IsBusy && item is not null && item.CanResumeSync);
         }
 
-        public AsyncCommand LoadCommand { get; }
+        public IAsyncRelayCommand LoadCommand { get; }
 
-        public AsyncCommand AddRootCommand { get; }
+        public IAsyncRelayCommand AddRootCommand { get; }
 
-        public AsyncCommand RunAllCommand { get; }
+        public IAsyncRelayCommand RunAllCommand { get; }
 
-        public AsyncCommand<CottonSyncRootListItem> RootPrimaryActionCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> RootPrimaryActionCommand { get; }
 
-        public AsyncCommand<CottonSyncRootListItem> StopRootCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> StopRootCommand { get; }
 
-        public AsyncCommand<CottonSyncRootListItem> PauseRootCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> PauseRootCommand { get; }
 
-        public AsyncCommand<CottonSyncRootListItem> ResumeRootCommand { get; }
+        public IAsyncRelayCommand<CottonSyncRootListItem> ResumeRootCommand { get; }
 
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = new();
 
@@ -94,13 +107,13 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isBusy, value))
                 {
-                    LoadCommand.RaiseCanExecuteChanged();
-                    AddRootCommand.RaiseCanExecuteChanged();
-                    RunAllCommand.RaiseCanExecuteChanged();
-                    RootPrimaryActionCommand.RaiseCanExecuteChanged();
-                    StopRootCommand.RaiseCanExecuteChanged();
-                    PauseRootCommand.RaiseCanExecuteChanged();
-                    ResumeRootCommand.RaiseCanExecuteChanged();
+                    LoadCommand.NotifyCanExecuteChanged();
+                    AddRootCommand.NotifyCanExecuteChanged();
+                    RunAllCommand.NotifyCanExecuteChanged();
+                    RootPrimaryActionCommand.NotifyCanExecuteChanged();
+                    StopRootCommand.NotifyCanExecuteChanged();
+                    PauseRootCommand.NotifyCanExecuteChanged();
+                    ResumeRootCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -171,7 +184,7 @@ namespace Cotton.Mobile.ViewModels
 
             _instanceUri = instanceUri;
             _accountScopeKey = accountScopeKey.Trim();
-            AddRootCommand.RaiseCanExecuteChanged();
+            AddRootCommand.NotifyCanExecuteChanged();
         }
 
         public async Task LoadForInstanceAsync(Uri instanceUri, string accountScopeKey)
@@ -190,8 +203,8 @@ namespace Cotton.Mobile.ViewModels
             IsEmptyVisible = true;
             _canRunAll = false;
             OnPropertyChanged(nameof(IsRunAllVisible));
-            RunAllCommand.RaiseCanExecuteChanged();
-            AddRootCommand.RaiseCanExecuteChanged();
+            RunAllCommand.NotifyCanExecuteChanged();
+            AddRootCommand.NotifyCanExecuteChanged();
         }
 
         private void ShowRoots(SyncRootCollectionSnapshot collection)
@@ -210,7 +223,7 @@ namespace Cotton.Mobile.ViewModels
                 OnPropertyChanged(nameof(IsRunAllVisible));
             }
 
-            RunAllCommand.RaiseCanExecuteChanged();
+            RunAllCommand.NotifyCanExecuteChanged();
         }
 
         private bool CanRunAll()

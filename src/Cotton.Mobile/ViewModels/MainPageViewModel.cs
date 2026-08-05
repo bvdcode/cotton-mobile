@@ -5,11 +5,13 @@ using Cotton.Mobile.Commands;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Sdk;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageViewModel : ViewModelBase
+    public class MainPageViewModel : ObservableObject
     {
         private readonly MainPageSessionCoordinator _sessionCoordinator;
         private readonly MainPageUserInteractionService _userInteractionService;
@@ -41,17 +43,23 @@ namespace Cotton.Mobile.ViewModels
             Sync.PropertyChanged += OnSyncPropertyChanged;
             ApplicationVersionText = CreateApplicationVersionText(applicationMetadata);
 
-            ConnectCommand = new AsyncCommand(SignInAsync, LogUnhandledCommandException, () => Display.IsInputEnabled);
-            CancelAuthorizationCommand = new AsyncCommand(
-                CancelAuthorizationAsync,
-                LogUnhandledCommandException,
+            ConnectCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(SignInAsync, LogUnhandledCommandException),
+                () => Display.IsInputEnabled);
+            CancelAuthorizationCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(CancelAuthorizationAsync, LogUnhandledCommandException),
                 () => Display.IsCancelAuthorizationEnabled);
-            LogoutCommand = new AsyncCommand(ConfirmLogoutAsync, LogUnhandledCommandException, () => IsLogoutEnabled);
-            PrivacyPolicyCommand = new AsyncCommand(
-                _userInteractionService.OpenPrivacyPolicyAsync,
-                LogUnhandledCommandException);
-            ShowSyncCommand = new AsyncCommand(ShowSyncAsync, LogUnhandledCommandException);
-            ShowProfileCommand = new AsyncCommand(ShowProfileAsync, LogUnhandledCommandException);
+            LogoutCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ConfirmLogoutAsync, LogUnhandledCommandException),
+                () => IsLogoutEnabled);
+            PrivacyPolicyCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(
+                    _userInteractionService.OpenPrivacyPolicyAsync,
+                    LogUnhandledCommandException));
+            ShowSyncCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ShowSyncAsync, LogUnhandledCommandException));
+            ShowProfileCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(ShowProfileAsync, LogUnhandledCommandException));
         }
 
         public MainPageDisplayState Display { get; }
@@ -62,17 +70,17 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsLogoutEnabled => Display.IsLogoutEnabled && !Sync.IsBusy;
 
-        public AsyncCommand ConnectCommand { get; }
+        public IAsyncRelayCommand ConnectCommand { get; }
 
-        public AsyncCommand CancelAuthorizationCommand { get; }
+        public IAsyncRelayCommand CancelAuthorizationCommand { get; }
 
-        public AsyncCommand LogoutCommand { get; }
+        public IAsyncRelayCommand LogoutCommand { get; }
 
-        public AsyncCommand PrivacyPolicyCommand { get; }
+        public IAsyncRelayCommand PrivacyPolicyCommand { get; }
 
-        public AsyncCommand ShowSyncCommand { get; }
+        public IAsyncRelayCommand ShowSyncCommand { get; }
 
-        public AsyncCommand ShowProfileCommand { get; }
+        public IAsyncRelayCommand ShowProfileCommand { get; }
 
         public async Task RestoreSessionOnceAsync()
         {
@@ -191,9 +199,9 @@ namespace Cotton.Mobile.ViewModels
 
         private void RefreshCommands()
         {
-            ConnectCommand.RaiseCanExecuteChanged();
-            CancelAuthorizationCommand.RaiseCanExecuteChanged();
-            LogoutCommand.RaiseCanExecuteChanged();
+            ConnectCommand.NotifyCanExecuteChanged();
+            CancelAuthorizationCommand.NotifyCanExecuteChanged();
+            LogoutCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsLogoutEnabled));
         }
 
@@ -204,7 +212,7 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            LogoutCommand.RaiseCanExecuteChanged();
+            LogoutCommand.NotifyCanExecuteChanged();
             OnPropertyChanged(nameof(IsLogoutEnabled));
         }
 

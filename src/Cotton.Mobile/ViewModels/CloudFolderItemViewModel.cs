@@ -3,6 +3,7 @@
 
 using Cotton.Mobile.Commands;
 using Cotton.Mobile.Services;
+using CommunityToolkit.Mvvm.Input;
 
 namespace Cotton.Mobile.ViewModels
 {
@@ -23,12 +24,13 @@ namespace Cotton.Mobile.ViewModels
             _folder = folder;
             _openAsync = openAsync;
             Name = folder.Name;
-            OpenCommand = new AsyncCommand(OpenAsync, onUnhandledException);
+            OpenCommand = new AsyncRelayCommand(
+                () => AsyncCommandExecution.RunAsync(OpenAsync, onUnhandledException));
         }
 
         public string Name { get; }
 
-        public AsyncCommand OpenCommand { get; }
+        public IAsyncRelayCommand OpenCommand { get; }
 
         private Task OpenAsync()
         {

@@ -3,10 +3,11 @@
 
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.ViewModels;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSyncRootListItem : ViewModelBase
+    public class CottonSyncRootListItem : ObservableObject
     {
         private readonly string _idleStatusText;
         private readonly string _runningStatusText;

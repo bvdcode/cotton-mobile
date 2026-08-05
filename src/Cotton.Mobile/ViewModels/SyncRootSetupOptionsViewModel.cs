@@ -2,10 +2,11 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Services;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class SyncRootSetupOptionsViewModel : ViewModelBase
+    public class SyncRootSetupOptionsViewModel : ObservableObject
     {
         private readonly Action<SyncRootSetupOptions?> _complete;
         private CottonSyncDirection _direction = CottonSyncDirection.DeviceToCloud;

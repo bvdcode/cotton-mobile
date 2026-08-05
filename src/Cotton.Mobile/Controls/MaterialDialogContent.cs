@@ -148,7 +148,7 @@ namespace Cotton.Mobile.Controls
                 return false;
             }
 
-            return !isPrompt || message.TrimEnd().EndsWith(".", StringComparison.Ordinal);
+            return !isPrompt || message.TrimEnd().EndsWith('.');
         }
     }
 }

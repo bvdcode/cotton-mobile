@@ -7,7 +7,7 @@ using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore
+    public class FileSystemCottonUploadReceiptStore : ICottonUploadReceiptStore, IDisposable
     {
         private const int SchemaVersion = 1;
         private const string ReceiptFileExtension = ".json";
@@ -156,6 +156,12 @@ namespace Cotton.Mobile.Services
             {
                 _writeLock.Release();
             }
+        }
+
+        public void Dispose()
+        {
+            _writeLock.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         private static async Task<CottonUploadReceiptSnapshot> LoadReceiptAsync(

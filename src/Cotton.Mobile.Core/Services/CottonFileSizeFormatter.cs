@@ -16,7 +16,7 @@ namespace Cotton.Mobile.Services
                 < Kilobyte => $"{bytes} B",
                 < Megabyte => $"{bytes / (double)Kilobyte:0.#} KB",
                 < Gigabyte => $"{bytes / (double)Megabyte:0.#} MB",
-                _ => $"{bytes / (double)Gigabyte:0.#} GB",
+                >= Gigabyte => $"{bytes / (double)Gigabyte:0.#} GB",
             };
         }
     }

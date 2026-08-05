@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Services
             <= 2 => ShortPlaceholderFontSize,
             3 => ThreeCharacterPlaceholderFontSize,
             4 => FourCharacterPlaceholderFontSize,
-            _ => LongPlaceholderFontSize,
+            >= 5 => LongPlaceholderFontSize,
         };
 
         public bool IsLoading => State == CottonFileThumbnailState.Loading;

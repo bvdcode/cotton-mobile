@@ -1,22 +1,14 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Buffers;
+
 namespace Cotton.Mobile.Services
 {
     public static class CottonCloudItemNameRules
     {
-        private static readonly char[] InvalidCharacters =
-        [
-            '/',
-            '\\',
-            ':',
-            '*',
-            '?',
-            '"',
-            '<',
-            '>',
-            '|',
-        ];
+        private static readonly SearchValues<char> InvalidCharacters =
+            SearchValues.Create(['/', '\\', ':', '*', '?', '"', '<', '>', '|']);
 
         public static bool IsReservedPathSegment(string name)
         {
@@ -27,7 +19,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(name);
 
-            return name.IndexOfAny(InvalidCharacters) >= 0;
+            return name.AsSpan().IndexOfAny(InvalidCharacters) >= 0;
         }
 
         public static bool ContainsDuplicateName(string name, IEnumerable<string> existingNames)

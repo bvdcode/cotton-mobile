@@ -146,7 +146,8 @@ namespace Cotton.Mobile.Services
                 CottonSyncRootReadinessStatus.GrantRevoked => CoreResources.ReconnectStatus,
                 CottonSyncRootReadinessStatus.LocalRootUnavailable => CoreResources.UnavailableStatus,
                 _ => throw new ArgumentOutOfRangeException(
-                    nameof(readinessStatus),
+                    nameof(root),
+                    readinessStatus,
                     "Sync root readiness status is not supported."),
             };
         }

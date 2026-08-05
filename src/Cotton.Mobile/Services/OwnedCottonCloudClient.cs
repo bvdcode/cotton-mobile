@@ -56,6 +56,7 @@ namespace Cotton.Mobile.Services
             finally
             {
                 _httpClient.Dispose();
+                GC.SuppressFinalize(this);
             }
         }
     }

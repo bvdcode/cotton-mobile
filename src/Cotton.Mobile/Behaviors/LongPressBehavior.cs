@@ -226,7 +226,7 @@ namespace Cotton.Mobile.Behaviors
         private void DetachPlatformLongPress()
         {
 #if ANDROID
-            _platformGesture?.Detach();
+            _platformGesture?.Dispose();
             _platformGesture = null;
 #endif
         }

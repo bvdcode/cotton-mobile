@@ -75,7 +75,7 @@ namespace Cotton.Mobile.Services
             int count,
             CancellationToken cancellationToken)
         {
-            await _inner.WriteAsync(buffer, offset, count, cancellationToken).ConfigureAwait(false);
+            await _inner.WriteAsync(buffer.AsMemory(offset, count), cancellationToken).ConfigureAwait(false);
             Report(count);
         }
 

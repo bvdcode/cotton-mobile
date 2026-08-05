@@ -2,7 +2,7 @@
 set -euo pipefail
 
 manifest_path="src/Cotton.Mobile/Platforms/Android/AndroidManifest.xml"
-policy_path="src/Cotton.Mobile/Platforms/Android/AndroidCameraBackupMediaAccessPolicy.cs"
+android_source_path="src/Cotton.Mobile/Platforms/Android"
 
 if [[ ! -f "$manifest_path" ]]; then
   printf 'Android manifest was not found: %s\n' "$manifest_path" >&2
@@ -28,8 +28,8 @@ blocked_api_references=(
 )
 
 for api_reference in "${blocked_api_references[@]}"; do
-  if grep -Fq "$api_reference" "$policy_path"; then
-    printf 'Camera backup media policy must not request %s.\n' "$api_reference" >&2
+  if grep -R -Fq --include='*.cs' "$api_reference" "$android_source_path"; then
+    printf 'Android source must not request %s.\n' "$api_reference" >&2
     exit 1
   fi
 done

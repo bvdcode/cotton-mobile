@@ -5,7 +5,7 @@ using Android.Views;
 
 namespace Cotton.Mobile.Behaviors
 {
-    internal class AndroidLongPressGesture
+    internal class AndroidLongPressGesture : IDisposable
     {
         private const int DefaultTouchSlop = 8;
 
@@ -59,6 +59,12 @@ namespace Cotton.Mobile.Behaviors
             CancelLongPress();
             _platformView.Touch -= OnPlatformTouch;
             _platformView = null;
+        }
+
+        public void Dispose()
+        {
+            Detach();
+            GC.SuppressFinalize(this);
         }
 
         private void OnPlatformTouch(object? sender, Android.Views.View.TouchEventArgs e)
@@ -149,6 +155,7 @@ namespace Cotton.Mobile.Behaviors
                 _platformView.RemoveCallbacks(_longPressRunnable);
             }
 
+            _longPressRunnable?.Dispose();
             _longPressRunnable = null;
         }
 

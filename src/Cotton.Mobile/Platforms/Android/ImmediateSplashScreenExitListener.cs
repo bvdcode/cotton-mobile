@@ -20,9 +20,9 @@ namespace Cotton.Mobile
             _activity = activity;
         }
 
-        public void OnSplashScreenExit(SplashScreenView splashScreenView)
+        public void OnSplashScreenExit(SplashScreenView view)
         {
-            splashScreenView.Remove();
+            view.Remove();
             _activity.RefreshSystemBars();
         }
     }

@@ -94,9 +94,7 @@ namespace Cotton.Mobile.Services
                 CottonSyncRootConfigurationStatus.AlreadyConfigured => new SyncRootSetupResult(
                     SyncRootSetupStatus.AlreadyConfigured,
                     ResolveAlreadyConfiguredMessage(result.Root, options)),
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(result),
-                    "Sync root setup status is not supported."),
+                _ => throw new InvalidOperationException("Sync root setup status is not supported."),
             };
         }
 

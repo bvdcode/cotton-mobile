@@ -93,9 +93,7 @@ namespace Cotton.Mobile.Services
                         break;
 
                     default:
-                        throw new ArgumentOutOfRangeException(
-                            nameof(root),
-                            "Sync run route is not supported.");
+                        throw new InvalidOperationException("Sync run route is not supported.");
                 }
             }
 

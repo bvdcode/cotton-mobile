@@ -22,6 +22,8 @@ on:
       - develop
     paths:
       - "GitVersion.yml"
+      - ".editorconfig"
+      - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
       - "tests/**"
@@ -32,6 +34,8 @@ on:
   pull_request:
     paths:
       - "GitVersion.yml"
+      - ".editorconfig"
+      - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
       - "tests/**"
@@ -163,6 +167,9 @@ jobs:
     steps:
       - name: Check repository
         uses: actions/checkout@v5
+
+      - name: Validate source quality
+        run: python3 scripts/ci/validate-source.py
 
       - name: Test Android release version computation
         run: scripts/ci/test-android-release-version.sh

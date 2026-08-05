@@ -35,6 +35,7 @@ namespace Cotton.Mobile.Services
             }
 
             _isDisposed = true;
+            GC.SuppressFinalize(this);
             await DismissAsync(_navigation, _page).ConfigureAwait(false);
         }
 

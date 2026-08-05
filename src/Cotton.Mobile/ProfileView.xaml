@@ -1,66 +1,126 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.ProfileView"
              x:DataType="viewModels:MainPageViewModel">
 
-    <controls:ScreenShellView>
-        <controls:TopAppBar TitleText="{x:Static localization:AppResources.ProfileTitle}"
-                            IsBackActionVisible="False"
-                            IsPrimaryActionVisible="False"
-                            IsSecondaryActionVisible="False" />
+    <Grid RowDefinitions="Auto,*"
+          Style="{StaticResource AppScreen}">
+        <Grid ColumnDefinitions="*"
+              Style="{StaticResource AppTopBar}">
+            <Label Text="{x:Static localization:AppResources.ProfileTitle}"
+                   Style="{StaticResource AppTopBarTitle}" />
+        </Grid>
 
-        <controls:ScreenScrollBodyView Grid.Row="1">
-            <controls:ScreenHeaderView Title="{x:Static localization:AppResources.AccountTitle}"
-                                       SupportingText="{x:Static localization:AppResources.AccountSupportingText}"
-                                       IsSupportingTextMultiline="True" />
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Style="{StaticResource AppScrollableContent}">
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="{x:Static localization:AppResources.AccountTitle}"
+                           Style="{StaticResource AppScreenTitle}" />
+                    <Label Text="{x:Static localization:AppResources.AccountSupportingText}"
+                           Style="{StaticResource AppBodyText}" />
+                </VerticalStackLayout>
 
-            <controls:ScreenStatusView Text="{Binding Display.ProfileStatus}"
-                                       IsStatusVisible="{Binding Display.IsProfileStatusVisible}" />
+                <Label Text="{Binding Display.ProfileStatus}"
+                       IsVisible="{Binding Display.IsProfileStatusVisible}"
+                       Style="{StaticResource AppBodyText}" />
 
-            <controls:SettingsCardView>
-                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Profile}"
-                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                                    Title="{Binding Display.ProfileName}"
-                                                    PrimaryDetailText="{Binding Display.ProfileEmail}"
-                                                    SecondaryDetailText="{Binding Display.ProfileInstance}" />
-            </controls:SettingsCardView>
+                <Border Style="{StaticResource AppCard}">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="12">
+                        <Border Style="{StaticResource AppIconFrame}">
+                            <Image Style="{StaticResource AppIcon}"
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Account_circle}}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{Binding Display.ProfileName}"
+                                   Style="{StaticResource AppSectionTitle}" />
+                            <Label Text="{Binding Display.ProfileEmail}"
+                                   Style="{StaticResource AppBodyText}" />
+                            <Label Text="{Binding Display.ProfileInstance}"
+                                   Style="{StaticResource AppCaptionText}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
 
-            <controls:SettingsCardView>
-                <controls:ActionListItemView Text="{x:Static localization:AppResources.PrivacyPolicyText}"
-                                             SupportingText="{x:Static localization:AppResources.PrivacyPolicySupportingText}"
-                                             LeadingIconData="{x:Static controls:IconPathData.OpenInNew}"
-                                             IsLeadingIconVisible="True"
-                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                             ActionIconData="{x:Static controls:IconPathData.ChevronRight}"
-                                             Command="{Binding PrivacyPolicyCommand}"
-                                             GridStyleResourceKey="M3SettingsListItemGrid"
-                                             TextStyleResourceKey="M3CardSupportingStrongLine"
-                                             SemanticDescription="{x:Static localization:AppResources.OpenPrivacyPolicyDescription}" />
+                <material:ButtonView TappedCommand="{Binding PrivacyPolicyCommand}"
+                                     Padding="16"
+                                     Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                     StrokeThickness="1"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                     StrokeShape="RoundRectangle 20"
+                                     SemanticProperties.Description="{x:Static localization:AppResources.OpenPrivacyPolicyDescription}">
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="12">
+                        <Image Style="{StaticResource AppIcon}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Open_in_new}}" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:AppResources.PrivacyPolicyText}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{x:Static localization:AppResources.PrivacyPolicySupportingText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                        <Image Grid.Column="2"
+                               Style="{StaticResource AppIcon}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}}" />
+                    </Grid>
+                </material:ButtonView>
 
-                <controls:ActionListItemView Text="{x:Static localization:AppResources.SignOutText}"
-                                             SupportingText="{x:Static localization:AppResources.SignOutSupportingText}"
-                                             LeadingIconData="{x:Static controls:IconPathData.Close}"
-                                             IsLeadingIconVisible="True"
-                                             LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                             ActionIconData="{x:Static controls:IconPathData.Close}"
-                                             Command="{Binding LogoutCommand}"
-                                             IsActionEnabled="{Binding IsLogoutEnabled}"
-                                             GridStyleResourceKey="M3SettingsListItemGrid"
-                                             TextStyleResourceKey="M3CardSupportingStrongLine"
-                                             ActionIconButtonStyleResourceKey="M3DestructiveIconButton"
-                                             SemanticDescription="{x:Static localization:AppResources.SignOutText}" />
-            </controls:SettingsCardView>
+                <material:ButtonView TappedCommand="{Binding LogoutCommand}"
+                                     IsEnabled="{Binding IsLogoutEnabled}"
+                                     Padding="16"
+                                     Stroke="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                     StrokeThickness="1"
+                                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                     StrokeShape="RoundRectangle 20"
+                                     SemanticProperties.Description="{x:Static localization:AppResources.SignOutText}">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="12">
+                        <Image Style="{StaticResource AppIcon}">
+                            <Image.Source>
+                                <FontImageSource FontFamily="MaterialOutlined"
+                                                 Glyph="{x:Static symbols:MaterialOutlined.Close}"
+                                                 Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                            </Image.Source>
+                        </Image>
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:AppResources.SignOutText}"
+                                   FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                            <Label Text="{x:Static localization:AppResources.SignOutSupportingText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </material:ButtonView>
 
-            <controls:SettingsCardView>
-                <controls:SettingsSectionHeaderView LeadingIconData="{x:Static controls:IconPathData.Info}"
-                                                    LeadingIconFrameStyleResourceKey="M3CardUtilityThumbnailFrame"
-                                                    Title="{x:Static localization:AppResources.AppTitle}"
-                                                    PrimaryDetailText="{Binding ApplicationVersionText}" />
-            </controls:SettingsCardView>
-        </controls:ScreenScrollBodyView>
-    </controls:ScreenShellView>
+                <Border Style="{StaticResource AppCard}">
+                    <Grid ColumnDefinitions="Auto,*"
+                          ColumnSpacing="12">
+                        <Border Style="{StaticResource AppIconFrame}">
+                            <Image Style="{StaticResource AppIcon}"
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Info}}" />
+                        </Border>
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="3"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:AppResources.AppTitle}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding ApplicationVersionText}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 </ContentView>

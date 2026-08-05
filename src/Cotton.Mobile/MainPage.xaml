@@ -1,63 +1,110 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:local="clr-namespace:Cotton.Mobile"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.MainPage"
              x:Name="RootPage"
              x:DataType="viewModels:MainPageViewModel"
              Shell.NavBarIsVisible="False">
 
-    <controls:MainPageRootView>
-        <controls:ScreenScrollBodyView Grid.Row="0"
-                                       IsContentVisible="{Binding Display.IsBrandHeaderVisible}"
-                                       StackStyleResourceKey="M3MainContentStack">
-            <controls:StackedContentView IsContentVisible="{Binding Display.IsBrandHeaderVisible}"
-                                         StackStyleResourceKey="M3AuthShellStack">
-                <controls:BrandHeaderView Source="cotton_brand_mark.svg"
-                                          Title="{x:Static localization:AppResources.AppTitle}"
-                                          SemanticDescription="{x:Static localization:AppResources.AppTitle}" />
+    <Grid RowDefinitions="*,Auto"
+          Style="{StaticResource AppScreen}">
+        <ScrollView Grid.Row="0"
+                    IsVisible="{Binding Display.IsBrandHeaderVisible}">
+            <VerticalStackLayout Style="{StaticResource AppScrollableContent}"
+                                 Padding="24,48,24,24">
+                <VerticalStackLayout Spacing="16"
+                                     HorizontalOptions="Center">
+                    <Border WidthRequest="104"
+                            HeightRequest="104"
+                            Padding="12"
+                            BackgroundColor="{StaticResource BackgroundDark}"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            StrokeThickness="1">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="28" />
+                        </Border.StrokeShape>
+                        <Image Source="cotton_brand_mark.svg"
+                               SemanticProperties.Description="{x:Static localization:AppResources.AppTitle}" />
+                    </Border>
+                    <Label Text="{x:Static localization:AppResources.AppTitle}"
+                           Style="{StaticResource AppScreenTitle}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
-                <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsLoadingVisible}"
-                                            IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                            Text="{Binding Display.LoadingMessage}"
-                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel" />
+                <Border IsVisible="{Binding Display.IsLoadingVisible}"
+                        Style="{StaticResource AppStatusCard}">
+                    <HorizontalStackLayout Spacing="12">
+                        <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        <Label Text="{Binding Display.LoadingMessage}"
+                               VerticalOptions="Center" />
+                    </HorizontalStackLayout>
+                </Border>
 
-                <controls:AuthSignInPanelView IsPanelVisible="{Binding Display.IsSignInVisible}"
-                                              InstanceUrl="{Binding Display.InstanceUrl, Mode=TwoWay}"
-                                              Placeholder="{Binding Display.InstanceUrlPlaceholder}"
-                                              Status="{Binding Display.Status}"
-                                              IsStatusVisible="{Binding Display.IsStatusVisible}"
-                                              IsInputEnabled="{Binding Display.IsInputEnabled}"
-                                              ConnectCommand="{Binding ConnectCommand}" />
+                <Border IsVisible="{Binding Display.IsSignInVisible}"
+                        Style="{StaticResource AppCard}">
+                    <VerticalStackLayout Spacing="16">
+                        <material:TextField Title="{Binding Display.InstanceUrlPlaceholder}"
+                                            Text="{Binding Display.InstanceUrl, Mode=TwoWay}"
+                                            Keyboard="Url"
+                                            ReturnType="Go"
+                                            ReturnCommand="{Binding ConnectCommand}"
+                                            AllowClear="True"
+                                            IsEnabled="{Binding Display.IsInputEnabled}"
+                                            SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
+                                            Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}}" />
 
-                <controls:LoadingStatusView IsStatusVisible="{Binding Display.IsAuthorizationProgressVisible}"
-                                            IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
-                                            Text="{x:Static localization:AppResources.WaitingForBrowserApproval}"
-                                            DetailText="{Binding Display.AuthorizationProgressMessage}"
-                                            ActionIconData="{x:Static controls:IconPathData.Close}"
-                                            ActionCommand="{Binding CancelAuthorizationCommand}"
-                                            IsActionEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
-                                            IsActionVisible="True"
-                                            ActionSemanticDescription="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
-                                            ContainerStyleResourceKey="M3AuthLoadingStatusPanel"
-                                            TextStyleResourceKey="M3CardSupportingStrong" />
-            </controls:StackedContentView>
-        </controls:ScreenScrollBodyView>
+                        <Label Text="{Binding Display.Status}"
+                               IsVisible="{Binding Display.IsStatusVisible}"
+                               Style="{StaticResource AppBodyText}" />
 
-        <controls:AuthLegalFooterView Grid.Row="1"
-                                      IsFooterVisible="{Binding Display.IsLegalFooterVisible}"
-                                      PrivacyCommand="{Binding PrivacyPolicyCommand}" />
+                        <Button Text="{x:Static localization:AppResources.ConnectText}"
+                                Command="{Binding ConnectCommand}"
+                                IsEnabled="{Binding Display.IsInputEnabled}"
+                                StyleClass="FilledButton" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border IsVisible="{Binding Display.IsAuthorizationProgressVisible}"
+                        Style="{StaticResource AppStatusCard}">
+                    <Grid ColumnDefinitions="Auto,*,Auto"
+                          ColumnSpacing="12">
+                        <ActivityIndicator IsRunning="{Binding Display.IsAuthorizationProgressIndicatorRunning}"
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        <VerticalStackLayout Grid.Column="1"
+                                             Spacing="4"
+                                             VerticalOptions="Center">
+                            <Label Text="{x:Static localization:AppResources.WaitingForBrowserApproval}"
+                                   FontAttributes="Bold" />
+                            <Label Text="{Binding Display.AuthorizationProgressMessage}"
+                                   Style="{StaticResource AppBodyText}" />
+                        </VerticalStackLayout>
+                        <Button Grid.Column="2"
+                                Text="{x:Static localization:AppResources.CancelText}"
+                                Command="{Binding CancelAuthorizationCommand}"
+                                IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
+                                SemanticProperties.Description="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
+                                StyleClass="TextButton" />
+                    </Grid>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="1"
+                Margin="12,4"
+                Text="{x:Static localization:AppResources.PrivacyText}"
+                Command="{Binding PrivacyPolicyCommand}"
+                IsVisible="{Binding Display.IsLegalFooterVisible}"
+                StyleClass="TextButton" />
 
         <Grid Grid.RowSpan="2"
+              RowDefinitions="*,Auto"
               IsVisible="{Binding Display.IsAuthenticatedVisible}">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-
             <local:SyncDashboardView Grid.Row="0"
                                      BindingContext="{Binding Sync}"
                                      IsVisible="{Binding BindingContext.Display.IsSyncDestinationVisible, Source={x:Reference RootPage}}" />
@@ -65,10 +112,48 @@
             <local:ProfileView Grid.Row="0"
                                IsVisible="{Binding Display.IsProfileDestinationVisible}" />
 
-            <controls:AppNavigationBarView Grid.Row="1"
-                                           SelectedDestination="{Binding Display.SelectedDestination}"
-                                           SyncCommand="{Binding ShowSyncCommand}"
-                                           ProfileCommand="{Binding ShowProfileCommand}" />
+            <Grid Grid.Row="1"
+                  ColumnDefinitions="*,*"
+                  Style="{StaticResource AppNavigationBar}">
+                <Button Text="{x:Static localization:AppResources.SyncTitle}"
+                        Command="{Binding ShowSyncCommand}"
+                        ContentLayout="Top,4"
+                        SemanticProperties.Description="{x:Static localization:AppResources.OpenSyncDescription}"
+                        StyleClass="TextButton">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Sync_alt}" />
+                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding Display.IsSyncDestinationVisible}"
+                                     Value="True">
+                            <Setter Property="BackgroundColor"
+                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+
+                <Button Grid.Column="1"
+                        Text="{x:Static localization:AppResources.ProfileTitle}"
+                        Command="{Binding ShowProfileCommand}"
+                        ContentLayout="Top,4"
+                        SemanticProperties.Description="{x:Static localization:AppResources.OpenProfileDescription}"
+                        StyleClass="TextButton">
+                    <Button.ImageSource>
+                        <FontImageSource FontFamily="MaterialOutlined"
+                                         Glyph="{x:Static symbols:MaterialOutlined.Account_circle}" />
+                    </Button.ImageSource>
+                    <Button.Triggers>
+                        <DataTrigger TargetType="Button"
+                                     Binding="{Binding Display.IsProfileDestinationVisible}"
+                                     Value="True">
+                            <Setter Property="BackgroundColor"
+                                    Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}" />
+                        </DataTrigger>
+                    </Button.Triggers>
+                </Button>
+            </Grid>
         </Grid>
-    </controls:MainPageRootView>
+    </Grid>
 </ContentPage>

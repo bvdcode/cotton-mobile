@@ -1,20 +1,25 @@
 ﻿// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
-using Cotton.Mobile.Controls;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
+using UraniumUI.Dialogs;
 
 namespace Cotton.Mobile.Services
 {
     public class UserDialogService : IUserDialogService
     {
+        private readonly IDialogService _dialogService;
         private readonly ILogger<UserDialogService> _logger;
 
-        public UserDialogService(ILogger<UserDialogService> logger)
+        public UserDialogService(
+            IDialogService dialogService,
+            ILogger<UserDialogService> logger)
         {
+            ArgumentNullException.ThrowIfNull(dialogService);
             ArgumentNullException.ThrowIfNull(logger);
 
+            _dialogService = dialogService;
             _logger = logger;
         }
 
@@ -24,15 +29,13 @@ namespace Cotton.Mobile.Services
             {
                 await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    Page? page = GetCurrentPage();
-                    if (page is null)
+                    Label content = new()
                     {
-                        return;
-                    }
+                        Text = message,
+                        Margin = 20,
+                    };
 
-                    MaterialDialogPage dialog = MaterialDialogPage.Alert(title, message, cancel);
-                    await page.Navigation.PushModalAsync(dialog, animated: false);
-                    await dialog.WaitForResultAsync();
+                    await _dialogService.DisplayViewAsync(title, content, cancel);
                 });
             }
             catch (Exception exception)
@@ -47,16 +50,7 @@ namespace Cotton.Mobile.Services
             {
                 return await MainThread.InvokeOnMainThreadAsync(async () =>
                 {
-                    Page? page = GetCurrentPage();
-                    if (page is null)
-                    {
-                        return false;
-                    }
-
-                    MaterialDialogPage dialog = MaterialDialogPage.Confirmation(title, message, accept, cancel);
-                    await page.Navigation.PushModalAsync(dialog, animated: false);
-                    string? result = await dialog.WaitForResultAsync();
-                    return result is not null;
+                    return await _dialogService.ConfirmAsync(title, message, accept, cancel);
                 });
             }
             catch (Exception exception)
@@ -66,9 +60,5 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static Page? GetCurrentPage()
-        {
-            return Application.Current?.Windows.FirstOrDefault()?.Page;
-        }
     }
 }

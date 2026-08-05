@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.CloudFolderPickerPage"
              x:Name="RootPage"
@@ -10,55 +11,119 @@
              Shell.NavBarIsVisible="False"
              Title="{x:Static localization:AppResources.ChooseCloudFolderPageTitle}">
 
-    <controls:ScreenShellView>
-        <controls:TopAppBar TitleText="{x:Static localization:AppResources.CloudFolderAppBarTitle}"
-                            BackCommand="{Binding CancelCommand}"
-                            PrimaryIconData="{x:Static controls:IconPathData.Check}"
-                            PrimaryCommand="{Binding ChooseCommand}"
-                            PrimaryDescription="{x:Static localization:AppResources.UseCurrentCloudFolderDescription}"
-                            SecondaryIconData="{x:Static controls:IconPathData.ArrowUp}"
-                            SecondaryCommand="{Binding UpCommand}"
-                            SecondaryDescription="{x:Static localization:AppResources.GoToParentFolderDescription}"
-                            IsSecondaryActionVisible="{Binding CanNavigateUp}" />
+    <Grid RowDefinitions="Auto,*"
+          Style="{StaticResource AppScreen}">
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto"
+              Style="{StaticResource AppTopBar}">
+            <Button Command="{Binding CancelCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.BackDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}" />
+                </Button.ImageSource>
+            </Button>
+            <Label Grid.Column="1"
+                   Text="{x:Static localization:AppResources.CloudFolderAppBarTitle}"
+                   Style="{StaticResource AppTopBarTitle}" />
+            <Button Grid.Column="2"
+                    Command="{Binding UpCommand}"
+                    IsVisible="{Binding CanNavigateUp}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.GoToParentFolderDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_upward}" />
+                </Button.ImageSource>
+            </Button>
+            <Button Grid.Column="3"
+                    Command="{Binding ChooseCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.UseCurrentCloudFolderDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Check}" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
 
-        <controls:ScreenContentGridView Grid.Row="1">
-            <controls:ScreenHeaderView Title="{Binding CurrentFolderName}"
-                                       SupportingText="{Binding PathText}"
-                                       IsSupportingTextVisible="True"
-                                       IsSupportingTextMultiline="True"
-                                       IsBusy="{Binding IsBusy}" />
+        <Grid Grid.Row="1"
+              RowDefinitions="Auto,Auto,*"
+              Padding="{StaticResource AppPagePadding}"
+              RowSpacing="12"
+              MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
+              HorizontalOptions="Fill">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="12">
+                <VerticalStackLayout Spacing="4">
+                    <Label Text="{Binding CurrentFolderName}"
+                           Style="{StaticResource AppScreenTitle}" />
+                    <Label Text="{Binding PathText}"
+                           Style="{StaticResource AppBodyText}" />
+                </VerticalStackLayout>
+                <ActivityIndicator Grid.Column="1"
+                                   IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            </Grid>
 
-            <controls:ScreenStatusView Grid.Row="1"
-                                       Text="{Binding Status}"
-                                       IsStatusVisible="{Binding IsStatusVisible}" />
+            <Border Grid.Row="1"
+                    IsVisible="{Binding IsStatusVisible}"
+                    Style="{StaticResource AppStatusCard}">
+                <Label Text="{Binding Status}"
+                       Style="{StaticResource AppBodyText}" />
+            </Border>
 
-            <controls:EmptyStateView Grid.Row="2"
-                                     IsStateVisible="{Binding IsEmptyVisible}"
-                                     IconData="{x:Static controls:IconPathData.Folder}"
-                                     Title="{x:Static localization:AppResources.NoSubfoldersTitle}"
-                                     Body="{x:Static localization:AppResources.NoSubfoldersBody}"
-                                     IsActionVisible="False" />
+            <VerticalStackLayout Grid.Row="2"
+                                 Spacing="16"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 IsVisible="{Binding IsEmptyVisible}">
+                <Border Style="{StaticResource AppIconFrame}"
+                        HorizontalOptions="Center">
+                    <Image Style="{StaticResource AppIcon}"
+                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}}" />
+                </Border>
+                <Label Text="{x:Static localization:AppResources.NoSubfoldersTitle}"
+                       Style="{StaticResource AppSectionTitle}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="{x:Static localization:AppResources.NoSubfoldersBody}"
+                       Style="{StaticResource AppBodyText}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
 
-            <controls:MaterialCollectionView Grid.Row="2"
-                                             IsContentVisible="{Binding IsListVisible}"
-                                             ItemsSource="{Binding Folders}"
-                                             ItemSizingStrategy="MeasureAllItems"
-                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
-                <controls:MaterialCollectionView.ItemTemplate>
+            <CollectionView Grid.Row="2"
+                            IsVisible="{Binding IsListVisible}"
+                            ItemsSource="{Binding Folders}"
+                            ItemSizingStrategy="MeasureAllItems"
+                            ItemsLayout="{StaticResource AppVerticalCardList}">
+                <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="viewModels:CloudFolderItemViewModel">
-                        <controls:ContentCardView>
-                            <controls:ActionListItemView Text="{Binding Name}"
-                                                         LeadingIconData="{x:Static controls:IconPathData.Folder}"
-                                                         IsLeadingIconVisible="True"
-                                                         LeadingIconFrameStyleResourceKey="M3FolderThumbnailFrame"
-                                                         ActionIconData="{x:Static controls:IconPathData.ChevronRight}"
-                                                         Command="{Binding OpenCommand}"
-                                                         GridStyleResourceKey="M3SettingsListItemGrid"
-                                                         TextStyleResourceKey="M3SingleLineListItemTitle" />
-                        </controls:ContentCardView>
+                        <material:ButtonView TappedCommand="{Binding OpenCommand}"
+                                             Padding="16"
+                                             Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                             StrokeThickness="1"
+                                             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                             StrokeShape="RoundRectangle 20">
+                            <Grid ColumnDefinitions="Auto,*,Auto"
+                                  ColumnSpacing="12">
+                                <Border Style="{StaticResource AppIconFrame}">
+                                    <Image Style="{StaticResource AppIcon}"
+                                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}}" />
+                                </Border>
+                                <Label Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       FontAttributes="Bold"
+                                       VerticalOptions="Center"
+                                       LineBreakMode="TailTruncation" />
+                                <Image Grid.Column="2"
+                                       Style="{StaticResource AppIcon}"
+                                       Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}}" />
+                            </Grid>
+                        </material:ButtonView>
                     </DataTemplate>
-                </controls:MaterialCollectionView.ItemTemplate>
-            </controls:MaterialCollectionView>
-        </controls:ScreenContentGridView>
-    </controls:ScreenShellView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
 </ContentPage>

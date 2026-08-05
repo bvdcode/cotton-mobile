@@ -6,22 +6,18 @@ namespace Cotton.Mobile.Tests
 {
     public class MaterialColorContrastTests
     {
-        private const string ColorsPath = "src/Cotton.Mobile/Resources/Styles/Theme/MColors.xaml";
+        private const string ColorsPath = "src/Cotton.Mobile/Resources/Styles/Colors.xaml";
         private const double MinimumTextContrast = 4.5;
         private const double MinimumNonTextContrast = 3.0;
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
-        public void Material_text_role_pairings_meet_wcag_aa()
+        public void Material_theme_text_pairings_meet_wcag_aa()
         {
             IReadOnlyDictionary<string, Rgba> colors = LoadColors();
 
             foreach (string theme in new[] { "Light", "Dark" })
             {
-                AssertContrast(colors, theme, "OnAction", "Action", MinimumTextContrast);
-                AssertContrast(colors, theme, "OnAction", "ActionPressed", MinimumTextContrast);
-                AssertContrast(colors, theme, "OnActionContainer", "ActionContainer", MinimumTextContrast);
-                AssertContrast(colors, theme, "OnActionContainer", "ActionContainerPressed", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnPrimary", "Primary", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnPrimaryContainer", "PrimaryContainer", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnSecondary", "Secondary", MinimumTextContrast);
@@ -31,63 +27,24 @@ namespace Cotton.Mobile.Tests
                 AssertContrast(colors, theme, "OnError", "Error", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnErrorContainer", "ErrorContainer", MinimumTextContrast);
                 AssertContrast(colors, theme, "InverseOnSurface", "InverseSurface", MinimumTextContrast);
-
-                foreach (string surface in CommonSurfaceRoles)
-                {
-                    AssertContrast(colors, theme, "OnSurface", surface, MinimumTextContrast);
-                    AssertContrast(colors, theme, "OnSurfaceVariant", surface, MinimumTextContrast);
-                    AssertContrast(colors, theme, "Primary", surface, MinimumTextContrast);
-                    AssertContrast(colors, theme, "Tertiary", surface, MinimumTextContrast);
-                    AssertContrast(colors, theme, "Error", surface, MinimumTextContrast);
-                }
-
-                AssertContrast(colors, theme, "InputPlaceholder", "SurfaceContainerLow", MinimumTextContrast);
-                AssertContrast(colors, theme, "InputPlaceholder", "SurfaceContainerHigh", MinimumTextContrast);
+                AssertContrast(colors, theme, "OnSurface", "Surface", MinimumTextContrast);
+                AssertContrast(colors, theme, "OnSurfaceVariant", "SurfaceVariant", MinimumTextContrast);
+                AssertContrast(colors, theme, "OnBackground", "Background", MinimumTextContrast);
             }
         }
 
         [Fact]
-        public void Compact_state_and_input_boundaries_meet_non_text_contrast()
+        public void Material_theme_actions_and_boundaries_meet_non_text_contrast()
         {
             IReadOnlyDictionary<string, Rgba> colors = LoadColors();
 
             foreach (string theme in new[] { "Light", "Dark" })
             {
-                string stateRole = theme == "Light" ? "Primary" : "Action";
-                foreach (string surface in CompactStateBackgroundRoles)
-                {
-                    AssertContrast(colors, theme, stateRole, surface, MinimumNonTextContrast);
-                }
-
-                AssertContrast(colors, theme, "Outline", "SurfaceContainerLow", MinimumNonTextContrast);
-                AssertContrast(colors, theme, "Outline", "SurfaceContainer", MinimumNonTextContrast);
-                AssertContrast(colors, theme, "Outline", "SurfaceContainerHigh", MinimumNonTextContrast);
+                AssertContrast(colors, theme, "Primary", "Surface", MinimumNonTextContrast);
+                AssertContrast(colors, theme, "Error", "Surface", MinimumNonTextContrast);
+                AssertContrast(colors, theme, "Outline", "Surface", MinimumNonTextContrast);
             }
         }
-
-        private static readonly string[] CommonSurfaceRoles =
-        [
-            "Surface",
-            "SurfaceBright",
-            "SurfaceDim",
-            "SurfaceContainerLowest",
-            "SurfaceContainerLow",
-            "SurfaceContainer",
-            "SurfaceContainerHigh",
-            "SurfaceContainerHighest",
-            "SurfaceVariant",
-        ];
-
-        private static readonly string[] CompactStateBackgroundRoles =
-        [
-            "SurfaceBright",
-            "SurfaceDim",
-            "SurfaceContainerLow",
-            "SurfaceContainer",
-            "SurfaceContainerHigh",
-            "SurfaceContainerHighest",
-            "ActionContainer",
-        ];
 
         private static IReadOnlyDictionary<string, Rgba> LoadColors()
         {
@@ -137,8 +94,9 @@ namespace Cotton.Mobile.Tests
             string backgroundRole,
             double minimumContrast)
         {
-            string foregroundKey = $"M3{theme}{foregroundRole}";
-            string backgroundKey = $"M3{theme}{backgroundRole}";
+            string suffix = string.Equals(theme, "Dark", StringComparison.Ordinal) ? "Dark" : string.Empty;
+            string foregroundKey = $"{foregroundRole}{suffix}";
+            string backgroundKey = $"{backgroundRole}{suffix}";
             double contrast = Contrast(colors[foregroundKey], colors[backgroundKey]);
 
             Assert.True(

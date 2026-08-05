@@ -1,104 +1,173 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.SyncDashboardView"
              x:Name="SyncViewRoot"
              x:DataType="viewModels:SyncSettingsViewModel">
 
-    <controls:ScreenShellView>
-        <controls:TopAppBar IsBackActionVisible="False"
-                            PrimaryIconData="{x:Static controls:IconPathData.Plus}"
-                            PrimaryCommand="{Binding AddRootCommand}"
-                            PrimaryDescription="{x:Static localization:AppResources.AddSyncFolderDescription}"
-                            SecondaryIconData="{x:Static controls:IconPathData.Play}"
-                            SecondaryCommand="{Binding RunAllCommand}"
-                            SecondaryDescription="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
-                            IsSecondaryActionVisible="{Binding IsRunAllVisible}"
-                            TertiaryIconData="{x:Static controls:IconPathData.Refresh}"
-                            TertiaryCommand="{Binding LoadCommand}"
-                            TertiaryDescription="{x:Static localization:AppResources.RefreshSyncFoldersDescription}"
-                            IsTertiaryActionVisible="True" />
+    <Grid RowDefinitions="Auto,*"
+          Style="{StaticResource AppScreen}">
+        <Grid ColumnDefinitions="*,Auto,Auto,Auto"
+              Style="{StaticResource AppTopBar}">
+            <Label Text="{x:Static localization:AppResources.SyncTitle}"
+                   Style="{StaticResource AppTopBarTitle}" />
 
-        <controls:ScreenContentGridView Grid.Row="1">
-            <controls:ScreenHeaderView Title="{x:Static localization:AppResources.SyncTitle}"
-                                       SupportingText="{Binding HeaderSupportingText}"
-                                       IsSupportingTextVisible="{Binding IsHeaderSupportingTextVisible}"
-                                       IsBusy="{Binding IsBusy}" />
+            <Button Grid.Column="1"
+                    Command="{Binding AddRootCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.AddSyncFolderDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Add}" />
+                </Button.ImageSource>
+            </Button>
 
-            <controls:EmptyStateView Grid.Row="2"
-                                     IsStateVisible="{Binding IsEmptyVisible}"
-                                     IconData="{x:Static controls:IconPathData.Folder}"
-                                     Title="{x:Static localization:AppResources.NoSyncFoldersTitle}"
-                                     Body="{x:Static localization:AppResources.NoSyncFoldersBody}"
-                                     ActionIconData="{x:Static controls:IconPathData.Plus}"
-                                     ActionCommand="{Binding AddRootCommand}"
-                                     ActionSemanticDescription="{x:Static localization:AppResources.AddSyncFolderDescription}"
-                                     IsActionVisible="True" />
+            <Button Grid.Column="2"
+                    Command="{Binding RunAllCommand}"
+                    IsVisible="{Binding IsRunAllVisible}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.RunAllSyncFoldersDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Play_arrow}" />
+                </Button.ImageSource>
+            </Button>
 
-            <controls:MaterialCollectionView Grid.Row="2"
-                                             IsContentVisible="{Binding IsListVisible}"
-                                             ItemsSource="{Binding Roots}"
-                                             ItemSizingStrategy="MeasureAllItems"
-                                             ItemsLayout="{StaticResource M3VerticalCardListItemsLayout}">
-                <controls:MaterialCollectionView.ItemTemplate>
+            <Button Grid.Column="3"
+                    Command="{Binding LoadCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.RefreshSyncFoldersDescription}"
+                    StyleClass="TextButton">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Refresh}" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              RowDefinitions="Auto,*"
+              Padding="{StaticResource AppPagePadding}"
+              RowSpacing="16"
+              MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
+              HorizontalOptions="Fill">
+            <Grid ColumnDefinitions="*,Auto"
+                  ColumnSpacing="12">
+                <Label Text="{Binding HeaderSupportingText}"
+                       IsVisible="{Binding IsHeaderSupportingTextVisible}"
+                       Style="{StaticResource AppBodyText}"
+                       VerticalOptions="Center" />
+                <ActivityIndicator Grid.Column="1"
+                                   IsRunning="{Binding IsBusy}"
+                                   IsVisible="{Binding IsBusy}"
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            </Grid>
+
+            <VerticalStackLayout Grid.Row="1"
+                                 Spacing="16"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 IsVisible="{Binding IsEmptyVisible}">
+                <Border Style="{StaticResource AppIconFrame}"
+                        HorizontalOptions="Center">
+                    <Image Style="{StaticResource AppIcon}"
+                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}}" />
+                </Border>
+                <Label Text="{x:Static localization:AppResources.NoSyncFoldersTitle}"
+                       Style="{StaticResource AppSectionTitle}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="{x:Static localization:AppResources.NoSyncFoldersBody}"
+                       Style="{StaticResource AppBodyText}"
+                       HorizontalTextAlignment="Center" />
+                <Button Text="{x:Static localization:AppResources.AddSyncFolderDescription}"
+                        Command="{Binding AddRootCommand}"
+                        StyleClass="FilledButton" />
+            </VerticalStackLayout>
+
+            <CollectionView Grid.Row="1"
+                            IsVisible="{Binding IsListVisible}"
+                            ItemsSource="{Binding Roots}"
+                            ItemSizingStrategy="MeasureAllItems"
+                            ItemsLayout="{StaticResource AppVerticalCardList}">
+                <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <controls:ContentCardView>
-                            <controls:StackedContentView StackStyleResourceKey="M3SettingsDenseStack">
-                                <controls:SettingsInfoItemView LeadingIconData="{x:Static controls:IconPathData.Folder}"
-                                                               AttentionLeadingIconData="{x:Static controls:IconPathData.Error}"
-                                                               IsAttentionState="{Binding IsAttentionVisible}"
-                                                               LeadingIconFrameStyleResourceKey="M3CardSyncThumbnailFrame"
-                                                               Title="{Binding Title}"
-                                                               TitleTextStyleResourceKey="M3CardTitle"
-                                                               PrimaryDetailText="{Binding PathText}"
-                                                               SecondaryDetailText="{Binding DetailText}"
-                                                               TrailingText="{Binding StatusText}" />
+                        <Border Style="{StaticResource AppCard}">
+                            <VerticalStackLayout Spacing="12">
+                                <Grid ColumnDefinitions="Auto,*,Auto"
+                                      ColumnSpacing="12">
+                                    <Border Style="{StaticResource AppIconFrame}">
+                                        <Image Style="{StaticResource AppIcon}">
+                                            <Image.Source>
+                                                <FontImageSource FontFamily="MaterialOutlined"
+                                                                 Glyph="{x:Static symbols:MaterialOutlined.Folder}" />
+                                            </Image.Source>
+                                            <Image.Triggers>
+                                                <DataTrigger TargetType="Image"
+                                                             Binding="{Binding IsAttentionVisible}"
+                                                             Value="True">
+                                                    <Setter Property="Source"
+                                                            Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Error}}" />
+                                                </DataTrigger>
+                                            </Image.Triggers>
+                                        </Image>
+                                    </Border>
 
-                                <HorizontalStackLayout Style="{StaticResource M3PanelActionCluster}">
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                                         Command="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         SemanticProperties.Description="{Binding PrimaryActionText}"
-                                                         IsEnabled="{Binding CanUsePrimaryAction}"
-                                                         IsVisible="{Binding CanUsePrimaryAction}">
-                                        <controls:IconButton.Triggers>
-                                            <DataTrigger TargetType="controls:IconButton"
-                                                         Binding="{Binding CanReconnect}"
-                                                         Value="True">
-                                                <Setter Property="IconData"
-                                                        Value="{x:Static controls:IconPathData.Folder}" />
-                                            </DataTrigger>
-                                        </controls:IconButton.Triggers>
-                                    </controls:IconButton>
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Pause}"
-                                                         Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         SemanticProperties.Description="{Binding PauseSyncActionText}"
-                                                         IsEnabled="{Binding CanPauseSync}"
-                                                         IsVisible="{Binding CanPauseSync}" />
-                                    <controls:IconButton IconData="{x:Static controls:IconPathData.Play}"
-                                                         Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         SemanticProperties.Description="{Binding ResumeSyncActionText}"
-                                                         IsEnabled="{Binding CanResumeSync}"
-                                                         IsVisible="{Binding CanResumeSync}" />
-                                    <controls:IconButton Style="{StaticResource M3DestructiveIconButton}"
-                                                         IconData="{x:Static controls:IconPathData.Delete}"
-                                                         Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
-                                                         CommandParameter="{Binding .}"
-                                                         SemanticProperties.Description="{Binding StopSyncActionText}"
-                                                         IsEnabled="{Binding CanStopSync}"
-                                                         IsVisible="{Binding CanStopSync}" />
-                                </HorizontalStackLayout>
-                            </controls:StackedContentView>
-                        </controls:ContentCardView>
+                                    <VerticalStackLayout Grid.Column="1"
+                                                         Spacing="3"
+                                                         VerticalOptions="Center">
+                                        <Label Text="{Binding Title}"
+                                               FontAttributes="Bold" />
+                                        <Label Text="{Binding PathText}"
+                                               Style="{StaticResource AppBodyText}"
+                                               LineBreakMode="TailTruncation" />
+                                        <Label Text="{Binding DetailText}"
+                                               Style="{StaticResource AppCaptionText}" />
+                                    </VerticalStackLayout>
+
+                                    <Label Grid.Column="2"
+                                           Text="{Binding StatusText}"
+                                           Style="{StaticResource AppCaptionText}"
+                                           VerticalOptions="Center" />
+                                </Grid>
+
+                                <FlexLayout Direction="Row"
+                                            Wrap="Wrap"
+                                            JustifyContent="End"
+                                            AlignItems="Center">
+                                    <Button Text="{Binding PrimaryActionText}"
+                                            Command="{Binding BindingContext.RootPrimaryActionCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanUsePrimaryAction}"
+                                            IsVisible="{Binding CanUsePrimaryAction}"
+                                            StyleClass="TextButton" />
+                                    <Button Text="{Binding PauseSyncActionText}"
+                                            Command="{Binding BindingContext.PauseRootCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanPauseSync}"
+                                            IsVisible="{Binding CanPauseSync}"
+                                            StyleClass="TextButton" />
+                                    <Button Text="{Binding ResumeSyncActionText}"
+                                            Command="{Binding BindingContext.ResumeRootCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanResumeSync}"
+                                            IsVisible="{Binding CanResumeSync}"
+                                            StyleClass="TextButton" />
+                                    <Button Text="{Binding StopSyncActionText}"
+                                            Command="{Binding BindingContext.StopRootCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding .}"
+                                            IsEnabled="{Binding CanStopSync}"
+                                            IsVisible="{Binding CanStopSync}"
+                                            TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                            StyleClass="TextButton" />
+                                </FlexLayout>
+                            </VerticalStackLayout>
+                        </Border>
                     </DataTemplate>
-                </controls:MaterialCollectionView.ItemTemplate>
-            </controls:MaterialCollectionView>
-        </controls:ScreenContentGridView>
-    </controls:ScreenShellView>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
 </ContentView>

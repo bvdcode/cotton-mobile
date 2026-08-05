@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Tests
         public void Single_root_runtime_progress_does_not_reset_the_collection()
         {
             string source = RepositoryPath.ReadText(
-                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.Execution.cs");
             int runRootStart = source.IndexOf("private async Task RunRootAsync", StringComparison.Ordinal);
             int runAllStart = source.IndexOf("private async Task RunAllAsync", runRootStart, StringComparison.Ordinal);
 
@@ -37,13 +37,11 @@ namespace Cotton.Mobile.Tests
         public void Run_all_runtime_progress_updates_existing_items_without_a_reset()
         {
             string source = RepositoryPath.ReadText(
-                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.Execution.cs");
             int runAllStart = source.IndexOf("private async Task RunAllAsync", StringComparison.Ordinal);
-            int stopRootStart = source.IndexOf("private async Task StopRootAsync", runAllStart, StringComparison.Ordinal);
 
             Assert.True(runAllStart >= 0);
-            Assert.True(stopRootStart > runAllStart);
-            string runAll = source[runAllStart..stopRootStart];
+            string runAll = source[runAllStart..];
             Assert.Contains("runningItem.SetRunning(isRunning: true);", runAll, StringComparison.Ordinal);
             Assert.Contains("runningItem.SetRunning(isRunning: false);", runAll, StringComparison.Ordinal);
             Assert.DoesNotContain("ShowRoots(await", runAll, StringComparison.Ordinal);

@@ -148,7 +148,7 @@ namespace Cotton.Mobile.Tests
             string coordinator = RepositoryPath.ReadText(
                 "src/Cotton.Mobile/Services/SyncRootSetupCoordinator.cs");
             string viewModel = RepositoryPath.ReadText(
-                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.cs");
+                "src/Cotton.Mobile/ViewModels/SyncSettingsViewModel.Setup.cs");
 
             Assert.Contains("RootPrimaryActionCommand", page.ToString(), StringComparison.Ordinal);
             Assert.Contains("Binding=\"{Binding CanReconnect}\"", page.ToString(), StringComparison.Ordinal);

@@ -21,7 +21,8 @@ namespace Cotton.Mobile.Tests
                 "cotton-offline-file-pin-tests",
                 Guid.NewGuid().ToString("N"));
             _store = new FileSystemCottonOfflineFilePinStore(
-                new FixedOfflineFileMetadataPathProvider(_rootDirectory));
+                new FixedOfflineFileMetadataPathProvider(_rootDirectory),
+                NullLogger<FileSystemCottonOfflineFilePinStore>.Instance);
         }
 
         [Fact]
@@ -71,6 +72,16 @@ namespace Cotton.Mobile.Tests
 
             CottonOfflineFilePinSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
             Assert.Equal("report-new.pdf", loaded.FileName);
+        }
+
+        [Fact]
+        public async Task Save_propagates_file_system_failures()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
+            await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
+
+            await Assert.ThrowsAsync<IOException>(() =>
+                _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]));
         }
 
         [Fact]
@@ -242,6 +253,11 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_rootDirectory))
             {
                 Directory.Delete(_rootDirectory, recursive: true);
+            }
+
+            if (File.Exists(_rootDirectory))
+            {
+                File.Delete(_rootDirectory);
             }
         }
 

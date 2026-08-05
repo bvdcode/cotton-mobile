@@ -21,7 +21,9 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-sync-root-configuration-tests",
                 Guid.NewGuid().ToString("N"));
-            _rootStore = new FileSystemCottonSyncRootStore(new FixedSyncRootMetadataPathProvider(_directory));
+            _rootStore = new FileSystemCottonSyncRootStore(
+                new FixedSyncRootMetadataPathProvider(_directory),
+                NullLogger<FileSystemCottonSyncRootStore>.Instance);
             _service = new CottonSyncRootConfigurationService(_rootStore);
         }
 

@@ -20,7 +20,9 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-sync-root-reconnect-tests",
                 Guid.NewGuid().ToString("N"));
-            _rootStore = new FileSystemCottonSyncRootStore(new FixedSyncRootMetadataPathProvider(_directory));
+            _rootStore = new FileSystemCottonSyncRootStore(
+                new FixedSyncRootMetadataPathProvider(_directory),
+                NullLogger<FileSystemCottonSyncRootStore>.Instance);
             _service = new CottonSyncRootReconnectService(_rootStore);
         }
 

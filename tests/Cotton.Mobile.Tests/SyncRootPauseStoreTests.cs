@@ -18,7 +18,9 @@ namespace Cotton.Mobile.Tests
                 Path.GetTempPath(),
                 "cotton-sync-root-pause-store-tests",
                 Guid.NewGuid().ToString("N"));
-            _store = new FileSystemCottonSyncRootPauseStore(new FixedSyncRootMetadataPathProvider(_directory));
+            _store = new FileSystemCottonSyncRootPauseStore(
+                new FixedSyncRootMetadataPathProvider(_directory),
+                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance);
         }
 
         [Fact]
@@ -89,6 +91,16 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_propagates_file_system_failures()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
+            await File.WriteAllTextAsync(_directory, "blocked directory");
+
+            await Assert.ThrowsAsync<IOException>(() =>
+                _store.SetPausedAsync(InstanceUri, RootId, isPaused: true));
+        }
+
+        [Fact]
         public async Task Clear_removes_pause_metadata()
         {
             await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
@@ -104,6 +116,11 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);
+            }
+
+            if (File.Exists(_directory))
+            {
+                File.Delete(_directory);
             }
         }
 

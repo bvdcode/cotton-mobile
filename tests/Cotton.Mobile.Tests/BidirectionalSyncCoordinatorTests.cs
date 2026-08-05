@@ -23,11 +23,14 @@ namespace Cotton.Mobile.Tests
                 "cotton-bidirectional-coordinator-tests",
                 Guid.NewGuid().ToString("N"));
             _rootStore = new FileSystemCottonSyncRootStore(
-                new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
+                new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
+                NullLogger<FileSystemCottonSyncRootStore>.Instance);
             _pauseStore = new FileSystemCottonSyncRootPauseStore(
-                new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")));
+                new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
+                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance);
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
-                new FixedSyncedFileManifestPathProvider(Path.Combine(_directory, "manifest")));
+                new FixedSyncedFileManifestPathProvider(Path.Combine(_directory, "manifest")),
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
             _localTreeReader = new BidirectionalLocalTreeReader();
             _remoteFolderContentSource = new BidirectionalRemoteFolderContentSource();
             _cloudToDeviceFileOperator = new BidirectionalCloudToDeviceFileOperator();

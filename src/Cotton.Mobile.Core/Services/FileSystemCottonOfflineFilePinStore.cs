@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
@@ -15,13 +16,17 @@ namespace Cotton.Mobile.Services
         public const string MetadataFileName = "offline-files.json";
 
         private readonly ICottonOfflineFileMetadataPathProvider _pathProvider;
+        private readonly ILogger<FileSystemCottonOfflineFilePinStore> _logger;
 
         public FileSystemCottonOfflineFilePinStore(
-            ICottonOfflineFileMetadataPathProvider pathProvider)
+            ICottonOfflineFileMetadataPathProvider pathProvider,
+            ILogger<FileSystemCottonOfflineFilePinStore> logger)
         {
             ArgumentNullException.ThrowIfNull(pathProvider);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _pathProvider = pathProvider;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<CottonOfflineFilePinSnapshot>> LoadAsync(
@@ -73,6 +78,10 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
                 when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
             {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to load offline-file pins from {FilePath}; resetting the store.",
+                    filePath);
                 DeleteFile(filePath);
                 return [];
             }
@@ -119,7 +128,9 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
+                _logger.LogError(exception, "Failed to save offline-file pins to {FilePath}.", filePath);
                 DeleteFile(temporaryFilePath);
+                throw;
             }
         }
 
@@ -234,7 +245,7 @@ namespace Cotton.Mobile.Services
             return $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
         }
 
-        private static void DeleteFile(string filePath)
+        private void DeleteFile(string filePath)
         {
             try
             {
@@ -245,6 +256,8 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
+                _logger.LogError(exception, "Failed to delete offline-file pin store {FilePath}.", filePath);
+                throw;
             }
         }
     }

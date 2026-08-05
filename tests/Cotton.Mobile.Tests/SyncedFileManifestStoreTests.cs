@@ -30,7 +30,8 @@ namespace Cotton.Mobile.Tests
                 CloudFolderId,
                 "app-private-sync-root");
             _store = new FileSystemCottonSyncedFileManifestStore(
-                new FixedSyncedFileManifestPathProvider(_rootDirectory));
+                new FixedSyncedFileManifestPathProvider(_rootDirectory),
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
         }
 
         [Fact]
@@ -116,6 +117,19 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(replacementFileId, loaded.FileId);
             Assert.Equal("report.pdf", loaded.RelativePath);
             Assert.Equal("\"etag-2\"", loaded.ETag);
+        }
+
+        [Fact]
+        public async Task Save_propagates_file_system_failures()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
+            await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
+
+            await Assert.ThrowsAsync<IOException>(() =>
+                _store.SaveAsync(
+                    InstanceUri,
+                    _syncRoot,
+                    [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]));
         }
 
         [Fact]
@@ -275,6 +289,11 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_rootDirectory))
             {
                 Directory.Delete(_rootDirectory, recursive: true);
+            }
+
+            if (File.Exists(_rootDirectory))
+            {
+                File.Delete(_rootDirectory);
             }
         }
 

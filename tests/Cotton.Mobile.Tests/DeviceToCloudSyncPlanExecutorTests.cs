@@ -20,7 +20,8 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _syncRoot = CreateRoot(RootFolderId);
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
-                new FixedSyncedFileManifestPathProvider(_rootDirectory));
+                new FixedSyncedFileManifestPathProvider(_rootDirectory),
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
             _fileOperator = new FakeDeviceToCloudFileOperator();
             _executor = new CottonDeviceToCloudSyncPlanExecutor(
                 _fileOperator,

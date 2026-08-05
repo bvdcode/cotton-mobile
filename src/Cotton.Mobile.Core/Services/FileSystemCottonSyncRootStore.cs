@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
@@ -15,12 +16,17 @@ namespace Cotton.Mobile.Services
         public const string MetadataFileName = "sync-roots.json";
 
         private readonly ICottonSyncRootMetadataPathProvider _pathProvider;
+        private readonly ILogger<FileSystemCottonSyncRootStore> _logger;
 
-        public FileSystemCottonSyncRootStore(ICottonSyncRootMetadataPathProvider pathProvider)
+        public FileSystemCottonSyncRootStore(
+            ICottonSyncRootMetadataPathProvider pathProvider,
+            ILogger<FileSystemCottonSyncRootStore> logger)
         {
             ArgumentNullException.ThrowIfNull(pathProvider);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _pathProvider = pathProvider;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<CottonSyncRootSnapshot>> LoadAsync(
@@ -70,6 +76,7 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
                 when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
             {
+                _logger.LogWarning(exception, "Failed to load sync roots from {FilePath}; resetting the store.", filePath);
                 DeleteFile(filePath);
                 return [];
             }
@@ -117,7 +124,9 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
+                _logger.LogError(exception, "Failed to save sync roots to {FilePath}.", filePath);
                 DeleteFile(temporaryFilePath);
+                throw;
             }
         }
 
@@ -183,7 +192,7 @@ namespace Cotton.Mobile.Services
             return $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
         }
 
-        private static void DeleteFile(string filePath)
+        private void DeleteFile(string filePath)
         {
             try
             {
@@ -194,6 +203,8 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
+                _logger.LogError(exception, "Failed to delete sync-root store file {FilePath}.", filePath);
+                throw;
             }
         }
     }

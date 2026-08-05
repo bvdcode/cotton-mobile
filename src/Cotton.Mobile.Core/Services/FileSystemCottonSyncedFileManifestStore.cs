@@ -2,6 +2,7 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
@@ -15,12 +16,17 @@ namespace Cotton.Mobile.Services
         public const string MetadataFileName = "synced-files.json";
 
         private readonly ICottonSyncedFileManifestPathProvider _pathProvider;
+        private readonly ILogger<FileSystemCottonSyncedFileManifestStore> _logger;
 
-        public FileSystemCottonSyncedFileManifestStore(ICottonSyncedFileManifestPathProvider pathProvider)
+        public FileSystemCottonSyncedFileManifestStore(
+            ICottonSyncedFileManifestPathProvider pathProvider,
+            ILogger<FileSystemCottonSyncedFileManifestStore> logger)
         {
             ArgumentNullException.ThrowIfNull(pathProvider);
+            ArgumentNullException.ThrowIfNull(logger);
 
             _pathProvider = pathProvider;
+            _logger = logger;
         }
 
         public async Task<IReadOnlyList<CottonSyncedFileSnapshot>> LoadAsync(
@@ -75,6 +81,10 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
                 when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
             {
+                _logger.LogWarning(
+                    exception,
+                    "Failed to load the synced-file manifest from {FilePath}; resetting the store.",
+                    filePath);
                 DeleteFile(filePath);
                 return [];
             }
@@ -123,7 +133,9 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
+                _logger.LogError(exception, "Failed to save the synced-file manifest to {FilePath}.", filePath);
                 DeleteFile(temporaryFilePath);
+                throw;
             }
         }
 
@@ -271,7 +283,7 @@ namespace Cotton.Mobile.Services
             return $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
         }
 
-        private static void DeleteFile(string filePath)
+        private void DeleteFile(string filePath)
         {
             try
             {
@@ -282,6 +294,8 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
+                _logger.LogError(exception, "Failed to delete synced-file manifest {FilePath}.", filePath);
+                throw;
             }
         }
     }

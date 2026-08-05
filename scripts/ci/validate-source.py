@@ -16,6 +16,10 @@ MAX_LOGICAL_LINES = 300
 
 SEALED_TYPE_PATTERN = re.compile(r"\bsealed\s+(?:class|record)\b")
 SILENT_SWITCH_FALLBACK_PATTERN = re.compile(r"^\s*_\s*=>(?!\s*throw\b)", re.MULTILINE)
+EMPTY_CATCH_PATTERN = re.compile(
+    r"\bcatch\s*(?:\([^)]*\))?\s*(?:when\s*\([^)]*\))?\s*\{\s*\}",
+    re.MULTILINE,
+)
 TYPE_DECLARATION_PATTERN = re.compile(
     r"^\s*(?:(?:public|internal|private|protected)\s+)?"
     r"(?:(?:abstract|partial|static)\s+)?"
@@ -87,6 +91,7 @@ def validate_csharp(path: Path, content: str) -> list[str]:
     for label, pattern in (
         ("sealed type", SEALED_TYPE_PATTERN),
         ("non-throwing switch fallback", SILENT_SWITCH_FALLBACK_PATTERN),
+        ("empty catch block", EMPTY_CATCH_PATTERN),
     ):
         for match in pattern.finditer(content):
             violations.append(

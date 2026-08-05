@@ -9,6 +9,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.8" />
 	</ItemGroup>
 
 </Project>

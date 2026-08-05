@@ -18,7 +18,9 @@ namespace Cotton.Mobile.Tests
         public SyncRootStoreTests()
         {
             _directory = Path.Combine(Path.GetTempPath(), "cotton-sync-root-store-tests", Guid.NewGuid().ToString("N"));
-            _store = new FileSystemCottonSyncRootStore(new FixedSyncRootMetadataPathProvider(_directory));
+            _store = new FileSystemCottonSyncRootStore(
+                new FixedSyncRootMetadataPathProvider(_directory),
+                NullLogger<FileSystemCottonSyncRootStore>.Instance);
         }
 
         [Fact]
@@ -255,6 +257,16 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Save_propagates_file_system_failures()
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
+            await File.WriteAllTextAsync(_directory, "blocked directory");
+
+            await Assert.ThrowsAsync<IOException>(() =>
+                _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")]));
+        }
+
+        [Fact]
         public async Task Clear_removes_metadata_file()
         {
             await _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")]);
@@ -270,6 +282,11 @@ namespace Cotton.Mobile.Tests
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);
+            }
+
+            if (File.Exists(_directory))
+            {
+                File.Delete(_directory);
             }
         }
 

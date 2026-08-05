@@ -635,17 +635,24 @@
         <Setter Property="PressInDuration" Value="{StaticResource M3MotionPressInDuration}" />
         <Setter Property="PressOutDuration" Value="{StaticResource M3MotionPressOutDuration}" />
         <Setter Property="DisabledOpacity" Value="{StaticResource M3InteractionDisabledOpacity}" />
+    </Style>
+
+    <Style TargetType="controls:NavigationBarItemVisual" x:Key="M3NavigationBarItemVisual">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FillColor" Value="{StaticResource M3Transparent}" />
         <Setter Property="PressedFillColor" Value="{AppThemeBinding Light={StaticResource M3LightSurfaceContainerHigh}, Dark={StaticResource M3DarkSurfaceContainerHigh}}" />
         <Setter Property="BorderColor" Value="{StaticResource M3Transparent}" />
-        <Setter Property="BorderWidth" Value="{StaticResource M3StrokeThin}" />
-        <Setter Property="ContentPadding" Value="{StaticResource M3NavigationBarItemPadding}" />
+        <Setter Property="StrokeThickness" Value="{StaticResource M3StrokeThin}" />
+        <Setter Property="Padding" Value="{StaticResource M3NavigationBarItemPadding}" />
         <Setter Property="ContentSpacing" Value="{StaticResource M3NavigationBarContentSpacing}" />
         <Setter Property="IconSize" Value="{StaticResource M3NavigationBarIconSize}" />
-        <Setter Property="ItemCornerRadius" Value="{StaticResource ShapeExtraLarge}" />
-        <Setter Property="ItemHeight" Value="{StaticResource M3NavigationBarHeight}" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <RoundRectangle CornerRadius="{StaticResource ShapeExtraLarge}" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="HeightRequest" Value="{StaticResource M3NavigationBarHeight}" />
         <Setter Property="TextFontSize" Value="{StaticResource M3NavigationBarLabelFontSize}" />
         <Setter Property="TextFontFamily" Value="{StaticResource M3FontFamilyMedium}" />
         <Setter Property="TextFontAttributes" Value="None" />
@@ -653,7 +660,7 @@
 
     <Style TargetType="controls:NavigationBarItem" BasedOn="{StaticResource M3NavigationBarItem}" />
 
-    <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemSelected" BasedOn="{StaticResource M3NavigationBarItem}">
+    <Style TargetType="controls:NavigationBarItemVisual" x:Key="M3NavigationBarItemVisualSelected" BasedOn="{StaticResource M3NavigationBarItemVisual}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnAction}, Dark={StaticResource M3DarkOnAction}}" />
         <Setter Property="FillColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
@@ -661,7 +668,7 @@
         <Setter Property="BorderColor" Value="{AppThemeBinding Light={StaticResource M3LightAction}, Dark={StaticResource M3DarkAction}}" />
     </Style>
 
-    <Style TargetType="controls:NavigationBarItem" x:Key="M3NavigationBarItemUnselected" BasedOn="{StaticResource M3NavigationBarItem}">
+    <Style TargetType="controls:NavigationBarItemVisual" x:Key="M3NavigationBarItemVisualUnselected" BasedOn="{StaticResource M3NavigationBarItemVisual}">
         <Setter Property="IconColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource M3LightOnSurfaceVariant}, Dark={StaticResource M3DarkOnSurfaceVariant}}" />
         <Setter Property="FillColor" Value="{StaticResource M3Transparent}" />

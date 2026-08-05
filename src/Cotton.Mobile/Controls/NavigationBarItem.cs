@@ -6,65 +6,84 @@ using Microsoft.Maui.Controls.Shapes;
 
 namespace Cotton.Mobile.Controls
 {
-    public partial class NavigationBarItem : PressableContentView
+    public class NavigationBarItem : PressableContentView
     {
-        private const string BackgroundAnimationName = "M3NavigationBarItemBackground";
-        private const string BorderColorAnimationName = "M3NavigationBarItemBorderColor";
-        private const string LabelTextColorAnimationName = "M3NavigationBarItemTextColor";
         private const string OpacityAnimationName = "M3NavigationBarItemOpacity";
-        private const string SelectedItemStyleResourceKey = "M3NavigationBarItemSelected";
-        private const string UnselectedItemStyleResourceKey = "M3NavigationBarItemUnselected";
 
-        private readonly Border _container;
-        private readonly VerticalStackLayout _content;
-        private readonly IconView _icon;
-        private readonly Label _label;
-        private bool _isApplyingSelection;
+        public static readonly BindableProperty IsSelectedProperty = BindableProperty.Create(
+            nameof(IsSelected),
+            typeof(bool),
+            typeof(NavigationBarItem),
+            false,
+            propertyChanged: OnSelectionChanged);
+
+        public static readonly BindableProperty IconDataProperty = BindableProperty.Create(
+            nameof(IconData),
+            typeof(Geometry),
+            typeof(NavigationBarItem),
+            default(Geometry),
+            propertyChanged: OnContentPropertyChanged);
+
+        public static readonly BindableProperty TextProperty = BindableProperty.Create(
+            nameof(Text),
+            typeof(string),
+            typeof(NavigationBarItem),
+            string.Empty,
+            propertyChanged: OnContentPropertyChanged);
+
+        public static readonly BindableProperty CommandProperty = BindableProperty.Create(
+            nameof(Command),
+            typeof(ICommand),
+            typeof(NavigationBarItem),
+            propertyChanged: OnCommandPropertyChanged);
+
+        public static readonly BindableProperty CommandParameterProperty = BindableProperty.Create(
+            nameof(CommandParameter),
+            typeof(object),
+            typeof(NavigationBarItem),
+            propertyChanged: OnCommandParameterChanged);
+
+        private readonly NavigationBarItemVisual _visual;
         private bool _hasAppliedVisualState;
         private ICommand? _observedCommand;
 
         public NavigationBarItem()
         {
-            _icon = new IconView
-            {
-                HorizontalOptions = LayoutOptions.Center,
-            };
-
-            _label = new Label
-            {
-                HorizontalTextAlignment = TextAlignment.Center,
-                VerticalTextAlignment = TextAlignment.Center,
-                LineBreakMode = LineBreakMode.TailTruncation,
-                MaxLines = 1,
-                InputTransparent = true,
-            };
-
-            _content = new VerticalStackLayout
-            {
-                InputTransparent = true,
-                HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
-                Children =
-                {
-                    _icon,
-                    _label,
-                },
-            };
-
-            _container = new Border
-            {
-                StrokeThickness = BorderWidth,
-                StrokeShape = new RoundRectangle
-                {
-                    CornerRadius = new CornerRadius(ItemCornerRadius),
-                },
-                HorizontalOptions = LayoutOptions.Fill,
-                VerticalOptions = LayoutOptions.Center,
-                Content = _content,
-            };
-
-            Content = _container;
+            _visual = new NavigationBarItemVisual();
+            Content = _visual;
+            _visual.ApplySelection(IsSelected);
+            UpdateContent();
             UpdateVisualState(false);
+        }
+
+        public Geometry? IconData
+        {
+            get => (Geometry?)GetValue(IconDataProperty);
+            set => SetValue(IconDataProperty, value);
+        }
+
+        public bool IsSelected
+        {
+            get => (bool)GetValue(IsSelectedProperty);
+            set => SetValue(IsSelectedProperty, value);
+        }
+
+        public string Text
+        {
+            get => (string)GetValue(TextProperty);
+            set => SetValue(TextProperty, value);
+        }
+
+        public ICommand? Command
+        {
+            get => (ICommand?)GetValue(CommandProperty);
+            set => SetValue(CommandProperty, value);
+        }
+
+        public object? CommandParameter
+        {
+            get => GetValue(CommandParameterProperty);
+            set => SetValue(CommandParameterProperty, value);
         }
 
         protected override void OnPropertyChanged(string? propertyName = null)
@@ -75,28 +94,6 @@ namespace Cotton.Mobile.Controls
             {
                 UpdateVisualState(true);
             }
-        }
-
-        private static void OnVisualPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            NavigationBarItem item = (NavigationBarItem)bindable;
-            item.UpdateVisualState(!item._isApplyingSelection);
-        }
-
-        private static void OnSelectionChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            NavigationBarItem item = (NavigationBarItem)bindable;
-            item.ApplySelectionStyle();
-        }
-
-        private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
-        {
-            NavigationBarItem item = (NavigationBarItem)bindable;
-            ICommand? oldCommand = oldValue as ICommand;
-            ICommand? newCommand = newValue as ICommand;
-
-            item.ObserveCommand(oldCommand, newCommand);
-            item.UpdateVisualState(true);
         }
 
         protected override bool CanHandlePress()
@@ -124,15 +121,36 @@ namespace Cotton.Mobile.Controls
             }
         }
 
+        private static void OnContentPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NavigationBarItem item = (NavigationBarItem)bindable;
+            item.UpdateContent();
+        }
+
+        private static void OnSelectionChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NavigationBarItem item = (NavigationBarItem)bindable;
+            item._visual.ApplySelection(item.IsSelected);
+            item.UpdateVisualState(false);
+        }
+
+        private static void OnCommandPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NavigationBarItem item = (NavigationBarItem)bindable;
+            item.ObserveCommand(oldValue as ICommand, newValue as ICommand);
+            item.UpdateVisualState(true);
+        }
+
+        private static void OnCommandParameterChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            NavigationBarItem item = (NavigationBarItem)bindable;
+            item.UpdateVisualState(true);
+        }
+
         private bool CanExecuteCommand()
         {
             ICommand? command = Command;
-            if (command is null)
-            {
-                return true;
-            }
-
-            return command.CanExecute(CommandParameter);
+            return command is null || command.CanExecute(CommandParameter);
         }
 
         private void ObserveCommand(ICommand? oldCommand, ICommand? newCommand)
@@ -155,87 +173,35 @@ namespace Cotton.Mobile.Controls
             UpdateVisualState(true);
         }
 
-        private void UpdateVisualState(bool animateState)
+        private void UpdateContent()
         {
-            if (_container is null || _content is null || _icon is null || _label is null)
+            if (_visual is null)
             {
                 return;
             }
 
-            double targetOpacity = ResolvePressableOpacity(1);
+            _visual.SetContent(IconData, Text);
+        }
+
+        private void UpdateVisualState(bool animateState)
+        {
+            if (_visual is null)
+            {
+                return;
+            }
+
             int duration = IsPressed ? PressInDuration : PressOutDuration;
             bool shouldAnimate = animateState && _hasAppliedVisualState;
             MaterialMotion.UpdateDouble(
                 this,
                 Opacity,
-                targetOpacity,
+                ResolvePressableOpacity(1),
                 duration,
                 OpacityAnimationName,
                 shouldAnimate,
                 opacity => Opacity = opacity);
-            MaterialMotion.UpdateBackgroundColor(
-                _container,
-                IsPressed ? PressedFillColor : FillColor,
-                duration,
-                BackgroundAnimationName,
-                shouldAnimate);
-            _container.HeightRequest = ItemHeight;
-            _container.Padding = ContentPadding;
-            MaterialMotion.UpdateColor(
-                _container,
-                ResolveCurrentBorderColor(),
-                BorderColor,
-                duration,
-                BorderColorAnimationName,
-                shouldAnimate,
-                color => _container.Stroke = new SolidColorBrush(color));
-            _container.StrokeThickness = BorderWidth;
-            _container.StrokeShape = new RoundRectangle
-            {
-                CornerRadius = new CornerRadius(ItemCornerRadius),
-            };
-            _content.Spacing = ContentSpacing;
-            _icon.IconData = IconData;
-            _icon.IconColor = IconColor;
-            _icon.IconSize = IconSize;
-            _label.Text = Text;
-            MaterialMotion.UpdateTextColor(
-                _label,
-                TextColor,
-                MaterialResources.Get<int>("M3MotionStatusDuration"),
-                LabelTextColorAnimationName,
-                shouldAnimate);
-            _label.FontSize = TextFontSize;
-            _label.FontAttributes = TextFontAttributes;
-            _label.FontFamily = TextFontFamily;
+            _visual.UpdateVisualState(IsPressed, duration, shouldAnimate);
             _hasAppliedVisualState = true;
-        }
-
-        private void ApplySelectionStyle()
-        {
-            _isApplyingSelection = true;
-            try
-            {
-                SetDynamicResource(
-                    StyleProperty,
-                    IsSelected ? SelectedItemStyleResourceKey : UnselectedItemStyleResourceKey);
-            }
-            finally
-            {
-                _isApplyingSelection = false;
-            }
-
-            UpdateVisualState(false);
-        }
-
-        private Color ResolveCurrentBorderColor()
-        {
-            if (_container.Stroke is SolidColorBrush solidColorBrush)
-            {
-                return solidColorBrush.Color;
-            }
-
-            return BorderColor;
         }
     }
 }

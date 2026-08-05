@@ -103,6 +103,13 @@ namespace Cotton.Mobile.Services
                 uploadSettings,
                 progress,
                 cancellationToken).ConfigureAwait(false);
+            if (source.Snapshot.SizeBytes.HasValue
+                && source.Snapshot.SizeBytes.Value != result.SizeBytes)
+            {
+                throw new InvalidDataException(
+                    $"Upload source size changed: expected {source.Snapshot.SizeBytes.Value} bytes, read {result.SizeBytes} bytes.");
+            }
+
             return result;
         }
 
@@ -169,7 +176,8 @@ namespace Cotton.Mobile.Services
                 ?? throw new InvalidOperationException("Upload content hash was not finalized.");
             return new CottonFileUploadResult(
                 chunkHashes,
-                CottonFileUploadHash.FormatHex(fileHash));
+                CottonFileUploadHash.FormatHex(fileHash),
+                uploadedBytes);
         }
 
         private static async Task<int> ReadChunkAsync(

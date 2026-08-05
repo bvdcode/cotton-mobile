@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Reconnect_replaces_only_local_root_and_preserves_configuration()
+        public async Task Reconnect_restores_original_local_root_and_preserves_configuration()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -36,8 +36,8 @@ namespace Cotton.Mobile.Tests
                 CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             await _rootStore.SaveAsync(InstanceUri, [root]);
             CottonSyncLocalRootSnapshot replacement = CreateLocalRoot(
-                "content://tree/primary%3ANew",
-                "New",
+                "content://tree/primary%3AOld",
+                "Old",
                 CottonSyncRootPermissionStatus.Available);
 
             CottonSyncRootSnapshot result = await _service
@@ -55,11 +55,11 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(result.Id, saved.Id);
             Assert.Equal(replacement.RootKey, saved.LocalRoot.RootKey);
             Assert.Equal(root.UploadOriginalRetention, saved.UploadOriginalRetention);
-            Assert.NotEqual(root.StableKey, saved.StableKey);
+            Assert.Equal(root.StableKey, saved.StableKey);
         }
 
         [Fact]
-        public async Task Reconnect_does_not_leave_a_duplicate_for_the_replacement_stable_key()
+        public async Task Reconnect_rejects_a_different_local_root_without_replacing_existing_roots()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -75,17 +75,18 @@ namespace Cotton.Mobile.Tests
                 CottonSyncDirection.Bidirectional);
             await _rootStore.SaveAsync(InstanceUri, [root, conflictingRoot]);
 
-            CottonSyncRootSnapshot result = await _service.ReconnectUserSelectedDocumentTreeAsync(
-                root,
-                CreateLocalRoot(
-                    "content://tree/primary%3ANew",
-                    "New",
-                    CottonSyncRootPermissionStatus.Available));
+            await Assert.ThrowsAsync<ArgumentException>(() =>
+                _service.ReconnectUserSelectedDocumentTreeAsync(
+                    root,
+                    CreateLocalRoot(
+                        "content://tree/primary%3ANew",
+                        "New",
+                        CottonSyncRootPermissionStatus.Available)));
 
-            CottonSyncRootSnapshot saved = Assert.Single(await _rootStore.LoadAsync(InstanceUri));
-            Assert.Equal(RootId, result.Id);
-            Assert.Equal(RootId, saved.Id);
-            Assert.Equal(result.StableKey, saved.StableKey);
+            IReadOnlyList<CottonSyncRootSnapshot> saved = await _rootStore.LoadAsync(InstanceUri);
+            Assert.Equal(2, saved.Count);
+            Assert.Contains(saved, candidate => candidate.Id == RootId);
+            Assert.Contains(saved, candidate => candidate.Id == ConflictingRootId);
         }
 
         [Fact]

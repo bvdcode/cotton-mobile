@@ -236,8 +236,7 @@ namespace Cotton.Mobile.Services
                 || previous.LocalUpdatedAtUtc != next.LocalUpdatedAtUtc
                 || previous.SizeBytes != next.SizeBytes
                 || !string.Equals(previous.ContentType, next.ContentType, StringComparison.Ordinal)
-                || previous.OperationId != next.OperationId
-                || next.RecordedAtUtc < previous.RecordedAtUtc)
+                || previous.OperationId != next.OperationId)
             {
                 throw new InvalidDataException("Upload receipt identity changed during confirmation.");
             }

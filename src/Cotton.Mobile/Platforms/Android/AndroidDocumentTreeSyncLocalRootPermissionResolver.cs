@@ -3,12 +3,20 @@
 
 #if ANDROID
 using Android.Content;
+using Android.Database;
+using Android.Provider;
+using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
 {
     public class AndroidDocumentTreeSyncLocalRootPermissionResolver :
         ICottonSyncLocalRootPermissionResolver
     {
+        private static readonly string[] RootProjection =
+        [
+            DocumentsContract.Document.ColumnDocumentId,
+        ];
+
         public CottonSyncRootPermissionStatus Resolve(CottonSyncLocalRootSnapshot localRoot)
         {
             ArgumentNullException.ThrowIfNull(localRoot);
@@ -26,12 +34,55 @@ namespace Cotton.Mobile.Services
                     permission.Uri?.ToString(),
                     localRoot.RootKey,
                     StringComparison.Ordinal));
-            if (hasReadWriteGrant)
+            if (!hasReadWriteGrant)
             {
-                return CottonSyncRootPermissionStatus.Available;
+                return CottonSyncRootPermissionStatus.Revoked;
             }
 
-            return CottonSyncRootPermissionStatus.Revoked;
+            return IsRootAvailable(contentResolver, localRoot.RootKey)
+                ? CottonSyncRootPermissionStatus.Available
+                : CottonSyncRootPermissionStatus.Unavailable;
+        }
+
+        private static bool IsRootAvailable(ContentResolver contentResolver, string rootKey)
+        {
+            try
+            {
+                AndroidUri? treeUri = AndroidUri.Parse(rootKey);
+                if (treeUri is null)
+                {
+                    return false;
+                }
+
+                string? rootDocumentId = DocumentsContract.GetTreeDocumentId(treeUri);
+                if (string.IsNullOrWhiteSpace(rootDocumentId))
+                {
+                    return false;
+                }
+
+                AndroidUri? rootUri = DocumentsContract.BuildDocumentUriUsingTree(treeUri, rootDocumentId);
+                if (rootUri is null)
+                {
+                    return false;
+                }
+
+                using ICursor? cursor = contentResolver.Query(rootUri, RootProjection, null, null, null);
+                return cursor is not null
+                    && cursor.MoveToFirst()
+                    && !cursor.IsNull(0);
+            }
+            catch (Java.IO.FileNotFoundException)
+            {
+                return false;
+            }
+            catch (Java.Lang.SecurityException)
+            {
+                return false;
+            }
+            catch (Java.Lang.IllegalArgumentException)
+            {
+                return false;
+            }
         }
     }
 }

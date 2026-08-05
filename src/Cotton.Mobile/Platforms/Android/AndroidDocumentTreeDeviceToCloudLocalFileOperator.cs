@@ -175,8 +175,7 @@ namespace Cotton.Mobile.Services
 
             if (item.TargetType != CottonFileBrowserEntryType.File
                 || string.IsNullOrWhiteSpace(item.LocalSourceId)
-                || !item.LocalUpdatedAtUtc.HasValue
-                || !item.SizeBytes.HasValue)
+                || !item.LocalUpdatedAtUtc.HasValue)
             {
                 throw new InvalidOperationException("Local file deletion requires an exact local file revision.");
             }

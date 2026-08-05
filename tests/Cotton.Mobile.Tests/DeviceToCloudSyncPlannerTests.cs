@@ -84,7 +84,8 @@ namespace Cotton.Mobile.Tests
             CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
                 CreateReadyRoot(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload),
                 local,
-                CreateRemoteContent(),
+                CreateRemoteContent(
+                    CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\"")),
                 [receipt]);
 
             CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
@@ -94,6 +95,31 @@ namespace Cotton.Mobile.Tests
             Assert.False(item.RequiresUpload);
             Assert.Equal(1, plan.LocalDeleteCount);
             Assert.True(plan.HasExecutableChanges);
+        }
+
+        [Fact]
+        public void Planner_blocks_local_delete_when_uploaded_remote_revision_is_missing_or_changed()
+        {
+            CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonSyncRootSnapshot root = CreateReadyRoot(
+                CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
+
+            CottonDeviceToCloudSyncPlanSnapshot missingRemotePlan = CottonDeviceToCloudSyncPlanner.Create(
+                root,
+                local,
+                CreateRemoteContent(),
+                [receipt]);
+            CottonDeviceToCloudSyncPlanSnapshot changedRemotePlan = CottonDeviceToCloudSyncPlanner.Create(
+                root,
+                local,
+                CreateRemoteContent(
+                    CreateRemoteFile(SecondFileId, "alpha.txt", "alpha.txt", "\"etag-2\"")),
+                [receipt]);
+
+            AssertUploadedReceiptDeleteIsBlocked(missingRemotePlan);
+            AssertUploadedReceiptDeleteIsBlocked(changedRemotePlan);
         }
 
         [Fact]
@@ -145,6 +171,32 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.ConfirmsPendingUpload);
             Assert.Equal(1, plan.ConfirmedUploadCount);
             Assert.True(plan.HasExecutableChanges);
+        }
+
+        [Fact]
+        public void Planner_blocks_pending_confirmation_when_remote_size_differs()
+        {
+            CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
+            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
+                CreateRemoteFile(
+                    FirstFileId,
+                    "alpha.txt",
+                    "alpha.txt",
+                    "\"etag-1\"",
+                    OperationId,
+                    sizeBytes: 41));
+
+            CottonDeviceToCloudSyncPlanSnapshot plan = CottonDeviceToCloudSyncPlanner.Create(
+                CreateReadyRoot(),
+                local,
+                remote,
+                [receipt]);
+
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision, item.Action);
+            Assert.True(item.IsBlocked);
         }
 
         [Fact]
@@ -295,6 +347,14 @@ namespace Cotton.Mobile.Tests
             Assert.True(plan.HasBlockingItems);
         }
 
+        private static void AssertUploadedReceiptDeleteIsBlocked(CottonDeviceToCloudSyncPlanSnapshot plan)
+        {
+            CottonDeviceToCloudSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonDeviceToCloudSyncActionKind.NeedsFreshServerRevision, item.Action);
+            Assert.False(item.RequiresLocalDelete);
+            Assert.True(item.IsBlocked);
+        }
+
         private static CottonSyncRootSnapshot CreateReadyRoot(
             CottonUploadOriginalRetention retention = CottonUploadOriginalRetention.KeepOriginals)
         {
@@ -357,7 +417,8 @@ namespace Cotton.Mobile.Tests
             string name,
             string relativePath,
             string eTag,
-            Guid? operationId = null)
+            Guid? operationId = null,
+            long sizeBytes = 42)
         {
             IReadOnlyDictionary<string, string>? metadata = operationId.HasValue
                 ? new Dictionary<string, string>
@@ -369,7 +430,7 @@ namespace Cotton.Mobile.Tests
                 id,
                 name,
                 SyncedAt,
-                42,
+                sizeBytes,
                 "text/plain",
                 previewHashEncryptedHex: null,
                 eTag,

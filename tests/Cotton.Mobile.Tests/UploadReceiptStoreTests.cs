@@ -78,6 +78,38 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Mark_uploaded_rejects_a_different_remote_size()
+        {
+            CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
+            CottonFileBrowserEntry wrongSize = CottonFileBrowserEntry.CreateFile(
+                RemoteFileId,
+                "photo.jpg",
+                RecordedAtUtc,
+                41,
+                "image/jpeg",
+                previewHashEncryptedHex: null,
+                eTag: "etag-uploaded",
+                CreateOperationMetadata());
+
+            Assert.Throws<ArgumentException>(() => pending.MarkUploaded(wrongSize, RecordedAtUtc));
+        }
+
+        [Fact]
+        public async Task Save_accepts_confirmation_after_device_clock_moves_backwards()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
+            CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
+            CottonUploadReceiptSnapshot uploaded = pending.MarkUploaded(
+                CreateUploadedFile(),
+                pending.RecordedAtUtc.AddMinutes(-1));
+            await _store.SaveAsync(InstanceUri, root, pending);
+
+            await _store.SaveAsync(InstanceUri, root, uploaded);
+
+            Assert.True(Assert.Single(await _store.LoadAsync(InstanceUri, root)).IsUploaded);
+        }
+
+        [Fact]
         public async Task Receipts_are_isolated_by_sync_root()
         {
             CottonSyncRootSnapshot firstRoot = CreateRoot(RootId, "content://tree/camera");

@@ -177,6 +177,11 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Uploaded receipt revision has a different operation id.", nameof(remoteFile));
             }
 
+            if (SizeBytes.HasValue && remoteFile.SizeBytes != SizeBytes)
+            {
+                throw new ArgumentException("Uploaded receipt revision has a different file size.", nameof(remoteFile));
+            }
+
             return new CottonUploadReceiptSnapshot(
                 LocalSourceId,
                 RelativePath,

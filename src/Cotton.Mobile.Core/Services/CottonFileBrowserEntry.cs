@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Services
     {
         private const string LocalCopyStatusText = "On device";
 
-        private CottonFileBrowserEntry(
+        internal CottonFileBrowserEntry(
             Guid id,
             CottonFileBrowserEntryType type,
             string name,
@@ -128,48 +128,12 @@ namespace Cotton.Mobile.Services
 
         public static CottonFileBrowserEntry FromNode(NodeDto node)
         {
-            ArgumentNullException.ThrowIfNull(node);
-
-            return new CottonFileBrowserEntry(
-                node.Id,
-                CottonFileBrowserEntryType.Folder,
-                node.Name,
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                node.UpdatedAt,
-                null,
-                null,
-                null,
-                null,
-                null,
-                null);
+            return CottonFileBrowserEntryFactory.FromNode(node);
         }
 
         public static CottonFileBrowserEntry FromFile(NodeFileManifestDto file)
         {
-            ArgumentNullException.ThrowIfNull(file);
-
-            string contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? string.Empty
-                : file.ContentType.Trim();
-            string kind = CottonFileKindClassifier.ResolveKind(file.Name, contentType);
-            return new CottonFileBrowserEntry(
-                file.Id,
-                CottonFileBrowserEntryType.File,
-                file.Name,
-                kind,
-                $"{CottonFileSizeFormatter.Format(file.SizeBytes)} · {kind}",
-                "More",
-                ResolveBadgeText(kind),
-                file.UpdatedAt,
-                file.SizeBytes,
-                contentType,
-                file.ContentHash,
-                file.PreviewHashEncryptedHex,
-                file.ETag,
-                metadata: file.Metadata);
+            return CottonFileBrowserEntryFactory.FromFile(file);
         }
 
         public static CottonFileBrowserEntry CreateFile(
@@ -183,27 +147,16 @@ namespace Cotton.Mobile.Services
             IReadOnlyDictionary<string, string>? metadata = null,
             string? contentHash = null)
         {
-            string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
-            string details = sizeBytes.HasValue
-                ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {kind}"
-                : kind;
-            return new CottonFileBrowserEntry(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 id,
-                CottonFileBrowserEntryType.File,
                 name,
-                kind,
-                details,
-                "More",
-                ResolveBadgeText(kind),
                 updatedAtUtc,
                 sizeBytes,
                 contentType,
-                contentHash,
                 previewHashEncryptedHex,
                 eTag,
-                null,
-                null,
-                metadata: metadata);
+                metadata,
+                contentHash);
         }
 
         public static CottonFileBrowserEntry CreateCached(
@@ -221,7 +174,7 @@ namespace Cotton.Mobile.Services
             string? eTag,
             string? contentHash = null)
         {
-            return new CottonFileBrowserEntry(
+            return CottonFileBrowserEntryFactory.CreateCached(
                 id,
                 type,
                 name,
@@ -232,11 +185,9 @@ namespace Cotton.Mobile.Services
                 updatedAtUtc,
                 sizeBytes,
                 contentType,
-                contentHash,
                 previewHashEncryptedHex,
                 eTag,
-                null,
-                null);
+                contentHash);
         }
 
         public bool Matches(string searchText)
@@ -257,56 +208,49 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(thumbnail);
 
-            return new CottonFileBrowserEntry(
-                Id,
-                Type,
-                Name,
-                Kind,
-                Details,
-                ActionLabel,
-                BadgeText,
-                UpdatedAtUtc,
-                SizeBytes,
-                ContentType,
-                ContentHash,
-                PreviewHashEncryptedHex,
-                ETag,
-                OfflineAvailability,
-                LocalFile,
-                thumbnail,
-                IsSelected,
-                Metadata);
+            return Copy(OfflineAvailability, LocalFile, thumbnail, IsSelected);
         }
 
         public CottonFileBrowserEntry WithLocalFile(CottonLocalFileSnapshot localFile)
         {
             ArgumentNullException.ThrowIfNull(localFile);
 
-            return new CottonFileBrowserEntry(
-                Id,
-                Type,
-                Name,
-                Kind,
-                Details,
-                ActionLabel,
-                BadgeText,
-                UpdatedAtUtc,
-                SizeBytes,
-                ContentType,
-                ContentHash,
-                PreviewHashEncryptedHex,
-                ETag,
-                OfflineAvailability,
-                localFile,
-                Thumbnail,
-                IsSelected,
-                Metadata);
+            return Copy(OfflineAvailability, localFile, Thumbnail, IsSelected);
         }
 
         public CottonFileBrowserEntry WithOfflineAvailability(CottonOfflineFileAvailabilitySnapshot offlineAvailability)
         {
             ArgumentNullException.ThrowIfNull(offlineAvailability);
 
+            return Copy(offlineAvailability, LocalFile, Thumbnail, IsSelected);
+        }
+
+        public CottonFileBrowserEntry WithoutLocalFile()
+        {
+            if (LocalFile is null)
+            {
+                return this;
+            }
+
+            return Copy(OfflineAvailability, null, Thumbnail, IsSelected);
+        }
+
+        public CottonFileBrowserEntry WithSelection(bool isSelected)
+        {
+            if (IsSelected == isSelected)
+            {
+                return this;
+            }
+
+            return Copy(OfflineAvailability, LocalFile, Thumbnail, isSelected);
+        }
+
+        private CottonFileBrowserEntry Copy(
+            CottonOfflineFileAvailabilitySnapshot offlineAvailability,
+            CottonLocalFileSnapshot? localFile,
+            CottonFileThumbnailSnapshot thumbnail,
+            bool isSelected)
+        {
             return new CottonFileBrowserEntry(
                 Id,
                 Type,
@@ -322,64 +266,8 @@ namespace Cotton.Mobile.Services
                 PreviewHashEncryptedHex,
                 ETag,
                 offlineAvailability,
-                LocalFile,
-                Thumbnail,
-                IsSelected,
-                Metadata);
-        }
-
-        public CottonFileBrowserEntry WithoutLocalFile()
-        {
-            if (LocalFile is null)
-            {
-                return this;
-            }
-
-            return new CottonFileBrowserEntry(
-                Id,
-                Type,
-                Name,
-                Kind,
-                Details,
-                ActionLabel,
-                BadgeText,
-                UpdatedAtUtc,
-                SizeBytes,
-                ContentType,
-                ContentHash,
-                PreviewHashEncryptedHex,
-                ETag,
-                OfflineAvailability,
-                null,
-                Thumbnail,
-                IsSelected,
-                Metadata);
-        }
-
-        public CottonFileBrowserEntry WithSelection(bool isSelected)
-        {
-            if (IsSelected == isSelected)
-            {
-                return this;
-            }
-
-            return new CottonFileBrowserEntry(
-                Id,
-                Type,
-                Name,
-                Kind,
-                Details,
-                ActionLabel,
-                BadgeText,
-                UpdatedAtUtc,
-                SizeBytes,
-                ContentType,
-                ContentHash,
-                PreviewHashEncryptedHex,
-                ETag,
-                OfflineAvailability,
-                LocalFile,
-                Thumbnail,
+                localFile,
+                thumbnail,
                 isSelected,
                 Metadata);
         }
@@ -398,19 +286,5 @@ namespace Cotton.Mobile.Services
             return new ReadOnlyDictionary<string, string>(values);
         }
 
-        private static string ResolveBadgeText(string kind)
-        {
-            return kind switch
-            {
-                "Image" => "IMG",
-                "PDF" => "PDF",
-                "Document" => "DOC",
-                "Video" => "VID",
-                "Audio" => "AUD",
-                "SVG" => "SVG",
-                "Text" => "TXT",
-                _ => "FILE",
-            };
-        }
     }
 }

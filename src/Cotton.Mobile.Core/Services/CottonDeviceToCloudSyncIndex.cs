@@ -3,25 +3,48 @@
 
 namespace Cotton.Mobile.Services
 {
-    public static partial class CottonDeviceToCloudSyncPlanner
+    internal class CottonDeviceToCloudSyncIndex
     {
-        private static bool TryCollectRequiredFolders(
+        private const char RelativePathSeparator = '/';
+
+        public CottonDeviceToCloudSyncIndex(
+            CottonDeviceToCloudLocalContentSnapshot localContent,
+            CottonDeviceToCloudRemoteContentSnapshot remoteContent,
+            IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
+        {
+            LocalByPath = CreateLocalItemMap(localContent);
+            RemoteByPath = CreateRemotePathMap(remoteContent);
+            ReceiptsBySource = CreateReceiptSourceMap(uploadReceipts);
+            RemoteByOperation = CreateRemoteOperationMap(remoteContent);
+        }
+
+        public IReadOnlyDictionary<string, CottonDeviceToCloudLocalItemSnapshot> LocalByPath { get; }
+
+        public IReadOnlyDictionary<string, CottonDeviceToCloudRemoteItemSnapshot> RemoteByPath { get; }
+
+        public IReadOnlyDictionary<string, CottonUploadReceiptSnapshot> ReceiptsBySource { get; }
+
+        public IReadOnlyDictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> RemoteByOperation { get; }
+
+        public bool TryCollectRequiredFolders(
             CottonDeviceToCloudSyncPlanItem fileItem,
-            IReadOnlyDictionary<string, CottonDeviceToCloudLocalItemSnapshot> localByPath,
-            IReadOnlyDictionary<string, CottonDeviceToCloudRemoteItemSnapshot> remoteByPath,
             ISet<string> requiredFolderPaths,
             out CottonDeviceToCloudRemoteItemSnapshot? conflictingParent)
         {
             foreach (string parentPath in GetParentPaths(fileItem.RelativePath))
             {
-                if (!localByPath.TryGetValue(parentPath, out CottonDeviceToCloudLocalItemSnapshot? localFolder)
+                if (!LocalByPath.TryGetValue(
+                    parentPath,
+                    out CottonDeviceToCloudLocalItemSnapshot? localFolder)
                     || localFolder.ItemType != CottonFileBrowserEntryType.Folder)
                 {
                     conflictingParent = null;
                     return false;
                 }
 
-                if (remoteByPath.TryGetValue(parentPath, out CottonDeviceToCloudRemoteItemSnapshot? remoteFolder)
+                if (RemoteByPath.TryGetValue(
+                    parentPath,
+                    out CottonDeviceToCloudRemoteItemSnapshot? remoteFolder)
                     && remoteFolder.Entry.Type != CottonFileBrowserEntryType.Folder)
                 {
                     conflictingParent = remoteFolder;
@@ -33,6 +56,11 @@ namespace Cotton.Mobile.Services
 
             conflictingParent = null;
             return true;
+        }
+
+        public static int GetPathDepth(string relativePath)
+        {
+            return relativePath.Count(character => character == RelativePathSeparator);
         }
 
         private static IReadOnlyList<string> GetParentPaths(string relativePath)
@@ -57,7 +85,9 @@ namespace Cotton.Mobile.Services
             {
                 if (!result.TryAdd(localItem.RelativePath, localItem))
                 {
-                    throw new ArgumentException("Upload-only local content contains duplicate relative paths.", nameof(localContent));
+                    throw new ArgumentException(
+                        "Upload-only local content contains duplicate relative paths.",
+                        nameof(localContent));
                 }
             }
 
@@ -72,7 +102,9 @@ namespace Cotton.Mobile.Services
             {
                 if (!result.TryAdd(remoteItem.RelativePath, remoteItem))
                 {
-                    throw new ArgumentException("Upload-only remote content contains duplicate relative paths.", nameof(remoteContent));
+                    throw new ArgumentException(
+                        "Upload-only remote content contains duplicate relative paths.",
+                        nameof(remoteContent));
                 }
             }
 
@@ -88,12 +120,16 @@ namespace Cotton.Mobile.Services
             {
                 if (!result.TryAdd(receipt.LocalSourceId, receipt))
                 {
-                    throw new ArgumentException("Upload receipt journal contains duplicate local source ids.", nameof(uploadReceipts));
+                    throw new ArgumentException(
+                        "Upload receipt journal contains duplicate local source ids.",
+                        nameof(uploadReceipts));
                 }
 
                 if (!operationIds.Add(receipt.OperationId))
                 {
-                    throw new ArgumentException("Upload receipt journal contains duplicate operation ids.", nameof(uploadReceipts));
+                    throw new ArgumentException(
+                        "Upload receipt journal contains duplicate operation ids.",
+                        nameof(uploadReceipts));
                 }
             }
 
@@ -117,16 +153,13 @@ namespace Cotton.Mobile.Services
 
                 if (!result.TryAdd(operationId, remoteItem))
                 {
-                    throw new ArgumentException("Remote content contains duplicate upload operation ids.", nameof(remoteContent));
+                    throw new ArgumentException(
+                        "Remote content contains duplicate upload operation ids.",
+                        nameof(remoteContent));
                 }
             }
 
             return result;
-        }
-
-        private static int GetPathDepth(string relativePath)
-        {
-            return relativePath.Count(character => character == RelativePathSeparator);
         }
     }
 }

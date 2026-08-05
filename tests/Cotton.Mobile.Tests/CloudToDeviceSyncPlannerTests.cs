@@ -1,17 +1,11 @@
 using Cotton.Mobile.Services;
 using Xunit;
+using static Cotton.Mobile.Tests.CloudToDeviceSyncPlannerTestData;
 
 namespace Cotton.Mobile.Tests
 {
     public class CloudToDeviceSyncPlannerTests
     {
-        private static readonly Guid SyncRootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        private static readonly Guid FolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
-        private static readonly Guid FirstFileId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-        private static readonly Guid SecondFileId = Guid.Parse("22222222-2222-2222-2222-222222222222");
-        private static readonly Guid ThirdFileId = Guid.Parse("33333333-3333-3333-3333-333333333333");
-        private static readonly DateTime UpdatedAt = new(2026, 6, 20, 14, 0, 0, DateTimeKind.Utc);
-
         [Fact]
         public void Planner_downloads_new_remote_files()
         {
@@ -269,159 +263,5 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(1, plan.LocalRemovalCount);
         }
 
-        [Fact]
-        public void Planner_rejects_wrong_cloud_folder()
-        {
-            CottonFolderContent remote = new(
-                Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
-                "Other",
-                [CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"")]);
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(CreateReadyRoot(), remote, []));
-        }
-
-        [Fact]
-        public void Planner_rejects_not_ready_root()
-        {
-            CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
-
-            Assert.Throws<InvalidOperationException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(
-                    CreateRoot(CottonSyncRootPermissionStatus.Unavailable),
-                    remote,
-                    []));
-        }
-
-        [Fact]
-        public void Planner_rejects_non_cloud_to_device_roots()
-        {
-            CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
-
-            Assert.Throws<InvalidOperationException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(
-                    CreateRoot(CottonSyncRootPermissionStatus.Available, CottonSyncDirection.DeviceToCloud),
-                    remote,
-                    []));
-            Assert.Throws<InvalidOperationException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(
-                    CreateRoot(CottonSyncRootPermissionStatus.Available, CottonSyncDirection.Bidirectional),
-                    remote,
-                    []));
-        }
-
-        [Fact]
-        public void Planner_rejects_duplicate_manifest_or_remote_file_ids()
-        {
-            CottonSyncedFileSnapshot first = CottonSyncedFileSnapshot.Create(
-                CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""),
-                UpdatedAt);
-            CottonSyncedFileSnapshot duplicate = new(
-                FirstFileId,
-                "duplicate.txt",
-                "\"etag-2\"",
-                UpdatedAt,
-                42,
-                "text/plain",
-                UpdatedAt);
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(CreateReadyRoot(), CreateContent(), [first, duplicate]));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateContent(),
-                    [
-                        first,
-                        new CottonSyncedFileSnapshot(
-                            SecondFileId,
-                            "alpha.txt",
-                            "\"etag-2\"",
-                            UpdatedAt,
-                            42,
-                            "text/plain",
-                            UpdatedAt),
-                    ]));
-
-            Assert.Throws<ArgumentException>(() =>
-                CottonCloudToDeviceSyncPlanner.Create(
-                    CreateReadyRoot(),
-                    CreateContent(
-                        CreateFile(ThirdFileId, "first.txt", "\"etag-1\""),
-                        CreateFile(ThirdFileId, "second.txt", "\"etag-2\"")),
-                    []));
-        }
-
-        private static CottonSyncRootSnapshot CreateReadyRoot()
-        {
-            return CreateRoot(CottonSyncRootPermissionStatus.Available);
-        }
-
-        private static CottonSyncRootSnapshot CreateRoot(CottonSyncRootPermissionStatus permissionStatus)
-        {
-            return CreateRoot(permissionStatus, CottonSyncDirection.CloudToDevice);
-        }
-
-        private static CottonSyncRootSnapshot CreateRoot(
-            CottonSyncRootPermissionStatus permissionStatus,
-            CottonSyncDirection direction)
-        {
-            return new CottonSyncRootSnapshot(
-                SyncRootId,
-                new Uri("https://app.cottoncloud.dev"),
-                "account-1",
-                new CottonUploadDestinationSnapshot(
-                    FolderId,
-                    "Projects",
-                    "Files / Projects"),
-                new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.AppPrivateDirectory,
-                    "app-private-sync-root",
-                    "On this device",
-                    permissionStatus),
-                direction,
-                CottonUploadOriginalRetention.KeepOriginals);
-        }
-
-        private static CottonFolderContent CreateContent(params CottonFileBrowserEntry[] entries)
-        {
-            return new CottonFolderContent(FolderId, "Projects", entries);
-        }
-
-        private static CottonFileBrowserEntry CreateFile(Guid id, string name, string? eTag)
-        {
-            return CottonFileBrowserEntry.CreateCached(
-                id,
-                CottonFileBrowserEntryType.File,
-                name,
-                "Text",
-                "42 B · Text",
-                "More",
-                "TXT",
-                UpdatedAt,
-                42,
-                "text/plain",
-                previewHashEncryptedHex: null,
-                eTag,
-                TestContentHashes.First);
-        }
-
-        private static CottonFileBrowserEntry CreateFolder(string name)
-        {
-            return CottonFileBrowserEntry.CreateCached(
-                Guid.NewGuid(),
-                CottonFileBrowserEntryType.Folder,
-                name,
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                UpdatedAt,
-                sizeBytes: null,
-                contentType: null,
-                previewHashEncryptedHex: null,
-                eTag: null);
-        }
     }
 }

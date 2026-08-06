@@ -17,10 +17,11 @@
               Style="{StaticResource AppTopBar}">
             <Button Command="{Binding CancelCommand}"
                     SemanticProperties.Description="{x:Static localization:AppResources.BackDescription}"
-                    StyleClass="TextButton">
+                    StyleClass="TextButton, TouchTarget">
                 <Button.ImageSource>
                     <FontImageSource FontFamily="MaterialOutlined"
-                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}" />
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                 </Button.ImageSource>
             </Button>
             <Label Grid.Column="1"
@@ -29,10 +30,11 @@
             <Button Grid.Column="2"
                     Command="{Binding ContinueCommand}"
                     SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.ContinueDescription}"
-                    StyleClass="TextButton">
+                    StyleClass="TextButton, TouchTarget">
                 <Button.ImageSource>
                     <FontImageSource FontFamily="MaterialOutlined"
-                                     Glyph="{x:Static symbols:MaterialOutlined.Check}" />
+                                     Glyph="{x:Static symbols:MaterialOutlined.Check}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                 </Button.ImageSource>
             </Button>
         </Grid>
@@ -47,8 +49,9 @@
                 </VerticalStackLayout>
 
                 <material:ButtonView TappedCommand="{Binding SelectUploadOnlyCommand}"
+                                     SemanticProperties.Description="{Binding UploadOnlyDescription}"
                                      Padding="16"
-                                     Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                                      StrokeThickness="1"
                                      BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                                      StrokeShape="RoundRectangle 20">
@@ -67,7 +70,7 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Upload}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Upload}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
@@ -79,14 +82,15 @@
                         </VerticalStackLayout>
                         <Image Grid.Column="2"
                                Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
                                IsVisible="{Binding IsUploadOnlySelected}" />
                     </Grid>
                 </material:ButtonView>
 
                 <material:ButtonView TappedCommand="{Binding SelectBidirectionalCommand}"
+                                     SemanticProperties.Description="{Binding BidirectionalDescription}"
                                      Padding="16"
-                                     Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                                      StrokeThickness="1"
                                      BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                                      StrokeShape="RoundRectangle 20">
@@ -105,7 +109,7 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Sync_alt}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Sync_alt}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
@@ -117,7 +121,7 @@
                         </VerticalStackLayout>
                         <Image Grid.Column="2"
                                Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}}"
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
                                IsVisible="{Binding IsBidirectionalSelected}" />
                     </Grid>
                 </material:ButtonView>

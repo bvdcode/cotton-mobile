@@ -23,7 +23,7 @@
                             HeightRequest="104"
                             Padding="12"
                             BackgroundColor="{StaticResource BackgroundDark}"
-                            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                             StrokeThickness="1">
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="28" />
@@ -57,7 +57,7 @@
                                             AllowClear="True"
                                             IsEnabled="{Binding Display.IsInputEnabled}"
                                             SemanticProperties.Hint="{x:Static localization:AppResources.CottonCloudAddressHint}"
-                                            Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}}" />
+                                            Icon="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Cloud}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
 
                         <Label Text="{Binding Display.Status}"
                                IsVisible="{Binding Display.IsStatusVisible}"
@@ -66,7 +66,7 @@
                         <Button Text="{x:Static localization:AppResources.ConnectText}"
                                 Command="{Binding ConnectCommand}"
                                 IsEnabled="{Binding Display.IsInputEnabled}"
-                                StyleClass="FilledButton" />
+                                StyleClass="FilledButton, TouchTarget" />
                     </VerticalStackLayout>
                 </Border>
 
@@ -89,7 +89,7 @@
                                 Command="{Binding CancelAuthorizationCommand}"
                                 IsEnabled="{Binding Display.IsCancelAuthorizationEnabled}"
                                 SemanticProperties.Description="{x:Static localization:AppResources.CancelBrowserApprovalDescription}"
-                                StyleClass="TextButton" />
+                                StyleClass="TextButton, TouchTarget" />
                     </Grid>
                 </Border>
             </VerticalStackLayout>
@@ -100,7 +100,7 @@
                 Text="{x:Static localization:AppResources.PrivacyText}"
                 Command="{Binding PrivacyPolicyCommand}"
                 IsVisible="{Binding Display.IsLegalFooterVisible}"
-                StyleClass="TextButton" />
+                StyleClass="TextButton, TouchTarget" />
 
         <Grid Grid.RowSpan="2"
               RowDefinitions="*,Auto"
@@ -119,10 +119,11 @@
                         Command="{Binding ShowSyncCommand}"
                         ContentLayout="Top,4"
                         SemanticProperties.Description="{x:Static localization:AppResources.OpenSyncDescription}"
-                        StyleClass="TextButton">
+                        StyleClass="TextButton, NavigationBarItem">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Sync_alt}" />
+                                         Glyph="{x:Static symbols:MaterialOutlined.Sync_alt}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                     </Button.ImageSource>
                     <Button.Triggers>
                         <DataTrigger TargetType="Button"
@@ -139,10 +140,11 @@
                         Command="{Binding ShowProfileCommand}"
                         ContentLayout="Top,4"
                         SemanticProperties.Description="{x:Static localization:AppResources.OpenProfileDescription}"
-                        StyleClass="TextButton">
+                        StyleClass="TextButton, NavigationBarItem">
                     <Button.ImageSource>
                         <FontImageSource FontFamily="MaterialOutlined"
-                                         Glyph="{x:Static symbols:MaterialOutlined.Account_circle}" />
+                                         Glyph="{x:Static symbols:MaterialOutlined.Account_circle}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                     </Button.ImageSource>
                     <Button.Triggers>
                         <DataTrigger TargetType="Button"

@@ -34,7 +34,7 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Account_circle}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Account_circle}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
@@ -51,7 +51,7 @@
 
                 <material:ButtonView TappedCommand="{Binding PrivacyPolicyCommand}"
                                      Padding="16"
-                                     Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                     Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                                      StrokeThickness="1"
                                      BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                                      StrokeShape="RoundRectangle 20"
@@ -59,7 +59,7 @@
                     <Grid ColumnDefinitions="Auto,*,Auto"
                           ColumnSpacing="12">
                         <Image Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Open_in_new}}" />
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Open_in_new}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
                                              VerticalOptions="Center">
@@ -70,7 +70,7 @@
                         </VerticalStackLayout>
                         <Image Grid.Column="2"
                                Style="{StaticResource AppIcon}"
-                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}}" />
+                               Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Chevron_right}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
                     </Grid>
                 </material:ButtonView>
 
@@ -108,7 +108,7 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Info}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Info}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"

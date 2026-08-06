@@ -30,6 +30,12 @@ namespace Cotton.Mobile.Tests
                 AssertContrast(colors, theme, "OnSurface", "Surface", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnSurfaceVariant", "SurfaceVariant", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnBackground", "Background", MinimumTextContrast);
+
+                // Pairings the app actually renders: supporting copy sits on Surface,
+                // and both copy and titles sit on PrimaryContainer inside status and selected cards.
+                AssertContrast(colors, theme, "OnSurfaceVariant", "Surface", MinimumTextContrast);
+                AssertContrast(colors, theme, "OnSurfaceVariant", "PrimaryContainer", MinimumTextContrast);
+                AssertContrast(colors, theme, "OnSurface", "PrimaryContainer", MinimumTextContrast);
             }
         }
 
@@ -43,6 +49,11 @@ namespace Cotton.Mobile.Tests
                 AssertContrast(colors, theme, "Primary", "Surface", MinimumNonTextContrast);
                 AssertContrast(colors, theme, "Error", "Surface", MinimumNonTextContrast);
                 AssertContrast(colors, theme, "Outline", "Surface", MinimumNonTextContrast);
+
+                // Glyph tints: action icons on the bar and on the selected navigation pill,
+                // and framed icons drawn on a secondary container.
+                AssertContrast(colors, theme, "Primary", "PrimaryContainer", MinimumNonTextContrast);
+                AssertContrast(colors, theme, "OnSecondaryContainer", "SecondaryContainer", MinimumNonTextContrast);
             }
         }
 

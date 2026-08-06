@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 
@@ -39,6 +40,14 @@ namespace Cotton.Mobile.ViewModels
         public bool IsBidirectionalSelected => _direction == CottonSyncDirection.Bidirectional;
 
         public bool IsDeleteOptionVisible => IsUploadOnlySelected;
+
+        public string UploadOnlyDescription => SyncRootSetupResources.CreateModeDescription(
+            SyncRootSetupResources.UploadOnlyTitle,
+            IsUploadOnlySelected);
+
+        public string BidirectionalDescription => SyncRootSetupResources.CreateModeDescription(
+            SyncRootSetupResources.BidirectionalTitle,
+            IsBidirectionalSelected);
 
         public bool IsInteractionLocked => _didComplete;
 
@@ -82,6 +91,8 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsUploadOnlySelected));
             OnPropertyChanged(nameof(IsBidirectionalSelected));
             OnPropertyChanged(nameof(IsDeleteOptionVisible));
+            OnPropertyChanged(nameof(UploadOnlyDescription));
+            OnPropertyChanged(nameof(BidirectionalDescription));
         }
 
         private void Continue()

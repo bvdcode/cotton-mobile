@@ -6,8 +6,28 @@
     <Thickness x:Key="AppPagePadding">20,12,20,24</Thickness>
     <Thickness x:Key="AppCardPadding">16</Thickness>
     <Thickness x:Key="AppTopBarPadding">12,8</Thickness>
+    <Thickness x:Key="AppCardActionPadding">12,14</Thickness>
     <x:Double x:Key="AppContentMaximumWidth">720</x:Double>
     <x:Double x:Key="AppTouchTargetSize">48</x:Double>
+    <x:Double x:Key="AppNavigationItemHeight">64</x:Double>
+
+    <!-- Compose with an existing class, e.g. StyleClass="TextButton, TouchTarget". -->
+    <Style TargetType="Button" Class="TouchTarget" ApplyToDerivedTypes="True">
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource AppTouchTargetSize}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource AppTouchTargetSize}" />
+    </Style>
+
+    <!-- Taller than a plain touch target so the icon and its label both fit. -->
+    <Style TargetType="Button" Class="NavigationBarItem" ApplyToDerivedTypes="True">
+        <Setter Property="MinimumHeightRequest" Value="{StaticResource AppNavigationItemHeight}" />
+        <Setter Property="MinimumWidthRequest" Value="{StaticResource AppTouchTargetSize}" />
+    </Style>
+
+    <!-- FlexLayout measures children from content, so padding supplies the touch target
+         while still allowing the button to grow with accessible font scaling. -->
+    <Style TargetType="Button" Class="CardAction" ApplyToDerivedTypes="True">
+        <Setter Property="Padding" Value="{StaticResource AppCardActionPadding}" />
+    </Style>
 
     <Style x:Key="AppScreen" TargetType="Grid">
         <Setter Property="BackgroundColor"
@@ -32,7 +52,7 @@
     <Style x:Key="AppCard" TargetType="Border">
         <Setter Property="Padding" Value="{StaticResource AppCardPadding}" />
         <Setter Property="Stroke"
-                Value="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+                Value="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
         <Setter Property="StrokeThickness" Value="1" />
         <Setter Property="BackgroundColor"
                 Value="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}" />

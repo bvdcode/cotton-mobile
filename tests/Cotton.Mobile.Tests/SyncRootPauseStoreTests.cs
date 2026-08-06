@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
             Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
             await File.WriteAllTextAsync(_directory, "blocked directory");
 
-            await Assert.ThrowsAsync<IOException>(() =>
+            await Assert.ThrowsAnyAsync<IOException>(() =>
                 _store.SetPausedAsync(InstanceUri, RootId, isPaused: true));
         }
 

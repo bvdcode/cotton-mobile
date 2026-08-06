@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
             Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
             await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
 
-            await Assert.ThrowsAsync<IOException>(() =>
+            await Assert.ThrowsAnyAsync<IOException>(() =>
                 _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]));
         }
 

@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Default_instance_url_stays_effective_without_being_field_placeholder()
         {
-            var display = new MainPageDisplayState(" https://app.cottoncloud.dev/ ");
+            MainPageDisplayState display = new(" https://app.cottoncloud.dev/ ");
 
             Assert.Equal(string.Empty, display.InstanceUrl);
             Assert.Equal("https://app.cottoncloud.dev/", display.DefaultInstanceUrl);
@@ -27,7 +27,13 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Sign_in_state_exposes_only_the_authentication_surface()
         {
-            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            display.ShowAuthenticated(new MainPageProfile(
+                "Mobile Demo",
+                "demo@example.com",
+                "app.cottoncloud.dev",
+                "user:mobile-demo",
+                new Uri("https://app.cottoncloud.dev/api/v1/preview/avatar.webp")));
 
             display.ShowSignIn("Sign in again.");
 
@@ -37,12 +43,13 @@ namespace Cotton.Mobile.Tests
             Assert.True(display.IsInputEnabled);
             Assert.False(display.IsAuthenticatedVisible);
             Assert.Equal("Sign in again.", display.Status);
+            Assert.Null(display.ProfileAvatarUrl);
         }
 
         [Fact]
         public void Authorization_state_can_be_cancelled_once()
         {
-            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new("https://app.cottoncloud.dev");
 
             display.ShowAuthorizationProgress();
 
@@ -60,12 +67,14 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Authenticated_state_starts_on_sync_and_exposes_profile_data()
         {
-            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
-            var profile = new MainPageProfile(
+            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            Uri avatarUrl = new("https://app.cottoncloud.dev/api/v1/preview/avatar.webp");
+            MainPageProfile profile = new(
                 "Mobile Demo",
                 "demo@example.com",
                 "app.cottoncloud.dev",
-                "user:mobile-demo");
+                "user:mobile-demo",
+                avatarUrl);
 
             display.ShowAuthenticated(profile);
 
@@ -77,17 +86,19 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Mobile Demo", display.ProfileName);
             Assert.Equal("demo@example.com", display.ProfileEmail);
             Assert.Equal("app.cottoncloud.dev", display.ProfileInstance);
+            Assert.Equal(avatarUrl.AbsoluteUri, display.ProfileAvatarUrl);
         }
 
         [Fact]
         public void Authenticated_navigation_switches_between_two_stable_destinations()
         {
-            var display = new MainPageDisplayState("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new("https://app.cottoncloud.dev");
             display.ShowAuthenticated(new MainPageProfile(
                 "Mobile Demo",
                 null,
                 "app.cottoncloud.dev",
-                "user:mobile-demo"));
+                "user:mobile-demo",
+                avatarUrl: null));
 
             display.ShowDestination(AppNavigationDestination.Profile);
 

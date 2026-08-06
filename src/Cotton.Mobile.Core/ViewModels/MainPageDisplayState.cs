@@ -18,6 +18,7 @@ namespace Cotton.Mobile.ViewModels
         private string? _profileEmail;
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
+        private string? _profileAvatarUrl;
         private bool _isInputEnabled = true;
         private bool _isCancelAuthorizationEnabled;
         private bool _isLogoutEnabled;
@@ -97,6 +98,12 @@ namespace Cotton.Mobile.ViewModels
         }
 
         public bool IsProfileEmailVisible => !string.IsNullOrWhiteSpace(ProfileEmail);
+
+        public string? ProfileAvatarUrl
+        {
+            get => _profileAvatarUrl;
+            private set => SetProperty(ref _profileAvatarUrl, value);
+        }
 
         public string ProfileInstance
         {
@@ -187,6 +194,7 @@ namespace Cotton.Mobile.ViewModels
             LoadingMessage = string.Empty;
             Status = status;
             ProfileStatus = null;
+            ProfileAvatarUrl = null;
             IsInputEnabled = true;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
@@ -219,6 +227,7 @@ namespace Cotton.Mobile.ViewModels
             ProfileName = profile.Name;
             ProfileEmail = profile.Email;
             ProfileInstance = profile.Instance;
+            ProfileAvatarUrl = profile.AvatarUrl?.AbsoluteUri;
             ProfileStatus = status;
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = false;

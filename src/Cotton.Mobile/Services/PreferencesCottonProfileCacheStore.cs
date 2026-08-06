@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.ViewModels;
@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Services
         private const string EmailKey = "Cotton.Mobile.Profile.Email";
         private const string InstanceDisplayKey = "Cotton.Mobile.Profile.InstanceDisplay";
         private const string AccountScopeKey = "Cotton.Mobile.Profile.AccountScope";
+        private const string AvatarUrlKey = "Cotton.Mobile.Profile.AvatarUrl";
 
         private readonly IPreferences _preferences;
         private readonly ILogger<PreferencesCottonProfileCacheStore> _logger;
@@ -55,8 +56,13 @@ namespace Cotton.Mobile.Services
                     return Task.FromResult<MainPageProfile?>(null);
                 }
 
+                string savedAvatarUrl = _preferences.Get(AvatarUrlKey, string.Empty) ?? string.Empty;
+                Uri? avatarUrl = Uri.TryCreate(savedAvatarUrl, UriKind.Absolute, out Uri? parsed)
+                    ? parsed
+                    : null;
+
                 return Task.FromResult<MainPageProfile?>(
-                    new MainPageProfile(name, email, instanceDisplay, accountScopeKey));
+                    new MainPageProfile(name, email, instanceDisplay, accountScopeKey, avatarUrl));
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -91,6 +97,14 @@ namespace Cotton.Mobile.Services
 
                 _preferences.Set(InstanceDisplayKey, profile.Instance);
                 _preferences.Set(AccountScopeKey, profile.AccountScopeKey);
+                if (profile.AvatarUrl is null)
+                {
+                    _preferences.Remove(AvatarUrlKey);
+                }
+                else
+                {
+                    _preferences.Set(AvatarUrlKey, profile.AvatarUrl.AbsoluteUri);
+                }
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
@@ -112,6 +126,7 @@ namespace Cotton.Mobile.Services
             RemoveKey(EmailKey, failures);
             RemoveKey(InstanceDisplayKey, failures);
             RemoveKey(AccountScopeKey, failures);
+            RemoveKey(AvatarUrlKey, failures);
             if (failures.Count == 1)
             {
                 throw new InvalidOperationException("Failed to clear one Cotton mobile cached profile value.", failures[0]);
@@ -133,6 +148,7 @@ namespace Cotton.Mobile.Services
             RemoveKey(EmailKey, failures);
             RemoveKey(InstanceDisplayKey, failures);
             RemoveKey(AccountScopeKey, failures);
+            RemoveKey(AvatarUrlKey, failures);
             foreach (Exception exception in failures)
             {
                 _logger.LogWarning(exception, "Failed to clear Cotton mobile cached profile after {Reason}.", reason);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:controls="clr-namespace:Cotton.Mobile.Controls"
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
              xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
@@ -32,10 +33,24 @@
                 <Border Style="{StaticResource AppCard}">
                     <Grid ColumnDefinitions="Auto,*"
                           ColumnSpacing="12">
-                        <Border Style="{StaticResource AppIconFrame}">
-                            <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Account_circle}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
-                        </Border>
+                        <Grid>
+                            <Border Style="{StaticResource AppIconFrame}">
+                                <Image Style="{StaticResource AppIcon}"
+                                       Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Account_circle}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                            </Border>
+                            <Border Style="{StaticResource AppAvatarFrame}">
+                                <controls:ProfileAvatarImage Source="{Binding Display.ProfileAvatarUrl}"
+                                                             Aspect="AspectFill">
+                                    <controls:ProfileAvatarImage.Triggers>
+                                        <Trigger TargetType="controls:ProfileAvatarImage"
+                                                 Property="IsLoadedSuccessfully"
+                                                 Value="False">
+                                            <Setter Property="Opacity" Value="0" />
+                                        </Trigger>
+                                    </controls:ProfileAvatarImage.Triggers>
+                                </controls:ProfileAvatarImage>
+                            </Border>
+                        </Grid>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
                                              VerticalOptions="Center">

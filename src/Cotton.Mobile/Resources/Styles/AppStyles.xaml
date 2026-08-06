@@ -116,6 +116,17 @@
         </Setter>
     </Style>
 
+    <!-- Same footprint as AppIconFrame, but full-bleed and round so a photo fills it. -->
+    <Style x:Key="AppAvatarFrame" TargetType="Border" BasedOn="{StaticResource AppIconFrame}">
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="BackgroundColor" Value="Transparent" />
+        <Setter Property="StrokeShape">
+            <Setter.Value>
+                <Ellipse />
+            </Setter.Value>
+        </Setter>
+    </Style>
+
     <Style x:Key="AppNavigationBar" TargetType="Grid">
         <Setter Property="Padding" Value="12,6" />
         <Setter Property="ColumnSpacing" Value="8" />

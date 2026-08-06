@@ -19,7 +19,8 @@ namespace Cotton.Mobile.ViewModels
                 displayName,
                 string.IsNullOrWhiteSpace(user.Email) ? null : user.Email.Trim(),
                 CreateInstanceDisplayName(instanceUri),
-                CreateAccountScopeKey(user, displayName));
+                CreateAccountScopeKey(user, displayName),
+                CottonAvatarUrl.TryCreate(instanceUri, user.AvatarHashEncryptedHex));
         }
 
         public string ResolveStatusMessage(CottonSessionResult result, string unauthenticatedStatus)

@@ -22,9 +22,9 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice, "Syncing Projects...")]
-        [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading new files from Projects...")]
-        [InlineData(CottonSyncDirection.Bidirectional, "Syncing Projects both ways...")]
+        [InlineData(CottonSyncDirection.CloudToDevice, "Syncing Projects…")]
+        [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading new files from Projects…")]
+        [InlineData(CottonSyncDirection.Bidirectional, "Syncing Projects both ways…")]
         public void Starting_status_matches_sync_direction(CottonSyncDirection direction, string expected)
         {
             CottonSyncRootSnapshot root = CreateRoot(direction);

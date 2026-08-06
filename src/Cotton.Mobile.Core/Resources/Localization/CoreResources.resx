@@ -16,7 +16,7 @@
   <data name="DestructiveReviewRequired" xml:space="preserve"><value>Bidirectional sync needs review before removing files.</value></data>
   <data name="ConfirmBidirectionalSyncTitle" xml:space="preserve"><value>Run bidirectional sync?</value></data>
   <data name="SyncAction" xml:space="preserve"><value>Sync</value></data>
-  <data name="SyncingBothWaysFormat" xml:space="preserve"><value>Syncing {0} both ways...</value></data>
+  <data name="SyncingBothWaysFormat" xml:space="preserve"><value>Syncing {0} both ways…</value></data>
   <data name="NoBidirectionalFolders" xml:space="preserve"><value>No bidirectional folders are set to sync.</value></data>
   <data name="BidirectionalSyncCurrent" xml:space="preserve"><value>Bidirectional sync complete. Everything is up to date.</value></data>
   <data name="BidirectionalSyncCompletedFormat" xml:space="preserve"><value>Bidirectional sync complete. {0}.</value></data>
@@ -28,18 +28,18 @@
   <data name="TrashCloudFilesFormat" xml:space="preserve"><value>move {0} cloud files to trash</value></data>
   <data name="SyncToDeviceAction" xml:space="preserve"><value>Sync to this device</value></data>
   <data name="SyncToFolderAction" xml:space="preserve"><value>Sync to folder</value></data>
-  <data name="SyncingFolders" xml:space="preserve"><value>Syncing folders...</value></data>
+  <data name="SyncingFolders" xml:space="preserve"><value>Syncing folders…</value></data>
   <data name="AccountSessionRequired" xml:space="preserve"><value>Sync needs a fresh account session.</value></data>
   <data name="SyncOffline" xml:space="preserve"><value>Offline. Sync needs internet.</value></data>
   <data name="SyncCancelled" xml:space="preserve"><value>Sync cancelled.</value></data>
   <data name="SyncFailed" xml:space="preserve"><value>Sync failed.</value></data>
-  <data name="SyncingFolderFormat" xml:space="preserve"><value>Syncing {0}...</value></data>
+  <data name="SyncingFolderFormat" xml:space="preserve"><value>Syncing {0}…</value></data>
   <data name="NoSyncFolders" xml:space="preserve"><value>No folders are set to sync.</value></data>
   <data name="SyncCurrent" xml:space="preserve"><value>Sync complete. Everything is up to date.</value></data>
   <data name="SyncCompletedFormat" xml:space="preserve"><value>Sync complete. {0}.</value></data>
   <data name="UploadNewFilesAction" xml:space="preserve"><value>Upload new files</value></data>
   <data name="UploadDirectionUnsupported" xml:space="preserve"><value>Sync root is not configured to upload new files.</value></data>
-  <data name="UploadingFolderFormat" xml:space="preserve"><value>Uploading new files from {0}...</value></data>
+  <data name="UploadingFolderFormat" xml:space="preserve"><value>Uploading new files from {0}…</value></data>
   <data name="StopSyncingAction" xml:space="preserve"><value>Stop syncing</value></data>
   <data name="PauseAction" xml:space="preserve"><value>Pause</value></data>
   <data name="ResumeAction" xml:space="preserve"><value>Resume</value></data>

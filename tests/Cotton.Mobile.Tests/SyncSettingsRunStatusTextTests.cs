@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Combined_status_reports_no_roots()
         {
-            Assert.Equal("Syncing folders...", CottonSyncSettingsRunStatusText.StartingAllStatus);
+            Assert.Equal("Syncing folders…", CottonSyncSettingsRunStatusText.StartingAllStatus);
             Assert.Equal("Offline. Sync needs internet.", CottonSyncSettingsRunStatusText.OfflineUnavailableStatus);
             Assert.Equal("Sync failed.", CottonSyncSettingsRunStatusText.FailedStatus);
             Assert.Equal(
@@ -208,7 +208,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("Offline. Sync needs internet.", CottonBidirectionalSyncStatusText.OfflineUnavailableStatus);
             Assert.Equal("Sync cancelled.", CottonBidirectionalSyncStatusText.CancelledStatus);
             Assert.Equal("Sync failed.", CottonBidirectionalSyncStatusText.FailedStatus);
-            Assert.Equal("Syncing Projects both ways...", CottonBidirectionalSyncStatusText.CreateStartingStatus(" Projects "));
+            Assert.Equal("Syncing Projects both ways…", CottonBidirectionalSyncStatusText.CreateStartingStatus(" Projects "));
             Assert.Equal(
                 "Bidirectional sync needs review before it can run.",
                 CottonBidirectionalSyncStatusText.BlockedReviewRequiredStatus);
@@ -257,7 +257,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal("Upload new files", CottonDeviceToCloudSyncStatusText.ActionLabel);
             Assert.Equal(
-                "Uploading new files from Camera...",
+                "Uploading new files from Camera…",
                 CottonDeviceToCloudSyncStatusText.CreateStartingStatus(" Camera "));
             Assert.Equal("Offline. Sync needs internet.", CottonDeviceToCloudSyncStatusText.OfflineUnavailableStatus);
             Assert.Equal("Sync failed.", CottonDeviceToCloudSyncStatusText.FailedStatus);

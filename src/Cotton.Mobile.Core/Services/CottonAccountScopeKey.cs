@@ -5,18 +5,16 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonAccountScopeKey
     {
-        private const string UserPrefix = "user:";
+        private const string UserIdPrefix = "user-id:";
 
-        public static bool TryCreateFromUsername(string? username, out string accountScopeKey)
+        public static string Create(Guid userId)
         {
-            accountScopeKey = string.Empty;
-            if (string.IsNullOrWhiteSpace(username))
+            if (userId == Guid.Empty)
             {
-                return false;
+                throw new ArgumentException("User id is required.", nameof(userId));
             }
 
-            accountScopeKey = UserPrefix + username.Trim();
-            return true;
+            return UserIdPrefix + userId.ToString("D");
         }
     }
 }

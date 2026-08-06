@@ -19,7 +19,7 @@ namespace Cotton.Mobile.ViewModels
                 displayName,
                 string.IsNullOrWhiteSpace(user.Email) ? null : user.Email.Trim(),
                 CreateInstanceDisplayName(instanceUri),
-                CreateAccountScopeKey(user, displayName),
+                CottonAccountScopeKey.Create(user.Id),
                 CottonAvatarUrl.TryCreate(instanceUri, user.AvatarHashEncryptedHex));
         }
 
@@ -84,17 +84,6 @@ namespace Cotton.Mobile.ViewModels
             return string.IsNullOrWhiteSpace(path) || string.Equals(path, "/", StringComparison.Ordinal)
                 ? authority
                 : $"{authority}{path}";
-        }
-
-        private static string CreateAccountScopeKey(UserDto user, string displayName)
-        {
-            string identity = !string.IsNullOrWhiteSpace(user.Username)
-                ? user.Username
-                : !string.IsNullOrWhiteSpace(user.Email)
-                    ? user.Email
-                    : displayName;
-            CottonAccountScopeKey.TryCreateFromUsername(identity, out string accountScopeKey);
-            return accountScopeKey;
         }
     }
 }

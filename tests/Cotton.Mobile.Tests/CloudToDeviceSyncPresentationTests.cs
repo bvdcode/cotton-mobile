@@ -10,21 +10,19 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid FolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
         [Fact]
-        public void Account_scope_uses_normalized_username_only()
+        public void Account_scope_uses_stable_user_id()
         {
-            bool created = CottonAccountScopeKey.TryCreateFromUsername(" mobile-demo ", out string accountScopeKey);
+            Guid userId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
-            Assert.True(created);
-            Assert.Equal("user:mobile-demo", accountScopeKey);
+            string accountScopeKey = CottonAccountScopeKey.Create(userId);
+
+            Assert.Equal("user-id:cccccccc-cccc-cccc-cccc-cccccccccccc", accountScopeKey);
         }
 
         [Fact]
-        public void Account_scope_rejects_missing_username_without_fallback()
+        public void Account_scope_rejects_missing_user_id()
         {
-            bool created = CottonAccountScopeKey.TryCreateFromUsername(" ", out string accountScopeKey);
-
-            Assert.False(created);
-            Assert.Equal(string.Empty, accountScopeKey);
+            Assert.Throws<ArgumentException>(() => CottonAccountScopeKey.Create(Guid.Empty));
         }
 
         [Fact]
@@ -114,7 +112,7 @@ namespace Cotton.Mobile.Tests
             return new CottonSyncRootSnapshot(
                 RootId,
                 InstanceUri,
-                "user:mobile-demo",
+                "user-id:cccccccc-cccc-cccc-cccc-cccccccccccc",
                 new CottonUploadDestinationSnapshot(
                     FolderId,
                     "Projects",

@@ -75,6 +75,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task Load_returns_roots_only_for_requested_account()
+        {
+            CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
+            await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
+
+            SyncRootCollectionSnapshot currentAccount = await _manager.LoadAsync(InstanceUri, "account-1");
+            SyncRootCollectionSnapshot otherAccount = await _manager.LoadAsync(InstanceUri, "account-2");
+
+            Assert.Single(currentAccount.Roots);
+            Assert.Empty(otherAccount.Roots);
+        }
+
+        [Fact]
         public async Task Stop_clears_upload_receipts_for_device_to_cloud_root()
         {
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);

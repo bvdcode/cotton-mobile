@@ -31,16 +31,14 @@ namespace Cotton.Mobile.Services
         {
             CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
 
-            var options = new CottonSdkOptions
+            CottonSdkOptions options = new()
             {
                 BaseAddress = instanceUri,
                 DeviceName = _metadata.DeviceName,
                 UserAgent = _metadata.UserAgent,
             };
 
-            var httpClient = new HttpClient();
-            ICottonCloudClient client = new CottonCloudClient(httpClient, _tokenStore, options, _loggerFactory);
-            return new OwnedCottonCloudClient(client, httpClient);
+            return new CottonCloudClient(_tokenStore, options, _loggerFactory);
         }
     }
 }

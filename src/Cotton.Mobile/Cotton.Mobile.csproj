@@ -17,7 +17,6 @@
 		<PackageProjectUrl>https://cottoncloud.dev</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/bvdcode/cotton-mobile</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
-		<CottonSdkVersion>0.4.31</CottonSdkVersion>
 		<CottonBrandSurfaceColor>#090B0A</CottonBrandSurfaceColor>
 		<CottonBrandMarkBaseSize>128,128</CottonBrandMarkBaseSize>
 

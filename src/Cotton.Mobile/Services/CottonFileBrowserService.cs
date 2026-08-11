@@ -107,25 +107,25 @@ namespace Cotton.Mobile.Services
             string folderName,
             CancellationToken cancellationToken)
         {
-            NodeContentDto firstPage = await client.Nodes.GetChildrenAsync(
+            CottonPagedResult<NodeContentDto> firstPage = await client.Nodes.GetChildrenAsync(
                 folderId,
                 page: 1,
                 pageSize: PageSize,
                 depth: 0,
                 cancellationToken).ConfigureAwait(false);
-            var nodes = new List<NodeDto>(firstPage.Nodes);
-            var files = new List<NodeFileManifestDto>(firstPage.Files);
+            List<NodeDto> nodes = new(firstPage.Payload.Nodes);
+            List<NodeFileManifestDto> files = new(firstPage.Payload.Files);
             int totalPages = (int)Math.Ceiling(firstPage.TotalCount / (double)PageSize);
             for (int page = 2; page <= totalPages; page++)
             {
-                NodeContentDto content = await client.Nodes.GetChildrenAsync(
+                CottonPagedResult<NodeContentDto> result = await client.Nodes.GetChildrenAsync(
                     folderId,
                     page,
                     PageSize,
                     depth: 0,
                     cancellationToken).ConfigureAwait(false);
-                nodes.AddRange(content.Nodes);
-                files.AddRange(content.Files);
+                nodes.AddRange(result.Payload.Nodes);
+                files.AddRange(result.Payload.Files);
             }
 
             List<CottonFileBrowserEntry> entries = nodes

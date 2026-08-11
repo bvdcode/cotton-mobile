@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 namespace Cotton.Mobile.Services
@@ -20,7 +20,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.AppPrivateDirectory);
             CottonFileBrowserEntry file = CottonCloudToDeviceFileEntryFactory.Create(item);
             await _fileBrowserService
                 .DownloadAsync(instanceUri, file, progress: null, cancellationToken)
@@ -33,7 +36,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.AppPrivateDirectory);
             CottonFileBrowserEntry file = CottonCloudToDeviceFileEntryFactory.Create(item);
             return Task.Run(
                 () => RenameLocalDownload(instanceUri, file, item, cancellationToken),
@@ -46,7 +52,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.AppPrivateDirectory);
             return Task.Run(
                 () =>
                 {
@@ -71,34 +80,6 @@ namespace Cotton.Mobile.Services
                 cancellationToken);
         }
 
-        private static void EnsureSupportedRoot(Uri instanceUri, CottonSyncRootSnapshot root)
-        {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
-            ArgumentNullException.ThrowIfNull(root);
-
-            if (!string.Equals(
-                CottonMobileStoragePaths.CreateInstanceStorageKey(instanceUri),
-                CottonMobileStoragePaths.CreateInstanceStorageKey(root.InstanceUri),
-                StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("Cloud-to-device sync instance does not match the sync root.");
-            }
-
-            if (!root.CanRunSync)
-            {
-                throw new InvalidOperationException("Cloud-to-device sync root is not ready.");
-            }
-
-            if (!root.LocalRoot.UsesAppPrivateStorage)
-            {
-                throw new InvalidOperationException("This sync file operator only supports app-private local roots.");
-            }
-
-            if (root.Direction == CottonSyncDirection.DeviceToCloud)
-            {
-                throw new InvalidOperationException("This sync file operator requires cloud-to-device sync direction.");
-            }
-        }
 
         private static void RenameLocalDownload(
             Uri instanceUri,

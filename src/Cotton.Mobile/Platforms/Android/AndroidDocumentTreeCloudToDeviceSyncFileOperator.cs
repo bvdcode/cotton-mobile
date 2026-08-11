@@ -25,7 +25,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             CottonFileBrowserEntry file = CottonCloudToDeviceFileEntryFactory.Create(item);
             CottonFileDownloadResult download = await _fileBrowserService
                 .DownloadAsync(instanceUri, file, progress: null, cancellationToken)
@@ -42,7 +45,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             return Task.Run(
                 () => CreateFileStore(root).Rename(item, cancellationToken),
                 cancellationToken);
@@ -54,7 +60,10 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncPlanItem item,
             CancellationToken cancellationToken = default)
         {
-            EnsureSupportedRoot(instanceUri, root);
+            CottonCloudToDeviceSyncRootValidator.EnsureSupported(
+                instanceUri,
+                root,
+                CottonSyncRootStorageKind.UserSelectedDocumentTree);
             return Task.Run(
                 () => CreateFileStore(root).Remove(item, cancellationToken),
                 cancellationToken);
@@ -68,35 +77,6 @@ namespace Cotton.Mobile.Services
             return new AndroidDocumentTreeSyncFileStore(
                 resolver,
                 treeUri ?? throw new InvalidOperationException("Document-tree sync root URI is invalid."));
-        }
-
-        private static void EnsureSupportedRoot(Uri instanceUri, CottonSyncRootSnapshot root)
-        {
-            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
-            ArgumentNullException.ThrowIfNull(root);
-
-            if (!string.Equals(
-                CottonMobileStoragePaths.CreateInstanceStorageKey(instanceUri),
-                CottonMobileStoragePaths.CreateInstanceStorageKey(root.InstanceUri),
-                StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("Cloud-to-device sync instance does not match the sync root.");
-            }
-
-            if (!root.CanRunSync)
-            {
-                throw new InvalidOperationException("Cloud-to-device sync root is not ready.");
-            }
-
-            if (!root.LocalRoot.RequiresPersistedUserGrant)
-            {
-                throw new InvalidOperationException("This sync file operator only supports user-selected folders.");
-            }
-
-            if (root.Direction == CottonSyncDirection.DeviceToCloud)
-            {
-                throw new InvalidOperationException("This sync file operator requires cloud-to-device sync direction.");
-            }
         }
     }
 }

@@ -30,7 +30,6 @@ wait_for_text_capture() {
   exit 66
 }
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -180,7 +179,6 @@ start_file_uri_edge_share() {
     --eu android.intent.extra.STREAM "file:///sdcard/Download/$share_file_name" \
     > "$evidence_dir/40-file-uri-edge-start.txt" 2>&1
 }
-
 
 write_metadata
 write_checklist

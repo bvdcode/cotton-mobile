@@ -21,7 +21,6 @@ require_xml_any_text() {
   exit 66
 }
 
-
 tap_text() {
   local xml_file="$1"
   local needle="$2"
@@ -80,7 +79,6 @@ PY
   read -r tap_x tap_y < "$point_file"
   cotton_adb shell input tap "$tap_x" "$tap_y"
 }
-
 
 generate_media_file() {
   local output_path="$1"

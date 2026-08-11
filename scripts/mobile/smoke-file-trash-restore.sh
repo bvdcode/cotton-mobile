@@ -36,7 +36,6 @@ bulk_second_name=""
 target_kind=""
 target_name=""
 
-
 # shellcheck source=smoke-file-trash-options.sh
 source "$SCRIPT_DIR/smoke-file-trash-options.sh"
 

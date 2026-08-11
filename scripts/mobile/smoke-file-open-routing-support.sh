@@ -83,7 +83,6 @@ write_checklist() {
 EOF
 }
 
-
 capture_device_state() {
   local prefix="$1"
 

@@ -65,14 +65,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
-
 open_account_action() {
   local action="$1"
   local prefix="$2"

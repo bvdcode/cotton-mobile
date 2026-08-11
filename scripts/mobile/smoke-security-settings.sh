@@ -73,7 +73,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -153,7 +152,6 @@ Device: \`$serial\`
 - \`90-logcat.txt\`
 EOF
 }
-
 
 capture_security_state() {
   local prefix="$1"

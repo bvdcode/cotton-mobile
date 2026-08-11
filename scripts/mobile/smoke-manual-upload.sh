@@ -90,7 +90,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -154,10 +153,6 @@ Seeded file: \`$upload_file_name\`
 EOF
 }
 
-
-
-
-
 seed_upload_file() {
   local seed_dir="$evidence_dir/seed-files"
   local seed_file="$seed_dir/$upload_file_name"
@@ -179,7 +174,6 @@ seed_upload_file() {
   cotton_adb shell ls -la "/sdcard/Download/$upload_file_name" \
     >> "$evidence_dir/06-seed-upload-file.txt" 2>&1
 }
-
 
 write_metadata
 write_checklist

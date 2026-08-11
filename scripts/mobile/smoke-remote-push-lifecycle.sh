@@ -117,9 +117,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
 # shellcheck source=smoke-remote-push-presentation.sh
 source "$SCRIPT_DIR/smoke-remote-push-presentation.sh"
 # shellcheck source=smoke-remote-push-flow.sh

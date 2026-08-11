@@ -94,12 +94,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
 # shellcheck source=smoke-selection-share-support.sh
 source "$SCRIPT_DIR/smoke-selection-share-support.sh"
 

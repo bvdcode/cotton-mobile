@@ -72,7 +72,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -132,31 +131,9 @@ Device: \`$serial\`
 EOF
 }
 
-
-
-
-
-
 write_metadata
 write_checklist
-
-cotton_capture_text_best_effort "00-device.txt" cotton_adb shell getprop ro.product.model
-cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
-cotton_capture_text_best_effort "02-window.txt" cotton_adb shell dumpsys window
-cotton_capture_text_best_effort "03-package-path.txt" cotton_adb shell pm path "$package_id"
-cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
-cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
-  "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
-cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
-
-if [[ "$install_debug" -eq 1 ]]; then
-  if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
-    printf 'APK not found: %s\nRun scripts/mobile/build-android-debug.sh first.\n' "$COTTON_ANDROID_APK" >&2
-    exit 66
-  fi
-
-  cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/06-install.txt"
-fi
+cotton_capture_standard_package_evidence
 
 if [[ "$launch_app" -eq 1 ]]; then
   cotton_adb logcat -c || true

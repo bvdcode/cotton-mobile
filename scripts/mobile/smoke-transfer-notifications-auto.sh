@@ -109,9 +109,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
 apply_permission_state() {
   case "$permission_state" in
     allowed)
@@ -141,7 +138,6 @@ capture_notification_state() {
     "$evidence_dir/$prefix-notification-dumpsys.txt" \
     > "$evidence_dir/$prefix-notification-summary.txt" || true
 }
-
 
 capture_queue() {
   local prefix="$1"

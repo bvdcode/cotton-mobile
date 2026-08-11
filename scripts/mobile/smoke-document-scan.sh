@@ -80,7 +80,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -147,8 +146,6 @@ Require upload: \`$require_upload\`
 EOF
 }
 
-
-
 prompt_capture() {
   local message="$1"
   local prefix="$2"
@@ -158,8 +155,6 @@ prompt_capture() {
   read -r _
   cotton_capture_screen "$prefix"
 }
-
-
 
 require_xml_any_text() {
   local xml_file="$1"

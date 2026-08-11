@@ -102,8 +102,6 @@ prompt_capture() {
   capture_window "$prefix"
 }
 
-
-
 require_xml_without_text() {
   local xml_file="$1"
   local needle="$2"

@@ -125,11 +125,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -213,7 +208,6 @@ seed_nested_file() {
   cotton_adb shell ls -la "/sdcard/Download/$nested_file_name" \
     >> "$evidence_dir/06-seed-nested-file.txt" 2>&1
 }
-
 
 run_auto_offline_proof() {
   local args=(

@@ -83,3 +83,18 @@ cotton_require_interactive_terminal() {
     exit "$COTTON_EXIT_NON_INTERACTIVE"
   fi
 }
+
+cotton_validate_notification_permission_state() {
+  local permission_state="$1"
+
+  case "$permission_state" in
+    preserve|fresh|allowed|denied)
+      return
+      ;;
+    *)
+      printf 'Invalid --permission-state: %s. Expected preserve, fresh, allowed, or denied.\n' \
+        "$permission_state" >&2
+      exit "$COTTON_EXIT_USAGE"
+      ;;
+  esac
+}

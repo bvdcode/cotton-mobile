@@ -21,9 +21,14 @@ cotton_parse_arguments --value "fixture value" --flag
 [[ "$value" == "fixture value" ]]
 [[ "$flag" -eq 1 ]]
 [[ "$mode" == "explicit" ]]
+cotton_validate_notification_permission_state allowed
 
 if (cotton_parse_arguments --unsupported >/dev/null 2>&1); then
   printf 'Unknown arguments must fail.\n' >&2
+  exit 1
+fi
+if (cotton_validate_notification_permission_state unsupported >/dev/null 2>&1); then
+  printf 'Unknown notification permission states must fail.\n' >&2
   exit 1
 fi
 

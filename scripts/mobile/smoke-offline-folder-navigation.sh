@@ -79,7 +79,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -135,7 +134,6 @@ Device: \`$serial\`
 - \`91-connectivity.txt\`
 EOF
 }
-
 
 capture_device_state() {
   local prefix="$1"

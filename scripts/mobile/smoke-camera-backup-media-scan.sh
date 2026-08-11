@@ -108,12 +108,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
 # shellcheck source=smoke-camera-backup-media-support.sh
 source "$SCRIPT_DIR/smoke-camera-backup-media-support.sh"
 

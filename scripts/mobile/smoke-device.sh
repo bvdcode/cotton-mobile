@@ -134,3 +134,71 @@ cotton_write_remote_push_metadata() {
   printf 'launch_app=%s\n' "$launch_app"
   printf 'preflight_only=%s\n' "$preflight_only"
 }
+
+cotton_apply_notification_permission_state() {
+  local permission_state="$1"
+  local android_package_id="$2"
+  local output_file="$3"
+
+  case "$permission_state" in
+    preserve)
+      printf 'Preserving existing Android notification permission state.\n' > "$output_file"
+      ;;
+    fresh)
+      {
+        cotton_adb shell pm revoke "$android_package_id" android.permission.POST_NOTIFICATIONS || true
+        cotton_adb shell pm clear-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-set || true
+        cotton_adb shell pm clear-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
+      } > "$output_file" 2>&1
+      ;;
+    allowed)
+      {
+        cotton_adb shell pm grant "$android_package_id" android.permission.POST_NOTIFICATIONS || true
+        cotton_adb shell pm set-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-set || true
+        cotton_adb shell pm clear-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
+      } > "$output_file" 2>&1
+      ;;
+    denied)
+      {
+        cotton_adb shell pm revoke "$android_package_id" android.permission.POST_NOTIFICATIONS || true
+        cotton_adb shell pm set-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-set || true
+        cotton_adb shell pm clear-permission-flags \
+          "$android_package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
+      } > "$output_file" 2>&1
+      ;;
+    *)
+      printf 'Unsupported notification permission state: %s.\n' "$permission_state" >&2
+      exit "$COTTON_EXIT_USAGE"
+      ;;
+  esac
+}
+
+cotton_capture_standard_package_evidence() {
+  cotton_capture_text_best_effort "00-device.txt" cotton_adb shell getprop ro.product.model
+  cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+  cotton_capture_text_best_effort "02-window.txt" cotton_adb shell dumpsys window
+  cotton_capture_text_best_effort "03-package-path.txt" cotton_adb shell pm path "$package_id"
+  cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
+  cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
+    "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
+  cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
+
+  if [[ "$install_debug" -eq 1 ]]; then
+    if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
+      printf 'APK not found: %s\nRun scripts/mobile/build-android-debug.sh first.\n' \
+        "$COTTON_ANDROID_APK" >&2
+      exit "$COTTON_EXIT_EVIDENCE"
+    fi
+
+    cotton_install_android_apk \
+      "$serial" \
+      "$package_id" \
+      "$COTTON_ANDROID_APK" \
+      > "$evidence_dir/06-install.txt"
+  fi
+}

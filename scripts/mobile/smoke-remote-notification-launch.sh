@@ -81,8 +81,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -116,8 +114,6 @@ capture_window() {
     printf 'Could not capture UIAutomator XML. See %s/%s-uiautomator.log.\n' "$evidence_dir" "$prefix" >&2
   fi
 }
-
-
 
 require_notifications_destination() {
   local xml_file="$1"

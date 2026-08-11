@@ -92,13 +92,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
 # shellcheck source=smoke-sync-settings-data.sh
 source "$SCRIPT_DIR/smoke-sync-settings-data.sh"
 # shellcheck source=smoke-sync-settings-flow.sh

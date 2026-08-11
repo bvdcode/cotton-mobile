@@ -72,15 +72,7 @@ COTTON_FLAG_OPTIONS=(
 )
 cotton_parse_arguments "$@"
 
-case "$permission_state" in
-  preserve|fresh|allowed|denied)
-    ;;
-  *)
-    printf 'Invalid --permission-state: %s. Expected preserve, fresh, allowed, or denied.\n' \
-      "$permission_state" >&2
-    exit 64
-    ;;
-esac
+cotton_validate_notification_permission_state "$permission_state"
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
@@ -100,7 +92,6 @@ if [[ -z "$evidence_dir" ]]; then
 fi
 
 mkdir -p "$evidence_dir"
-
 
 write_metadata() {
   {
@@ -175,7 +166,6 @@ Requested Android permission setup: \`$permission_state\`
 EOF
 }
 
-
 summarize_notification_dumpsys() {
   local source_file="$1"
   local summary_file="$2"
@@ -231,36 +221,6 @@ prompt_capture() {
   capture_device_state "$prefix"
 }
 
-apply_permission_state() {
-  case "$permission_state" in
-    preserve)
-      printf 'Preserving existing Android notification permission state.\n' \
-        > "$evidence_dir/06-permission-setup.txt"
-      ;;
-    fresh)
-      {
-        cotton_adb shell pm revoke "$package_id" android.permission.POST_NOTIFICATIONS || true
-        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
-        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
-      } > "$evidence_dir/06-permission-setup.txt" 2>&1
-      ;;
-    allowed)
-      {
-        cotton_adb shell pm grant "$package_id" android.permission.POST_NOTIFICATIONS || true
-        cotton_adb shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
-        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
-      } > "$evidence_dir/06-permission-setup.txt" 2>&1
-      ;;
-    denied)
-      {
-        cotton_adb shell pm revoke "$package_id" android.permission.POST_NOTIFICATIONS || true
-        cotton_adb shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
-        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
-      } > "$evidence_dir/06-permission-setup.txt" 2>&1
-      ;;
-  esac
-}
-
 write_metadata
 write_checklist
 
@@ -290,7 +250,10 @@ fi
 
 cotton_write_installed_package_version "$evidence_dir/05-package-dumpsys.txt" "$evidence_dir/05-package-version.txt"
 
-apply_permission_state
+cotton_apply_notification_permission_state \
+  "$permission_state" \
+  "$package_id" \
+  "$evidence_dir/06-permission-setup.txt"
 
 cotton_capture_text_best_effort "06-notification-permission.txt" cotton_adb shell dumpsys package "$package_id"
 cotton_capture_text_best_effort "07-notification-appops.txt" cotton_adb shell appops get "$package_id" POST_NOTIFICATION

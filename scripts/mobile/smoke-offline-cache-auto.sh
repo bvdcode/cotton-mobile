@@ -113,16 +113,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
-
-
-
 # shellcheck source=smoke-offline-cache-support.sh
 source "$SCRIPT_DIR/smoke-offline-cache-support.sh"
 

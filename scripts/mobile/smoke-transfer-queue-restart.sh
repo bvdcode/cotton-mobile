@@ -108,13 +108,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
 capture_transfer_state() {
   local prefix="$1"
   local instance_key="$2"

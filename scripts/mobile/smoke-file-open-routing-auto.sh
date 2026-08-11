@@ -68,15 +68,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
-
-
 # shellcheck source=smoke-file-open-routing-auto-support.sh
 source "$SCRIPT_DIR/smoke-file-open-routing-auto-support.sh"
 

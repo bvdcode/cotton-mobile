@@ -72,11 +72,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
 require_activity_content() {
   local xml_file="$1"
 
@@ -93,9 +88,6 @@ require_activity_content() {
   printf 'Evidence: %s\n' "$xml_file" >&2
   exit 66
 }
-
-
-
 
 open_account_activity() {
   cotton_tap_node_from_xml "$files_root_xml" "Account" exact

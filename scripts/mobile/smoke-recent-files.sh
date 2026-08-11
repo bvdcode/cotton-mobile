@@ -87,13 +87,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
 create_smoke_file_id() {
   python3 - "$run_id" <<'PY'
 import sys
@@ -102,8 +95,6 @@ import uuid
 print(uuid.uuid5(uuid.NAMESPACE_URL, f"cotton-recent-files-smoke:{sys.argv[1]}"))
 PY
 }
-
-
 
 write_metadata() {
   {

@@ -79,8 +79,6 @@ namespace Cotton.Mobile.Services
                 },
                 cancellationToken);
         }
-
-
         private static void RenameLocalDownload(
             Uri instanceUri,
             CottonFileBrowserEntry file,

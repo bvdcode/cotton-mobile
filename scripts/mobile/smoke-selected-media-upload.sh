@@ -128,13 +128,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
-
 # shellcheck source=smoke-selected-media-seed.sh
 source "$SCRIPT_DIR/smoke-selected-media-seed.sh"
 # shellcheck source=smoke-selected-media-flow.sh

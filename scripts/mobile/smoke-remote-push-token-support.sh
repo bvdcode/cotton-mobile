@@ -72,9 +72,6 @@ capture_window() {
   fi
 }
 
-
-
-
 find_account_entry_text() {
   local xml_file="$1"
 

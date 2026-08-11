@@ -11,10 +11,6 @@ require_storage_quota_state() {
   exit 66
 }
 
-
-
-
-
 write_metadata() {
   {
     printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"

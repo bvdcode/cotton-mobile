@@ -98,9 +98,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
 # shellcheck source=smoke-remote-push-token-support.sh
 source "$SCRIPT_DIR/smoke-remote-push-token-support.sh"
 

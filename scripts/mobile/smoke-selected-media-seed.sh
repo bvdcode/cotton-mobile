@@ -4,8 +4,6 @@ tap_text() {
   cotton_tap_node_from_xml "$xml_file" "$needle" exact
 }
 
-
-
 generate_photo_file() {
   local output_path="$1"
 

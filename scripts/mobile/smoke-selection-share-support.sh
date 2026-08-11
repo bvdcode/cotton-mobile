@@ -4,12 +4,6 @@ xml_has_selection_banner() {
   [[ -f "$xml_file" ]] && grep -Eq 'text="[0-9]+ selected"' "$xml_file"
 }
 
-
-
-
-
-
-
 is_cotton_focused() {
   local window_file="$1"
   grep -Fq "$package_id/" "$window_file"

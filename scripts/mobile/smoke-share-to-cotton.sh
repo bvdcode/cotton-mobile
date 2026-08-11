@@ -117,12 +117,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-
-
-
-
-
-
 # shellcheck source=smoke-share-to-cotton-support.sh
 source "$SCRIPT_DIR/smoke-share-to-cotton-support.sh"
 

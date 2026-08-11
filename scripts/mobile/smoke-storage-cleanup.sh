@@ -102,12 +102,6 @@ failed_upload_name="failed-storage-cleanup-smoke-$run_id.bin"
 completed_upload_name="completed-storage-cleanup-smoke-$run_id.bin"
 orphan_upload_name="orphan-storage-cleanup-smoke-$run_id.bin"
 
-
-
-
-
-
-
 # shellcheck source=smoke-storage-cleanup-seed.sh
 source "$SCRIPT_DIR/smoke-storage-cleanup-seed.sh"
 # shellcheck source=smoke-storage-cleanup-flow.sh

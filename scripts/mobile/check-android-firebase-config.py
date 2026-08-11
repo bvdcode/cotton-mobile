@@ -142,7 +142,7 @@ def load_project_application_ids(project_path: Path) -> dict[str, str]:
     if not project_path.exists():
         raise FileNotFoundError(f"Project file was not found: {project_path}")
 
-    root = ElementTree.parse(project_path).getroot()
+    root = ElementTree.parse(project_path).getroot()  # nosec B314: input is the repository project file.
     default_application_id: str | None = None
     application_ids: dict[str, str] = {}
     for element in root.iter():

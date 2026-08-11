@@ -43,40 +43,75 @@ namespace Cotton.Mobile.ViewModels
             _setupHandler = setupHandler;
             _managementHandler = managementHandler;
             _logger = logger;
-            LoadCommand = new AsyncRelayCommand(
+            LoadCommand = CreateLoadCommand();
+            AddRootCommand = CreateAddRootCommand();
+            RunAllCommand = CreateRunAllCommand();
+            RootPrimaryActionCommand = CreateRootPrimaryActionCommand();
+            StopRootCommand = CreateStopRootCommand();
+            PauseRootCommand = CreatePauseRootCommand();
+            ResumeRootCommand = CreateResumeRootCommand();
+        }
+
+        private IAsyncRelayCommand CreateLoadCommand()
+        {
+            return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
                     () => _loadingHandler.LoadAsync(this),
                     LogUnhandledCommandException),
                 () => !IsBusy);
-            AddRootCommand = new AsyncRelayCommand(
+        }
+
+        private IAsyncRelayCommand CreateAddRootCommand()
+        {
+            return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
                     () => _setupHandler.AddRootAsync(this),
                     LogUnhandledCommandException),
                 CanAddRoot);
-            RunAllCommand = new AsyncRelayCommand(
+        }
+
+        private IAsyncRelayCommand CreateRunAllCommand()
+        {
+            return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
                     () => _executionHandler.RunAllAsync(this),
                     LogUnhandledCommandException),
                 CanRunAll);
-            RootPrimaryActionCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+        }
+
+        private IAsyncRelayCommand<CottonSyncRootListItem> CreateRootPrimaryActionCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
                     item,
                     ExecuteRootPrimaryActionAsync,
                     LogUnhandledCommandException),
                 item => !IsBusy && item is not null && item.CanUsePrimaryAction);
-            StopRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+        }
+
+        private IAsyncRelayCommand<CottonSyncRootListItem> CreateStopRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
                     item,
                     root => _managementHandler.StopRootAsync(this, root),
                     LogUnhandledCommandException),
                 item => !IsBusy && item is not null && item.CanStopSync);
-            PauseRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+        }
+
+        private IAsyncRelayCommand<CottonSyncRootListItem> CreatePauseRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
                     item,
                     root => _managementHandler.SetRootPausedAsync(this, root, isPaused: true),
                     LogUnhandledCommandException),
                 item => !IsBusy && item is not null && item.CanPauseSync);
-            ResumeRootCommand = new AsyncRelayCommand<CottonSyncRootListItem>(
+        }
+
+        private IAsyncRelayCommand<CottonSyncRootListItem> CreateResumeRootCommand()
+        {
+            return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
                     item,
                     root => _managementHandler.SetRootPausedAsync(this, root, isPaused: false),

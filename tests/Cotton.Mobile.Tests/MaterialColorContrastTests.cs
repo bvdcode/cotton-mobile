@@ -134,17 +134,17 @@ namespace Cotton.Mobile.Tests
 
             double inverseAlpha = 1d - foreground.Alpha;
             return new Rgba(
-                foreground.Red * foreground.Alpha + background.Red * inverseAlpha,
-                foreground.Green * foreground.Alpha + background.Green * inverseAlpha,
-                foreground.Blue * foreground.Alpha + background.Blue * inverseAlpha,
+                (foreground.Red * foreground.Alpha) + (background.Red * inverseAlpha),
+                (foreground.Green * foreground.Alpha) + (background.Green * inverseAlpha),
+                (foreground.Blue * foreground.Alpha) + (background.Blue * inverseAlpha),
                 1d);
         }
 
         private static double RelativeLuminance(Rgba color)
         {
-            return 0.2126d * Linearize(color.Red)
-                + 0.7152d * Linearize(color.Green)
-                + 0.0722d * Linearize(color.Blue);
+            return (0.2126d * Linearize(color.Red))
+                + (0.7152d * Linearize(color.Green))
+                + (0.0722d * Linearize(color.Blue));
         }
 
         private static double Linearize(double channel)

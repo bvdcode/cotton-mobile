@@ -281,6 +281,5 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.CanPauseSync);
             Assert.True(item.CanStopSync);
         }
-
     }
 }

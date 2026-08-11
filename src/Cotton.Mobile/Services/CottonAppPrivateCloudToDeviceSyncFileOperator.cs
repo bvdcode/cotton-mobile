@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken = default)
         {
             EnsureSupportedRoot(instanceUri, root);
-            CottonFileBrowserEntry file = CreateFileEntry(item);
+            CottonFileBrowserEntry file = CottonCloudToDeviceFileEntryFactory.Create(item);
             await _fileBrowserService
                 .DownloadAsync(instanceUri, file, progress: null, cancellationToken)
                 .ConfigureAwait(false);
@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken = default)
         {
             EnsureSupportedRoot(instanceUri, root);
-            CottonFileBrowserEntry file = CreateFileEntry(item);
+            CottonFileBrowserEntry file = CottonCloudToDeviceFileEntryFactory.Create(item);
             return Task.Run(
                 () => RenameLocalDownload(instanceUri, file, item, cancellationToken),
                 cancellationToken);
@@ -98,33 +98,6 @@ namespace Cotton.Mobile.Services
             {
                 throw new InvalidOperationException("This sync file operator requires cloud-to-device sync direction.");
             }
-        }
-
-        private static CottonFileBrowserEntry CreateFileEntry(CottonCloudToDeviceSyncPlanItem item)
-        {
-            ArgumentNullException.ThrowIfNull(item);
-            if (item.TargetType != CottonFileBrowserEntryType.File)
-            {
-                throw new InvalidOperationException("Only files can be written by cloud-to-device sync.");
-            }
-
-            if (string.IsNullOrWhiteSpace(item.RemoteETag)
-                || !item.RemoteUpdatedAtUtc.HasValue
-                || item.ContentHash is null)
-            {
-                throw new InvalidOperationException(
-                    "Cloud-to-device file writes require a remote ETag, update time, and content hash.");
-            }
-
-            return CottonFileBrowserEntry.CreateFile(
-                item.TargetId,
-                item.DisplayName,
-                item.RemoteUpdatedAtUtc.Value,
-                item.SizeBytes,
-                item.ContentType,
-                previewHashEncryptedHex: null,
-                item.RemoteETag,
-                contentHash: item.ContentHash);
         }
 
         private static void RenameLocalDownload(

@@ -310,6 +310,5 @@ namespace Cotton.Mobile.Tests
                 relativePath: null,
                 TestContentHashes.First);
         }
-
     }
 }

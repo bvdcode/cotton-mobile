@@ -281,6 +281,5 @@ namespace Cotton.Mobile.Tests
         {
             return Path.Combine(_rootDirectory, instanceUri.Host);
         }
-
     }
 }

@@ -246,6 +246,5 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(TestContentHashes.Second, item.LocalContentHash);
             Assert.Equal(TestContentHashes.Third, item.RemoteContentHash);
         }
-
     }
 }

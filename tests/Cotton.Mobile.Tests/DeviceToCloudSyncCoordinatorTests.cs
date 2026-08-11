@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Tests
                 _pauseStore,
                 _uploadReceiptStore,
                 _localTreeReader,
-                _remoteFolderContentSource,
+                new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 executor);
         }
 
@@ -288,6 +288,5 @@ namespace Cotton.Mobile.Tests
                 Directory.Delete(_directory, recursive: true);
             }
         }
-
     }
 }

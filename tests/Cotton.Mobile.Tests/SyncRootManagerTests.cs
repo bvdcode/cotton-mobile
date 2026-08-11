@@ -174,6 +174,5 @@ namespace Cotton.Mobile.Tests
                 Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
                 new DateTime(2026, 8, 4, 10, 1, 0, DateTimeKind.Utc));
         }
-
     }
 }

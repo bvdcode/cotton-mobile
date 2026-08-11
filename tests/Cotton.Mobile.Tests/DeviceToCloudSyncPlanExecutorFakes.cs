@@ -64,5 +64,4 @@ namespace Cotton.Mobile.Tests
             return Task.CompletedTask;
         }
     }
-
 }

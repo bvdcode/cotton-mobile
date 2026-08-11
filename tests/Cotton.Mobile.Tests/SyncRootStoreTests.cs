@@ -312,6 +312,5 @@ namespace Cotton.Mobile.Tests
                 CottonSyncDirection.CloudToDevice,
                 CottonUploadOriginalRetention.KeepOriginals);
         }
-
     }
 }

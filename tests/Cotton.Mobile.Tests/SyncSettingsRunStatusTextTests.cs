@@ -271,6 +271,5 @@ namespace Cotton.Mobile.Tests
                 "Sync complete. 1 blocked.",
                 CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(blockedSummary));
         }
-
     }
 }

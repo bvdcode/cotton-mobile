@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 namespace Cotton.Mobile.Services
@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonSyncRootPauseStore _pauseStore;
         private readonly ICottonSyncedFileManifestStore _manifestStore;
         private readonly ICottonDeviceToCloudLocalTreeReader _localTreeReader;
-        private readonly ICottonDeviceToCloudRemoteFolderContentSource _remoteFolderContentSource;
+        private readonly CottonRecursiveRemoteContentLoader _remoteContentLoader;
         private readonly CottonCloudToDeviceSyncPlanExecutor _cloudToDevicePlanExecutor;
         private readonly CottonDeviceToCloudSyncPlanExecutor _deviceToCloudPlanExecutor;
 
@@ -18,7 +18,7 @@ namespace Cotton.Mobile.Services
             ICottonSyncRootPauseStore pauseStore,
             ICottonSyncedFileManifestStore manifestStore,
             ICottonDeviceToCloudLocalTreeReader localTreeReader,
-            ICottonDeviceToCloudRemoteFolderContentSource remoteFolderContentSource,
+            CottonRecursiveRemoteContentLoader remoteContentLoader,
             CottonCloudToDeviceSyncPlanExecutor cloudToDevicePlanExecutor,
             CottonDeviceToCloudSyncPlanExecutor deviceToCloudPlanExecutor)
         {
@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(pauseStore);
             ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(localTreeReader);
-            ArgumentNullException.ThrowIfNull(remoteFolderContentSource);
+            ArgumentNullException.ThrowIfNull(remoteContentLoader);
             ArgumentNullException.ThrowIfNull(cloudToDevicePlanExecutor);
             ArgumentNullException.ThrowIfNull(deviceToCloudPlanExecutor);
 
@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Services
             _pauseStore = pauseStore;
             _manifestStore = manifestStore;
             _localTreeReader = localTreeReader;
-            _remoteFolderContentSource = remoteFolderContentSource;
+            _remoteContentLoader = remoteContentLoader;
             _cloudToDevicePlanExecutor = cloudToDevicePlanExecutor;
             _deviceToCloudPlanExecutor = deviceToCloudPlanExecutor;
         }
@@ -165,54 +165,13 @@ namespace Cotton.Mobile.Services
                 .ReadAsync(instanceUri, root, cancellationToken)
                 .ConfigureAwait(false);
             CottonDeviceToCloudRemoteContentSnapshot remoteContent =
-                await LoadRecursiveRemoteContentAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+                await _remoteContentLoader.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             IReadOnlyList<CottonSyncedFileSnapshot> manifestFiles =
                 await _manifestStore.LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             CottonBidirectionalSyncPlanSnapshot preflightPlan =
                 CottonBidirectionalSyncPlanner.Create(root, localContent, remoteContent, manifestFiles);
 
             return CottonBidirectionalSyncExecutionPlanner.Create(preflightPlan);
-        }
-
-        private async Task<CottonDeviceToCloudRemoteContentSnapshot> LoadRecursiveRemoteContentAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CancellationToken cancellationToken)
-        {
-            var items = new List<CottonDeviceToCloudRemoteItemSnapshot>();
-            var folders = new Queue<(CottonFolderHandle Folder, string RelativePath)>();
-            var visitedFolderIds = new HashSet<Guid>();
-
-            folders.Enqueue((root.CloudFolder.ToFolderHandle(), string.Empty));
-            while (folders.Count > 0)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                (CottonFolderHandle folder, string folderRelativePath) = folders.Dequeue();
-                if (!visitedFolderIds.Add(folder.Id))
-                {
-                    continue;
-                }
-
-                CottonFolderContent content = await _remoteFolderContentSource
-                    .LoadAsync(instanceUri, folder, cancellationToken)
-                    .ConfigureAwait(false);
-                foreach (CottonFileBrowserEntry entry in content.Entries)
-                {
-                    string relativePath = entry.Type == CottonFileBrowserEntryType.Folder
-                        ? CottonSyncRelativePath.CreateChildFolderPath(folderRelativePath, entry.Name)
-                        : CottonSyncRelativePath.CreateFilePath(folderRelativePath, entry.Name);
-                    items.Add(new CottonDeviceToCloudRemoteItemSnapshot(entry, relativePath));
-                    if (entry.Type == CottonFileBrowserEntryType.Folder)
-                    {
-                        folders.Enqueue((new CottonFolderHandle(entry.Id, entry.Name), relativePath));
-                    }
-                }
-            }
-
-            return new CottonDeviceToCloudRemoteContentSnapshot(
-                root.CloudFolder.FolderId,
-                root.CloudFolder.FolderName,
-                items);
         }
     }
 }

@@ -262,6 +262,5 @@ namespace Cotton.Mobile.Tests
             Assert.True(removal.RemovesLocalFile);
             Assert.Equal(1, plan.LocalRemovalCount);
         }
-
     }
 }

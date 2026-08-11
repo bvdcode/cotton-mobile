@@ -114,6 +114,7 @@ namespace Cotton.Mobile
             services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonCloudToDeviceSyncFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+            services.AddSingleton<CottonRecursiveRemoteContentLoader>();
 
             services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
             services.AddSingleton<ICottonCloudToDeviceSyncFileOperator, CottonCloudToDeviceSyncFileOperatorRouter>();

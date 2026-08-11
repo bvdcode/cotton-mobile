@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Tests
                 _pauseStore,
                 _manifestStore,
                 _localTreeReader,
-                _remoteFolderContentSource,
+                new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 cloudExecutor,
                 deviceExecutor);
         }
@@ -214,6 +214,5 @@ namespace Cotton.Mobile.Tests
                 Directory.Delete(_directory, recursive: true);
             }
         }
-
     }
 }

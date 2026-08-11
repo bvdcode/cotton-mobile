@@ -243,6 +243,5 @@ namespace Cotton.Mobile.Tests
             Assert.Empty(_folderContentSource.RequestedFolderIds);
             Assert.Empty(_fileOperator.DownloadedIds);
         }
-
     }
 }

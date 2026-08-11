@@ -167,6 +167,5 @@ namespace Cotton.Mobile.Tests
                 displayName,
                 permissionStatus);
         }
-
     }
 }

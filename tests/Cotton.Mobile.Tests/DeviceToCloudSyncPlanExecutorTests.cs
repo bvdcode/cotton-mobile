@@ -220,6 +220,5 @@ namespace Cotton.Mobile.Tests
                 Directory.Delete(_rootDirectory, recursive: true);
             }
         }
-
     }
 }

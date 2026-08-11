@@ -128,6 +128,5 @@ namespace Cotton.Mobile.Tests
         {
             return Path.Combine(_directory, FileSystemCottonSyncRootPauseStore.MetadataFileName);
         }
-
     }
 }

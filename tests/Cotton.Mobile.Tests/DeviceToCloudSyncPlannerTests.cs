@@ -285,6 +285,5 @@ namespace Cotton.Mobile.Tests
             Assert.True(item.IsBlocked);
             Assert.False(item.RequiresUpload);
         }
-
     }
 }

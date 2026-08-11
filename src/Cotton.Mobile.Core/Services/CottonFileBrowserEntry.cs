@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Files;
@@ -284,6 +284,5 @@ namespace Cotton.Mobile.Services
                 : new Dictionary<string, string>(metadata, StringComparer.Ordinal);
             return new ReadOnlyDictionary<string, string>(values);
         }
-
     }
 }

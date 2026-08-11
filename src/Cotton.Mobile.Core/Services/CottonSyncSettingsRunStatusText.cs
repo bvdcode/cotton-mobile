@@ -23,69 +23,26 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(cloudToDeviceSummary);
             ArgumentNullException.ThrowIfNull(deviceToCloudSummary);
 
-            int rootCount = cloudToDeviceSummary.RootCount
-                + deviceToCloudSummary.RootCount
-                + (bidirectionalSummary?.RootCount ?? 0);
+            int rootCount = cloudToDeviceSummary.RootCount + deviceToCloudSummary.RootCount;
+            if (bidirectionalSummary is not null)
+            {
+                rootCount += bidirectionalSummary.RootCount;
+            }
+
             if (rootCount == 0)
             {
                 return CoreResources.NoSyncFolders;
             }
 
             List<string> parts = [];
-            AddCount(parts, cloudToDeviceSummary.DownloadedCount, CoreResources.DownloadedLabel);
-            AddCount(parts, cloudToDeviceSummary.RefreshedCount, CoreResources.RefreshedLabel);
-            AddCount(parts, cloudToDeviceSummary.RenamedCount, CoreResources.RenamedLabel);
-            AddCount(parts, cloudToDeviceSummary.RemovedCount, CoreResources.RemovedLabel);
-            AddCount(parts, deviceToCloudSummary.UploadedCount, CoreResources.UploadedLabel);
-            AddCount(parts, deviceToCloudSummary.ConfirmedUploadCount, CoreResources.UploadConfirmedSingular, CoreResources.UploadConfirmedPlural);
-            AddCount(parts, deviceToCloudSummary.DeletedLocalFileCount, CoreResources.OriginalRemovedSingular, CoreResources.OriginalRemovedPlural);
-            AddCount(parts, bidirectionalSummary?.DownloadedCount ?? 0, CoreResources.BidirectionalDownloadedLabel);
-            AddCount(parts, bidirectionalSummary?.RefreshedLocalCount ?? 0, CoreResources.BidirectionalRefreshedLocallyLabel);
-            AddCount(parts, bidirectionalSummary?.RenamedLocalCount ?? 0, CoreResources.BidirectionalRenamedLocallyLabel);
-            AddCount(parts, bidirectionalSummary?.RemovedLocalCount ?? 0, CoreResources.BidirectionalRemovedLocallyLabel);
-            AddCount(parts, bidirectionalSummary?.UploadedCount ?? 0, CoreResources.BidirectionalUploadedLabel);
-            AddCount(parts, bidirectionalSummary?.RefreshedRemoteCount ?? 0, CoreResources.BidirectionalUpdatedInCloudLabel);
-            AddCount(
-                parts,
-                deviceToCloudSummary.CreatedFolderCount + (bidirectionalSummary?.CreatedFolderCount ?? 0),
-                CoreResources.FolderCreatedSingular,
-                CoreResources.FolderCreatedPlural);
-            AddCount(
-                parts,
-                bidirectionalSummary?.DeletedRemoteFileCount ?? 0,
-                CoreResources.RemoteFileRemovedSingular,
-                CoreResources.RemoteFileRemovedPlural);
-            AddCount(
-                parts,
-                bidirectionalSummary?.RemovedManifestCount ?? 0,
-                CoreResources.RecordCleanedSingular,
-                CoreResources.RecordCleanedPlural);
-            AddCount(
-                parts,
-                bidirectionalSummary?.ConflictReviewCount ?? 0,
-                CoreResources.BidirectionalConflictReviewSingular,
-                CoreResources.BidirectionalConflictReviewPlural);
-            AddCount(
-                parts,
-                bidirectionalSummary?.DestructiveReviewLocalDeleteCount ?? 0,
-                CoreResources.BidirectionalLocalRemovalReviewSingular,
-                CoreResources.BidirectionalLocalRemovalReviewPlural);
-            AddCount(
-                parts,
-                bidirectionalSummary?.DestructiveReviewRemoteDeleteCount ?? 0,
-                CoreResources.BidirectionalCloudRemovalReviewSingular,
-                CoreResources.BidirectionalCloudRemovalReviewPlural);
-            AddCount(
-                parts,
-                cloudToDeviceSummary.BlockedItemCount
-                    + deviceToCloudSummary.BlockedItemCount
-                    + (bidirectionalSummary?.BlockedItemCount ?? 0),
-                CoreResources.BlockedLabel);
-            AddRootCount(
-                parts,
-                cloudToDeviceSummary.SkippedRootCount
-                    + deviceToCloudSummary.SkippedRootCount
-                    + (bidirectionalSummary?.SkippedRootCount ?? 0));
+            AddCloudToDeviceCounts(parts, cloudToDeviceSummary);
+            AddDeviceToCloudCounts(parts, deviceToCloudSummary);
+            if (bidirectionalSummary is not null)
+            {
+                AddBidirectionalCounts(parts, bidirectionalSummary);
+            }
+
+            AddAggregateCounts(parts, cloudToDeviceSummary, deviceToCloudSummary, bidirectionalSummary);
 
             if (parts.Count == 0)
             {
@@ -93,6 +50,99 @@ namespace Cotton.Mobile.Services
             }
 
             return CoreResources.Format(CoreResources.SyncCompletedFormat, string.Join(", ", parts));
+        }
+
+        private static void AddCloudToDeviceCounts(
+            List<string> parts,
+            CottonCloudToDeviceSyncRunSummary summary)
+        {
+            AddCount(parts, summary.DownloadedCount, CoreResources.DownloadedLabel);
+            AddCount(parts, summary.RefreshedCount, CoreResources.RefreshedLabel);
+            AddCount(parts, summary.RenamedCount, CoreResources.RenamedLabel);
+            AddCount(parts, summary.RemovedCount, CoreResources.RemovedLabel);
+        }
+
+        private static void AddDeviceToCloudCounts(
+            List<string> parts,
+            CottonDeviceToCloudSyncRunSummary summary)
+        {
+            AddCount(parts, summary.UploadedCount, CoreResources.UploadedLabel);
+            AddCount(
+                parts,
+                summary.ConfirmedUploadCount,
+                CoreResources.UploadConfirmedSingular,
+                CoreResources.UploadConfirmedPlural);
+            AddCount(
+                parts,
+                summary.DeletedLocalFileCount,
+                CoreResources.OriginalRemovedSingular,
+                CoreResources.OriginalRemovedPlural);
+        }
+
+        private static void AddBidirectionalCounts(
+            List<string> parts,
+            CottonBidirectionalSyncRunSummary summary)
+        {
+            AddCount(parts, summary.DownloadedCount, CoreResources.BidirectionalDownloadedLabel);
+            AddCount(parts, summary.RefreshedLocalCount, CoreResources.BidirectionalRefreshedLocallyLabel);
+            AddCount(parts, summary.RenamedLocalCount, CoreResources.BidirectionalRenamedLocallyLabel);
+            AddCount(parts, summary.RemovedLocalCount, CoreResources.BidirectionalRemovedLocallyLabel);
+            AddCount(parts, summary.UploadedCount, CoreResources.BidirectionalUploadedLabel);
+            AddCount(parts, summary.RefreshedRemoteCount, CoreResources.BidirectionalUpdatedInCloudLabel);
+            AddCount(
+                parts,
+                summary.DeletedRemoteFileCount,
+                CoreResources.RemoteFileRemovedSingular,
+                CoreResources.RemoteFileRemovedPlural);
+            AddCount(
+                parts,
+                summary.RemovedManifestCount,
+                CoreResources.RecordCleanedSingular,
+                CoreResources.RecordCleanedPlural);
+            AddCount(
+                parts,
+                summary.ConflictReviewCount,
+                CoreResources.BidirectionalConflictReviewSingular,
+                CoreResources.BidirectionalConflictReviewPlural);
+            AddCount(
+                parts,
+                summary.DestructiveReviewLocalDeleteCount,
+                CoreResources.BidirectionalLocalRemovalReviewSingular,
+                CoreResources.BidirectionalLocalRemovalReviewPlural);
+            AddCount(
+                parts,
+                summary.DestructiveReviewRemoteDeleteCount,
+                CoreResources.BidirectionalCloudRemovalReviewSingular,
+                CoreResources.BidirectionalCloudRemovalReviewPlural);
+        }
+
+        private static void AddAggregateCounts(
+            List<string> parts,
+            CottonCloudToDeviceSyncRunSummary cloudToDeviceSummary,
+            CottonDeviceToCloudSyncRunSummary deviceToCloudSummary,
+            CottonBidirectionalSyncRunSummary? bidirectionalSummary)
+        {
+            int bidirectionalCreatedFolderCount = bidirectionalSummary?.CreatedFolderCount ?? 0;
+            AddCount(
+                parts,
+                deviceToCloudSummary.CreatedFolderCount + bidirectionalCreatedFolderCount,
+                CoreResources.FolderCreatedSingular,
+                CoreResources.FolderCreatedPlural);
+
+            int bidirectionalBlockedItemCount = bidirectionalSummary?.BlockedItemCount ?? 0;
+            AddCount(
+                parts,
+                cloudToDeviceSummary.BlockedItemCount
+                    + deviceToCloudSummary.BlockedItemCount
+                    + bidirectionalBlockedItemCount,
+                CoreResources.BlockedLabel);
+
+            int bidirectionalSkippedRootCount = bidirectionalSummary?.SkippedRootCount ?? 0;
+            AddRootCount(
+                parts,
+                cloudToDeviceSummary.SkippedRootCount
+                    + deviceToCloudSummary.SkippedRootCount
+                    + bidirectionalSkippedRootCount);
         }
 
         private static void AddCount(List<string> parts, int count, string label)

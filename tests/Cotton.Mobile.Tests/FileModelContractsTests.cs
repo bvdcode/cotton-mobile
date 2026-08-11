@@ -198,6 +198,5 @@ namespace Cotton.Mobile.Tests
             Assert.False(freshEntry.IsOfflineAttentionVisible);
             Assert.Equal("42 B · Text · On device", freshEntry.DisplayDetails);
         }
-
     }
 }

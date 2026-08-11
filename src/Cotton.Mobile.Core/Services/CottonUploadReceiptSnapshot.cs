@@ -161,6 +161,26 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Only pending upload receipts can be marked uploaded.");
             }
 
+            ValidateRemoteFileRevision(remoteFile);
+            ValidateRemoteFileIdentity(remoteFile);
+            ValidateRemoteFileContent(remoteFile);
+
+            return new CottonUploadReceiptSnapshot(
+                LocalSourceId,
+                RelativePath,
+                LocalUpdatedAtUtc,
+                SizeBytes,
+                ContentType,
+                OperationId,
+                CottonUploadReceiptStatus.Uploaded,
+                recordedAtUtc,
+                remoteFile.Id,
+                remoteFile.ETag,
+                ContentHash);
+        }
+
+        private static void ValidateRemoteFileRevision(CottonFileBrowserEntry remoteFile)
+        {
             if (remoteFile.Type != CottonFileBrowserEntryType.File)
             {
                 throw new ArgumentException("Uploaded receipt revision requires a remote file.", nameof(remoteFile));
@@ -170,7 +190,10 @@ namespace Cotton.Mobile.Services
             {
                 throw new ArgumentException("Uploaded receipt revision requires a remote ETag.", nameof(remoteFile));
             }
+        }
 
+        private void ValidateRemoteFileIdentity(CottonFileBrowserEntry remoteFile)
+        {
             if (!string.Equals(
                 remoteFile.Name,
                 CottonSyncRelativePath.GetFileName(RelativePath),
@@ -186,7 +209,10 @@ namespace Cotton.Mobile.Services
             {
                 throw new ArgumentException("Uploaded receipt revision has a different operation id.", nameof(remoteFile));
             }
+        }
 
+        private void ValidateRemoteFileContent(CottonFileBrowserEntry remoteFile)
+        {
             if (SizeBytes.HasValue && remoteFile.SizeBytes != SizeBytes)
             {
                 throw new ArgumentException("Uploaded receipt revision has a different file size.", nameof(remoteFile));
@@ -197,19 +223,6 @@ namespace Cotton.Mobile.Services
             {
                 throw new ArgumentException("Uploaded receipt revision has a different content hash.", nameof(remoteFile));
             }
-
-            return new CottonUploadReceiptSnapshot(
-                LocalSourceId,
-                RelativePath,
-                LocalUpdatedAtUtc,
-                SizeBytes,
-                ContentType,
-                OperationId,
-                CottonUploadReceiptStatus.Uploaded,
-                recordedAtUtc,
-                remoteFile.Id,
-                remoteFile.ETag,
-                ContentHash);
         }
 
         public bool MatchesLocalSource(CottonDeviceToCloudLocalItemSnapshot localItem)

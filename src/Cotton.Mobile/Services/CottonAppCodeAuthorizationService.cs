@@ -227,6 +227,5 @@ namespace Cotton.Mobile.Services
                 PollInterval = pendingSession.PollInterval,
             };
         }
-
     }
 }

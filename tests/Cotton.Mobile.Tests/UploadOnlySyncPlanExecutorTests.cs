@@ -256,6 +256,5 @@ namespace Cotton.Mobile.Tests
 
             Assert.Empty(harness.Events);
         }
-
     }
 }

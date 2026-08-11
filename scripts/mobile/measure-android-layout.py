@@ -6,6 +6,7 @@ import logging
 import os
 import re
 import subprocess
+import tempfile
 from dataclasses import dataclass
 from pathlib import Path
 from xml.etree import ElementTree
@@ -102,7 +103,7 @@ def parse_arguments() -> MeasureOptions:
     )
     parser.add_argument(
         "--xml",
-        default="/tmp/cotton-android-layout.xml",
+        default=Path(tempfile.gettempdir()) / "cotton-android-layout.xml",
         type=Path,
         help="Local UIAutomator XML path.",
     )
@@ -178,7 +179,7 @@ def create_adb_command(serial: str | None, arguments: tuple[str, ...]) -> list[s
 
 
 def load_nodes(xml_path: Path, package_id: str) -> list[UiNode]:
-    document = ElementTree.parse(xml_path)
+    document = ElementTree.parse(xml_path)  # nosec B314: input is a local UIAutomator dump.
     nodes: list[UiNode] = []
 
     for element in document.getroot().iter("node"):

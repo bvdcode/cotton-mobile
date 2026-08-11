@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 instance_uri="https://app.cottoncloud.dev"
 destination_name="Mobile smoke folder"
@@ -24,71 +26,22 @@ the selected instance scope.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --destination)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --destination.\n' >&2
-        exit 64
-      fi
-      destination_name="$2"
-      shift 2
-      ;;
-    --run-id)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --run-id.\n' >&2
-        exit 64
-      fi
-      run_id="$2"
-      shift 2
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--instance:instance_uri"
+  "--destination:destination_name"
+  "--run-id:run_id"
+)
+COTTON_FLAG_OPTIONS=(
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if [[ -z "${run_id//[[:space:]]/}" || "$run_id" == *"/"* ]]; then
   printf 'Run id must not be blank and must not contain a slash.\n' >&2
   exit 64
 fi
 
-instance_key="$(
-  python3 - "$instance_uri" <<'PY'
-import hashlib
-import sys
-from urllib.parse import urlparse
-
-uri = urlparse(sys.argv[1])
-if uri.scheme.lower() not in ("http", "https") or not uri.hostname:
-    raise SystemExit("Instance URI must include http(s) scheme and host.")
-
-scheme = uri.scheme.lower()
-host = uri.hostname.lower()
-default_port = (scheme == "http" and uri.port in (None, 80)) or (scheme == "https" and uri.port in (None, 443))
-authority = host if default_port else f"{host}:{uri.port}"
-path = "" if uri.path in ("", "/") else uri.path.rstrip("/")
-scope = f"{scheme}://{authority}{path}"
-print(hashlib.sha256(scope.encode("utf-8")).hexdigest())
-PY
-)"
+instance_key="$(cotton_create_instance_key)"
 
 queued_id="11111111-1111-1111-1111-111111111111"
 failed_id="22222222-2222-2222-2222-222222222222"

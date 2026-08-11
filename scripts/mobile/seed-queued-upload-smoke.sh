@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 instance_uri="https://app.cottoncloud.dev"
 destination_name="Mobile smoke folder"
@@ -22,82 +24,19 @@ online at least once before running this smoke.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --destination)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --destination.\n' >&2
-        exit 64
-      fi
-      destination_name="$2"
-      shift 2
-      ;;
-    --name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --name.\n' >&2
-        exit 64
-      fi
-      upload_name="$2"
-      shift 2
-      ;;
-    --body)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --body.\n' >&2
-        exit 64
-      fi
-      upload_body="$2"
-      shift 2
-      ;;
-    --content-type)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --content-type.\n' >&2
-        exit 64
-      fi
-      content_type="$2"
-      shift 2
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--instance:instance_uri"
+  "--destination:destination_name"
+  "--name:upload_name"
+  "--body:upload_body"
+  "--content-type:content_type"
+)
+COTTON_FLAG_OPTIONS=(
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
-instance_key="$(
-  python3 - "$instance_uri" <<'PY'
-import hashlib
-import sys
-from urllib.parse import urlparse
-
-uri = urlparse(sys.argv[1])
-if uri.scheme.lower() not in ("http", "https") or not uri.hostname:
-    raise SystemExit("Instance URI must include http(s) scheme and host.")
-
-scheme = uri.scheme.lower()
-host = uri.hostname.lower()
-default_port = (scheme == "http" and uri.port in (None, 80)) or (scheme == "https" and uri.port in (None, 443))
-authority = host if default_port else f"{host}:{uri.port}"
-path = "" if uri.path in ("", "/") else uri.path.rstrip("/")
-scope = f"{scheme}://{authority}{path}"
-print(hashlib.sha256(scope.encode("utf-8")).hexdigest())
-PY
-)"
+instance_key="$(cotton_create_instance_key)"
 
 local_seed_dir="$(mktemp -d "${TMPDIR:-/tmp}/cotton-queued-upload-smoke.XXXXXX")"
 remote_seed_dir="/data/local/tmp/cotton-queued-upload-smoke"
@@ -111,26 +50,8 @@ destination_tsv="$local_seed_dir/destination.tsv"
 adb -s "$COTTON_ADB_SERIAL" shell run-as "$COTTON_ANDROID_PACKAGE_ID" cat \
   "files/CottonFolderListings/$instance_key/root.json" > "$root_cache"
 
-python3 - "$root_cache" "$destination_name" > "$destination_tsv" <<'PY'
-import json
-import sys
-
-root_cache, destination_name = sys.argv[1:3]
-data = json.load(open(root_cache, encoding="utf-8"))
-for entry in data.get("entries", []):
-    if entry.get("name") == destination_name and entry.get("type") == 0:
-        print(f"{entry['id']}\t{entry['name']}")
-        break
-else:
-    raise SystemExit(f"Destination folder not found in cached root listing: {destination_name}")
-PY
-
-IFS=$'\t' read -r destination_id destination_folder_name < "$destination_tsv"
-transfer_id="$(python3 - <<'PY'
-import uuid
-print(uuid.uuid4())
-PY
-)"
+cotton_resolve_cached_destination "$root_cache" "$destination_name" "$destination_tsv"
+transfer_id="$(cotton_new_uuid)"
 transfer_id_n="${transfer_id//-/}"
 printf '%s\n' "$upload_body" > "$upload_file"
 upload_size="$(wc -c < "$upload_file" | tr -d ' ')"
@@ -162,24 +83,15 @@ cat > "$queue_json" <<EOF
 }
 EOF
 
-adb -s "$COTTON_ADB_SERIAL" shell am force-stop "$COTTON_ANDROID_PACKAGE_ID" >/dev/null 2>&1 || true
-adb -s "$COTTON_ADB_SERIAL" shell rm -rf "$remote_seed_dir"
-adb -s "$COTTON_ADB_SERIAL" shell mkdir -p "$remote_seed_dir"
-adb -s "$COTTON_ADB_SERIAL" push "$queue_json" "$remote_seed_dir/queue.json" >/dev/null
-adb -s "$COTTON_ADB_SERIAL" push "$upload_file" "$remote_seed_dir/$upload_name" >/dev/null
-
-transfer_root="files/CottonTransfers/$instance_key"
-staged_root="$transfer_root/Staged"
-
-adb -s "$COTTON_ADB_SERIAL" shell run-as "$COTTON_ANDROID_PACKAGE_ID" rm -rf "$transfer_root"
-adb -s "$COTTON_ADB_SERIAL" shell run-as "$COTTON_ANDROID_PACKAGE_ID" mkdir -p "$staged_root/$transfer_id_n"
-adb -s "$COTTON_ADB_SERIAL" shell run-as "$COTTON_ANDROID_PACKAGE_ID" cp \
-  "$remote_seed_dir/queue.json" \
-  "$transfer_root/queue.json"
-adb -s "$COTTON_ADB_SERIAL" shell run-as "$COTTON_ANDROID_PACKAGE_ID" cp \
-  "$remote_seed_dir/$upload_name" \
-  "$staged_root/$transfer_id_n/$upload_name"
-adb -s "$COTTON_ADB_SERIAL" shell rm -rf "$remote_seed_dir"
+cotton_stage_queued_upload \
+  "$COTTON_ADB_SERIAL" \
+  "$COTTON_ANDROID_PACKAGE_ID" \
+  "$remote_seed_dir" \
+  "$queue_json" \
+  "$upload_file" \
+  "$upload_name" \
+  "$instance_key" \
+  "$transfer_id_n"
 
 printf 'Seeded queued upload smoke for %s (%s).\n' "$instance_uri" "$instance_key"
 printf 'Transfer:    %s\n' "$transfer_id"

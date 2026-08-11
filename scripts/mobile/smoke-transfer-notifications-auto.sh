@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -46,102 +48,22 @@ selected instance.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --destination)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --destination.\n' >&2
-        exit 64
-      fi
-      destination_name="$2"
-      shift 2
-      ;;
-    --permission-state)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --permission-state.\n' >&2
-        exit 64
-      fi
-      permission_state="$2"
-      shift 2
-      ;;
-    --name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --name.\n' >&2
-        exit 64
-      fi
-      upload_name="$2"
-      shift 2
-      ;;
-    --body)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --body.\n' >&2
-        exit 64
-      fi
-      upload_body="$2"
-      shift 2
-      ;;
-    --content-type)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --content-type.\n' >&2
-        exit 64
-      fi
-      content_type="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --wait-seconds)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --wait-seconds.\n' >&2
-        exit 64
-      fi
-      wait_seconds="$2"
-      shift 2
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--instance:instance_uri"
+  "--destination:destination_name"
+  "--permission-state:permission_state"
+  "--name:upload_name"
+  "--body:upload_body"
+  "--content-type:content_type"
+  "--evidence-dir:evidence_dir"
+  "--wait-seconds:wait_seconds"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+)
+cotton_parse_arguments "$@"
 
 case "$permission_state" in
   allowed|denied)
@@ -187,54 +109,23 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-create_instance_key() {
-  python3 - "$instance_uri" <<'PY'
-import hashlib
-import sys
-from urllib.parse import urlparse
-
-uri = urlparse(sys.argv[1])
-if uri.scheme.lower() not in ("http", "https") or not uri.hostname:
-    raise SystemExit("Instance URI must include http(s) scheme and host.")
-
-scheme = uri.scheme.lower()
-host = uri.hostname.lower()
-default_port = (scheme == "http" and uri.port in (None, 80)) or (
-    scheme == "https" and uri.port in (None, 443)
-)
-authority = host if default_port else f"{host}:{uri.port}"
-path = "" if uri.path in ("", "/") else uri.path.rstrip("/")
-scope = f"{scheme}://{authority}{path}"
-print(hashlib.sha256(scope.encode("utf-8")).hexdigest())
-PY
-}
 
 apply_permission_state() {
   case "$permission_state" in
     allowed)
       {
-        adb_device shell pm grant "$package_id" android.permission.POST_NOTIFICATIONS || true
-        adb_device shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
-        adb_device shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
+        cotton_adb shell pm grant "$package_id" android.permission.POST_NOTIFICATIONS || true
+        cotton_adb shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
+        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
       } > "$evidence_dir/04-permission-setup.txt" 2>&1
       ;;
     denied)
       {
-        adb_device shell pm revoke "$package_id" android.permission.POST_NOTIFICATIONS || true
-        adb_device shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
-        adb_device shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
+        cotton_adb shell pm revoke "$package_id" android.permission.POST_NOTIFICATIONS || true
+        cotton_adb shell pm set-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-set || true
+        cotton_adb shell pm clear-permission-flags "$package_id" android.permission.POST_NOTIFICATIONS user-fixed || true
       } > "$evidence_dir/04-permission-setup.txt" 2>&1
       ;;
   esac
@@ -243,37 +134,22 @@ apply_permission_state() {
 capture_notification_state() {
   local prefix="$1"
 
-  capture_text "$prefix-package-permission.txt" adb_device shell dumpsys package "$package_id"
-  capture_text "$prefix-appops.txt" adb_device shell appops get "$package_id" POST_NOTIFICATION
-  capture_text "$prefix-notification-dumpsys.txt" adb_device shell dumpsys notification --noredact
+  cotton_capture_text_best_effort "$prefix-package-permission.txt" cotton_adb shell dumpsys package "$package_id"
+  cotton_capture_text_best_effort "$prefix-appops.txt" cotton_adb shell appops get "$package_id" POST_NOTIFICATION
+  cotton_capture_text_best_effort "$prefix-notification-dumpsys.txt" cotton_adb shell dumpsys notification --noredact
   grep -E "$package_id|cotton\\.|Upload complete|Upload failed|$upload_name" \
     "$evidence_dir/$prefix-notification-dumpsys.txt" \
     > "$evidence_dir/$prefix-notification-summary.txt" || true
 }
 
-capture_screen() {
-  local prefix="$1"
-
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
-
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-    adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
-  fi
-}
 
 capture_queue() {
   local prefix="$1"
   local transfer_root="files/CottonTransfers/$instance_key"
 
-  adb_device shell run-as "$package_id" cat "$transfer_root/queue.json" \
+  cotton_adb shell run-as "$package_id" cat "$transfer_root/queue.json" \
     > "$evidence_dir/$prefix-queue.json"
-  adb_device shell run-as "$package_id" find "$transfer_root/Staged" \
+  cotton_adb shell run-as "$package_id" find "$transfer_root/Staged" \
     -maxdepth 2 -type f | sort > "$evidence_dir/$prefix-staged-files.txt" || true
 }
 
@@ -367,9 +243,9 @@ write_metadata() {
   } > "$evidence_dir/00-metadata.txt"
 }
 
-instance_key="$(create_instance_key)"
+instance_key="$(cotton_create_instance_key)"
 write_metadata
-capture_text "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -380,7 +256,7 @@ if [[ "$install_debug" -eq 1 ]]; then
   cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/02-install.txt"
 fi
 
-capture_text "03-package.txt" adb_device shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "03-package.txt" cotton_adb shell dumpsys package "$package_id"
 apply_permission_state
 capture_notification_state "10-before-run"
 
@@ -396,14 +272,14 @@ COTTON_ADB_SERIAL="$serial" \
     > "$evidence_dir/11-seed-upload.txt" 2>&1
 
 capture_queue "12-before-launch"
-adb_device logcat -c >/dev/null 2>&1 || true
-adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/13-launch.txt"
+cotton_adb logcat -c >/dev/null 2>&1 || true
+cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/13-launch.txt"
 sleep "$wait_seconds"
 
 capture_queue "20-after-run"
 capture_notification_state "20-after-run"
-capture_screen "22-after-run"
-capture_text "90-logcat.txt" adb_device logcat -d -v threadtime
+cotton_capture_screen "22-after-run"
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v threadtime
 
 validate_permission_state
 validate_queue

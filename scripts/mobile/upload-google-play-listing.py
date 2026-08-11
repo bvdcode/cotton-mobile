@@ -2,19 +2,20 @@
 from __future__ import annotations
 
 import argparse
-import json
 import logging
 import os
 import struct
-from dataclasses import dataclass
 from pathlib import Path
-from typing import Mapping, Protocol
-from urllib.parse import quote
+
+from google_play_listing import (
+    GooglePlayListingClient,
+    GooglePlayListingUploadError,
+    GooglePlayListingUploadOptions,
+    PngInfo,
+    StoreListing,
+)
 
 
-ANDROID_PUBLISHER_SCOPE = "https://www.googleapis.com/auth/androidpublisher"
-ANDROID_PUBLISHER_API_BASE_URL = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications"
-ANDROID_PUBLISHER_UPLOAD_BASE_URL = "https://androidpublisher.googleapis.com/upload/androidpublisher/v3/applications"
 DEFAULT_LISTING_DIR = Path("store/google-play/default-listing")
 DEFAULT_SERVICE_ACCOUNT_ENV = "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"
 DEFAULT_TIMEOUT_SECONDS = 120
@@ -23,257 +24,7 @@ MAX_ICON_BYTES = 1024 * 1024
 MAX_SHORT_DESCRIPTION_LENGTH = 80
 MAX_FULL_DESCRIPTION_LENGTH = 4000
 PNG_SIGNATURE = b"\x89PNG\r\n\x1a\n"
-
 logger = logging.getLogger("upload-google-play-listing")
-
-
-class GooglePlayListingUploadError(Exception):
-    pass
-
-
-@dataclass(frozen=True)
-class GooglePlayListingUploadOptions:
-    package_name: str
-    listing_dir: Path
-    language: str
-    title: str
-    changes_not_sent_for_review: bool
-    service_account_json_env: str
-    service_account_json_file: Path | None
-    timeout_seconds: int
-    dry_run: bool
-
-
-@dataclass(frozen=True)
-class PngInfo:
-    width: int
-    height: int
-    color_type: int
-    file_size: int
-
-    @property
-    def color_description(self) -> str:
-        if self.color_type == 2:
-            return "rgb"
-        if self.color_type == 6:
-            return "rgba"
-        return f"png-color-type-{self.color_type}"
-
-
-@dataclass(frozen=True)
-class StoreListing:
-    title: str
-    short_description: str
-    full_description: str
-    icon_path: Path
-    feature_graphic_path: Path
-    phone_screenshot_paths: tuple[Path, ...]
-
-
-class HttpResponse(Protocol):
-    status_code: int
-    content: bytes
-    text: str
-
-    def json(self) -> object:
-        ...
-
-
-class HttpSession(Protocol):
-    def request(
-        self,
-        method: str,
-        url: str,
-        *,
-        json: Mapping[str, object] | None = None,
-        data: object | None = None,
-        headers: Mapping[str, str] | None = None,
-        params: Mapping[str, str] | None = None,
-        timeout: int,
-    ) -> HttpResponse:
-        ...
-
-
-class AndroidPublisherClient:
-    def __init__(self, service_account_json: str, timeout_seconds: int) -> None:
-        self._timeout_seconds = timeout_seconds
-        service_account, authorized_session_type = self._load_google_auth_dependencies()
-        service_account_info = self._parse_service_account_json(service_account_json)
-        credentials = service_account.Credentials.from_service_account_info(
-            service_account_info,
-            scopes=[ANDROID_PUBLISHER_SCOPE],
-        )
-        self._session: HttpSession = authorized_session_type(credentials)
-
-    def create_edit(self, package_name: str) -> str:
-        response = self._request("POST", f"{self._application_url(package_name)}/edits", json_body={})
-        edit_id = response.get("id")
-        if not isinstance(edit_id, str) or not edit_id:
-            raise GooglePlayListingUploadError("Google Play edit response did not include an edit id.")
-
-        logger.info("Created Google Play edit %s.", edit_id)
-        return edit_id
-
-    def update_listing(
-        self,
-        package_name: str,
-        edit_id: str,
-        language: str,
-        listing: StoreListing,
-    ) -> None:
-        body: dict[str, object] = {
-            "language": language,
-            "title": listing.title,
-            "shortDescription": listing.short_description,
-            "fullDescription": listing.full_description,
-        }
-        logger.info("Updating Google Play listing text for %s.", language)
-        self._request(
-            "PUT",
-            f"{self._application_url(package_name)}/edits/{self._quote_path(edit_id)}/listings/{self._quote_path(language)}",
-            json_body=body,
-        )
-
-    def replace_images(
-        self,
-        package_name: str,
-        edit_id: str,
-        language: str,
-        image_type: str,
-        image_paths: tuple[Path, ...],
-    ) -> None:
-        logger.info("Deleting existing %s images for %s.", image_type, language)
-        self._request(
-            "DELETE",
-            (
-                f"{self._application_url(package_name)}/edits/{self._quote_path(edit_id)}"
-                f"/listings/{self._quote_path(language)}/{self._quote_path(image_type)}"
-            ),
-        )
-
-        for image_path in image_paths:
-            self.upload_image(package_name, edit_id, language, image_type, image_path)
-
-    def upload_image(
-        self,
-        package_name: str,
-        edit_id: str,
-        language: str,
-        image_type: str,
-        image_path: Path,
-    ) -> None:
-        upload_url = (
-            f"{ANDROID_PUBLISHER_UPLOAD_BASE_URL}/"
-            f"{self._quote_path(package_name)}/edits/{self._quote_path(edit_id)}"
-            f"/listings/{self._quote_path(language)}/{self._quote_path(image_type)}"
-        )
-        logger.info("Uploading %s image %s.", image_type, image_path)
-        with image_path.open("rb") as image_stream:
-            self._request(
-                "POST",
-                upload_url,
-                data=image_stream,
-                headers={"Content-Type": "image/png"},
-                params={"uploadType": "media"},
-            )
-
-    def commit_edit(self, package_name: str, edit_id: str, changes_not_sent_for_review: bool) -> None:
-        params: dict[str, str] = {}
-        if changes_not_sent_for_review:
-            params["changesNotSentForReview"] = "true"
-
-        logger.info("Committing Google Play edit %s.", edit_id)
-        self._request(
-            "POST",
-            f"{self._application_url(package_name)}/edits/{self._quote_path(edit_id)}:commit",
-            params=params,
-        )
-
-    def delete_edit(self, package_name: str, edit_id: str) -> None:
-        logger.info("Deleting failed Google Play edit %s.", edit_id)
-        response = self._session.request(
-            "DELETE",
-            f"{self._application_url(package_name)}/edits/{self._quote_path(edit_id)}",
-            timeout=self._timeout_seconds,
-        )
-        if response.status_code >= 400:
-            logger.warning("Could not delete Google Play edit %s: %s", edit_id, response.text)
-
-    def _request(
-        self,
-        method: str,
-        url: str,
-        *,
-        json_body: Mapping[str, object] | None = None,
-        data: object | None = None,
-        headers: Mapping[str, str] | None = None,
-        params: Mapping[str, str] | None = None,
-    ) -> dict[str, object]:
-        response = self._session.request(
-            method,
-            url,
-            json=json_body,
-            data=data,
-            headers=headers,
-            params=params,
-            timeout=self._timeout_seconds,
-        )
-        self._raise_for_error(response)
-        if not response.content:
-            return {}
-
-        body = response.json()
-        if not isinstance(body, dict):
-            raise GooglePlayListingUploadError("Google Play API response was not a JSON object.")
-
-        return body
-
-    @staticmethod
-    def _raise_for_error(response: HttpResponse) -> None:
-        if response.status_code < 400:
-            return
-
-        try:
-            error_body = response.json()
-        except ValueError:
-            error_body = response.text
-
-        raise GooglePlayListingUploadError(
-            f"Google Play API request failed with HTTP {response.status_code}: {error_body}"
-        )
-
-    @staticmethod
-    def _parse_service_account_json(service_account_json: str) -> dict[str, object]:
-        try:
-            service_account_info = json.loads(service_account_json)
-        except json.JSONDecodeError as exception:
-            raise GooglePlayListingUploadError("Service account JSON is not valid JSON.") from exception
-
-        if not isinstance(service_account_info, dict):
-            raise GooglePlayListingUploadError("Service account JSON root must be an object.")
-
-        return service_account_info
-
-    @staticmethod
-    def _load_google_auth_dependencies() -> tuple[object, type[HttpSession]]:
-        try:
-            from google.auth.transport.requests import AuthorizedSession
-            from google.oauth2 import service_account
-        except ModuleNotFoundError as exception:
-            raise GooglePlayListingUploadError(
-                "Google Play upload dependencies are missing. "
-                "Install them with: python3 -m pip install google-auth requests"
-            ) from exception
-
-        return service_account, AuthorizedSession
-
-    @staticmethod
-    def _application_url(package_name: str) -> str:
-        return f"{ANDROID_PUBLISHER_API_BASE_URL}/{AndroidPublisherClient._quote_path(package_name)}"
-
-    @staticmethod
-    def _quote_path(value: str) -> str:
-        return quote(value, safe="")
 
 
 def main() -> int:
@@ -287,7 +38,7 @@ def main() -> int:
         return 0
 
     service_account_json = load_service_account_json(options)
-    client = AndroidPublisherClient(service_account_json, options.timeout_seconds)
+    client = GooglePlayListingClient(service_account_json, options.timeout_seconds)
 
     edit_id: str | None = None
     try:

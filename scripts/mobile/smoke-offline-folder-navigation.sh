@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -42,78 +44,21 @@ UI XML, dumpsys window state, connectivity diagnostics, and logcat output.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --skip-network-toggle)
-      skip_network_toggle=1
-      shift
-      ;;
-    --leave-network-disabled)
-      leave_network_disabled=1
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--no-launch:launch_app:0"
+  "--skip-network-toggle:skip_network_toggle:1"
+  "--leave-network-disabled:leave_network_disabled:1"
+)
+cotton_parse_arguments "$@"
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
@@ -134,9 +79,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
 write_metadata() {
   {
@@ -194,31 +136,23 @@ Device: \`$serial\`
 EOF
 }
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q' "$1" >> "$evidence_dir/$name"
-    printf '\n' >> "$evidence_dir/$name"
-  fi
-}
 
 capture_device_state() {
   local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  capture_text "$prefix-connectivity.txt" adb_device shell dumpsys connectivity
-  capture_text "$prefix-package.txt" adb_device shell pm path "$package_id"
+  cotton_capture_text_best_effort "$prefix-window.txt" cotton_adb shell dumpsys window
+  cotton_capture_text_best_effort "$prefix-connectivity.txt" cotton_adb shell dumpsys connectivity
+  cotton_capture_text_best_effort "$prefix-package.txt" cotton_adb shell pm path "$package_id"
 
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
+  if ! cotton_adb exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
     rm -f "$evidence_dir/$prefix.png"
   fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
+  if cotton_adb shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
+    if ! cotton_adb pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
       rm -f "$evidence_dir/$prefix.xml"
     fi
-    adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
+    cotton_adb shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
   fi
 }
 
@@ -232,8 +166,8 @@ prompt_continue() {
 restore_network() {
   if [[ "$network_disabled" -eq 1 && "$leave_network_disabled" -eq 0 ]]; then
     printf '\nRestoring Wi-Fi and mobile data...\n'
-    adb_device shell svc wifi enable >/dev/null 2>&1 || true
-    adb_device shell svc data enable >/dev/null 2>&1 || true
+    cotton_adb shell svc wifi enable >/dev/null 2>&1 || true
+    cotton_adb shell svc data enable >/dev/null 2>&1 || true
     network_disabled=0
   fi
 }
@@ -243,69 +177,12 @@ trap restore_network EXIT
 write_metadata
 write_checklist
 
-capture_text "00-device.txt" adb_device shell getprop
-capture_text "01-adb-devices.txt" adb devices
+cotton_prepare_installed_package
 
-if ! adb_device get-state > "$evidence_dir/02-device-state.txt" 2>&1; then
-  printf 'ADB device is not available for serial %s. See %s/01-adb-devices.txt.\n' "$serial" "$evidence_dir" >&2
-  exit 69
-fi
-
-device_state="$(tr -d '\r\n' < "$evidence_dir/02-device-state.txt")"
-if [[ "$device_state" != "device" ]]; then
-  printf 'ADB serial %s is in state %s, expected device.\n' "$serial" "$device_state" >&2
-  exit 69
-fi
-
-if [[ "$install_debug" -eq 1 ]]; then
-  if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
-    printf 'APK not found: %s\nRun scripts/mobile/build-android-debug.sh first.\n' "$COTTON_ANDROID_APK" >&2
-    exit 66
-  fi
-
-  capture_text "03-install-debug.txt" cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK"
-fi
-
-if ! adb_device shell pm path "$package_id" > "$evidence_dir/04-package.txt" 2>&1; then
-  printf 'Package %s is not installed on %s. Use --install-debug or install a Play-delivered build first.\n' "$package_id" "$serial" >&2
-  exit 69
-fi
-
-if ! adb_device shell dumpsys package "$package_id" > "$evidence_dir/05-package-dumpsys.txt" 2>&1; then
-  printf 'Could not inspect installed package %s. See %s/05-package-dumpsys.txt.\n' "$package_id" "$evidence_dir" >&2
-  exit 69
-fi
-
-installed_version_code="$(
-  sed -n 's/.*versionCode=\([0-9][0-9]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
-)"
-installed_version_name="$(
-  sed -n 's/.*versionName=\([^[:space:]]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
-)"
-
-{
-  printf 'installed_version_code=%s\n' "$installed_version_code"
-  printf 'installed_version_name=%s\n' "$installed_version_name"
-  printf 'expected_version_code=%s\n' "$expected_version_code"
-  printf 'expected_version_name=%s\n' "$expected_version_name"
-} > "$evidence_dir/05-package-version.txt"
-
-if [[ -n "$expected_version_code" && "$installed_version_code" != "$expected_version_code" ]]; then
-  printf 'Installed %s versionCode is %s, expected %s. Evidence: %s\n' \
-    "$package_id" "$installed_version_code" "$expected_version_code" "$evidence_dir" >&2
-  exit 70
-fi
-
-if [[ -n "$expected_version_name" && "$installed_version_name" != "$expected_version_name" ]]; then
-  printf 'Installed %s versionName is %s, expected %s. Evidence: %s\n' \
-    "$package_id" "$installed_version_name" "$expected_version_name" "$evidence_dir" >&2
-  exit 70
-fi
-
-adb_device logcat -c >/dev/null 2>&1 || true
+cotton_adb logcat -c >/dev/null 2>&1 || true
 
 if [[ "$launch_app" -eq 1 ]]; then
-  capture_text "05-launch.txt" adb_device shell monkey -p "$package_id" 1
+  cotton_capture_text_best_effort "05-launch.txt" cotton_adb shell monkey -p "$package_id" 1
   sleep 2
 fi
 
@@ -321,12 +198,12 @@ prompt_continue "Online setup: sign in if needed, open Files, keep the target fo
 capture_device_state "20-online-kept-folder"
 
 if [[ "$skip_network_toggle" -eq 0 ]]; then
-  capture_text "29-network-before.txt" adb_device shell dumpsys connectivity
-  adb_device shell svc wifi disable >/dev/null 2>&1 || true
-  adb_device shell svc data disable >/dev/null 2>&1 || true
+  cotton_capture_text_best_effort "29-network-before.txt" cotton_adb shell dumpsys connectivity
+  cotton_adb shell svc wifi disable >/dev/null 2>&1 || true
+  cotton_adb shell svc data disable >/dev/null 2>&1 || true
   network_disabled=1
   sleep 3
-  capture_text "30-network-disabled.txt" adb_device shell dumpsys connectivity
+  cotton_capture_text_best_effort "30-network-disabled.txt" cotton_adb shell dumpsys connectivity
 else
   printf 'Network toggle skipped by operator.\n' > "$evidence_dir/30-network-disabled.txt"
 fi
@@ -334,11 +211,11 @@ fi
 prompt_continue "Offline pass: browse cached root/folder listings, enter/up the folder, verify cached-listing age copy, and open a kept-offline file."
 capture_device_state "40-offline-navigation"
 
-capture_text "90-logcat.txt" adb_device logcat -d -v threadtime
-capture_text "91-connectivity.txt" adb_device shell dumpsys connectivity
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v threadtime
+cotton_capture_text_best_effort "91-connectivity.txt" cotton_adb shell dumpsys connectivity
 
 restore_network
-capture_text "92-connectivity-after-restore.txt" adb_device shell dumpsys connectivity
+cotton_capture_text_best_effort "92-connectivity-after-restore.txt" cotton_adb shell dumpsys connectivity
 
 printf '\nOffline folder-navigation smoke evidence: %s\n' "$evidence_dir"
 printf 'Review checklist.md before marking the roadmap slice complete.\n'

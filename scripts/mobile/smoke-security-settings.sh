@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -38,70 +40,19 @@ diagnostics, dumpsys window state, and logcat output.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
@@ -122,9 +73,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
 write_metadata() {
   {
@@ -206,33 +154,26 @@ Device: \`$serial\`
 EOF
 }
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
 capture_security_state() {
   local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  capture_text "$prefix-activity.txt" adb_device shell dumpsys activity top
-  capture_text "$prefix-package-permissions.txt" adb_device shell dumpsys package "$package_id"
-  capture_text "$prefix-appops.txt" adb_device shell appops get "$package_id"
-  capture_text "$prefix-device-lock.txt" adb_device shell dumpsys trust
-  capture_text "$prefix-keyguard.txt" adb_device shell dumpsys activity service KeyguardService
+  cotton_capture_text_best_effort "$prefix-window.txt" cotton_adb shell dumpsys window
+  cotton_capture_text_best_effort "$prefix-activity.txt" cotton_adb shell dumpsys activity top
+  cotton_capture_text_best_effort "$prefix-package-permissions.txt" cotton_adb shell dumpsys package "$package_id"
+  cotton_capture_text_best_effort "$prefix-appops.txt" cotton_adb shell appops get "$package_id"
+  cotton_capture_text_best_effort "$prefix-device-lock.txt" cotton_adb shell dumpsys trust
+  cotton_capture_text_best_effort "$prefix-keyguard.txt" cotton_adb shell dumpsys activity service KeyguardService
 
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
+  if ! cotton_adb exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
     rm -f "$evidence_dir/$prefix.png"
   fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
+  if cotton_adb shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
+    if ! cotton_adb pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
       rm -f "$evidence_dir/$prefix.xml"
     fi
-    adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
+    cotton_adb shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
   fi
 }
 
@@ -248,74 +189,17 @@ prompt_capture() {
 write_metadata
 write_checklist
 
-capture_text "00-device.txt" adb_device shell getprop
-capture_text "01-adb-devices.txt" adb devices
+cotton_prepare_installed_package
 
-if ! adb_device get-state > "$evidence_dir/02-device-state.txt" 2>&1; then
-  printf 'ADB device is not available for serial %s. See %s/01-adb-devices.txt.\n' "$serial" "$evidence_dir" >&2
-  exit 69
-fi
+cotton_capture_text_best_effort "06-package-permissions.txt" cotton_adb shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "07-appops.txt" cotton_adb shell appops get "$package_id"
+cotton_capture_text_best_effort "08-device-lock.txt" cotton_adb shell dumpsys trust
+cotton_capture_text_best_effort "09-keyguard.txt" cotton_adb shell dumpsys activity service KeyguardService
 
-device_state="$(tr -d '\r\n' < "$evidence_dir/02-device-state.txt")"
-if [[ "$device_state" != "device" ]]; then
-  printf 'ADB serial %s is in state %s, expected device.\n' "$serial" "$device_state" >&2
-  exit 69
-fi
-
-if [[ "$install_debug" -eq 1 ]]; then
-  if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
-    printf 'APK not found: %s\nRun scripts/mobile/build-android-debug.sh first.\n' "$COTTON_ANDROID_APK" >&2
-    exit 66
-  fi
-
-  capture_text "03-install-debug.txt" cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK"
-fi
-
-if ! adb_device shell pm path "$package_id" > "$evidence_dir/04-package.txt" 2>&1; then
-  printf 'Package %s is not installed on %s. Use --install-debug or install a Play-delivered build first.\n' "$package_id" "$serial" >&2
-  exit 69
-fi
-
-if ! adb_device shell dumpsys package "$package_id" > "$evidence_dir/05-package-dumpsys.txt" 2>&1; then
-  printf 'Could not inspect installed package %s. See %s/05-package-dumpsys.txt.\n' "$package_id" "$evidence_dir" >&2
-  exit 69
-fi
-
-installed_version_code="$(
-  sed -n 's/.*versionCode=\([0-9][0-9]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
-)"
-installed_version_name="$(
-  sed -n 's/.*versionName=\([^[:space:]]*\).*/\1/p' "$evidence_dir/05-package-dumpsys.txt" | head -1
-)"
-
-{
-  printf 'installed_version_code=%s\n' "$installed_version_code"
-  printf 'installed_version_name=%s\n' "$installed_version_name"
-  printf 'expected_version_code=%s\n' "$expected_version_code"
-  printf 'expected_version_name=%s\n' "$expected_version_name"
-} > "$evidence_dir/05-package-version.txt"
-
-if [[ -n "$expected_version_code" && "$installed_version_code" != "$expected_version_code" ]]; then
-  printf 'Installed %s versionCode is %s, expected %s. Evidence: %s\n' \
-    "$package_id" "$installed_version_code" "$expected_version_code" "$evidence_dir" >&2
-  exit 70
-fi
-
-if [[ -n "$expected_version_name" && "$installed_version_name" != "$expected_version_name" ]]; then
-  printf 'Installed %s versionName is %s, expected %s. Evidence: %s\n' \
-    "$package_id" "$installed_version_name" "$expected_version_name" "$evidence_dir" >&2
-  exit 70
-fi
-
-capture_text "06-package-permissions.txt" adb_device shell dumpsys package "$package_id"
-capture_text "07-appops.txt" adb_device shell appops get "$package_id"
-capture_text "08-device-lock.txt" adb_device shell dumpsys trust
-capture_text "09-keyguard.txt" adb_device shell dumpsys activity service KeyguardService
-
-adb_device logcat -c >/dev/null 2>&1 || true
+cotton_adb logcat -c >/dev/null 2>&1 || true
 
 if [[ "$launch_app" -eq 1 ]]; then
-  capture_text "11-launch.txt" adb_device shell monkey -p "$package_id" 1
+  cotton_capture_text_best_effort "11-launch.txt" cotton_adb shell monkey -p "$package_id" 1
   sleep 2
 fi
 
@@ -347,7 +231,7 @@ prompt_capture "If App lock is enabled, background and resume after timeout, the
 prompt_capture "If running the sensitive-cache pass, capture the file row/action state that proves the policy." \
   "80-sensitive-cache-policy"
 
-capture_text "90-logcat.txt" adb_device logcat -d -v threadtime
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v threadtime
 
 printf '\nSecurity settings smoke evidence: %s\n' "$evidence_dir"
 printf 'Review checklist.md before marking Stage 13 security smoke complete.\n'

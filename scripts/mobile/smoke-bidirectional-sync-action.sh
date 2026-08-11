@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -38,70 +40,19 @@ screenshots, UIAutomator XML, package state, and logcat output.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if ! command -v adb >/dev/null 2>&1; then
   printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
@@ -121,9 +72,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
 write_metadata() {
   {
@@ -184,75 +132,22 @@ Device: \`$serial\`
 EOF
 }
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-  fi
-}
 
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if [[ ! -f "$xml_file" ]] || ! grep -Fq "$needle" "$xml_file"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
-
-verify_expected_version() {
-  if [[ -n "$expected_version_code" ]] \
-    && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionCode does not match expected value %s.\n' "$expected_version_code" >&2
-    exit 67
-  fi
-
-  if [[ -n "$expected_version_name" ]] \
-    && ! grep -Fq "versionName=$expected_version_name" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionName does not match expected value %s.\n' "$expected_version_name" >&2
-    exit 67
-  fi
-}
-
-wait_for_operator() {
-  local prompt="$1"
-
-  printf '\n%s\n' "$prompt"
-  printf 'Press Enter when ready to capture evidence... '
-  read -r _
-}
 
 write_metadata
 write_checklist
 
-capture_text "00-device.txt" adb_device shell getprop ro.product.model
-capture_text "01-adb-devices.txt" adb devices
-capture_text "02-window.txt" adb_device shell dumpsys window
-capture_text "03-package-path.txt" adb_device shell pm path "$package_id"
-capture_text "04-package.txt" adb_device shell dumpsys package "$package_id"
-capture_text "05-package-version.txt" bash -lc \
+cotton_capture_text_best_effort "00-device.txt" cotton_adb shell getprop ro.product.model
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "02-window.txt" cotton_adb shell dumpsys window
+cotton_capture_text_best_effort "03-package-path.txt" cotton_adb shell pm path "$package_id"
+cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
   "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
-verify_expected_version
+cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -264,35 +159,35 @@ if [[ "$install_debug" -eq 1 ]]; then
 fi
 
 if [[ "$launch_app" -eq 1 ]]; then
-  adb_device logcat -c || true
-  adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/07-launch.txt"
+  cotton_adb logcat -c || true
+  cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/07-launch.txt"
   sleep 3
 fi
 
-capture_screen "10-files-root"
+cotton_capture_screen "10-files-root"
 
 if [[ "$preflight_only" -eq 1 ]]; then
   printf 'Preflight evidence captured in %s\n' "$evidence_dir"
   exit 0
 fi
 
-wait_for_operator "Open a folder action sheet in Files so Sync both ways is visible."
-capture_screen "20-folder-actions"
-require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync to this device" "Folder action sheet did not expose cloud-to-device sync."
-require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync to folder" "Folder action sheet did not expose selected-folder cloud-to-device sync."
-require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync from folder" "Folder action sheet did not expose device-to-cloud sync."
-require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync both ways" "Folder action sheet did not expose bidirectional sync."
+cotton_wait_for_operator "Open a folder action sheet in Files so Sync both ways is visible."
+cotton_capture_screen "20-folder-actions"
+cotton_require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync to this device" "Folder action sheet did not expose cloud-to-device sync."
+cotton_require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync to folder" "Folder action sheet did not expose selected-folder cloud-to-device sync."
+cotton_require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync from folder" "Folder action sheet did not expose device-to-cloud sync."
+cotton_require_xml_text "$evidence_dir/20-folder-actions.xml" "Sync both ways" "Folder action sheet did not expose bidirectional sync."
 
-wait_for_operator "Tap Sync both ways and wait for the Android folder picker."
-capture_screen "30-documents-picker"
-require_xml_text "$evidence_dir/30-documents-picker.xml" "com.google.android.documentsui" "Android document-tree picker did not open."
-require_xml_text "$evidence_dir/30-documents-picker.xml" "USE THIS FOLDER" "Android document-tree picker did not show folder-selection action."
+cotton_wait_for_operator "Tap Sync both ways and wait for the Android folder picker."
+cotton_capture_screen "30-documents-picker"
+cotton_require_xml_text "$evidence_dir/30-documents-picker.xml" "com.google.android.documentsui" "Android document-tree picker did not open."
+cotton_require_xml_text "$evidence_dir/30-documents-picker.xml" "USE THIS FOLDER" "Android document-tree picker did not show folder-selection action."
 
-wait_for_operator "Cancel the picker with Back, returning to Cotton Files."
-capture_screen "40-picker-cancel-return"
-require_xml_text "$evidence_dir/40-picker-cancel-return.xml" "$package_id" "Cotton Files did not regain focus after picker cancellation."
-require_xml_text "$evidence_dir/40-picker-cancel-return.xml" "Sync cancelled." "Cotton Files did not show the sync-cancelled status."
+cotton_wait_for_operator "Cancel the picker with Back, returning to Cotton Files."
+cotton_capture_screen "40-picker-cancel-return"
+cotton_require_xml_text "$evidence_dir/40-picker-cancel-return.xml" "$package_id" "Cotton Files did not regain focus after picker cancellation."
+cotton_require_xml_text "$evidence_dir/40-picker-cancel-return.xml" "Sync cancelled." "Cotton Files did not show the sync-cancelled status."
 
-capture_text "90-logcat.txt" adb_device logcat -d -v time
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v time
 
 printf 'Bidirectional sync action evidence captured in %s\n' "$evidence_dir"

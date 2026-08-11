@@ -9,8 +9,12 @@ from re import Pattern
 
 LOGGER = logging.getLogger(__name__)
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
-SOURCE_DIRECTORIES = (REPOSITORY_ROOT / "src", REPOSITORY_ROOT / "tests")
-SOURCE_SUFFIXES = frozenset({".cs", ".css", ".ts", ".tsx", ".xaml"})
+SOURCE_DIRECTORIES = (
+    REPOSITORY_ROOT / "src",
+    REPOSITORY_ROOT / "tests",
+    REPOSITORY_ROOT / "scripts" / "mobile",
+)
+SOURCE_SUFFIXES = frozenset({".cs", ".css", ".py", ".sh", ".ts", ".tsx", ".xaml"})
 IGNORED_DIRECTORIES = frozenset({"bin", "obj"})
 MAX_LOGICAL_LINES = 300
 
@@ -56,6 +60,8 @@ def count_logical_lines(content: str, suffix: str) -> int:
     comment_prefixes = ("//", "/*", "*", "*/")
     if suffix == ".xaml":
         comment_prefixes = ("<!--", "-->")
+    elif suffix in {".py", ".sh"}:
+        comment_prefixes = ("#",)
 
     return sum(
         1

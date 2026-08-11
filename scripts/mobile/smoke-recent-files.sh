@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -44,74 +46,20 @@ By default, existing recent metadata is restored and the seeded download is remo
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --run-id)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --run-id.\n' >&2
-        exit 64
-      fi
-      run_id="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --verify-clear)
-      verify_clear=1
-      shift
-      ;;
-    --leave-seed)
-      leave_seed=1
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--instance:instance_uri"
+  "--run-id:run_id"
+  "--evidence-dir:evidence_dir"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--no-launch:launch_app:0"
+  "--verify-clear:verify_clear:1"
+  "--leave-seed:leave_seed:1"
+)
+cotton_parse_arguments "$@"
 
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 if [[ -z "$run_id" ]]; then
@@ -139,121 +87,12 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
-  local remote_xml="/sdcard/cotton-recent-files-window.xml"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
 
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
 
-  adb_device shell rm -f "$remote_xml" >/dev/null 2>&1 || true
-  if adb_device shell uiautomator dump "$remote_xml" > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull "$remote_xml" "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-    adb_device shell rm -f "$remote_xml" >/dev/null 2>&1 || true
-  else
-    rm -f "$evidence_dir/$prefix.xml"
-  fi
-}
 
-xml_has_text() {
-  local xml_file="$1"
-  local needle="$2"
-
-  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
-}
-
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if ! xml_has_text "$xml_file" "$needle"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
-
-tap_node_from_xml() {
-  local xml_file="$1"
-  local needle="$2"
-  local mode="${3:-contains}"
-  local point_file="$evidence_dir/tap-point.txt"
-
-  python3 - "$xml_file" "$needle" "$mode" > "$point_file" <<'PY'
-import re
-import sys
-from xml.etree import ElementTree
-
-xml_file, needle, mode = sys.argv[1:4]
-root = ElementTree.parse(xml_file).getroot()
-
-def center(bounds: str) -> tuple[int, int]:
-    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-    if match is None:
-        raise ValueError(bounds)
-    left, top, right, bottom = [int(value) for value in match.groups()]
-    return ((left + right) // 2, (top + bottom) // 2)
-
-def matches(value: str) -> bool:
-    return value == needle if mode == "exact" else needle in value
-
-for node in root.iter("node"):
-    values = (
-        node.attrib.get("text", ""),
-        node.attrib.get("content-desc", ""),
-        node.attrib.get("hint", ""),
-    )
-    if any(matches(value) for value in values):
-        print(*center(node.attrib["bounds"]))
-        raise SystemExit(0)
-
-raise SystemExit(f"Could not find UI node: {needle}")
-PY
-
-  read -r tap_x tap_y < "$point_file"
-  adb_device shell input tap "$tap_x" "$tap_y"
-}
-
-create_instance_key() {
-  python3 - "$instance_uri" <<'PY'
-import hashlib
-import sys
-from urllib.parse import urlparse
-
-uri = urlparse(sys.argv[1])
-if uri.scheme.lower() not in ("http", "https") or not uri.hostname:
-    raise SystemExit("Instance URI must include http(s) scheme and host.")
-
-scheme = uri.scheme.lower()
-host = uri.hostname.lower()
-default_port = (scheme == "http" and uri.port in (None, 80)) or (
-    scheme == "https" and uri.port in (None, 443)
-)
-authority = host if default_port else f"{host}:{uri.port}"
-path = "" if uri.path in ("", "/") else uri.path.rstrip("/")
-scope = f"{scheme}://{authority}{path}"
-print(hashlib.sha256(scope.encode("utf-8")).hexdigest())
-PY
-}
 
 create_smoke_file_id() {
   python3 - "$run_id" <<'PY'
@@ -264,58 +103,7 @@ print(uuid.uuid5(uuid.NAMESPACE_URL, f"cotton-recent-files-smoke:{sys.argv[1]}")
 PY
 }
 
-wait_for_text() {
-  local prefix="$1"
-  local needle="$2"
-  local attempt
-  local xml_file
 
-  for attempt in 0 1 2 3 4 5 6 7; do
-    capture_screen "$prefix-$attempt"
-    xml_file="$evidence_dir/$prefix-$attempt.xml"
-    if xml_has_text "$xml_file" "$needle"; then
-      waited_xml="$xml_file"
-      return
-    fi
-    sleep 2
-  done
-
-  printf 'Timed out waiting for UI text: %s\n' "$needle" >&2
-  printf 'Evidence: %s\n' "$evidence_dir" >&2
-  exit 66
-}
-
-wait_for_files_root() {
-  local attempt
-  local prefix
-  local xml_file
-
-  for attempt in 0 1 2 3 4 5 6 7; do
-    prefix="20-files-root-$attempt"
-    capture_screen "$prefix"
-    xml_file="$evidence_dir/$prefix.xml"
-
-    if xml_has_text "$xml_file" "Files" && xml_has_text "$xml_file" "Account"; then
-      files_root_xml="$xml_file"
-      return
-    fi
-
-    if xml_has_text "$xml_file" "Navigate up"; then
-      tap_node_from_xml "$xml_file" "Navigate up" exact
-      sleep 2
-      continue
-    fi
-
-    adb_device shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
-    sleep 1
-    adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/20-relaunch-$attempt.txt" || true
-    sleep 2
-  done
-
-  printf 'Files root with Account navigation is not visible.\n' >&2
-  printf 'Evidence: %s\n' "$evidence_dir" >&2
-  exit 66
-}
 
 write_metadata() {
   {
@@ -350,7 +138,7 @@ prepare_seed_files() {
   printf 'Recent files smoke %s\n' "$run_id" > "$content_file"
   size_bytes="$(wc -c < "$content_file" | tr -d ' ')"
 
-  if adb_device shell run-as "$package_id" cat "$recent_metadata_path" \
+  if cotton_adb shell run-as "$package_id" cat "$recent_metadata_path" \
     > "$existing_metadata" 2> "$seed_dir/existing-recent-files.err"; then
     recent_backup_exists=1
     cp "$existing_metadata" "$recent_backup_path"
@@ -413,22 +201,22 @@ seed_recent_data() {
   local seed_dir="$1"
   local remote_seed_dir="/data/local/tmp/cotton-recent-files-smoke-$run_id"
 
-  adb_device shell rm -rf "$remote_seed_dir"
-  adb_device shell mkdir -p "$remote_seed_dir"
-  adb_device push "$seed_dir/$smoke_file_name" "$remote_seed_dir/$smoke_file_name" \
+  cotton_adb shell rm -rf "$remote_seed_dir"
+  cotton_adb shell mkdir -p "$remote_seed_dir"
+  cotton_adb push "$seed_dir/$smoke_file_name" "$remote_seed_dir/$smoke_file_name" \
     > "$evidence_dir/10-push-smoke-file.txt"
-  adb_device push "$seed_dir/recent-files.json" "$remote_seed_dir/recent-files.json" \
+  cotton_adb push "$seed_dir/recent-files.json" "$remote_seed_dir/recent-files.json" \
     > "$evidence_dir/11-push-recent-metadata.txt"
 
-  adb_device shell run-as "$package_id" rm -rf "$download_directory"
-  adb_device shell run-as "$package_id" mkdir -p "$recent_metadata_directory" "$download_directory"
-  adb_device shell run-as "$package_id" cp \
+  cotton_adb shell run-as "$package_id" rm -rf "$download_directory"
+  cotton_adb shell run-as "$package_id" mkdir -p "$recent_metadata_directory" "$download_directory"
+  cotton_adb shell run-as "$package_id" cp \
     "$remote_seed_dir/$smoke_file_name" \
     "$download_directory/$smoke_file_name"
-  adb_device shell run-as "$package_id" cp \
+  cotton_adb shell run-as "$package_id" cp \
     "$remote_seed_dir/recent-files.json" \
     "$recent_metadata_path"
-  adb_device shell rm -rf "$remote_seed_dir"
+  cotton_adb shell rm -rf "$remote_seed_dir"
   seeded_recent_data=1
 }
 
@@ -439,72 +227,72 @@ restore_recent_data() {
 
   if [[ "$recent_backup_exists" -eq 1 && -f "$recent_backup_path" ]]; then
     local remote_restore_dir="/data/local/tmp/cotton-recent-files-restore-$run_id"
-    adb_device shell rm -rf "$remote_restore_dir" >/dev/null 2>&1 || true
-    adb_device shell mkdir -p "$remote_restore_dir" >/dev/null 2>&1 || true
-    adb_device push "$recent_backup_path" "$remote_restore_dir/recent-files.json" \
+    cotton_adb shell rm -rf "$remote_restore_dir" >/dev/null 2>&1 || true
+    cotton_adb shell mkdir -p "$remote_restore_dir" >/dev/null 2>&1 || true
+    cotton_adb push "$recent_backup_path" "$remote_restore_dir/recent-files.json" \
       > "$evidence_dir/98-restore-push.txt" 2>&1 || true
-    adb_device shell run-as "$package_id" mkdir -p "$recent_metadata_directory" >/dev/null 2>&1 || true
-    adb_device shell run-as "$package_id" cp \
+    cotton_adb shell run-as "$package_id" mkdir -p "$recent_metadata_directory" >/dev/null 2>&1 || true
+    cotton_adb shell run-as "$package_id" cp \
       "$remote_restore_dir/recent-files.json" \
       "$recent_metadata_path" >/dev/null 2>&1 || true
-    adb_device shell rm -rf "$remote_restore_dir" >/dev/null 2>&1 || true
+    cotton_adb shell rm -rf "$remote_restore_dir" >/dev/null 2>&1 || true
   else
-    adb_device shell run-as "$package_id" rm -f "$recent_metadata_path" >/dev/null 2>&1 || true
+    cotton_adb shell run-as "$package_id" rm -f "$recent_metadata_path" >/dev/null 2>&1 || true
   fi
 
-  adb_device shell run-as "$package_id" rm -rf "$download_directory" >/dev/null 2>&1 || true
+  cotton_adb shell run-as "$package_id" rm -rf "$download_directory" >/dev/null 2>&1 || true
 }
 
 open_recent_files() {
-  tap_node_from_xml "$files_root_xml" "Account" exact
+  cotton_tap_node_from_xml "$files_root_xml" "Account" exact
   sleep 2
-  capture_screen "30-account-actions"
-  require_xml_text "$evidence_dir/30-account-actions.xml" "Recent files" \
+  cotton_capture_screen "30-account-actions"
+  cotton_require_xml_text "$evidence_dir/30-account-actions.xml" "Recent files" \
     "Account action sheet did not expose Recent files."
-  tap_node_from_xml "$evidence_dir/30-account-actions.xml" "Recent files" exact
+  cotton_tap_node_from_xml "$evidence_dir/30-account-actions.xml" "Recent files" exact
   sleep 2
-  wait_for_text "40-recent-files" "Recent files"
+  cotton_wait_for_text "40-recent-files" "Recent files"
   recent_files_xml="$waited_xml"
 }
 
 verify_recent_row() {
-  require_xml_text "$recent_files_xml" "$smoke_file_name" \
+  cotton_require_xml_text "$recent_files_xml" "$smoke_file_name" \
     "Seeded Recent files row is not visible."
-  require_xml_text "$recent_files_xml" "Downloaded" \
+  cotton_require_xml_text "$recent_files_xml" "Downloaded" \
     "Seeded Recent files row did not show the seeded action."
 }
 
 verify_recent_open() {
-  tap_node_from_xml "$recent_files_xml" "$smoke_file_name" exact
+  cotton_tap_node_from_xml "$recent_files_xml" "$smoke_file_name" exact
   sleep 2
-  wait_for_text "50-text-viewer" "Recent files smoke $run_id"
-  require_xml_text "$waited_xml" "$smoke_file_name" \
+  cotton_wait_for_text "50-text-viewer" "Recent files smoke $run_id"
+  cotton_require_xml_text "$waited_xml" "$smoke_file_name" \
     "Text viewer did not show the seeded file name."
 }
 
 verify_clear_action() {
-  adb_device shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
+  cotton_adb shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
   sleep 2
-  wait_for_text "60-recent-after-open" "$smoke_file_name"
+  cotton_wait_for_text "60-recent-after-open" "$smoke_file_name"
   recent_files_xml="$waited_xml"
-  require_xml_text "$recent_files_xml" "Opened" \
+  cotton_require_xml_text "$recent_files_xml" "Opened" \
     "Recent files did not update the seeded row after opening."
 
-  tap_node_from_xml "$recent_files_xml" "Clear" exact
+  cotton_tap_node_from_xml "$recent_files_xml" "Clear" exact
   sleep 1
-  capture_screen "70-clear-dialog"
-  require_xml_text "$evidence_dir/70-clear-dialog.xml" "Clear recent files?" \
+  cotton_capture_screen "70-clear-dialog"
+  cotton_require_xml_text "$evidence_dir/70-clear-dialog.xml" "Clear recent files?" \
     "Clear confirmation dialog did not appear."
-  tap_node_from_xml "$evidence_dir/70-clear-dialog.xml" "Clear" exact
+  cotton_tap_node_from_xml "$evidence_dir/70-clear-dialog.xml" "Clear" exact
   sleep 1
-  wait_for_text "80-clear-result" "Recent files cleared."
-  require_xml_text "$waited_xml" "No recent files yet" \
+  cotton_wait_for_text "80-clear-result" "Recent files cleared."
+  cotton_require_xml_text "$waited_xml" "No recent files yet" \
     "Recent files page did not show the empty state after clear."
 }
 
 capture_final_state() {
-  capture_screen "90-final"
-  capture_text "91-logcat.txt" adb_device logcat -d -t 400
+  cotton_capture_screen "90-final"
+  cotton_capture_text_best_effort "91-logcat.txt" cotton_adb logcat -d -t 400
   if grep -Ei 'FATAL EXCEPTION|AndroidRuntime.*FATAL|SIGSEGV|libc.*Fatal signal|mono-rt.*SIG' \
       "$evidence_dir/91-logcat.txt" \
       > "$evidence_dir/92-fatal-logcat.txt"; then
@@ -514,7 +302,7 @@ capture_final_state() {
   fi
 }
 
-instance_key="$(create_instance_key)"
+instance_key="$(cotton_create_instance_key)"
 smoke_file_id="$(create_smoke_file_id)"
 smoke_file_name="cotton-recent-files-smoke-$run_id.txt"
 recent_metadata_directory="files/CottonRecentFiles/$instance_key"
@@ -527,7 +315,7 @@ seeded_recent_data=0
 trap restore_recent_data EXIT
 
 write_metadata
-capture_text "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -538,7 +326,7 @@ if [[ "$install_debug" -eq 1 ]]; then
   cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/02-install.txt"
 fi
 
-capture_text "03-package.txt" adb_device shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "03-package.txt" cotton_adb shell dumpsys package "$package_id"
 
 seed_dir="$evidence_dir/seed"
 mkdir -p "$seed_dir"
@@ -546,12 +334,12 @@ prepare_seed_files "$seed_dir"
 seed_recent_data "$seed_dir"
 
 if [[ "$launch_app" -eq 1 ]]; then
-  adb_device logcat -c >/dev/null 2>&1 || true
-  adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/04-launch.txt"
+  cotton_adb logcat -c >/dev/null 2>&1 || true
+  cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/04-launch.txt"
   sleep 4
 fi
 
-wait_for_files_root
+cotton_wait_for_files_root
 open_recent_files
 verify_recent_row
 verify_recent_open

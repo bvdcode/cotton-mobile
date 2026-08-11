@@ -171,6 +171,12 @@ jobs:
       - name: Validate source quality
         run: python3 scripts/ci/validate-source.py
 
+      - name: Test mobile smoke support
+        run: python3 scripts/ci/test-mobile-smoke-support.py
+
+      - name: Test mobile smoke scripts
+        run: scripts/ci/test-mobile-smoke-common.sh
+
       - name: Test Android release version computation
         run: scripts/ci/test-android-release-version.sh
 

@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -51,82 +53,20 @@ selected instance.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --destination)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --destination.\n' >&2
-        exit 64
-      fi
-      destination_name="$2"
-      shift 2
-      ;;
-    --run-id)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --run-id.\n' >&2
-        exit 64
-      fi
-      run_id="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --wait-seconds)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --wait-seconds.\n' >&2
-        exit 64
-      fi
-      wait_seconds="$2"
-      shift 2
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--instance:instance_uri"
+  "--destination:destination_name"
+  "--run-id:run_id"
+  "--evidence-dir:evidence_dir"
+  "--wait-seconds:wait_seconds"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if [[ -z "${destination_name//[[:space:]]/}" ]]; then
   printf 'Destination name must not be blank.\n' >&2
@@ -168,143 +108,48 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-    adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
-  fi
-}
 
-xml_has_text() {
-  local xml_file="$1"
-  local needle="$2"
 
-  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
-}
-
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if ! xml_has_text "$xml_file" "$needle"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
-
-tap_node_from_xml() {
-  local xml_file="$1"
-  local needle="$2"
-  local point_file="$evidence_dir/tap-point.txt"
-
-  python3 - "$xml_file" "$needle" > "$point_file" <<'PY'
-import re
-import sys
-from xml.etree import ElementTree
-
-xml_file, needle = sys.argv[1:3]
-root = ElementTree.parse(xml_file).getroot()
-
-def center(bounds: str) -> tuple[int, int]:
-    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-    if match is None:
-        raise ValueError(bounds)
-    left, top, right, bottom = [int(value) for value in match.groups()]
-    return ((left + right) // 2, (top + bottom) // 2)
-
-for node in root.iter("node"):
-    if needle in (node.attrib.get("text", ""), node.attrib.get("content-desc", "")):
-        print(*center(node.attrib["bounds"]))
-        raise SystemExit(0)
-
-raise SystemExit(f"Could not find UI node: {needle}")
-PY
-
-  read -r tap_x tap_y < "$point_file"
-  adb_device shell input tap "$tap_x" "$tap_y"
-}
-
-create_instance_key() {
-  python3 - "$instance_uri" <<'PY'
-import hashlib
-import sys
-from urllib.parse import urlparse
-
-uri = urlparse(sys.argv[1])
-if uri.scheme.lower() not in ("http", "https") or not uri.hostname:
-    raise SystemExit("Instance URI must include http(s) scheme and host.")
-
-scheme = uri.scheme.lower()
-host = uri.hostname.lower()
-default_port = (scheme == "http" and uri.port in (None, 80)) or (
-    scheme == "https" and uri.port in (None, 443)
-)
-authority = host if default_port else f"{host}:{uri.port}"
-path = "" if uri.path in ("", "/") else uri.path.rstrip("/")
-scope = f"{scheme}://{authority}{path}"
-print(hashlib.sha256(scope.encode("utf-8")).hexdigest())
-PY
-}
 
 capture_transfer_state() {
   local prefix="$1"
   local instance_key="$2"
   local transfer_root="files/CottonTransfers/$instance_key"
 
-  adb_device shell run-as "$package_id" cat "$transfer_root/queue.json" \
+  cotton_adb shell run-as "$package_id" cat "$transfer_root/queue.json" \
     > "$evidence_dir/$prefix-queue.json"
-  adb_device shell run-as "$package_id" find "$transfer_root/Staged" \
+  cotton_adb shell run-as "$package_id" find "$transfer_root/Staged" \
     -maxdepth 2 -type f | sort > "$evidence_dir/$prefix-staged-files.txt" || true
 }
 
-wait_for_files_root() {
+cotton_wait_for_files_root() {
   local attempt
   local prefix
   local xml_file
 
   for attempt in 0 1 2 3 4 5; do
     prefix="30-files-root-$attempt"
-    capture_screen "$prefix"
+    cotton_capture_screen "$prefix"
     xml_file="$evidence_dir/$prefix.xml"
 
-    if xml_has_text "$xml_file" "Open transfers"; then
+    if cotton_xml_has_text "$xml_file" "Open transfers"; then
       files_root_xml="$xml_file"
       return
     fi
 
-    if xml_has_text "$xml_file" "Navigate up"; then
-      tap_node_from_xml "$xml_file" "Navigate up"
+    if cotton_xml_has_text "$xml_file" "Navigate up"; then
+      cotton_tap_node_from_xml "$xml_file" "Navigate up"
       sleep 2
       continue
     fi
 
-    adb_device shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
+    cotton_adb shell input keyevent KEYCODE_BACK >/dev/null 2>&1 || true
     sleep 1
-    adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/30-relaunch-$attempt.txt" || true
+    cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/30-relaunch-$attempt.txt" || true
     sleep 2
   done
 
@@ -442,9 +287,9 @@ write_metadata() {
   } > "$evidence_dir/00-metadata.txt"
 }
 
-instance_key="$(create_instance_key)"
+instance_key="$(cotton_create_instance_key)"
 write_metadata
-capture_text "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -463,7 +308,7 @@ fi
   > "$evidence_dir/10-seed.txt"
 
 capture_transfer_state "20-before-launch" "$instance_key"
-capture_text "21-package.txt" adb_device shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "21-package.txt" cotton_adb shell dumpsys package "$package_id"
 
 if [[ "$launch_app" -eq 0 ]]; then
   validate_transfer_state
@@ -471,23 +316,23 @@ if [[ "$launch_app" -eq 0 ]]; then
   exit 0
 fi
 
-adb_device logcat -c >/dev/null 2>&1 || true
-adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/29-launch.txt"
+cotton_adb logcat -c >/dev/null 2>&1 || true
+cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/29-launch.txt"
 sleep "$wait_seconds"
 
 capture_transfer_state "50-after-launch" "$instance_key"
-capture_text "51-jobscheduler.txt" adb_device shell dumpsys jobscheduler "$package_id"
+cotton_capture_text_best_effort "51-jobscheduler.txt" cotton_adb shell dumpsys jobscheduler "$package_id"
 validate_transfer_state
 
-wait_for_files_root
-tap_node_from_xml "$files_root_xml" "Transfers"
+cotton_wait_for_files_root
+cotton_tap_node_from_xml "$files_root_xml" "Transfers"
 sleep 3
-capture_screen "70-transfers"
-require_xml_text "$evidence_dir/70-transfers.xml" "Transfers" "Transfers page did not open."
-require_xml_text "$evidence_dir/70-transfers.xml" "$failed_display_name" "Failed transfer is not visible."
-require_xml_text "$evidence_dir/70-transfers.xml" "$completed_display_name" "Completed transfer is not visible."
+cotton_capture_screen "70-transfers"
+cotton_require_xml_text "$evidence_dir/70-transfers.xml" "Transfers" "Transfers page did not open."
+cotton_require_xml_text "$evidence_dir/70-transfers.xml" "$failed_display_name" "Failed transfer is not visible."
+cotton_require_xml_text "$evidence_dir/70-transfers.xml" "$completed_display_name" "Completed transfer is not visible."
 
-capture_text "90-logcat-raw.txt" adb_device logcat -d -v time
+cotton_capture_text_best_effort "90-logcat-raw.txt" cotton_adb logcat -d -v time
 grep -E 'Cotton|WorkManager|SystemJobService|AndroidRuntime|FATAL EXCEPTION|mono-rt' \
   "$evidence_dir/90-logcat-raw.txt" \
   > "$evidence_dir/91-logcat-cotton.txt" || true

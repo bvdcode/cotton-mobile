@@ -4,6 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
+
+COTTON_NODE_MATCH_MODE_DEFAULT=exact
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -48,98 +52,24 @@ share so Android grants temporary read access like it does for users.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --share-text)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --share-text.\n' >&2
-        exit 64
-      fi
-      share_text="$2"
-      shift 2
-      ;;
-    --share-file-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --share-file-name.\n' >&2
-        exit 64
-      fi
-      share_file_name="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --seed-only)
-      seed_only=1
-      shift
-      ;;
-    --skip-source-app-file)
-      skip_source_app_file=1
-      shift
-      ;;
-    --queue-text-share)
-      queue_text_share=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+  "--share-text:share_text"
+  "--share-file-name:share_file_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--seed-only:seed_only:1"
+  "--skip-source-app-file:skip_source_app_file:1"
+  "--queue-text-share:queue_text_share:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 timestamp="$(date -u +%Y%m%dT%H%M%SZ)"
 if [[ -z "$share_text" ]]; then
@@ -187,298 +117,18 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-    adb_device shell rm -f /sdcard/cotton-window.xml >/dev/null 2>&1 || true
-  fi
-}
 
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
 
-  if [[ ! -f "$xml_file" ]] || ! grep -Fq "$needle" "$xml_file"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
+# shellcheck source=smoke-share-to-cotton-support.sh
+source "$SCRIPT_DIR/smoke-share-to-cotton-support.sh"
 
-tap_node_from_xml() {
-  local xml_file="$1"
-  local needle="$2"
-  local mode="${3:-exact}"
-  local point_file="$evidence_dir/tap-point.txt"
-
-  python3 - "$xml_file" "$needle" "$mode" > "$point_file" <<'PY'
-import re
-import sys
-from xml.etree import ElementTree
-
-xml_file, needle, mode = sys.argv[1:4]
-root = ElementTree.parse(xml_file).getroot()
-
-def center(bounds: str) -> tuple[int, int]:
-    match = re.fullmatch(r"\[(\d+),(\d+)\]\[(\d+),(\d+)\]", bounds)
-    if match is None:
-        raise ValueError(bounds)
-    left, top, right, bottom = (int(value) for value in match.groups())
-    return ((left + right) // 2, (top + bottom) // 2)
-
-def matches(value: str) -> bool:
-    return value == needle if mode == "exact" else needle in value
-
-for node in root.iter("node"):
-    values = (
-        node.attrib.get("text", ""),
-        node.attrib.get("content-desc", ""),
-        node.attrib.get("hint", ""),
-    )
-    if any(matches(value) for value in values):
-        print(*center(node.attrib["bounds"]))
-        raise SystemExit(0)
-
-raise SystemExit(f"Could not find UI node: {needle}")
-PY
-
-  read -r tap_x tap_y < "$point_file"
-  adb_device shell input tap "$tap_x" "$tap_y"
-}
-
-wait_for_text_capture() {
-  local prefix="$1"
-  local needle="$2"
-  local message="$3"
-  local attempt
-  local attempt_prefix
-  local attempt_xml
-
-  for attempt in 0 1 2 3 4 5 6 7 8 9; do
-    attempt_prefix="$prefix-$attempt"
-    capture_screen "$attempt_prefix"
-    attempt_xml="$evidence_dir/$attempt_prefix.xml"
-    if [[ -f "$attempt_xml" ]] && grep -Fq "$needle" "$attempt_xml"; then
-      cp "$attempt_xml" "$evidence_dir/$prefix.xml"
-      if [[ -f "$evidence_dir/$attempt_prefix.png" ]]; then
-        cp "$evidence_dir/$attempt_prefix.png" "$evidence_dir/$prefix.png"
-      fi
-      if [[ -f "$evidence_dir/$attempt_prefix-window.txt" ]]; then
-        cp "$evidence_dir/$attempt_prefix-window.txt" "$evidence_dir/$prefix-window.txt"
-      fi
-      return
-    fi
-
-    sleep 2
-  done
-
-  printf '%s\n' "$message" >&2
-  printf 'Timed out waiting for text: %s\n' "$needle" >&2
-  printf 'Evidence: %s\n' "$evidence_dir" >&2
-  exit 66
-}
-
-verify_expected_version() {
-  if [[ -n "$expected_version_code" ]] \
-    && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionCode does not match expected value %s.\n' "$expected_version_code" >&2
-    exit 67
-  fi
-
-  if [[ -n "$expected_version_name" ]] \
-    && ! grep -Fq "versionName=$expected_version_name" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionName does not match expected value %s.\n' "$expected_version_name" >&2
-    exit 67
-  fi
-}
-
-write_metadata() {
-  {
-    printf 'timestamp_utc=%s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    printf 'repo=%s\n' "$COTTON_REPO_ROOT"
-    printf 'git_head=%s\n' "$(git -C "$COTTON_REPO_ROOT" rev-parse --short HEAD 2>/dev/null || printf unknown)"
-    printf 'package=%s\n' "$package_id"
-    printf 'serial=%s\n' "$serial"
-    printf 'install_debug=%s\n' "$install_debug"
-    printf 'preflight_only=%s\n' "$preflight_only"
-    printf 'seed_only=%s\n' "$seed_only"
-    printf 'skip_source_app_file=%s\n' "$skip_source_app_file"
-    printf 'queue_text_share=%s\n' "$queue_text_share"
-    printf 'expected_version_code=%s\n' "$expected_version_code"
-    printf 'expected_version_name=%s\n' "$expected_version_name"
-    printf 'share_text=%s\n' "$share_text"
-    printf 'share_file_name=%s\n' "$share_file_name"
-    printf 'android_receive_share_docs=https://developer.android.com/training/sharing/receive\n'
-    printf 'android_send_share_docs=https://developer.android.com/training/sharing/send\n'
-    printf 'android_file_share_docs=https://developer.android.com/training/secure-file-sharing/share-file\n'
-    printf 'android_adb_docs=https://developer.android.com/tools/adb\n'
-    printf 'android_uiautomator_docs=https://developer.android.com/training/testing/other-components/ui-automator\n'
-  } > "$evidence_dir/metadata.env"
-}
-
-write_checklist() {
-  cat > "$evidence_dir/checklist.md" <<EOF
-# Share To Cotton Smoke
-
-Package: \`$package_id\`
-Device: \`$serial\`
-Text payload: \`$share_text\`
-Seeded file: \`$share_file_name\`
-
-## Preconditions
-
-- [ ] Package/version in \`05-package-version.txt\` matches the build under test.
-- [ ] Signed-in session is restored without clearing app data.
-- [ ] \`06-seed-share-file.txt\` shows \`$share_file_name\` pushed to Android Downloads.
-
-## Automated Text Share
-
-- [ ] \`20-text-share-inbox.png\` / \`20-text-share-inbox.xml\` show \`Capture Inbox\`.
-- [ ] The captured item shows \`$share_text\`.
-- [ ] The captured item shows \`Text share captured\`, \`Choose folder\`, \`No destination selected\`, and \`Text\`.
-
-## Automated Text Queue
-
-- [ ] If \`--queue-text-share\` was used, \`21-text-share-destination.xml\` shows \`Choose Destination\`.
-- [ ] If \`--queue-text-share\` was used, \`22-text-share-destination-saved.xml\` shows \`Ready\` and \`Destination:\`.
-- [ ] If \`--queue-text-share\` was used, \`23-text-share-queued.xml\` shows queued upload status.
-
-## Shell URI Edge Cases
-
-- [ ] \`30-shell-content-uri-edge.png\` / \`30-shell-content-uri-edge.xml\` show Cotton does not upload a shell content URI without a valid source-app grant.
-- [ ] \`40-file-uri-edge.png\` / \`40-file-uri-edge.xml\` show Cotton reports unsupported file URI content without crashing.
-
-## Source-App File Share
-
-- [ ] Share \`$share_file_name\` from Android Files, Photos, Drive, or another real source app to Cotton.
-- [ ] \`50-source-app-file-share.png\` / \`50-source-app-file-share.xml\` show \`$share_file_name\`.
-- [ ] The captured file item shows \`Copied to this device\` and \`Choose folder\`.
-- [ ] \`90-logcat.txt\` has no share-to-Cotton crashes.
-
-## Evidence To Review
-
-- \`00-device.txt\`
-- \`04-package.txt\`
-- \`05-package-version.txt\`
-- \`06-seed-share-file.txt\`
-- \`20-text-share-inbox.png\` / \`20-text-share-inbox.xml\`
-- \`21-text-share-destination.png\` / \`21-text-share-destination.xml\`
-- \`22-text-share-destination-saved.png\` / \`22-text-share-destination-saved.xml\`
-- \`23-text-share-queued.png\` / \`23-text-share-queued.xml\`
-- \`30-shell-content-uri-edge.png\` / \`30-shell-content-uri-edge.xml\`
-- \`40-file-uri-edge.png\` / \`40-file-uri-edge.xml\`
-- \`50-source-app-file-share.png\` / \`50-source-app-file-share.xml\`
-- \`90-logcat.txt\`
-EOF
-}
-
-seed_share_file() {
-  local seed_dir="$evidence_dir/seed-files"
-  local seed_file="$seed_dir/$share_file_name"
-  mkdir -p "$seed_dir"
-
-  {
-    printf 'Cotton source-app share smoke file.\n'
-    printf 'Created at UTC: %s\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-    printf 'Package: %s\n' "$package_id"
-  } > "$seed_file"
-
-  : > "$evidence_dir/06-seed-share-file.txt"
-  adb_device push "$seed_file" "/sdcard/Download/$share_file_name" \
-    >> "$evidence_dir/06-seed-share-file.txt" 2>&1
-  adb_device shell am broadcast \
-    -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
-    -d "file:///sdcard/Download/$share_file_name" \
-    >> "$evidence_dir/06-seed-share-file.txt" 2>&1 || true
-  adb_device shell ls -la "/sdcard/Download/$share_file_name" \
-    >> "$evidence_dir/06-seed-share-file.txt" 2>&1
-  capture_text "07-share-file-mediastore.txt" adb_device shell content query \
-    --uri content://media/external/file \
-    --projection _id:_display_name:mime_type:size \
-    --where "_display_name='$share_file_name'"
-}
-
-content_uri_for_seeded_file() {
-  local media_id
-  media_id="$(sed -n 's/.*_id=\([0-9][0-9]*\).*/\1/p' "$evidence_dir/07-share-file-mediastore.txt" | sed -n '1p')"
-  if [[ -n "${media_id//[[:space:]]/}" ]]; then
-    printf 'content://media/external/file/%s' "$media_id"
-  fi
-}
-
-start_text_share() {
-  adb_device shell am start \
-    -a android.intent.action.SEND \
-    -t text/plain \
-    -p "$package_id" \
-    --es android.intent.extra.TEXT "$share_text" \
-    > "$evidence_dir/20-text-share-start.txt" 2>&1
-}
-
-start_content_uri_edge_share() {
-  local content_uri="$1"
-
-  if [[ -z "$content_uri" ]]; then
-    printf 'No MediaStore URI was available for %s.\n' "$share_file_name" \
-      > "$evidence_dir/30-shell-content-uri-edge-start.txt"
-    return
-  fi
-
-  adb_device shell am start \
-    -a android.intent.action.SEND \
-    -t text/plain \
-    -p "$package_id" \
-    --eu android.intent.extra.STREAM "$content_uri" \
-    --grant-read-uri-permission \
-    > "$evidence_dir/30-shell-content-uri-edge-start.txt" 2>&1
-}
-
-start_file_uri_edge_share() {
-  adb_device shell am start \
-    -a android.intent.action.SEND \
-    -t text/plain \
-    -p "$package_id" \
-    --eu android.intent.extra.STREAM "file:///sdcard/Download/$share_file_name" \
-    > "$evidence_dir/40-file-uri-edge-start.txt" 2>&1
-}
-
-wait_for_operator() {
-  local prompt="$1"
-
-  printf '\n%s\n' "$prompt"
-  printf 'Press Enter when ready to capture evidence... '
-  read -r _
-}
-
-write_metadata
-write_checklist
-
-capture_text "00-device.txt" adb_device shell getprop ro.product.model
-capture_text "01-adb-devices.txt" adb devices
-capture_text "02-window.txt" adb_device shell dumpsys window
+cotton_capture_text_best_effort "00-device.txt" cotton_adb shell getprop ro.product.model
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "02-window.txt" cotton_adb shell dumpsys window
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -489,11 +139,11 @@ if [[ "$install_debug" -eq 1 ]]; then
   cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/08-install.txt"
 fi
 
-capture_text "03-package-path.txt" adb_device shell pm path "$package_id"
-capture_text "04-package.txt" adb_device shell dumpsys package "$package_id"
-capture_text "05-package-version.txt" bash -lc \
+cotton_capture_text_best_effort "03-package-path.txt" cotton_adb shell pm path "$package_id"
+cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
   "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
-verify_expected_version
+cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
 
 seed_share_file
 
@@ -503,40 +153,40 @@ if [[ "$preflight_only" -eq 1 || "$seed_only" -eq 1 ]]; then
 fi
 
 if [[ "$launch_app" -eq 1 ]]; then
-  adb_device logcat -c || true
-  adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/09-launch.txt"
+  cotton_adb logcat -c || true
+  cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/09-launch.txt"
   sleep 3
 fi
 
-capture_screen "10-launch"
+cotton_capture_screen "10-launch"
 
 start_text_share
 sleep 3
-capture_screen "20-text-share-inbox"
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Capture Inbox" "Capture Inbox did not open for text share."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "$share_text" "Text share payload is not visible in Capture Inbox."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text share captured" "Text share detail is not visible."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Choose folder" "Text share is not waiting for a destination."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "No destination selected" "Text share destination state is not visible."
-require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text" "Text share kind is not visible."
+cotton_capture_screen "20-text-share-inbox"
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Capture Inbox" "Capture Inbox did not open for text share."
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "$share_text" "Text share payload is not visible in Capture Inbox."
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text share captured" "Text share detail is not visible."
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Choose folder" "Text share is not waiting for a destination."
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "No destination selected" "Text share destination state is not visible."
+cotton_require_xml_text "$evidence_dir/20-text-share-inbox.xml" "Text" "Text share kind is not visible."
 
 if [[ "$queue_text_share" -eq 1 ]]; then
-  tap_node_from_xml "$evidence_dir/20-text-share-inbox.xml" "Destination" exact
+  cotton_tap_node_from_xml "$evidence_dir/20-text-share-inbox.xml" "Destination" exact
   wait_for_text_capture \
     "21-text-share-destination" \
     "Choose Destination" \
     "Destination picker did not open for text share."
-  require_xml_text "$evidence_dir/21-text-share-destination.xml" "Choose this folder" "Destination picker did not expose current-folder selection."
+  cotton_require_xml_text "$evidence_dir/21-text-share-destination.xml" "Choose this folder" "Destination picker did not expose current-folder selection."
 
-  tap_node_from_xml "$evidence_dir/21-text-share-destination.xml" "Choose this folder" exact
+  cotton_tap_node_from_xml "$evidence_dir/21-text-share-destination.xml" "Choose this folder" exact
   wait_for_text_capture \
     "22-text-share-destination-saved" \
     "Destination:" \
     "Capture Inbox did not show saved text-share destination."
-  require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "$share_text" "Text share payload was lost after destination selection."
-  require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "Ready" "Text share was not ready after destination selection."
+  cotton_require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "$share_text" "Text share payload was lost after destination selection."
+  cotton_require_xml_text "$evidence_dir/22-text-share-destination-saved.xml" "Ready" "Text share was not ready after destination selection."
 
-  tap_node_from_xml "$evidence_dir/22-text-share-destination-saved.xml" "Queue" exact
+  cotton_tap_node_from_xml "$evidence_dir/22-text-share-destination-saved.xml" "Queue" exact
   wait_for_text_capture \
     "23-text-share-queued" \
     "Queued" \
@@ -546,28 +196,28 @@ fi
 seed_content_uri="$(content_uri_for_seeded_file)"
 start_content_uri_edge_share "$seed_content_uri"
 sleep 3
-capture_screen "30-shell-content-uri-edge"
-require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Capture Inbox" "Capture Inbox did not stay visible for shell content URI edge case."
-require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Needs access" "Shell content URI edge case did not surface missing access."
-require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Android revoked access to the shared content." "Missing-permission message is not visible."
+cotton_capture_screen "30-shell-content-uri-edge"
+cotton_require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Capture Inbox" "Capture Inbox did not stay visible for shell content URI edge case."
+cotton_require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Needs access" "Shell content URI edge case did not surface missing access."
+cotton_require_xml_text "$evidence_dir/30-shell-content-uri-edge.xml" "Android revoked access to the shared content." "Missing-permission message is not visible."
 
 start_file_uri_edge_share
 sleep 3
-capture_screen "40-file-uri-edge"
-require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Capture Inbox" "Capture Inbox did not stay visible for file URI edge case."
-require_xml_text "$evidence_dir/40-file-uri-edge.xml" "$share_file_name" "File URI edge case did not show the source file name."
-require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Unsupported" "File URI edge case did not surface unsupported status."
-require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Android could not open the shared content." "Unsupported-content message is not visible."
+cotton_capture_screen "40-file-uri-edge"
+cotton_require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Capture Inbox" "Capture Inbox did not stay visible for file URI edge case."
+cotton_require_xml_text "$evidence_dir/40-file-uri-edge.xml" "$share_file_name" "File URI edge case did not show the source file name."
+cotton_require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Unsupported" "File URI edge case did not surface unsupported status."
+cotton_require_xml_text "$evidence_dir/40-file-uri-edge.xml" "Android could not open the shared content." "Unsupported-content message is not visible."
 
 if [[ "$skip_source_app_file" -eq 0 ]]; then
-  wait_for_operator "Share $share_file_name from Android Files, Photos, Drive, or another source app to Cotton."
-  capture_screen "50-source-app-file-share"
-  require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Capture Inbox" "Capture Inbox is not visible after source-app file share."
-  require_xml_text "$evidence_dir/50-source-app-file-share.xml" "$share_file_name" "Source-app shared file name is not visible."
-  require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Copied to this device" "Source-app file was not copied to local staging."
-  require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Choose folder" "Source-app shared file is not waiting for destination selection."
+  cotton_wait_for_operator "Share $share_file_name from Android Files, Photos, Drive, or another source app to Cotton."
+  cotton_capture_screen "50-source-app-file-share"
+  cotton_require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Capture Inbox" "Capture Inbox is not visible after source-app file share."
+  cotton_require_xml_text "$evidence_dir/50-source-app-file-share.xml" "$share_file_name" "Source-app shared file name is not visible."
+  cotton_require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Copied to this device" "Source-app file was not copied to local staging."
+  cotton_require_xml_text "$evidence_dir/50-source-app-file-share.xml" "Choose folder" "Source-app shared file is not waiting for destination selection."
 fi
 
-capture_text "90-logcat.txt" adb_device logcat -d -v time
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v time
 
 printf 'Share-to-Cotton evidence captured in %s\n' "$evidence_dir"

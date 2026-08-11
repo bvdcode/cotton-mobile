@@ -4,6 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
+
+COTTON_CAPTURE_CONNECTIVITY=1
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -58,126 +62,28 @@ UIAutomator XML, package state, the seeded local file, and logcat output.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --instance)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --instance.\n' >&2
-        exit 64
-      fi
-      instance_uri="$2"
-      shift 2
-      ;;
-    --folder)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --folder.\n' >&2
-        exit 64
-      fi
-      folder_name="$2"
-      shift 2
-      ;;
-    --nested-folder)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --nested-folder.\n' >&2
-        exit 64
-      fi
-      nested_folder_name="$2"
-      shift 2
-      ;;
-    --nested-file)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --nested-file.\n' >&2
-        exit 64
-      fi
-      nested_file_name="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --auto-evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --auto-evidence-dir.\n' >&2
-        exit 64
-      fi
-      auto_evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --seed-only)
-      seed_only=1
-      shift
-      ;;
-    --skip-seed-file)
-      skip_seed=1
-      shift
-      ;;
-    --skip-auto-proof)
-      run_auto_proof=0
-      shift
-      ;;
-    --leave-network-disabled)
-      leave_network_disabled=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--instance:instance_uri"
+  "--folder:folder_name"
+  "--nested-folder:nested_folder_name"
+  "--nested-file:nested_file_name"
+  "--evidence-dir:evidence_dir"
+  "--auto-evidence-dir:auto_evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--seed-only:seed_only:1"
+  "--skip-seed-file:skip_seed:1"
+  "--skip-auto-proof:run_auto_proof:0"
+  "--leave-network-disabled:leave_network_disabled:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if [[ -z "$nested_file_name" ]]; then
   nested_file_name="cotton-nested-offline-$(date -u +%Y%m%dT%H%M%SZ).txt"
@@ -219,66 +125,10 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
-  local remote_xml="/sdcard/cotton-window.xml"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  capture_text "$prefix-connectivity.txt" adb_device shell dumpsys connectivity
 
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
-
-  adb_device shell rm -f "$remote_xml" >/dev/null 2>&1 || true
-  if adb_device shell uiautomator dump "$remote_xml" > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull "$remote_xml" "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-    adb_device shell rm -f "$remote_xml" >/dev/null 2>&1 || true
-  else
-    rm -f "$evidence_dir/$prefix.xml"
-  fi
-}
-
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if [[ ! -f "$xml_file" ]] || ! grep -Fq "$needle" "$xml_file"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
-
-verify_expected_version() {
-  if [[ -n "$expected_version_code" ]] \
-    && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionCode does not match expected value %s.\n' "$expected_version_code" >&2
-    exit 67
-  fi
-
-  if [[ -n "$expected_version_name" ]] \
-    && ! grep -Fq "versionName=$expected_version_name" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionName does not match expected value %s.\n' "$expected_version_name" >&2
-    exit 67
-  fi
-}
 
 write_metadata() {
   {
@@ -354,23 +204,16 @@ seed_nested_file() {
   } > "$seed_file"
 
   : > "$evidence_dir/06-seed-nested-file.txt"
-  adb_device push "$seed_file" "/sdcard/Download/$nested_file_name" \
+  cotton_adb push "$seed_file" "/sdcard/Download/$nested_file_name" \
     >> "$evidence_dir/06-seed-nested-file.txt" 2>&1
-  adb_device shell am broadcast \
+  cotton_adb shell am broadcast \
     -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
     -d "file:///sdcard/Download/$nested_file_name" \
     >> "$evidence_dir/06-seed-nested-file.txt" 2>&1 || true
-  adb_device shell ls -la "/sdcard/Download/$nested_file_name" \
+  cotton_adb shell ls -la "/sdcard/Download/$nested_file_name" \
     >> "$evidence_dir/06-seed-nested-file.txt" 2>&1
 }
 
-wait_for_operator() {
-  local prompt="$1"
-
-  printf '\n%s\n' "$prompt"
-  printf 'Press Enter when ready to capture evidence... '
-  read -r _
-}
 
 run_auto_offline_proof() {
   local args=(
@@ -415,8 +258,8 @@ run_auto_offline_proof() {
 write_metadata
 write_checklist
 
-capture_text "01-adb-devices.txt" adb devices
-capture_text "02-device.txt" adb_device shell getprop ro.product.model
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "02-device.txt" cotton_adb shell getprop ro.product.model
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -427,10 +270,10 @@ if [[ "$install_debug" -eq 1 ]]; then
   cotton_install_android_apk "$serial" "$package_id" "$COTTON_ANDROID_APK" > "$evidence_dir/03-install.txt"
 fi
 
-capture_text "04-package.txt" adb_device shell dumpsys package "$package_id"
-capture_text "05-package-version.txt" bash -lc \
+cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
   "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
-verify_expected_version
+cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
 
 if [[ "$preflight_only" -eq 1 ]]; then
   printf 'Nested offline fixture preflight evidence captured in %s\n' "$evidence_dir"
@@ -447,40 +290,40 @@ if [[ "$seed_only" -eq 1 ]]; then
 fi
 
 if [[ "$launch_app" -eq 1 ]]; then
-  adb_device logcat -c || true
-  adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/10-launch.txt"
+  cotton_adb logcat -c || true
+  cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/10-launch.txt"
   sleep 4
 fi
 
-capture_screen "10-launch"
+cotton_capture_screen "10-launch"
 
-wait_for_operator "Confirm Cotton Files root is visible and contains $folder_name."
-capture_screen "20-root-ready"
-require_xml_text "$evidence_dir/20-root-ready.xml" "Files" "Files root is not visible."
-require_xml_text "$evidence_dir/20-root-ready.xml" "$folder_name" "Parent folder is not visible in Files root."
+cotton_wait_for_operator "Confirm Cotton Files root is visible and contains $folder_name."
+cotton_capture_screen "20-root-ready"
+cotton_require_xml_text "$evidence_dir/20-root-ready.xml" "Files" "Files root is not visible."
+cotton_require_xml_text "$evidence_dir/20-root-ready.xml" "$folder_name" "Parent folder is not visible in Files root."
 
-wait_for_operator "Open $folder_name. If $nested_folder_name is missing, create it with Add files -> New folder, then leave the parent folder open."
-capture_screen "30-parent-with-nested"
-require_xml_text "$evidence_dir/30-parent-with-nested.xml" "Files / $folder_name" "Parent folder is not open."
-require_xml_text "$evidence_dir/30-parent-with-nested.xml" "Add files" "Parent folder Add files action is not visible."
-require_xml_text "$evidence_dir/30-parent-with-nested.xml" "$nested_folder_name" "Nested folder is not visible in the parent folder."
+cotton_wait_for_operator "Open $folder_name. If $nested_folder_name is missing, create it with Add files -> New folder, then leave the parent folder open."
+cotton_capture_screen "30-parent-with-nested"
+cotton_require_xml_text "$evidence_dir/30-parent-with-nested.xml" "Files / $folder_name" "Parent folder is not open."
+cotton_require_xml_text "$evidence_dir/30-parent-with-nested.xml" "Add files" "Parent folder Add files action is not visible."
+cotton_require_xml_text "$evidence_dir/30-parent-with-nested.xml" "$nested_folder_name" "Nested folder is not visible in the parent folder."
 
-wait_for_operator "Open $nested_folder_name and leave the nested folder visible."
-capture_screen "40-nested-open"
-require_xml_text "$evidence_dir/40-nested-open.xml" "Files /" "Nested folder breadcrumb is not visible."
-require_xml_text "$evidence_dir/40-nested-open.xml" "$nested_folder_name" "Nested folder is not open."
-require_xml_text "$evidence_dir/40-nested-open.xml" "Add files" "Nested folder Add files action is not visible."
+cotton_wait_for_operator "Open $nested_folder_name and leave the nested folder visible."
+cotton_capture_screen "40-nested-open"
+cotton_require_xml_text "$evidence_dir/40-nested-open.xml" "Files /" "Nested folder breadcrumb is not visible."
+cotton_require_xml_text "$evidence_dir/40-nested-open.xml" "$nested_folder_name" "Nested folder is not open."
+cotton_require_xml_text "$evidence_dir/40-nested-open.xml" "Add files" "Nested folder Add files action is not visible."
 
-wait_for_operator "Upload $nested_file_name from Android Downloads through Add files -> Upload file, then wait until it appears in the nested folder."
-capture_screen "50-nested-file-uploaded"
-require_xml_text "$evidence_dir/50-nested-file-uploaded.xml" "$nested_file_name" "Nested file is not visible after upload."
+cotton_wait_for_operator "Upload $nested_file_name from Android Downloads through Add files -> Upload file, then wait until it appears in the nested folder."
+cotton_capture_screen "50-nested-file-uploaded"
+cotton_require_xml_text "$evidence_dir/50-nested-file-uploaded.xml" "$nested_file_name" "Nested file is not visible after upload."
 
-wait_for_operator "Return to Files root so $folder_name is visible for the automated offline-cache proof."
-capture_screen "60-root-ready-for-auto"
-require_xml_text "$evidence_dir/60-root-ready-for-auto.xml" "Files" "Files root is not visible before auto proof."
-require_xml_text "$evidence_dir/60-root-ready-for-auto.xml" "$folder_name" "Parent folder is not visible before auto proof."
+cotton_wait_for_operator "Return to Files root so $folder_name is visible for the automated offline-cache proof."
+cotton_capture_screen "60-root-ready-for-auto"
+cotton_require_xml_text "$evidence_dir/60-root-ready-for-auto.xml" "Files" "Files root is not visible before auto proof."
+cotton_require_xml_text "$evidence_dir/60-root-ready-for-auto.xml" "$folder_name" "Parent folder is not visible before auto proof."
 
-capture_text "70-logcat-setup.txt" adb_device logcat -d -v time
+cotton_capture_text_best_effort "70-logcat-setup.txt" cotton_adb logcat -d -v time
 
 if [[ "$run_auto_proof" -eq 1 ]]; then
   run_auto_offline_proof

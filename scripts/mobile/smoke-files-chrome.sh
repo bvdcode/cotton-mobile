@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -40,78 +42,20 @@ sorting, search, and pull-to-refresh behavior.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --search-query)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --search-query.\n' >&2
-        exit 64
-      fi
-      search_query="$2"
-      shift 2
-      ;;
-    --preflight-only)
-      preflight_only=1
-      shift
-      ;;
-    --no-launch)
-      launch_app=0
-      shift
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+  "--search-query:search_query"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+  "--preflight-only:preflight_only:1"
+  "--no-launch:launch_app:0"
+)
+cotton_parse_arguments "$@"
 
 if [[ -z "${search_query//[[:space:]]/}" ]]; then
   printf 'Search query must not be blank.\n' >&2
@@ -136,9 +80,6 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
 write_metadata() {
   {
@@ -218,41 +159,8 @@ Search query: \`$search_query\`
 EOF
 }
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed: %q\n' "$1" >> "$evidence_dir/$name"
-  fi
-}
 
-capture_screen() {
-  local prefix="$1"
 
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
-    rm -f "$evidence_dir/$prefix.png"
-  fi
-
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    if ! adb_device pull /sdcard/cotton-window.xml "$evidence_dir/$prefix.xml" > "$evidence_dir/$prefix-pull-xml.log" 2>&1; then
-      rm -f "$evidence_dir/$prefix.xml"
-    fi
-  fi
-}
-
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if [[ ! -f "$xml_file" ]] || ! grep -Fq "$needle" "$xml_file"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 66
-  fi
-}
 
 require_xml_any_text() {
   local xml_file="$1"
@@ -277,39 +185,19 @@ require_xml_any_text() {
   exit 66
 }
 
-verify_expected_version() {
-  if [[ -n "$expected_version_code" ]] \
-    && ! grep -Fq "versionCode=$expected_version_code" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionCode does not match expected value %s.\n' "$expected_version_code" >&2
-    exit 67
-  fi
 
-  if [[ -n "$expected_version_name" ]] \
-    && ! grep -Fq "versionName=$expected_version_name" "$evidence_dir/05-package-version.txt"; then
-    printf 'Installed versionName does not match expected value %s.\n' "$expected_version_name" >&2
-    exit 67
-  fi
-}
-
-wait_for_operator() {
-  local prompt="$1"
-
-  printf '\n%s\n' "$prompt"
-  printf 'Press Enter when ready to capture evidence... '
-  read -r _
-}
 
 write_metadata
 write_checklist
 
-capture_text "00-device.txt" adb_device shell getprop ro.product.model
-capture_text "01-adb-devices.txt" adb devices
-capture_text "02-window.txt" adb_device shell dumpsys window
-capture_text "03-package-path.txt" adb_device shell pm path "$package_id"
-capture_text "04-package.txt" adb_device shell dumpsys package "$package_id"
-capture_text "05-package-version.txt" bash -lc \
+cotton_capture_text_best_effort "00-device.txt" cotton_adb shell getprop ro.product.model
+cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+cotton_capture_text_best_effort "02-window.txt" cotton_adb shell dumpsys window
+cotton_capture_text_best_effort "03-package-path.txt" cotton_adb shell pm path "$package_id"
+cotton_capture_text_best_effort "04-package.txt" cotton_adb shell dumpsys package "$package_id"
+cotton_capture_text_best_effort "05-package-version.txt" bash -lc \
   "adb -s '$serial' shell dumpsys package '$package_id' | grep -E 'versionCode|versionName|firstInstallTime|lastUpdateTime'"
-verify_expected_version
+cotton_verify_expected_version_file "$evidence_dir/05-package-version.txt"
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -321,56 +209,56 @@ if [[ "$install_debug" -eq 1 ]]; then
 fi
 
 if [[ "$launch_app" -eq 1 ]]; then
-  adb_device logcat -c || true
-  adb_device shell monkey -p "$package_id" 1 > "$evidence_dir/07-launch.txt"
+  cotton_adb logcat -c || true
+  cotton_adb shell monkey -p "$package_id" 1 > "$evidence_dir/07-launch.txt"
   sleep 3
 fi
 
-capture_screen "10-launch"
+cotton_capture_screen "10-launch"
 
 if [[ "$preflight_only" -eq 1 ]]; then
   printf 'Preflight evidence captured in %s\n' "$evidence_dir"
   exit 0
 fi
 
-wait_for_operator "Confirm Files root is visible with the search, sort, and view buttons."
-capture_screen "20-files-root-ready"
-require_xml_text "$evidence_dir/20-files-root-ready.xml" "Files" "Files root is not visible."
-require_xml_text "$evidence_dir/20-files-root-ready.xml" "Search files" "Files search action is not exposed."
-require_xml_text "$evidence_dir/20-files-root-ready.xml" "Sort files" "Files sort action is not exposed."
-require_xml_text "$evidence_dir/20-files-root-ready.xml" "Change file view" "Files view action is not exposed."
+cotton_wait_for_operator "Confirm Files root is visible with the search, sort, and view buttons."
+cotton_capture_screen "20-files-root-ready"
+cotton_require_xml_text "$evidence_dir/20-files-root-ready.xml" "Files" "Files root is not visible."
+cotton_require_xml_text "$evidence_dir/20-files-root-ready.xml" "Search files" "Files search action is not exposed."
+cotton_require_xml_text "$evidence_dir/20-files-root-ready.xml" "Sort files" "Files sort action is not exposed."
+cotton_require_xml_text "$evidence_dir/20-files-root-ready.xml" "Change file view" "Files view action is not exposed."
 
-wait_for_operator "Tap the file-view button so the View files as action sheet is visible."
-capture_screen "30-view-actions"
-require_xml_text "$evidence_dir/30-view-actions.xml" "View files as" "View action sheet did not open."
-require_xml_text "$evidence_dir/30-view-actions.xml" "List" "View action sheet did not include List."
-require_xml_text "$evidence_dir/30-view-actions.xml" "Tiles" "View action sheet did not include Tiles."
+cotton_wait_for_operator "Tap the file-view button so the View files as action sheet is visible."
+cotton_capture_screen "30-view-actions"
+cotton_require_xml_text "$evidence_dir/30-view-actions.xml" "View files as" "View action sheet did not open."
+cotton_require_xml_text "$evidence_dir/30-view-actions.xml" "List" "View action sheet did not include List."
+cotton_require_xml_text "$evidence_dir/30-view-actions.xml" "Tiles" "View action sheet did not include Tiles."
 
-wait_for_operator "Choose the opposite view mode, then wait for Files to settle."
-capture_screen "40-view-applied"
-require_xml_text "$evidence_dir/40-view-applied.xml" "Files" "Files root was lost after view-mode change."
-require_xml_text "$evidence_dir/40-view-applied.xml" "Change file view" "Files view action was lost after view-mode change."
+cotton_wait_for_operator "Choose the opposite view mode, then wait for Files to settle."
+cotton_capture_screen "40-view-applied"
+cotton_require_xml_text "$evidence_dir/40-view-applied.xml" "Files" "Files root was lost after view-mode change."
+cotton_require_xml_text "$evidence_dir/40-view-applied.xml" "Change file view" "Files view action was lost after view-mode change."
 
-wait_for_operator "Tap the sort button so the Sort files by action sheet is visible."
-capture_screen "50-sort-actions"
-require_xml_text "$evidence_dir/50-sort-actions.xml" "Sort files by" "Sort action sheet did not open."
-require_xml_text "$evidence_dir/50-sort-actions.xml" "Name" "Sort action sheet did not include Name."
-require_xml_text "$evidence_dir/50-sort-actions.xml" "Updated" "Sort action sheet did not include Updated."
-require_xml_text "$evidence_dir/50-sort-actions.xml" "Type" "Sort action sheet did not include Type."
-require_xml_text "$evidence_dir/50-sort-actions.xml" "Size" "Sort action sheet did not include Size."
+cotton_wait_for_operator "Tap the sort button so the Sort files by action sheet is visible."
+cotton_capture_screen "50-sort-actions"
+cotton_require_xml_text "$evidence_dir/50-sort-actions.xml" "Sort files by" "Sort action sheet did not open."
+cotton_require_xml_text "$evidence_dir/50-sort-actions.xml" "Name" "Sort action sheet did not include Name."
+cotton_require_xml_text "$evidence_dir/50-sort-actions.xml" "Updated" "Sort action sheet did not include Updated."
+cotton_require_xml_text "$evidence_dir/50-sort-actions.xml" "Type" "Sort action sheet did not include Type."
+cotton_require_xml_text "$evidence_dir/50-sort-actions.xml" "Size" "Sort action sheet did not include Size."
 
-wait_for_operator "Choose Updated sort, then wait for Files to settle."
-capture_screen "60-sort-updated"
-require_xml_text "$evidence_dir/60-sort-updated.xml" "Files" "Files root was lost after sort change."
+cotton_wait_for_operator "Choose Updated sort, then wait for Files to settle."
+cotton_capture_screen "60-sort-updated"
+cotton_require_xml_text "$evidence_dir/60-sort-updated.xml" "Files" "Files root was lost after sort change."
 require_xml_any_text \
   "$evidence_dir/60-sort-updated.xml" \
   "Updated sort status is not visible after sort change." \
   "Updated" \
   "Newest"
 
-wait_for_operator "Tap search, type \"$search_query\", and wait for filtering to settle."
-capture_screen "70-search-query"
-require_xml_text "$evidence_dir/70-search-query.xml" "$search_query" "Search query is not visible."
+cotton_wait_for_operator "Tap search, type \"$search_query\", and wait for filtering to settle."
+cotton_capture_screen "70-search-query"
+cotton_require_xml_text "$evidence_dir/70-search-query.xml" "$search_query" "Search query is not visible."
 require_xml_any_text \
   "$evidence_dir/70-search-query.xml" \
   "Search result state is not visible." \
@@ -378,17 +266,17 @@ require_xml_any_text \
   "matches" \
   "No matching files"
 
-wait_for_operator "Clear search with the search action or SearchBar clear affordance."
-capture_screen "80-search-cleared"
-require_xml_text "$evidence_dir/80-search-cleared.xml" "Files" "Files root was lost after clearing search."
-require_xml_text "$evidence_dir/80-search-cleared.xml" "Search files" "Search action did not return after clearing search."
+cotton_wait_for_operator "Clear search with the search action or SearchBar clear affordance."
+cotton_capture_screen "80-search-cleared"
+cotton_require_xml_text "$evidence_dir/80-search-cleared.xml" "Files" "Files root was lost after clearing search."
+cotton_require_xml_text "$evidence_dir/80-search-cleared.xml" "Search files" "Search action did not return after clearing search."
 
-wait_for_operator "Pull down from the Files root to refresh, then wait for the list to settle."
-capture_screen "90-refresh-return"
-require_xml_text "$evidence_dir/90-refresh-return.xml" "Files" "Files root was lost after refresh."
-require_xml_text "$evidence_dir/90-refresh-return.xml" "Sort files" "Files sort action was lost after refresh."
-require_xml_text "$evidence_dir/90-refresh-return.xml" "Change file view" "Files view action was lost after refresh."
+cotton_wait_for_operator "Pull down from the Files root to refresh, then wait for the list to settle."
+cotton_capture_screen "90-refresh-return"
+cotton_require_xml_text "$evidence_dir/90-refresh-return.xml" "Files" "Files root was lost after refresh."
+cotton_require_xml_text "$evidence_dir/90-refresh-return.xml" "Sort files" "Files sort action was lost after refresh."
+cotton_require_xml_text "$evidence_dir/90-refresh-return.xml" "Change file view" "Files view action was lost after refresh."
 
-capture_text "90-logcat.txt" adb_device logcat -d -v time
+cotton_capture_text_best_effort "90-logcat.txt" cotton_adb logcat -d -v time
 
 printf 'Files chrome evidence captured in %s\n' "$evidence_dir"

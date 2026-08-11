@@ -4,6 +4,8 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=android-env.sh
 source "$SCRIPT_DIR/android-env.sh"
+# shellcheck source=smoke-common.sh
+source "$SCRIPT_DIR/smoke-common.sh"
 
 package_id="$COTTON_ANDROID_PACKAGE_ID"
 serial="$COTTON_ADB_SERIAL"
@@ -39,78 +41,19 @@ if the simulated notification tap does not land on Cotton's Notifications page.
 EOF
 }
 
-while [[ $# -gt 0 ]]; do
-  case "$1" in
-    --package)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --package.\n' >&2
-        exit 64
-      fi
-      package_id="$2"
-      shift 2
-      ;;
-    --serial)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --serial.\n' >&2
-        exit 64
-      fi
-      serial="$2"
-      shift 2
-      ;;
-    --evidence-dir)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --evidence-dir.\n' >&2
-        exit 64
-      fi
-      evidence_dir="$2"
-      shift 2
-      ;;
-    --install-debug)
-      install_debug=1
-      shift
-      ;;
-    --notification-id)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --notification-id.\n' >&2
-        exit 64
-      fi
-      notification_id="$2"
-      shift 2
-      ;;
-    --event-category)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --event-category.\n' >&2
-        exit 64
-      fi
-      event_category="$2"
-      shift 2
-      ;;
-    --expected-version-code)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-code.\n' >&2
-        exit 64
-      fi
-      expected_version_code="$2"
-      shift 2
-      ;;
-    --expected-version-name)
-      if [[ $# -lt 2 ]]; then
-        printf 'Missing value for --expected-version-name.\n' >&2
-        exit 64
-      fi
-      expected_version_name="$2"
-      shift 2
-      ;;
-    --help|-h)
-      usage
-      exit 0
-      ;;
-    *)
-      printf 'Unknown argument: %s\n' "$1" >&2
-      exit 64
-      ;;
-  esac
-done
+COTTON_VALUE_OPTIONS=(
+  "--package:package_id"
+  "--serial:serial"
+  "--evidence-dir:evidence_dir"
+  "--notification-id:notification_id"
+  "--event-category:event_category"
+  "--expected-version-code:expected_version_code"
+  "--expected-version-name:expected_version_name"
+)
+COTTON_FLAG_OPTIONS=(
+  "--install-debug:install_debug:1"
+)
+cotton_parse_arguments "$@"
 
 case "$event_category" in
   SharedFile|AccessRequest|CommentMention|SecuritySession)
@@ -138,18 +81,7 @@ fi
 
 mkdir -p "$evidence_dir"
 
-adb_device() {
-  adb -s "$serial" "$@"
-}
 
-capture_text() {
-  local name="$1"
-  shift
-  if ! "$@" > "$evidence_dir/$name" 2>&1; then
-    printf 'Command failed while writing %s. See %s/%s.\n' "$name" "$evidence_dir" "$name" >&2
-    return 1
-  fi
-}
 
 write_metadata() {
   {
@@ -171,67 +103,49 @@ write_metadata() {
 
 capture_window() {
   local prefix="$1"
-  capture_text "$prefix-window.txt" adb_device shell dumpsys window
-  capture_text "$prefix-activity.txt" adb_device shell dumpsys activity top
+  cotton_capture_text "$prefix-window.txt" cotton_adb shell dumpsys window
+  cotton_capture_text "$prefix-activity.txt" cotton_adb shell dumpsys activity top
 
-  if ! adb_device exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
+  if ! cotton_adb exec-out screencap -p > "$evidence_dir/$prefix.png" 2> "$evidence_dir/$prefix-screencap.err"; then
     printf 'Could not capture screenshot. See %s/%s-screencap.err.\n' "$evidence_dir" "$prefix" >&2
   fi
 
-  if adb_device shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
-    adb_device shell cat /sdcard/cotton-window.xml > "$evidence_dir/$prefix-window.xml"
+  if cotton_adb shell uiautomator dump /sdcard/cotton-window.xml > "$evidence_dir/$prefix-uiautomator.log" 2>&1; then
+    cotton_adb shell cat /sdcard/cotton-window.xml > "$evidence_dir/$prefix-window.xml"
   else
     printf 'Could not capture UIAutomator XML. See %s/%s-uiautomator.log.\n' "$evidence_dir" "$prefix" >&2
   fi
 }
 
-xml_has_text() {
-  local xml_file="$1"
-  local needle="$2"
 
-  [[ -f "$xml_file" ]] && grep -Fq "$needle" "$xml_file"
-}
-
-require_xml_text() {
-  local xml_file="$1"
-  local needle="$2"
-  local message="$3"
-
-  if ! xml_has_text "$xml_file" "$needle"; then
-    printf '%s\n' "$message" >&2
-    printf 'Missing text: %s\n' "$needle" >&2
-    printf 'Evidence: %s\n' "$xml_file" >&2
-    exit 67
-  fi
-}
 
 require_notifications_destination() {
   local xml_file="$1"
   local state_xml="$xml_file"
   local attempt
 
-  require_xml_text "$xml_file" "Notifications" \
+  cotton_require_xml_text "$xml_file" "Notifications" \
     "Notifications page title was not found after notification launch."
 
   for attempt in 0 1 2; do
-    if xml_has_text "$state_xml" "Server push"; then
-      if xml_has_text "$state_xml" "Shared-file activity" \
-        || xml_has_text "$state_xml" "Security and sessions"; then
-        require_xml_text "$state_xml" "Shared-file activity" \
+    if cotton_xml_has_text "$state_xml" "Server push"; then
+      if cotton_xml_has_text "$state_xml" "Shared-file activity" \
+        || cotton_xml_has_text "$state_xml" "Security and sessions"; then
+        cotton_require_xml_text "$state_xml" "Shared-file activity" \
           "Server push preferences did not show shared-file activity after notification launch."
-        require_xml_text "$state_xml" "Security and sessions" \
+        cotton_require_xml_text "$state_xml" "Security and sessions" \
           "Server push preferences did not show security/session alerts after notification launch."
         return
       fi
 
-      if xml_has_text "$state_xml" "Server alerts unavailable."; then
-        require_xml_text "$state_xml" "Retry" \
+      if cotton_xml_has_text "$state_xml" "Server alerts unavailable."; then
+        cotton_require_xml_text "$state_xml" "Retry" \
           "Server push unavailable state did not expose Retry after notification launch."
         return
       fi
     fi
 
-    adb_device shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
+    cotton_adb shell input swipe 540 1700 540 650 350 >/dev/null 2>&1 || true
     sleep 1
     capture_window "05-after-launch-server-push-$attempt"
     state_xml="$evidence_dir/05-after-launch-server-push-$attempt-window.xml"
@@ -260,8 +174,8 @@ fi
 
 write_metadata
 
-capture_text "02-adb-devices.txt" adb devices
-capture_text "03-package-dumpsys.txt" adb_device shell dumpsys package "$package_id"
+cotton_capture_text "02-adb-devices.txt" adb devices
+cotton_capture_text "03-package-dumpsys.txt" cotton_adb shell dumpsys package "$package_id"
 
 version_code="$(
   sed -n 's/.*versionCode=\([0-9][0-9]*\).*/\1/p' "$evidence_dir/03-package-dumpsys.txt" | head -1
@@ -282,10 +196,10 @@ if [[ -n "$expected_version_name" && "$version_name" != "$expected_version_name"
   exit 65
 fi
 
-adb_device logcat -c >/dev/null 2>&1 || true
+cotton_adb logcat -c >/dev/null 2>&1 || true
 
-capture_text "04-notification-launch-intent.txt" \
-  adb_device shell am start \
+cotton_capture_text "04-notification-launch-intent.txt" \
+  cotton_adb shell am start \
     -n "$package_id/$component_activity" \
     --ez dev.cottoncloud.app.extra.NOTIFICATION_LAUNCH true \
     --es dev.cottoncloud.app.extra.NOTIFICATION_ID "$notification_id" \
@@ -294,7 +208,7 @@ capture_text "04-notification-launch-intent.txt" \
 sleep 5
 
 capture_window "05-after-launch"
-capture_text "06-logcat.txt" adb_device logcat -d -v threadtime
+cotton_capture_text "06-logcat.txt" cotton_adb logcat -d -v threadtime
 
 xml_path="$evidence_dir/05-after-launch-window.xml"
 if [[ ! -s "$xml_path" ]]; then

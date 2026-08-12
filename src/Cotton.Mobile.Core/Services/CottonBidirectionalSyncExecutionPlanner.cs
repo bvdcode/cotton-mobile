@@ -107,7 +107,31 @@ namespace Cotton.Mobile.Services
                 item.ContentType,
                 item.RelativePath,
                 item.PreviousRelativePath,
-                item.RemoteContentHash);
+                GetCloudToDeviceContentHash(action, item));
+        }
+
+        private static string? GetCloudToDeviceContentHash(
+            CottonCloudToDeviceSyncActionKind action,
+            CottonBidirectionalSyncPlanItem item)
+        {
+            switch (action)
+            {
+                case CottonCloudToDeviceSyncActionKind.DownloadNewFile:
+                case CottonCloudToDeviceSyncActionKind.RefreshChangedFile:
+                case CottonCloudToDeviceSyncActionKind.RenameLocalFile:
+                    return item.RemoteContentHash;
+
+                case CottonCloudToDeviceSyncActionKind.RemoveLocalOrphan:
+                    return item.LocalContentHash;
+
+                case CottonCloudToDeviceSyncActionKind.KeepExistingFile:
+                case CottonCloudToDeviceSyncActionKind.BlockedFolder:
+                case CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision:
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        nameof(action),
+                        "Cloud-to-device action cannot be created from the bidirectional execution plan.");
+            }
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateDeviceToCloudItem(

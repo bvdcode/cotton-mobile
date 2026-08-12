@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Services
             SyncRootId = syncRootId;
             FolderId = folderId;
             FolderName = folderName.Trim();
-            Items = items;
+            Items = items.ToList().AsReadOnly();
         }
 
         public Guid SyncRootId { get; }

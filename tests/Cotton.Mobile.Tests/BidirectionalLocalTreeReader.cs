@@ -6,6 +6,8 @@ namespace Cotton.Mobile.Tests
     {
         private readonly Dictionary<Guid, CottonDeviceToCloudLocalContentSnapshot> _contentByRootId = [];
 
+        public int ReadCount { get; private set; }
+
         public void SetContent(Guid rootId, CottonDeviceToCloudLocalContentSnapshot content)
         {
             _contentByRootId[rootId] = content;
@@ -16,6 +18,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)
         {
+            ReadCount++;
             return Task.FromResult(_contentByRootId[root.Id]);
         }
     }

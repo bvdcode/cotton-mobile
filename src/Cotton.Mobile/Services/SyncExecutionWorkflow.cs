@@ -128,10 +128,21 @@ namespace Cotton.Mobile.Services
                 return summary;
             }
 
-            return await _bidirectionalCoordinator.RunRootAsync(
-                instanceUri,
-                root,
-                CottonBidirectionalSyncRunOptions.AllowDestructiveDeletes);
+            CottonBidirectionalSyncExecutionPlan reviewedPlan = GetReviewedPlan(summary);
+            return await _bidirectionalCoordinator.ExecuteReviewedPlanAsync(instanceUri, root, reviewedPlan);
+        }
+
+        private static CottonBidirectionalSyncExecutionPlan GetReviewedPlan(
+            CottonBidirectionalSyncRunSummary summary)
+        {
+            if (summary.RootResults.Count != 1)
+            {
+                throw new InvalidOperationException("Single-root destructive review requires exactly one result.");
+            }
+
+            CottonBidirectionalSyncRootRunResult result = summary.RootResults[0];
+            return result.ExecutionPlan
+                ?? throw new InvalidOperationException("Destructive review result does not contain an execution plan.");
         }
     }
 }

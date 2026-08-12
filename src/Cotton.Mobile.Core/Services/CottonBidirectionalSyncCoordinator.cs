@@ -43,17 +43,7 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CancellationToken cancellationToken = default)
         {
-            return await RunAsync(instanceUri, CottonBidirectionalSyncRunOptions.Default, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<CottonBidirectionalSyncRunSummary> RunAsync(
-            Uri instanceUri,
-            CottonBidirectionalSyncRunOptions options,
-            CancellationToken cancellationToken = default)
-        {
             ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(options);
 
             IReadOnlyList<CottonSyncRootSnapshot> roots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
@@ -64,7 +54,7 @@ namespace Cotton.Mobile.Services
             foreach (CottonSyncRootSnapshot root in roots)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, options, cancellationToken)
+                results.Add(await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
                     .ConfigureAwait(false));
             }
 
@@ -76,29 +66,36 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)
         {
-            return await RunRootAsync(instanceUri, root, CottonBidirectionalSyncRunOptions.Default, cancellationToken)
-                .ConfigureAwait(false);
-        }
-
-        public async Task<CottonBidirectionalSyncRunSummary> RunRootAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonBidirectionalSyncRunOptions options,
-            CancellationToken cancellationToken = default)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-            ArgumentNullException.ThrowIfNull(root);
-            ArgumentNullException.ThrowIfNull(options);
-            if (!Uri.Equals(root.InstanceUri, instanceUri))
-            {
-                throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
-            }
+            ValidateRoot(instanceUri, root);
 
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonBidirectionalSyncRootRunResult result =
-                await RunRootCoreAsync(instanceUri, root, pausedRootIds, options, cancellationToken)
+                await RunRootCoreAsync(instanceUri, root, pausedRootIds, cancellationToken)
                     .ConfigureAwait(false);
+            return new CottonBidirectionalSyncRunSummary([result]);
+        }
+
+        public async Task<CottonBidirectionalSyncRunSummary> ExecuteReviewedPlanAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonBidirectionalSyncExecutionPlan reviewedPlan,
+            CancellationToken cancellationToken = default)
+        {
+            ValidateRoot(instanceUri, root);
+            ArgumentNullException.ThrowIfNull(reviewedPlan);
+            ValidateReviewedPlan(root, reviewedPlan);
+
+            IReadOnlySet<Guid> pausedRootIds =
+                await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            CottonBidirectionalSyncRootRunResult? skippedResult = CreateSkippedResult(root, pausedRootIds);
+            if (skippedResult is not null)
+            {
+                return new CottonBidirectionalSyncRunSummary([skippedResult]);
+            }
+
+            CottonBidirectionalSyncRootRunResult result =
+                await ExecutePlanAsync(instanceUri, root, reviewedPlan, cancellationToken).ConfigureAwait(false);
             return new CottonBidirectionalSyncRunSummary([result]);
         }
 
@@ -106,24 +103,12 @@ namespace Cotton.Mobile.Services
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             IReadOnlySet<Guid> pausedRootIds,
-            CottonBidirectionalSyncRunOptions options,
             CancellationToken cancellationToken)
         {
-            if (root.Direction != CottonSyncDirection.Bidirectional)
+            CottonBidirectionalSyncRootRunResult? skippedResult = CreateSkippedResult(root, pausedRootIds);
+            if (skippedResult is not null)
             {
-                return CottonBidirectionalSyncRootRunResult.SkippedUnsupportedDirection(root);
-            }
-
-            if (pausedRootIds.Contains(root.Id))
-            {
-                return CottonBidirectionalSyncRootRunResult.SkippedPaused(root);
-            }
-
-            if (!CottonDeviceToCloudSyncRootCapability.CanRun(root))
-            {
-                return !root.CanRunSync
-                    ? CottonBidirectionalSyncRootRunResult.SkippedNotReady(root)
-                    : CottonBidirectionalSyncRootRunResult.SkippedUnsupportedLocalRoot(root);
+                return skippedResult;
             }
 
             CottonBidirectionalSyncExecutionPlan executionPlan =
@@ -135,11 +120,20 @@ namespace Cotton.Mobile.Services
                     : CottonBidirectionalSyncRootRunResult.SkippedBlockedReviewRequired(root, executionPlan);
             }
 
-            if (executionPlan.HasDestructiveChanges && !options.AllowDestructiveChanges)
+            if (executionPlan.HasDestructiveChanges)
             {
                 return CottonBidirectionalSyncRootRunResult.SkippedDestructiveReviewRequired(root, executionPlan);
             }
 
+            return await ExecutePlanAsync(instanceUri, root, executionPlan, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task<CottonBidirectionalSyncRootRunResult> ExecutePlanAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CottonBidirectionalSyncExecutionPlan executionPlan,
+            CancellationToken cancellationToken)
+        {
             CottonCloudToDeviceSyncExecutionResult cloudToDeviceResult =
                 await _cloudToDevicePlanExecutor
                     .ExecuteAsync(instanceUri, root, executionPlan.CloudToDevicePlan, cancellationToken)
@@ -154,6 +148,56 @@ namespace Cotton.Mobile.Services
                 executionPlan,
                 cloudToDeviceResult,
                 deviceToCloudResult);
+        }
+
+        private static CottonBidirectionalSyncRootRunResult? CreateSkippedResult(
+            CottonSyncRootSnapshot root,
+            IReadOnlySet<Guid> pausedRootIds)
+        {
+            if (root.Direction != CottonSyncDirection.Bidirectional)
+            {
+                return CottonBidirectionalSyncRootRunResult.SkippedUnsupportedDirection(root);
+            }
+
+            if (pausedRootIds.Contains(root.Id))
+            {
+                return CottonBidirectionalSyncRootRunResult.SkippedPaused(root);
+            }
+
+            if (CottonDeviceToCloudSyncRootCapability.CanRun(root))
+            {
+                return null;
+            }
+
+            return !root.CanRunSync
+                ? CottonBidirectionalSyncRootRunResult.SkippedNotReady(root)
+                : CottonBidirectionalSyncRootRunResult.SkippedUnsupportedLocalRoot(root);
+        }
+
+        private static void ValidateRoot(Uri instanceUri, CottonSyncRootSnapshot root)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(root);
+            if (!Uri.Equals(root.InstanceUri, instanceUri))
+            {
+                throw new ArgumentException("Sync root belongs to a different instance.", nameof(root));
+            }
+        }
+
+        private static void ValidateReviewedPlan(
+            CottonSyncRootSnapshot root,
+            CottonBidirectionalSyncExecutionPlan reviewedPlan)
+        {
+            if (reviewedPlan.PreflightPlan.SyncRootId != root.Id
+                || reviewedPlan.PreflightPlan.FolderId != root.CloudFolder.FolderId)
+            {
+                throw new ArgumentException("Reviewed plan belongs to a different sync root.", nameof(reviewedPlan));
+            }
+
+            if (!reviewedPlan.CanExecute || !reviewedPlan.HasDestructiveChanges)
+            {
+                throw new ArgumentException("Reviewed plan must contain executable destructive changes.", nameof(reviewedPlan));
+            }
         }
 
         private async Task<CottonBidirectionalSyncExecutionPlan> CreateExecutionPlanAsync(

@@ -70,7 +70,7 @@ namespace Cotton.Mobile.Services
                 manifestItem.SizeBytes,
                 manifestItem.ContentType,
                 localSourceId: null,
-                localContentHash: null,
+                manifestItem.ContentHash,
                 remoteContentHash);
         }
 

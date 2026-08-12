@@ -140,7 +140,8 @@ namespace Cotton.Mobile.Tests
                     localUpdatedAtUtc: null,
                     remoteUpdatedAtUtc: null,
                     sizeBytes: 10,
-                    contentType: "text/plain"),
+                    contentType: "text/plain",
+                    localContentHash: TestContentHashes.First),
                 CreateItem(
                     CottonBidirectionalSyncActionKind.DeleteRemoteFile,
                     "device-deleted.txt",
@@ -160,6 +161,7 @@ namespace Cotton.Mobile.Tests
             CottonCloudToDeviceSyncPlanItem cloudItem = Assert.Single(executionPlan.CloudToDevicePlan.Items);
             CottonDeviceToCloudSyncPlanItem deviceItem = Assert.Single(executionPlan.DeviceToCloudPlan.Items);
             Assert.Equal(CottonCloudToDeviceSyncActionKind.RemoveLocalOrphan, cloudItem.Action);
+            Assert.Equal(TestContentHashes.First, cloudItem.ContentHash);
             Assert.Equal(CottonDeviceToCloudSyncActionKind.DeleteRemoteFile, deviceItem.Action);
             Assert.Equal(NotesFileId, deviceItem.CloudItemId);
             Assert.Equal("\"etag-notes\"", deviceItem.ExpectedRemoteETag);
@@ -187,7 +189,9 @@ namespace Cotton.Mobile.Tests
             string? contentType,
             CottonFileBrowserEntryType targetType = CottonFileBrowserEntryType.File,
             string? previousRelativePath = null,
-            string? localSourceId = null)
+            string? localSourceId = null,
+            string? localContentHash = null,
+            string? remoteContentHash = null)
         {
             return new CottonBidirectionalSyncPlanItem(
                 action,
@@ -201,7 +205,9 @@ namespace Cotton.Mobile.Tests
                 remoteUpdatedAtUtc,
                 sizeBytes,
                 contentType,
-                localSourceId);
+                localSourceId,
+                localContentHash,
+                remoteContentHash);
         }
     }
 }

@@ -146,7 +146,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_executes_destructive_delete_when_explicitly_allowed()
+        public async Task Execute_reviewed_plan_does_not_rebuild_destructive_plan()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             CottonFileBrowserEntry oldFile = CreateFile(OldFileId, "old.txt", "\"etag-old\"");
@@ -154,16 +154,25 @@ namespace Cotton.Mobile.Tests
             _localTreeReader.SetContent(root.Id, CreateLocalContent());
             _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root, oldFile));
 
-            CottonBidirectionalSyncRunSummary summary = await _coordinator.RunRootAsync(
-                InstanceUri,
-                root,
-                CottonBidirectionalSyncRunOptions.AllowDestructiveDeletes);
+            CottonBidirectionalSyncRunSummary reviewSummary =
+                await _coordinator.RunRootAsync(InstanceUri, root);
+            CottonBidirectionalSyncExecutionPlan reviewedPlan = Assert.Single(reviewSummary.RootResults).ExecutionPlan!;
+
+            _localTreeReader.SetContent(
+                root.Id,
+                CreateLocalContent(CreateLocalFile("new.txt", "new.txt", "document:new")));
+            _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
+
+            CottonBidirectionalSyncRunSummary summary =
+                await _coordinator.ExecuteReviewedPlanAsync(InstanceUri, root, reviewedPlan);
 
             Assert.Equal(CottonBidirectionalSyncRootRunStatus.Completed, Assert.Single(summary.RootResults).Status);
             Assert.Equal(1, summary.DeletedRemoteFileCount);
             Assert.False(summary.NeedsDestructiveReview);
             Assert.Equal([OldFileId], _deviceToCloudFileOperator.DeletedFileIds);
             Assert.Empty(await _manifestStore.LoadAsync(InstanceUri, root));
+            Assert.Equal(1, _localTreeReader.ReadCount);
+            Assert.Equal(1, _remoteFolderContentSource.LoadCount);
         }
 
         [Fact]

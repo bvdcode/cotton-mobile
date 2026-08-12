@@ -109,6 +109,25 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void Remote_deletion_carries_reviewed_local_content_hash()
+        {
+            CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
+            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
+                CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 42, updatedAtUtc: SyncedAt));
+
+            CottonBidirectionalSyncPlanSnapshot plan = CottonBidirectionalSyncPlanner.Create(
+                CreateRoot(),
+                local,
+                CreateRemoteContent(),
+                [manifest]);
+
+            CottonBidirectionalSyncPlanItem item = Assert.Single(plan.Items);
+            Assert.Equal(CottonBidirectionalSyncActionKind.RemoveLocalFile, item.Action);
+            Assert.Equal(manifest.ContentHash, item.LocalContentHash);
+            Assert.True(item.IsDestructive);
+        }
+
+        [Fact]
         public void Remote_recreated_same_path_refreshes_unchanged_local_file()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);

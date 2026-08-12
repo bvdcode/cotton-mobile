@@ -6,6 +6,8 @@ namespace Cotton.Mobile.Tests
     {
         private readonly Dictionary<Guid, CottonFolderContent> _contentByFolderId = [];
 
+        public int LoadCount { get; private set; }
+
         public void SetContent(Guid folderId, CottonFolderContent content)
         {
             _contentByFolderId[folderId] = content;
@@ -16,6 +18,7 @@ namespace Cotton.Mobile.Tests
             CottonFolderHandle folder,
             CancellationToken cancellationToken = default)
         {
+            LoadCount++;
             return Task.FromResult(_contentByFolderId[folder.Id]);
         }
     }

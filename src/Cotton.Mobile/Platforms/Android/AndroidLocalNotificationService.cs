@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Platforms.Android
                 CottonNotificationDto latest = deliveryPlan.Notifications[0];
                 string message = AppResources.CreateNotificationSummary(
                     latest.Title,
-                    deliveryPlan.UnseenCount - 1);
+                    deliveryPlan.UnreadCount - 1);
                 manager.Notify(
                     AndroidNotificationConstants.SummaryNotificationId,
                     BuildNotification(

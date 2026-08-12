@@ -5,16 +5,24 @@ namespace Cotton.Mobile.Services
 {
     public class CottonNotificationCursor
     {
-        public CottonNotificationCursor(Guid? lastNotificationId, int totalCount)
+        public CottonNotificationCursor(DateTime createdAt, Guid notificationId)
         {
-            ArgumentOutOfRangeException.ThrowIfNegative(totalCount);
+            if (createdAt.Kind != DateTimeKind.Utc)
+            {
+                throw new ArgumentException("Notification cursor timestamp must be UTC.", nameof(createdAt));
+            }
 
-            LastNotificationId = lastNotificationId;
-            TotalCount = totalCount;
+            if (notificationId == Guid.Empty)
+            {
+                throw new ArgumentException("Notification cursor id is required.", nameof(notificationId));
+            }
+
+            CreatedAt = createdAt;
+            NotificationId = notificationId;
         }
 
-        public Guid? LastNotificationId { get; }
+        public DateTime CreatedAt { get; }
 
-        public int TotalCount { get; }
+        public Guid NotificationId { get; }
     }
 }

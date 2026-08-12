@@ -3,10 +3,11 @@
 
 namespace Cotton.Mobile.Services
 {
-    public interface ICottonNotificationPageProvider
+    public interface ICottonNotificationBatchProvider
     {
-        Task<CottonNotificationPage?> GetLatestAsync(
-            int pageSize,
+        Task<CottonNotificationBatch?> GetAsync(
+            CottonNotificationCursor? cursor,
+            int detailLimit,
             CancellationToken cancellationToken = default);
     }
 }

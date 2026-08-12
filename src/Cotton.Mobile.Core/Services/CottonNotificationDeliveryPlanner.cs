@@ -24,76 +24,28 @@ namespace Cotton.Mobile.Services
         }
 
         public CottonNotificationDeliveryPlan Create(
-            IReadOnlyList<CottonNotificationDto> newestPage,
-            int totalCount,
-            CottonNotificationCursor? cursor)
+            CottonNotificationBatch batch)
         {
-            ArgumentNullException.ThrowIfNull(newestPage);
-            ArgumentOutOfRangeException.ThrowIfNegative(totalCount);
+            ArgumentNullException.ThrowIfNull(batch);
 
-            if (newestPage.Count > totalCount)
+            if (batch.UnreadCount == 0)
             {
-                throw new ArgumentException(
-                    "The notification page cannot contain more items than the server total.",
-                    nameof(newestPage));
+                return new CottonNotificationDeliveryPlan([], 0, batch.NextCursor);
             }
 
-            Guid? newestNotificationId = newestPage.Count == 0
-                ? null
-                : newestPage[0].Id;
-            CottonNotificationCursor nextCursor = new(newestNotificationId, totalCount);
-            int unseenCount = ResolveUnseenCount(newestPage, totalCount, cursor);
-            if (unseenCount == 0 || newestPage.Count == 0)
+            if (batch.UnreadCount <= _maximumIndividualNotifications
+                && batch.UnreadNotifications.Count == batch.UnreadCount)
             {
-                return new CottonNotificationDeliveryPlan([], 0, nextCursor);
+                return new CottonNotificationDeliveryPlan(
+                    batch.UnreadNotifications,
+                    batch.UnreadCount,
+                    batch.NextCursor);
             }
 
-            int availableDetails = Math.Min(unseenCount, newestPage.Count);
-            if (unseenCount <= _maximumIndividualNotifications
-                && availableDetails == unseenCount)
-            {
-                CottonNotificationDto[] notifications = [.. newestPage.Take(unseenCount)];
-                return new CottonNotificationDeliveryPlan(notifications, unseenCount, nextCursor);
-            }
-
-            return new CottonNotificationDeliveryPlan([newestPage[0]], unseenCount, nextCursor);
-        }
-
-        private static int ResolveUnseenCount(
-            IReadOnlyList<CottonNotificationDto> newestPage,
-            int totalCount,
-            CottonNotificationCursor? cursor)
-        {
-            if (cursor is null)
-            {
-                return totalCount;
-            }
-
-            if (cursor.LastNotificationId.HasValue)
-            {
-                int cursorIndex = FindNotificationIndex(newestPage, cursor.LastNotificationId.Value);
-                if (cursorIndex >= 0)
-                {
-                    return cursorIndex;
-                }
-            }
-
-            return Math.Max(0, totalCount - cursor.TotalCount);
-        }
-
-        private static int FindNotificationIndex(
-            IReadOnlyList<CottonNotificationDto> notifications,
-            Guid notificationId)
-        {
-            for (int index = 0; index < notifications.Count; index++)
-            {
-                if (notifications[index].Id == notificationId)
-                {
-                    return index;
-                }
-            }
-
-            return -1;
+            return new CottonNotificationDeliveryPlan(
+                [batch.UnreadNotifications[0]],
+                batch.UnreadCount,
+                batch.NextCursor);
         }
     }
 }

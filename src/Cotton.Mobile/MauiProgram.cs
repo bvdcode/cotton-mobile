@@ -84,7 +84,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
             services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
             services.AddSingleton<ICottonNotificationCursorStore, PreferencesCottonNotificationCursorStore>();
-            services.AddSingleton<ICottonNotificationPageProvider, CottonSdkNotificationPageProvider>();
+            services.AddSingleton<ICottonNotificationBatchProvider, CottonSdkNotificationBatchProvider>();
             services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
             services.AddSingleton<ICottonAppCodeAuthorizationService, CottonAppCodeAuthorizationService>();
             services.AddSingleton<ICottonSessionService, CottonSessionService>();

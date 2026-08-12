@@ -4,18 +4,18 @@
 namespace Cotton.Mobile.Services
 {
     public class CottonNotificationPollingService(
-        ICottonNotificationPageProvider pageProvider,
+        ICottonNotificationBatchProvider batchProvider,
         ICottonNotificationCursorStore cursorStore,
         CottonNotificationDeliveryPlanner deliveryPlanner,
         ICottonLocalNotificationService localNotificationService) :
         ICottonNotificationPollingService,
         IDisposable
     {
-        private const int PageSize = 50;
+        private const int DetailLimit = 50;
 
         private readonly SemaphoreSlim _gate = new(1, 1);
-        private readonly ICottonNotificationPageProvider _pageProvider =
-            pageProvider ?? throw new ArgumentNullException(nameof(pageProvider));
+        private readonly ICottonNotificationBatchProvider _batchProvider =
+            batchProvider ?? throw new ArgumentNullException(nameof(batchProvider));
         private readonly ICottonNotificationCursorStore _cursorStore =
             cursorStore ?? throw new ArgumentNullException(nameof(cursorStore));
         private readonly CottonNotificationDeliveryPlanner _deliveryPlanner =
@@ -28,23 +28,20 @@ namespace Cotton.Mobile.Services
             await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
-                CottonNotificationPage? page = await _pageProvider
-                    .GetLatestAsync(PageSize, cancellationToken)
+                CottonNotificationCursor? cursor = await _cursorStore
+                    .GetAsync(cancellationToken)
                     .ConfigureAwait(false);
-                if (page is null)
+                CottonNotificationBatch? batch = await _batchProvider
+                    .GetAsync(cursor, DetailLimit, cancellationToken)
+                    .ConfigureAwait(false);
+                if (batch is null)
                 {
                     return;
                 }
 
-                CottonNotificationCursor? cursor = await _cursorStore
-                    .GetAsync(cancellationToken)
-                    .ConfigureAwait(false);
-                CottonNotificationDeliveryPlan deliveryPlan = _deliveryPlanner.Create(
-                    page.Notifications,
-                    page.TotalCount,
-                    cursor);
+                CottonNotificationDeliveryPlan deliveryPlan = _deliveryPlanner.Create(batch);
 
-                if (deliveryPlan.UnseenCount == 0)
+                if (deliveryPlan.UnreadCount == 0)
                 {
                     await SaveCursorAsync(deliveryPlan, cancellationToken).ConfigureAwait(false);
                     return;
@@ -74,7 +71,9 @@ namespace Cotton.Mobile.Services
             CottonNotificationDeliveryPlan deliveryPlan,
             CancellationToken cancellationToken)
         {
-            return _cursorStore.SaveAsync(deliveryPlan.NextCursor, cancellationToken);
+            return deliveryPlan.NextCursor is null
+                ? Task.CompletedTask
+                : _cursorStore.SaveAsync(deliveryPlan.NextCursor, cancellationToken);
         }
     }
 }

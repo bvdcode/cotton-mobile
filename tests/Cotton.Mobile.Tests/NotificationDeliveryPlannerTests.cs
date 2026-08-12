@@ -9,88 +9,77 @@ namespace Cotton.Mobile.Tests
 {
     public class NotificationDeliveryPlannerTests
     {
+        private static readonly DateTime CursorCreatedAt =
+            new(2026, 8, 12, 12, 0, 0, DateTimeKind.Utc);
+
         private readonly CottonNotificationDeliveryPlanner _planner = new();
 
         [Fact]
-        public void CreateUsesSummaryForLargeInitialBacklog()
+        public void CreateUsesSummaryForLargeUnreadBacklog()
         {
             CottonNotificationDto newest = CreateNotification();
+            CottonNotificationCursor nextCursor = CreateCursor();
+            CottonNotificationBatch batch = new([newest], 1825, nextCursor);
 
-            CottonNotificationDeliveryPlan plan = _planner.Create([newest], 1825, cursor: null);
+            CottonNotificationDeliveryPlan plan = _planner.Create(batch);
 
             Assert.True(plan.IsSummary);
-            Assert.Equal(1825, plan.UnseenCount);
+            Assert.Equal(1825, plan.UnreadCount);
             Assert.Same(newest, Assert.Single(plan.Notifications));
-            Assert.Equal(newest.Id, plan.NextCursor.LastNotificationId);
-            Assert.Equal(1825, plan.NextCursor.TotalCount);
+            Assert.Same(nextCursor, plan.NextCursor);
         }
 
         [Fact]
-        public void CreateReturnsEachNewNotificationWithinIndividualLimit()
+        public void CreateReturnsEachUnreadNotificationWithinIndividualLimit()
         {
-            CottonNotificationDto secondNew = CreateNotification();
             CottonNotificationDto newest = CreateNotification();
-            CottonNotificationDto previous = CreateNotification();
-            CottonNotificationCursor cursor = new(previous.Id, 10);
+            CottonNotificationDto second = CreateNotification();
+            CottonNotificationBatch batch = new([newest, second], 2, CreateCursor());
 
-            CottonNotificationDeliveryPlan plan = _planner.Create(
-                [newest, secondNew, previous],
-                12,
-                cursor);
+            CottonNotificationDeliveryPlan plan = _planner.Create(batch);
 
             Assert.False(plan.IsSummary);
-            Assert.Equal(2, plan.UnseenCount);
-            Assert.Equal([newest, secondNew], plan.Notifications);
+            Assert.Equal(2, plan.UnreadCount);
+            Assert.Equal([newest, second], plan.Notifications);
         }
 
         [Fact]
-        public void CreateUsesServerCountWhenCursorIsOutsideNewestPage()
+        public void CreateUsesSummaryWhenServerCapsUnreadDetails()
         {
             CottonNotificationDto newest = CreateNotification();
-            CottonNotificationCursor cursor = new(Guid.NewGuid(), 1);
+            CottonNotificationDto second = CreateNotification();
+            CottonNotificationBatch batch = new([newest, second], 3, CreateCursor());
 
-            CottonNotificationDeliveryPlan plan = _planner.Create([newest], 1826, cursor);
+            CottonNotificationDeliveryPlan plan = _planner.Create(batch);
 
             Assert.True(plan.IsSummary);
-            Assert.Equal(1825, plan.UnseenCount);
+            Assert.Equal(3, plan.UnreadCount);
             Assert.Same(newest, Assert.Single(plan.Notifications));
         }
 
         [Fact]
-        public void CreateDoesNotRepeatCurrentCursor()
+        public void CreateAdvancesHighWatermarkWithoutUnreadNotifications()
         {
-            CottonNotificationDto newest = CreateNotification();
-            CottonNotificationCursor cursor = new(newest.Id, 8);
+            CottonNotificationCursor nextCursor = CreateCursor();
+            CottonNotificationBatch batch = new([], 0, nextCursor);
 
-            CottonNotificationDeliveryPlan plan = _planner.Create([newest], 8, cursor);
+            CottonNotificationDeliveryPlan plan = _planner.Create(batch);
 
-            Assert.Equal(0, plan.UnseenCount);
+            Assert.Equal(0, plan.UnreadCount);
             Assert.Empty(plan.Notifications);
+            Assert.Same(nextCursor, plan.NextCursor);
         }
 
         [Fact]
-        public void CreateRebaselinesWithoutRepeatingWhenServerTotalDecreases()
+        public void BatchRejectsUnreadCountWithoutNotificationDetails()
         {
-            CottonNotificationDto newest = CreateNotification();
-            CottonNotificationCursor cursor = new(Guid.NewGuid(), 8);
-
-            CottonNotificationDeliveryPlan plan = _planner.Create([newest], 7, cursor);
-
-            Assert.Equal(0, plan.UnseenCount);
-            Assert.Empty(plan.Notifications);
-            Assert.Equal(newest.Id, plan.NextCursor.LastNotificationId);
-            Assert.Equal(7, plan.NextCursor.TotalCount);
+            Assert.Throws<ArgumentException>(() =>
+                new CottonNotificationBatch([], 1, CreateCursor()));
         }
 
-        [Fact]
-        public void CreateTracksAnEmptyNotificationCollection()
+        private static CottonNotificationCursor CreateCursor()
         {
-            CottonNotificationDeliveryPlan plan = _planner.Create([], 0, cursor: null);
-
-            Assert.Equal(0, plan.UnseenCount);
-            Assert.Empty(plan.Notifications);
-            Assert.Null(plan.NextCursor.LastNotificationId);
-            Assert.Equal(0, plan.NextCursor.TotalCount);
+            return new CottonNotificationCursor(CursorCreatedAt, Guid.NewGuid());
         }
 
         private static CottonNotificationDto CreateNotification()

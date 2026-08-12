@@ -5,41 +5,46 @@ using Cotton.Sdk.Notifications;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonNotificationDeliveryPlan
+    public class CottonNotificationBatch
     {
-        public CottonNotificationDeliveryPlan(
-            IReadOnlyList<CottonNotificationDto> notifications,
+        public CottonNotificationBatch(
+            IReadOnlyList<CottonNotificationDto> unreadNotifications,
             int unreadCount,
             CottonNotificationCursor? nextCursor)
         {
-            ArgumentNullException.ThrowIfNull(notifications);
+            ArgumentNullException.ThrowIfNull(unreadNotifications);
             ArgumentOutOfRangeException.ThrowIfNegative(unreadCount);
 
-            if (notifications.Count > unreadCount)
+            if (unreadNotifications.Count > unreadCount)
             {
                 throw new ArgumentException(
                     "Notification details cannot exceed the unread notification count.",
-                    nameof(notifications));
+                    nameof(unreadNotifications));
+            }
+
+            if (unreadCount > 0 && unreadNotifications.Count == 0)
+            {
+                throw new ArgumentException(
+                    "A non-empty unread batch requires at least one notification detail.",
+                    nameof(unreadNotifications));
             }
 
             if (unreadCount > 0 && nextCursor is null)
             {
                 throw new ArgumentException(
-                    "A notification delivery requires a next cursor.",
+                    "A non-empty unread batch requires a next cursor.",
                     nameof(nextCursor));
             }
 
-            Notifications = notifications;
+            UnreadNotifications = unreadNotifications;
             UnreadCount = unreadCount;
             NextCursor = nextCursor;
         }
 
-        public IReadOnlyList<CottonNotificationDto> Notifications { get; }
+        public IReadOnlyList<CottonNotificationDto> UnreadNotifications { get; }
 
         public int UnreadCount { get; }
 
         public CottonNotificationCursor? NextCursor { get; }
-
-        public bool IsSummary => UnreadCount > Notifications.Count;
     }
 }

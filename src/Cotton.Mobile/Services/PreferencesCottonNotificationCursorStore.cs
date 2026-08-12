@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Storage;
 
@@ -8,9 +9,10 @@ namespace Cotton.Mobile.Services
 {
     public class PreferencesCottonNotificationCursorStore : ICottonNotificationCursorStore
     {
-        private const string InitializedKey = "Cotton.Mobile.Notifications.Cursor.Initialized";
-        private const string NotificationIdKey = "Cotton.Mobile.Notifications.Cursor.NotificationId";
-        private const string TotalCountKey = "Cotton.Mobile.Notifications.Cursor.TotalCount";
+        private const string CursorKey = "Cotton.Mobile.Notifications.Cursor.V2";
+
+        private static readonly JsonSerializerOptions SerializerOptions =
+            new(JsonSerializerDefaults.Web);
 
         private readonly IPreferences _preferences;
         private readonly ILogger<PreferencesCottonNotificationCursorStore> _logger;
@@ -32,26 +34,21 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                if (!_preferences.Get(InitializedKey, false))
+                string value = _preferences.Get(CursorKey, string.Empty);
+                if (string.IsNullOrEmpty(value))
                 {
                     return Task.FromResult<CottonNotificationCursor?>(null);
                 }
 
-                int totalCount = _preferences.Get(TotalCountKey, -1);
-                string notificationIdValue = _preferences.Get(NotificationIdKey, string.Empty);
-                if (totalCount < 0 || !TryParseNotificationId(notificationIdValue, out Guid? notificationId))
-                {
-                    ClearInvalidCursorBestEffort();
-                    return Task.FromResult<CottonNotificationCursor?>(null);
-                }
-
-                return Task.FromResult<CottonNotificationCursor?>(
-                    new CottonNotificationCursor(notificationId, totalCount));
+                CottonNotificationCursor cursor = JsonSerializer
+                    .Deserialize<CottonNotificationCursor>(value, SerializerOptions)
+                    ?? throw new InvalidDataException("The Cotton notification cursor is empty.");
+                return Task.FromResult<CottonNotificationCursor?>(cursor);
             }
             catch (Exception exception)
             {
                 CottonLog.Warning(_logger, "Failed to read the Cotton notification cursor.", exception);
-                return Task.FromResult<CottonNotificationCursor?>(null);
+                throw;
             }
         }
 
@@ -64,12 +61,8 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                _preferences.Set(InitializedKey, false);
-                _preferences.Set(
-                    NotificationIdKey,
-                    cursor.LastNotificationId?.ToString("D") ?? string.Empty);
-                _preferences.Set(TotalCountKey, cursor.TotalCount);
-                _preferences.Set(InitializedKey, true);
+                string value = JsonSerializer.Serialize(cursor, SerializerOptions);
+                _preferences.Set(CursorKey, value);
             }
             catch (Exception exception)
             {
@@ -86,7 +79,7 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                RemoveCursor();
+                _preferences.Remove(CursorKey);
             }
             catch (Exception exception)
             {
@@ -95,43 +88,6 @@ namespace Cotton.Mobile.Services
             }
 
             return Task.CompletedTask;
-        }
-
-        private static bool TryParseNotificationId(string value, out Guid? notificationId)
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                notificationId = null;
-                return true;
-            }
-
-            if (Guid.TryParseExact(value, "D", out Guid parsedNotificationId))
-            {
-                notificationId = parsedNotificationId;
-                return true;
-            }
-
-            notificationId = null;
-            return false;
-        }
-
-        private void ClearInvalidCursorBestEffort()
-        {
-            try
-            {
-                RemoveCursor();
-            }
-            catch (Exception exception)
-            {
-                CottonLog.Warning(_logger, "Failed to clear an invalid Cotton notification cursor.", exception);
-            }
-        }
-
-        private void RemoveCursor()
-        {
-            _preferences.Remove(InitializedKey);
-            _preferences.Remove(NotificationIdKey);
-            _preferences.Remove(TotalCountKey);
         }
     }
 }

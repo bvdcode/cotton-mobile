@@ -2,7 +2,6 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.Resources.Localization;
-using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Devices;
 
@@ -12,101 +11,70 @@ namespace Cotton.Mobile.Services
     {
         private const string DebugApplicationIdSuffix = ".debug";
         private const string ReleaseApplicationId = "dev.cottoncloud.app";
-        private const string UnknownApplicationVersion = "unknown";
-        private const string UserAgentFallbackProduct = "Cotton-Mobile";
 
         private readonly CottonMobileOptions _options;
-        private readonly ILogger<CottonMobileApplicationMetadata> _logger;
 
-        public CottonMobileApplicationMetadata(
-            CottonMobileOptions options,
-            ILogger<CottonMobileApplicationMetadata> logger)
+        public CottonMobileApplicationMetadata(CottonMobileOptions options)
         {
             ArgumentNullException.ThrowIfNull(options);
-            ArgumentNullException.ThrowIfNull(logger);
 
             _options = options;
-            _logger = logger;
         }
 
         public string ApplicationName => _options.ApplicationName;
 
-        public string ApplicationVersion => ReadMetadata(
-            "application version",
-            () => AppInfo.Current.VersionString,
-            UnknownApplicationVersion);
+        public string ApplicationVersion => RequireMetadata(
+            AppInfo.Current.VersionString,
+            "Application version");
 
-        public string ApplicationBuild => ReadMetadata(
-            "application build",
-            () => AppInfo.Current.BuildString,
-            string.Empty);
+        public string ApplicationBuild => RequireMetadata(
+            AppInfo.Current.BuildString,
+            "Application build");
 
-        public string PackageName => ReadMetadata(
-            "package name",
-            () => AppInfo.Current.PackageName,
-            string.Empty);
+        public string PackageName => RequireMetadata(
+            AppInfo.Current.PackageName,
+            "Package name");
 
         public string InstallChannel => ResolveInstallChannel(PackageName);
 
-        public string DeviceName => ReadMetadata("device name", CreateDeviceName, AppResources.UnknownText);
+        public string DeviceName => RequireMetadata(DeviceInfo.Current.Name, "Device name");
 
-        public string OperatingSystem => ReadMetadata(
-            "operating system",
-            () => $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}",
-            AppResources.UnknownText);
+        public string OperatingSystem => RequireMetadata(
+            $"{DeviceInfo.Current.Platform} {DeviceInfo.Current.VersionString}",
+            "Operating system");
 
-        public string ScreenDetails => ReadMetadata(
-            "screen details",
-            () => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo),
-            AppResources.UnknownText);
+        public string ScreenDetails => CreateScreenDetails(DeviceDisplay.Current.MainDisplayInfo);
 
         public string UserAgent =>
-            $"{CreateUserAgentToken(ApplicationName, UserAgentFallbackProduct)}/{CreateUserAgentToken(ApplicationVersion, UnknownApplicationVersion)}";
+            $"{CreateUserAgentToken(ApplicationName)}/{CreateUserAgentToken(ApplicationVersion)}";
 
-        private string ReadMetadata(string name, Func<string> read, string fallback)
+        private static string RequireMetadata(string value, string name)
         {
-            try
+            if (string.IsNullOrWhiteSpace(value))
             {
-                string value = read();
-                return string.IsNullOrWhiteSpace(value) ? fallback : value.Trim();
-            }
-            catch (Exception exception)
-            {
-                CottonLog.DebugWithContext(
-                    _logger,
-                    "Failed to read Cotton mobile application metadata.",
-                    name,
-                    exception);
-                return fallback;
-            }
-        }
-
-        private static string CreateDeviceName()
-        {
-            string deviceName = DeviceInfo.Current.Name;
-            if (!string.IsNullOrWhiteSpace(deviceName))
-            {
-                return deviceName;
+                throw new InvalidOperationException($"{name} is unavailable.");
             }
 
-            return $"{DeviceInfo.Current.Manufacturer} {DeviceInfo.Current.Model}";
+            return value.Trim();
         }
 
         private static string CreateScreenDetails(DisplayInfo displayInfo)
         {
-            double density = displayInfo.Density <= 0 ? 1 : displayInfo.Density;
+            if (displayInfo.Density <= 0)
+            {
+                throw new InvalidOperationException("Display density must be positive.");
+            }
+
+            double density = displayInfo.Density;
             double widthDp = displayInfo.Width / density;
             double heightDp = displayInfo.Height / density;
             return FormattableString.Invariant(
                 $"{displayInfo.Width:0}x{displayInfo.Height:0}px · {widthDp:0}x{heightDp:0}dp · {density:0.##}x · {displayInfo.Orientation}");
         }
 
-        private static string CreateUserAgentToken(string value, string fallback)
+        private static string CreateUserAgentToken(string value)
         {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return fallback;
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(value);
 
             char[] buffer = new char[value.Length];
             for (int index = 0; index < value.Length; index++)
@@ -116,7 +84,9 @@ namespace Cotton.Mobile.Services
             }
 
             string token = new string(buffer).Trim('-');
-            return string.IsNullOrWhiteSpace(token) ? fallback : token;
+            return string.IsNullOrWhiteSpace(token)
+                ? throw new InvalidOperationException("Application metadata cannot form an HTTP product token.")
+                : token;
         }
 
         private static bool IsHttpTokenCharacter(char character)
@@ -143,11 +113,6 @@ namespace Cotton.Mobile.Services
 
         private static string ResolveInstallChannel(string packageName)
         {
-            if (string.IsNullOrWhiteSpace(packageName))
-            {
-                return AppResources.UnknownText;
-            }
-
             if (packageName.EndsWith(DebugApplicationIdSuffix, StringComparison.OrdinalIgnoreCase))
             {
                 return AppResources.DebugInstallChannel;

@@ -5,14 +5,20 @@
 using Android.App;
 using Android.Content;
 using Cotton.Mobile.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Platforms.Android
 {
-    public class AndroidDocumentTreeActivityResultBridge : IAndroidDocumentTreeActivityResultBridge, IDisposable
+    public class AndroidDocumentTreeActivityResultBridge(
+        ILogger<AndroidDocumentTreeActivityResultBridge> logger) :
+        IAndroidDocumentTreeActivityResultBridge,
+        IDisposable
     {
         private const int RequestCode = 61029;
 
         private readonly Lock _syncRoot = new();
+        private readonly ILogger<AndroidDocumentTreeActivityResultBridge> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
         private PendingDocumentTreePick? _pendingPick;
 
         public Task<Intent?> StartOpenDocumentTreeAsync(
@@ -41,10 +47,11 @@ namespace Cotton.Mobile.Platforms.Android
             {
                 activity.StartActivityForResult(intent, RequestCode);
             }
-            catch (Exception)
+            catch (Exception exception)
             {
                 PendingDocumentTreePick? pendingPick = ClearPending(completion);
                 pendingPick?.Dispose();
+                CottonLog.Error(_logger, "Failed to start the Android document-tree picker.", exception);
                 throw;
             }
 

@@ -13,21 +13,14 @@ namespace Cotton.Mobile.Services
         private const int TruncatedFileNameHashLength = 12;
         private const int MaxSafeFileExtensionLength = 24;
         private const string DefaultDownloadFileName = "download";
-        private const string FolderContentCacheDirectoryName = "CottonFolderListings";
-        private const string TransferMetadataDirectoryName = "CottonTransfers";
-        private const string CameraBackupMetadataDirectoryName = "CottonCameraBackup";
         private const string OfflineFileMetadataDirectoryName = "CottonOfflineFiles";
-        private const string RecentFileMetadataDirectoryName = "CottonRecentFiles";
         private const string SyncedFileManifestDirectoryName = "CottonSyncedFiles";
         private const string UploadReceiptDirectoryName = "CottonUploadReceipts";
         private const string SyncRootMetadataDirectoryName = "CottonSyncRoots";
-        private const string ShareIntakeDirectoryName = "CottonShareInbox";
         private const string TemporaryDownloadDirectoryName = ".temp";
         private const string TemporaryDownloadFileExtension = ".download";
 
         public const string DownloadDirectoryName = "CottonDownloads";
-
-        public const string TransferStagingDirectoryName = "Staged";
 
         public static string CreateDownloadsDirectory()
         {
@@ -37,42 +30,6 @@ namespace Cotton.Mobile.Services
         public static string CreateTemporaryDownloadsDirectory()
         {
             return Path.Combine(CreateDownloadsDirectory(), TemporaryDownloadDirectoryName);
-        }
-
-        public static string CreateFolderContentCacheRootDirectory()
-        {
-            return Path.Combine(FileSystem.AppDataDirectory, FolderContentCacheDirectoryName);
-        }
-
-        public static string CreateFolderContentCacheDirectory(Uri instanceUri)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            return Path.Combine(CreateFolderContentCacheRootDirectory(), CreateInstanceStorageKey(instanceUri));
-        }
-
-        public static string CreateTransferMetadataRootDirectory()
-        {
-            return Path.Combine(FileSystem.AppDataDirectory, TransferMetadataDirectoryName);
-        }
-
-        public static string CreateTransferMetadataDirectory(Uri instanceUri)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            return Path.Combine(CreateTransferMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
-        }
-
-        public static string CreateCameraBackupMetadataRootDirectory()
-        {
-            return Path.Combine(FileSystem.AppDataDirectory, CameraBackupMetadataDirectoryName);
-        }
-
-        public static string CreateCameraBackupMetadataDirectory(Uri instanceUri)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            return Path.Combine(CreateCameraBackupMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
         }
 
         public static string CreateOfflineFileMetadataRootDirectory()
@@ -85,18 +42,6 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             return Path.Combine(CreateOfflineFileMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
-        }
-
-        public static string CreateRecentFileMetadataRootDirectory()
-        {
-            return Path.Combine(FileSystem.AppDataDirectory, RecentFileMetadataDirectoryName);
-        }
-
-        public static string CreateRecentFileMetadataDirectory(Uri instanceUri)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            return Path.Combine(CreateRecentFileMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
         }
 
         public static string CreateSyncedFileManifestRootDirectory()
@@ -141,18 +86,6 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
 
             return Path.Combine(CreateSyncRootMetadataRootDirectory(), CreateInstanceStorageKey(instanceUri));
-        }
-
-        public static string CreateTransferStagingDirectory(Uri instanceUri)
-        {
-            ArgumentNullException.ThrowIfNull(instanceUri);
-
-            return Path.Combine(CreateTransferMetadataDirectory(instanceUri), TransferStagingDirectoryName);
-        }
-
-        public static string CreateShareIntakeDirectory()
-        {
-            return Path.Combine(FileSystem.AppDataDirectory, ShareIntakeDirectoryName);
         }
 
         public static string CreateDownloadDirectory(Uri instanceUri, CottonFileBrowserEntry file)
@@ -218,7 +151,7 @@ namespace Cotton.Mobile.Services
         {
             string trimmedName = string.IsNullOrWhiteSpace(fileName) ? DefaultDownloadFileName : fileName.Trim();
             char[] invalidChars = Path.GetInvalidFileNameChars();
-            var buffer = new char[trimmedName.Length];
+            char[] buffer = new char[trimmedName.Length];
             for (int index = 0; index < trimmedName.Length; index++)
             {
                 char character = trimmedName[index];

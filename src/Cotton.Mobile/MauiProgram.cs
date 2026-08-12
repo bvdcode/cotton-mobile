@@ -46,9 +46,7 @@ namespace Cotton.Mobile
             services.AddSingleton<IPreferences>(Preferences.Default);
             services.AddSingleton<IBrowser>(Browser.Default);
             services.AddSingleton<IConnectivity>(Connectivity.Current);
-            services.AddSingleton(_ => new HttpClient());
 
-#if ANDROID
             services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
             services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidDocumentTreeSyncLocalRootPickerService>();
             services.AddSingleton<ICottonSyncLocalRootPermissionResolver, AndroidDocumentTreeSyncLocalRootPermissionResolver>();
@@ -60,14 +58,6 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();
-#else
-            services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
-            services.AddSingleton<ICottonSyncLocalRootPermissionResolver, StoredCottonSyncLocalRootPermissionResolver>();
-            services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, DisabledCottonDeviceToCloudLocalTreeReader>();
-            services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, DisabledCottonDeviceToCloudLocalFileContentSource>();
-            services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, DisabledCottonDeviceToCloudLocalFileOperator>();
-            services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, DisabledUserSelectedDocumentTreeCloudToDeviceSyncFileOperator>();
-#endif
         }
 
         private static void RegisterApplicationServices(IServiceCollection services)

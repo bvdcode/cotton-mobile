@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonBidirectionalSyncCoordinator
+    public class CottonBidirectionalSyncCoordinator : ICottonBidirectionalSyncCoordinator
     {
         private readonly ICottonSyncRootStore _rootStore;
         private readonly ICottonSyncRootPauseStore _pauseStore;

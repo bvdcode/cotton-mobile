@@ -3,7 +3,7 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonCloudToDeviceSyncCoordinator
+    public class CottonCloudToDeviceSyncCoordinator : ICottonCloudToDeviceSyncCoordinator
     {
         private readonly ICottonCloudToDeviceSyncFolderContentSource _folderContentSource;
         private readonly CottonCloudToDeviceSyncPlanExecutor _planExecutor;

@@ -16,7 +16,9 @@ namespace Cotton.Mobile.ViewModels
         private readonly ILogger<SyncSettingsLoadingHandler> _logger = logger
             ?? throw new ArgumentNullException(nameof(logger));
 
-        public async Task LoadAsync(ISyncSettingsViewState state)
+        public async Task LoadAsync(
+            ISyncSettingsViewState state,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             if (state.InstanceUri is null)
@@ -28,8 +30,13 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                state.ShowRoots(await _rootProvider.LoadAsync(state));
+                state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 state.Status = null;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {

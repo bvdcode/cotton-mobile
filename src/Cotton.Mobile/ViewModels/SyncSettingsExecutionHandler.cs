@@ -33,20 +33,23 @@ namespace Cotton.Mobile.ViewModels
 
         public Task ExecutePrimaryActionAsync(
             ISyncSettingsViewState state,
-            CottonSyncRootListItem item)
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(item);
 
             if (item.CanRunNow)
             {
-                return RunRootAsync(state, item);
+                return RunRootAsync(state, item, cancellationToken);
             }
 
             throw new InvalidOperationException("Sync root does not have a runnable primary action.");
         }
 
-        public async Task RunAllAsync(ISyncSettingsViewState state)
+        public async Task RunAllAsync(
+            ISyncSettingsViewState state,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             Uri? instanceUri = state.InstanceUri;
@@ -66,7 +69,7 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
                 IReadOnlyList<CottonSyncRootSnapshot> runnableRoots =
                     CottonSyncRootRunCapability.GetRunnableRoots(
                         collection.Roots,
@@ -79,7 +82,13 @@ namespace Cotton.Mobile.ViewModels
                 state.Status = await _executionWorkflow.RunAllAsync(
                     instanceUri,
                     runnableRoots,
-                    status => state.Status = status);
+                    status => state.Status = status,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {
@@ -95,7 +104,8 @@ namespace Cotton.Mobile.ViewModels
 
         private async Task RunRootAsync(
             ISyncSettingsViewState state,
-            CottonSyncRootListItem item)
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken)
         {
             Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
@@ -114,7 +124,7 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -143,7 +153,13 @@ namespace Cotton.Mobile.ViewModels
                 state.Status = await _executionWorkflow.RunRootAsync(
                     instanceUri,
                     root,
-                    status => state.Status = status);
+                    status => state.Status = status,
+                    cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {

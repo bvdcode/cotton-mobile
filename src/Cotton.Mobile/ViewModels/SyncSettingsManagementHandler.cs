@@ -32,7 +32,8 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task StopRootAsync(
             ISyncSettingsViewState state,
-            CottonSyncRootListItem item)
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(item);
@@ -46,7 +47,7 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -55,22 +56,29 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
+                cancellationToken.ThrowIfCancellationRequested();
                 bool confirmed = await _dialogService.ShowConfirmationAsync(
                     CottonSyncRootManagementText.CreateStopTitle(root.CloudFolder.FolderName),
                     CottonSyncRootManagementText.StopMessage,
                     CottonSyncRootManagementText.StopAction,
                     CottonSyncRootManagementText.CancelAction);
+                cancellationToken.ThrowIfCancellationRequested();
                 if (!confirmed)
                 {
                     state.Status = null;
                     return;
                 }
 
-                bool removed = await _rootManager.StopAsync(instanceUri, root);
-                state.ShowRoots(await _rootProvider.LoadAsync(state));
+                bool removed = await _rootManager.StopAsync(instanceUri, root, cancellationToken);
+                state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 state.Status = removed
                     ? CottonSyncRootManagementText.CreateStoppedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.RootMissingStatus;
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {
@@ -86,7 +94,8 @@ namespace Cotton.Mobile.ViewModels
         public async Task SetRootPausedAsync(
             ISyncSettingsViewState state,
             CottonSyncRootListItem item,
-            bool isPaused)
+            bool isPaused,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(item);
@@ -102,7 +111,7 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -111,11 +120,16 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                await _rootManager.SetPausedAsync(instanceUri, root, isPaused);
-                state.ShowRoots(await _rootProvider.LoadAsync(state));
+                await _rootManager.SetPausedAsync(instanceUri, root, isPaused, cancellationToken);
+                state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 state.Status = isPaused
                     ? CottonSyncRootManagementText.CreatePausedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.CreateResumedStatus(root.CloudFolder.FolderName);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {

@@ -135,9 +135,9 @@ namespace Cotton.Mobile
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudLocalFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonUploadReceiptStore>()));
-            services.AddSingleton<CottonCloudToDeviceSyncCoordinator>();
-            services.AddSingleton<CottonDeviceToCloudSyncCoordinator>();
-            services.AddSingleton<CottonBidirectionalSyncCoordinator>();
+            services.AddSingleton<ICottonCloudToDeviceSyncCoordinator, CottonCloudToDeviceSyncCoordinator>();
+            services.AddSingleton<ICottonDeviceToCloudSyncCoordinator, CottonDeviceToCloudSyncCoordinator>();
+            services.AddSingleton<ICottonBidirectionalSyncCoordinator, CottonBidirectionalSyncCoordinator>();
             services.AddSingleton<SyncExecutionWorkflow>();
         }
 

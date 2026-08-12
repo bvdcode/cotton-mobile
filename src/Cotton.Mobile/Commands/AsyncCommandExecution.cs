@@ -22,6 +22,28 @@ namespace Cotton.Mobile.Commands
             }
         }
 
+        public static async Task RunAsync(
+            Func<CancellationToken, Task> executeAsync,
+            Action<Exception> onException,
+            CancellationToken cancellationToken)
+        {
+            ArgumentNullException.ThrowIfNull(executeAsync);
+            ArgumentNullException.ThrowIfNull(onException);
+
+            try
+            {
+                await executeAsync(cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                onException(exception);
+            }
+        }
+
         public static Task RunAsync<T>(
             T? parameter,
             Func<T, Task> executeAsync,
@@ -34,6 +56,23 @@ namespace Cotton.Mobile.Commands
                 () => executeAsync(parameter
                     ?? throw new ArgumentNullException(nameof(parameter))),
                 onException);
+        }
+
+        public static Task RunAsync<T>(
+            T? parameter,
+            Func<T, CancellationToken, Task> executeAsync,
+            Action<Exception> onException,
+            CancellationToken cancellationToken)
+            where T : class
+        {
+            ArgumentNullException.ThrowIfNull(executeAsync);
+
+            return RunAsync(
+                token => executeAsync(
+                    parameter ?? throw new ArgumentNullException(nameof(parameter)),
+                    token),
+                onException,
+                cancellationToken);
         }
     }
 }

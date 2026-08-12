@@ -55,67 +55,82 @@ namespace Cotton.Mobile.ViewModels
         private AsyncRelayCommand CreateLoadCommand()
         {
             return new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(
-                    () => _loadingHandler.LoadAsync(this),
-                    LogUnhandledCommandException),
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _loadingHandler.LoadAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 () => !IsBusy);
         }
 
         private AsyncRelayCommand CreateAddRootCommand()
         {
             return new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(
-                    () => _setupHandler.AddRootAsync(this),
-                    LogUnhandledCommandException),
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _setupHandler.AddRootAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 CanAddRoot);
         }
 
         private AsyncRelayCommand CreateRunAllCommand()
         {
             return new AsyncRelayCommand(
-                () => AsyncCommandExecution.RunAsync(
-                    () => _executionHandler.RunAllAsync(this),
-                    LogUnhandledCommandException),
+                cancellationToken => AsyncCommandExecution.RunAsync(
+                    token => _executionHandler.RunAllAsync(this, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 CanRunAll);
         }
 
         private AsyncRelayCommand<CottonSyncRootListItem> CreateRootPrimaryActionCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
-                item => AsyncCommandExecution.RunAsync(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
                     item,
                     ExecuteRootPrimaryActionAsync,
-                    LogUnhandledCommandException),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 item => !IsBusy && item is not null && item.CanUsePrimaryAction);
         }
 
         private AsyncRelayCommand<CottonSyncRootListItem> CreateStopRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
-                item => AsyncCommandExecution.RunAsync(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
                     item,
-                    root => _managementHandler.StopRootAsync(this, root),
-                    LogUnhandledCommandException),
+                    (root, token) => _managementHandler.StopRootAsync(this, root, token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 item => !IsBusy && item is not null && item.CanStopSync);
         }
 
         private AsyncRelayCommand<CottonSyncRootListItem> CreatePauseRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
-                item => AsyncCommandExecution.RunAsync(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
                     item,
-                    root => _managementHandler.SetRootPausedAsync(this, root, isPaused: true),
-                    LogUnhandledCommandException),
+                    (root, token) => _managementHandler.SetRootPausedAsync(
+                        this,
+                        root,
+                        isPaused: true,
+                        token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 item => !IsBusy && item is not null && item.CanPauseSync);
         }
 
         private AsyncRelayCommand<CottonSyncRootListItem> CreateResumeRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
-                item => AsyncCommandExecution.RunAsync(
+                (item, cancellationToken) => AsyncCommandExecution.RunAsync(
                     item,
-                    root => _managementHandler.SetRootPausedAsync(this, root, isPaused: false),
-                    LogUnhandledCommandException),
+                    (root, token) => _managementHandler.SetRootPausedAsync(
+                        this,
+                        root,
+                        isPaused: false,
+                        token),
+                    LogUnhandledCommandException,
+                    cancellationToken),
                 item => !IsBusy && item is not null && item.CanResumeSync);
         }
 
@@ -222,10 +237,13 @@ namespace Cotton.Mobile.ViewModels
             AddRootCommand.NotifyCanExecuteChanged();
         }
 
-        public async Task LoadForInstanceAsync(Uri instanceUri, string accountScopeKey)
+        public async Task LoadForInstanceAsync(
+            Uri instanceUri,
+            string accountScopeKey,
+            CancellationToken cancellationToken = default)
         {
             Configure(instanceUri, accountScopeKey);
-            await _loadingHandler.LoadAsync(this);
+            await _loadingHandler.LoadAsync(this, cancellationToken);
         }
 
         public void Clear()
@@ -271,15 +289,17 @@ namespace Cotton.Mobile.ViewModels
             return !IsBusy && _instanceUri is not null && !string.IsNullOrWhiteSpace(_accountScopeKey);
         }
 
-        private Task ExecuteRootPrimaryActionAsync(CottonSyncRootListItem item)
+        private Task ExecuteRootPrimaryActionAsync(
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(item);
             if (item.CanReconnect)
             {
-                return _setupHandler.ReconnectRootAsync(this, item);
+                return _setupHandler.ReconnectRootAsync(this, item, cancellationToken);
             }
 
-            return _executionHandler.ExecutePrimaryActionAsync(this, item);
+            return _executionHandler.ExecutePrimaryActionAsync(this, item, cancellationToken);
         }
 
         private void LogUnhandledCommandException(Exception exception)

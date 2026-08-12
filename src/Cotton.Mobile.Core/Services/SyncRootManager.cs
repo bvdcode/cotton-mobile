@@ -33,34 +33,46 @@ namespace Cotton.Mobile.Services
 
         public async Task<SyncRootCollectionSnapshot> LoadAsync(
             Uri instanceUri,
-            string accountScopeKey)
+            string accountScopeKey,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
 
-            IReadOnlyList<CottonSyncRootSnapshot> storedRoots = await _rootStore.LoadAsync(instanceUri);
+            IReadOnlyList<CottonSyncRootSnapshot> storedRoots = await _rootStore
+                .LoadAsync(instanceUri, cancellationToken)
+                .ConfigureAwait(false);
             IReadOnlyList<CottonSyncRootSnapshot> accountRoots = [.. storedRoots
                 .Where(root => string.Equals(
                     root.AccountScopeKey,
                     accountScopeKey,
                     StringComparison.Ordinal))
                 .Select(ResolvePermission)];
-            IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
+            IReadOnlySet<Guid> pausedRootIds = await _pauseStore
+                .LoadPausedRootIdsAsync(instanceUri, cancellationToken)
+                .ConfigureAwait(false);
             return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds);
         }
 
-        public async Task<bool> StopAsync(Uri instanceUri, CottonSyncRootSnapshot root)
+        public async Task<bool> StopAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
 
-            bool removed = await _rootStore.RemoveAsync(instanceUri, root.Id);
-            await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused: false);
-            await _manifestStore.ClearAsync(instanceUri, root);
+            bool removed = await _rootStore
+                .RemoveAsync(instanceUri, root.Id, cancellationToken)
+                .ConfigureAwait(false);
+            await _pauseStore
+                .SetPausedAsync(instanceUri, root.Id, isPaused: false, cancellationToken)
+                .ConfigureAwait(false);
+            await _manifestStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             switch (root.Direction)
             {
                 case CottonSyncDirection.DeviceToCloud:
-                    await _uploadReceiptStore.ClearAsync(instanceUri, root);
+                    await _uploadReceiptStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
                     break;
 
                 case CottonSyncDirection.CloudToDevice:
@@ -77,12 +89,15 @@ namespace Cotton.Mobile.Services
         public async Task SetPausedAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            bool isPaused)
+            bool isPaused,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
 
-            await _pauseStore.SetPausedAsync(instanceUri, root.Id, isPaused);
+            await _pauseStore
+                .SetPausedAsync(instanceUri, root.Id, isPaused, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private CottonSyncRootSnapshot ResolvePermission(CottonSyncRootSnapshot root)

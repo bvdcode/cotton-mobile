@@ -31,7 +31,9 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
         }
 
-        public async Task AddRootAsync(ISyncSettingsViewState state)
+        public async Task AddRootAsync(
+            ISyncSettingsViewState state,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             Uri? instanceUri = state.InstanceUri;
@@ -53,19 +55,21 @@ namespace Cotton.Mobile.ViewModels
             {
                 SyncRootSetupResult result = await _rootSetupCoordinator.AddRootAsync(
                     instanceUri,
-                    accountScopeKey);
+                    accountScopeKey,
+                    cancellationToken);
                 if (result.Status == SyncRootSetupStatus.Cancelled)
                 {
                     state.Status = null;
                     return;
                 }
 
-                state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey));
+                state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
                 state.Status = result.Message;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {
@@ -80,7 +84,8 @@ namespace Cotton.Mobile.ViewModels
 
         public async Task ReconnectRootAsync(
             ISyncSettingsViewState state,
-            CottonSyncRootListItem item)
+            CottonSyncRootListItem item,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(state);
             ArgumentNullException.ThrowIfNull(item);
@@ -94,7 +99,7 @@ namespace Cotton.Mobile.ViewModels
             state.IsBusy = true;
             try
             {
-                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state);
+                SyncRootCollectionSnapshot collection = await _rootProvider.LoadAsync(state, cancellationToken);
                 CottonSyncRootSnapshot? root = collection.Roots.FirstOrDefault(root => root.Id == item.Id);
                 if (root is null)
                 {
@@ -110,7 +115,8 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                SyncRootSetupResult result = await _rootSetupCoordinator.ReconnectLocalRootAsync(root);
+                SyncRootSetupResult result = await _rootSetupCoordinator
+                    .ReconnectLocalRootAsync(root, cancellationToken);
                 if (result.Status == SyncRootSetupStatus.Cancelled)
                 {
                     state.Status = null;
@@ -119,14 +125,15 @@ namespace Cotton.Mobile.ViewModels
 
                 if (result.DidChangeRoots)
                 {
-                    state.ShowRoots(await _rootProvider.LoadAsync(state));
+                    state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 }
 
                 state.Status = result.Message;
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
                 state.Status = null;
+                throw;
             }
             catch (Exception exception)
             {

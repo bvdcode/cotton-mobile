@@ -3,54 +3,52 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class SyncExecutionWorkflow
+    public class SyncExecutionWorkflow(
+        ICottonCloudToDeviceSyncCoordinator cloudToDeviceCoordinator,
+        ICottonDeviceToCloudSyncCoordinator deviceToCloudCoordinator,
+        ICottonBidirectionalSyncCoordinator bidirectionalCoordinator,
+        IUserDialogService dialogService)
     {
-        private readonly CottonCloudToDeviceSyncCoordinator _cloudToDeviceCoordinator;
-        private readonly CottonDeviceToCloudSyncCoordinator _deviceToCloudCoordinator;
-        private readonly CottonBidirectionalSyncCoordinator _bidirectionalCoordinator;
-        private readonly IUserDialogService _dialogService;
-
-        public SyncExecutionWorkflow(
-            CottonCloudToDeviceSyncCoordinator cloudToDeviceCoordinator,
-            CottonDeviceToCloudSyncCoordinator deviceToCloudCoordinator,
-            CottonBidirectionalSyncCoordinator bidirectionalCoordinator,
-            IUserDialogService dialogService)
-        {
-            ArgumentNullException.ThrowIfNull(cloudToDeviceCoordinator);
-            ArgumentNullException.ThrowIfNull(deviceToCloudCoordinator);
-            ArgumentNullException.ThrowIfNull(bidirectionalCoordinator);
-            ArgumentNullException.ThrowIfNull(dialogService);
-
-            _cloudToDeviceCoordinator = cloudToDeviceCoordinator;
-            _deviceToCloudCoordinator = deviceToCloudCoordinator;
-            _bidirectionalCoordinator = bidirectionalCoordinator;
-            _dialogService = dialogService;
-        }
+        private readonly ICottonCloudToDeviceSyncCoordinator _cloudToDeviceCoordinator =
+            cloudToDeviceCoordinator ?? throw new ArgumentNullException(nameof(cloudToDeviceCoordinator));
+        private readonly ICottonDeviceToCloudSyncCoordinator _deviceToCloudCoordinator =
+            deviceToCloudCoordinator ?? throw new ArgumentNullException(nameof(deviceToCloudCoordinator));
+        private readonly ICottonBidirectionalSyncCoordinator _bidirectionalCoordinator =
+            bidirectionalCoordinator ?? throw new ArgumentNullException(nameof(bidirectionalCoordinator));
+        private readonly IUserDialogService _dialogService =
+            dialogService ?? throw new ArgumentNullException(nameof(dialogService));
 
         public async Task<string> RunRootAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            Action<string> reportStatus)
+            Action<string> reportStatus,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
             ArgumentNullException.ThrowIfNull(reportStatus);
+            cancellationToken.ThrowIfCancellationRequested();
 
             switch (CottonSyncRootRunRouting.CreateRoute(root))
             {
                 case CottonSyncRootRunRoute.CloudToDevice:
                     CottonCloudToDeviceSyncRunSummary cloudSummary =
-                        await _cloudToDeviceCoordinator.RunRootAsync(instanceUri, root);
+                        await _cloudToDeviceCoordinator
+                            .RunRootAsync(instanceUri, root, cancellationToken)
+                            .ConfigureAwait(false);
                     return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(cloudSummary);
 
                 case CottonSyncRootRunRoute.DeviceToCloud:
                     CottonDeviceToCloudSyncRunSummary deviceSummary =
-                        await _deviceToCloudCoordinator.RunRootAsync(instanceUri, root);
+                        await _deviceToCloudCoordinator
+                            .RunRootAsync(instanceUri, root, cancellationToken)
+                            .ConfigureAwait(false);
                     return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(deviceSummary);
 
                 case CottonSyncRootRunRoute.Bidirectional:
                     CottonBidirectionalSyncRunSummary bidirectionalSummary =
-                        await RunBidirectionalRootAsync(instanceUri, root, reportStatus);
+                        await RunBidirectionalRootAsync(instanceUri, root, reportStatus, cancellationToken)
+                            .ConfigureAwait(false);
                     return CottonSyncSettingsSingleRootRunStatusText.CreateFinishedStatus(bidirectionalSummary);
 
                 default:
@@ -61,7 +59,8 @@ namespace Cotton.Mobile.Services
         public async Task<string> RunAllAsync(
             Uri instanceUri,
             IReadOnlyList<CottonSyncRootSnapshot> roots,
-            Action<string> reportStatus)
+            Action<string> reportStatus,
+            CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(roots);
@@ -72,23 +71,33 @@ namespace Cotton.Mobile.Services
             List<CottonBidirectionalSyncRootRunResult> bidirectionalResults = [];
             foreach (CottonSyncRootSnapshot root in roots)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 switch (CottonSyncRootRunRouting.CreateRoute(root))
                 {
                     case CottonSyncRootRunRoute.CloudToDevice:
                         CottonCloudToDeviceSyncRunSummary cloudSummary =
-                            await _cloudToDeviceCoordinator.RunRootAsync(instanceUri, root);
+                            await _cloudToDeviceCoordinator
+                                .RunRootAsync(instanceUri, root, cancellationToken)
+                                .ConfigureAwait(false);
                         cloudResults.AddRange(cloudSummary.RootResults);
                         break;
 
                     case CottonSyncRootRunRoute.DeviceToCloud:
                         CottonDeviceToCloudSyncRunSummary deviceSummary =
-                            await _deviceToCloudCoordinator.RunRootAsync(instanceUri, root);
+                            await _deviceToCloudCoordinator
+                                .RunRootAsync(instanceUri, root, cancellationToken)
+                                .ConfigureAwait(false);
                         deviceResults.AddRange(deviceSummary.RootResults);
                         break;
 
                     case CottonSyncRootRunRoute.Bidirectional:
                         CottonBidirectionalSyncRunSummary bidirectionalSummary =
-                            await RunBidirectionalRootAsync(instanceUri, root, reportStatus);
+                            await RunBidirectionalRootAsync(
+                                    instanceUri,
+                                    root,
+                                    reportStatus,
+                                    cancellationToken)
+                                .ConfigureAwait(false);
                         bidirectionalResults.AddRange(bidirectionalSummary.RootResults);
                         break;
 
@@ -106,30 +115,38 @@ namespace Cotton.Mobile.Services
         private async Task<CottonBidirectionalSyncRunSummary> RunBidirectionalRootAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            Action<string> reportStatus)
+            Action<string> reportStatus,
+            CancellationToken cancellationToken)
         {
             CottonBidirectionalSyncRunSummary summary =
-                await _bidirectionalCoordinator.RunRootAsync(instanceUri, root);
+                await _bidirectionalCoordinator
+                    .RunRootAsync(instanceUri, root, cancellationToken)
+                    .ConfigureAwait(false);
             if (!summary.NeedsDestructiveReview)
             {
                 return summary;
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             reportStatus(CottonBidirectionalSyncStatusText.DestructiveReviewRequiredStatus);
             bool confirmed = await _dialogService.ShowConfirmationAsync(
-                CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle,
-                CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(
-                    summary.DestructiveReviewLocalDeleteCount,
-                    summary.DestructiveReviewRemoteDeleteCount),
-                CottonBidirectionalSyncStatusText.ConfirmDestructiveAction,
-                CottonSyncRootManagementText.CancelAction);
+                    CottonBidirectionalSyncStatusText.ConfirmDestructiveTitle,
+                    CottonBidirectionalSyncStatusText.CreateConfirmDestructiveMessage(
+                        summary.DestructiveReviewLocalDeleteCount,
+                        summary.DestructiveReviewRemoteDeleteCount),
+                    CottonBidirectionalSyncStatusText.ConfirmDestructiveAction,
+                    CottonSyncRootManagementText.CancelAction)
+                .ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
             if (!confirmed)
             {
                 return summary;
             }
 
             CottonBidirectionalSyncExecutionPlan reviewedPlan = GetReviewedPlan(summary);
-            return await _bidirectionalCoordinator.ExecuteReviewedPlanAsync(instanceUri, root, reviewedPlan);
+            return await _bidirectionalCoordinator
+                .ExecuteReviewedPlanAsync(instanceUri, root, reviewedPlan, cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private static CottonBidirectionalSyncExecutionPlan GetReviewedPlan(

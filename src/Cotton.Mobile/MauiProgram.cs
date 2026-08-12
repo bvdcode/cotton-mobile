@@ -8,6 +8,7 @@ using Cotton.Mobile.ViewModels;
 using Cotton.Mobile.Platforms.Android;
 #endif
 using Cotton.Sdk.Auth;
+using EasyExtensions.Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Networking;
@@ -65,6 +66,8 @@ namespace Cotton.Mobile
 
         private static void RegisterApplicationServices(IServiceCollection services)
         {
+            services.AddMediator(configuration =>
+                configuration.RegisterServicesFromAssemblyContaining<RunSyncRootRequest>());
             services.AddSingleton(
                 new CottonMobileOptions(
                     AppResources.AppTitle,

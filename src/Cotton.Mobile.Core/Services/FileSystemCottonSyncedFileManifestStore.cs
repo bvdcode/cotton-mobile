@@ -6,23 +6,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonSyncedFileManifestStore : ICottonSyncedFileManifestStore
+    public class FileSystemCottonSyncedFileManifestStore(
+        ICottonSyncedFileManifestPathProvider pathProvider,
+        ILogger<FileSystemCottonSyncedFileManifestStore> logger,
+        TimeProvider timeProvider) : ICottonSyncedFileManifestStore
     {
         public const string MetadataFileName = "synced-files.json";
 
-        private readonly ICottonSyncedFileManifestPathProvider _pathProvider;
-        private readonly ILogger<FileSystemCottonSyncedFileManifestStore> _logger;
-
-        public FileSystemCottonSyncedFileManifestStore(
-            ICottonSyncedFileManifestPathProvider pathProvider,
-            ILogger<FileSystemCottonSyncedFileManifestStore> logger)
-        {
-            ArgumentNullException.ThrowIfNull(pathProvider);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _pathProvider = pathProvider;
-            _logger = logger;
-        }
+        private readonly ICottonSyncedFileManifestPathProvider _pathProvider =
+            pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
+        private readonly ILogger<FileSystemCottonSyncedFileManifestStore> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task<IReadOnlyList<CottonSyncedFileSnapshot>> LoadAsync(
             Uri instanceUri,
@@ -164,7 +160,7 @@ namespace Cotton.Mobile.Services
                 MetadataFileName);
         }
 
-        private static CottonStoredSyncedFileManifest CreateStoredManifest(
+        private CottonStoredSyncedFileManifest CreateStoredManifest(
             CottonSyncRootSnapshot root,
             IReadOnlyCollection<CottonSyncedFileSnapshot> items)
         {
@@ -172,7 +168,7 @@ namespace Cotton.Mobile.Services
             {
                 SchemaVersion = CottonSyncedFileManifestSchema.CurrentVersion,
                 SyncRootStableKey = root.StableKey,
-                SavedAtUtc = DateTime.UtcNow,
+                SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
                 Items = DeduplicateItems(items)
                     .Select<CottonSyncedFileSnapshot, CottonStoredSyncedFileItem?>(CreateStoredItem)
                     .ToList(),

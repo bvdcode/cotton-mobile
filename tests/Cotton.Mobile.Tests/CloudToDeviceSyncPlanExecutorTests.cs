@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Tests
             _syncRoot = CreateRoot(FolderId);
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(_rootDirectory),
-                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System);
             _fileOperator = new CloudToDevicePlanExecutorFileOperator();
             _executor = new CottonCloudToDeviceSyncPlanExecutor(
                 _fileOperator,

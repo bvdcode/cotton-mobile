@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _rootStore = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(_directory),
-                NullLogger<FileSystemCottonSyncRootStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
             _service = new CottonSyncRootConfigurationService(_rootStore);
         }
 

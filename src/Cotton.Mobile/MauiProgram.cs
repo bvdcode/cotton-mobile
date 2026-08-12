@@ -46,6 +46,7 @@ namespace Cotton.Mobile
             services.AddSingleton<IPreferences>(Preferences.Default);
             services.AddSingleton<IBrowser>(Browser.Default);
             services.AddSingleton<IConnectivity>(Connectivity.Current);
+            services.AddSingleton(TimeProvider.System);
 
             services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
             services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidDocumentTreeSyncLocalRootPickerService>();

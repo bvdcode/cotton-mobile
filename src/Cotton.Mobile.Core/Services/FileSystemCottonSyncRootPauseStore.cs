@@ -6,24 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonSyncRootPauseStore : ICottonSyncRootPauseStore
+    public class FileSystemCottonSyncRootPauseStore(
+        ICottonSyncRootMetadataPathProvider pathProvider,
+        ILogger<FileSystemCottonSyncRootPauseStore> logger,
+        TimeProvider timeProvider) : ICottonSyncRootPauseStore
     {
         private const int SchemaVersion = 1;
         public const string MetadataFileName = "paused-sync-roots.json";
 
-        private readonly ICottonSyncRootMetadataPathProvider _pathProvider;
-        private readonly ILogger<FileSystemCottonSyncRootPauseStore> _logger;
-
-        public FileSystemCottonSyncRootPauseStore(
-            ICottonSyncRootMetadataPathProvider pathProvider,
-            ILogger<FileSystemCottonSyncRootPauseStore> logger)
-        {
-            ArgumentNullException.ThrowIfNull(pathProvider);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _pathProvider = pathProvider;
-            _logger = logger;
-        }
+        private readonly ICottonSyncRootMetadataPathProvider _pathProvider =
+            pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
+        private readonly ILogger<FileSystemCottonSyncRootPauseStore> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task<IReadOnlySet<Guid>> LoadPausedRootIdsAsync(
             Uri instanceUri,
@@ -144,13 +140,13 @@ namespace Cotton.Mobile.Services
             return Path.Combine(_pathProvider.CreateSyncRootMetadataDirectory(instanceUri), MetadataFileName);
         }
 
-        private static CottonStoredPausedSyncRootCollection CreateStoredCollection(
+        private CottonStoredPausedSyncRootCollection CreateStoredCollection(
             IReadOnlyCollection<Guid> rootIds)
         {
             return new CottonStoredPausedSyncRootCollection
             {
                 SchemaVersion = SchemaVersion,
-                SavedAtUtc = DateTime.UtcNow,
+                SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
                 RootIds = rootIds.ToList(),
             };
         }

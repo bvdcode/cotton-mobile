@@ -22,7 +22,7 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _store = new FileSystemCottonOfflineFilePinStore(
                 new FixedOfflineFileMetadataPathProvider(_rootDirectory),
-                NullLogger<FileSystemCottonOfflineFilePinStore>.Instance);
+                NullLogger<FileSystemCottonOfflineFilePinStore>.Instance, TimeProvider.System);
         }
 
         [Fact]

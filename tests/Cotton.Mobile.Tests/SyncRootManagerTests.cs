@@ -24,17 +24,17 @@ namespace Cotton.Mobile.Tests
             TestSyncRootMetadataPathProvider metadataPathProvider = new(_directory);
             _rootStore = new FileSystemCottonSyncRootStore(
                 metadataPathProvider,
-                NullLogger<FileSystemCottonSyncRootStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
             _uploadReceiptStore = new TestUploadReceiptStore();
             _permissionResolver = new TestPermissionResolver();
             _manager = new SyncRootManager(
                 _rootStore,
                 new FileSystemCottonSyncRootPauseStore(
                     metadataPathProvider,
-                    NullLogger<FileSystemCottonSyncRootPauseStore>.Instance),
+                    NullLogger<FileSystemCottonSyncRootPauseStore>.Instance, TimeProvider.System),
                 new FileSystemCottonSyncedFileManifestStore(
                     new TestSyncedFileManifestPathProvider(_directory),
-                    NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance),
+                    NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System),
                 _uploadReceiptStore,
                 _permissionResolver);
         }

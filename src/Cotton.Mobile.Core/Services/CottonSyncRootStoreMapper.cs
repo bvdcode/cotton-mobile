@@ -7,12 +7,13 @@ namespace Cotton.Mobile.Services
     {
         public static CottonStoredSyncRootCollection CreateStoredCollection(
             IReadOnlyCollection<CottonSyncRootSnapshot> roots,
-            int schemaVersion)
+            int schemaVersion,
+            DateTime savedAt)
         {
             return new CottonStoredSyncRootCollection
             {
                 SchemaVersion = schemaVersion,
-                SavedAtUtc = DateTime.UtcNow,
+                SavedAtUtc = savedAt,
                 Items = Deduplicate(roots)
                     .Select<CottonSyncRootSnapshot, CottonStoredSyncRootItem?>(CreateStoredItem)
                     .ToList(),

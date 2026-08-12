@@ -22,13 +22,13 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _rootStore = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
-                NullLogger<FileSystemCottonSyncRootStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
             _pauseStore = new FileSystemCottonSyncRootPauseStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
-                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance, TimeProvider.System);
             _manifestStore = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(Path.Combine(_directory, "manifest")),
-                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System);
             _folderContentSource = new CloudToDeviceCoordinatorFolderContentSource();
             _fileOperator = new CloudToDeviceCoordinatorFileOperator();
             CottonCloudToDeviceSyncPlanExecutor executor = new(

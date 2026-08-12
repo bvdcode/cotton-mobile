@@ -6,24 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonOfflineFilePinStore : ICottonOfflineFilePinStore
+    public class FileSystemCottonOfflineFilePinStore(
+        ICottonOfflineFileMetadataPathProvider pathProvider,
+        ILogger<FileSystemCottonOfflineFilePinStore> logger,
+        TimeProvider timeProvider) : ICottonOfflineFilePinStore
     {
         private const int SchemaVersion = 1;
         public const string MetadataFileName = "offline-files.json";
 
-        private readonly ICottonOfflineFileMetadataPathProvider _pathProvider;
-        private readonly ILogger<FileSystemCottonOfflineFilePinStore> _logger;
-
-        public FileSystemCottonOfflineFilePinStore(
-            ICottonOfflineFileMetadataPathProvider pathProvider,
-            ILogger<FileSystemCottonOfflineFilePinStore> logger)
-        {
-            ArgumentNullException.ThrowIfNull(pathProvider);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _pathProvider = pathProvider;
-            _logger = logger;
-        }
+        private readonly ICottonOfflineFileMetadataPathProvider _pathProvider =
+            pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
+        private readonly ILogger<FileSystemCottonOfflineFilePinStore> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task<IReadOnlyList<CottonOfflineFilePinSnapshot>> LoadAsync(
             Uri instanceUri,
@@ -157,13 +153,13 @@ namespace Cotton.Mobile.Services
                 MetadataFileName);
         }
 
-        private static CottonStoredOfflineFilePinManifest CreateStoredManifest(
+        private CottonStoredOfflineFilePinManifest CreateStoredManifest(
             IReadOnlyCollection<CottonOfflineFilePinSnapshot> items)
         {
             return new CottonStoredOfflineFilePinManifest
             {
                 SchemaVersion = SchemaVersion,
-                SavedAtUtc = DateTime.UtcNow,
+                SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
                 Items = items
                     .GroupBy(item => item.FileId)
                     .Select(group => group.Last())

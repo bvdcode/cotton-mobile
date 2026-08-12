@@ -23,10 +23,10 @@ namespace Cotton.Mobile.Tests
                 Guid.NewGuid().ToString("N"));
             _rootStore = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
-                NullLogger<FileSystemCottonSyncRootStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
             _pauseStore = new FileSystemCottonSyncRootPauseStore(
                 new FixedSyncRootMetadataPathProvider(Path.Combine(_directory, "roots")),
-                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootPauseStore>.Instance, TimeProvider.System);
             _uploadReceiptStore = new DeviceToCloudCoordinatorUploadReceiptStore();
             _localTreeReader = new DeviceToCloudCoordinatorLocalTreeReader();
             _remoteFolderContentSource = new DeviceToCloudCoordinatorRemoteFolderContentSource();

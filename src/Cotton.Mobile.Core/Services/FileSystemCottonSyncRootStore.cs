@@ -6,24 +6,20 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileSystemCottonSyncRootStore : ICottonSyncRootStore
+    public class FileSystemCottonSyncRootStore(
+        ICottonSyncRootMetadataPathProvider pathProvider,
+        ILogger<FileSystemCottonSyncRootStore> logger,
+        TimeProvider timeProvider) : ICottonSyncRootStore
     {
         private const int SchemaVersion = 1;
         public const string MetadataFileName = "sync-roots.json";
 
-        private readonly ICottonSyncRootMetadataPathProvider _pathProvider;
-        private readonly ILogger<FileSystemCottonSyncRootStore> _logger;
-
-        public FileSystemCottonSyncRootStore(
-            ICottonSyncRootMetadataPathProvider pathProvider,
-            ILogger<FileSystemCottonSyncRootStore> logger)
-        {
-            ArgumentNullException.ThrowIfNull(pathProvider);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _pathProvider = pathProvider;
-            _logger = logger;
-        }
+        private readonly ICottonSyncRootMetadataPathProvider _pathProvider =
+            pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
+        private readonly ILogger<FileSystemCottonSyncRootStore> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task<IReadOnlyList<CottonSyncRootSnapshot>> LoadAsync(
             Uri instanceUri,
@@ -86,7 +82,10 @@ namespace Cotton.Mobile.Services
                 await CottonAtomicJsonFile
                     .WriteAsync(
                         filePath,
-                        CottonSyncRootStoreMapper.CreateStoredCollection(roots, SchemaVersion),
+                        CottonSyncRootStoreMapper.CreateStoredCollection(
+                            roots,
+                            SchemaVersion,
+                            _timeProvider.GetUtcNow().UtcDateTime),
                         cancellationToken)
                     .ConfigureAwait(false);
             }

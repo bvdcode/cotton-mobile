@@ -20,7 +20,7 @@ namespace Cotton.Mobile.Tests
             _directory = Path.Combine(Path.GetTempPath(), "cotton-sync-root-store-tests", Guid.NewGuid().ToString("N"));
             _store = new FileSystemCottonSyncRootStore(
                 new FixedSyncRootMetadataPathProvider(_directory),
-                NullLogger<FileSystemCottonSyncRootStore>.Instance);
+                NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
         }
 
         [Fact]

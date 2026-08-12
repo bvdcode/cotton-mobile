@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Tests
                 "app-private-sync-root");
             _store = new FileSystemCottonSyncedFileManifestStore(
                 new FixedSyncedFileManifestPathProvider(_rootDirectory),
-                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance);
+                NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System);
         }
 
         [Fact]

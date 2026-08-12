@@ -154,6 +154,5 @@ namespace Cotton.Mobile.Tests
                 : Math.Pow((channel + 0.055d) / 1.055d, 2.4d);
         }
 
-        private readonly record struct Rgba(double Red, double Green, double Blue, double Alpha);
     }
 }

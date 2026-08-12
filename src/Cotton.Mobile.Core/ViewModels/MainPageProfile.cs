@@ -3,32 +3,23 @@
 
 namespace Cotton.Mobile.ViewModels
 {
-    public class MainPageProfile
+    public class MainPageProfile(
+        string name,
+        string? email,
+        string instance,
+        string accountScopeKey,
+        Uri? avatarUrl)
     {
-        public MainPageProfile(
-            string name,
-            string? email,
-            string instance,
-            string accountScopeKey,
-            Uri? avatarUrl)
-        {
-            AvatarUrl = avatarUrl;
-            Name = string.IsNullOrWhiteSpace(name) ? throw new ArgumentException("Profile name is required.", nameof(name)) : name.Trim();
-            Email = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
-            Instance = string.IsNullOrWhiteSpace(instance) ? throw new ArgumentException("Profile instance is required.", nameof(instance)) : instance.Trim();
-            AccountScopeKey = string.IsNullOrWhiteSpace(accountScopeKey)
+        public string Name { get; } = string.IsNullOrWhiteSpace(name) ? throw new ArgumentException("Profile name is required.", nameof(name)) : name.Trim();
+
+        public string? Email { get; } = string.IsNullOrWhiteSpace(email) ? null : email.Trim();
+
+        public string Instance { get; } = string.IsNullOrWhiteSpace(instance) ? throw new ArgumentException("Profile instance is required.", nameof(instance)) : instance.Trim();
+
+        public string AccountScopeKey { get; } = string.IsNullOrWhiteSpace(accountScopeKey)
                 ? throw new ArgumentException("Account scope key is required.", nameof(accountScopeKey))
                 : accountScopeKey.Trim();
-        }
 
-        public string Name { get; }
-
-        public string? Email { get; }
-
-        public string Instance { get; }
-
-        public string AccountScopeKey { get; }
-
-        public Uri? AvatarUrl { get; }
+        public Uri? AvatarUrl { get; } = avatarUrl;
     }
 }

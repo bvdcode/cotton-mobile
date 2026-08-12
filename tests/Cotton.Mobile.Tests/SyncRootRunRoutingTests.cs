@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Unknown_direction_is_rejected()
         {
-            var direction = (CottonSyncDirection)999;
+            CottonSyncDirection direction = (CottonSyncDirection)999;
 
             Assert.Throws<ArgumentOutOfRangeException>(
                 () => CottonSyncRootRunRouting.CreateRoute(direction));

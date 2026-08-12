@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Services
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            var results = new List<CottonCloudToDeviceSyncRootRunResult>(roots.Count);
+            List<CottonCloudToDeviceSyncRootRunResult> results = new List<CottonCloudToDeviceSyncRootRunResult>(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
             {
@@ -136,8 +136,8 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            var files = new List<CottonCloudToDeviceRemoteItemSnapshot>();
-            var folders = new Queue<(CottonFolderHandle Folder, string RelativePath, int Depth)>();
+            List<CottonCloudToDeviceRemoteItemSnapshot> files = new List<CottonCloudToDeviceRemoteItemSnapshot>();
+            Queue<(CottonFolderHandle Folder, string RelativePath, int Depth)> folders = new Queue<(CottonFolderHandle Folder, string RelativePath, int Depth)>();
             CottonSyncTraversalGuard<Guid> traversalGuard = new();
 
             folders.Enqueue((root.CloudFolder.ToFolderHandle(), string.Empty, 0));

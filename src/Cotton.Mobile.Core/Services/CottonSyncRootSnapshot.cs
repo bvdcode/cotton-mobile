@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Services
 
         private static Uri NormalizeInstanceUri(Uri instanceUri)
         {
-            var builder = new UriBuilder(instanceUri)
+            UriBuilder builder = new UriBuilder(instanceUri)
             {
                 Scheme = instanceUri.Scheme.ToLowerInvariant(),
                 Host = instanceUri.Host.ToLowerInvariant(),

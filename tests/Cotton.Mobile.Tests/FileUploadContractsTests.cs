@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(" sha256 ")]
         public void Upload_settings_accept_supported_sha256_algorithm(string algorithm)
         {
-            var settings = new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes, algorithm);
+            CottonFileUploadSettings settings = new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes, algorithm);
 
             Assert.Equal(CottonFileUploadSettings.MinimumChunkSizeBytes, settings.MaxChunkSizeBytes);
             Assert.Equal(CottonFileUploadSettings.SupportedSha256Algorithm, settings.SupportedHashAlgorithm);
@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Upload_source_snapshot_normalizes_user_selected_file_metadata()
         {
-            var snapshot = new CottonFileUploadSourceSnapshot(
+            CottonFileUploadSourceSnapshot snapshot = new CottonFileUploadSourceSnapshot(
                 " /tmp/report.pdf ",
                 " application/pdf ",
                 1536);
@@ -43,7 +43,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Upload_source_snapshot_uses_explicit_safe_defaults()
         {
-            var snapshot = new CottonFileUploadSourceSnapshot(" ", " ", null);
+            CottonFileUploadSourceSnapshot snapshot = new CottonFileUploadSourceSnapshot(" ", " ", null);
 
             Assert.Equal(CottonFileUploadSourceSnapshot.DefaultFileName, snapshot.Name);
             Assert.Equal(CottonFileUploadSourceSnapshot.DefaultContentType, snapshot.ContentType);
@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Upload_source_snapshot_normalizes_optional_metadata()
         {
-            var snapshot = new CottonFileUploadSourceSnapshot(
+            CottonFileUploadSourceSnapshot snapshot = new CottonFileUploadSourceSnapshot(
                 "photo.jpg",
                 "image/jpeg",
                 200,
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Upload_source_snapshot_keeps_metadata_when_renamed()
         {
-            var snapshot = new CottonFileUploadSourceSnapshot(
+            CottonFileUploadSourceSnapshot snapshot = new CottonFileUploadSourceSnapshot(
                 "photo.jpg",
                 "image/jpeg",
                 200,
@@ -111,7 +111,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Upload_hash_streaming_uses_lowercase_sha256_hex()
         {
-            await using var content = new MemoryStream("abc"u8.ToArray());
+            await using MemoryStream content = new MemoryStream("abc"u8.ToArray());
 
             string hash = await CottonContentHash.ComputeSha256Async(content);
 
@@ -139,7 +139,7 @@ namespace Cotton.Mobile.Tests
         public void Upload_destination_snapshot_normalizes_folder_copy()
         {
             Guid folderId = Guid.Parse("11111111-2222-3333-4444-555555555555");
-            var destination = new CottonUploadDestinationSnapshot(
+            CottonUploadDestinationSnapshot destination = new CottonUploadDestinationSnapshot(
                 folderId,
                 " Camera Uploads ",
                 " Files / Camera Uploads ");

@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Services
                 return [];
             }
 
-            var protectedDirectories = new HashSet<string>(StringComparer.Ordinal);
+            HashSet<string> protectedDirectories = new HashSet<string>(StringComparer.Ordinal);
             try
             {
                 foreach (string manifestPath in Directory.EnumerateFiles(
@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                var fileIds = new List<Guid>();
+                List<Guid> fileIds = new List<Guid>();
                 foreach (JsonElement item in items.EnumerateArray())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -210,7 +210,7 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
-                var file = new FileInfo(path);
+                FileInfo file = new FileInfo(path);
                 if (!file.Exists || !CottonTemporaryFilePolicy.IsAbandoned(file, utcNow))
                 {
                     continue;

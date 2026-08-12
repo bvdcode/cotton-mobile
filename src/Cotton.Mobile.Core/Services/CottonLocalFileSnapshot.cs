@@ -3,19 +3,12 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonLocalFileSnapshot
+    public class CottonLocalFileSnapshot(string fileName, long sizeBytes, DateTime updatedAtUtc)
     {
-        public CottonLocalFileSnapshot(string fileName, long sizeBytes, DateTime updatedAtUtc)
-        {
-            FileName = string.IsNullOrWhiteSpace(fileName) ? throw new ArgumentException("File name is required.", nameof(fileName)) : fileName;
-            SizeBytes = sizeBytes;
-            UpdatedAtUtc = updatedAtUtc;
-        }
+        public string FileName { get; } = string.IsNullOrWhiteSpace(fileName) ? throw new ArgumentException("File name is required.", nameof(fileName)) : fileName;
 
-        public string FileName { get; }
+        public long SizeBytes { get; } = sizeBytes;
 
-        public long SizeBytes { get; }
-
-        public DateTime UpdatedAtUtc { get; }
+        public DateTime UpdatedAtUtc { get; } = updatedAtUtc;
     }
 }

@@ -6,19 +6,13 @@ using Android.Content;
 
 namespace Cotton.Mobile.Services
 {
-    internal class PendingDocumentTreePick : IDisposable
+    internal class PendingDocumentTreePick(
+        TaskCompletionSource<Intent?> completion,
+        CancellationTokenRegistration cancellationRegistration) : IDisposable
     {
-        private readonly CancellationTokenRegistration _cancellationRegistration;
+        private readonly CancellationTokenRegistration _cancellationRegistration = cancellationRegistration;
 
-        public PendingDocumentTreePick(
-            TaskCompletionSource<Intent?> completion,
-            CancellationTokenRegistration cancellationRegistration)
-        {
-            Completion = completion;
-            _cancellationRegistration = cancellationRegistration;
-        }
-
-        public TaskCompletionSource<Intent?> Completion { get; }
+        public TaskCompletionSource<Intent?> Completion { get; } = completion;
 
         public void Dispose()
         {

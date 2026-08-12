@@ -13,10 +13,10 @@ namespace Cotton.Mobile.Services
         {
             ValidateInput(root, localContent, remoteContent, manifestFiles);
 
-            var index = new CottonBidirectionalSyncIndex(localContent, remoteContent, manifestFiles);
-            var itemPlanner = new CottonBidirectionalSyncItemPlanner(index);
-            var handledRemoteIds = new HashSet<Guid>();
-            var handledManifestPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            CottonBidirectionalSyncIndex index = new CottonBidirectionalSyncIndex(localContent, remoteContent, manifestFiles);
+            CottonBidirectionalSyncItemPlanner itemPlanner = new CottonBidirectionalSyncItemPlanner(index);
+            HashSet<Guid> handledRemoteIds = new HashSet<Guid>();
+            HashSet<string> handledManifestPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<CottonBidirectionalSyncPlanItem> items = localContent.Problems
                 .OrderBy(problem => problem.RelativePath, StringComparer.OrdinalIgnoreCase)
                 .Select(CottonBidirectionalSyncPlanItemFactory.CreateLocalProblem)

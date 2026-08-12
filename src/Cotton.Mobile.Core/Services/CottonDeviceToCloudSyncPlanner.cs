@@ -13,9 +13,9 @@ namespace Cotton.Mobile.Services
         {
             ValidateInput(root, localContent, remoteContent, uploadReceipts);
 
-            var index = new CottonDeviceToCloudSyncIndex(localContent, remoteContent, uploadReceipts);
-            var itemPlanner = new CottonDeviceToCloudSyncItemPlanner(root, index);
-            var requiredFolderPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            CottonDeviceToCloudSyncIndex index = new CottonDeviceToCloudSyncIndex(localContent, remoteContent, uploadReceipts);
+            CottonDeviceToCloudSyncItemPlanner itemPlanner = new CottonDeviceToCloudSyncItemPlanner(root, index);
+            HashSet<string> requiredFolderPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             List<CottonDeviceToCloudSyncPlanItem> fileItems = [];
             foreach (CottonDeviceToCloudLocalItemSnapshot localFile in localContent.Items
                 .Where(item => item.ItemType == CottonFileBrowserEntryType.File)

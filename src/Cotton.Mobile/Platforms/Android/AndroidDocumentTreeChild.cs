@@ -7,23 +7,15 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
 {
-    public class AndroidDocumentTreeChild
+    public class AndroidDocumentTreeChild(AndroidUri uri, string documentId, string displayName, string mimeType)
     {
-        public AndroidDocumentTreeChild(AndroidUri uri, string documentId, string displayName, string mimeType)
-        {
-            Uri = uri;
-            DocumentId = documentId;
-            DisplayName = displayName;
-            MimeType = mimeType;
-        }
+        public AndroidUri Uri { get; } = uri;
 
-        public AndroidUri Uri { get; }
+        public string DocumentId { get; } = documentId;
 
-        public string DocumentId { get; }
+        public string DisplayName { get; } = displayName;
 
-        public string DisplayName { get; }
-
-        public string MimeType { get; }
+        public string MimeType { get; } = mimeType;
 
         public bool IsDirectory => string.Equals(
             MimeType,

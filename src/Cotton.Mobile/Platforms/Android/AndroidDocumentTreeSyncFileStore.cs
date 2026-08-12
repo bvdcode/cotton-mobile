@@ -230,7 +230,7 @@ namespace Cotton.Mobile.Services
             Stream target,
             CancellationToken cancellationToken)
         {
-            using var source = new FileStream(
+            using FileStream source = new FileStream(
                 sourcePath,
                 FileMode.Open,
                 FileAccess.Read,

@@ -45,7 +45,7 @@ namespace Cotton.Mobile.Services
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            var results = new List<CottonDeviceToCloudSyncRootRunResult>(roots.Count);
+            List<CottonDeviceToCloudSyncRootRunResult> results = new List<CottonDeviceToCloudSyncRootRunResult>(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
             {

@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Services
             Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId = CreateLocalFileMap(localFileList);
             Dictionary<string, CottonSyncedFileSnapshot> localByRelativePath = CreateLocalPathMap(localFileList);
             Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> remoteFilesById = CreateRemoteFileMap(remoteContent);
-            var handledLocalFileIds = new HashSet<Guid>();
+            HashSet<Guid> handledLocalFileIds = new HashSet<Guid>();
             List<CottonCloudToDeviceSyncPlanItem> items = [];
 
             foreach (CottonCloudToDeviceRemoteItemSnapshot item in remoteContent.Entries
@@ -190,7 +190,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<Guid, CottonSyncedFileSnapshot> CreateLocalFileMap(
             IEnumerable<CottonSyncedFileSnapshot> localFiles)
         {
-            var result = new Dictionary<Guid, CottonSyncedFileSnapshot>();
+            Dictionary<Guid, CottonSyncedFileSnapshot> result = new Dictionary<Guid, CottonSyncedFileSnapshot>();
             foreach (CottonSyncedFileSnapshot localFile in localFiles)
             {
                 if (!result.TryAdd(localFile.FileId, localFile))
@@ -205,7 +205,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonSyncedFileSnapshot> CreateLocalPathMap(
             IEnumerable<CottonSyncedFileSnapshot> localFiles)
         {
-            var result = new Dictionary<string, CottonSyncedFileSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonSyncedFileSnapshot> result = new Dictionary<string, CottonSyncedFileSnapshot>(StringComparer.OrdinalIgnoreCase);
             foreach (CottonSyncedFileSnapshot localFile in localFiles)
             {
                 if (!result.TryAdd(localFile.RelativePath, localFile))
@@ -220,7 +220,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> CreateRemoteFileMap(
             CottonCloudToDeviceRemoteContentSnapshot remoteContent)
         {
-            var result = new Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot>();
+            Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot> result = new Dictionary<Guid, CottonCloudToDeviceRemoteItemSnapshot>();
             foreach (CottonCloudToDeviceRemoteItemSnapshot item in remoteContent.Entries
                 .Where(item => item.Entry.Type == CottonFileBrowserEntryType.File))
             {

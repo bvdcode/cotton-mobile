@@ -3,24 +3,16 @@
 
 namespace Cotton.Mobile.Services
 {
-    internal class CottonUploadOnlyFileWorkflow
+    internal class CottonUploadOnlyFileWorkflow(
+        ICottonDeviceToCloudSyncFileOperator fileOperator,
+        ICottonDeviceToCloudLocalFileOperator localFileOperator,
+        ICottonUploadReceiptStore uploadReceiptStore,
+        TimeProvider timeProvider)
     {
-        private readonly ICottonDeviceToCloudSyncFileOperator _fileOperator;
-        private readonly ICottonDeviceToCloudLocalFileOperator _localFileOperator;
-        private readonly ICottonUploadReceiptStore _uploadReceiptStore;
-        private readonly TimeProvider _timeProvider;
-
-        public CottonUploadOnlyFileWorkflow(
-            ICottonDeviceToCloudSyncFileOperator fileOperator,
-            ICottonDeviceToCloudLocalFileOperator localFileOperator,
-            ICottonUploadReceiptStore uploadReceiptStore,
-            TimeProvider timeProvider)
-        {
-            _fileOperator = fileOperator;
-            _localFileOperator = localFileOperator;
-            _uploadReceiptStore = uploadReceiptStore;
-            _timeProvider = timeProvider;
-        }
+        private readonly ICottonDeviceToCloudSyncFileOperator _fileOperator = fileOperator;
+        private readonly ICottonDeviceToCloudLocalFileOperator _localFileOperator = localFileOperator;
+        private readonly ICottonUploadReceiptStore _uploadReceiptStore = uploadReceiptStore;
+        private readonly TimeProvider _timeProvider = timeProvider;
 
         public async Task<CottonDeviceToCloudLocalFileDeleteStatus?> UploadFileAsync(
             Uri instanceUri,

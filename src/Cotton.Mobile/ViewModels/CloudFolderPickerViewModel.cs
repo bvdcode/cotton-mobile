@@ -192,7 +192,7 @@ namespace Cotton.Mobile.ViewModels
             try
             {
                 CottonFolderContent content = await loadAsync();
-                var folder = new CottonFolderHandle(content.FolderId, content.FolderName);
+                CottonFolderHandle folder = new CottonFolderHandle(content.FolderId, content.FolderName);
                 if (resetPath)
                 {
                     _path.Clear();

@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Services
                 .Select(path => Path.GetFullPath(path))
                 .ToHashSet(StringComparer.Ordinal);
             long totalBytes = entries.Sum(entry => entry.SizeBytes);
-            var deletePaths = new List<string>();
+            List<string> deletePaths = new List<string>();
 
             foreach (CottonFileDownloadCacheEntry entry in entries
                 .OrderBy(entry => entry.ActivityUtc)

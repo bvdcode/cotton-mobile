@@ -129,7 +129,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public async Task Run_root_rejects_root_from_another_instance()
         {
-            var otherInstanceUri = new Uri("https://files.cottoncloud.dev");
+            Uri otherInstanceUri = new Uri("https://files.cottoncloud.dev");
             CottonSyncRootSnapshot root = new(
                 SyncRootId,
                 otherInstanceUri,

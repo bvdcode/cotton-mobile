@@ -11,15 +11,10 @@ using Microsoft.Extensions.Logging;
 namespace Cotton.Mobile
 {
     [Register("dev.cottoncloud.mobile.AndroidNotificationPollingWorker")]
-    public class AndroidNotificationPollingWorker : Worker
+    public class AndroidNotificationPollingWorker(
+        Context context,
+        WorkerParameters workerParameters) : Worker(context, workerParameters)
     {
-        public AndroidNotificationPollingWorker(
-            Context context,
-            WorkerParameters workerParameters)
-            : base(context, workerParameters)
-        {
-        }
-
         public override ListenableWorker.Result DoWork()
         {
             IServiceProvider? services = IPlatformApplication.Current?.Services;

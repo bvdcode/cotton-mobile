@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Services
             ContentResolver contentResolver = activity.ContentResolver
                 ?? throw new InvalidOperationException("Folder picker needs an active Android content resolver.");
 
-            var intent = new Intent(Intent.ActionOpenDocumentTree);
+            Intent intent = new Intent(Intent.ActionOpenDocumentTree);
             intent.AddFlags(PickerIntentFlags);
 
             Intent? resultIntent = await MainThread.InvokeOnMainThreadAsync(() =>

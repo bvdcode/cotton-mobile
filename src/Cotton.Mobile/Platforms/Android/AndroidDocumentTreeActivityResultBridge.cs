@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(intent);
             cancellationToken.ThrowIfCancellationRequested();
 
-            var completion = new TaskCompletionSource<Intent?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<Intent?> completion = new TaskCompletionSource<Intent?>(TaskCreationOptions.RunContinuationsAsynchronously);
             CancellationTokenRegistration cancellationRegistration = default;
             lock (_syncRoot)
             {

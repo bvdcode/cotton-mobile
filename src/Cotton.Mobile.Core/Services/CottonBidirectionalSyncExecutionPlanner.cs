@@ -14,8 +14,8 @@ namespace Cotton.Mobile.Services
                 return CreateEmptyExecutionPlan(preflightPlan);
             }
 
-            var cloudItems = new List<CottonCloudToDeviceSyncPlanItem>();
-            var deviceItems = new List<CottonDeviceToCloudSyncPlanItem>();
+            List<CottonCloudToDeviceSyncPlanItem> cloudItems = new List<CottonCloudToDeviceSyncPlanItem>();
+            List<CottonDeviceToCloudSyncPlanItem> deviceItems = new List<CottonDeviceToCloudSyncPlanItem>();
 
             foreach (CottonBidirectionalSyncPlanItem item in preflightPlan.Items)
             {

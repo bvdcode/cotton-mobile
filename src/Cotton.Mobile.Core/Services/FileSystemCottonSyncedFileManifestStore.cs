@@ -179,9 +179,9 @@ namespace Cotton.Mobile.Services
             IEnumerable<CottonSyncedFileSnapshot> items)
         {
             List<CottonSyncedFileSnapshot> source = items.ToList();
-            var fileIds = new HashSet<Guid>();
-            var relativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var result = new List<CottonSyncedFileSnapshot>(source.Count);
+            HashSet<Guid> fileIds = new HashSet<Guid>();
+            HashSet<string> relativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<CottonSyncedFileSnapshot> result = new List<CottonSyncedFileSnapshot>(source.Count);
 
             for (int index = source.Count - 1; index >= 0; index--)
             {

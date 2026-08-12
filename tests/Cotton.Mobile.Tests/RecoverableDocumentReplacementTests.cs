@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         public void Replace_promotes_verified_replacement_before_removing_backup()
         {
             FakeDocumentMutationStore store = CreateStore();
-            var replacement = new CottonRecoverableDocumentReplacement<string>(store);
+            CottonRecoverableDocumentReplacement<string> replacement = new CottonRecoverableDocumentReplacement<string>(store);
 
             string promoted = replacement.Replace("temporary", "current", "report.pdf", "report.backup");
 
@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
-            var replacement = new CottonRecoverableDocumentReplacement<string>(store);
+            CottonRecoverableDocumentReplacement<string> replacement = new CottonRecoverableDocumentReplacement<string>(store);
 
             Assert.Throws<IOException>(
                 () => replacement.Replace("temporary", "current", "report.pdf", "report.backup"));
@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Tests
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
             store.FailingRenameCalls.Add(3);
-            var replacement = new CottonRecoverableDocumentReplacement<string>(store);
+            CottonRecoverableDocumentReplacement<string> replacement = new CottonRecoverableDocumentReplacement<string>(store);
 
             AggregateException exception = Assert.Throws<AggregateException>(
                 () => replacement.Replace("temporary", "current", "report.pdf", "report.backup"));
@@ -70,7 +70,7 @@ namespace Cotton.Mobile.Tests
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
             store.FailingDeleteCalls.Add(1);
-            var replacement = new CottonRecoverableDocumentReplacement<string>(store);
+            CottonRecoverableDocumentReplacement<string> replacement = new CottonRecoverableDocumentReplacement<string>(store);
 
             AggregateException exception = Assert.Throws<AggregateException>(
                 () => replacement.Replace("temporary", "current", "report.pdf", "report.backup"));
@@ -85,7 +85,7 @@ namespace Cotton.Mobile.Tests
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingDeleteCalls.Add(1);
-            var replacement = new CottonRecoverableDocumentReplacement<string>(store);
+            CottonRecoverableDocumentReplacement<string> replacement = new CottonRecoverableDocumentReplacement<string>(store);
 
             Assert.Throws<IOException>(
                 () => replacement.Replace("temporary", "current", "report.pdf", "report.backup"));
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
 
         private static FakeDocumentMutationStore CreateStore()
         {
-            var store = new FakeDocumentMutationStore();
+            FakeDocumentMutationStore store = new FakeDocumentMutationStore();
             store.Add("current", "report.pdf");
             store.Add("temporary", "report.temporary");
             return store;

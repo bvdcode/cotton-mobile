@@ -3,28 +3,20 @@
 
 namespace Cotton.Mobile.Services
 {
-    internal class CottonDeviceToCloudSyncIndex
+    internal class CottonDeviceToCloudSyncIndex(
+        CottonDeviceToCloudLocalContentSnapshot localContent,
+        CottonDeviceToCloudRemoteContentSnapshot remoteContent,
+        IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
     {
         private const char RelativePathSeparator = '/';
 
-        public CottonDeviceToCloudSyncIndex(
-            CottonDeviceToCloudLocalContentSnapshot localContent,
-            CottonDeviceToCloudRemoteContentSnapshot remoteContent,
-            IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
-        {
-            LocalByPath = CreateLocalItemMap(localContent);
-            RemoteByPath = CreateRemotePathMap(remoteContent);
-            ReceiptsBySource = CreateReceiptSourceMap(uploadReceipts);
-            RemoteByOperation = CreateRemoteOperationMap(remoteContent);
-        }
+        public IReadOnlyDictionary<string, CottonDeviceToCloudLocalItemSnapshot> LocalByPath { get; } = CreateLocalItemMap(localContent);
 
-        public IReadOnlyDictionary<string, CottonDeviceToCloudLocalItemSnapshot> LocalByPath { get; }
+        public IReadOnlyDictionary<string, CottonDeviceToCloudRemoteItemSnapshot> RemoteByPath { get; } = CreateRemotePathMap(remoteContent);
 
-        public IReadOnlyDictionary<string, CottonDeviceToCloudRemoteItemSnapshot> RemoteByPath { get; }
+        public IReadOnlyDictionary<string, CottonUploadReceiptSnapshot> ReceiptsBySource { get; } = CreateReceiptSourceMap(uploadReceipts);
 
-        public IReadOnlyDictionary<string, CottonUploadReceiptSnapshot> ReceiptsBySource { get; }
-
-        public IReadOnlyDictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> RemoteByOperation { get; }
+        public IReadOnlyDictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> RemoteByOperation { get; } = CreateRemoteOperationMap(remoteContent);
 
         public bool TryCollectRequiredFolders(
             CottonDeviceToCloudSyncPlanItem fileItem,
@@ -65,7 +57,7 @@ namespace Cotton.Mobile.Services
 
         private static IReadOnlyList<string> GetParentPaths(string relativePath)
         {
-            var paths = new List<string>();
+            List<string> paths = new List<string>();
             string currentPath = relativePath;
             while (currentPath.LastIndexOf(RelativePathSeparator) is int separatorIndex && separatorIndex >= 0)
             {
@@ -80,7 +72,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> CreateLocalItemMap(
             CottonDeviceToCloudLocalContentSnapshot localContent)
         {
-            var result = new Dictionary<string, CottonDeviceToCloudLocalItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudLocalItemSnapshot>(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudLocalItemSnapshot localItem in localContent.Items)
             {
                 if (!result.TryAdd(localItem.RelativePath, localItem))
@@ -97,7 +89,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> CreateRemotePathMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            var result = new Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot>(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (!result.TryAdd(remoteItem.RelativePath, remoteItem))
@@ -114,8 +106,8 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonUploadReceiptSnapshot> CreateReceiptSourceMap(
             IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
         {
-            var result = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
-            var operationIds = new HashSet<Guid>();
+            Dictionary<string, CottonUploadReceiptSnapshot> result = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
+            HashSet<Guid> operationIds = new HashSet<Guid>();
             foreach (CottonUploadReceiptSnapshot receipt in uploadReceipts)
             {
                 if (!result.TryAdd(receipt.LocalSourceId, receipt))
@@ -139,7 +131,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> CreateRemoteOperationMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            var result = new Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot>();
+            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot>();
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (remoteItem.Entry.Type != CottonFileBrowserEntryType.File

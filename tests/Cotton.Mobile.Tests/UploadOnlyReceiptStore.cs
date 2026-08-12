@@ -2,19 +2,13 @@ using Cotton.Mobile.Services;
 
 namespace Cotton.Mobile.Tests
 {
-    internal class UploadOnlyReceiptStore : ICottonUploadReceiptStore
+    internal class UploadOnlyReceiptStore(
+        List<string> events,
+        IReadOnlyList<CottonUploadReceiptSnapshot> initialReceipts) : ICottonUploadReceiptStore
     {
-        private readonly List<string> _events;
+        private readonly List<string> _events = events;
 
-        public UploadOnlyReceiptStore(
-            List<string> events,
-            IReadOnlyList<CottonUploadReceiptSnapshot> initialReceipts)
-        {
-            _events = events;
-            Receipts = [.. initialReceipts];
-        }
-
-        public List<CottonUploadReceiptSnapshot> Receipts { get; }
+        public List<CottonUploadReceiptSnapshot> Receipts { get; } = [.. initialReceipts];
 
         public List<CottonUploadReceiptSnapshot> SaveHistory { get; } = [];
 

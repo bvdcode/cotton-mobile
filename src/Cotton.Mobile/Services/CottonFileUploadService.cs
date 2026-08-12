@@ -4,6 +4,7 @@
 using System.Security.Cryptography;
 using Cotton.Files;
 using Cotton.Sdk;
+using Cotton.Settings;
 
 namespace Cotton.Mobile.Services
 {
@@ -91,8 +92,8 @@ namespace Cotton.Mobile.Services
             IProgress<long>? progress,
             CancellationToken cancellationToken)
         {
-            var serverSettings = await client.Settings.GetAsync(cancellationToken).ConfigureAwait(false);
-            var uploadSettings = new CottonFileUploadSettings(
+            ClientSettingsDto serverSettings = await client.Settings.GetAsync(cancellationToken).ConfigureAwait(false);
+            CottonFileUploadSettings uploadSettings = new CottonFileUploadSettings(
                 serverSettings.MaxChunkSizeBytes,
                 serverSettings.SupportedHashAlgorithm);
 
@@ -145,11 +146,11 @@ namespace Cotton.Mobile.Services
             IProgress<long>? progress,
             CancellationToken cancellationToken)
         {
-            var chunkHashes = new List<string>();
+            List<string> chunkHashes = new List<string>();
             byte[] buffer = new byte[settings.MaxChunkSizeBytes];
             long uploadedBytes = 0;
 
-            using var contentHash = SHA256.Create();
+            using SHA256 contentHash = SHA256.Create();
             while (true)
             {
                 int bytesRead = await ReadChunkAsync(content, buffer, cancellationToken).ConfigureAwait(false);
@@ -164,7 +165,7 @@ namespace Cotton.Mobile.Services
 
                 if (!await client.Chunks.ExistsAsync(chunkHash, cancellationToken).ConfigureAwait(false))
                 {
-                    using var chunkStream = new MemoryStream(buffer, 0, bytesRead, writable: false);
+                    using MemoryStream chunkStream = new MemoryStream(buffer, 0, bytesRead, writable: false);
                     await client.Chunks.UploadRawAsync(
                             chunkHash,
                             chunkStream,

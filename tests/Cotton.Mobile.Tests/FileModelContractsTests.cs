@@ -70,7 +70,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void From_file_preserves_an_immutable_metadata_snapshot()
         {
-            var sourceMetadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            Dictionary<string, string> sourceMetadata = new Dictionary<string, string>(StringComparer.Ordinal)
             {
                 [CottonFileUploadMetadataKeys.UploadOperationId] = "operation-1",
             };
@@ -112,7 +112,7 @@ namespace Cotton.Mobile.Tests
         public void Local_file_snapshot_marks_and_clears_entry_without_changing_identity()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
-            var localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
+            CottonLocalFileSnapshot localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
 
             CottonFileBrowserEntry marked = entry.WithLocalFile(localFile);
             CottonFileBrowserEntry cleared = marked.WithoutLocalFile();
@@ -130,7 +130,7 @@ namespace Cotton.Mobile.Tests
         public void Selection_marker_preserves_file_identity_and_local_state()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
-            var localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
+            CottonLocalFileSnapshot localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
 
             CottonFileBrowserEntry selected = entry.WithSelection(true).WithLocalFile(localFile);
             CottonFileBrowserEntry cleared = selected.WithSelection(false);
@@ -147,9 +147,9 @@ namespace Cotton.Mobile.Tests
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt.AddMinutes(1));
-            var freshLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
-            var staleTimeLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt.AddSeconds(-3));
-            var wrongSizeLocal = new CottonLocalFileSnapshot("notes.txt", 41, UpdatedAt);
+            CottonLocalFileSnapshot freshLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
+            CottonLocalFileSnapshot staleTimeLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt.AddSeconds(-3));
+            CottonLocalFileSnapshot wrongSizeLocal = new CottonLocalFileSnapshot("notes.txt", 41, UpdatedAt);
 
             CottonOfflineFileAvailabilitySnapshot available =
                 CottonOfflineFileAvailabilitySnapshot.Create(entry, pin, freshLocal);

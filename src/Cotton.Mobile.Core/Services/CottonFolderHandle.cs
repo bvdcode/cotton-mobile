@@ -5,16 +5,10 @@ using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonFolderHandle
+    public class CottonFolderHandle(Guid id, string name)
     {
-        public CottonFolderHandle(Guid id, string name)
-        {
-            Id = id;
-            Name = string.IsNullOrWhiteSpace(name) ? CoreResources.FilesName : name.Trim();
-        }
+        public Guid Id { get; } = id;
 
-        public Guid Id { get; }
-
-        public string Name { get; }
+        public string Name { get; } = string.IsNullOrWhiteSpace(name) ? CoreResources.FilesName : name.Trim();
     }
 }

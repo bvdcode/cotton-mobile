@@ -27,7 +27,7 @@ namespace Cotton.Mobile
             _channelService = channelService;
         }
 
-        public async Task ShowAsync(
+        public async Task<CottonLocalNotificationDeliveryStatus> ShowAsync(
             CottonNotificationDeliveryPlan deliveryPlan,
             CancellationToken cancellationToken = default)
         {
@@ -36,7 +36,7 @@ namespace Cotton.Mobile
 
             if (!await _permissionService.CanPostAsync(cancellationToken).ConfigureAwait(false))
             {
-                return;
+                return CottonLocalNotificationDeliveryStatus.PermissionDenied;
             }
 
             _channelService.EnsureChannels();
@@ -60,7 +60,7 @@ namespace Cotton.Mobile
                         AppResources.AppTitle,
                         message,
                         latest.Priority));
-                return;
+                return CottonLocalNotificationDeliveryStatus.Delivered;
             }
 
             foreach (CottonNotificationDto notification in deliveryPlan.Notifications.Reverse())
@@ -75,6 +75,8 @@ namespace Cotton.Mobile
                         notification.Content,
                         notification.Priority));
             }
+
+            return CottonLocalNotificationDeliveryStatus.Delivered;
         }
 
         private static Notification BuildNotification(

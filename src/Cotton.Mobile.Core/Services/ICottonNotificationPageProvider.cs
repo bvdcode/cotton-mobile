@@ -3,10 +3,10 @@
 
 namespace Cotton.Mobile.Services
 {
-    public interface ICottonLocalNotificationService
+    public interface ICottonNotificationPageProvider
     {
-        Task ShowAsync(
-            CottonNotificationDeliveryPlan deliveryPlan,
+        Task<CottonNotificationPage?> GetLatestAsync(
+            int pageSize,
             CancellationToken cancellationToken = default);
     }
 }

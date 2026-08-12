@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 namespace Cotton.Mobile.Services
@@ -12,6 +12,8 @@ namespace Cotton.Mobile.Services
         long CurrentResumeVersion { get; }
 
         DateTimeOffset? LastStoppedAtUtc { get; }
+
+        bool IsForeground { get; }
 
         Task WaitForNextResumeAsync(long resumeVersionCheckpoint, CancellationToken cancellationToken);
 

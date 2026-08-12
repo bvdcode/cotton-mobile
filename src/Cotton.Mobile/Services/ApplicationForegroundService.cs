@@ -1,4 +1,4 @@
-﻿// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Microsoft.Extensions.Logging;
@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
         private readonly ILogger<ApplicationForegroundService> _logger;
         private TaskCompletionSource _nextResume = CreateResumeSource();
         private DateTimeOffset? _lastStoppedAtUtc;
+        private bool _isForeground;
         private long _resumeVersion;
 
         public ApplicationForegroundService(ILogger<ApplicationForegroundService> logger)
@@ -46,6 +47,17 @@ namespace Cotton.Mobile.Services
             }
         }
 
+        public bool IsForeground
+        {
+            get
+            {
+                lock (_gate)
+                {
+                    return _isForeground;
+                }
+            }
+        }
+
         public Task WaitForNextResumeAsync(long resumeVersionCheckpoint, CancellationToken cancellationToken)
         {
             Task resumeTask;
@@ -67,6 +79,7 @@ namespace Cotton.Mobile.Services
             lock (_gate)
             {
                 _lastStoppedAtUtc = DateTimeOffset.UtcNow;
+                _isForeground = false;
             }
 
             NotifyStoppedSubscribers();
@@ -79,6 +92,7 @@ namespace Cotton.Mobile.Services
             {
                 resume = _nextResume;
                 _nextResume = CreateResumeSource();
+                _isForeground = true;
                 _resumeVersion++;
             }
 

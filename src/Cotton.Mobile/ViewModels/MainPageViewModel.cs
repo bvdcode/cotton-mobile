@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly MainPageSessionCoordinator _sessionCoordinator;
         private readonly MainPageUserInteractionService _userInteractionService;
+        private readonly ICottonNotificationSessionService _notificationSessionService;
         private readonly ILogger<MainPageViewModel> _logger;
 
         private CancellationTokenSource? _authorizationCancellation;
@@ -24,18 +25,21 @@ namespace Cotton.Mobile.ViewModels
         public MainPageViewModel(
             MainPageSessionCoordinator sessionCoordinator,
             MainPageUserInteractionService userInteractionService,
+            ICottonNotificationSessionService notificationSessionService,
             ICottonMobileApplicationMetadata applicationMetadata,
             SyncSettingsViewModel sync,
             ILogger<MainPageViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(sessionCoordinator);
             ArgumentNullException.ThrowIfNull(userInteractionService);
+            ArgumentNullException.ThrowIfNull(notificationSessionService);
             ArgumentNullException.ThrowIfNull(applicationMetadata);
             ArgumentNullException.ThrowIfNull(sync);
             ArgumentNullException.ThrowIfNull(logger);
 
             _sessionCoordinator = sessionCoordinator;
             _userInteractionService = userInteractionService;
+            _notificationSessionService = notificationSessionService;
             _logger = logger;
 
             Display = new MainPageDisplayState(sessionCoordinator.DefaultInstanceUrl);
@@ -177,9 +181,12 @@ namespace Cotton.Mobile.ViewModels
                     await Sync.LoadForInstanceAsync(state.InstanceUriValue, profile.AccountScopeKey);
                 }
 
+                await _notificationSessionService.SetSessionAsync(state.InstanceUriValue);
+
                 return;
             }
 
+            await _notificationSessionService.SetSessionAsync(instanceUri: null);
             Sync.Clear();
             Display.ShowSignIn(state.Status);
             RefreshCommands();

@@ -56,6 +56,10 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
+            services.AddSingleton<AndroidNotificationChannelService>();
+            services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
+            services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
+            services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();
 #else
             services.AddSingleton<ICottonSyncLocalRootPickerService, DisabledCottonSyncLocalRootPickerService>();
             services.AddSingleton<ICottonSyncLocalRootPermissionResolver, StoredCottonSyncLocalRootPermissionResolver>();
@@ -83,9 +87,14 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
             services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
             services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
+            services.AddSingleton<ICottonNotificationCursorStore, PreferencesCottonNotificationCursorStore>();
             services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
             services.AddSingleton<ICottonAppCodeAuthorizationService, CottonAppCodeAuthorizationService>();
             services.AddSingleton<ICottonSessionService, CottonSessionService>();
+            services.AddSingleton(new CottonNotificationDeliveryPlanner(3));
+            services.AddSingleton<ICottonNotificationPollingService, CottonNotificationPollingService>();
+            services.AddSingleton<ICottonNotificationRealtimeService, CottonNotificationRealtimeService>();
+            services.AddSingleton<ICottonNotificationSessionService, CottonNotificationSessionService>();
         }
 
         private static void RegisterSyncServices(IServiceCollection services)

@@ -15,6 +15,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonInstanceStore _instanceStore;
         private readonly ICottonTokenStore _tokenStore;
         private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
+        private readonly ICottonNotificationCursorStore _notificationCursorStore;
         private readonly ICottonAppCodeAuthorizationService _appCodeAuthorization;
         private readonly ILogger<CottonSessionService> _logger;
 
@@ -23,6 +24,7 @@ namespace Cotton.Mobile.Services
             ICottonInstanceStore instanceStore,
             ICottonTokenStore tokenStore,
             ICottonPendingAppCodeSessionStore pendingSessionStore,
+            ICottonNotificationCursorStore notificationCursorStore,
             ICottonAppCodeAuthorizationService appCodeAuthorization,
             ILogger<CottonSessionService> logger)
         {
@@ -30,6 +32,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceStore);
             ArgumentNullException.ThrowIfNull(tokenStore);
             ArgumentNullException.ThrowIfNull(pendingSessionStore);
+            ArgumentNullException.ThrowIfNull(notificationCursorStore);
             ArgumentNullException.ThrowIfNull(appCodeAuthorization);
             ArgumentNullException.ThrowIfNull(logger);
 
@@ -37,6 +40,7 @@ namespace Cotton.Mobile.Services
             _instanceStore = instanceStore;
             _tokenStore = tokenStore;
             _pendingSessionStore = pendingSessionStore;
+            _notificationCursorStore = notificationCursorStore;
             _appCodeAuthorization = appCodeAuthorization;
             _logger = logger;
         }
@@ -143,6 +147,11 @@ namespace Cotton.Mobile.Services
             await TryClearLocalSessionAreaAsync(
                 _instanceStore.ClearAsync,
                 "instance",
+                failures,
+                cancellationToken).ConfigureAwait(false);
+            await TryClearLocalSessionAreaAsync(
+                _notificationCursorStore.ClearAsync,
+                "notification cursor",
                 failures,
                 cancellationToken).ConfigureAwait(false);
 

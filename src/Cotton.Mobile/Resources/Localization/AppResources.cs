@@ -91,6 +91,21 @@ namespace Cotton.Mobile.Resources.Localization
         public static string ReleaseInstallChannel => GetString(nameof(ReleaseInstallChannel));
         public static string CustomInstallChannel => GetString(nameof(CustomInstallChannel));
         public static string SelectedFolder => GetString(nameof(SelectedFolder));
+        public static string NotificationChannelName => GetString(nameof(NotificationChannelName));
+        public static string NotificationChannelDescription => GetString(nameof(NotificationChannelDescription));
+        public static string SecurityNotificationChannelName => GetString(nameof(SecurityNotificationChannelName));
+        public static string SecurityNotificationChannelDescription => GetString(nameof(SecurityNotificationChannelDescription));
+
+        public static string CreateNotificationSummary(string latestTitle, int additionalCount)
+        {
+            ArgumentException.ThrowIfNullOrWhiteSpace(latestTitle);
+            ArgumentOutOfRangeException.ThrowIfNegativeOrZero(additionalCount);
+
+            string format = additionalCount == 1
+                ? GetString("NotificationSummarySingleFormat")
+                : GetString("NotificationSummaryFormat");
+            return string.Format(CultureInfo.CurrentCulture, format, latestTitle, additionalCount);
+        }
 
         public static string CreateVersionText(string version, string build)
         {

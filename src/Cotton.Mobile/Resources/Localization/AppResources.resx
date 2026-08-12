@@ -87,4 +87,10 @@
   <data name="ReleaseInstallChannel" xml:space="preserve"><value>Release package</value></data>
   <data name="CustomInstallChannel" xml:space="preserve"><value>Custom package</value></data>
   <data name="SelectedFolder" xml:space="preserve"><value>Selected folder</value></data>
+  <data name="NotificationChannelName" xml:space="preserve"><value>Notifications</value></data>
+  <data name="NotificationChannelDescription" xml:space="preserve"><value>Account and activity notifications.</value></data>
+  <data name="SecurityNotificationChannelName" xml:space="preserve"><value>Security notifications</value></data>
+  <data name="SecurityNotificationChannelDescription" xml:space="preserve"><value>Important account security alerts.</value></data>
+  <data name="NotificationSummarySingleFormat" xml:space="preserve"><value>{0} + {1} unread notification</value></data>
+  <data name="NotificationSummaryFormat" xml:space="preserve"><value>{0} + {1} unread notifications</value></data>
 </root>

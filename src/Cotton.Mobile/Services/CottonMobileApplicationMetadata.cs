@@ -104,7 +104,7 @@ namespace Cotton.Mobile.Services
                 return fallback;
             }
 
-            var buffer = new char[value.Length];
+            char[] buffer = new char[value.Length];
             for (int index = 0; index < value.Length; index++)
             {
                 char character = value[index];

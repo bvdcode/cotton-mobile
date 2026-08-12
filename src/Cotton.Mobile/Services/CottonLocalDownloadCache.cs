@@ -5,16 +5,14 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonLocalDownloadCache : ICottonLocalDownloadCache
+    public class CottonLocalDownloadCache(
+        ILogger<CottonLocalDownloadCache> logger,
+        TimeProvider timeProvider) : ICottonLocalDownloadCache
     {
-        private readonly ILogger<CottonLocalDownloadCache> _logger;
-
-        public CottonLocalDownloadCache(ILogger<CottonLocalDownloadCache> logger)
-        {
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _logger = logger;
-        }
+        private readonly ILogger<CottonLocalDownloadCache> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public CottonLocalFileSnapshot? GetLocalDownload(Uri instanceUri, CottonFileBrowserEntry file)
         {
@@ -158,7 +156,7 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
-            var info = new FileInfo(CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file));
+            FileInfo info = new(CottonMobileStoragePaths.CreateDownloadPath(instanceUri, file));
             return info.Exists ? info : null;
         }
 
@@ -222,7 +220,7 @@ namespace Cotton.Mobile.Services
         {
             try
             {
-                info.LastAccessTimeUtc = DateTime.UtcNow;
+                info.LastAccessTimeUtc = _timeProvider.GetUtcNow().UtcDateTime;
             }
             catch (Exception exception)
                 when (exception is IOException

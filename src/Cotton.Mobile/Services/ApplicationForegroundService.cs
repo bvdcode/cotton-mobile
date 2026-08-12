@@ -5,21 +5,19 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class ApplicationForegroundService : IApplicationForegroundService
+    public class ApplicationForegroundService(
+        ILogger<ApplicationForegroundService> logger,
+        TimeProvider timeProvider) : IApplicationForegroundService
     {
         private readonly Lock _gate = new();
-        private readonly ILogger<ApplicationForegroundService> _logger;
+        private readonly ILogger<ApplicationForegroundService> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         private TaskCompletionSource _nextResume = CreateResumeSource();
         private DateTimeOffset? _lastStoppedAtUtc;
         private bool _isForeground;
         private long _resumeVersion;
-
-        public ApplicationForegroundService(ILogger<ApplicationForegroundService> logger)
-        {
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _logger = logger;
-        }
 
         public event EventHandler? Resumed;
 
@@ -78,7 +76,7 @@ namespace Cotton.Mobile.Services
         {
             lock (_gate)
             {
-                _lastStoppedAtUtc = DateTimeOffset.UtcNow;
+                _lastStoppedAtUtc = _timeProvider.GetUtcNow();
                 _isForeground = false;
             }
 

@@ -6,25 +6,20 @@ using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
-    public class FileDownloadCachePruner : IFileDownloadCachePruner
+    public class FileDownloadCachePruner(
+        FileDownloadCacheOptions options,
+        ICottonOfflineFilePinStore offlineFilePinStore,
+        ILogger<FileDownloadCachePruner> logger,
+        TimeProvider timeProvider) : IFileDownloadCachePruner
     {
-        private readonly FileDownloadCacheOptions _options;
-        private readonly ICottonOfflineFilePinStore _offlineFilePinStore;
-        private readonly ILogger<FileDownloadCachePruner> _logger;
-
-        public FileDownloadCachePruner(
-            FileDownloadCacheOptions options,
-            ICottonOfflineFilePinStore offlineFilePinStore,
-            ILogger<FileDownloadCachePruner> logger)
-        {
-            ArgumentNullException.ThrowIfNull(options);
-            ArgumentNullException.ThrowIfNull(offlineFilePinStore);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _options = options;
-            _offlineFilePinStore = offlineFilePinStore;
-            _logger = logger;
-        }
+        private readonly FileDownloadCacheOptions _options =
+            options ?? throw new ArgumentNullException(nameof(options));
+        private readonly ICottonOfflineFilePinStore _offlineFilePinStore =
+            offlineFilePinStore ?? throw new ArgumentNullException(nameof(offlineFilePinStore));
+        private readonly ILogger<FileDownloadCachePruner> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task PruneAsync(
             Uri instanceUri,
@@ -206,7 +201,7 @@ namespace Cotton.Mobile.Services
 
         private void DeleteAbandonedTemporaryDownloads(string rootDirectory, CancellationToken cancellationToken)
         {
-            DateTime utcNow = DateTime.UtcNow;
+            DateTime utcNow = _timeProvider.GetUtcNow().UtcDateTime;
             foreach (string path in Directory.EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories))
             {
                 cancellationToken.ThrowIfCancellationRequested();

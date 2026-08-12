@@ -10,8 +10,18 @@ using AndroidUri = Android.Net.Uri;
 
 namespace Cotton.Mobile.Services
 {
-    public class AndroidDocumentTreeDeviceToCloudLocalTreeReader : ICottonDeviceToCloudLocalTreeReader
+    public class AndroidDocumentTreeDeviceToCloudLocalTreeReader(TimeProvider timeProvider) :
+        ICottonDeviceToCloudLocalTreeReader
     {
+        private const int DocumentIdColumnIndex = 0;
+        private const int DisplayNameColumnIndex = 1;
+        private const int MimeTypeColumnIndex = 2;
+        private const int LastModifiedColumnIndex = 3;
+        private const int SizeColumnIndex = 4;
+
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
+
         private static readonly string[] ChildProjection =
         [
             DocumentsContract.Document.ColumnDocumentId,
@@ -34,7 +44,7 @@ namespace Cotton.Mobile.Services
                 .ConfigureAwait(false);
         }
 
-        private static CottonDeviceToCloudLocalContentSnapshot ReadTree(
+        private CottonDeviceToCloudLocalContentSnapshot ReadTree(
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
@@ -42,10 +52,10 @@ namespace Cotton.Mobile.Services
             ContentResolver resolver = GetContentResolver();
             AndroidUri treeUri = ParseTreeUri(root);
             AndroidUri rootUri = GetRootDocumentUri(treeUri);
-            var items = new List<CottonDeviceToCloudLocalItemSnapshot>();
-            var problems = new List<CottonDeviceToCloudLocalProblemSnapshot>();
+            List<CottonDeviceToCloudLocalItemSnapshot> items = [];
+            List<CottonDeviceToCloudLocalProblemSnapshot> problems = [];
             CottonSyncTraversalGuard<string> traversalGuard = new();
-            DateTime scanStartedAtUtc = DateTime.UtcNow;
+            DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
             string rootDocumentId = DocumentsContract.GetDocumentId(rootUri)
                 ?? throw new IOException("Document-tree root id is unavailable.");
             traversalGuard.TryEnterContainer(rootDocumentId, 0);
@@ -184,11 +194,11 @@ namespace Cotton.Mobile.Services
 
         private static AndroidDocumentTreeChild ReadChild(AndroidUri treeUri, ICursor cursor)
         {
-            string documentId = cursor.GetString(0)
+            string documentId = cursor.GetString(DocumentIdColumnIndex)
                 ?? throw new IOException("Document-tree child id is unavailable.");
-            string displayName = cursor.GetString(1)
+            string displayName = cursor.GetString(DisplayNameColumnIndex)
                 ?? throw new IOException("Document-tree child name is unavailable.");
-            string mimeType = cursor.GetString(2) ?? string.Empty;
+            string mimeType = cursor.GetString(MimeTypeColumnIndex) ?? string.Empty;
             AndroidUri childUri = DocumentsContract.BuildDocumentUriUsingTree(treeUri, documentId)
                 ?? throw new IOException("Could not build document-tree child URI.");
             return new AndroidDocumentTreeChild(childUri, documentId, displayName, mimeType);
@@ -196,12 +206,12 @@ namespace Cotton.Mobile.Services
 
         private static DateTime ReadLastModifiedUtc(ICursor cursor, DateTime scanStartedAtUtc)
         {
-            if (cursor.IsNull(3))
+            if (cursor.IsNull(LastModifiedColumnIndex))
             {
                 return scanStartedAtUtc;
             }
 
-            long milliseconds = cursor.GetLong(3);
+            long milliseconds = cursor.GetLong(LastModifiedColumnIndex);
             return milliseconds <= 0
                 ? scanStartedAtUtc
                 : DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).UtcDateTime;
@@ -209,12 +219,12 @@ namespace Cotton.Mobile.Services
 
         private static long? ReadSizeBytes(ICursor cursor)
         {
-            if (cursor.IsNull(4))
+            if (cursor.IsNull(SizeColumnIndex))
             {
                 return null;
             }
 
-            long sizeBytes = cursor.GetLong(4);
+            long sizeBytes = cursor.GetLong(SizeColumnIndex);
             return sizeBytes < 0 ? null : sizeBytes;
         }
 

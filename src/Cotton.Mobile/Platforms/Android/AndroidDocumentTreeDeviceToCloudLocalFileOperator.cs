@@ -139,7 +139,7 @@ namespace Cotton.Mobile.Services
                 return CottonDeviceToCloudLocalFileDeleteStatus.Changed;
             }
 
-            var flags = (DocumentContractFlags)cursor.GetLong(FlagsColumnIndex);
+            DocumentContractFlags flags = (DocumentContractFlags)cursor.GetLong(FlagsColumnIndex);
             if ((flags & DocumentContractFlags.SupportsDelete) == 0)
             {
                 return CottonDeviceToCloudLocalFileDeleteStatus.Unsupported;

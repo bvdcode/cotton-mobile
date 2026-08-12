@@ -15,9 +15,12 @@ namespace Cotton.Mobile.Services
             ICottonCloudClient client,
             AppCodeAuthorizationSession session,
             Uri instanceUri,
+            TimeProvider timeProvider,
             CancellationToken cancellationToken)
         {
-            while (DateTime.UtcNow < session.ExpiresAt)
+            ArgumentNullException.ThrowIfNull(timeProvider);
+
+            while (timeProvider.GetUtcNow().UtcDateTime < session.ExpiresAt)
             {
                 AppCodePollResult poll = await client.Auth.PollAppCodeAsync(
                     session.PollToken,
@@ -35,6 +38,7 @@ namespace Cotton.Mobile.Services
                 await DelayBeforeNextPollAsync(
                     ResolvePollDelay(session, poll),
                     session.ExpiresAt,
+                    timeProvider,
                     cancellationToken).ConfigureAwait(false);
             }
 
@@ -98,16 +102,17 @@ namespace Cotton.Mobile.Services
         private static async Task DelayBeforeNextPollAsync(
             TimeSpan delay,
             DateTime expiresAt,
+            TimeProvider timeProvider,
             CancellationToken cancellationToken)
         {
-            TimeSpan remaining = expiresAt - DateTime.UtcNow;
+            TimeSpan remaining = expiresAt - timeProvider.GetUtcNow().UtcDateTime;
             if (remaining <= TimeSpan.Zero)
             {
                 return;
             }
 
             TimeSpan effectiveDelay = delay < remaining ? delay : remaining;
-            await Task.Delay(effectiveDelay, cancellationToken).ConfigureAwait(false);
+            await Task.Delay(effectiveDelay, timeProvider, cancellationToken).ConfigureAwait(false);
         }
     }
 }

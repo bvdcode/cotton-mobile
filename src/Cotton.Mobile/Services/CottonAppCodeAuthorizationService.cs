@@ -9,39 +9,30 @@ using Microsoft.Maui.ApplicationModel;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonAppCodeAuthorizationService : ICottonAppCodeAuthorizationService
+    public class CottonAppCodeAuthorizationService(
+        ICottonClientFactory clientFactory,
+        ICottonMobileApplicationMetadata metadata,
+        ICottonPendingAppCodeSessionStore pendingSessionStore,
+        IBrowser browser,
+        IApplicationForegroundService foregroundService,
+        ILogger<CottonAppCodeAuthorizationService> logger,
+        TimeProvider timeProvider) : ICottonAppCodeAuthorizationService
     {
         private static readonly TimeSpan RestoreTimeout = TimeSpan.FromSeconds(8);
 
-        private readonly ICottonClientFactory _clientFactory;
-        private readonly ICottonMobileApplicationMetadata _metadata;
-        private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore;
-        private readonly IBrowser _browser;
-        private readonly IApplicationForegroundService _foregroundService;
-        private readonly ILogger<CottonAppCodeAuthorizationService> _logger;
-
-        public CottonAppCodeAuthorizationService(
-            ICottonClientFactory clientFactory,
-            ICottonMobileApplicationMetadata metadata,
-            ICottonPendingAppCodeSessionStore pendingSessionStore,
-            IBrowser browser,
-            IApplicationForegroundService foregroundService,
-            ILogger<CottonAppCodeAuthorizationService> logger)
-        {
-            ArgumentNullException.ThrowIfNull(clientFactory);
-            ArgumentNullException.ThrowIfNull(metadata);
-            ArgumentNullException.ThrowIfNull(pendingSessionStore);
-            ArgumentNullException.ThrowIfNull(browser);
-            ArgumentNullException.ThrowIfNull(foregroundService);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _clientFactory = clientFactory;
-            _metadata = metadata;
-            _pendingSessionStore = pendingSessionStore;
-            _browser = browser;
-            _foregroundService = foregroundService;
-            _logger = logger;
-        }
+        private readonly ICottonClientFactory _clientFactory =
+            clientFactory ?? throw new ArgumentNullException(nameof(clientFactory));
+        private readonly ICottonMobileApplicationMetadata _metadata =
+            metadata ?? throw new ArgumentNullException(nameof(metadata));
+        private readonly ICottonPendingAppCodeSessionStore _pendingSessionStore =
+            pendingSessionStore ?? throw new ArgumentNullException(nameof(pendingSessionStore));
+        private readonly IBrowser _browser = browser ?? throw new ArgumentNullException(nameof(browser));
+        private readonly IApplicationForegroundService _foregroundService =
+            foregroundService ?? throw new ArgumentNullException(nameof(foregroundService));
+        private readonly ILogger<CottonAppCodeAuthorizationService> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
+        private readonly TimeProvider _timeProvider =
+            timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
 
         public async Task<CottonSessionResult> SignInAsync(
             Uri instanceUri,
@@ -97,6 +88,7 @@ namespace Cotton.Mobile.Services
                     client,
                     session,
                     instanceUri,
+                    _timeProvider,
                     cancellationToken).ConfigureAwait(false);
                 await ClearPendingBestEffortAsync("browser authorization completion").ConfigureAwait(false);
                 return result;
@@ -126,13 +118,14 @@ namespace Cotton.Mobile.Services
                 return CottonSessionResult.Unauthenticated(instanceUri);
             }
 
-            if (pendingSession.ExpiresAt <= DateTime.UtcNow)
+            if (pendingSession.ExpiresAt <= _timeProvider.GetUtcNow().UtcDateTime)
             {
                 await ClearPendingBestEffortAsync("pending authorization expiration").ConfigureAwait(false);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.TimedOut, instanceUri);
             }
 
-            using var restoreTimeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using CancellationTokenSource restoreTimeout =
+                CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             restoreTimeout.CancelAfter(RestoreTimeout);
             try
             {
@@ -141,6 +134,7 @@ namespace Cotton.Mobile.Services
                     client,
                     CreateAuthorizationSession(pendingSession),
                     instanceUri,
+                    _timeProvider,
                     restoreTimeout.Token).ConfigureAwait(false);
                 await ClearPendingBestEffortAsync("pending authorization restore completion").ConfigureAwait(false);
                 return result;
@@ -179,13 +173,14 @@ namespace Cotton.Mobile.Services
             long resumeVersionCheckpoint,
             CancellationToken cancellationToken)
         {
-            TimeSpan remaining = session.ExpiresAt - DateTime.UtcNow;
+            TimeSpan remaining = session.ExpiresAt - _timeProvider.GetUtcNow().UtcDateTime;
             if (remaining <= TimeSpan.Zero)
             {
                 return false;
             }
 
-            using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using CancellationTokenSource timeout =
+                CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(remaining);
             try
             {

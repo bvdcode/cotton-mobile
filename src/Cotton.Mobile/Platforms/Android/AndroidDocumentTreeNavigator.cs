@@ -11,6 +11,10 @@ namespace Cotton.Mobile.Services
 {
     internal class AndroidDocumentTreeNavigator
     {
+        private const int DocumentIdColumnIndex = 0;
+        private const int DisplayNameColumnIndex = 1;
+        private const int MimeTypeColumnIndex = 2;
+
         private static readonly string[] ChildProjection =
         [
             DocumentsContract.Document.ColumnDocumentId,
@@ -106,15 +110,15 @@ namespace Cotton.Mobile.Services
             while (cursor.MoveToNext())
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                string childName = cursor.GetString(1) ?? string.Empty;
+                string childName = cursor.GetString(DisplayNameColumnIndex) ?? string.Empty;
                 if (!string.Equals(childName, displayName, StringComparison.Ordinal))
                 {
                     continue;
                 }
 
-                string documentId = cursor.GetString(0)
+                string documentId = cursor.GetString(DocumentIdColumnIndex)
                     ?? throw new IOException("Document-tree child id is unavailable.");
-                string mimeType = cursor.GetString(2) ?? string.Empty;
+                string mimeType = cursor.GetString(MimeTypeColumnIndex) ?? string.Empty;
                 AndroidUri childUri = DocumentsContract.BuildDocumentUriUsingTree(_treeUri, documentId)
                     ?? throw new IOException("Could not build document-tree child URI.");
                 return new AndroidDocumentTreeChild(childUri, documentId, childName, mimeType);

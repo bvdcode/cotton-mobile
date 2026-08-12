@@ -18,6 +18,7 @@ namespace Cotton.Mobile
         MainLauncher = true,
         Exported = true,
         LaunchMode = LaunchMode.SingleTask,
+        TaskAffinity = "",
         ResizeableActivity = true,
         ConfigurationChanges = ConfigChanges.ScreenSize
             | ConfigChanges.Orientation

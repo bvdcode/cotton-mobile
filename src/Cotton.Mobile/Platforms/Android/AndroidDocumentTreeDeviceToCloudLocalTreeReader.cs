@@ -44,7 +44,11 @@ namespace Cotton.Mobile.Services
             AndroidUri rootUri = GetRootDocumentUri(treeUri);
             var items = new List<CottonDeviceToCloudLocalItemSnapshot>();
             var problems = new List<CottonDeviceToCloudLocalProblemSnapshot>();
+            CottonSyncTraversalGuard<string> traversalGuard = new();
             DateTime scanStartedAtUtc = DateTime.UtcNow;
+            string rootDocumentId = DocumentsContract.GetDocumentId(rootUri)
+                ?? throw new IOException("Document-tree root id is unavailable.");
+            traversalGuard.TryEnterContainer(rootDocumentId, 0);
 
             ReadChildren(
                 resolver,
@@ -54,7 +58,9 @@ namespace Cotton.Mobile.Services
                 items,
                 problems,
                 scanStartedAtUtc,
-                cancellationToken);
+                traversalGuard,
+                depth: 0,
+                cancellationToken: cancellationToken);
 
             return new CottonDeviceToCloudLocalContentSnapshot(root.LocalRoot.DisplayName, items, problems);
         }
@@ -67,6 +73,8 @@ namespace Cotton.Mobile.Services
             List<CottonDeviceToCloudLocalItemSnapshot> items,
             List<CottonDeviceToCloudLocalProblemSnapshot> problems,
             DateTime scanStartedAtUtc,
+            CottonSyncTraversalGuard<string> traversalGuard,
+            int depth,
             CancellationToken cancellationToken)
         {
             string parentDocumentId = DocumentsContract.GetDocumentId(parentUri)
@@ -83,6 +91,7 @@ namespace Cotton.Mobile.Services
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 AndroidDocumentTreeChild child = ReadChild(treeUri, cursor);
+                traversalGuard.RecordItem();
                 if (CottonSyncWorkingFileName.IsWorkingFile(child.DisplayName))
                 {
                     continue;
@@ -98,6 +107,11 @@ namespace Cotton.Mobile.Services
 
                 if (child.IsDirectory)
                 {
+                    if (!traversalGuard.TryEnterContainer(child.DocumentId, depth + 1))
+                    {
+                        continue;
+                    }
+
                     items.Add(CottonDeviceToCloudLocalItemSnapshot.CreateFolder(
                         child.DisplayName,
                         relativePath!,
@@ -111,6 +125,8 @@ namespace Cotton.Mobile.Services
                         items,
                         problems,
                         scanStartedAtUtc,
+                        traversalGuard,
+                        depth + 1,
                         cancellationToken);
                     continue;
                 }

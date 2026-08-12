@@ -18,15 +18,15 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(root);
 
             List<CottonDeviceToCloudRemoteItemSnapshot> items = [];
-            Queue<(CottonFolderHandle Folder, string RelativePath)> folders = [];
-            HashSet<Guid> visitedFolderIds = [];
+            Queue<(CottonFolderHandle Folder, string RelativePath, int Depth)> folders = [];
+            CottonSyncTraversalGuard<Guid> traversalGuard = new();
 
-            folders.Enqueue((root.CloudFolder.ToFolderHandle(), string.Empty));
+            folders.Enqueue((root.CloudFolder.ToFolderHandle(), string.Empty, 0));
             while (folders.Count > 0)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                (CottonFolderHandle folder, string folderRelativePath) = folders.Dequeue();
-                if (!visitedFolderIds.Add(folder.Id))
+                (CottonFolderHandle folder, string folderRelativePath, int depth) = folders.Dequeue();
+                if (!traversalGuard.TryEnterContainer(folder.Id, depth))
                 {
                     continue;
                 }
@@ -36,11 +36,12 @@ namespace Cotton.Mobile.Services
                     .ConfigureAwait(false);
                 foreach (CottonFileBrowserEntry entry in content.Entries)
                 {
+                    traversalGuard.RecordItem();
                     string relativePath = CreateRelativePath(folderRelativePath, entry);
                     items.Add(new CottonDeviceToCloudRemoteItemSnapshot(entry, relativePath));
                     if (entry.Type == CottonFileBrowserEntryType.Folder)
                     {
-                        folders.Enqueue((new CottonFolderHandle(entry.Id, entry.Name), relativePath));
+                        folders.Enqueue((new CottonFolderHandle(entry.Id, entry.Name), relativePath, depth + 1));
                     }
                 }
             }

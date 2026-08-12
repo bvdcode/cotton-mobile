@@ -9,8 +9,6 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileBrowserService : ICottonFileBrowserService
     {
-        private const int PageSize = 100;
-
         private readonly ICottonClientFactory _clientFactory;
         private readonly ICottonFileDownloadService _downloadService;
 
@@ -110,23 +108,25 @@ namespace Cotton.Mobile.Services
             CottonPagedResult<NodeContentDto> firstPage = await client.Nodes.GetChildrenAsync(
                 folderId,
                 page: 1,
-                pageSize: PageSize,
+                pageSize: CottonFolderPagination.PageSize,
                 depth: 0,
                 cancellationToken).ConfigureAwait(false);
             List<NodeDto> nodes = new(firstPage.Payload.Nodes);
             List<NodeFileManifestDto> files = new(firstPage.Payload.Files);
-            int totalPages = (int)Math.Ceiling(firstPage.TotalCount / (double)PageSize);
+            int totalPages = CottonFolderPagination.CreatePageCount(firstPage.TotalCount);
             for (int page = 2; page <= totalPages; page++)
             {
                 CottonPagedResult<NodeContentDto> result = await client.Nodes.GetChildrenAsync(
                     folderId,
                     page,
-                    PageSize,
+                    CottonFolderPagination.PageSize,
                     depth: 0,
                     cancellationToken).ConfigureAwait(false);
                 nodes.AddRange(result.Payload.Nodes);
                 files.AddRange(result.Payload.Files);
             }
+
+            CottonFolderPagination.EnsureComplete(firstPage.TotalCount, nodes.Count + files.Count);
 
             List<CottonFileBrowserEntry> entries = nodes
                 .OrderBy(node => node.Name, StringComparer.OrdinalIgnoreCase)

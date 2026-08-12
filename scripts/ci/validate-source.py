@@ -10,24 +10,29 @@ from re import Pattern
 LOGGER = logging.getLogger(__name__)
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 SOURCE_DIRECTORIES = (
+    REPOSITORY_ROOT / ".github" / "workflows",
     REPOSITORY_ROOT / "src",
     REPOSITORY_ROOT / "tests",
     REPOSITORY_ROOT / "scripts" / "mobile",
 )
-SOURCE_SUFFIXES = frozenset({".cs", ".css", ".py", ".sh", ".ts", ".tsx", ".xaml"})
+SOURCE_SUFFIXES = frozenset(
+    {".cs", ".css", ".py", ".sh", ".ts", ".tsx", ".xaml", ".yaml", ".yml"}
+)
 IGNORED_DIRECTORIES = frozenset({"bin", "obj"})
 MAX_LOGICAL_LINES = 300
 
 SEALED_TYPE_PATTERN = re.compile(r"\bsealed\s+(?:class|record)\b")
+FILE_SCOPED_NAMESPACE_PATTERN = re.compile(r"^\s*namespace\s+[\w.]+\s*;", re.MULTILINE)
+IMPLICIT_LOCAL_TYPE_PATTERN = re.compile(r"\bvar\s+[A-Za-z_]\w*\s*=")
 SILENT_SWITCH_FALLBACK_PATTERN = re.compile(r"^\s*_\s*=>(?!\s*throw\b)", re.MULTILINE)
 EMPTY_CATCH_PATTERN = re.compile(
     r"\bcatch\s*(?:\([^)]*\))?\s*(?:when\s*\([^)]*\))?\s*\{\s*\}",
     re.MULTILINE,
 )
 TYPE_DECLARATION_PATTERN = re.compile(
-    r"^\s*(?:(?:public|internal|private|protected)\s+)?"
-    r"(?:(?:abstract|partial|static)\s+)?"
-    r"(?:class|enum|interface|record(?:\s+struct)?)\s+\w+",
+    r"^\s*(?:(?:public|internal|private|protected|abstract|partial|static|readonly|"
+    r"ref|unsafe|new|sealed)\s+)*"
+    r"(?:class|enum|interface|struct|record(?:\s+(?:class|struct))?)\s+\w+",
     re.MULTILINE,
 )
 VIEWPORT_UNIT_PATTERN = re.compile(r"(?<![A-Za-z0-9_.])\d+(?:\.\d+)?d?v[hw]\b", re.IGNORECASE)
@@ -60,7 +65,7 @@ def count_logical_lines(content: str, suffix: str) -> int:
     comment_prefixes = ("//", "/*", "*", "*/")
     if suffix == ".xaml":
         comment_prefixes = ("<!--", "-->")
-    elif suffix in {".py", ".sh"}:
+    elif suffix in {".py", ".sh", ".yaml", ".yml"}:
         comment_prefixes = ("#",)
 
     return sum(
@@ -96,6 +101,8 @@ def validate_csharp(path: Path, content: str) -> list[str]:
         )
     for label, pattern in (
         ("sealed type", SEALED_TYPE_PATTERN),
+        ("file-scoped namespace", FILE_SCOPED_NAMESPACE_PATTERN),
+        ("implicit local type", IMPLICIT_LOCAL_TYPE_PATTERN),
         ("non-throwing switch fallback", SILENT_SWITCH_FALLBACK_PATTERN),
         ("empty catch block", EMPTY_CATCH_PATTERN),
     ):

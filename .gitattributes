@@ -1,6 +1,6 @@
-* text=auto
+* text=auto eol=lf
 
-*.cs text diff=csharp
+*.cs text eol=lf diff=csharp
 *.xaml text
 *.xml text
 *.json text

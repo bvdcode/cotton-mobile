@@ -8,10 +8,6 @@ namespace Cotton.Mobile.Services
 {
     public class FileSystemCottonSyncedFileManifestStore : ICottonSyncedFileManifestStore
     {
-        private const string TemporaryFileExtension = ".tmp";
-
-        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
-
         public const string MetadataFileName = "synced-files.json";
 
         private readonly ICottonSyncedFileManifestPathProvider _pathProvider;
@@ -44,27 +40,16 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                CottonStoredSyncedFileManifest? stored;
-                await using (var stream = new FileStream(
-                    filePath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read,
-                    bufferSize: 16384,
-                    useAsync: true))
-                {
-                    stored = await JsonSerializer.DeserializeAsync<CottonStoredSyncedFileManifest>(
-                        stream,
-                        SerializerOptions,
-                        cancellationToken).ConfigureAwait(false);
-                }
+                CottonStoredSyncedFileManifest? stored = await CottonAtomicJsonFile
+                    .ReadAsync<CottonStoredSyncedFileManifest>(filePath, cancellationToken)
+                    .ConfigureAwait(false);
 
                 if (stored is null
                     || stored.SchemaVersion != CottonSyncedFileManifestSchema.CurrentVersion
                     || !string.Equals(stored.SyncRootStableKey, root.StableKey, StringComparison.Ordinal)
                     || stored.Items is null)
                 {
-                    DeleteFile(filePath);
+                    CottonAtomicJsonFile.DeleteIfExists(filePath);
                     return [];
                 }
 
@@ -84,7 +69,7 @@ namespace Cotton.Mobile.Services
                     exception,
                     "Failed to load the synced-file manifest from {FilePath}; resetting the store.",
                     filePath);
-                DeleteFile(filePath);
+                CottonAtomicJsonFile.DeleteIfExists(filePath);
                 return [];
             }
         }
@@ -99,41 +84,17 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(root);
             ArgumentNullException.ThrowIfNull(items);
 
-            string directory = _pathProvider.CreateSyncedFileManifestDirectory(instanceUri, root);
-            string filePath = Path.Combine(directory, MetadataFileName);
-            string temporaryFilePath = CreateTemporaryFilePath(filePath);
+            string filePath = CreateMetadataFilePath(instanceUri, root);
 
             try
             {
-                Directory.CreateDirectory(directory);
-                await using (var stream = new FileStream(
-                    temporaryFilePath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    bufferSize: 16384,
-                    useAsync: true))
-                {
-                    await JsonSerializer.SerializeAsync(
-                        stream,
-                        CreateStoredManifest(root, items),
-                        SerializerOptions,
-                        cancellationToken).ConfigureAwait(false);
-                    await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                File.Move(temporaryFilePath, filePath, overwrite: true);
-            }
-            catch (OperationCanceledException)
-            {
-                DeleteFile(temporaryFilePath);
-                throw;
+                await CottonAtomicJsonFile
+                    .WriteAsync(filePath, CreateStoredManifest(root, items), cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
                 _logger.LogError(exception, "Failed to save the synced-file manifest to {FilePath}.", filePath);
-                DeleteFile(temporaryFilePath);
                 throw;
             }
         }
@@ -192,7 +153,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(root);
             cancellationToken.ThrowIfCancellationRequested();
 
-            DeleteFile(CreateMetadataFilePath(instanceUri, root));
+            CottonAtomicJsonFile.DeleteIfExists(CreateMetadataFilePath(instanceUri, root));
             return Task.CompletedTask;
         }
 
@@ -282,25 +243,5 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static string CreateTemporaryFilePath(string filePath)
-        {
-            return $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
-        }
-
-        private void DeleteFile(string filePath)
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                _logger.LogError(exception, "Failed to delete synced-file manifest {FilePath}.", filePath);
-                throw;
-            }
-        }
     }
 }

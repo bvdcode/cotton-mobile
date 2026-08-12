@@ -9,10 +9,6 @@ namespace Cotton.Mobile.Services
     public class FileSystemCottonSyncRootPauseStore : ICottonSyncRootPauseStore
     {
         private const int SchemaVersion = 1;
-        private const string TemporaryFileExtension = ".tmp";
-
-        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
-
         public const string MetadataFileName = "paused-sync-roots.json";
 
         private readonly ICottonSyncRootMetadataPathProvider _pathProvider;
@@ -43,23 +39,15 @@ namespace Cotton.Mobile.Services
 
             try
             {
-                await using var stream = new FileStream(
-                    filePath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.Read,
-                    bufferSize: 16384,
-                    useAsync: true);
                 CottonStoredPausedSyncRootCollection? stored =
-                    await JsonSerializer.DeserializeAsync<CottonStoredPausedSyncRootCollection>(
-                        stream,
-                        SerializerOptions,
-                        cancellationToken).ConfigureAwait(false);
+                    await CottonAtomicJsonFile
+                        .ReadAsync<CottonStoredPausedSyncRootCollection>(filePath, cancellationToken)
+                        .ConfigureAwait(false);
                 if (stored is null
                     || stored.SchemaVersion != SchemaVersion
                     || stored.RootIds is null)
                 {
-                    DeleteFile(filePath);
+                    CottonAtomicJsonFile.DeleteIfExists(filePath);
                     return new HashSet<Guid>();
                 }
 
@@ -78,7 +66,7 @@ namespace Cotton.Mobile.Services
                     exception,
                     "Failed to load paused sync roots from {FilePath}; resetting the store.",
                     filePath);
-                DeleteFile(filePath);
+                CottonAtomicJsonFile.DeleteIfExists(filePath);
                 return new HashSet<Guid>();
             }
         }
@@ -113,7 +101,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             cancellationToken.ThrowIfCancellationRequested();
 
-            DeleteFile(CreateMetadataFilePath(instanceUri));
+            CottonAtomicJsonFile.DeleteIfExists(CreateMetadataFilePath(instanceUri));
             return Task.CompletedTask;
         }
 
@@ -134,44 +122,19 @@ namespace Cotton.Mobile.Services
             string filePath = CreateMetadataFilePath(instanceUri);
             if (validRootIds.Length == 0)
             {
-                DeleteFile(filePath);
+                CottonAtomicJsonFile.DeleteIfExists(filePath);
                 return;
             }
 
-            string directory = _pathProvider.CreateSyncRootMetadataDirectory(instanceUri);
-            string temporaryFilePath = CreateTemporaryFilePath(filePath);
-
             try
             {
-                Directory.CreateDirectory(directory);
-                await using (var stream = new FileStream(
-                    temporaryFilePath,
-                    FileMode.Create,
-                    FileAccess.Write,
-                    FileShare.None,
-                    bufferSize: 16384,
-                    useAsync: true))
-                {
-                    await JsonSerializer.SerializeAsync(
-                        stream,
-                        CreateStoredCollection(validRootIds),
-                        SerializerOptions,
-                        cancellationToken).ConfigureAwait(false);
-                    await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                File.Move(temporaryFilePath, filePath, overwrite: true);
-            }
-            catch (OperationCanceledException)
-            {
-                DeleteFile(temporaryFilePath);
-                throw;
+                await CottonAtomicJsonFile
+                    .WriteAsync(filePath, CreateStoredCollection(validRootIds), cancellationToken)
+                    .ConfigureAwait(false);
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
                 _logger.LogError(exception, "Failed to save paused sync roots to {FilePath}.", filePath);
-                DeleteFile(temporaryFilePath);
                 throw;
             }
         }
@@ -192,25 +155,5 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static string CreateTemporaryFilePath(string filePath)
-        {
-            return $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
-        }
-
-        private void DeleteFile(string filePath)
-        {
-            try
-            {
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-            }
-            catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
-            {
-                _logger.LogError(exception, "Failed to delete paused-sync-root store file {FilePath}.", filePath);
-                throw;
-            }
-        }
     }
 }

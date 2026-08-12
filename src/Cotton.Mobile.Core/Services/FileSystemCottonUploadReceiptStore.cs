@@ -3,7 +3,6 @@
 
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 
 namespace Cotton.Mobile.Services
 {
@@ -11,10 +10,6 @@ namespace Cotton.Mobile.Services
     {
         private const int SchemaVersion = 1;
         private const string ReceiptFileExtension = ".json";
-        private const string TemporaryFileExtension = ".tmp";
-
-        private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
-
         private readonly ICottonUploadReceiptPathProvider _pathProvider;
         private readonly SemaphoreSlim _writeLock = new(1, 1);
 
@@ -78,8 +73,6 @@ namespace Cotton.Mobile.Services
 
             string directory = _pathProvider.CreateUploadReceiptDirectory(instanceUri, root);
             string filePath = Path.Combine(directory, CreateReceiptFileName(receipt.LocalSourceId));
-            string temporaryFilePath = $"{filePath}.{Guid.NewGuid():N}{TemporaryFileExtension}";
-
             await _writeLock.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
@@ -96,38 +89,9 @@ namespace Cotton.Mobile.Services
                     throw new InvalidDataException("Upload receipt history must begin in the pending state.");
                 }
 
-                Directory.CreateDirectory(directory);
-                await using (var stream = new FileStream(
-                    temporaryFilePath,
-                    new FileStreamOptions
-                    {
-                        Mode = FileMode.CreateNew,
-                        Access = FileAccess.Write,
-                        Share = FileShare.None,
-                        BufferSize = 16384,
-                        Options = FileOptions.Asynchronous | FileOptions.WriteThrough,
-                    }))
-                {
-                    await JsonSerializer.SerializeAsync(
-                        stream,
-                        CreateStoredReceipt(root, receipt),
-                        SerializerOptions,
-                        cancellationToken).ConfigureAwait(false);
-                    await stream.FlushAsync(cancellationToken).ConfigureAwait(false);
-                    stream.Flush(flushToDisk: true);
-                }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                File.Move(temporaryFilePath, filePath, overwrite: true);
-            }
-            catch (Exception exception)
-                when (exception is OperationCanceledException
-                    or IOException
-                    or UnauthorizedAccessException
-                    or JsonException)
-            {
-                DeleteTemporaryFile(temporaryFilePath, exception);
-                throw;
+                await CottonAtomicJsonFile
+                    .WriteAsync(filePath, CreateStoredReceipt(root, receipt), cancellationToken)
+                    .ConfigureAwait(false);
             }
             finally
             {
@@ -169,15 +133,8 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken)
         {
-            await using var stream = new FileStream(
-                filePath,
-                FileMode.Open,
-                FileAccess.Read,
-                FileShare.Read,
-                bufferSize: 16384,
-                useAsync: true);
-            CottonStoredUploadReceipt? stored = await JsonSerializer
-                .DeserializeAsync<CottonStoredUploadReceipt>(stream, SerializerOptions, cancellationToken)
+            CottonStoredUploadReceipt? stored = await CottonAtomicJsonFile
+                .ReadAsync<CottonStoredUploadReceipt>(filePath, cancellationToken)
                 .ConfigureAwait(false);
             if (stored is null
                 || stored.SchemaVersion != SchemaVersion
@@ -271,20 +228,5 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static void DeleteTemporaryFile(string temporaryFilePath, Exception originalException)
-        {
-            try
-            {
-                if (File.Exists(temporaryFilePath))
-                {
-                    File.Delete(temporaryFilePath);
-                }
-            }
-            catch (Exception cleanupException)
-                when (cleanupException is IOException or UnauthorizedAccessException)
-            {
-                throw new AggregateException(originalException, cleanupException);
-            }
-        }
     }
 }

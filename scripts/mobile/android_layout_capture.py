@@ -10,10 +10,14 @@ from android_layout_models import AndroidLayoutMeasureError, MeasureOptions, Rec
 
 logger = logging.getLogger("measure-android-layout")
 
+
 def capture_layout(options: MeasureOptions) -> None:
     options.xml_path.parent.mkdir(parents=True, exist_ok=True)
-    run_adb(options.serial, "shell", "uiautomator", "dump", options.remote_xml_path)
-    run_adb(options.serial, "pull", options.remote_xml_path, str(options.xml_path))
+    try:
+        run_adb(options.serial, "shell", "uiautomator", "dump", options.remote_xml_path)
+        run_adb(options.serial, "pull", options.remote_xml_path, str(options.xml_path))
+    finally:
+        remove_remote_layout(options.serial, options.remote_xml_path)
     logger.info("Pulled UIAutomator XML to %s.", options.xml_path)
 
     if options.screenshot_path is None:
@@ -23,6 +27,13 @@ def capture_layout(options: MeasureOptions) -> None:
     screenshot = run_adb_binary(options.serial, "exec-out", "screencap", "-p")
     options.screenshot_path.write_bytes(screenshot)
     logger.info("Captured screenshot to %s.", options.screenshot_path)
+
+
+def remove_remote_layout(serial: str | None, remote_xml_path: str) -> None:
+    try:
+        run_adb(serial, "shell", "rm", "-f", remote_xml_path)
+    except AndroidLayoutMeasureError as exception:
+        logger.warning("Could not remove remote UIAutomator XML: %s", exception)
 
 
 def run_adb(serial: str | None, *arguments: str) -> str:

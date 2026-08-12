@@ -148,6 +148,8 @@ def read_trimmed_text(path: Path) -> str:
 
 
 def resolve_required_file(path: Path) -> Path:
+    if path.is_symlink():
+        raise GooglePlayListingUploadError(f"Required file must not be a symbolic link: {path}")
     if not path.is_file():
         raise GooglePlayListingUploadError(f"Required file does not exist: {path}")
 
@@ -200,6 +202,7 @@ def validate_phone_screenshots(paths: tuple[Path, ...]) -> None:
         raise GooglePlayListingUploadError("At least two phone screenshots are required.")
 
     for path in paths:
+        resolve_required_file(path)
         info = read_png_info(path)
         shorter_side = min(info.width, info.height)
         longer_side = max(info.width, info.height)

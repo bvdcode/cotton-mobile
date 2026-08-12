@@ -14,6 +14,11 @@ if [[ ! -d "$screenshots_dir" ]]; then
   exit 1
 fi
 
+if find "$screenshots_dir" -maxdepth 1 -type l -name '*.png' -print -quit | grep -q .; then
+  printf 'Google Play phone screenshots must not be symbolic links.\n' >&2
+  exit 1
+fi
+
 mapfile -t actual_screenshots < <(
   find "$screenshots_dir" -maxdepth 1 -type f -name '*.png' -printf '%f\n' | sort
 )

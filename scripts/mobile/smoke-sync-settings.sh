@@ -25,7 +25,7 @@ Usage: $(basename "$0") [options]
 Runs an Android Sync settings smoke:
   1. Backs up current app-private sync root metadata for the selected instance.
   2. Seeds one ready cloud-to-device root and one paused bidirectional root.
-  3. Opens Files -> Sync and verifies the Sync settings page chrome/cards.
+  3. Opens the current Sync dashboard and verifies its toolbar and root cards.
   4. Taps Refresh and verifies the seeded roots reload from app-private metadata.
   5. Restores the previous sync root metadata unless --leave-seed is used.
 
@@ -80,15 +80,9 @@ if [[ -z "$evidence_dir" ]]; then
   evidence_dir="$evidence_root/$timestamp-sync-settings"
 fi
 
-if ! command -v adb >/dev/null 2>&1; then
-  printf 'adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT.\n' >&2
-  exit 127
-fi
-
-if ! command -v python3 >/dev/null 2>&1; then
-  printf 'python3 was not found.\n' >&2
-  exit 127
-fi
+cotton_require_command adb \
+  "adb was not found. Install Android SDK Platform-Tools or set ANDROID_HOME/COTTON_ANDROID_SDK_ROOT."
+cotton_require_command python3
 
 mkdir -p "$evidence_dir"
 
@@ -100,8 +94,7 @@ source "$SCRIPT_DIR/smoke-sync-settings-flow.sh"
 seed_dir="$evidence_dir/seed"
 mkdir -p "$seed_dir"
 create_sync_seed "$seed_dir"
-# shellcheck disable=SC1091
-source "$seed_dir/seed.env"
+load_sync_seed "$seed_dir/seed-data.json"
 
 sync_metadata_directory="files/CottonSyncRoots/$instance_key"
 sync_roots_path="$sync_metadata_directory/sync-roots.json"
@@ -116,6 +109,7 @@ trap restore_sync_data EXIT
 
 write_metadata
 cotton_capture_text_best_effort "01-adb-devices.txt" adb devices
+cotton_require_device
 
 if [[ "$install_debug" -eq 1 ]]; then
   if [[ ! -f "$COTTON_ANDROID_APK" ]]; then
@@ -138,11 +132,8 @@ if [[ "$launch_app" -eq 1 ]]; then
   sleep 4
 fi
 
-cotton_wait_for_files_root
-cotton_tap_node_from_xml "$files_root_xml" "Sync" exact
-sleep 2
-wait_for_sync_settings
-verify_sync_settings
+wait_for_sync_dashboard
+verify_sync_dashboard
 verify_refresh_action
 capture_final_state
 

@@ -23,8 +23,13 @@ cotton_install_android_apk() {
   local serial="$1"
   local package_id="$2"
   local apk_path="$3"
+  local install_status=0
 
-  adb -s "$serial" install --no-incremental -r "$apk_path"
+  adb -s "$serial" install --no-incremental -r "$apk_path" || install_status=$?
+  if [[ "$install_status" -ne 0 ]]; then
+    return "$install_status"
+  fi
+
   cotton_clear_android_fast_deployment_overrides "$serial" "$package_id"
 }
 

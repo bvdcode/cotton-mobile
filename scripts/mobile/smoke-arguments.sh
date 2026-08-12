@@ -7,8 +7,6 @@ cotton_parse_arguments() {
   local cotton_spec
   local cotton_target
   local cotton_value
-  local cotton_auxiliary_target
-  local cotton_auxiliary_value
 
   while [[ $# -gt 0 ]]; do
     cotton_argument="$1"
@@ -19,8 +17,7 @@ cotton_parse_arguments() {
 
     cotton_matched=0
     for cotton_spec in "${COTTON_VALUE_OPTIONS[@]:-}"; do
-      IFS=: read -r cotton_option cotton_target cotton_auxiliary_target cotton_auxiliary_value \
-        <<< "$cotton_spec"
+      IFS=: read -r cotton_option cotton_target <<< "$cotton_spec"
       if [[ "$cotton_argument" != "$cotton_option" ]]; then
         continue
       fi
@@ -30,9 +27,6 @@ cotton_parse_arguments() {
       fi
 
       printf -v "$cotton_target" '%s' "$2"
-      if [[ -n "$cotton_auxiliary_target" ]]; then
-        printf -v "$cotton_auxiliary_target" '%s' "$cotton_auxiliary_value"
-      fi
       shift 2
       cotton_matched=1
       break
@@ -42,16 +36,12 @@ cotton_parse_arguments() {
     fi
 
     for cotton_spec in "${COTTON_FLAG_OPTIONS[@]:-}"; do
-      IFS=: read -r cotton_option cotton_target cotton_value cotton_auxiliary_target cotton_auxiliary_value \
-        <<< "$cotton_spec"
+      IFS=: read -r cotton_option cotton_target cotton_value <<< "$cotton_spec"
       if [[ "$cotton_argument" != "$cotton_option" ]]; then
         continue
       fi
 
       printf -v "$cotton_target" '%s' "$cotton_value"
-      if [[ -n "$cotton_auxiliary_target" ]]; then
-        printf -v "$cotton_auxiliary_target" '%s' "$cotton_auxiliary_value"
-      fi
       shift
       cotton_matched=1
       break
@@ -73,28 +63,4 @@ cotton_require_command() {
     printf '%s\n' "$message" >&2
     exit "$COTTON_EXIT_COMMAND_NOT_FOUND"
   fi
-}
-
-cotton_require_interactive_terminal() {
-  local message="$1"
-
-  if [[ ! -t 0 ]]; then
-    printf '%s\n' "$message" >&2
-    exit "$COTTON_EXIT_NON_INTERACTIVE"
-  fi
-}
-
-cotton_validate_notification_permission_state() {
-  local permission_state="$1"
-
-  case "$permission_state" in
-    preserve|fresh|allowed|denied)
-      return
-      ;;
-    *)
-      printf 'Invalid --permission-state: %s. Expected preserve, fresh, allowed, or denied.\n' \
-        "$permission_state" >&2
-      exit "$COTTON_EXIT_USAGE"
-      ;;
-  esac
 }

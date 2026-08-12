@@ -5,6 +5,7 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonSyncWorkingFileName
     {
+        private const int UniqueIdentifierLength = 32;
         private const string TemporarySuffix = ".cotton-sync-tmp";
         private const string BackupSuffix = ".cotton-sync-backup";
 
@@ -20,8 +21,8 @@ namespace Cotton.Mobile.Services
 
         public static bool IsWorkingFile(string displayName)
         {
-            return displayName.EndsWith(TemporarySuffix, StringComparison.Ordinal)
-                || displayName.EndsWith(BackupSuffix, StringComparison.Ordinal);
+            return HasGeneratedNameFormat(displayName, TemporarySuffix)
+                || HasGeneratedNameFormat(displayName, BackupSuffix);
         }
 
         private static string Create(string displayName, string suffix)
@@ -32,6 +33,32 @@ namespace Cotton.Mobile.Services
             }
 
             return $"{displayName.Trim()}.{Guid.NewGuid():N}{suffix}";
+        }
+
+        private static bool HasGeneratedNameFormat(string displayName, string suffix)
+        {
+            if (string.IsNullOrEmpty(displayName)
+                || !displayName.EndsWith(suffix, StringComparison.Ordinal))
+            {
+                return false;
+            }
+
+            int identifierStart = displayName.Length - suffix.Length - UniqueIdentifierLength;
+            if (identifierStart < 2 || displayName[identifierStart - 1] != '.')
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> identifier = displayName.AsSpan(identifierStart, UniqueIdentifierLength);
+            foreach (char character in identifier)
+            {
+                if (!Uri.IsHexDigit(character))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

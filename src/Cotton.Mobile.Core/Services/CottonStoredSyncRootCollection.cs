@@ -9,6 +9,6 @@ namespace Cotton.Mobile.Services
 
         public DateTime SavedAtUtc { get; set; }
 
-        public List<CottonStoredSyncRootItem>? Items { get; set; }
+        public List<CottonStoredSyncRootItem?>? Items { get; set; }
     }
 }

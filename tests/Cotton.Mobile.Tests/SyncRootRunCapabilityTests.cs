@@ -36,7 +36,7 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootStorageKind.AppPrivateDirectory);
 
             Assert.True(CottonSyncRootRunCapability.CanRun(cloudAppPrivate));
-            Assert.True(CottonSyncRootRunCapability.CanRun(cloudDocumentTree));
+            Assert.False(CottonSyncRootRunCapability.CanRun(cloudDocumentTree));
             Assert.False(CottonSyncRootRunCapability.CanRun(cloudNeedsGrant));
             Assert.True(CottonSyncRootRunCapability.CanRun(deviceDocumentTree));
             Assert.False(CottonSyncRootRunCapability.CanRun(deviceAppPrivate));
@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Tests
             Assert.False(CottonSyncRootRunCapability.CanRun(bidirectionalAppPrivate));
 
             Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudAppPrivate));
-            Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudDocumentTree));
+            Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudDocumentTree));
             Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudNeedsGrant));
             Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(deviceDocumentTree));
             Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(deviceAppPrivate));

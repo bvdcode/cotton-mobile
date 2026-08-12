@@ -14,15 +14,20 @@ namespace Cotton.Mobile.Services
                 SchemaVersion = schemaVersion,
                 SavedAtUtc = DateTime.UtcNow,
                 Items = Deduplicate(roots)
-                    .Select(CreateStoredItem)
+                    .Select<CottonSyncRootSnapshot, CottonStoredSyncRootItem?>(CreateStoredItem)
                     .ToList(),
             };
         }
 
         public static CottonSyncRootSnapshot? TryCreateSyncRoot(
             Uri expectedInstanceUri,
-            CottonStoredSyncRootItem item)
+            CottonStoredSyncRootItem? item)
         {
+            if (item is null)
+            {
+                return null;
+            }
+
             try
             {
                 if (string.IsNullOrWhiteSpace(item.InstanceUri)

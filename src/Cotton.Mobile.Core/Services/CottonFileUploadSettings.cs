@@ -5,15 +5,17 @@ namespace Cotton.Mobile.Services
 {
     public class CottonFileUploadSettings
     {
+        public const int MinimumChunkSizeBytes = 4 * 1024 * 1024;
+        public const int MaximumChunkSizeBytes = 16 * 1024 * 1024;
         public const string SupportedSha256Algorithm = "SHA256";
 
         public CottonFileUploadSettings(long maxChunkSizeBytes, string? supportedHashAlgorithm)
         {
-            if (maxChunkSizeBytes <= 0 || maxChunkSizeBytes > Array.MaxLength)
+            if (maxChunkSizeBytes < MinimumChunkSizeBytes || maxChunkSizeBytes > MaximumChunkSizeBytes)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(maxChunkSizeBytes),
-                    "Upload chunk size must fit in a single managed buffer.");
+                    $"Upload chunk size must be between {MinimumChunkSizeBytes} and {MaximumChunkSizeBytes} bytes.");
             }
 
             if (!string.Equals(

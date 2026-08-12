@@ -112,7 +112,7 @@ namespace Cotton.Mobile.Services
 
                 if (!document.RootElement.TryGetProperty("schemaVersion", out JsonElement schemaVersion)
                     || !schemaVersion.TryGetInt32(out int parsedSchemaVersion)
-                    || parsedSchemaVersion != 1
+                    || parsedSchemaVersion != CottonSyncedFileManifestSchema.CurrentVersion
                     || !document.RootElement.TryGetProperty("items", out JsonElement items)
                     || items.ValueKind != JsonValueKind.Array)
                 {

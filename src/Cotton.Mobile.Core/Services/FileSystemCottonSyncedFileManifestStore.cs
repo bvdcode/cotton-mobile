@@ -8,7 +8,6 @@ namespace Cotton.Mobile.Services
 {
     public class FileSystemCottonSyncedFileManifestStore : ICottonSyncedFileManifestStore
     {
-        private const int SchemaVersion = 2;
         private const string TemporaryFileExtension = ".tmp";
 
         private static readonly JsonSerializerOptions SerializerOptions = new(JsonSerializerDefaults.Web);
@@ -61,7 +60,7 @@ namespace Cotton.Mobile.Services
                 }
 
                 if (stored is null
-                    || stored.SchemaVersion != SchemaVersion
+                    || stored.SchemaVersion != CottonSyncedFileManifestSchema.CurrentVersion
                     || !string.Equals(stored.SyncRootStableKey, root.StableKey, StringComparison.Ordinal)
                     || stored.Items is null)
                 {
@@ -210,11 +209,11 @@ namespace Cotton.Mobile.Services
         {
             return new CottonStoredSyncedFileManifest
             {
-                SchemaVersion = SchemaVersion,
+                SchemaVersion = CottonSyncedFileManifestSchema.CurrentVersion,
                 SyncRootStableKey = root.StableKey,
                 SavedAtUtc = DateTime.UtcNow,
                 Items = DeduplicateItems(items)
-                    .Select(CreateStoredItem)
+                    .Select<CottonSyncedFileSnapshot, CottonStoredSyncedFileItem?>(CreateStoredItem)
                     .ToList(),
             };
         }
@@ -256,8 +255,13 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static CottonSyncedFileSnapshot? TryCreateSyncedFile(CottonStoredSyncedFileItem item)
+        private static CottonSyncedFileSnapshot? TryCreateSyncedFile(CottonStoredSyncedFileItem? item)
         {
+            if (item is null)
+            {
+                return null;
+            }
+
             try
             {
                 return new CottonSyncedFileSnapshot(

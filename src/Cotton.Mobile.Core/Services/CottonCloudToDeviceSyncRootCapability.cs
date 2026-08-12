@@ -29,7 +29,7 @@ namespace Cotton.Mobile.Services
 
         private static bool HasSupportedLocalRoot(CottonSyncRootSnapshot root)
         {
-            return root.LocalRoot.UsesAppPrivateStorage || root.LocalRoot.RequiresPersistedUserGrant;
+            return root.LocalRoot.UsesAppPrivateStorage;
         }
     }
 }

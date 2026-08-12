@@ -56,11 +56,21 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice, "Syncing")]
-        [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading")]
-        [InlineData(CottonSyncDirection.Bidirectional, "Syncing")]
+        [InlineData(
+            CottonSyncDirection.CloudToDevice,
+            CottonSyncRootStorageKind.AppPrivateDirectory,
+            "Syncing")]
+        [InlineData(
+            CottonSyncDirection.DeviceToCloud,
+            CottonSyncRootStorageKind.UserSelectedDocumentTree,
+            "Uploading")]
+        [InlineData(
+            CottonSyncDirection.Bidirectional,
+            CottonSyncRootStorageKind.UserSelectedDocumentTree,
+            "Syncing")]
         public void Running_root_updates_status_in_place(
             CottonSyncDirection direction,
+            CottonSyncRootStorageKind storageKind,
             string expectedStatus)
         {
             CottonSyncRootSnapshot root = CreateRoot(
@@ -70,7 +80,7 @@ namespace Cotton.Mobile.Tests
                 "Files / Projects",
                 CottonSyncRootPermissionStatus.Available,
                 direction,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                storageKind,
                 "Device folder");
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
             List<string?> changedProperties = [];
@@ -208,7 +218,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void User_selected_document_tree_root_is_ready_and_runnable()
+        public void Legacy_cloud_to_device_document_tree_root_is_unsupported()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -222,11 +232,11 @@ namespace Cotton.Mobile.Tests
 
             CottonSyncRootListItem item = Assert.Single(CottonSyncRootListDisplayState.Create([root]).Items);
 
-            Assert.Equal("Ready", item.StatusText);
-            Assert.False(item.IsUnsupportedLocalRoot);
-            Assert.True(item.IsReady);
-            Assert.False(item.IsAttentionVisible);
-            Assert.True(item.CanRunNow);
+            Assert.Equal("Unsupported", item.StatusText);
+            Assert.True(item.IsUnsupportedLocalRoot);
+            Assert.False(item.IsReady);
+            Assert.True(item.IsAttentionVisible);
+            Assert.False(item.CanRunNow);
             Assert.True(item.CanPauseSync);
             Assert.True(item.CanStopSync);
         }

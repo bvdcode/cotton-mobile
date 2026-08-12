@@ -10,17 +10,21 @@ namespace Cotton.Mobile.Tests
         [InlineData(" sha256 ")]
         public void Upload_settings_accept_supported_sha256_algorithm(string algorithm)
         {
-            var settings = new CottonFileUploadSettings(1024, algorithm);
+            var settings = new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes, algorithm);
 
-            Assert.Equal(1024, settings.MaxChunkSizeBytes);
+            Assert.Equal(CottonFileUploadSettings.MinimumChunkSizeBytes, settings.MaxChunkSizeBytes);
             Assert.Equal(CottonFileUploadSettings.SupportedSha256Algorithm, settings.SupportedHashAlgorithm);
         }
 
         [Fact]
         public void Upload_settings_reject_invalid_server_contracts()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => new CottonFileUploadSettings(0, "SHA256"));
-            Assert.Throws<NotSupportedException>(() => new CottonFileUploadSettings(1024, "SHA1"));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes - 1, "SHA256"));
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                new CottonFileUploadSettings(CottonFileUploadSettings.MaximumChunkSizeBytes + 1L, "SHA256"));
+            Assert.Throws<NotSupportedException>(() =>
+                new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes, "SHA1"));
         }
 
         [Fact]
@@ -125,6 +129,10 @@ namespace Cotton.Mobile.Tests
             Assert.True(CottonSyncWorkingFileName.IsWorkingFile(temporary));
             Assert.True(CottonSyncWorkingFileName.IsWorkingFile(backup));
             Assert.False(CottonSyncWorkingFileName.IsWorkingFile("report.pdf"));
+            Assert.False(CottonSyncWorkingFileName.IsWorkingFile("notes.cotton-sync-tmp"));
+            Assert.False(CottonSyncWorkingFileName.IsWorkingFile("notes.cotton-sync-backup"));
+            Assert.False(CottonSyncWorkingFileName.IsWorkingFile(
+                "notes.not-a-generated-identifier.cotton-sync-tmp"));
         }
 
         [Fact]

@@ -156,6 +156,7 @@ namespace Cotton.Mobile.Tests
                   "schemaVersion": 1,
                   "savedAtUtc": "2026-06-20T09:00:00Z",
                   "items": [
+                    null,
                     {
                       "id": "00000000-0000-0000-0000-000000000000",
                       "instanceUri": "{{InstanceUri.AbsoluteUri}}",

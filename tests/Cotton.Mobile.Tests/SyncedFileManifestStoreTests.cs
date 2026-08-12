@@ -188,6 +188,7 @@ namespace Cotton.Mobile.Tests
                   "syncRootStableKey": "{{_syncRoot.StableKey}}",
                   "savedAtUtc": "2026-06-20T14:00:00Z",
                   "items": [
+                    null,
                     {
                       "fileId": "00000000-0000-0000-0000-000000000000",
                       "fileName": "bad.pdf",

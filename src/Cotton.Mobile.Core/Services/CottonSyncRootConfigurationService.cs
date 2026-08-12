@@ -51,6 +51,15 @@ namespace Cotton.Mobile.Services
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             CottonSyncRootSnapshot? existingRoot = existingRoots
                 .FirstOrDefault(root => string.Equals(root.StableKey, candidate.StableKey, StringComparison.Ordinal));
+            CottonSyncRootSnapshot? localRootOwner = existingRoots.FirstOrDefault(
+                root => HasSameAccountAndLocalRoot(root, candidate));
+
+            if (existingRoot is null && localRootOwner is not null)
+            {
+                return new CottonSyncRootConfigurationResult(
+                    CottonSyncRootConfigurationStatus.AlreadyConfigured,
+                    localRootOwner);
+            }
 
             if (existingRoot is not null
                 && (existingRoot.Direction != direction
@@ -143,6 +152,21 @@ namespace Cotton.Mobile.Services
                     candidate.LocalRoot.DisplayName,
                     StringComparison.Ordinal)
                 && existingRoot.LocalRoot.PermissionStatus == candidate.LocalRoot.PermissionStatus;
+        }
+
+        private static bool HasSameAccountAndLocalRoot(
+            CottonSyncRootSnapshot existingRoot,
+            CottonSyncRootSnapshot candidate)
+        {
+            return string.Equals(
+                    existingRoot.AccountScopeKey,
+                    candidate.AccountScopeKey,
+                    StringComparison.Ordinal)
+                && existingRoot.LocalRoot.StorageKind == candidate.LocalRoot.StorageKind
+                && string.Equals(
+                    existingRoot.LocalRoot.RootKey,
+                    candidate.LocalRoot.RootKey,
+                    StringComparison.Ordinal);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(

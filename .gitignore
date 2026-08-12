@@ -40,7 +40,6 @@ msbuild.wrn
 *.apk
 *.aab
 *.apks
-src/Cotton.Mobile/Platforms/Android/google-services.json
 *.keystore
 *.jks
 *.idsig

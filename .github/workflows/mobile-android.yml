@@ -198,9 +198,6 @@ jobs:
       - name: Test Google Play listing screenshots
         run: scripts/ci/test-google-play-listing-screenshots.sh
 
-      - name: Test Android Firebase config validation
-        run: scripts/ci/test-android-firebase-config.sh
-
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
@@ -353,7 +350,6 @@ jobs:
       ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
       ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
       ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      ANDROID_FIREBASE_GOOGLE_SERVICES_JSON: ${{ secrets.ANDROID_FIREBASE_GOOGLE_SERVICES_JSON }}
       GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
     steps:
       - name: Check repository
@@ -416,17 +412,6 @@ jobs:
             echo "ANDROID_KEY_PASSWORD is empty; using ANDROID_KEYSTORE_PASSWORD for the key password."
             echo "ANDROID_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
           fi
-
-      - name: Restore Firebase Android config
-        if: >-
-          ${{
-            (github.event_name == 'push' && github.ref_name == 'main') ||
-            (github.event_name == 'workflow_dispatch' && inputs.upload_to_google_play)
-          }}
-        run: |
-          scripts/mobile/restore-android-firebase-config.sh \
-            --configuration Release \
-            --package-id "$GOOGLE_PLAY_PACKAGE_NAME"
 
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"

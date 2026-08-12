@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Cotton.Mobile.Services;
 using Xunit;
 using static Cotton.Mobile.Tests.TestFilePaths;
@@ -132,20 +133,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task LoadDeletesCorruptMetadataFileAndReturnsEmptyList()
+        public async Task LoadRejectsCorruptMetadataWithoutDeletingIt()
         {
             Directory.CreateDirectory(_directory);
             string metadataPath = CreateSyncRootMetadataPath(_directory);
             await File.WriteAllTextAsync(metadataPath, "{ not valid json");
 
-            IReadOnlyList<CottonSyncRootSnapshot> loaded = await _store.LoadAsync(InstanceUri);
+            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri));
 
-            Assert.Empty(loaded);
-            Assert.False(File.Exists(metadataPath));
+            Assert.True(File.Exists(metadataPath));
         }
 
         [Fact]
-        public async Task LoadFiltersInvalidRecordsWithoutDiscardingValidRoots()
+        public async Task LoadRejectsMetadataContainingAnInvalidRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
             Directory.CreateDirectory(_directory);
@@ -189,14 +189,12 @@ namespace Cotton.Mobile.Tests
                 }
                 """);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
-
-            Assert.Equal(root.Id, loaded.Id);
-            Assert.Equal(root.StableKey, loaded.StableKey);
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri));
+            Assert.True(File.Exists(CreateSyncRootMetadataPath(_directory)));
         }
 
         [Fact]
-        public async Task LoadIgnoresRootsForAnotherInstance()
+        public async Task LoadRejectsRootsForAnotherInstance()
         {
             CottonSyncRootSnapshot current = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot other = CreateRoot(
@@ -244,8 +242,7 @@ namespace Cotton.Mobile.Tests
                 }
                 """);
 
-            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
-            Assert.Equal(current.Id, loaded.Id);
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri));
         }
 
         [Fact]

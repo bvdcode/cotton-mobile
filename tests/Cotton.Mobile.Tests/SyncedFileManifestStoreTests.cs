@@ -1,3 +1,4 @@
+using System.Text.Json;
 using Cotton.Mobile.Services;
 using Xunit;
 using static Cotton.Mobile.Tests.SyncedFileManifestTestData;
@@ -141,20 +142,19 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task LoadDeletesCorruptMetadataAndReturnsEmpty()
+        public async Task LoadRejectsCorruptMetadataWithoutDeletingIt()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
             await File.WriteAllTextAsync(metadataPath, "{ not valid json");
 
-            IReadOnlyList<CottonSyncedFileSnapshot> loaded = await _store.LoadAsync(InstanceUri, _syncRoot);
+            await Assert.ThrowsAsync<JsonException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
 
-            Assert.Empty(loaded);
-            Assert.False(File.Exists(metadataPath));
+            Assert.True(File.Exists(metadataPath));
         }
 
         [Fact]
-        public async Task LoadDeletesManifestForWrongSyncRoot()
+        public async Task LoadRejectsManifestForWrongSyncRootWithoutDeletingIt()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -169,14 +169,13 @@ namespace Cotton.Mobile.Tests
                 }
                 """);
 
-            IReadOnlyList<CottonSyncedFileSnapshot> loaded = await _store.LoadAsync(InstanceUri, _syncRoot);
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
 
-            Assert.Empty(loaded);
-            Assert.False(File.Exists(metadataPath));
+            Assert.True(File.Exists(metadataPath));
         }
 
         [Fact]
-        public async Task LoadFiltersInvalidRecordsWithoutDiscardingValidItems()
+        public async Task LoadRejectsManifestContainingAnInvalidItem()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -211,11 +210,8 @@ namespace Cotton.Mobile.Tests
                 }
                 """);
 
-            CottonSyncedFileSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri, _syncRoot));
-
-            Assert.Equal(FileId, loaded.FileId);
-            Assert.Equal("good.pdf", loaded.FileName);
-            Assert.Equal("Nested/good.pdf", loaded.RelativePath);
+            await Assert.ThrowsAsync<InvalidDataException>(() => _store.LoadAsync(InstanceUri, _syncRoot));
+            Assert.True(File.Exists(metadataPath));
         }
 
         [Fact]

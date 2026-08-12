@@ -18,68 +18,42 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        public static CottonSyncRootSnapshot? TryCreateSyncRoot(
+        public static CottonSyncRootSnapshot CreateSyncRoot(
             Uri expectedInstanceUri,
             CottonStoredSyncRootItem? item)
         {
             if (item is null)
             {
-                return null;
+                throw new InvalidDataException("The sync-root metadata contains an empty item.");
             }
 
-            Uri? storedInstanceUri = TryCreateAbsoluteUri(item.InstanceUri);
-            if (storedInstanceUri is null)
+            if (string.IsNullOrWhiteSpace(item.InstanceUri)
+                || !Uri.TryCreate(item.InstanceUri, UriKind.Absolute, out Uri? storedInstanceUri))
             {
-                return null;
+                throw new InvalidDataException("The sync-root metadata contains an invalid instance URI.");
             }
 
-            CottonSyncRootSnapshot? root = TryCreateSnapshot(item, storedInstanceUri);
-            if (root is null || !HasValidIdentity(expectedInstanceUri, item, root))
+            CottonSyncRootSnapshot root = new(
+                item.Id,
+                storedInstanceUri,
+                item.AccountScopeKey ?? string.Empty,
+                new CottonUploadDestinationSnapshot(
+                    item.CloudFolderId,
+                    item.CloudFolderName ?? string.Empty,
+                    item.CloudFolderPath),
+                new CottonSyncLocalRootSnapshot(
+                    item.LocalStorageKind,
+                    item.LocalRootKey ?? string.Empty,
+                    item.LocalRootDisplayName ?? string.Empty,
+                    item.LocalPermissionStatus),
+                item.Direction,
+                item.UploadOriginalRetention);
+            if (!HasValidIdentity(expectedInstanceUri, item, root))
             {
-                return null;
+                throw new InvalidDataException("The sync-root metadata identity is invalid.");
             }
 
             return root;
-        }
-
-        private static Uri? TryCreateAbsoluteUri(string? value)
-        {
-            if (string.IsNullOrWhiteSpace(value)
-                || !Uri.TryCreate(value, UriKind.Absolute, out Uri? uri))
-            {
-                return null;
-            }
-
-            return uri;
-        }
-
-        private static CottonSyncRootSnapshot? TryCreateSnapshot(
-            CottonStoredSyncRootItem item,
-            Uri storedInstanceUri)
-        {
-            try
-            {
-                return new CottonSyncRootSnapshot(
-                    item.Id,
-                    storedInstanceUri,
-                    item.AccountScopeKey ?? string.Empty,
-                    new CottonUploadDestinationSnapshot(
-                        item.CloudFolderId,
-                        item.CloudFolderName ?? string.Empty,
-                        item.CloudFolderPath),
-                    new CottonSyncLocalRootSnapshot(
-                        item.LocalStorageKind,
-                        item.LocalRootKey ?? string.Empty,
-                        item.LocalRootDisplayName ?? string.Empty,
-                        item.LocalPermissionStatus),
-                    item.Direction,
-                    item.UploadOriginalRetention);
-            }
-            catch (Exception exception)
-                when (exception is ArgumentException or ArgumentOutOfRangeException or UriFormatException)
-            {
-                return null;
-            }
         }
 
         private static bool HasValidIdentity(

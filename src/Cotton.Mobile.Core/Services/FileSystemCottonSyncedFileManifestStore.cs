@@ -14,9 +14,9 @@ namespace Cotton.Mobile.Services
         public const string MetadataFileName = "synced-files.json";
 
         private static readonly Action<ILogger, string, Exception?> LogLoadFailed = LoggerMessage.Define<string>(
-            LogLevel.Warning,
+            LogLevel.Error,
             new EventId(1, nameof(LoadAsync)),
-            "Failed to load the synced-file manifest from {FilePath}; resetting the store.");
+            "Failed to load the synced-file manifest from {FilePath}.");
         private static readonly Action<ILogger, string, Exception?> LogSaveFailed = LoggerMessage.Define<string>(
             LogLevel.Error,
             new EventId(2, nameof(SaveAsync)),
@@ -54,25 +54,24 @@ namespace Cotton.Mobile.Services
                     || !string.Equals(stored.SyncRootStableKey, root.StableKey, StringComparison.Ordinal)
                     || stored.Items is null)
                 {
-                    CottonAtomicJsonFile.DeleteIfExists(filePath);
-                    return [];
+                    throw new InvalidDataException("The synced-file manifest is invalid for this sync root.");
                 }
 
-                return DeduplicateItems(stored.Items
-                    .Select(TryCreateSyncedFile)
-                    .Where(item => item is not null)
-                    .Select(item => item!));
+                return DeduplicateItems(stored.Items.Select(CreateSyncedFile));
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
             catch (Exception exception)
-                when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or JsonException
+                    or NotSupportedException
+                    or ArgumentException)
             {
                 LogLoadFailed(_logger, filePath, exception);
-                CottonAtomicJsonFile.DeleteIfExists(filePath);
-                return [];
+                throw;
             }
         }
 
@@ -213,32 +212,23 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static CottonSyncedFileSnapshot? TryCreateSyncedFile(CottonStoredSyncedFileItem? item)
+        private static CottonSyncedFileSnapshot CreateSyncedFile(CottonStoredSyncedFileItem? item)
         {
             if (item is null)
             {
-                return null;
+                throw new InvalidDataException("The synced-file manifest contains an empty item.");
             }
 
-            try
-            {
-                return new CottonSyncedFileSnapshot(
-                    item.FileId,
-                    item.FileName ?? string.Empty,
-                    item.ETag ?? string.Empty,
-                    item.RemoteUpdatedAtUtc,
-                    item.SizeBytes,
-                    item.ContentType,
-                    item.SyncedAtUtc,
-                    item.RelativePath ?? string.Empty,
-                    item.ContentHash);
-            }
-            catch (Exception exception)
-                when (exception is ArgumentException or ArgumentOutOfRangeException)
-            {
-                return null;
-            }
+            return new CottonSyncedFileSnapshot(
+                item.FileId,
+                item.FileName ?? string.Empty,
+                item.ETag ?? string.Empty,
+                item.RemoteUpdatedAtUtc,
+                item.SizeBytes,
+                item.ContentType,
+                item.SyncedAtUtc,
+                item.RelativePath ?? string.Empty,
+                item.ContentHash);
         }
-
     }
 }

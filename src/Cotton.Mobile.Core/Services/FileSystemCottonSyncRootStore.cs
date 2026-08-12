@@ -15,9 +15,9 @@ namespace Cotton.Mobile.Services
         public const string MetadataFileName = "sync-roots.json";
 
         private static readonly Action<ILogger, string, Exception?> LogLoadFailed = LoggerMessage.Define<string>(
-            LogLevel.Warning,
+            LogLevel.Error,
             new EventId(1, nameof(LoadAsync)),
-            "Failed to load sync roots from {FilePath}; resetting the store.");
+            "Failed to load sync roots from {FilePath}.");
         private static readonly Action<ILogger, string, Exception?> LogSaveFailed = LoggerMessage.Define<string>(
             LogLevel.Error,
             new EventId(2, nameof(SaveAsync)),
@@ -52,25 +52,25 @@ namespace Cotton.Mobile.Services
                     || stored.SchemaVersion != SchemaVersion
                     || stored.Items is null)
                 {
-                    CottonAtomicJsonFile.DeleteIfExists(filePath);
-                    return [];
+                    throw new InvalidDataException("The sync-root metadata is invalid.");
                 }
 
                 return CottonSyncRootStoreMapper.Deduplicate([.. stored.Items
-                    .Select(item => CottonSyncRootStoreMapper.TryCreateSyncRoot(instanceUri, item))
-                    .Where(item => item is not null)
-                    .Select(item => item!)]);
+                    .Select(item => CottonSyncRootStoreMapper.CreateSyncRoot(instanceUri, item))]);
             }
             catch (OperationCanceledException)
             {
                 throw;
             }
             catch (Exception exception)
-                when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
+                when (exception is IOException
+                    or UnauthorizedAccessException
+                    or JsonException
+                    or NotSupportedException
+                    or ArgumentException)
             {
                 LogLoadFailed(_logger, filePath, exception);
-                CottonAtomicJsonFile.DeleteIfExists(filePath);
-                return [];
+                throw;
             }
         }
 
@@ -157,6 +157,5 @@ namespace Cotton.Mobile.Services
         {
             return Path.Combine(_pathProvider.CreateSyncRootMetadataDirectory(instanceUri), MetadataFileName);
         }
-
     }
 }

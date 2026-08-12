@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to read Cotton mobile cached profile.");
+                CottonLog.Warning(_logger, "Failed to read Cotton mobile cached profile.", exception);
                 ClearBestEffort("profile cache read failure");
                 return Task.FromResult<MainPageProfile?>(null);
             }
@@ -108,7 +108,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to save Cotton mobile cached profile.");
+                CottonLog.Warning(_logger, "Failed to save Cotton mobile cached profile.", exception);
                 ClearBestEffort("profile cache save failure");
                 throw;
             }
@@ -151,7 +151,11 @@ namespace Cotton.Mobile.Services
             RemoveKey(AvatarUrlKey, failures);
             foreach (Exception exception in failures)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile cached profile after {Reason}.", reason);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear the Cotton mobile cached profile.",
+                    reason,
+                    exception);
             }
         }
 

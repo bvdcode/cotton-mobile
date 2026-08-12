@@ -122,7 +122,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to resume Cotton notification delivery.");
+                CottonLog.Warning(_logger, "Failed to resume Cotton notification delivery.", exception);
             }
         }
 
@@ -143,7 +143,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to start Cotton realtime notifications.");
+                CottonLog.Warning(_logger, "Failed to start Cotton realtime notifications.", exception);
             }
 
             try
@@ -152,7 +152,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to fetch Cotton notifications.");
+                CottonLog.Warning(_logger, "Failed to fetch Cotton notifications.", exception);
             }
         }
 
@@ -164,7 +164,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to request Cotton notification permission.");
+                CottonLog.Warning(_logger, "Failed to request Cotton notification permission.", exception);
             }
         }
 
@@ -176,7 +176,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to schedule Cotton background notification polling.");
+                CottonLog.Warning(_logger, "Failed to schedule Cotton background notification polling.", exception);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to cancel Cotton background notification polling.");
+                CottonLog.Warning(_logger, "Failed to cancel Cotton background notification polling.", exception);
             }
         }
 
@@ -200,7 +200,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to stop Cotton realtime notifications.");
+                CottonLog.Warning(_logger, "Failed to stop Cotton realtime notifications.", exception);
             }
         }
     }

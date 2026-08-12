@@ -3,27 +3,20 @@
 
 using Android.App;
 using Android.Content;
-using Android.OS;
 using Cotton.Mobile.Resources.Localization;
 
 namespace Cotton.Mobile.Platforms.Android
 {
-    public class AndroidNotificationChannelService
+    public static class AndroidNotificationChannels
     {
-        public void EnsureChannels()
+        public static void EnsureCreated()
         {
-            if (Build.VERSION.SdkInt < BuildVersionCodes.O)
-            {
-                return;
-            }
-
             if (global::Android.App.Application.Context.GetSystemService(Context.NotificationService)
                 is not NotificationManager notificationManager)
             {
                 throw new InvalidOperationException("Android notification manager is unavailable.");
             }
 
-#pragma warning disable CA1416
             NotificationChannel generalChannel = new(
                 AndroidNotificationConstants.GeneralChannelId,
                 AppResources.NotificationChannelName,
@@ -41,7 +34,6 @@ namespace Cotton.Mobile.Platforms.Android
 
             notificationManager.CreateNotificationChannel(generalChannel);
             notificationManager.CreateNotificationChannel(securityChannel);
-#pragma warning restore CA1416
         }
     }
 }

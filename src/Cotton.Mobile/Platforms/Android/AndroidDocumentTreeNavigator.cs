@@ -167,7 +167,7 @@ namespace Cotton.Mobile.Platforms.Android
             return current;
         }
 
-        private static IReadOnlyList<string> GetParentSegments(string fileRelativePath)
+        private static string[] GetParentSegments(string fileRelativePath)
         {
             string parentPath = GetParentPath(fileRelativePath);
             return string.IsNullOrWhiteSpace(parentPath)

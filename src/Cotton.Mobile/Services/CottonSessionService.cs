@@ -123,7 +123,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Cotton mobile remote logout failed; clearing local session.");
+                CottonLog.Warning(_logger, "Cotton mobile remote logout failed; clearing local session.", exception);
             }
             finally
             {
@@ -169,7 +169,7 @@ namespace Cotton.Mobile.Services
         private async Task TryClearLocalSessionAreaAsync(
             Func<CancellationToken, Task> clearAsync,
             string sessionAreaName,
-            ICollection<Exception> failures,
+            List<Exception> failures,
             CancellationToken cancellationToken)
         {
             try
@@ -178,7 +178,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile {SessionAreaName}.", sessionAreaName);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear a Cotton mobile session area.",
+                    sessionAreaName,
+                    exception);
                 failures.Add(exception);
             }
         }

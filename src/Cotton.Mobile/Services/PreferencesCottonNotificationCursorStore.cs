@@ -50,7 +50,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to read the Cotton notification cursor.");
+                CottonLog.Warning(_logger, "Failed to read the Cotton notification cursor.", exception);
                 return Task.FromResult<CottonNotificationCursor?>(null);
             }
         }
@@ -73,7 +73,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to save the Cotton notification cursor.");
+                CottonLog.Warning(_logger, "Failed to save the Cotton notification cursor.", exception);
                 throw;
             }
 
@@ -90,7 +90,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to clear the Cotton notification cursor.");
+                CottonLog.Warning(_logger, "Failed to clear the Cotton notification cursor.", exception);
                 throw;
             }
 
@@ -123,7 +123,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to clear an invalid Cotton notification cursor.");
+                CottonLog.Warning(_logger, "Failed to clear an invalid Cotton notification cursor.", exception);
             }
         }
 

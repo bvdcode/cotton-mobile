@@ -71,9 +71,7 @@ namespace Cotton.Mobile.ViewModels
                     CottonSyncRootRunCapability.GetRunnableRoots(
                         collection.Roots,
                         collection.PausedRootIds);
-                IReadOnlySet<Guid> runnableRootIds = runnableRoots
-                    .Select(root => root.Id)
-                    .ToHashSet();
+                HashSet<Guid> runnableRootIds = [.. runnableRoots.Select(root => root.Id)];
                 runningItems = [.. state.Roots.Where(item => runnableRootIds.Contains(item.Id))];
                 SetRunning(runningItems, isRunning: true);
 
@@ -85,7 +83,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to run Cotton mobile sync roots.");
+                CottonLog.Warning(_logger, "Failed to run Cotton mobile sync roots.", exception);
                 state.Status = CottonSyncSettingsRunStatusText.FailedStatus;
             }
             finally
@@ -149,7 +147,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to run Cotton mobile sync root.");
+                CottonLog.Warning(_logger, "Failed to run Cotton mobile sync root.", exception);
                 state.Status = CottonSyncRootRunRouting.CreateFailedStatus(statusDirection);
             }
             finally

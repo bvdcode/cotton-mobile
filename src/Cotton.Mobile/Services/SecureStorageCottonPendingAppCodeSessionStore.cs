@@ -38,9 +38,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to read Cotton mobile app-code authorization session; clearing it.");
+                CottonLog.Warning(_logger, "Failed to read Cotton mobile app-code authorization session; clearing it.", exception);
                 ClearBestEffort("pending authorization read failure");
                 return null;
             }
@@ -58,7 +56,7 @@ namespace Cotton.Mobile.Services
                     JsonSerializer.Deserialize<CottonPendingAppCodeSession>(value, SerializerOptions);
                 if (session is null || !IsValid(session))
                 {
-                    _logger.LogWarning("Stored Cotton mobile app-code authorization session is invalid; clearing it.");
+                    CottonLog.Warning(_logger, "Stored Cotton mobile app-code authorization session is invalid; clearing it.");
                     ClearBestEffort("invalid pending authorization session");
                     return null;
                 }
@@ -68,13 +66,13 @@ namespace Cotton.Mobile.Services
             }
             catch (JsonException exception)
             {
-                _logger.LogWarning(exception, "Failed to parse stored Cotton mobile app-code authorization session; clearing it.");
+                CottonLog.Warning(_logger, "Failed to parse stored Cotton mobile app-code authorization session; clearing it.", exception);
                 ClearBestEffort("pending authorization parse failure");
                 return null;
             }
             catch (NotSupportedException exception)
             {
-                _logger.LogWarning(exception, "Stored Cotton mobile app-code authorization session has an unsupported shape; clearing it.");
+                CottonLog.Warning(_logger, "Stored Cotton mobile app-code authorization session has an unsupported shape; clearing it.", exception);
                 ClearBestEffort("unsupported pending authorization session");
                 return null;
             }
@@ -108,7 +106,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to save Cotton mobile app-code authorization session; clearing it.");
+                CottonLog.Warning(_logger, "Failed to save Cotton mobile app-code authorization session; clearing it.", exception);
                 ClearBestEffort("pending authorization save failure");
                 throw;
             }
@@ -132,10 +130,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to clear Cotton mobile app-code authorization session after {Reason}.",
-                    reason);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear the Cotton mobile app-code authorization session.",
+                    reason,
+                    exception);
             }
         }
 

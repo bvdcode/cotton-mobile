@@ -107,10 +107,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to stamp Cotton mobile temporary download file {Path}.",
-                    temporaryPath);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to stamp a Cotton mobile temporary download file.",
+                    temporaryPath,
+                    exception);
                 throw;
             }
 
@@ -120,10 +121,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to replace Cotton mobile download file {Path}.",
-                    finalPath);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to replace a Cotton mobile download file.",
+                    finalPath,
+                    exception);
                 throw;
             }
 
@@ -142,10 +144,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to delete temporary Cotton mobile download file {Path}.",
-                    temporaryPath);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to delete a temporary Cotton mobile download file.",
+                    temporaryPath,
+                    exception);
             }
         }
 
@@ -207,11 +210,12 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                _logger.LogDebug(
-                    exception,
-                    "Failed to inspect Cotton mobile {Operation} for file {FileId}.",
+                CottonLog.DebugWithFileId(
+                    _logger,
+                    "Failed to inspect a Cotton mobile download.",
                     operation,
-                    file.Id);
+                    file.Id,
+                    exception);
                 return null;
             }
         }
@@ -228,7 +232,11 @@ namespace Cotton.Mobile.Services
                     or PlatformNotSupportedException
                     or ArgumentException)
             {
-                _logger.LogDebug(exception, "Failed to update Cotton mobile local file timestamp {Path}.", info.FullName);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to update a Cotton mobile local file timestamp.",
+                    info.FullName,
+                    exception);
             }
         }
 
@@ -250,10 +258,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                _logger.LogDebug(
-                    exception,
-                    "Failed to inspect stale Cotton mobile download files in {Directory}.",
-                    directory);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to inspect stale Cotton mobile download files.",
+                    directory,
+                    exception);
             }
         }
 
@@ -268,7 +277,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to delete Cotton mobile download file {Path}.", filePath);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to delete a Cotton mobile download file.",
+                    filePath,
+                    exception);
             }
         }
     }

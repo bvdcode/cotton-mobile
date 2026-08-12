@@ -212,7 +212,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to load Cotton cloud folders for sync setup.");
+                CottonLog.Warning(_logger, "Failed to load Cotton cloud folders for sync setup.", exception);
                 Status = AppResources.CloudFoldersLoadFailed;
             }
             finally
@@ -268,7 +268,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void LogUnhandledCommandException(Exception exception)
         {
-            _logger.LogError(exception, "Unhandled cloud folder picker command failure.");
+            CottonLog.Error(_logger, "Unhandled cloud folder picker command failure.", exception);
             Status = AppResources.CloudFolderOpenFailed;
         }
     }

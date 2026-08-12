@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Services
             return protectedDirectories;
         }
 
-        private IReadOnlyCollection<string> LoadSyncedManifestDownloadDirectories(
+        private HashSet<string> LoadSyncedManifestDownloadDirectories(
             Uri instanceUri,
             CancellationToken cancellationToken)
         {
@@ -84,16 +84,17 @@ namespace Cotton.Mobile.Services
                     or JsonException
                     or InvalidOperationException)
             {
-                _logger.LogDebug(
-                    exception,
-                    "Failed to inspect Cotton mobile synced-file manifests under {Directory}.",
-                    instanceManifestDirectory);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to inspect Cotton mobile synced-file manifests.",
+                    instanceManifestDirectory,
+                    exception);
             }
 
             return protectedDirectories;
         }
 
-        private IReadOnlyList<Guid> ReadSyncedManifestFileIds(
+        private List<Guid> ReadSyncedManifestFileIds(
             string manifestPath,
             CancellationToken cancellationToken)
         {
@@ -136,10 +137,11 @@ namespace Cotton.Mobile.Services
                     or JsonException
                     or InvalidOperationException)
             {
-                _logger.LogDebug(
-                    exception,
-                    "Failed to inspect Cotton mobile synced-file manifest {Path}.",
-                    manifestPath);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to inspect a Cotton mobile synced-file manifest.",
+                    manifestPath,
+                    exception);
                 return [];
             }
         }
@@ -155,7 +157,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                _logger.LogDebug(exception, "Failed to prune Cotton mobile download cache.");
+                CottonLog.Debug(_logger, "Failed to prune Cotton mobile download cache.", exception);
             }
         }
 
@@ -239,7 +241,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                _logger.LogDebug(exception, "Failed to prune Cotton mobile downloaded file {Path}.", file.FullName);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to prune a Cotton mobile downloaded file.",
+                    file.FullName,
+                    exception);
                 return 0;
             }
         }
@@ -266,7 +272,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException)
             {
-                _logger.LogDebug(exception, "Failed to prune empty Cotton mobile download directory {Path}.", directory);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to prune an empty Cotton mobile download directory.",
+                    directory,
+                    exception);
             }
         }
     }

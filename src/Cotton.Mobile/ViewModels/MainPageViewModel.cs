@@ -225,7 +225,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void LogUnhandledCommandException(Exception exception)
         {
-            _logger.LogError(exception, "Unhandled Cotton mobile command failure.");
+            CottonLog.Error(_logger, "Unhandled Cotton mobile command failure.", exception);
             if (Display.IsAuthenticatedVisible)
             {
                 Display.ShowProfileStatus(AppResources.UnexpectedError);

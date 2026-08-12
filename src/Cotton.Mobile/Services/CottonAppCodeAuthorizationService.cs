@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to open Cotton mobile app-code authorization browser.");
+                CottonLog.Warning(_logger, "Failed to open Cotton mobile app-code authorization browser.", exception);
                 await ClearPendingBestEffortAsync("browser open failure").ConfigureAwait(false);
                 throw;
             }
@@ -146,9 +146,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to restore Cotton mobile pending app-code authorization; keeping it for retry.");
+                CottonLog.Warning(_logger, "Failed to restore Cotton mobile pending app-code authorization; keeping it for retry.", exception);
                 return CottonSessionResult.FromStatus(CottonSessionResultStatus.AuthorizationPending, instanceUri);
             }
         }
@@ -161,10 +159,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to clear Cotton mobile pending authorization after {Reason}.",
-                    reason);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear Cotton mobile pending authorization.",
+                    reason,
+                    exception);
             }
         }
 

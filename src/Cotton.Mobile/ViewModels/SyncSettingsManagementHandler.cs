@@ -74,7 +74,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to stop Cotton mobile sync root.");
+                CottonLog.Warning(_logger, "Failed to stop Cotton mobile sync root.", exception);
                 state.Status = CottonSyncRootManagementText.StopFailedStatus;
             }
             finally
@@ -119,7 +119,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to update Cotton mobile sync root pause state.");
+                CottonLog.Warning(_logger, "Failed to update Cotton mobile sync root pause state.", exception);
                 state.Status = isPaused
                     ? CottonSyncRootManagementText.PauseFailedStatus
                     : CottonSyncRootManagementText.ResumeFailedStatus;

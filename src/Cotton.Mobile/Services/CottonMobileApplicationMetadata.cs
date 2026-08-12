@@ -72,7 +72,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogDebug(exception, "Failed to read Cotton mobile {MetadataName}.", name);
+                CottonLog.DebugWithContext(
+                    _logger,
+                    "Failed to read Cotton mobile application metadata.",
+                    name,
+                    exception);
                 return fallback;
             }
         }

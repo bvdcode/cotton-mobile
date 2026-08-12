@@ -55,10 +55,10 @@ jobs:
         run: dotnet restore "$TEST_PROJECT_PATH"
 
       - name: Verify core formatting
-        run: dotnet format "$CORE_PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+        run: dotnet format "$CORE_PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Verify test formatting
-        run: dotnet format "$TEST_PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+        run: dotnet format "$TEST_PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Test mobile core
         run: dotnet test "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal

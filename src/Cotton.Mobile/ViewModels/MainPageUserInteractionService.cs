@@ -56,7 +56,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to open the Cotton Cloud privacy policy.");
+                CottonLog.Warning(_logger, "Failed to open the Cotton Cloud privacy policy.", exception);
             }
 
             await _dialogService.ShowAlertAsync(

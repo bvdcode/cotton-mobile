@@ -14,17 +14,12 @@ namespace Cotton.Mobile.Platforms.Android
     public class AndroidLocalNotificationService : ICottonLocalNotificationService
     {
         private readonly ICottonNotificationPermissionService _permissionService;
-        private readonly AndroidNotificationChannelService _channelService;
 
-        public AndroidLocalNotificationService(
-            ICottonNotificationPermissionService permissionService,
-            AndroidNotificationChannelService channelService)
+        public AndroidLocalNotificationService(ICottonNotificationPermissionService permissionService)
         {
             ArgumentNullException.ThrowIfNull(permissionService);
-            ArgumentNullException.ThrowIfNull(channelService);
 
             _permissionService = permissionService;
-            _channelService = channelService;
         }
 
         public async Task<CottonLocalNotificationDeliveryStatus> ShowAsync(
@@ -39,7 +34,7 @@ namespace Cotton.Mobile.Platforms.Android
                 return CottonLocalNotificationDeliveryStatus.PermissionDenied;
             }
 
-            _channelService.EnsureChannels();
+            AndroidNotificationChannels.EnsureCreated();
             Context context = global::Android.App.Application.Context;
             if (context.GetSystemService(Context.NotificationService) is not NotificationManager manager)
             {
@@ -87,19 +82,7 @@ namespace Cotton.Mobile.Platforms.Android
             CottonNotificationPriority priority)
         {
             string channelId = ResolveChannelId(priority);
-            Notification.Builder builder;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
-            {
-#pragma warning disable CA1416
-                builder = new Notification.Builder(context, channelId);
-#pragma warning restore CA1416
-            }
-            else
-            {
-#pragma warning disable CA1422
-                builder = new Notification.Builder(context);
-#pragma warning restore CA1422
-            }
+            Notification.Builder builder = new(context, channelId);
 
             builder
                 .SetContentTitle(title)
@@ -109,13 +92,6 @@ namespace Cotton.Mobile.Platforms.Android
                 .SetShowWhen(true)
                 .SetGroup(AndroidNotificationConstants.GroupKey)
                 .SetCategory(Notification.CategoryMessage);
-
-            if (Build.VERSION.SdkInt < BuildVersionCodes.O)
-            {
-#pragma warning disable CA1422
-                builder.SetPriority(ResolveAndroidPriority(priority));
-#pragma warning restore CA1422
-            }
 
             if (!string.IsNullOrWhiteSpace(message))
             {
@@ -141,13 +117,7 @@ namespace Cotton.Mobile.Platforms.Android
                 return null;
             }
 
-            PendingIntentFlags flags = PendingIntentFlags.UpdateCurrent;
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.M)
-            {
-#pragma warning disable CA1416
-                flags |= PendingIntentFlags.Immutable;
-#pragma warning restore CA1416
-            }
+            PendingIntentFlags flags = PendingIntentFlags.UpdateCurrent | PendingIntentFlags.Immutable;
 
             return PendingIntent.GetActivity(context, notificationId, launchIntent, flags);
         }
@@ -170,16 +140,5 @@ namespace Cotton.Mobile.Platforms.Android
             };
         }
 
-        private static int ResolveAndroidPriority(CottonNotificationPriority priority)
-        {
-            return priority switch
-            {
-                CottonNotificationPriority.None => (int)NotificationPriority.Default,
-                CottonNotificationPriority.Low => (int)NotificationPriority.Low,
-                CottonNotificationPriority.Medium => (int)NotificationPriority.Default,
-                CottonNotificationPriority.High => (int)NotificationPriority.High,
-                _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, "Unknown notification priority."),
-            };
-        }
     }
 }

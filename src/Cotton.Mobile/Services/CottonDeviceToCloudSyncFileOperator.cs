@@ -130,7 +130,7 @@ namespace Cotton.Mobile.Services
                 token => _localContentSource.OpenReadAsync(instanceUri, root, item, token));
         }
 
-        private static IReadOnlyDictionary<string, string> CreateUploadMetadata(
+        private static Dictionary<string, string> CreateUploadMetadata(
             CottonDeviceToCloudSyncPlanItem item)
         {
             Dictionary<string, string> metadata = new(StringComparer.Ordinal)

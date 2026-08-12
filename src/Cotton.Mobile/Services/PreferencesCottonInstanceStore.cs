@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to read Cotton mobile saved instance URL.");
+                CottonLog.Warning(_logger, "Failed to read Cotton mobile saved instance URL.", exception);
                 return Task.FromResult<Uri?>(null);
             }
 
@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to save Cotton mobile instance URL.");
+                CottonLog.Warning(_logger, "Failed to save Cotton mobile instance URL.", exception);
                 throw;
             }
 
@@ -78,7 +78,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile instance URL.");
+                CottonLog.Warning(_logger, "Failed to clear Cotton mobile instance URL.", exception);
                 throw;
             }
 
@@ -93,10 +93,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to clear invalid Cotton mobile instance URL {InstanceUrl}.",
-                    value);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear an invalid Cotton mobile instance URL.",
+                    value,
+                    exception);
             }
         }
     }

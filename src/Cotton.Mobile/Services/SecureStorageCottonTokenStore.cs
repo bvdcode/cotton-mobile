@@ -40,7 +40,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to read Cotton mobile tokens; clearing local token store.");
+                CottonLog.Warning(_logger, "Failed to read Cotton mobile tokens; clearing local token store.", exception);
                 ClearBestEffort("token read failure");
                 return null;
             }
@@ -86,7 +86,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                _logger.LogWarning(exception, "Failed to save Cotton mobile tokens; clearing local token store.");
+                CottonLog.Warning(_logger, "Failed to save Cotton mobile tokens; clearing local token store.", exception);
                 ClearBestEffort("token save failure");
                 throw;
             }
@@ -121,7 +121,11 @@ namespace Cotton.Mobile.Services
             RemoveTokenKey(RefreshTokenKey, failures);
             foreach (Exception exception in failures)
             {
-                _logger.LogWarning(exception, "Failed to clear Cotton mobile tokens after {Reason}.", reason);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear Cotton mobile tokens.",
+                    reason,
+                    exception);
             }
         }
 

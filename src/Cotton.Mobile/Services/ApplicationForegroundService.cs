@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Services
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Cotton mobile stopped subscriber failed.");
+                    CottonLog.Warning(_logger, "Cotton mobile stopped subscriber failed.", exception);
                 }
             }
         }
@@ -135,7 +135,7 @@ namespace Cotton.Mobile.Services
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Cotton mobile foreground subscriber failed.");
+                    CottonLog.Warning(_logger, "Cotton mobile foreground subscriber failed.", exception);
                 }
             }
         }

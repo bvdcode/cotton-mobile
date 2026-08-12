@@ -57,11 +57,11 @@ namespace Cotton.Mobile.Platforms.Android
                 PermissionStatus status = await Permissions
                     .RequestAsync<CottonPostNotificationsPermissionRequest>()
                     .ConfigureAwait(false);
-                _logger.LogInformation("Cotton notification permission result: {PermissionStatus}.", status);
+                CottonLog.NotificationPermissionResult(_logger, status);
             }
             catch (PermissionException exception)
             {
-                _logger.LogWarning(exception, "Cotton notification permission is unavailable.");
+                CottonLog.Warning(_logger, "Cotton notification permission is unavailable.", exception);
             }
         }
     }

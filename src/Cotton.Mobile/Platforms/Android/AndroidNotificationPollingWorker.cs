@@ -32,8 +32,10 @@ namespace Cotton.Mobile.Platforms.Android
             }
             catch (Exception exception)
             {
-                services?.GetService<ILogger<AndroidNotificationPollingWorker>>()?
-                    .LogWarning(exception, "Android background notification polling failed.");
+                if (services?.GetService<ILogger<AndroidNotificationPollingWorker>>() is ILogger logger)
+                {
+                    CottonLog.Warning(logger, "Android background notification polling failed.", exception);
+                }
                 return Retry();
             }
         }

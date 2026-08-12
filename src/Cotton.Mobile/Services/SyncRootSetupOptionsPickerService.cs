@@ -50,7 +50,13 @@ namespace Cotton.Mobile.Services
 
         private static INavigation GetNavigation()
         {
-            return Application.Current?.Windows.FirstOrDefault()?.Page?.Navigation
+            Application? application = Application.Current;
+            if (application is null || application.Windows.Count == 0)
+            {
+                throw new InvalidOperationException("Sync setup options need an active page.");
+            }
+
+            return application.Windows[0].Page?.Navigation
                 ?? throw new InvalidOperationException("Sync setup options need an active page.");
         }
     }

@@ -108,7 +108,7 @@ jobs:
         run: dotnet restore "$PROJECT_PATH"
 
       - name: Verify mobile formatting
-        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity info
 
       - name: Decode upload keystore
         run: |

@@ -69,7 +69,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to add Cotton mobile sync root.");
+                CottonLog.Warning(_logger, "Failed to add Cotton mobile sync root.", exception);
                 state.Status = AppResources.SyncFolderAddFailed;
             }
             finally
@@ -130,7 +130,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to reconnect Cotton mobile sync root.");
+                CottonLog.Warning(_logger, "Failed to reconnect Cotton mobile sync root.", exception);
                 state.Status = AppResources.LocalFolderReconnectFailed;
             }
             finally

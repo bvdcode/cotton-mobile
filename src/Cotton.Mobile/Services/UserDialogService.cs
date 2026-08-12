@@ -40,7 +40,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to show Cotton mobile alert dialog {Title}.", title);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to show a Cotton mobile alert dialog.",
+                    title,
+                    exception);
             }
         }
 
@@ -55,7 +59,11 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to show Cotton mobile confirmation dialog {Title}.", title);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to show a Cotton mobile confirmation dialog.",
+                    title,
+                    exception);
                 return false;
             }
         }

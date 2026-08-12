@@ -63,7 +63,7 @@ namespace Cotton.Mobile.Services
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Cotton mobile internet-restored subscriber failed.");
+                    CottonLog.Warning(_logger, "Cotton mobile internet-restored subscriber failed.", exception);
                 }
             }
         }

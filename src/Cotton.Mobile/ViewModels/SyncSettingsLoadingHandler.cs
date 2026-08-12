@@ -33,7 +33,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to load Cotton mobile sync roots.");
+                CottonLog.Warning(_logger, "Failed to load Cotton mobile sync roots.", exception);
                 state.Status = AppResources.SyncFoldersInspectFailed;
             }
             finally

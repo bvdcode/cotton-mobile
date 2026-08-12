@@ -54,7 +54,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to restore Cotton mobile session.");
+                CottonLog.Warning(_logger, "Failed to restore Cotton mobile session.", exception);
                 MainPageSessionState? cachedState = await TryCreateCachedStateAsync(rememberedInstanceUri);
                 if (cachedState is not null)
                 {
@@ -93,12 +93,12 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception) when (cancellationToken.IsCancellationRequested)
             {
-                _logger.LogInformation(exception, "Cotton mobile browser authorization was cancelled.");
+                CottonLog.Information(_logger, "Cotton mobile browser authorization was cancelled.", exception);
                 return await CompleteAuthorizationCancellationAsync(signInInstanceUrl);
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Cotton mobile browser authorization failed.");
+                CottonLog.Error(_logger, "Cotton mobile browser authorization failed.", exception);
                 await ClearLocalSessionBestEffortAsync("authorization failure");
                 return MainPageSessionState.SignedOut(
                     signInInstanceUrl,
@@ -118,7 +118,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogError(exception, "Cotton mobile logout failed.");
+                CottonLog.Error(_logger, "Cotton mobile logout failed.", exception);
                 if (currentProfile is not null)
                 {
                     if (currentInstanceUri is not null)
@@ -177,7 +177,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to load the cached Cotton mobile profile.");
+                CottonLog.Warning(_logger, "Failed to load the cached Cotton mobile profile.", exception);
                 return null;
             }
         }
@@ -196,7 +196,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogDebug(exception, "Failed to read the remembered Cotton mobile session.");
+                CottonLog.Debug(_logger, "Failed to read the remembered Cotton mobile session.", exception);
                 return null;
             }
         }
@@ -209,7 +209,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to restore the Cotton mobile instance URL.");
+                CottonLog.Warning(_logger, "Failed to restore the Cotton mobile instance URL.", exception);
                 return null;
             }
         }
@@ -222,7 +222,7 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to save the Cotton mobile profile cache.");
+                CottonLog.Warning(_logger, "Failed to save the Cotton mobile profile cache.", exception);
             }
         }
 
@@ -235,10 +235,11 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to clear the Cotton mobile session after {Reason}.",
-                    reason);
+                CottonLog.WarningWithContext(
+                    _logger,
+                    "Failed to clear the Cotton mobile session.",
+                    reason,
+                    exception);
             }
         }
     }

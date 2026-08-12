@@ -52,7 +52,7 @@ namespace Cotton.Mobile.ViewModels
             ResumeRootCommand = CreateResumeRootCommand();
         }
 
-        private IAsyncRelayCommand CreateLoadCommand()
+        private AsyncRelayCommand CreateLoadCommand()
         {
             return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
@@ -61,7 +61,7 @@ namespace Cotton.Mobile.ViewModels
                 () => !IsBusy);
         }
 
-        private IAsyncRelayCommand CreateAddRootCommand()
+        private AsyncRelayCommand CreateAddRootCommand()
         {
             return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
@@ -70,7 +70,7 @@ namespace Cotton.Mobile.ViewModels
                 CanAddRoot);
         }
 
-        private IAsyncRelayCommand CreateRunAllCommand()
+        private AsyncRelayCommand CreateRunAllCommand()
         {
             return new AsyncRelayCommand(
                 () => AsyncCommandExecution.RunAsync(
@@ -79,7 +79,7 @@ namespace Cotton.Mobile.ViewModels
                 CanRunAll);
         }
 
-        private IAsyncRelayCommand<CottonSyncRootListItem> CreateRootPrimaryActionCommand()
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateRootPrimaryActionCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
@@ -89,7 +89,7 @@ namespace Cotton.Mobile.ViewModels
                 item => !IsBusy && item is not null && item.CanUsePrimaryAction);
         }
 
-        private IAsyncRelayCommand<CottonSyncRootListItem> CreateStopRootCommand()
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateStopRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
@@ -99,7 +99,7 @@ namespace Cotton.Mobile.ViewModels
                 item => !IsBusy && item is not null && item.CanStopSync);
         }
 
-        private IAsyncRelayCommand<CottonSyncRootListItem> CreatePauseRootCommand()
+        private AsyncRelayCommand<CottonSyncRootListItem> CreatePauseRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.ViewModels
                 item => !IsBusy && item is not null && item.CanPauseSync);
         }
 
-        private IAsyncRelayCommand<CottonSyncRootListItem> CreateResumeRootCommand()
+        private AsyncRelayCommand<CottonSyncRootListItem> CreateResumeRootCommand()
         {
             return new AsyncRelayCommand<CottonSyncRootListItem>(
                 item => AsyncCommandExecution.RunAsync(
@@ -284,7 +284,7 @@ namespace Cotton.Mobile.ViewModels
 
         private void LogUnhandledCommandException(Exception exception)
         {
-            _logger.LogError(exception, "Unhandled Cotton mobile sync settings command failure.");
+            CottonLog.Error(_logger, "Unhandled Cotton mobile sync settings command failure.", exception);
             Status = AppResources.SyncSettingsUpdateFailed;
         }
 

@@ -58,7 +58,6 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
             services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
             services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
-            services.AddSingleton<AndroidNotificationChannelService>();
             services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();

@@ -89,7 +89,6 @@ namespace Cotton.Mobile.Platforms.Android
                 return;
             }
 
-#pragma warning disable CA1416, CA1422
             global::Android.Graphics.Color systemBarColor = Resources.GetColor(
                 Resource.Color.cotton_system_bar_background,
                 Theme);
@@ -97,12 +96,15 @@ namespace Cotton.Mobile.Platforms.Android
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
             Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);
-            Window.SetStatusBarColor(systemBarColor);
-            Window.SetNavigationBarColor(systemBarColor);
-
-            if (Build.VERSION.SdkInt >= BuildVersionCodes.P)
+            if (!OperatingSystem.IsAndroidVersionAtLeast(35))
             {
-                Window.NavigationBarDividerColor = systemBarColor;
+                Window.SetStatusBarColor(systemBarColor);
+                Window.SetNavigationBarColor(systemBarColor);
+
+                if (OperatingSystem.IsAndroidVersionAtLeast(28))
+                {
+                    Window.NavigationBarDividerColor = systemBarColor;
+                }
             }
 
             bool useLightIcons = (configuration.UiMode & UiMode.NightMask) != UiMode.NightYes;
@@ -112,7 +114,6 @@ namespace Cotton.Mobile.Platforms.Android
                 insetsController.AppearanceLightStatusBars = useLightIcons;
                 insetsController.AppearanceLightNavigationBars = useLightIcons;
             }
-#pragma warning restore CA1416, CA1422
         }
     }
 }

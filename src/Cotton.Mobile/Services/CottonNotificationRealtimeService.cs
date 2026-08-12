@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Services
                 }
                 catch (Exception exception)
                 {
-                    _logger.LogWarning(exception, "Failed to establish the Cotton realtime notification connection.");
+                    CottonLog.Warning(_logger, "Failed to establish the Cotton realtime notification connection.", exception);
                     client.Realtime.NotificationReceived -= OnNotificationReceived;
                     await client.DisposeAsync().ConfigureAwait(false);
                     throw;
@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                _logger.LogWarning(exception, "Failed to fetch Cotton notifications after a realtime event.");
+                CottonLog.Warning(_logger, "Failed to fetch Cotton notifications after a realtime event.", exception);
             }
         }
     }

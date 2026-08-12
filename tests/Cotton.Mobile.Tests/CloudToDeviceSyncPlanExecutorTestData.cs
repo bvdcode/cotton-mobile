@@ -38,37 +38,23 @@ namespace Cotton.Mobile.Tests
 
         public static CottonFileBrowserEntry CreateFile(Guid id, string name, string? eTag)
         {
-            return CottonFileBrowserEntry.CreateCached(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 id,
-                CottonFileBrowserEntryType.File,
                 name,
-                "Text",
-                "42 B · Text",
-                "More",
-                "TXT",
                 UpdatedAt,
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
                 eTag,
-                TestContentHashes.First);
+                contentHash: TestContentHashes.First);
         }
 
         public static CottonFileBrowserEntry CreateFolder(string name)
         {
-            return CottonFileBrowserEntry.CreateCached(
+            return CottonFileBrowserEntryFactory.CreateFolder(
                 Guid.NewGuid(),
-                CottonFileBrowserEntryType.Folder,
                 name,
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                UpdatedAt,
-                sizeBytes: null,
-                contentType: null,
-                previewHashEncryptedHex: null,
-                eTag: null);
+                UpdatedAt);
         }
     }
 }

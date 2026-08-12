@@ -86,9 +86,9 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Sensitive_file_cache_policy_blocks_unpinned_reusable_local_copy()
         {
-            CottonFileBrowserEntry sensitiveEntry = CottonFileBrowserEntry.FromFile(
+            CottonFileBrowserEntry sensitiveEntry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile("private-key.pem", "application/x-pem-file", 42));
-            CottonFileBrowserEntry normalEntry = CottonFileBrowserEntry.FromFile(
+            CottonFileBrowserEntry normalEntry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile("notes.txt", "text/plain", 42));
 
             Assert.False(CottonSensitiveFileCachePolicy.CanReuseUnpinnedLocalCopy(sensitiveEntry));

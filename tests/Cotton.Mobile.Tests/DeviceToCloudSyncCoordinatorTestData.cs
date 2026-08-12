@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
             string? eTag,
             IReadOnlyDictionary<string, string>? metadata = null)
         {
-            return CottonFileBrowserEntry.CreateFile(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 id,
                 name,
                 UpdatedAt,
@@ -94,19 +94,10 @@ namespace Cotton.Mobile.Tests
 
         public static CottonFileBrowserEntry CreateFolder(Guid id, string name)
         {
-            return CottonFileBrowserEntry.CreateCached(
+            return CottonFileBrowserEntryFactory.CreateFolder(
                 id,
-                CottonFileBrowserEntryType.Folder,
                 name,
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                UpdatedAt,
-                sizeBytes: null,
-                contentType: null,
-                previewHashEncryptedHex: null,
-                eTag: null);
+                UpdatedAt);
         }
     }
 }

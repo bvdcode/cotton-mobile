@@ -60,7 +60,7 @@ namespace Cotton.Mobile.Services
             NodeDto node = await client.Nodes
                 .CreateAsync(parentFolder.Id, folderName.Trim(), cancellationToken)
                 .ConfigureAwait(false);
-            return CottonFileBrowserEntry.FromNode(node);
+            return CottonFileBrowserEntryFactory.FromNode(node);
         }
 
         public Task<CottonFileDownloadResult> DownloadAsync(
@@ -130,11 +130,11 @@ namespace Cotton.Mobile.Services
 
             List<CottonFileBrowserEntry> entries = nodes
                 .OrderBy(node => node.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(CottonFileBrowserEntry.FromNode)
+                .Select(CottonFileBrowserEntryFactory.FromNode)
                 .Concat(
                     files
                         .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
-                        .Select(CottonFileBrowserEntry.FromFile))
+                        .Select(CottonFileBrowserEntryFactory.FromFile))
                 .ToList();
             return new CottonFolderContent(folderId, folderName, entries);
         }

@@ -204,14 +204,9 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Snapshot_create_captures_file_browser_metadata()
         {
-            CottonFileBrowserEntry file = CottonFileBrowserEntry.CreateCached(
+            CottonFileBrowserEntry file = CottonFileBrowserEntryFactory.CreateFile(
                 FileId,
-                CottonFileBrowserEntryType.File,
                 " report.pdf ",
-                "PDF",
-                "2 KB · PDF",
-                "More",
-                "PDF",
                 RemoteUpdatedAt,
                 2048,
                 " application/pdf ",
@@ -231,19 +226,10 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Snapshot_create_rejects_folder_entries()
         {
-            CottonFileBrowserEntry folder = CottonFileBrowserEntry.CreateCached(
+            CottonFileBrowserEntry folder = CottonFileBrowserEntryFactory.CreateFolder(
                 FileId,
-                CottonFileBrowserEntryType.Folder,
                 "Reports",
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                RemoteUpdatedAt,
-                sizeBytes: null,
-                contentType: null,
-                previewHashEncryptedHex: null,
-                eTag: null);
+                RemoteUpdatedAt);
 
             Assert.Throws<ArgumentException>(() => CottonOfflineFilePinSnapshot.Create(folder, PinnedAt));
         }

@@ -29,7 +29,7 @@ namespace Cotton.Mobile.Tests
             {
                 [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.ToString("N"),
             };
-            CottonFileBrowserEntry uploaded = CottonFileBrowserEntry.CreateFile(
+            CottonFileBrowserEntry uploaded = CottonFileBrowserEntryFactory.CreateFile(
                 RemoteFileId,
                 item.DisplayName,
                 RecordedAt,

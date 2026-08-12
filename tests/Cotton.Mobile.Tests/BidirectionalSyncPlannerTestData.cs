@@ -84,20 +84,15 @@ namespace Cotton.Mobile.Tests
             string contentHash = TestContentHashes.First)
         {
             return new CottonDeviceToCloudRemoteItemSnapshot(
-                CottonFileBrowserEntry.CreateCached(
+                CottonFileBrowserEntryFactory.CreateFile(
                     id,
-                    CottonFileBrowserEntryType.File,
                     name,
-                    "Text",
-                    $"{sizeBytes} B · Text",
-                    "More",
-                    "TXT",
                     RemoteUpdatedAt,
                     sizeBytes,
                     "text/plain",
                     previewHashEncryptedHex: null,
                     eTag,
-                    contentHash),
+                    contentHash: contentHash),
                 relativePath);
         }
     }

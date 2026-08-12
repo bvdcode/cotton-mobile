@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
             CottonUploadReceiptSnapshot uploaded = pending.MarkUploaded(
-                CottonFileBrowserEntry.CreateFile(
+                CottonFileBrowserEntryFactory.CreateFile(
                     RemoteFileId,
                     "photo.jpg",
                     RecordedAtUtc,
@@ -83,7 +83,7 @@ namespace Cotton.Mobile.Tests
         public void Mark_uploaded_rejects_a_different_remote_size()
         {
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
-            CottonFileBrowserEntry wrongSize = CottonFileBrowserEntry.CreateFile(
+            CottonFileBrowserEntry wrongSize = CottonFileBrowserEntryFactory.CreateFile(
                 RemoteFileId,
                 "photo.jpg",
                 RecordedAtUtc,
@@ -259,7 +259,7 @@ namespace Cotton.Mobile.Tests
 
         private static CottonFileBrowserEntry CreateUploadedFile()
         {
-            return CottonFileBrowserEntry.CreateFile(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 RemoteFileId,
                 "photo.jpg",
                 RecordedAtUtc,

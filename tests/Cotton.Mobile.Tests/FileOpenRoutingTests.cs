@@ -119,19 +119,10 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void File_open_route_rejects_folder_entries()
         {
-            CottonFileBrowserEntry folder = CottonFileBrowserEntry.CreateCached(
+            CottonFileBrowserEntry folder = CottonFileBrowserEntryFactory.CreateFolder(
                 Guid.NewGuid(),
-                CottonFileBrowserEntryType.Folder,
                 "Folder",
-                "Folder",
-                "Folder",
-                "Open",
-                "Folder",
-                UpdatedAt,
-                null,
-                null,
-                null,
-                eTag: null);
+                UpdatedAt);
 
             Assert.Throws<ArgumentException>(() => CottonFileOpenRouter.CreateRoute(folder));
         }
@@ -141,7 +132,7 @@ namespace Cotton.Mobile.Tests
             string contentType,
             long sizeBytes)
         {
-            return CottonFileBrowserEntry.FromFile(
+            return CottonFileBrowserEntryFactory.FromFile(
                 new NodeFileManifestDto
                 {
                     Id = Guid.NewGuid(),

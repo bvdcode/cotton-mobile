@@ -113,48 +113,48 @@ namespace Cotton.Mobile.Services
             "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         };
 
-        public static string ResolveKind(string? name, string? contentType)
+        public static CottonFileKind ResolveKind(string? name, string? contentType)
         {
             string normalizedName = string.IsNullOrWhiteSpace(name) ? string.Empty : name.Trim();
             string mediaType = CreateContentTypeMediaType(contentType);
             if (IsSvgFile(normalizedName, mediaType))
             {
-                return "SVG";
+                return CottonFileKind.Svg;
             }
 
             if (IsTextFile(normalizedName, mediaType))
             {
-                return "Text";
+                return CottonFileKind.Text;
             }
 
             if (mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
             {
-                return "Image";
+                return CottonFileKind.Image;
             }
 
             if (mediaType.Equals("application/pdf", StringComparison.OrdinalIgnoreCase)
                 || Path.GetExtension(normalizedName).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
             {
-                return "PDF";
+                return CottonFileKind.Pdf;
             }
 
             if (DocumentContentTypes.Contains(mediaType)
                 || DocumentFileExtensions.Contains(Path.GetExtension(normalizedName)))
             {
-                return "Document";
+                return CottonFileKind.Document;
             }
 
             if (mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
             {
-                return "Video";
+                return CottonFileKind.Video;
             }
 
             if (mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase))
             {
-                return "Audio";
+                return CottonFileKind.Audio;
             }
 
-            return "File";
+            return CottonFileKind.File;
         }
 
         public static string CreateContentTypeMediaType(string? contentType)

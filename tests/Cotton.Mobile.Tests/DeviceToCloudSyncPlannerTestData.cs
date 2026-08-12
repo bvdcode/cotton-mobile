@@ -115,7 +115,7 @@ namespace Cotton.Mobile.Tests
                     [CottonFileUploadMetadataKeys.UploadOperationId] = operationId.Value.ToString("N"),
                 }
                 : null;
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.CreateFile(
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.CreateFile(
                 id,
                 name,
                 SyncedAt,

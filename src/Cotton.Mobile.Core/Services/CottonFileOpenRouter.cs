@@ -218,19 +218,19 @@ namespace Cotton.Mobile.Services
 
         private static bool IsPdfPreview(CottonFileBrowserEntry file, string? contentType)
         {
-            return string.Equals(file.Kind, "PDF", StringComparison.OrdinalIgnoreCase)
+            return file.Kind == CottonFileKind.Pdf
                 || string.Equals(contentType, "application/pdf", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsAudioPreview(CottonFileBrowserEntry file, string? contentType)
         {
-            return string.Equals(file.Kind, "Audio", StringComparison.OrdinalIgnoreCase)
+            return file.Kind == CottonFileKind.Audio
                 || (contentType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
         private static bool IsVideoPreview(CottonFileBrowserEntry file, string? contentType)
         {
-            return string.Equals(file.Kind, "Video", StringComparison.OrdinalIgnoreCase)
+            return file.Kind == CottonFileKind.Video
                 || (contentType?.StartsWith("video/", StringComparison.OrdinalIgnoreCase) ?? false);
         }
 
@@ -242,23 +242,26 @@ namespace Cotton.Mobile.Services
             string mediaType = contentType ?? string.Empty;
             return file.Kind switch
             {
-                "Text" => CottonSystemFileOpenKind.Text,
-                "PDF" => CottonSystemFileOpenKind.Pdf,
-                "Document" => CottonSystemFileOpenKind.Document,
-                "Audio" => CottonSystemFileOpenKind.Audio,
-                "Video" => CottonSystemFileOpenKind.Video,
-                "SVG" => CottonSystemFileOpenKind.Svg,
-                "Image" => CottonSystemFileOpenKind.Image,
-                "File" when ArchiveFileExtensions.Contains(extension) => CottonSystemFileOpenKind.Archive,
-                "File" when string.Equals(mediaType, "application/pdf", StringComparison.OrdinalIgnoreCase) =>
+                CottonFileKind.Text => CottonSystemFileOpenKind.Text,
+                CottonFileKind.Pdf => CottonSystemFileOpenKind.Pdf,
+                CottonFileKind.Document => CottonSystemFileOpenKind.Document,
+                CottonFileKind.Audio => CottonSystemFileOpenKind.Audio,
+                CottonFileKind.Video => CottonSystemFileOpenKind.Video,
+                CottonFileKind.Svg => CottonSystemFileOpenKind.Svg,
+                CottonFileKind.Image => CottonSystemFileOpenKind.Image,
+                CottonFileKind.File when ArchiveFileExtensions.Contains(extension) => CottonSystemFileOpenKind.Archive,
+                CottonFileKind.File when string.Equals(mediaType, "application/pdf", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Pdf,
-                "File" when mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) =>
+                CottonFileKind.File when mediaType.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Audio,
-                "File" when mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) =>
+                CottonFileKind.File when mediaType.StartsWith("video/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Video,
-                "File" when mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) =>
+                CottonFileKind.File when mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase) =>
                     CottonSystemFileOpenKind.Image,
-                "File" => CottonSystemFileOpenKind.File,
+                CottonFileKind.File => CottonSystemFileOpenKind.File,
+                CottonFileKind.Folder => throw new ArgumentException(
+                    "Folder entries cannot be opened with a file route.",
+                    nameof(file)),
                 _ => throw new ArgumentOutOfRangeException(nameof(file), file.Kind, "File kind is not supported."),
             };
         }

@@ -60,20 +60,15 @@ namespace Cotton.Mobile.Tests
 
         public static CottonFileBrowserEntry CreateFile(Guid id, string name, string? eTag)
         {
-            return CottonFileBrowserEntry.CreateCached(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 id,
-                CottonFileBrowserEntryType.File,
                 name,
-                "Text",
-                "42 B · Text",
-                "More",
-                "TXT",
                 UpdatedAt,
                 42,
                 "text/plain",
                 previewHashEncryptedHex: null,
                 eTag,
-                TestContentHashes.First);
+                contentHash: TestContentHashes.First);
         }
     }
 }

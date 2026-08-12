@@ -42,7 +42,7 @@ namespace Cotton.Mobile.Services
                 result);
             NodeFileManifestDto createdFile = await client.Files.CreateFromChunksAsync(request, cancellationToken)
                 .ConfigureAwait(false);
-            return CottonFileBrowserEntry.FromFile(createdFile);
+            return CottonFileBrowserEntryFactory.FromFile(createdFile);
         }
 
         public async Task<CottonFileBrowserEntry> UpdateContentAsync(
@@ -82,7 +82,7 @@ namespace Cotton.Mobile.Services
             NodeFileManifestDto updatedFile = await client.Files
                 .UpdateContentAsync(fileId, request, expectedETag.Trim(), cancellationToken)
                 .ConfigureAwait(false);
-            return CottonFileBrowserEntry.FromFile(updatedFile);
+            return CottonFileBrowserEntryFactory.FromFile(updatedFile);
         }
 
         private static async Task<CottonFileUploadResult> UploadContentAsync(

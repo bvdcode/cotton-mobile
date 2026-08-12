@@ -7,131 +7,112 @@ using Cotton.Nodes;
 
 namespace Cotton.Mobile.Services
 {
-    internal static class CottonFileBrowserEntryFactory
+    public static class CottonFileBrowserEntryFactory
     {
         public static CottonFileBrowserEntry FromNode(NodeDto node)
         {
             ArgumentNullException.ThrowIfNull(node);
 
-            return new CottonFileBrowserEntry(
-                node.Id,
+            return CreateFolder(node.Id, node.Name, node.UpdatedAt);
+        }
+
+        public static CottonFileBrowserEntry CreateFolder(
+            Guid id,
+            string name,
+            DateTime updatedAt)
+        {
+
+            CottonFileDescriptor descriptor = new(
+                id,
                 CottonFileBrowserEntryType.Folder,
-                node.Name,
-                "Folder",
-                CoreResources.FolderKind,
-                CoreResources.OpenAction,
-                CoreResources.FolderKind,
-                node.UpdatedAt,
+                name,
+                CottonFileKind.Folder);
+            CottonFileRevisionSnapshot revision = new(
+                updatedAt,
                 sizeBytes: null,
                 contentType: null,
                 contentHash: null,
                 previewHashEncryptedHex: null,
                 eTag: null);
+            CottonFileBrowserPresentation presentation = new(
+                CoreResources.FolderKind,
+                CoreResources.OpenAction,
+                CoreResources.FolderKind);
+            return new CottonFileBrowserEntry(descriptor, revision, presentation);
         }
 
         public static CottonFileBrowserEntry FromFile(NodeFileManifestDto file)
         {
             ArgumentNullException.ThrowIfNull(file);
 
-            string contentType = string.IsNullOrWhiteSpace(file.ContentType)
-                ? string.Empty
-                : file.ContentType.Trim();
-            string kind = CottonFileKindClassifier.ResolveKind(file.Name, contentType);
-            string displayKind = CottonFileKindDisplayName.Create(kind);
-            return new CottonFileBrowserEntry(
+            return CreateFile(
                 file.Id,
-                CottonFileBrowserEntryType.File,
                 file.Name,
-                kind,
-                $"{CottonFileSizeFormatter.Format(file.SizeBytes)} · {displayKind}",
-                CoreResources.MoreAction,
-                ResolveBadgeText(kind),
                 file.UpdatedAt,
                 file.SizeBytes,
-                contentType,
-                file.ContentHash,
+                file.ContentType,
                 file.PreviewHashEncryptedHex,
                 file.ETag,
-                metadata: file.Metadata);
+                file.Metadata,
+                file.ContentHash);
         }
 
         public static CottonFileBrowserEntry CreateFile(
             Guid id,
             string name,
-            DateTime updatedAtUtc,
+            DateTime updatedAt,
             long? sizeBytes,
             string? contentType,
             string? previewHashEncryptedHex,
             string? eTag,
-            IReadOnlyDictionary<string, string>? metadata,
-            string? contentHash)
+            IReadOnlyDictionary<string, string>? metadata = null,
+            string? contentHash = null)
         {
-            string kind = CottonFileKindClassifier.ResolveKind(name, contentType);
+            string normalizedContentType = string.IsNullOrWhiteSpace(contentType)
+                ? string.Empty
+                : contentType.Trim();
+            CottonFileKind kind = CottonFileKindClassifier.ResolveKind(name, normalizedContentType);
             string displayKind = CottonFileKindDisplayName.Create(kind);
             string details = sizeBytes.HasValue
                 ? $"{CottonFileSizeFormatter.Format(sizeBytes.Value)} · {displayKind}"
                 : displayKind;
-            return new CottonFileBrowserEntry(
+            CottonFileDescriptor descriptor = new(
                 id,
                 CottonFileBrowserEntryType.File,
                 name,
-                kind,
-                details,
-                CoreResources.MoreAction,
-                ResolveBadgeText(kind),
-                updatedAtUtc,
+                kind);
+            CottonFileRevisionSnapshot revision = new(
+                updatedAt,
                 sizeBytes,
-                contentType,
+                normalizedContentType,
                 contentHash,
                 previewHashEncryptedHex,
                 eTag,
-                metadata: metadata);
-        }
-
-        public static CottonFileBrowserEntry CreateCached(
-            Guid id,
-            CottonFileBrowserEntryType type,
-            string name,
-            string kind,
-            string details,
-            string actionLabel,
-            string badgeText,
-            DateTime updatedAtUtc,
-            long? sizeBytes,
-            string? contentType,
-            string? previewHashEncryptedHex,
-            string? eTag,
-            string? contentHash)
-        {
-            return new CottonFileBrowserEntry(
-                id,
-                type,
-                name,
-                kind,
+                metadata);
+            CottonFileBrowserPresentation presentation = new(
                 details,
-                actionLabel,
-                badgeText,
-                updatedAtUtc,
-                sizeBytes,
-                contentType,
-                contentHash,
-                previewHashEncryptedHex,
-                eTag);
+                CoreResources.MoreAction,
+                ResolveBadgeText(kind));
+            return new CottonFileBrowserEntry(descriptor, revision, presentation);
         }
 
-        private static string ResolveBadgeText(string kind)
+        private static string ResolveBadgeText(CottonFileKind kind)
         {
             return kind switch
             {
-                "Image" => CoreResources.ImageBadge,
-                "PDF" => "PDF",
-                "Document" => CoreResources.DocumentBadge,
-                "Video" => CoreResources.VideoBadge,
-                "Audio" => CoreResources.AudioBadge,
-                "SVG" => "SVG",
-                "Text" => CoreResources.TextBadge,
-                "File" => CoreResources.FileBadge,
-                _ => throw new ArgumentOutOfRangeException(nameof(kind), kind, "File kind is not supported."),
+                CottonFileKind.Image => CoreResources.ImageBadge,
+                CottonFileKind.Pdf => "PDF",
+                CottonFileKind.Document => CoreResources.DocumentBadge,
+                CottonFileKind.Video => CoreResources.VideoBadge,
+                CottonFileKind.Audio => CoreResources.AudioBadge,
+                CottonFileKind.Svg => "SVG",
+                CottonFileKind.Text => CoreResources.TextBadge,
+                CottonFileKind.File => CoreResources.FileBadge,
+                CottonFileKind.Folder => CoreResources.FolderKind,
+                _ => throw new ArgumentOutOfRangeException(
+                    nameof(kind),
+                    kind,
+                    "File kind is not supported."),
             };
         }
     }

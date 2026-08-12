@@ -9,40 +9,42 @@ namespace Cotton.Mobile.Tests
     public class FileModelContractsTests
     {
         [Theory]
-        [InlineData("notes.txt", "text/plain; charset=utf-8", "Text", "TXT", true, false)]
-        [InlineData("data.json", "application/json", "Text", "TXT", true, false)]
-        [InlineData("Program.cs", "", "Text", "TXT", true, false)]
-        [InlineData("Dockerfile", "", "Text", "TXT", true, false)]
-        [InlineData("diagram.svg", "", "SVG", "SVG", false, false)]
-        [InlineData("icon.svg", "image/svg+xml; charset=utf-8", "SVG", "SVG", false, false)]
-        [InlineData("photo.webp", "image/webp", "Image", "IMG", false, true)]
-        [InlineData("report.pdf", "", "PDF", "PDF", false, false)]
-        [InlineData("brief.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", "Document", "DOC", false, false)]
-        [InlineData("notes.rtf", "", "Document", "DOC", false, false)]
-        [InlineData("movie.mp4", "video/mp4", "Video", "VID", false, false)]
-        [InlineData("song.mp3", "audio/mpeg", "Audio", "AUD", false, false)]
-        [InlineData("archive.zip", "application/zip", "File", "FILE", false, false)]
+        [InlineData("notes.txt", "text/plain; charset=utf-8", CottonFileKind.Text, "TXT", true, false)]
+        [InlineData("data.json", "application/json", CottonFileKind.Text, "TXT", true, false)]
+        [InlineData("Program.cs", "", CottonFileKind.Text, "TXT", true, false)]
+        [InlineData("Dockerfile", "", CottonFileKind.Text, "TXT", true, false)]
+        [InlineData("diagram.svg", "", CottonFileKind.Svg, "SVG", false, false)]
+        [InlineData("icon.svg", "image/svg+xml; charset=utf-8", CottonFileKind.Svg, "SVG", false, false)]
+        [InlineData("photo.webp", "image/webp", CottonFileKind.Image, "IMG", false, true)]
+        [InlineData("report.pdf", "", CottonFileKind.Pdf, "PDF", false, false)]
+        [InlineData("brief.docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document", CottonFileKind.Document, "DOC", false, false)]
+        [InlineData("notes.rtf", "", CottonFileKind.Document, "DOC", false, false)]
+        [InlineData("movie.mp4", "video/mp4", CottonFileKind.Video, "VID", false, false)]
+        [InlineData("song.mp3", "audio/mpeg", CottonFileKind.Audio, "AUD", false, false)]
+        [InlineData("archive.zip", "application/zip", CottonFileKind.File, "FILE", false, false)]
         public void From_file_classifies_supported_file_kinds(
             string name,
             string contentType,
-            string expectedKind,
+            CottonFileKind expectedKind,
             string expectedBadge,
             bool expectedText,
             bool expectedImage)
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile(name, contentType, sizeBytes: 1536));
 
             Assert.Equal(CottonFileBrowserEntryType.File, entry.Type);
             Assert.Equal(name, entry.Name);
             Assert.Equal(expectedKind, entry.Kind);
             Assert.Equal(expectedBadge, entry.BadgeText);
-            Assert.Equal($"1.5 KB · {expectedKind}", entry.Details);
+            Assert.Equal(
+                $"1.5 KB · {CottonFileKindDisplayName.Create(expectedKind)}",
+                entry.Details);
             Assert.Equal(UpdatedAt, entry.UpdatedAtUtc);
             Assert.Equal(1536, entry.SizeBytes);
             Assert.Equal(expectedText, entry.IsText);
             Assert.Equal(expectedImage, entry.IsImage);
-            Assert.Equal(expectedKind == "SVG", entry.IsSvg);
+            Assert.Equal(expectedKind == CottonFileKind.Svg, entry.IsSvg);
             Assert.False(entry.HasLocalCopy);
             Assert.True(entry.Thumbnail.IsPlaceholderVisible);
         }
@@ -50,7 +52,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void From_file_normalizes_content_type_and_preview_hash()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile(
                     " photo.png ",
                     " image/png ",
@@ -62,7 +64,7 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("image/png", entry.ContentType);
             Assert.Equal("abc123", entry.PreviewHashEncryptedHex);
             Assert.Equal("\"file-revision\"", entry.ETag);
-            Assert.Equal("Image", entry.Kind);
+            Assert.Equal(CottonFileKind.Image, entry.Kind);
         }
 
         [Fact]
@@ -72,7 +74,7 @@ namespace Cotton.Mobile.Tests
             {
                 [CottonFileUploadMetadataKeys.UploadOperationId] = "operation-1",
             };
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile("photo.jpg", "image/jpeg", 42, metadata: sourceMetadata));
 
             sourceMetadata[CottonFileUploadMetadataKeys.UploadOperationId] = "changed";
@@ -89,7 +91,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void From_node_creates_folder_entry_with_open_action()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromNode(
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromNode(
                 new NodeDto
                 {
                     Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
@@ -99,7 +101,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.True(entry.IsFolder);
             Assert.Equal("Projects", entry.Name);
-            Assert.Equal("Folder", entry.Kind);
+            Assert.Equal(CottonFileKind.Folder, entry.Kind);
             Assert.Equal("Folder", entry.Details);
             Assert.Equal("Open", entry.ActionLabel);
             Assert.Equal(UpdatedAt, entry.UpdatedAtUtc);
@@ -109,7 +111,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Local_file_snapshot_marks_and_clears_entry_without_changing_identity()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             var localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
 
             CottonFileBrowserEntry marked = entry.WithLocalFile(localFile);
@@ -127,7 +129,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Selection_marker_preserves_file_identity_and_local_state()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             var localFile = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
 
             CottonFileBrowserEntry selected = entry.WithSelection(true).WithLocalFile(localFile);
@@ -143,7 +145,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Offline_file_availability_distinguishes_available_stale_and_missing_pins()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt.AddMinutes(1));
             var freshLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt);
             var staleTimeLocal = new CottonLocalFileSnapshot("notes.txt", 42, UpdatedAt.AddSeconds(-3));
@@ -179,7 +181,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void File_entry_surfaces_offline_attention_without_overloading_on_device()
         {
-            CottonFileBrowserEntry entry = CottonFileBrowserEntry.FromFile(CreateFile("notes.txt", "text/plain", 42));
+            CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt);
             CottonOfflineFileAvailabilitySnapshot stale =
                 CottonOfflineFileAvailabilitySnapshot.Create(

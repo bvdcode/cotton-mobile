@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Services
                     "Cloud-to-device file writes require a remote ETag, update time, and content hash.");
             }
 
-            return CottonFileBrowserEntry.CreateFile(
+            return CottonFileBrowserEntryFactory.CreateFile(
                 item.TargetId,
                 item.DisplayName,
                 item.RemoteUpdatedAtUtc.Value,

@@ -1,0 +1,84 @@
+name: Mobile Quality
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  TEST_PROJECT_PATH: tests/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
+  CORE_PROJECT_PATH: src/Cotton.Mobile.Core/Cotton.Mobile.Core.csproj
+  DOTNET_VERSION: 10.0.x
+
+jobs:
+  source-and-tests:
+    name: Validate Source and Unit Tests
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Validate source quality
+        run: python3 scripts/ci/validate-source.py
+
+      - name: Test mobile smoke support
+        run: python3 scripts/ci/test-mobile-smoke-support.py
+
+      - name: Test mobile smoke scripts
+        run: scripts/ci/test-mobile-smoke-common.sh
+
+      - name: Test Android release version computation
+        run: scripts/ci/test-android-release-version.sh
+
+      - name: Test Android release notes
+        run: scripts/ci/test-android-release-notes.sh
+
+      - name: Test Android release change filter
+        run: scripts/ci/test-android-release-change-filter.sh
+
+      - name: Test Android Play media permissions
+        run: scripts/ci/test-android-play-media-permissions.sh
+
+      - name: Test Google Play listing screenshots
+        run: scripts/ci/test-google-play-listing-screenshots.sh
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Restore test project
+        run: dotnet restore "$TEST_PROJECT_PATH"
+
+      - name: Verify core formatting
+        run: dotnet format "$CORE_PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+
+      - name: Verify test formatting
+        run: dotnet format "$TEST_PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+
+      - name: Test mobile core
+        run: dotnet test "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
+
+  google-play-store-listing-dry-run:
+    name: Validate Google Play Store Listing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Validate default store listing
+        run: |
+          scripts/mobile/upload-google-play-listing.py \
+            --package-name dev.cottoncloud.app \
+            --dry-run

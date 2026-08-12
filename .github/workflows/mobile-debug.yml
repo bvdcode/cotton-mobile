@@ -1,0 +1,61 @@
+name: Mobile Debug Build
+
+on:
+  workflow_call:
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
+  DOTNET_VERSION: 10.0.x
+  JAVA_VERSION: "21"
+  ANDROID_PLATFORM: "platforms;android-36"
+  ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
+
+jobs:
+  android-debug:
+    name: Build Debug APK
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install Android dependencies
+        run: scripts/mobile/install-android-ci-dependencies.sh "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS"
+
+      - name: Restore mobile project
+        run: dotnet restore "$PROJECT_PATH"
+
+      - name: Verify mobile formatting
+        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+
+      - name: Build debug APK
+        run: |
+          dotnet build "$PROJECT_PATH" \
+            -f net10.0-android \
+            -c Debug \
+            --no-restore \
+            -p:EmbedAssembliesIntoApk=true
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: cotton-mobile-debug-apk
+          path: src/Cotton.Mobile/bin/Debug/net10.0-android/**/*Signed.apk
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,66 @@
+name: Mobile Store Listing
+
+on:
+  workflow_call:
+    inputs:
+      confirm_review_submission:
+        required: true
+        type: boolean
+      changes_not_sent_for_review:
+        required: true
+        type: boolean
+    secrets:
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:
+        required: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  google-play-store-listing:
+    name: Upload Google Play Store Listing
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+
+      - name: Confirm listing review submission
+        env:
+          CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.changes_not_sent_for_review }}
+          CONFIRM_REVIEW_SUBMISSION: ${{ inputs.confirm_review_submission }}
+        run: |
+          if [[ "$CONFIRM_REVIEW_SUBMISSION" != "true" \
+            && "$CHANGES_NOT_SENT_FOR_REVIEW" != "true" ]]; then
+            echo "Google Play sends store listing changes for review automatically." >&2
+            echo "Confirm review submission or save changes without review submission." >&2
+            exit 1
+          fi
+
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Google Play upload dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install google-auth requests
+
+      - name: Upload default store listing
+        env:
+          CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.changes_not_sent_for_review }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          changes_not_sent_flag=()
+          if [[ "$CHANGES_NOT_SENT_FOR_REVIEW" == "true" ]]; then
+            changes_not_sent_flag+=(--changes-not-sent-for-review)
+          fi
+
+          scripts/mobile/upload-google-play-listing.py \
+            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
+            "${changes_not_sent_flag[@]}"

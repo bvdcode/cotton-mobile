@@ -1,20 +1,5 @@
 name: Mobile Android
 
-env:
-  PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
-  TEST_PROJECT_PATH: tests/Cotton.Mobile.Tests/Cotton.Mobile.Tests.csproj
-  DOTNET_VERSION: 10.0.x
-  JAVA_VERSION: "21"
-  ANDROID_PLATFORM: "platforms;android-36"
-  ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
-  ANDROID_VERSION_CODE_BASE: "1001000"
-  ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
-  GOOGLE_PLAY_DEFAULT_TRACK: alpha
-
-defaults:
-  run:
-    shell: bash
-
 on:
   push:
     branches:
@@ -23,6 +8,7 @@ on:
     paths:
       - "GitVersion.yml"
       - ".editorconfig"
+      - ".gitattributes"
       - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
@@ -30,11 +16,12 @@ on:
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
-      - ".github/workflows/mobile-android.yml"
+      - ".github/workflows/mobile-*.yml"
   pull_request:
     paths:
       - "GitVersion.yml"
       - ".editorconfig"
+      - ".gitattributes"
       - "Directory.Build.props"
       - "src/Cotton.Mobile.Core/**"
       - "src/Cotton.Mobile/**"
@@ -42,7 +29,7 @@ on:
       - "scripts/ci/**"
       - "scripts/mobile/**"
       - "store/google-play/**"
-      - ".github/workflows/mobile-android.yml"
+      - ".github/workflows/mobile-*.yml"
   workflow_dispatch:
     inputs:
       build_signed_release:
@@ -61,7 +48,7 @@ on:
         type: boolean
         default: false
       github_release_tag:
-        description: Optional SemVer GitHub Release tag override. Defaults to the computed Android display version tag.
+        description: Optional SemVer GitHub Release tag override.
         required: false
         type: string
         default: ""
@@ -71,7 +58,7 @@ on:
         type: boolean
         default: false
       confirm_store_listing_review_submission:
-        description: Confirm Google Play may automatically send store listing changes for review.
+        description: Confirm Google Play may send store listing changes for review.
         required: true
         type: boolean
         default: false
@@ -94,6 +81,10 @@ on:
         type: boolean
         default: false
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   workflow-dispatch-guards:
     name: Validate Manual Release Inputs
@@ -104,110 +95,47 @@ jobs:
     steps:
       - name: Validate release input combinations
         env:
+          BUILD_SIGNED_RELEASE: ${{ inputs.build_signed_release }}
           GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
+          PUBLISH_GITHUB_RELEASE: ${{ inputs.publish_github_release }}
+          UPLOAD_TO_GOOGLE_PLAY: ${{ inputs.upload_to_google_play }}
         run: |
-          if [ "$GITHUB_REF" != "refs/heads/main" ] \
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]] \
             && [[ ! "$GITHUB_REF" =~ ^refs/tags/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "Manual production operations require main or a SemVer tag." >&2
             exit 1
           fi
 
-          if [ "${{ inputs.publish_github_release }}" = "true" ] \
-            && [ "${{ inputs.build_signed_release }}" != "true" ]; then
+          if [[ "$PUBLISH_GITHUB_RELEASE" == "true" && "$BUILD_SIGNED_RELEASE" != "true" ]]; then
             echo "publish_github_release requires build_signed_release=true." >&2
             exit 1
           fi
 
-          if [ "${{ inputs.upload_to_google_play }}" = "true" ] \
-            && [ "${{ inputs.build_signed_release }}" != "true" ]; then
+          if [[ "$UPLOAD_TO_GOOGLE_PLAY" == "true" && "$BUILD_SIGNED_RELEASE" != "true" ]]; then
             echo "upload_to_google_play requires build_signed_release=true." >&2
             exit 1
           fi
 
-          if [ "${{ inputs.publish_github_release }}" = "true" ] \
-            && [ -n "$GITHUB_RELEASE_TAG_INPUT" ] \
-            && [[ ! "$GITHUB_RELEASE_TAG_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+          if [[ "$PUBLISH_GITHUB_RELEASE" == "true" \
+            && -n "$GITHUB_RELEASE_TAG_INPUT" \
+            && ! "$GITHUB_RELEASE_TAG_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
             echo "github_release_tag must be blank or a SemVer tag such as v1.0.0." >&2
             exit 1
           fi
 
-          if [ "${{ inputs.upload_to_google_play }}" = "true" ] \
-            && [ -z "${{ inputs.google_play_track }}" ]; then
-            echo "google_play_track is required when upload_to_google_play=true." >&2
-            exit 1
-          fi
-
-          if [ "${{ inputs.upload_to_google_play }}" = "true" ]; then
-            if [ "${GITHUB_REF_TYPE:-}" != "tag" ] \
-              || [[ ! "${GITHUB_REF_NAME:-}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-              echo "upload_to_google_play requires running workflow_dispatch from a SemVer tag such as v1.0.0." >&2
+          if [[ "$UPLOAD_TO_GOOGLE_PLAY" == "true" ]]; then
+            if [[ "${GITHUB_REF_TYPE:-}" != "tag" \
+              || ! "${GITHUB_REF_NAME:-}" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+              echo "upload_to_google_play requires a SemVer tag such as v1.0.0." >&2
               exit 1
             fi
           fi
 
-  google-play-store-listing-dry-run:
-    name: Validate Google Play Store Listing
-    runs-on: ubuntu-latest
+  quality:
+    name: Validate Mobile Quality
+    uses: ./.github/workflows/mobile-quality.yml
     permissions:
       contents: read
-    steps:
-      - name: Check repository
-        uses: actions/checkout@v5
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Validate default store listing
-        run: |
-          scripts/mobile/upload-google-play-listing.py \
-            --package-name dev.cottoncloud.app \
-            --dry-run
-
-  mobile-unit-tests:
-    name: Run Mobile Unit Tests
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    steps:
-      - name: Check repository
-        uses: actions/checkout@v5
-
-      - name: Validate source quality
-        run: python3 scripts/ci/validate-source.py
-
-      - name: Test mobile smoke support
-        run: python3 scripts/ci/test-mobile-smoke-support.py
-
-      - name: Test mobile smoke scripts
-        run: scripts/ci/test-mobile-smoke-common.sh
-
-      - name: Test Android release version computation
-        run: scripts/ci/test-android-release-version.sh
-
-      - name: Test Android release notes
-        run: scripts/ci/test-android-release-notes.sh
-
-      - name: Test Android release change filter
-        run: scripts/ci/test-android-release-change-filter.sh
-
-      - name: Test Android Play media permissions
-        run: scripts/ci/test-android-play-media-permissions.sh
-
-      - name: Test Google Play listing screenshots
-        run: scripts/ci/test-google-play-listing-screenshots.sh
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Restore test project
-        run: dotnet restore "$TEST_PROJECT_PATH"
-
-      - name: Test mobile core
-        run: dotnet test "$TEST_PROJECT_PATH" --no-restore --configuration Release --verbosity normal
 
   android-release-changes:
     name: Detect Android Release Changes
@@ -228,7 +156,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if [ "$GITHUB_REF_NAME" = "main" ]; then
+          if [[ "$GITHUB_REF_NAME" == "main" ]]; then
             published_release_tag="$(
               gh api "repos/$GITHUB_REPOSITORY/releases?per_page=100" \
                 --jq 'map(select(.draft == false and .prerelease == false))[0].tag_name // ""'
@@ -247,14 +175,13 @@ jobs:
 
   android-debug:
     name: Build Debug APK
-    runs-on: ubuntu-latest
     needs:
       - android-release-changes
-      - mobile-unit-tests
+      - quality
     if: >-
       ${{
         always() &&
-        needs.mobile-unit-tests.result == 'success' &&
+        needs.quality.result == 'success' &&
         (
           github.event_name != 'push' ||
           (
@@ -263,69 +190,20 @@ jobs:
           )
         )
       }}
+    uses: ./.github/workflows/mobile-debug.yml
     permissions:
       contents: read
-    steps:
-      - name: Check repository
-        uses: actions/checkout@v5
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$sdkmanager_bin" ]; then
-            sdkmanager_bin="$(command -v sdkmanager)"
-          fi
-          set +o pipefail
-          yes | "$sdkmanager_bin" --licenses >/dev/null
-          set -o pipefail
-          "$sdkmanager_bin" --install "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS" platform-tools
-
-      - name: Install MAUI Android workload
-        run: dotnet workload install maui-android
-
-      - name: Restore mobile project
-        run: dotnet restore "$PROJECT_PATH"
-
-      - name: Build debug APK
-        run: |
-          dotnet build "$PROJECT_PATH" \
-            -f net10.0-android \
-            -c Debug \
-            --no-restore \
-            -p:EmbedAssembliesIntoApk=true
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: cotton-mobile-debug-apk
-          path: src/Cotton.Mobile/bin/Debug/net10.0-android/**/*Signed.apk
-          if-no-files-found: error
-          retention-days: 14
 
   android-signed-release:
-    name: Build Signed Release Artifacts
-    runs-on: ubuntu-latest
+    name: Build and Publish Signed Release
     needs:
       - workflow-dispatch-guards
       - android-release-changes
-      - google-play-store-listing-dry-run
-      - mobile-unit-tests
+      - quality
     if: >-
       ${{
         always() &&
-        needs.google-play-store-listing-dry-run.result == 'success' &&
-        needs.mobile-unit-tests.result == 'success' &&
+        needs.quality.result == 'success' &&
         (
           (
             github.event_name == 'push' &&
@@ -343,321 +221,27 @@ jobs:
     concurrency:
       group: mobile-android-release
       cancel-in-progress: false
+    uses: ./.github/workflows/mobile-release.yml
+    with:
+      github_release_tag: ${{ inputs.github_release_tag || '' }}
+      google_play_changes_not_sent_for_review: ${{ inputs.google_play_changes_not_sent_for_review || false }}
+      google_play_release_status: ${{ inputs.google_play_release_status || 'completed' }}
+      google_play_track: ${{ inputs.google_play_track || 'alpha' }}
+      publish_github_release: ${{ github.event_name == 'push' || inputs.publish_github_release }}
+      upload_to_google_play: ${{ (github.event_name == 'push' && github.ref_name == 'main') || inputs.upload_to_google_play }}
+    secrets: inherit
     permissions:
       contents: write
-    env:
-      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
-      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-      GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
-    steps:
-      - name: Check repository
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-
-      - name: Compute Android release version
-        env:
-          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
-        run: |
-          release_version_input=""
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] \
-            && [ -n "${GITHUB_RELEASE_TAG_INPUT:-}" ]; then
-            release_version_input="${GITHUB_RELEASE_TAG_INPUT#v}"
-          fi
-
-          scripts/mobile/compute-android-release-version.sh "$release_version_input"
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      - name: Setup Java
-        uses: actions/setup-java@v5
-        with:
-          distribution: temurin
-          java-version: ${{ env.JAVA_VERSION }}
-
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
-          if [ ! -x "$sdkmanager_bin" ]; then
-            sdkmanager_bin="$(command -v sdkmanager)"
-          fi
-          set +o pipefail
-          yes | "$sdkmanager_bin" --licenses >/dev/null
-          set -o pipefail
-          "$sdkmanager_bin" --install "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS" platform-tools
-
-      - name: Install MAUI Android workload
-        run: dotnet workload install maui-android
-
-      - name: Validate signing secrets
-        run: |
-          if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
-            echo "ANDROID_KEYSTORE_BASE64 secret is required." >&2
-            exit 1
-          fi
-          if [ -z "${ANDROID_KEYSTORE_ALIAS:-}" ]; then
-            echo "ANDROID_KEYSTORE_ALIAS secret is required." >&2
-            exit 1
-          fi
-          if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
-            echo "ANDROID_KEYSTORE_PASSWORD secret is required." >&2
-            exit 1
-          fi
-          if [ -z "${ANDROID_KEY_PASSWORD:-}" ]; then
-            echo "ANDROID_KEY_PASSWORD is empty; using ANDROID_KEYSTORE_PASSWORD for the key password."
-            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
-          fi
-
-      - name: Restore mobile project
-        run: dotnet restore "$PROJECT_PATH"
-
-      - name: Decode upload keystore
-        run: |
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/cotton-upload.keystore"
-          chmod 600 "$RUNNER_TEMP/cotton-upload.keystore"
-
-      - name: Publish signed APK and AAB
-        run: |
-          dotnet publish "$PROJECT_PATH" \
-            -f net10.0-android \
-            -c Release \
-            --no-restore \
-            -p:AndroidPackageFormats=apk%3Baab \
-            -p:AndroidKeyStore=true \
-            -p:AndroidSigningKeyStore="$RUNNER_TEMP/cotton-upload.keystore" \
-            -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
-            -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
-            -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD" \
-            -p:RequireComputedAndroidReleaseVersion=true \
-            -p:ApplicationDisplayVersion="$APPLICATION_DISPLAY_VERSION" \
-            -p:ApplicationVersion="$ANDROID_VERSION_CODE"
-
-      - name: Upload signed Android artifacts
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: cotton-mobile-signed-android
-          path: |
-            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.apk
-            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
-          if-no-files-found: error
-          retention-days: 30
-
-      - name: Prepare GitHub Release assets
-        if: >-
-          ${{
-            github.event_name == 'push' ||
-            (github.event_name == 'workflow_dispatch' && inputs.publish_github_release)
-          }}
-        env:
-          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
-        run: |
-          release_dir="$RUNNER_TEMP/cotton-mobile-github-release"
-          mkdir -p "$release_dir"
-
-          apk_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.apk' -print -quit)"
-          if [ -z "$apk_path" ]; then
-            echo "Signed APK was not found." >&2
-            exit 1
-          fi
-          cp "$apk_path" "$release_dir/CottonCloud-Android.apk"
-
-          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
-          if [ -n "$aab_path" ]; then
-            cp "$aab_path" "$release_dir/CottonCloud-Android.aab"
-          fi
-
-          tag="$ANDROID_DISPLAY_VERSION_TAG"
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] \
-            && [ -n "${GITHUB_RELEASE_TAG_INPUT:-}" ]; then
-            tag="$GITHUB_RELEASE_TAG_INPUT"
-          fi
-
-          scripts/mobile/create-android-release-notes.sh \
-            "$tag" \
-            "$APPLICATION_DISPLAY_VERSION" \
-            "$ANDROID_VERSION_CODE" \
-            "$GITHUB_REF_NAME" \
-            "$GITHUB_SHA" \
-            > "$release_dir/release-notes.md"
-
-          echo "COTTON_GITHUB_RELEASE_DIR=$release_dir" >> "$GITHUB_ENV"
-          echo "COTTON_GITHUB_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
-
-      - name: Setup Python
-        if: >-
-          ${{
-            (github.event_name == 'push' && github.ref_name == 'main') ||
-            (github.event_name == 'workflow_dispatch' && inputs.upload_to_google_play)
-          }}
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Install Google Play upload dependencies
-        if: >-
-          ${{
-            (github.event_name == 'push' && github.ref_name == 'main') ||
-            (github.event_name == 'workflow_dispatch' && inputs.upload_to_google_play)
-          }}
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install google-auth requests
-
-      - name: Upload signed AAB to Google Play
-        if: >-
-          ${{
-            (github.event_name == 'push' && github.ref_name == 'main') ||
-            (github.event_name == 'workflow_dispatch' && inputs.upload_to_google_play)
-          }}
-        env:
-          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-          GOOGLE_PLAY_TRACK_INPUT: ${{ inputs.google_play_track }}
-          GOOGLE_PLAY_RELEASE_STATUS_INPUT: ${{ inputs.google_play_release_status }}
-          GOOGLE_PLAY_CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.google_play_changes_not_sent_for_review }}
-        run: |
-          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
-            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is required for Google Play upload." >&2
-            exit 1
-          fi
-
-          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
-          if [ -z "$aab_path" ]; then
-            echo "Signed AAB was not found." >&2
-            exit 1
-          fi
-
-          changes_not_sent_flag=()
-          if [ "${GOOGLE_PLAY_CHANGES_NOT_SENT_FOR_REVIEW:-false}" = "true" ]; then
-            changes_not_sent_flag+=(--changes-not-sent-for-review)
-          fi
-
-          google_play_track="${GOOGLE_PLAY_TRACK_INPUT:-$GOOGLE_PLAY_DEFAULT_TRACK}"
-          if [ -z "$google_play_track" ]; then
-            google_play_track="$GOOGLE_PLAY_DEFAULT_TRACK"
-          fi
-
-          google_play_release_status="${GOOGLE_PLAY_RELEASE_STATUS_INPUT:-completed}"
-          if [ -z "$google_play_release_status" ]; then
-            google_play_release_status="completed"
-          fi
-
-          python3 scripts/mobile/upload-google-play.py \
-            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
-            --bundle "$aab_path" \
-            --track "$google_play_track" \
-            --release-status "$google_play_release_status" \
-            --release-name "$GOOGLE_PLAY_RELEASE_NAME" \
-            --release-notes-file store/google-play/default-listing/release-notes.txt \
-            "${changes_not_sent_flag[@]}"
-
-      - name: Publish versioned GitHub Release
-        if: >-
-          ${{
-            github.event_name == 'push' ||
-            (github.event_name == 'workflow_dispatch' && inputs.publish_github_release)
-          }}
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          tag="$COTTON_GITHUB_RELEASE_TAG"
-          release_dir="$COTTON_GITHUB_RELEASE_DIR"
-
-          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "GitHub Release tag must be a SemVer tag such as v1.0.0." >&2
-            exit 1
-          fi
-
-          git fetch --force --tags origin
-
-          if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-            tag_target="$(git rev-list -n 1 "$tag")"
-            if [ "$tag_target" != "$GITHUB_SHA" ]; then
-              echo "Release tag $tag already points to $tag_target, not $GITHUB_SHA." >&2
-              exit 1
-            fi
-
-            echo "Release tag $tag already points to this commit."
-          else
-            git tag "$tag" "$GITHUB_SHA"
-            git push origin "refs/tags/$tag"
-          fi
-
-          release_flags=(
-            --title "Cotton Mobile $APPLICATION_DISPLAY_VERSION"
-            --notes-file "$release_dir/release-notes.md"
-          )
-
-          if [ "$GITHUB_EVENT_NAME" = "push" ] && [ "$GITHUB_REF_NAME" = "develop" ]; then
-            release_flags+=(--prerelease)
-          else
-            release_flags+=(--latest)
-          fi
-
-          if gh release view "$tag" >/dev/null 2>&1; then
-            gh release edit "$tag" "${release_flags[@]}"
-          else
-            gh release create "$tag" "${release_flags[@]}" --verify-tag
-          fi
-
-          release_assets=("$release_dir/CottonCloud-Android.apk")
-          if [ -f "$release_dir/CottonCloud-Android.aab" ]; then
-            release_assets+=("$release_dir/CottonCloud-Android.aab")
-          fi
-          gh release upload "$tag" "${release_assets[@]}" --clobber
 
   google-play-store-listing:
     name: Upload Google Play Store Listing
-    runs-on: ubuntu-latest
     needs:
       - workflow-dispatch-guards
     if: github.event_name == 'workflow_dispatch' && inputs.upload_store_listing
+    uses: ./.github/workflows/mobile-store-listing.yml
+    with:
+      confirm_review_submission: ${{ inputs.confirm_store_listing_review_submission }}
+      changes_not_sent_for_review: ${{ inputs.google_play_changes_not_sent_for_review }}
+    secrets: inherit
     permissions:
       contents: read
-    env:
-      GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
-    steps:
-      - name: Check repository
-        uses: actions/checkout@v5
-
-      - name: Confirm listing review submission
-        run: |
-          if [ "${{ inputs.confirm_store_listing_review_submission }}" != "true" ] \
-            && [ "${{ inputs.google_play_changes_not_sent_for_review }}" != "true" ]; then
-            echo "Google Play sends store listing changes for review automatically." >&2
-            echo "Set confirm_store_listing_review_submission=true to continue." >&2
-            echo "Alternatively, set google_play_changes_not_sent_for_review=true to save changes without review submission." >&2
-            exit 1
-          fi
-
-      - name: Setup Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.13"
-
-      - name: Install Google Play upload dependencies
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install google-auth requests
-
-      - name: Upload default store listing
-        env:
-          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
-        run: |
-          if [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
-            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is required for Google Play listing upload." >&2
-            exit 1
-          fi
-
-          changes_not_sent_flag=()
-          if [ "${{ inputs.google_play_changes_not_sent_for_review }}" = "true" ]; then
-            changes_not_sent_flag+=(--changes-not-sent-for-review)
-          fi
-
-          scripts/mobile/upload-google-play-listing.py \
-            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
-            "${changes_not_sent_flag[@]}"

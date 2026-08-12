@@ -1,0 +1,232 @@
+name: Mobile Signed Release
+
+on:
+  workflow_call:
+    inputs:
+      github_release_tag:
+        required: true
+        type: string
+      google_play_changes_not_sent_for_review:
+        required: true
+        type: boolean
+      google_play_release_status:
+        required: true
+        type: string
+      google_play_track:
+        required: true
+        type: string
+      publish_github_release:
+        required: true
+        type: boolean
+      upload_to_google_play:
+        required: true
+        type: boolean
+    secrets:
+      ANDROID_KEYSTORE_ALIAS:
+        required: false
+      ANDROID_KEYSTORE_BASE64:
+        required: false
+      ANDROID_KEYSTORE_PASSWORD:
+        required: false
+      ANDROID_KEY_PASSWORD:
+        required: false
+      GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  PROJECT_PATH: src/Cotton.Mobile/Cotton.Mobile.csproj
+  DOTNET_VERSION: 10.0.x
+  JAVA_VERSION: "21"
+  ANDROID_PLATFORM: "platforms;android-36"
+  ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
+  ANDROID_VERSION_CODE_BASE: "1001000"
+  ANDROID_VERSION_CODE_PUBLISHED_FLOOR: "1000449"
+  GOOGLE_PLAY_DEFAULT_TRACK: alpha
+  GOOGLE_PLAY_PACKAGE_NAME: dev.cottoncloud.app
+
+jobs:
+  android-signed-release:
+    name: Build Signed Release Artifacts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ANDROID_KEYSTORE_ALIAS: ${{ secrets.ANDROID_KEYSTORE_ALIAS }}
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - name: Check repository
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Compute Android release version
+        env:
+          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
+        run: |
+          release_version_input="${GITHUB_RELEASE_TAG_INPUT#v}"
+          scripts/mobile/compute-android-release-version.sh "$release_version_input"
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: ${{ env.DOTNET_VERSION }}
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Install Android dependencies
+        run: scripts/mobile/install-android-ci-dependencies.sh "$ANDROID_PLATFORM" "$ANDROID_BUILD_TOOLS"
+
+      - name: Validate signing secrets
+        run: |
+          if [[ -z "${ANDROID_KEYSTORE_BASE64:-}" ]]; then
+            echo "ANDROID_KEYSTORE_BASE64 secret is required." >&2
+            exit 1
+          fi
+          if [[ -z "${ANDROID_KEYSTORE_ALIAS:-}" ]]; then
+            echo "ANDROID_KEYSTORE_ALIAS secret is required." >&2
+            exit 1
+          fi
+          if [[ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]]; then
+            echo "ANDROID_KEYSTORE_PASSWORD secret is required." >&2
+            exit 1
+          fi
+          if [[ -z "${ANDROID_KEY_PASSWORD:-}" ]]; then
+            echo "ANDROID_KEY_PASSWORD=$ANDROID_KEYSTORE_PASSWORD" >> "$GITHUB_ENV"
+          fi
+
+      - name: Restore mobile project
+        run: dotnet restore "$PROJECT_PATH"
+
+      - name: Verify mobile formatting
+        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity warn
+
+      - name: Decode upload keystore
+        run: |
+          printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/cotton-upload.keystore"
+          chmod 600 "$RUNNER_TEMP/cotton-upload.keystore"
+
+      - name: Publish signed APK and AAB
+        run: |
+          dotnet publish "$PROJECT_PATH" \
+            -f net10.0-android \
+            -c Release \
+            --no-restore \
+            -p:AndroidPackageFormats=apk%3Baab \
+            -p:AndroidKeyStore=true \
+            -p:AndroidSigningKeyStore="$RUNNER_TEMP/cotton-upload.keystore" \
+            -p:AndroidSigningKeyAlias="$ANDROID_KEYSTORE_ALIAS" \
+            -p:AndroidSigningKeyPass="env:ANDROID_KEY_PASSWORD" \
+            -p:AndroidSigningStorePass="env:ANDROID_KEYSTORE_PASSWORD" \
+            -p:RequireComputedAndroidReleaseVersion=true \
+            -p:ApplicationDisplayVersion="$APPLICATION_DISPLAY_VERSION" \
+            -p:ApplicationVersion="$ANDROID_VERSION_CODE"
+
+      - name: Upload signed Android artifacts
+        uses: actions/upload-artifact@v7.0.1
+        with:
+          name: cotton-mobile-signed-android
+          path: |
+            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.apk
+            src/Cotton.Mobile/bin/Release/net10.0-android/**/*.aab
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Prepare GitHub Release assets
+        if: inputs.publish_github_release
+        env:
+          GITHUB_RELEASE_TAG_INPUT: ${{ inputs.github_release_tag }}
+        run: |
+          release_dir="$RUNNER_TEMP/cotton-mobile-github-release"
+          mkdir -p "$release_dir"
+
+          apk_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.apk' -print -quit)"
+          if [[ -z "$apk_path" ]]; then
+            echo "Signed APK was not found." >&2
+            exit 1
+          fi
+          cp "$apk_path" "$release_dir/CottonCloud-Android.apk"
+
+          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
+          if [[ -n "$aab_path" ]]; then
+            cp "$aab_path" "$release_dir/CottonCloud-Android.aab"
+          fi
+
+          tag="${GITHUB_RELEASE_TAG_INPUT:-$ANDROID_DISPLAY_VERSION_TAG}"
+          scripts/mobile/create-android-release-notes.sh \
+            "$tag" \
+            "$APPLICATION_DISPLAY_VERSION" \
+            "$ANDROID_VERSION_CODE" \
+            "$GITHUB_REF_NAME" \
+            "$GITHUB_SHA" \
+            > "$release_dir/release-notes.md"
+
+          echo "COTTON_GITHUB_RELEASE_DIR=$release_dir" >> "$GITHUB_ENV"
+          echo "COTTON_GITHUB_RELEASE_TAG=$tag" >> "$GITHUB_ENV"
+
+      - name: Setup Python
+        if: inputs.upload_to_google_play
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install Google Play upload dependencies
+        if: inputs.upload_to_google_play
+        run: |
+          python3 -m pip install --upgrade pip
+          python3 -m pip install google-auth requests
+
+      - name: Upload signed AAB to Google Play
+        if: inputs.upload_to_google_play
+        env:
+          CHANGES_NOT_SENT_FOR_REVIEW: ${{ inputs.google_play_changes_not_sent_for_review }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          GOOGLE_PLAY_RELEASE_STATUS_INPUT: ${{ inputs.google_play_release_status }}
+          GOOGLE_PLAY_TRACK_INPUT: ${{ inputs.google_play_track }}
+        run: |
+          if [[ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]]; then
+            echo "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON secret is required for Google Play upload." >&2
+            exit 1
+          fi
+
+          aab_path="$(find src/Cotton.Mobile/bin/Release/net10.0-android -name '*-Signed.aab' -print -quit)"
+          if [[ -z "$aab_path" ]]; then
+            echo "Signed AAB was not found." >&2
+            exit 1
+          fi
+
+          changes_not_sent_flag=()
+          if [[ "$CHANGES_NOT_SENT_FOR_REVIEW" == "true" ]]; then
+            changes_not_sent_flag+=(--changes-not-sent-for-review)
+          fi
+
+          python3 scripts/mobile/upload-google-play.py \
+            --package-name "$GOOGLE_PLAY_PACKAGE_NAME" \
+            --bundle "$aab_path" \
+            --track "${GOOGLE_PLAY_TRACK_INPUT:-$GOOGLE_PLAY_DEFAULT_TRACK}" \
+            --release-status "${GOOGLE_PLAY_RELEASE_STATUS_INPUT:-completed}" \
+            --release-name "$GOOGLE_PLAY_RELEASE_NAME" \
+            --release-notes-file store/google-play/default-listing/release-notes.txt \
+            "${changes_not_sent_flag[@]}"
+
+      - name: Publish versioned GitHub Release
+        if: inputs.publish_github_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          scripts/mobile/publish-android-github-release.sh \
+            "$COTTON_GITHUB_RELEASE_TAG" \
+            "$COTTON_GITHUB_RELEASE_DIR" \
+            "$APPLICATION_DISPLAY_VERSION" \
+            "$GITHUB_REF_NAME" \
+            "$GITHUB_SHA" \
+            "$GITHUB_EVENT_NAME"

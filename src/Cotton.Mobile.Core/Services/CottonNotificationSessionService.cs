@@ -5,42 +5,33 @@ using Microsoft.Extensions.Logging;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonNotificationSessionService : ICottonNotificationSessionService, IDisposable
+    public class CottonNotificationSessionService(
+        IApplicationForegroundService foregroundService,
+        ICottonNotificationPermissionService permissionService,
+        ICottonNotificationBackgroundScheduler backgroundScheduler,
+        ICottonNotificationRealtimeService realtimeService,
+        ICottonNotificationPollingService pollingService,
+        ILogger<CottonNotificationSessionService> logger) :
+        ICottonNotificationSessionService,
+        IDisposable
     {
         private readonly Lock _initializationGate = new();
         private readonly SemaphoreSlim _lifecycleGate = new(1, 1);
-        private readonly IApplicationForegroundService _foregroundService;
-        private readonly ICottonNotificationPermissionService _permissionService;
-        private readonly ICottonNotificationBackgroundScheduler _backgroundScheduler;
-        private readonly ICottonNotificationRealtimeService _realtimeService;
-        private readonly ICottonNotificationPollingService _pollingService;
-        private readonly ILogger<CottonNotificationSessionService> _logger;
+        private readonly IApplicationForegroundService _foregroundService =
+            foregroundService ?? throw new ArgumentNullException(nameof(foregroundService));
+        private readonly ICottonNotificationPermissionService _permissionService =
+            permissionService ?? throw new ArgumentNullException(nameof(permissionService));
+        private readonly ICottonNotificationBackgroundScheduler _backgroundScheduler =
+            backgroundScheduler ?? throw new ArgumentNullException(nameof(backgroundScheduler));
+        private readonly ICottonNotificationRealtimeService _realtimeService =
+            realtimeService ?? throw new ArgumentNullException(nameof(realtimeService));
+        private readonly ICottonNotificationPollingService _pollingService =
+            pollingService ?? throw new ArgumentNullException(nameof(pollingService));
+        private readonly ILogger<CottonNotificationSessionService> _logger =
+            logger ?? throw new ArgumentNullException(nameof(logger));
 
         private Uri? _instanceUri;
         private bool _initialized;
-
-        public CottonNotificationSessionService(
-            IApplicationForegroundService foregroundService,
-            ICottonNotificationPermissionService permissionService,
-            ICottonNotificationBackgroundScheduler backgroundScheduler,
-            ICottonNotificationRealtimeService realtimeService,
-            ICottonNotificationPollingService pollingService,
-            ILogger<CottonNotificationSessionService> logger)
-        {
-            ArgumentNullException.ThrowIfNull(foregroundService);
-            ArgumentNullException.ThrowIfNull(permissionService);
-            ArgumentNullException.ThrowIfNull(backgroundScheduler);
-            ArgumentNullException.ThrowIfNull(realtimeService);
-            ArgumentNullException.ThrowIfNull(pollingService);
-            ArgumentNullException.ThrowIfNull(logger);
-
-            _foregroundService = foregroundService;
-            _permissionService = permissionService;
-            _backgroundScheduler = backgroundScheduler;
-            _realtimeService = realtimeService;
-            _pollingService = pollingService;
-            _logger = logger;
-        }
 
         public void Initialize()
         {
@@ -122,13 +113,28 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception)
             {
-                CottonLog.Warning(_logger, "Failed to resume Cotton notification delivery.", exception);
+                CottonNotificationSessionLog.ResumeFailed(_logger, exception);
             }
         }
 
-        private Task StopRealtimeSafelyAsync()
+        private async Task StopRealtimeSafelyAsync()
         {
-            return StopRealtimeBestEffortAsync(CancellationToken.None);
+            try
+            {
+                await _lifecycleGate.WaitAsync().ConfigureAwait(false);
+                try
+                {
+                    await StopRealtimeBestEffortAsync(CancellationToken.None).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _lifecycleGate.Release();
+                }
+            }
+            catch (Exception exception)
+            {
+                CottonNotificationSessionLog.RealtimeStopFailed(_logger, exception);
+            }
         }
 
         private async Task StartForegroundDeliveryAsync(
@@ -143,7 +149,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to start Cotton realtime notifications.", exception);
+                CottonNotificationSessionLog.RealtimeStartFailed(_logger, exception);
             }
 
             try
@@ -152,7 +158,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to fetch Cotton notifications.", exception);
+                CottonNotificationSessionLog.NotificationFetchFailed(_logger, exception);
             }
         }
 
@@ -164,7 +170,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to request Cotton notification permission.", exception);
+                CottonNotificationSessionLog.PermissionRequestFailed(_logger, exception);
             }
         }
 
@@ -176,7 +182,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to schedule Cotton background notification polling.", exception);
+                CottonNotificationSessionLog.BackgroundScheduleFailed(_logger, exception);
             }
         }
 
@@ -188,7 +194,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to cancel Cotton background notification polling.", exception);
+                CottonNotificationSessionLog.BackgroundCancelFailed(_logger, exception);
             }
         }
 
@@ -200,7 +206,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
-                CottonLog.Warning(_logger, "Failed to stop Cotton realtime notifications.", exception);
+                CottonNotificationSessionLog.RealtimeStopFailed(_logger, exception);
             }
         }
     }

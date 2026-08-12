@@ -15,11 +15,10 @@ namespace Cotton.Mobile.Tests
             string root = FindRoot();
             string directory = Path.Combine(root, relativePath);
 
-            return Directory
+            return [.. Directory
                 .EnumerateFiles(directory, searchPattern, SearchOption.AllDirectories)
                 .Select(path => Path.GetRelativePath(root, path))
-                .Order(StringComparer.Ordinal)
-                .ToList();
+                .Order(StringComparer.Ordinal)];
         }
 
         private static string FindRoot()

@@ -3,9 +3,10 @@
 
 #if ANDROID
 using Android.Content;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeCloudToDeviceSyncFileOperator :
         ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator
@@ -71,7 +72,7 @@ namespace Cotton.Mobile.Services
 
         private static AndroidDocumentTreeSyncFileStore CreateFileStore(CottonSyncRootSnapshot root)
         {
-            ContentResolver resolver = Android.App.Application.Context.ContentResolver
+            ContentResolver resolver = global::Android.App.Application.Context.ContentResolver
                 ?? throw new InvalidOperationException("Android content resolver is unavailable.");
             AndroidUri? treeUri = AndroidUri.Parse(root.LocalRoot.RootKey);
             return new AndroidDocumentTreeSyncFileStore(

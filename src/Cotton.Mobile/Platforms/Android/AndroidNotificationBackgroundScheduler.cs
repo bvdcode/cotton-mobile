@@ -7,7 +7,7 @@ using Cotton.Mobile.Services;
 using Java.Util.Concurrent;
 using WorkNetworkType = AndroidX.Work.NetworkType;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidNotificationBackgroundScheduler : ICottonNotificationBackgroundScheduler
     {
@@ -15,7 +15,7 @@ namespace Cotton.Mobile
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            Context context = Android.App.Application.Context;
+            Context context = global::Android.App.Application.Context;
             WorkManager workManager = WorkManager.GetInstance(context)
                 ?? throw new InvalidOperationException("Android WorkManager is unavailable.");
             PeriodicWorkRequest request = CreateRequest();
@@ -32,7 +32,7 @@ namespace Cotton.Mobile
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            Context context = Android.App.Application.Context;
+            Context context = global::Android.App.Application.Context;
             WorkManager workManager = WorkManager.GetInstance(context)
                 ?? throw new InvalidOperationException("Android WorkManager is unavailable.");
             _ = workManager.CancelUniqueWork(AndroidNotificationConstants.PeriodicWorkName);

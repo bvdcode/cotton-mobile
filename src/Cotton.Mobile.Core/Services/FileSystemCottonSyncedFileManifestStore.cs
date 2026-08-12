@@ -105,11 +105,10 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncedFileSnapshot> current =
                 await LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
-            List<CottonSyncedFileSnapshot> updated = current
+            List<CottonSyncedFileSnapshot> updated = [.. current
                 .Where(existing =>
                     existing.FileId != item.FileId
-                    && !string.Equals(existing.RelativePath, item.RelativePath, StringComparison.OrdinalIgnoreCase))
-                .ToList();
+                    && !string.Equals(existing.RelativePath, item.RelativePath, StringComparison.OrdinalIgnoreCase))];
             updated.Add(item);
 
             await SaveAsync(instanceUri, root, updated, cancellationToken).ConfigureAwait(false);
@@ -128,9 +127,7 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncedFileSnapshot> current =
                 await LoadAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
-            List<CottonSyncedFileSnapshot> updated = current
-                .Where(existing => existing.FileId != fileId)
-                .ToList();
+            List<CottonSyncedFileSnapshot> updated = [.. current.Where(existing => existing.FileId != fileId)];
             if (updated.Count == current.Count)
             {
                 return false;
@@ -169,19 +166,17 @@ namespace Cotton.Mobile.Services
                 SchemaVersion = CottonSyncedFileManifestSchema.CurrentVersion,
                 SyncRootStableKey = root.StableKey,
                 SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
-                Items = DeduplicateItems(items)
-                    .Select<CottonSyncedFileSnapshot, CottonStoredSyncedFileItem?>(CreateStoredItem)
-                    .ToList(),
+                Items = [.. DeduplicateItems(items).Select<CottonSyncedFileSnapshot, CottonStoredSyncedFileItem?>(CreateStoredItem)],
             };
         }
 
         private static IReadOnlyList<CottonSyncedFileSnapshot> DeduplicateItems(
             IEnumerable<CottonSyncedFileSnapshot> items)
         {
-            List<CottonSyncedFileSnapshot> source = items.ToList();
-            HashSet<Guid> fileIds = new HashSet<Guid>();
-            HashSet<string> relativePaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<CottonSyncedFileSnapshot> result = new List<CottonSyncedFileSnapshot>(source.Count);
+            List<CottonSyncedFileSnapshot> source = [.. items];
+            HashSet<Guid> fileIds = [];
+            HashSet<string> relativePaths = new(StringComparer.OrdinalIgnoreCase);
+            List<CottonSyncedFileSnapshot> result = new(source.Count);
 
             for (int index = source.Count - 1; index >= 0; index--)
             {

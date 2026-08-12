@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Pending app-code authorization session is invalid.", nameof(session));
             }
 
-            CottonPendingAppCodeSession sessionToSave = new CottonPendingAppCodeSession
+            CottonPendingAppCodeSession sessionToSave = new()
             {
                 InstanceUri = session.InstanceUri,
                 ApprovalId = session.ApprovalId,

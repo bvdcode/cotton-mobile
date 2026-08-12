@@ -111,8 +111,8 @@ namespace Cotton.Mobile.Services
                 pageSize: CottonFolderPagination.PageSize,
                 depth: 0,
                 cancellationToken).ConfigureAwait(false);
-            List<NodeDto> nodes = new(firstPage.Payload.Nodes);
-            List<NodeFileManifestDto> files = new(firstPage.Payload.Files);
+            List<NodeDto> nodes = [.. firstPage.Payload.Nodes];
+            List<NodeFileManifestDto> files = [.. firstPage.Payload.Files];
             int totalPages = CottonFolderPagination.CreatePageCount(firstPage.TotalCount);
             for (int page = 2; page <= totalPages; page++)
             {
@@ -128,14 +128,16 @@ namespace Cotton.Mobile.Services
 
             CottonFolderPagination.EnsureComplete(firstPage.TotalCount, nodes.Count + files.Count);
 
-            List<CottonFileBrowserEntry> entries = nodes
-                .OrderBy(node => node.Name, StringComparer.OrdinalIgnoreCase)
-                .Select(CottonFileBrowserEntryFactory.FromNode)
-                .Concat(
-                    files
-                        .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
-                        .Select(CottonFileBrowserEntryFactory.FromFile))
-                .ToList();
+            List<CottonFileBrowserEntry> entries =
+            [
+                .. nodes
+                                .OrderBy(node => node.Name, StringComparer.OrdinalIgnoreCase)
+                                .Select(CottonFileBrowserEntryFactory.FromNode)
+,
+                .. files
+                    .OrderBy(file => file.Name, StringComparer.OrdinalIgnoreCase)
+                    .Select(CottonFileBrowserEntryFactory.FromFile),
+            ];
             return new CottonFolderContent(folderId, folderName, entries);
         }
     }

@@ -39,13 +39,12 @@ namespace Cotton.Mobile.Services
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
 
             IReadOnlyList<CottonSyncRootSnapshot> storedRoots = await _rootStore.LoadAsync(instanceUri);
-            IReadOnlyList<CottonSyncRootSnapshot> accountRoots = storedRoots
+            IReadOnlyList<CottonSyncRootSnapshot> accountRoots = [.. storedRoots
                 .Where(root => string.Equals(
                     root.AccountScopeKey,
                     accountScopeKey,
                     StringComparison.Ordinal))
-                .Select(ResolvePermission)
-                .ToList();
+                .Select(ResolvePermission)];
             IReadOnlySet<Guid> pausedRootIds = await _pauseStore.LoadPausedRootIdsAsync(instanceUri);
             return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds);
         }

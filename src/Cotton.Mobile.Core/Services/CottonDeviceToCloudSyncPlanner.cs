@@ -13,9 +13,9 @@ namespace Cotton.Mobile.Services
         {
             ValidateInput(root, localContent, remoteContent, uploadReceipts);
 
-            CottonDeviceToCloudSyncIndex index = new CottonDeviceToCloudSyncIndex(localContent, remoteContent, uploadReceipts);
-            CottonDeviceToCloudSyncItemPlanner itemPlanner = new CottonDeviceToCloudSyncItemPlanner(root, index);
-            HashSet<string> requiredFolderPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            CottonDeviceToCloudSyncIndex index = new(localContent, remoteContent, uploadReceipts);
+            CottonDeviceToCloudSyncItemPlanner itemPlanner = new(root, index);
+            HashSet<string> requiredFolderPaths = new(StringComparer.OrdinalIgnoreCase);
             List<CottonDeviceToCloudSyncPlanItem> fileItems = [];
             foreach (CottonDeviceToCloudLocalItemSnapshot localFile in localContent.Items
                 .Where(item => item.ItemType == CottonFileBrowserEntryType.File)
@@ -36,10 +36,9 @@ namespace Cotton.Mobile.Services
                 fileItems.Add(fileItem);
             }
 
-            List<CottonDeviceToCloudSyncPlanItem> items = localContent.Problems
+            List<CottonDeviceToCloudSyncPlanItem> items = [.. localContent.Problems
                 .OrderBy(problem => problem.RelativePath, StringComparer.OrdinalIgnoreCase)
-                .Select(CottonDeviceToCloudSyncPlanItemFactory.CreateLocalProblem)
-                .ToList();
+                .Select(CottonDeviceToCloudSyncPlanItemFactory.CreateLocalProblem)];
             items.AddRange(requiredFolderPaths
                 .OrderBy(CottonDeviceToCloudSyncIndex.GetPathDepth)
                 .ThenBy(path => path, StringComparer.OrdinalIgnoreCase)

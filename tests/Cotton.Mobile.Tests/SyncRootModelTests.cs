@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void User_selected_document_tree_requires_explicit_grant_before_sync_can_run()
         {
-            CottonSyncLocalRootSnapshot localRoot = new CottonSyncLocalRootSnapshot(
+            CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.UserSelectedDocumentTree,
                 "content://tree/primary%3ACotton",
                 "Cotton",
@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Revoked_document_tree_surfaces_reconnect_state()
         {
-            CottonSyncLocalRootSnapshot localRoot = new CottonSyncLocalRootSnapshot(
+            CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.UserSelectedDocumentTree,
                 "content://tree/primary%3ACotton",
                 "Cotton",
@@ -64,7 +64,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Unavailable_local_root_blocks_sync_without_user_action()
         {
-            CottonSyncLocalRootSnapshot localRoot = new CottonSyncLocalRootSnapshot(
+            CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.AppPrivateDirectory,
                 "app-private-sync-root",
                 "On this device",

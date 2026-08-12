@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Services
         {
             ValidateInput(instanceUri, root, plan);
 
-            CottonDeviceToCloudRemoteFolderIndex folderIndex = new CottonDeviceToCloudRemoteFolderIndex(root, plan);
+            CottonDeviceToCloudRemoteFolderIndex folderIndex = new(root, plan);
             int uploadedCount = 0;
             int confirmedUploadCount = 0;
             int createdFolderCount = 0;

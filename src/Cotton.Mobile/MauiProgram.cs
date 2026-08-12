@@ -4,6 +4,9 @@
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
+#if ANDROID
+using Cotton.Mobile.Platforms.Android;
+#endif
 using Cotton.Sdk.Auth;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;

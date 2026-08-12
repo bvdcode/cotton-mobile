@@ -14,9 +14,7 @@ namespace Cotton.Mobile.Services
             {
                 SchemaVersion = schemaVersion,
                 SavedAtUtc = savedAt,
-                Items = Deduplicate(roots)
-                    .Select<CottonSyncRootSnapshot, CottonStoredSyncRootItem?>(CreateStoredItem)
-                    .ToList(),
+                Items = [.. Deduplicate(roots).Select<CottonSyncRootSnapshot, CottonStoredSyncRootItem?>(CreateStoredItem)],
             };
         }
 
@@ -110,12 +108,11 @@ namespace Cotton.Mobile.Services
         public static List<CottonSyncRootSnapshot> Deduplicate(
             IReadOnlyCollection<CottonSyncRootSnapshot> roots)
         {
-            return roots
+            return [.. roots
                 .GroupBy(root => root.Id)
                 .Select(group => group.Last())
                 .GroupBy(root => root.StableKey, StringComparer.Ordinal)
-                .Select(group => group.Last())
-                .ToList();
+                .Select(group => group.Last())];
         }
 
         private static CottonStoredSyncRootItem CreateStoredItem(CottonSyncRootSnapshot root)

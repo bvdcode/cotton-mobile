@@ -8,7 +8,7 @@ using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     [Register("dev.cottoncloud.mobile.AndroidNotificationPollingWorker")]
     public class AndroidNotificationPollingWorker(

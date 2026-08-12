@@ -30,14 +30,14 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             cancellationToken.ThrowIfCancellationRequested();
 
-            TaskCompletionSource<CottonUploadDestinationSnapshot?> completion = new TaskCompletionSource<CottonUploadDestinationSnapshot?>(
+            TaskCompletionSource<CottonUploadDestinationSnapshot?> completion = new(
                 TaskCreationOptions.RunContinuationsAsynchronously);
-            CloudFolderPickerViewModel viewModel = new CloudFolderPickerViewModel(
+            CloudFolderPickerViewModel viewModel = new(
                 instanceUri,
                 _fileBrowserService,
                 destination => completion.TrySetResult(destination),
                 _loggerFactory.CreateLogger<CloudFolderPickerViewModel>());
-            CloudFolderPickerPage page = new CloudFolderPickerPage(viewModel);
+            CloudFolderPickerPage page = new(viewModel);
             INavigation navigation = await MainThread.InvokeOnMainThreadAsync(GetNavigation);
 
             await MainThread.InvokeOnMainThreadAsync(

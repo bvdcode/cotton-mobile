@@ -6,7 +6,7 @@ using Android.Content;
 using Android.OS;
 using Cotton.Mobile.Resources.Localization;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidNotificationChannelService
     {
@@ -17,7 +17,7 @@ namespace Cotton.Mobile
                 return;
             }
 
-            if (Android.App.Application.Context.GetSystemService(Context.NotificationService)
+            if (global::Android.App.Application.Context.GetSystemService(Context.NotificationService)
                 is not NotificationManager notificationManager)
             {
                 throw new InvalidOperationException("Android notification manager is unavailable.");

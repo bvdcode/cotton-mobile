@@ -129,12 +129,11 @@ namespace Cotton.Mobile.Services
 
         private static FileInfo[] GetLocalFiles(string directory)
         {
-            return Directory
+            return [.. Directory
                 .EnumerateFiles(directory, "*", SearchOption.TopDirectoryOnly)
                 .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
                 .Select(path => new FileInfo(path))
-                .Where(info => info.Exists)
-                .ToArray();
+                .Where(info => info.Exists)];
         }
 
         private static void ValidateLocalFile(FileInfo file, CottonCloudToDeviceSyncPlanItem item)

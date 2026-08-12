@@ -13,7 +13,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(items);
 
-            List<T> replacement = items is List<T> list ? list : items.ToList();
+            List<T> replacement = items is List<T> list ? list : [.. items];
             CheckReentrancy();
 
             Items.Clear();

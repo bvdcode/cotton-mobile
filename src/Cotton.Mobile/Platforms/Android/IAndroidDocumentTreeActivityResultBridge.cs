@@ -5,7 +5,7 @@
 using Android.App;
 using Android.Content;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public interface IAndroidDocumentTreeActivityResultBridge
     {

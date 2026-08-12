@@ -79,7 +79,7 @@ namespace Cotton.Mobile.Services
             }
 
             HashSet<Guid> current =
-                (await LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false)).ToHashSet();
+                [.. (await LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false))];
             bool changed = isPaused
                 ? current.Add(rootId)
                 : current.Remove(rootId);
@@ -109,11 +109,10 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(rootIds);
 
-            Guid[] validRootIds = rootIds
+            Guid[] validRootIds = [.. rootIds
                 .Where(rootId => rootId != Guid.Empty)
                 .Distinct()
-                .OrderBy(rootId => rootId.ToString("N"), StringComparer.Ordinal)
-                .ToArray();
+                .OrderBy(rootId => rootId.ToString("N"), StringComparer.Ordinal)];
 
             string filePath = CreateMetadataFilePath(instanceUri);
             if (validRootIds.Length == 0)
@@ -147,7 +146,7 @@ namespace Cotton.Mobile.Services
             {
                 SchemaVersion = SchemaVersion,
                 SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
-                RootIds = rootIds.ToList(),
+                RootIds = [.. rootIds],
             };
         }
 

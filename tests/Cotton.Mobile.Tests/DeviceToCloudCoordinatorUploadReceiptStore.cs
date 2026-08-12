@@ -21,7 +21,7 @@ namespace Cotton.Mobile.Tests
                 return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>([]);
             }
 
-            return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>(receipts.Values.ToArray());
+            return Task.FromResult<IReadOnlyList<CottonUploadReceiptSnapshot>>([.. receipts.Values]);
         }
 
         public Task SaveAsync(

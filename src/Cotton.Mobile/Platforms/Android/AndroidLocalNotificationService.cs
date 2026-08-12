@@ -9,7 +9,7 @@ using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Sdk.Notifications;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidLocalNotificationService : ICottonLocalNotificationService
     {
@@ -40,7 +40,7 @@ namespace Cotton.Mobile
             }
 
             _channelService.EnsureChannels();
-            Context context = Android.App.Application.Context;
+            Context context = global::Android.App.Application.Context;
             if (context.GetSystemService(Context.NotificationService) is not NotificationManager manager)
             {
                 throw new InvalidOperationException("Android notification manager is unavailable.");

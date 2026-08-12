@@ -4,7 +4,7 @@
 #if ANDROID
 using Android.Content;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     internal class PendingDocumentTreePick(
         TaskCompletionSource<Intent?> completion,

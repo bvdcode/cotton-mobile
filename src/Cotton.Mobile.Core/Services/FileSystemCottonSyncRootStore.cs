@@ -47,11 +47,10 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                return CottonSyncRootStoreMapper.Deduplicate(stored.Items
+                return CottonSyncRootStoreMapper.Deduplicate([.. stored.Items
                     .Select(item => CottonSyncRootStoreMapper.TryCreateSyncRoot(instanceUri, item))
                     .Where(item => item is not null)
-                    .Select(item => item!)
-                    .ToList());
+                    .Select(item => item!)]);
             }
             catch (OperationCanceledException)
             {
@@ -106,10 +105,9 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncRootSnapshot> current =
                 await LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<CottonSyncRootSnapshot> updated = current
+            List<CottonSyncRootSnapshot> updated = [.. current
                 .Where(existing => existing.Id != root.Id)
-                .Where(existing => !string.Equals(existing.StableKey, root.StableKey, StringComparison.Ordinal))
-                .ToList();
+                .Where(existing => !string.Equals(existing.StableKey, root.StableKey, StringComparison.Ordinal))];
             updated.Add(root);
 
             await SaveAsync(instanceUri, updated, cancellationToken).ConfigureAwait(false);
@@ -127,9 +125,7 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonSyncRootSnapshot> current =
                 await LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<CottonSyncRootSnapshot> updated = current
-                .Where(root => root.Id != rootId)
-                .ToList();
+            List<CottonSyncRootSnapshot> updated = [.. current.Where(root => root.Id != rootId)];
             if (updated.Count == current.Count)
             {
                 return false;

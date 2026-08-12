@@ -3,10 +3,11 @@
 
 #if ANDROID
 using Android.Content;
+using Cotton.Mobile.Services;
 using System.Runtime.ExceptionServices;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     internal class AndroidDocumentTreeSyncFileStore
     {
@@ -230,7 +231,7 @@ namespace Cotton.Mobile.Services
             Stream target,
             CancellationToken cancellationToken)
         {
-            using FileStream source = new FileStream(
+            using FileStream source = new(
                 sourcePath,
                 FileMode.Open,
                 FileAccess.Read,

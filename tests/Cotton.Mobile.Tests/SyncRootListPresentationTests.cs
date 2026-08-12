@@ -185,7 +185,7 @@ namespace Cotton.Mobile.Tests
 
             Assert.Equal("2 folders set to sync", state.SummaryText);
             Assert.True(state.CanRunAny);
-            Assert.Equal(["Projects", "Archive"], state.Items.Select(item => item.Title).ToArray());
+            Assert.Equal(["Projects", "Archive"], [.. state.Items.Select(item => item.Title)]);
             Assert.Equal(CottonSyncDirection.DeviceToCloud, state.Items[0].Direction);
             Assert.Equal("Upload new files · On this device", state.Items[0].DetailText);
             Assert.False(state.Items[0].CanRunNow);

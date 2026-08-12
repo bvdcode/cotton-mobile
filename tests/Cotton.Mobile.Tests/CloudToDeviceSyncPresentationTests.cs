@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Sync_status_reports_no_roots()
         {
-            CottonCloudToDeviceSyncRunSummary summary = new CottonCloudToDeviceSyncRunSummary([]);
+            CottonCloudToDeviceSyncRunSummary summary = new([]);
 
             Assert.Equal("No folders are set to sync.", CottonCloudToDeviceSyncStatusText.CreateCompletedStatus(summary));
         }
@@ -91,16 +91,15 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = CreateRoot(
                 CottonSyncRootPermissionStatus.Available,
                 CottonSyncDirection.CloudToDevice);
-            CottonCloudToDeviceSyncPlanSnapshot plan = new CottonCloudToDeviceSyncPlanSnapshot(
+            CottonCloudToDeviceSyncPlanSnapshot plan = new(
                 root.Id,
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 []);
-            List<CottonCloudToDeviceSyncRootRunResult> results = new List<CottonCloudToDeviceSyncRootRunResult>
-            {
-                CottonCloudToDeviceSyncRootRunResult.Completed(root, plan, executionResult),
-            };
-            results.AddRange(extraResults);
+            List<CottonCloudToDeviceSyncRootRunResult> results =
+            [
+                CottonCloudToDeviceSyncRootRunResult.Completed(root, plan, executionResult), .. extraResults,
+            ];
 
             return new CottonCloudToDeviceSyncRunSummary(results);
         }

@@ -15,7 +15,7 @@ namespace Cotton.Mobile.Tests
             CottonCloudToDeviceSyncExecutionResult executionResult)
         {
             CottonSyncRootSnapshot root = CreateCloudRoot();
-            CottonCloudToDeviceSyncPlanSnapshot plan = new CottonCloudToDeviceSyncPlanSnapshot(
+            CottonCloudToDeviceSyncPlanSnapshot plan = new(
                 root.Id,
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
@@ -29,16 +29,15 @@ namespace Cotton.Mobile.Tests
             params CottonDeviceToCloudSyncRootRunResult[] extraResults)
         {
             CottonSyncRootSnapshot root = CreateDeviceRoot(DeviceRootId);
-            CottonDeviceToCloudSyncPlanSnapshot plan = new CottonDeviceToCloudSyncPlanSnapshot(
+            CottonDeviceToCloudSyncPlanSnapshot plan = new(
                 root.Id,
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,
                 []);
-            List<CottonDeviceToCloudSyncRootRunResult> results = new List<CottonDeviceToCloudSyncRootRunResult>
-            {
-                CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult),
-            };
-            results.AddRange(extraResults);
+            List<CottonDeviceToCloudSyncRootRunResult> results =
+            [
+                CottonDeviceToCloudSyncRootRunResult.Completed(root, plan, executionResult), .. extraResults,
+            ];
             return new CottonDeviceToCloudSyncRunSummary(results);
         }
 
@@ -164,7 +163,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root,
             IReadOnlyList<CottonBidirectionalSyncPlanItem> items)
         {
-            CottonBidirectionalSyncPlanSnapshot preflightPlan = new CottonBidirectionalSyncPlanSnapshot(
+            CottonBidirectionalSyncPlanSnapshot preflightPlan = new(
                 root.Id,
                 root.CloudFolder.FolderId,
                 root.CloudFolder.FolderName,

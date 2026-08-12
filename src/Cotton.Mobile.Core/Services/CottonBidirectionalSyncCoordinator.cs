@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Services
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
             IReadOnlySet<Guid> pausedRootIds =
                 await _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<CottonBidirectionalSyncRootRunResult> results = new List<CottonBidirectionalSyncRootRunResult>(roots.Count);
+            List<CottonBidirectionalSyncRootRunResult> results = new(roots.Count);
 
             foreach (CottonSyncRootSnapshot root in roots)
             {

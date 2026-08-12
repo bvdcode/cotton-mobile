@@ -5,9 +5,10 @@
 using Android.Content;
 using Android.Database;
 using Android.Provider;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     internal class AndroidDocumentTreeNavigator
     {
@@ -101,12 +102,7 @@ namespace Cotton.Mobile.Services
                 ?? throw new IOException("Document-tree parent id is unavailable.");
             AndroidUri childrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(_treeUri, parentDocumentId)
                 ?? throw new IOException("Could not build document-tree children URI.");
-            using ICursor? cursor = _resolver.Query(childrenUri, ChildProjection, null, null, null);
-            if (cursor is null)
-            {
-                throw new IOException("Could not read document-tree children.");
-            }
-
+            using ICursor? cursor = _resolver.Query(childrenUri, ChildProjection, null, null, null) ?? throw new IOException("Could not read document-tree children.");
             while (cursor.MoveToNext())
             {
                 cancellationToken.ThrowIfCancellationRequested();

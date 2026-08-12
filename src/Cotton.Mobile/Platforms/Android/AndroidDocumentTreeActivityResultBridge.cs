@@ -4,14 +4,15 @@
 #if ANDROID
 using Android.App;
 using Android.Content;
+using Cotton.Mobile.Services;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeActivityResultBridge : IAndroidDocumentTreeActivityResultBridge, IDisposable
     {
         private const int RequestCode = 61029;
 
-        private readonly object _syncRoot = new();
+        private readonly Lock _syncRoot = new();
         private PendingDocumentTreePick? _pendingPick;
 
         public Task<Intent?> StartOpenDocumentTreeAsync(
@@ -23,7 +24,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(intent);
             cancellationToken.ThrowIfCancellationRequested();
 
-            TaskCompletionSource<Intent?> completion = new TaskCompletionSource<Intent?>(TaskCreationOptions.RunContinuationsAsynchronously);
+            TaskCompletionSource<Intent?> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
             CancellationTokenRegistration cancellationRegistration = default;
             lock (_syncRoot)
             {

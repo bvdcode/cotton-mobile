@@ -6,9 +6,10 @@ using Android.Content;
 using Android.Database;
 using Android.Provider;
 using Cotton.Mobile.Resources.Localization;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeDeviceToCloudLocalTreeReader(TimeProvider timeProvider) :
         ICottonDeviceToCloudLocalTreeReader
@@ -91,12 +92,7 @@ namespace Cotton.Mobile.Services
                 ?? throw new IOException("Document-tree parent id is unavailable.");
             AndroidUri childrenUri = DocumentsContract.BuildChildDocumentsUriUsingTree(treeUri, parentDocumentId)
                 ?? throw new IOException("Could not build document-tree children URI.");
-            using ICursor? cursor = resolver.Query(childrenUri, ChildProjection, null, null, null);
-            if (cursor is null)
-            {
-                throw new IOException("Could not read document-tree children.");
-            }
-
+            using ICursor? cursor = resolver.Query(childrenUri, ChildProjection, null, null, null) ?? throw new IOException("Could not read document-tree children.");
             while (cursor.MoveToNext())
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -254,7 +250,7 @@ namespace Cotton.Mobile.Services
 
         private static ContentResolver GetContentResolver()
         {
-            return Android.App.Application.Context.ContentResolver
+            return global::Android.App.Application.Context.ContentResolver
                 ?? throw new InvalidOperationException("Android content resolver is unavailable.");
         }
 

@@ -4,7 +4,7 @@
 using Android.Window;
 using System.Runtime.Versioning;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     [SupportedOSPlatform("android31.0")]
     public class ImmediateSplashScreenExitListener :

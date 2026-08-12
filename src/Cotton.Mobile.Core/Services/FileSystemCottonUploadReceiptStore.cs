@@ -37,7 +37,7 @@ namespace Cotton.Mobile.Services
 
             string[] filePaths = Directory.GetFiles(directory, $"*{ReceiptFileExtension}", SearchOption.TopDirectoryOnly);
             Array.Sort(filePaths, StringComparer.Ordinal);
-            Dictionary<string, CottonUploadReceiptSnapshot> receiptsBySourceId = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
+            Dictionary<string, CottonUploadReceiptSnapshot> receiptsBySourceId = new(StringComparer.Ordinal);
             foreach (string filePath in filePaths)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Services
                 }
             }
 
-            return receiptsBySourceId.Values.ToArray();
+            return [.. receiptsBySourceId.Values];
         }
 
         public async Task SaveAsync(

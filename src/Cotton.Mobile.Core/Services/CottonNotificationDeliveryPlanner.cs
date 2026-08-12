@@ -52,9 +52,7 @@ namespace Cotton.Mobile.Services
             if (unseenCount <= _maximumIndividualNotifications
                 && availableDetails == unseenCount)
             {
-                CottonNotificationDto[] notifications = newestPage
-                    .Take(unseenCount)
-                    .ToArray();
+                CottonNotificationDto[] notifications = [.. newestPage.Take(unseenCount)];
                 return new CottonNotificationDeliveryPlan(notifications, unseenCount, nextCursor);
             }
 

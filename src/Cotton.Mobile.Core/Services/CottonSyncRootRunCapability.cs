@@ -45,9 +45,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(roots);
             ArgumentNullException.ThrowIfNull(pausedRootIds);
 
-            return roots
-                .Where(root => !pausedRootIds.Contains(root.Id) && CanRun(root))
-                .ToArray();
+            return [.. roots.Where(root => !pausedRootIds.Contains(root.Id) && CanRun(root))];
         }
 
         public static string CreateUnsupportedLocalRootStatusText(CottonSyncRootSnapshot root)

@@ -38,11 +38,10 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(pausedRootIds);
 
             return new CottonSyncRootListDisplayState(
-                roots
+                [.. roots
                     .OrderBy(root => root.CloudFolder.Path, StringComparer.OrdinalIgnoreCase)
                     .ThenBy(root => root.CloudFolder.FolderName, StringComparer.OrdinalIgnoreCase)
-                    .Select(root => new CottonSyncRootListItem(root, pausedRootIds.Contains(root.Id)))
-                    .ToArray());
+                    .Select(root => new CottonSyncRootListItem(root, pausedRootIds.Contains(root.Id)))]);
         }
 
         private static string CreateSummaryText(int count)

@@ -4,9 +4,10 @@
 #if ANDROID
 using Android.Content;
 using Android.Provider;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeDeviceToCloudLocalFileContentSource :
         ICottonDeviceToCloudLocalFileContentSource
@@ -47,7 +48,7 @@ namespace Cotton.Mobile.Services
 
         private static ContentResolver GetContentResolver()
         {
-            return Android.App.Application.Context.ContentResolver
+            return global::Android.App.Application.Context.ContentResolver
                 ?? throw new InvalidOperationException("Android content resolver is unavailable.");
         }
 

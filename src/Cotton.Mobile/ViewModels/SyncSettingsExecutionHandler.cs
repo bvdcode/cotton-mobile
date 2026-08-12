@@ -74,9 +74,7 @@ namespace Cotton.Mobile.ViewModels
                 IReadOnlySet<Guid> runnableRootIds = runnableRoots
                     .Select(root => root.Id)
                     .ToHashSet();
-                runningItems = state.Roots
-                    .Where(item => runnableRootIds.Contains(item.Id))
-                    .ToList();
+                runningItems = [.. state.Roots.Where(item => runnableRootIds.Contains(item.Id))];
                 SetRunning(runningItems, isRunning: true);
 
                 state.Status = CottonSyncSettingsRunStatusText.StartingAllStatus;

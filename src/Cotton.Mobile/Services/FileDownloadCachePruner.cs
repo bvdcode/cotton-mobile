@@ -42,9 +42,7 @@ namespace Cotton.Mobile.Services
         {
             IReadOnlyList<CottonOfflineFilePinSnapshot> pins =
                 await _offlineFilePinStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<string> protectedDirectories = pins
-                .Select(pin => CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, pin.FileId))
-                .ToList();
+            List<string> protectedDirectories = [.. pins.Select(pin => CottonMobileStoragePaths.CreateDownloadDirectory(instanceUri, pin.FileId))];
             protectedDirectories.AddRange(LoadSyncedManifestDownloadDirectories(instanceUri, cancellationToken));
             return protectedDirectories;
         }
@@ -61,7 +59,7 @@ namespace Cotton.Mobile.Services
                 return [];
             }
 
-            HashSet<string> protectedDirectories = new HashSet<string>(StringComparer.Ordinal);
+            HashSet<string> protectedDirectories = new(StringComparer.Ordinal);
             try
             {
                 foreach (string manifestPath in Directory.EnumerateFiles(
@@ -114,7 +112,7 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                List<Guid> fileIds = new List<Guid>();
+                List<Guid> fileIds = [];
                 foreach (JsonElement item in items.EnumerateArray())
                 {
                     cancellationToken.ThrowIfCancellationRequested();
@@ -174,7 +172,7 @@ namespace Cotton.Mobile.Services
 
             string? normalizedProtectedPath = NormalizeProtectedPath(protectedPath);
             DeleteAbandonedTemporaryDownloads(rootDirectory, cancellationToken);
-            List<CottonFileDownloadCacheEntry> entries = Directory
+            List<CottonFileDownloadCacheEntry> entries = [.. Directory
                 .EnumerateFiles(rootDirectory, "*", SearchOption.AllDirectories)
                 .Where(path => !CottonMobileStoragePaths.IsTemporaryDownloadPath(path))
                 .Select(path => new FileInfo(path))
@@ -183,8 +181,7 @@ namespace Cotton.Mobile.Services
                     file.FullName,
                     file.Length,
                     ResolvePruneTimestamp(file),
-                    CottonSensitiveFileCachePolicy.IsSensitiveFile(file.Name, contentType: null)))
-                .ToList();
+                    CottonSensitiveFileCachePolicy.IsSensitiveFile(file.Name, contentType: null)))];
             IReadOnlyList<string> deletePaths = CottonFileDownloadCachePrunePlanner.SelectFilesToDelete(
                 entries,
                 _options.MaxCacheBytes,
@@ -210,7 +207,7 @@ namespace Cotton.Mobile.Services
                     continue;
                 }
 
-                FileInfo file = new FileInfo(path);
+                FileInfo file = new(path);
                 if (!file.Exists || !CottonTemporaryFilePolicy.IsAbandoned(file, utcNow))
                 {
                     continue;

@@ -59,7 +59,7 @@ namespace Cotton.Mobile.Tests
 
             IReadOnlyList<CottonSyncedFileSnapshot> manifest =
                 await _manifestStore.LoadAsync(InstanceUri, _syncRoot);
-            Assert.Equal([FirstFileId, SecondFileId], manifest.Select(item => item.FileId).Order().ToArray());
+            Assert.Equal([FirstFileId, SecondFileId], [.. manifest.Select(item => item.FileId).Order()]);
             Assert.All(manifest, item => Assert.Equal(SyncedAt, item.SyncedAtUtc));
             Assert.Contains(manifest, item => item.FileId == SecondFileId && item.ETag == "\"etag-2\"");
             Assert.All(manifest, item => Assert.Equal(item.FileName, item.RelativePath));

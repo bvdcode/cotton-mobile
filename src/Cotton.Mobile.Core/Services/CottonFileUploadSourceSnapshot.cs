@@ -75,7 +75,7 @@ namespace Cotton.Mobile.Services
                 return new Dictionary<string, string>();
             }
 
-            Dictionary<string, string> normalized = new Dictionary<string, string>(StringComparer.Ordinal);
+            Dictionary<string, string> normalized = new(StringComparer.Ordinal);
             foreach (KeyValuePair<string, string> item in metadata)
             {
                 if (string.IsNullOrWhiteSpace(item.Key) || string.IsNullOrWhiteSpace(item.Value))

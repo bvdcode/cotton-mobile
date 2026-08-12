@@ -14,8 +14,8 @@ namespace Cotton.Mobile.Services
                 return CreateEmptyExecutionPlan(preflightPlan);
             }
 
-            List<CottonCloudToDeviceSyncPlanItem> cloudItems = new List<CottonCloudToDeviceSyncPlanItem>();
-            List<CottonDeviceToCloudSyncPlanItem> deviceItems = new List<CottonDeviceToCloudSyncPlanItem>();
+            List<CottonCloudToDeviceSyncPlanItem> cloudItems = [];
+            List<CottonDeviceToCloudSyncPlanItem> deviceItems = [];
 
             foreach (CottonBidirectionalSyncPlanItem item in preflightPlan.Items)
             {
@@ -114,24 +114,14 @@ namespace Cotton.Mobile.Services
             CottonCloudToDeviceSyncActionKind action,
             CottonBidirectionalSyncPlanItem item)
         {
-            switch (action)
+            return action switch
             {
-                case CottonCloudToDeviceSyncActionKind.DownloadNewFile:
-                case CottonCloudToDeviceSyncActionKind.RefreshChangedFile:
-                case CottonCloudToDeviceSyncActionKind.RenameLocalFile:
-                    return item.RemoteContentHash;
-
-                case CottonCloudToDeviceSyncActionKind.RemoveLocalOrphan:
-                    return item.LocalContentHash;
-
-                case CottonCloudToDeviceSyncActionKind.KeepExistingFile:
-                case CottonCloudToDeviceSyncActionKind.BlockedFolder:
-                case CottonCloudToDeviceSyncActionKind.NeedsFreshServerRevision:
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(action),
-                        "Cloud-to-device action cannot be created from the bidirectional execution plan.");
-            }
+                CottonCloudToDeviceSyncActionKind.DownloadNewFile or CottonCloudToDeviceSyncActionKind.RefreshChangedFile or CottonCloudToDeviceSyncActionKind.RenameLocalFile => item.RemoteContentHash,
+                CottonCloudToDeviceSyncActionKind.RemoveLocalOrphan => item.LocalContentHash,
+                _ => throw new ArgumentOutOfRangeException(
+                                        nameof(action),
+                                        "Cloud-to-device action cannot be created from the bidirectional execution plan."),
+            };
         }
 
         private static CottonDeviceToCloudSyncPlanItem CreateDeviceToCloudItem(

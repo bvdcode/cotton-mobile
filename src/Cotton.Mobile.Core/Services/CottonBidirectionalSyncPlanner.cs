@@ -13,14 +13,13 @@ namespace Cotton.Mobile.Services
         {
             ValidateInput(root, localContent, remoteContent, manifestFiles);
 
-            CottonBidirectionalSyncIndex index = new CottonBidirectionalSyncIndex(localContent, remoteContent, manifestFiles);
-            CottonBidirectionalSyncItemPlanner itemPlanner = new CottonBidirectionalSyncItemPlanner(index);
-            HashSet<Guid> handledRemoteIds = new HashSet<Guid>();
-            HashSet<string> handledManifestPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            List<CottonBidirectionalSyncPlanItem> items = localContent.Problems
+            CottonBidirectionalSyncIndex index = new(localContent, remoteContent, manifestFiles);
+            CottonBidirectionalSyncItemPlanner itemPlanner = new(index);
+            HashSet<Guid> handledRemoteIds = [];
+            HashSet<string> handledManifestPaths = new(StringComparer.OrdinalIgnoreCase);
+            List<CottonBidirectionalSyncPlanItem> items = [.. localContent.Problems
                 .OrderBy(problem => problem.RelativePath, StringComparer.OrdinalIgnoreCase)
-                .Select(CottonBidirectionalSyncPlanItemFactory.CreateLocalProblem)
-                .ToList();
+                .Select(CottonBidirectionalSyncPlanItemFactory.CreateLocalProblem)];
 
             foreach (CottonDeviceToCloudLocalItemSnapshot localItem in localContent.Items
                 .OrderBy(item => item.ItemType == CottonFileBrowserEntryType.Folder ? 0 : 1)

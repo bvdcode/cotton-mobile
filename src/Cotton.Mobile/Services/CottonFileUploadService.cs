@@ -93,7 +93,7 @@ namespace Cotton.Mobile.Services
             CancellationToken cancellationToken)
         {
             ClientSettingsDto serverSettings = await client.Settings.GetAsync(cancellationToken).ConfigureAwait(false);
-            CottonFileUploadSettings uploadSettings = new CottonFileUploadSettings(
+            CottonFileUploadSettings uploadSettings = new(
                 serverSettings.MaxChunkSizeBytes,
                 serverSettings.SupportedHashAlgorithm);
 
@@ -146,7 +146,7 @@ namespace Cotton.Mobile.Services
             IProgress<long>? progress,
             CancellationToken cancellationToken)
         {
-            List<string> chunkHashes = new List<string>();
+            List<string> chunkHashes = [];
             byte[] buffer = new byte[settings.MaxChunkSizeBytes];
             long uploadedBytes = 0;
 
@@ -165,7 +165,7 @@ namespace Cotton.Mobile.Services
 
                 if (!await client.Chunks.ExistsAsync(chunkHash, cancellationToken).ConfigureAwait(false))
                 {
-                    using MemoryStream chunkStream = new MemoryStream(buffer, 0, bytesRead, writable: false);
+                    using MemoryStream chunkStream = new(buffer, 0, bytesRead, writable: false);
                     await client.Chunks.UploadRawAsync(
                             chunkHash,
                             chunkStream,

@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Services
 
         private static IReadOnlyList<string> GetParentPaths(string relativePath)
         {
-            List<string> paths = new List<string>();
+            List<string> paths = [];
             string currentPath = relativePath;
             while (currentPath.LastIndexOf(RelativePathSeparator) is int separatorIndex && separatorIndex >= 0)
             {
@@ -72,7 +72,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> CreateLocalItemMap(
             CottonDeviceToCloudLocalContentSnapshot localContent)
         {
-            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudLocalItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> result = new(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudLocalItemSnapshot localItem in localContent.Items)
             {
                 if (!result.TryAdd(localItem.RelativePath, localItem))
@@ -89,7 +89,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> CreateRemotePathMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> result = new(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (!result.TryAdd(remoteItem.RelativePath, remoteItem))
@@ -106,8 +106,8 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonUploadReceiptSnapshot> CreateReceiptSourceMap(
             IEnumerable<CottonUploadReceiptSnapshot> uploadReceipts)
         {
-            Dictionary<string, CottonUploadReceiptSnapshot> result = new Dictionary<string, CottonUploadReceiptSnapshot>(StringComparer.Ordinal);
-            HashSet<Guid> operationIds = new HashSet<Guid>();
+            Dictionary<string, CottonUploadReceiptSnapshot> result = new(StringComparer.Ordinal);
+            HashSet<Guid> operationIds = [];
             foreach (CottonUploadReceiptSnapshot receipt in uploadReceipts)
             {
                 if (!result.TryAdd(receipt.LocalSourceId, receipt))
@@ -131,7 +131,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> CreateRemoteOperationMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot>();
+            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> result = [];
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (remoteItem.Entry.Type != CottonFileBrowserEntryType.File

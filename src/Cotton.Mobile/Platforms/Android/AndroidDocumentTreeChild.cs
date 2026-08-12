@@ -5,7 +5,7 @@
 using Android.Provider;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeChild(AndroidUri uri, string documentId, string displayName, string mimeType)
     {

@@ -4,9 +4,10 @@
 #if ANDROID
 using Android.Content;
 using Android.Provider;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentMutationStore : ICottonDocumentMutationStore<AndroidUri>
     {

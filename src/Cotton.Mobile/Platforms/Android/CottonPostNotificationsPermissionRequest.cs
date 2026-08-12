@@ -4,7 +4,7 @@
 using Android;
 using Microsoft.Maui.ApplicationModel;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     public class CottonPostNotificationsPermissionRequest : Permissions.BasePlatformPermission
     {

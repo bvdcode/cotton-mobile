@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> CreateLocalItemMap(
             CottonDeviceToCloudLocalContentSnapshot localContent)
         {
-            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudLocalItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> result = new(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudLocalItemSnapshot localItem in localContent.Items)
             {
                 if (!result.TryAdd(localItem.RelativePath, localItem))
@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> CreateRemotePathMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, CottonDeviceToCloudRemoteItemSnapshot> result = new(StringComparer.OrdinalIgnoreCase);
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (!result.TryAdd(remoteItem.RelativePath, remoteItem))
@@ -58,7 +58,7 @@ namespace Cotton.Mobile.Services
         private static Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> CreateRemoteIdMap(
             CottonDeviceToCloudRemoteContentSnapshot remoteContent)
         {
-            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> result = new Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot>();
+            Dictionary<Guid, CottonDeviceToCloudRemoteItemSnapshot> result = [];
             foreach (CottonDeviceToCloudRemoteItemSnapshot remoteItem in remoteContent.Items)
             {
                 if (remoteItem.Entry.Type != CottonFileBrowserEntryType.File)
@@ -80,8 +80,8 @@ namespace Cotton.Mobile.Services
         private static Dictionary<string, CottonSyncedFileSnapshot> CreateManifestPathMap(
             IEnumerable<CottonSyncedFileSnapshot> manifestFiles)
         {
-            Dictionary<string, CottonSyncedFileSnapshot> result = new Dictionary<string, CottonSyncedFileSnapshot>(StringComparer.OrdinalIgnoreCase);
-            HashSet<Guid> fileIds = new HashSet<Guid>();
+            Dictionary<string, CottonSyncedFileSnapshot> result = new(StringComparer.OrdinalIgnoreCase);
+            HashSet<Guid> fileIds = [];
             foreach (CottonSyncedFileSnapshot manifestFile in manifestFiles)
             {
                 if (!fileIds.Add(manifestFile.FileId))

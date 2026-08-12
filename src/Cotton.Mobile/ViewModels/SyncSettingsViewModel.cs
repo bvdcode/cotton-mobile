@@ -133,7 +133,7 @@ namespace Cotton.Mobile.ViewModels
 
         public IAsyncRelayCommand<CottonSyncRootListItem> ResumeRootCommand { get; }
 
-        public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = new();
+        public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
 
         public bool IsBusy
         {

@@ -42,24 +42,16 @@ namespace Cotton.Mobile.Services
         public static CottonBidirectionalSyncActionKind CreateLocalRemoteMismatchAction(
             CottonBidirectionalSyncActionKind remoteMismatchAction)
         {
-            switch (remoteMismatchAction)
+            return remoteMismatchAction switch
             {
-                case CottonBidirectionalSyncActionKind.NeedsFreshServerRevision:
-                    return CottonBidirectionalSyncActionKind.NeedsFreshServerRevision;
-
-                case CottonBidirectionalSyncActionKind.RenameLocalFile:
-                    return CottonBidirectionalSyncActionKind.RenameLocalFile;
-
-                case CottonBidirectionalSyncActionKind.RemotePathConflict:
-                case CottonBidirectionalSyncActionKind.RefreshLocalFile:
-                    return CottonBidirectionalSyncActionKind.RefreshLocalFile;
-
-                default:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(remoteMismatchAction),
-                        remoteMismatchAction,
-                        "Remote mismatch action is not supported.");
-            }
+                CottonBidirectionalSyncActionKind.NeedsFreshServerRevision => CottonBidirectionalSyncActionKind.NeedsFreshServerRevision,
+                CottonBidirectionalSyncActionKind.RenameLocalFile => CottonBidirectionalSyncActionKind.RenameLocalFile,
+                CottonBidirectionalSyncActionKind.RemotePathConflict or CottonBidirectionalSyncActionKind.RefreshLocalFile => CottonBidirectionalSyncActionKind.RefreshLocalFile,
+                _ => throw new ArgumentOutOfRangeException(
+                                        nameof(remoteMismatchAction),
+                                        remoteMismatchAction,
+                                        "Remote mismatch action is not supported."),
+            };
         }
     }
 }

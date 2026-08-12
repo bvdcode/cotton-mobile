@@ -37,9 +37,7 @@ namespace Cotton.Mobile.Services
             return new CottonCloudToDeviceRemoteContentSnapshot(
                 content.FolderId,
                 content.FolderName,
-                content.Entries
-                    .Select(entry => new CottonCloudToDeviceRemoteItemSnapshot(entry, entry.Name))
-                    .ToList());
+                [.. content.Entries.Select(entry => new CottonCloudToDeviceRemoteItemSnapshot(entry, entry.Name))]);
         }
     }
 }

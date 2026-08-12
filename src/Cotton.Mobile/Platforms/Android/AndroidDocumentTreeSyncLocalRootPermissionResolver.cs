@@ -5,9 +5,10 @@
 using Android.Content;
 using Android.Database;
 using Android.Provider;
+using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeSyncLocalRootPermissionResolver :
         ICottonSyncLocalRootPermissionResolver
@@ -25,7 +26,7 @@ namespace Cotton.Mobile.Services
                 return localRoot.PermissionStatus;
             }
 
-            ContentResolver contentResolver = Android.App.Application.Context.ContentResolver
+            ContentResolver contentResolver = global::Android.App.Application.Context.ContentResolver
                 ?? throw new InvalidOperationException("Android content resolver is unavailable.");
             bool hasReadWriteGrant = contentResolver.PersistedUriPermissions.Any(permission =>
                 permission.IsReadPermission

@@ -133,7 +133,7 @@ namespace Cotton.Mobile.Services
         private static IReadOnlyDictionary<string, string> CreateUploadMetadata(
             CottonDeviceToCloudSyncPlanItem item)
         {
-            Dictionary<string, string> metadata = new Dictionary<string, string>(StringComparer.Ordinal)
+            Dictionary<string, string> metadata = new(StringComparer.Ordinal)
             {
                 [CottonFileUploadMetadataKeys.Source] = MetadataSourceValue,
             };

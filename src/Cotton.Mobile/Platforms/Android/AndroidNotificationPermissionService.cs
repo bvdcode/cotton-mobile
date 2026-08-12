@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Storage;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidNotificationPermissionService : ICottonNotificationPermissionService
     {
@@ -36,7 +36,7 @@ namespace Cotton.Mobile
                 return Task.FromResult(true);
             }
 
-            bool isGranted = Android.App.Application.Context.CheckSelfPermission(
+            bool isGranted = global::Android.App.Application.Context.CheckSelfPermission(
                 Manifest.Permission.PostNotifications) == Permission.Granted;
             return Task.FromResult(isGranted);
         }

@@ -11,7 +11,7 @@ using AndroidX.Core.View;
 using Cotton.Mobile.Services;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Cotton.Mobile
+namespace Cotton.Mobile.Platforms.Android
 {
     [Activity(
         Theme = "@style/Cotton.SplashTheme",
@@ -90,10 +90,10 @@ namespace Cotton.Mobile
             }
 
 #pragma warning disable CA1416, CA1422
-            Android.Graphics.Color systemBarColor = Resources.GetColor(
+            global::Android.Graphics.Color systemBarColor = Resources.GetColor(
                 Resource.Color.cotton_system_bar_background,
                 Theme);
-            Android.Views.View decorView = Window.DecorView;
+            global::Android.Views.View decorView = Window.DecorView;
             WindowCompat.SetDecorFitsSystemWindows(Window, true);
             Window.ClearFlags(WindowManagerFlags.TranslucentStatus | WindowManagerFlags.TranslucentNavigation);
             Window.AddFlags(WindowManagerFlags.DrawsSystemBarBackgrounds);

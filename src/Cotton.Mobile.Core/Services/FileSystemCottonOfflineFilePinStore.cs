@@ -47,13 +47,12 @@ namespace Cotton.Mobile.Services
                     return [];
                 }
 
-                return stored.Items
+                return [.. stored.Items
                     .Select(TryCreatePin)
                     .Where(item => item is not null)
                     .Select(item => item!)
                     .GroupBy(item => item.FileId)
-                    .Select(group => group.Last())
-                    .ToList();
+                    .Select(group => group.Last())];
             }
             catch (OperationCanceledException)
             {
@@ -104,9 +103,7 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonOfflineFilePinSnapshot> current =
                 await LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<CottonOfflineFilePinSnapshot> updated = current
-                .Where(existing => existing.FileId != item.FileId)
-                .ToList();
+            List<CottonOfflineFilePinSnapshot> updated = [.. current.Where(existing => existing.FileId != item.FileId)];
             updated.Add(item);
 
             await SaveAsync(instanceUri, updated, cancellationToken).ConfigureAwait(false);
@@ -125,9 +122,7 @@ namespace Cotton.Mobile.Services
 
             IReadOnlyList<CottonOfflineFilePinSnapshot> current =
                 await LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            List<CottonOfflineFilePinSnapshot> updated = current
-                .Where(existing => existing.FileId != fileId)
-                .ToList();
+            List<CottonOfflineFilePinSnapshot> updated = [.. current.Where(existing => existing.FileId != fileId)];
             if (updated.Count == current.Count)
             {
                 return false;
@@ -160,11 +155,10 @@ namespace Cotton.Mobile.Services
             {
                 SchemaVersion = SchemaVersion,
                 SavedAtUtc = _timeProvider.GetUtcNow().UtcDateTime,
-                Items = items
+                Items = [.. items
                     .GroupBy(item => item.FileId)
                     .Select(group => group.Last())
-                    .Select(CreateStoredItem)
-                    .ToList(),
+                    .Select(CreateStoredItem)],
             };
         }
 

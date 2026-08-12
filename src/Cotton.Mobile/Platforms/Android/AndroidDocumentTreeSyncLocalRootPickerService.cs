@@ -6,10 +6,11 @@ using Android.App;
 using Android.Content;
 using Android.Provider;
 using Cotton.Mobile.Resources.Localization;
+using Cotton.Mobile.Services;
 using Microsoft.Maui.ApplicationModel;
 using AndroidUri = Android.Net.Uri;
 
-namespace Cotton.Mobile.Services
+namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidDocumentTreeSyncLocalRootPickerService : ICottonSyncLocalRootPickerService
     {
@@ -41,7 +42,7 @@ namespace Cotton.Mobile.Services
             ContentResolver contentResolver = activity.ContentResolver
                 ?? throw new InvalidOperationException("Folder picker needs an active Android content resolver.");
 
-            Intent intent = new Intent(Intent.ActionOpenDocumentTree);
+            Intent intent = new(Intent.ActionOpenDocumentTree);
             intent.AddFlags(PickerIntentFlags);
 
             Intent? resultIntent = await MainThread.InvokeOnMainThreadAsync(() =>

@@ -50,7 +50,7 @@ namespace Cotton.Mobile.Services
             try
             {
                 await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-                await using (FileStream destination = new FileStream(
+                await using (FileStream destination = new(
                     temporaryPath,
                     FileMode.Create,
                     FileAccess.Write,
@@ -137,7 +137,7 @@ namespace Cotton.Mobile.Services
                 throw new IOException($"Downloaded file manifest does not contain a content hash for {file.Id}.");
             }
 
-            await using FileStream content = new FileStream(
+            await using FileStream content = new(
                 filePath,
                 FileMode.Open,
                 FileAccess.Read,

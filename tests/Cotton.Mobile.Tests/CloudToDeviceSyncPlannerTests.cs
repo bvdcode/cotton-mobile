@@ -48,7 +48,7 @@ namespace Cotton.Mobile.Tests
         public void Planner_refreshes_file_when_remote_etag_changes()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-2\"");
-            CottonSyncedFileSnapshot localFile = new CottonSyncedFileSnapshot(
+            CottonSyncedFileSnapshot localFile = new(
                 FirstFileId,
                 "alpha.txt",
                 "\"etag-1\"",
@@ -148,7 +148,7 @@ namespace Cotton.Mobile.Tests
         public void Planner_renames_local_file_when_etag_matches_but_name_changes()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "renamed.txt", "\"etag-1\"");
-            CottonSyncedFileSnapshot localFile = new CottonSyncedFileSnapshot(
+            CottonSyncedFileSnapshot localFile = new(
                 FirstFileId,
                 "alpha.txt",
                 "\"etag-1\"",
@@ -175,11 +175,11 @@ namespace Cotton.Mobile.Tests
         public void Planner_renames_local_file_when_relative_path_changes()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
-            CottonCloudToDeviceRemoteContentSnapshot remote = new CottonCloudToDeviceRemoteContentSnapshot(
+            CottonCloudToDeviceRemoteContentSnapshot remote = new(
                 FolderId,
                 "Projects",
                 [new CottonCloudToDeviceRemoteItemSnapshot(remoteFile, "Nested/alpha.txt")]);
-            CottonSyncedFileSnapshot localFile = new CottonSyncedFileSnapshot(
+            CottonSyncedFileSnapshot localFile = new(
                 FirstFileId,
                 "alpha.txt",
                 "\"etag-1\"",
@@ -241,7 +241,7 @@ namespace Cotton.Mobile.Tests
         public void Planner_removes_local_orphans_from_manifest()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
-            CottonSyncedFileSnapshot orphan = new CottonSyncedFileSnapshot(
+            CottonSyncedFileSnapshot orphan = new(
                 SecondFileId,
                 "orphan.txt",
                 "\"etag-old\"",

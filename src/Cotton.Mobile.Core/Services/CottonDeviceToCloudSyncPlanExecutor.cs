@@ -42,7 +42,7 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("The manifest-based executor requires a two-way sync root.", nameof(root));
             }
 
-            CottonDeviceToCloudRemoteFolderIndex folderIndex = new CottonDeviceToCloudRemoteFolderIndex(root, plan);
+            CottonDeviceToCloudRemoteFolderIndex folderIndex = new(root, plan);
             int uploadedCount = 0;
             int refreshedCount = 0;
             int createdFolderCount = 0;

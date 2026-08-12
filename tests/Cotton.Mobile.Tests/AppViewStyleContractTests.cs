@@ -1,4 +1,4 @@
-using System.Text.RegularExpressions;
+using System.Xml;
 using System.Xml.Linq;
 using Xunit;
 
@@ -15,16 +15,10 @@ namespace Cotton.Mobile.Tests
         private const string AppStylesPath = "src/Cotton.Mobile/Resources/Styles/AppStyles.xaml";
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
-        private static readonly Regex FontImageSourcePattern = new(
-            "<FontImageSource\\b[^>]*?/>|\"\\{FontImageSource[^\"]*\"",
-            RegexOptions.Singleline | RegexOptions.CultureInvariant);
-
         [Fact]
         public void Every_font_image_source_declares_an_explicit_tint()
         {
-            IReadOnlyList<string> offenders = FindOffenders(
-                FontImageSourcePattern,
-                match => !match.Value.Contains("Color=", StringComparison.Ordinal));
+            IReadOnlyList<string> offenders = FindUntintedFontImageSources();
 
             AssertNone(
                 offenders,
@@ -61,31 +55,52 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void Card_actions_can_grow_with_accessible_font_scaling()
         {
-            string markup = RepositoryPath.ReadText(AppStylesPath);
-            Match cardActionStyle = Regex.Match(
-                markup,
-                "<Style[^>]*Class=\"CardAction\"[\\s\\S]*?</Style>",
-                RegexOptions.CultureInvariant);
+            XDocument document = XDocument.Parse(RepositoryPath.ReadText(AppStylesPath));
+            XElement cardActionStyle = document
+                .Descendants()
+                .Single(element =>
+                    element.Name.LocalName == "Style"
+                    && string.Equals(
+                        (string?)element.Attribute("Class"),
+                        "CardAction",
+                        StringComparison.Ordinal));
+            IReadOnlySet<string> properties = cardActionStyle
+                .Elements()
+                .Where(element => element.Name.LocalName == "Setter")
+                .Select(element => (string?)element.Attribute("Property"))
+                .Where(property => property is not null)
+                .Select(property => property!)
+                .ToHashSet(StringComparer.Ordinal);
 
-            Assert.True(cardActionStyle.Success, "CardAction style is missing.");
-            Assert.DoesNotContain("HeightRequest", cardActionStyle.Value, StringComparison.Ordinal);
-            Assert.Contains("Property=\"Padding\"", cardActionStyle.Value, StringComparison.Ordinal);
+            Assert.DoesNotContain("HeightRequest", properties);
+            Assert.Contains("Padding", properties);
         }
 
-        private static IReadOnlyList<string> FindOffenders(Regex pattern, Func<Match, bool> isOffending)
+        private static IReadOnlyList<string> FindUntintedFontImageSources()
         {
             List<string> offenders = [];
 
             foreach (string file in RepositoryPath.EnumerateFiles(ViewDirectory, "*.xaml"))
             {
-                string markup = RepositoryPath.ReadText(file);
-                foreach (Match match in pattern.Matches(markup))
+                XDocument document = XDocument.Parse(RepositoryPath.ReadText(file), LoadOptions.SetLineInfo);
+                IEnumerable<XObject> fontImageSources = document
+                    .Descendants()
+                    .Where(element =>
+                        element.Name.LocalName == "FontImageSource"
+                        && element.Attribute("Color") is null)
+                    .Cast<XObject>()
+                    .Concat(
+                        document
+                            .Descendants()
+                            .Attributes()
+                            .Where(attribute =>
+                                attribute.Value.Contains("{FontImageSource", StringComparison.Ordinal)
+                                && !attribute.Value.Contains("Color=", StringComparison.Ordinal)));
+
+                foreach (XObject source in fontImageSources)
                 {
-                    if (isOffending(match))
-                    {
-                        int line = markup.Take(match.Index).Count(character => character == '\n') + 1;
-                        offenders.Add($"{file}:{line}");
-                    }
+                    IXmlLineInfo lineInfo = (IXmlLineInfo)source;
+                    offenders.Add($"{file}:{lineInfo.LineNumber}");
                 }
             }
 

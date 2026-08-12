@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
                 new[] { "receipt:pending", "remote:upload", "receipt:uploaded", "local:delete" },
                 harness.Events);
             Assert.Equal(
-                new[] { CottonUploadReceiptStatus.Pending, CottonUploadReceiptStatus.Uploaded },
+                [CottonUploadReceiptStatus.Pending, CottonUploadReceiptStatus.Uploaded],
                 harness.ReceiptStore.SaveHistory.Select(receipt => receipt.Status));
             CottonUploadReceiptSnapshot pending = harness.ReceiptStore.SaveHistory[0];
             CottonUploadReceiptSnapshot uploaded = harness.ReceiptStore.SaveHistory[1];

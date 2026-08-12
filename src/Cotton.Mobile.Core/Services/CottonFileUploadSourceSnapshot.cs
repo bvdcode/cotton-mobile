@@ -68,11 +68,11 @@ namespace Cotton.Mobile.Services
             return string.IsNullOrWhiteSpace(contentType) ? DefaultContentType : contentType.Trim();
         }
 
-        private static IReadOnlyDictionary<string, string> NormalizeMetadata(IReadOnlyDictionary<string, string>? metadata)
+        private static Dictionary<string, string> NormalizeMetadata(IReadOnlyDictionary<string, string>? metadata)
         {
             if (metadata is null || metadata.Count == 0)
             {
-                return new Dictionary<string, string>();
+                return [];
             }
 
             Dictionary<string, string> normalized = new(StringComparer.Ordinal);

@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class BidirectionalSyncPlannerBoundaryTests
     {
         [Fact]
-        public void Local_delete_requires_remote_delete_review_when_remote_is_unchanged()
+        public void LocalDeleteRequiresRemoteDeleteReviewWhenRemoteIsUnchanged()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_new_file_downloads_when_local_path_is_empty()
+        public void RemoteNewFileDownloadsWhenLocalPathIsEmpty()
         {
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(NewRemoteFileId, "remote.txt", "remote.txt", "\"etag-new\"", sizeBytes: 7));
@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void New_local_file_blocks_when_remote_path_already_exists()
+        public void NewLocalFileBlocksWhenRemotePathAlreadyExists()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("notes.txt", "notes.txt", sizeBytes: 42, updatedAtUtc: SyncedAt));
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_requires_bidirectional_ready_root()
+        public void PlannerRequiresBidirectionalReadyRoot()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent();
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent();

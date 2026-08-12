@@ -9,8 +9,18 @@ namespace Cotton.Mobile.Tests
 {
     public class UploadOnlySyncPlanExecutorTests
     {
+        private static readonly string[] SuccessfulDeleteEvents =
+            ["receipt:pending", "remote:upload", "receipt:uploaded", "local:delete"];
+        private static readonly string[] SuccessfulUploadEvents =
+            ["receipt:pending", "remote:upload", "receipt:uploaded"];
+        private static readonly string[] RetryUploadEvents =
+            ["receipt:load", "remote:upload", "receipt:uploaded"];
+        private static readonly string[] ReceiptLoadEvents = ["receipt:load"];
+        private static readonly string[] FailedUploadEvents = ["receipt:pending", "remote:upload"];
+        private static readonly string[] LocalDeleteEvents = ["local:delete"];
+
         [Fact]
-        public async Task Execute_persists_pending_uploads_confirms_and_deletes_in_safe_order()
+        public async Task ExecutePersistsPendingUploadsConfirmsAndDeletesInSafeOrder()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.LocalFileOperator.DeleteStatus = CottonDeviceToCloudLocalFileDeleteStatus.Deleted;
@@ -21,7 +31,7 @@ namespace Cotton.Mobile.Tests
                 CreatePlan(CreateUploadItem()));
 
             Assert.Equal(
-                new[] { "receipt:pending", "remote:upload", "receipt:uploaded", "local:delete" },
+                SuccessfulDeleteEvents,
                 harness.Events);
             Assert.Equal(
                 [CottonUploadReceiptStatus.Pending, CottonUploadReceiptStatus.Uploaded],
@@ -39,7 +49,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Execute_keeps_original_when_retention_requires_it()
+        public async Task ExecuteKeepsOriginalWhenRetentionRequiresIt()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
 
@@ -49,7 +59,7 @@ namespace Cotton.Mobile.Tests
                 CreatePlan(CreateUploadItem()));
 
             Assert.Equal(
-                new[] { "receipt:pending", "remote:upload", "receipt:uploaded" },
+                SuccessfulUploadEvents,
                 harness.Events);
             Assert.Empty(harness.LocalFileOperator.DeleteCalls);
             Assert.Equal(1, result.UploadedCount);
@@ -57,7 +67,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Execute_retry_reuses_matching_operation_without_resaving_pending()
+        public async Task ExecuteRetryReusesMatchingOperationWithoutResavingPending()
         {
             CottonDeviceToCloudSyncPlanItem retryItem = CreateUploadItem(OperationId);
             CottonUploadReceiptSnapshot pending = CottonUploadReceiptSnapshot.CreatePending(
@@ -71,7 +81,7 @@ namespace Cotton.Mobile.Tests
             await harness.Executor.ExecuteAsync(InstanceUri, harness.Root, CreatePlan(retryItem));
 
             Assert.Equal(
-                new[] { "receipt:load", "remote:upload", "receipt:uploaded" },
+                RetryUploadEvents,
                 harness.Events);
             Assert.Equal(0, harness.ReceiptStore.PendingSaveCount);
             Assert.Equal(1, harness.ReceiptStore.UploadedSaveCount);
@@ -80,7 +90,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Execute_retry_rejects_missing_matching_pending_receipt_before_upload()
+        public async Task ExecuteRetryRejectsMissingMatchingPendingReceiptBeforeUpload()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
 
@@ -89,14 +99,14 @@ namespace Cotton.Mobile.Tests
                 harness.Root,
                 CreatePlan(CreateUploadItem(OperationId))));
 
-            Assert.Equal(new[] { "receipt:load" }, harness.Events);
+            Assert.Equal(ReceiptLoadEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
             Assert.Equal(0, harness.ReceiptStore.PendingSaveCount);
             Assert.Equal(0, harness.ReceiptStore.UploadedSaveCount);
         }
 
         [Fact]
-        public async Task Execute_retry_rejects_pending_receipt_for_different_content()
+        public async Task ExecuteRetryRejectsPendingReceiptForDifferentContent()
         {
             CottonDeviceToCloudSyncPlanItem staleItem = CreateUploadItem(OperationId, TestContentHashes.Second);
             CottonUploadReceiptSnapshot staleReceipt = CottonUploadReceiptSnapshot.CreatePending(
@@ -112,12 +122,12 @@ namespace Cotton.Mobile.Tests
                 harness.Root,
                 CreatePlan(CreateUploadItem(OperationId))));
 
-            Assert.Equal(new[] { "receipt:load" }, harness.Events);
+            Assert.Equal(ReceiptLoadEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
         }
 
         [Fact]
-        public async Task Execute_upload_failure_leaves_pending_receipt_and_does_not_delete()
+        public async Task ExecuteUploadFailureLeavesPendingReceiptAndDoesNotDelete()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.FileOperator.UploadException = new IOException("Upload failed.");
@@ -127,14 +137,14 @@ namespace Cotton.Mobile.Tests
                 harness.Root,
                 CreatePlan(CreateUploadItem())));
 
-            Assert.Equal(new[] { "receipt:pending", "remote:upload" }, harness.Events);
+            Assert.Equal(FailedUploadEvents, harness.Events);
             CottonUploadReceiptSnapshot receipt = Assert.Single(harness.ReceiptStore.Receipts);
             Assert.True(receipt.IsPending);
             Assert.Empty(harness.LocalFileOperator.DeleteCalls);
         }
 
         [Fact]
-        public async Task Execute_uploaded_receipt_failure_prevents_original_delete()
+        public async Task ExecuteUploadedReceiptFailurePreventsOriginalDelete()
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload);
             harness.ReceiptStore.ThrowOnUploadedSave = true;
@@ -145,7 +155,7 @@ namespace Cotton.Mobile.Tests
                 CreatePlan(CreateUploadItem())));
 
             Assert.Equal(
-                new[] { "receipt:pending", "remote:upload", "receipt:uploaded" },
+                SuccessfulUploadEvents,
                 harness.Events);
             CottonUploadReceiptSnapshot receipt = Assert.Single(harness.ReceiptStore.Receipts);
             Assert.True(receipt.IsPending);
@@ -155,7 +165,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonUploadOriginalRetention.KeepOriginals, false)]
         [InlineData(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload, true)]
-        public async Task Execute_confirms_pending_without_upload_then_optionally_deletes_original(
+        public async Task ExecuteConfirmsPendingWithoutUploadThenOptionallyDeletesOriginal(
             CottonUploadOriginalRetention retention,
             bool expectsDelete)
         {
@@ -188,7 +198,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonDeviceToCloudLocalFileDeleteStatus.AlreadyMissing, 0, 1, 0)]
         [InlineData(CottonDeviceToCloudLocalFileDeleteStatus.Changed, 0, 0, 1)]
         [InlineData(CottonDeviceToCloudLocalFileDeleteStatus.Unsupported, 0, 0, 1)]
-        public async Task Execute_counts_standalone_cleanup_status(
+        public async Task ExecuteCountsStandaloneCleanupStatus(
             CottonDeviceToCloudLocalFileDeleteStatus deleteStatus,
             int expectedDeleted,
             int expectedSkipped,
@@ -202,7 +212,7 @@ namespace Cotton.Mobile.Tests
                 harness.Root,
                 CreatePlan(CreateCleanupItem()));
 
-            Assert.Equal(new[] { "local:delete" }, harness.Events);
+            Assert.Equal(LocalDeleteEvents, harness.Events);
             Assert.Empty(harness.FileOperator.UploadCalls);
             Assert.Empty(harness.ReceiptStore.SaveHistory);
             Assert.Equal(expectedDeleted, result.DeletedLocalFileCount);
@@ -214,7 +224,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonDeviceToCloudSyncActionKind.UploadChangedFile)]
         [InlineData(CottonDeviceToCloudSyncActionKind.DeleteRemoteFile)]
         [InlineData(CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan)]
-        public async Task Execute_rejects_two_way_mirror_actions(CottonDeviceToCloudSyncActionKind action)
+        public async Task ExecuteRejectsTwoWayMirrorActions(CottonDeviceToCloudSyncActionKind action)
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
             CottonDeviceToCloudSyncPlanItem item = new(
@@ -242,7 +252,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        public async Task Execute_rejects_plan_with_different_root_or_folder(bool changesRootId)
+        public async Task ExecuteRejectsPlanWithDifferentRootOrFolder(bool changesRootId)
         {
             ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
             CottonDeviceToCloudSyncPlanSnapshot plan = new(

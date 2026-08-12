@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         private static readonly DateTime Newer = new(2026, 6, 19, 9, 0, 0, DateTimeKind.Utc);
 
         [Fact]
-        public void Select_files_to_delete_keeps_cache_under_budget_by_oldest_unprotected_files()
+        public void SelectFilesToDeleteKeepsCacheUnderBudgetByOldestUnprotectedFiles()
         {
             string oldFile = CreatePath("cache", "old.bin");
             string newFile = CreatePath("cache", "new.bin");
@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_preserves_exact_protected_path()
+        public void SelectFilesToDeletePreservesExactProtectedPath()
         {
             string protectedFile = CreatePath("cache", "fresh.bin");
             string oldFile = CreatePath("cache", "old.bin");
@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_preserves_pinned_download_directory()
+        public void SelectFilesToDeletePreservesPinnedDownloadDirectory()
         {
             string pinnedDirectory = CreatePath("downloads", "instance", "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
             string pinnedFile = Path.Combine(pinnedDirectory, "report.pdf");
@@ -71,7 +71,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_does_not_protect_sibling_directory_prefixes()
+        public void SelectFilesToDeleteDoesNotProtectSiblingDirectoryPrefixes()
         {
             string pinnedDirectory = CreatePath("downloads", "instance", "file");
             string siblingFile = CreatePath("downloads", "instance", "file-sibling", "cache.bin");
@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_keeps_unavoidable_pinned_over_budget()
+        public void SelectFilesToDeleteKeepsUnavoidablePinnedOverBudget()
         {
             string pinnedDirectory = CreatePath("downloads", "instance", "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
             string pinnedFile = Path.Combine(pinnedDirectory, "report.pdf");
@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_evicts_sensitive_unpinned_files_before_budget_pressure()
+        public void SelectFilesToDeleteEvictsSensitiveUnpinnedFilesBeforeBudgetPressure()
         {
             string sensitiveFile = CreatePath("downloads", "instance", "secret", "service-account.pem");
             string normalFile = CreatePath("downloads", "instance", "normal", "photo.jpg");
@@ -125,7 +125,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_preserves_protected_sensitive_path()
+        public void SelectFilesToDeletePreservesProtectedSensitivePath()
         {
             string sensitiveFile = CreatePath("downloads", "instance", "secret", "service-account.pem");
 
@@ -139,7 +139,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Select_files_to_delete_preserves_sensitive_pinned_directory()
+        public void SelectFilesToDeletePreservesSensitivePinnedDirectory()
         {
             string pinnedDirectory = CreatePath("downloads", "instance", "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee");
             string sensitiveFile = Path.Combine(pinnedDirectory, "service-account.pem");

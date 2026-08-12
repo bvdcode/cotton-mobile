@@ -39,8 +39,8 @@ namespace Cotton.Mobile.Services
 
         private static void AddMappedItem(
             CottonBidirectionalSyncPlanItem item,
-            ICollection<CottonCloudToDeviceSyncPlanItem> cloudItems,
-            ICollection<CottonDeviceToCloudSyncPlanItem> deviceItems)
+            List<CottonCloudToDeviceSyncPlanItem> cloudItems,
+            List<CottonDeviceToCloudSyncPlanItem> deviceItems)
         {
             switch (item.Action)
             {

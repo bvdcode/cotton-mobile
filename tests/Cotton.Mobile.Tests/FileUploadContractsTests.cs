@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData("SHA256")]
         [InlineData(" sha256 ")]
-        public void Upload_settings_accept_supported_sha256_algorithm(string algorithm)
+        public void UploadSettingsAcceptSupportedSha256Algorithm(string algorithm)
         {
             CottonFileUploadSettings settings = new(CottonFileUploadSettings.MinimumChunkSizeBytes, algorithm);
 
@@ -17,7 +17,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_settings_reject_invalid_server_contracts()
+        public void UploadSettingsRejectInvalidServerContracts()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 new CottonFileUploadSettings(CottonFileUploadSettings.MinimumChunkSizeBytes - 1, "SHA256"));
@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_normalizes_user_selected_file_metadata()
+        public void UploadSourceSnapshotNormalizesUserSelectedFileMetadata()
         {
             CottonFileUploadSourceSnapshot snapshot = new(
                 " /tmp/report.pdf ",
@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_uses_explicit_safe_defaults()
+        public void UploadSourceSnapshotUsesExplicitSafeDefaults()
         {
             CottonFileUploadSourceSnapshot snapshot = new(" ", " ", null);
 
@@ -52,7 +52,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_normalizes_optional_metadata()
+        public void UploadSourceSnapshotNormalizesOptionalMetadata()
         {
             CottonFileUploadSourceSnapshot snapshot = new(
                 "photo.jpg",
@@ -74,7 +74,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_keeps_metadata_when_renamed()
+        public void UploadSourceSnapshotKeepsMetadataWhenRenamed()
         {
             CottonFileUploadSourceSnapshot snapshot = new(
                 "photo.jpg",
@@ -92,14 +92,14 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_source_snapshot_rejects_negative_size()
+        public void UploadSourceSnapshotRejectsNegativeSize()
         {
             Assert.Throws<ArgumentOutOfRangeException>(() =>
                 new CottonFileUploadSourceSnapshot("notes.txt", "text/plain", -1));
         }
 
         [Fact]
-        public void Upload_hash_uses_lowercase_sha256_hex()
+        public void UploadHashUsesLowercaseSha256Hex()
         {
             string hash = CottonContentHash.ComputeSha256("abc"u8);
 
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Upload_hash_streaming_uses_lowercase_sha256_hex()
+        public async Task UploadHashStreamingUsesLowercaseSha256Hex()
         {
             await using MemoryStream content = new("abc"u8.ToArray());
 
@@ -121,7 +121,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sync_working_file_names_are_reserved_for_temporary_state()
+        public void SyncWorkingFileNamesAreReservedForTemporaryState()
         {
             string temporary = CottonSyncWorkingFileName.CreateTemporary("report.pdf");
             string backup = CottonSyncWorkingFileName.CreateBackup("report.pdf");
@@ -136,7 +136,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Upload_destination_snapshot_normalizes_folder_copy()
+        public void UploadDestinationSnapshotNormalizesFolderCopy()
         {
             Guid folderId = Guid.Parse("11111111-2222-3333-4444-555555555555");
             CottonUploadDestinationSnapshot destination = new(

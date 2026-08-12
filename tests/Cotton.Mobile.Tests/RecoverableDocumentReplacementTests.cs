@@ -6,7 +6,7 @@ namespace Cotton.Mobile.Tests
     public class RecoverableDocumentReplacementTests
     {
         [Fact]
-        public void Replace_promotes_verified_replacement_before_removing_backup()
+        public void ReplacePromotesVerifiedReplacementBeforeRemovingBackup()
         {
             FakeDocumentMutationStore store = CreateStore();
             CottonRecoverableDocumentReplacement<string> replacement = new(store);
@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Replace_restores_current_document_when_promotion_fails()
+        public void ReplaceRestoresCurrentDocumentWhenPromotionFails()
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
@@ -48,7 +48,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Replace_preserves_backup_when_promotion_and_rollback_fail()
+        public void ReplacePreservesBackupWhenPromotionAndRollbackFail()
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
@@ -65,7 +65,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Replace_reports_temporary_cleanup_failure_after_successful_rollback()
+        public void ReplaceReportsTemporaryCleanupFailureAfterSuccessfulRollback()
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingRenameCalls.Add(2);
@@ -81,7 +81,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Replace_keeps_promoted_document_when_backup_cleanup_fails()
+        public void ReplaceKeepsPromotedDocumentWhenBackupCleanupFails()
         {
             FakeDocumentMutationStore store = CreateStore();
             store.FailingDeleteCalls.Add(1);

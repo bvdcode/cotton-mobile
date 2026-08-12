@@ -15,7 +15,7 @@ namespace Cotton.Mobile.Tests
         private static readonly DateTime SyncedAt = new(2026, 6, 20, 19, 5, 0, DateTimeKind.Utc);
 
         [Fact]
-        public void Create_splits_conflict_free_preflight_into_existing_execution_plans()
+        public void CreateSplitsConflictFreePreflightIntoExistingExecutionPlans()
         {
             CottonBidirectionalSyncPlanSnapshot preflightPlan = CreatePlan(
                 CreateItem(
@@ -102,7 +102,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_keeps_blocked_preflight_non_executable()
+        public void CreateKeepsBlockedPreflightNonExecutable()
         {
             CottonBidirectionalSyncPlanSnapshot preflightPlan = CreatePlan(
                 CreateItem(
@@ -128,7 +128,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_maps_destructive_local_and_remote_deletes()
+        public void CreateMapsDestructiveLocalAndRemoteDeletes()
         {
             CottonBidirectionalSyncPlanSnapshot preflightPlan = CreatePlan(
                 CreateItem(

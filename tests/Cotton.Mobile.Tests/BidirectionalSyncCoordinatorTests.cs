@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_executes_safe_cloud_and_device_changes()
+        public async Task RunRootExecutesSafeCloudAndDeviceChanges()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             _localTreeReader.SetContent(
@@ -84,7 +84,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_requires_conflict_review_without_mutations()
+        public async Task RunRootRequiresConflictReviewWithoutMutations()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             _localTreeReader.SetContent(
@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_requires_blocked_review_without_mutations()
+        public async Task RunRootRequiresBlockedReviewWithoutMutations()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             _localTreeReader.SetContent(root.Id, CreateLocalContent());
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_requires_destructive_review_before_remote_delete()
+        public async Task RunRootRequiresDestructiveReviewBeforeRemoteDelete()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             CottonFileBrowserEntry oldFile = CreateFile(OldFileId, "old.txt", "\"etag-old\"");
@@ -146,7 +146,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Execute_reviewed_plan_does_not_rebuild_destructive_plan()
+        public async Task ExecuteReviewedPlanDoesNotRebuildDestructivePlan()
         {
             CottonSyncRootSnapshot root = CreateRoot();
             CottonFileBrowserEntry oldFile = CreateFile(OldFileId, "old.txt", "\"etag-old\"");
@@ -176,7 +176,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_roots_that_cannot_run()
+        public async Task RunRootSkipsRootsThatCannotRun()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(
                 permissionStatus: CottonSyncRootPermissionStatus.NeedsUserGrant);
@@ -222,6 +222,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

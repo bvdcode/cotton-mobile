@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid CloudFolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
         [Fact]
-        public void App_private_sync_root_is_ready_without_user_folder_grant()
+        public void AppPrivateSyncRootIsReadyWithoutUserFolderGrant()
         {
             CottonSyncLocalRootSnapshot localRoot = CreateAppPrivateLocalRoot();
 
@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void User_selected_document_tree_requires_explicit_grant_before_sync_can_run()
+        public void UserSelectedDocumentTreeRequiresExplicitGrantBeforeSyncCanRun()
         {
             CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.UserSelectedDocumentTree,
@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Revoked_document_tree_surfaces_reconnect_state()
+        public void RevokedDocumentTreeSurfacesReconnectState()
         {
             CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.UserSelectedDocumentTree,
@@ -62,7 +62,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Unavailable_local_root_blocks_sync_without_user_action()
+        public void UnavailableLocalRootBlocksSyncWithoutUserAction()
         {
             CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.AppPrivateDirectory,
@@ -79,7 +79,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Device_to_cloud_root_can_delete_originals_after_confirmed_upload()
+        public void DeviceToCloudRootCanDeleteOriginalsAfterConfirmedUpload()
         {
             CottonSyncRootSnapshot root = new(
                 SyncRootId,
@@ -103,7 +103,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonSyncDirection.CloudToDevice)]
         [InlineData(CottonSyncDirection.Bidirectional)]
-        public void Non_upload_root_rejects_delete_originals_policy(CottonSyncDirection direction)
+        public void NonUploadRootRejectsDeleteOriginalsPolicy(CottonSyncDirection direction)
         {
             Assert.Throws<ArgumentException>(() =>
                 new CottonSyncRootSnapshot(
@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Stable_key_normalizes_instance_uri_and_binds_account_cloud_folder_and_local_root()
+        public void StableKeyNormalizesInstanceUriAndBindsAccountCloudFolderAndLocalRoot()
         {
             CottonSyncLocalRootSnapshot localRoot = CreateAppPrivateLocalRoot();
 
@@ -150,7 +150,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Local_root_rejects_app_private_user_grant_state()
+        public void LocalRootRejectsAppPrivateUserGrantState()
         {
             Assert.Throws<ArgumentException>(() =>
                 new CottonSyncLocalRootSnapshot(
@@ -163,7 +163,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData("")]
         [InlineData(" ")]
-        public void Root_requires_account_scope_key(string accountScopeKey)
+        public void RootRequiresAccountScopeKey(string accountScopeKey)
         {
             Assert.Throws<ArgumentException>(() =>
                 CreateRoot(new Uri("https://app.cottoncloud.dev"), accountScopeKey, CreateAppPrivateLocalRoot()));
@@ -174,7 +174,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("https://app.cottoncloud.dev#files")]
         [InlineData("http://app.cottoncloud.dev")]
         [InlineData("ftp://app.cottoncloud.dev")]
-        public void Root_rejects_unsupported_instance_uri(string value)
+        public void RootRejectsUnsupportedInstanceUri(string value)
         {
             Assert.Throws<ArgumentException>(() =>
                 CreateRoot(new Uri(value), "account-1", CreateAppPrivateLocalRoot()));

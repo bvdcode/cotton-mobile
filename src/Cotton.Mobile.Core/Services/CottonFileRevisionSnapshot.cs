@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Services
 
         public IReadOnlyDictionary<string, string> Metadata { get; } = CreateMetadata(metadata);
 
-        private static IReadOnlyDictionary<string, string> CreateMetadata(
+        private static ReadOnlyDictionary<string, string> CreateMetadata(
             IReadOnlyDictionary<string, string>? metadata)
         {
             Dictionary<string, string> values = metadata is null

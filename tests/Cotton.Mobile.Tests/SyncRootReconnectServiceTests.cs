@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Reconnect_restores_original_local_root_and_preserves_configuration()
+        public async Task ReconnectRestoresOriginalLocalRootAndPreservesConfiguration()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -61,7 +61,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Reconnect_rejects_a_different_local_root_without_replacing_existing_roots()
+        public async Task ReconnectRejectsADifferentLocalRootWithoutReplacingExistingRoots()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -92,7 +92,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Reconnect_rejects_a_root_that_does_not_need_user_action()
+        public async Task ReconnectRejectsARootThatDoesNotNeedUserAction()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -111,7 +111,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Reconnect_rejects_a_replacement_without_an_available_grant()
+        public async Task ReconnectRejectsAReplacementWithoutAnAvailableGrant()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 RootId,
@@ -135,6 +135,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(

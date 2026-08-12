@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class SyncRootListPresentationTests
     {
         [Fact]
-        public void Empty_state_is_explicit()
+        public void EmptyStateIsExplicit()
         {
             CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create([]);
 
@@ -19,7 +19,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Ready_cloud_to_device_root_has_stable_display_copy()
+        public void ReadyCloudToDeviceRootHasStableDisplayCopy()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -68,7 +68,7 @@ namespace Cotton.Mobile.Tests
             CottonSyncDirection.Bidirectional,
             CottonSyncRootStorageKind.UserSelectedDocumentTree,
             "Syncing")]
-        public void Running_root_updates_status_in_place(
+        public void RunningRootUpdatesStatusInPlace(
             CottonSyncDirection direction,
             CottonSyncRootStorageKind storageKind,
             string expectedStatus)
@@ -100,7 +100,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Non_runnable_root_cannot_enter_running_state()
+        public void NonRunnableRootCannotEnterRunningState()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Attention_state_is_visible_for_roots_needing_user_action()
+        public void AttentionStateIsVisibleForRootsNeedingUserAction()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -143,7 +143,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Revoked_document_tree_uses_compact_status_and_explicit_reconnect_action()
+        public void RevokedDocumentTreeUsesCompactStatusAndExplicitReconnectAction()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -164,7 +164,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Roots_are_sorted_by_path_then_folder_name()
+        public void RootsAreSortedByPathThenFolderName()
         {
             CottonSyncRootSnapshot second = CreateRoot(
                 SecondRootId,
@@ -192,7 +192,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Paused_root_is_visible_but_not_runnable()
+        public void PausedRootIsVisibleButNotRunnable()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -218,7 +218,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Legacy_cloud_to_device_document_tree_root_is_unsupported()
+        public void LegacyCloudToDeviceDocumentTreeRootIsUnsupported()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -242,7 +242,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Device_to_cloud_user_selected_document_tree_root_is_ready_and_runnable()
+        public void DeviceToCloudUserSelectedDocumentTreeRootIsReadyAndRunnable()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,
@@ -267,7 +267,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Bidirectional_user_selected_document_tree_root_is_ready_and_runnable()
+        public void BidirectionalUserSelectedDocumentTreeRootIsReadyAndRunnable()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 FirstRootId,

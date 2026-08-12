@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class SyncSettingsRunStatusTextTests
     {
         [Fact]
-        public void Combined_status_reports_no_roots()
+        public void CombinedStatusReportsNoRoots()
         {
             Assert.Equal("Syncing folders…", CottonSyncSettingsRunStatusText.StartingAllStatus);
             Assert.Equal("Offline. Sync needs internet.", CottonSyncSettingsRunStatusText.OfflineUnavailableStatus);
@@ -20,7 +20,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Combined_status_reports_cloud_and_device_results()
+        public void CombinedStatusReportsCloudAndDeviceResults()
         {
             CottonCloudToDeviceSyncRunSummary cloudSummary = CreateCloudSummary(
                 new CottonCloudToDeviceSyncExecutionResult(
@@ -51,7 +51,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Combined_status_reports_bidirectional_results()
+        public void CombinedStatusReportsBidirectionalResults()
         {
             CottonBidirectionalSyncRunSummary bidirectionalSummary = CreateBidirectionalSummary(
                 new CottonCloudToDeviceSyncExecutionResult(
@@ -81,7 +81,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Single_root_status_reports_bidirectional_destructive_review_cancellation()
+        public void SingleRootStatusReportsBidirectionalDestructiveReviewCancellation()
         {
             Assert.Equal(
                 "Sync cancelled.",
@@ -90,7 +90,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Single_root_status_reports_bidirectional_conflict_review()
+        public void SingleRootStatusReportsBidirectionalConflictReview()
         {
             Assert.Equal(
                 "Bidirectional sync needs conflict review.",
@@ -99,7 +99,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Single_root_status_reports_bidirectional_blocked_review()
+        public void SingleRootStatusReportsBidirectionalBlockedReview()
         {
             Assert.Equal(
                 "Bidirectional sync needs review before it can run.",
@@ -108,7 +108,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Combined_status_reports_bidirectional_blocked_review()
+        public void CombinedStatusReportsBidirectionalBlockedReview()
         {
             Assert.Equal(
                 "Sync complete. 1 blocked, 1 root skipped.",
@@ -119,7 +119,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Single_root_status_reports_completed_results()
+        public void SingleRootStatusReportsCompletedResults()
         {
             CottonCloudToDeviceSyncRunSummary cloudSummary = CreateCloudSummary(
                 new CottonCloudToDeviceSyncExecutionResult(
@@ -182,7 +182,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Bidirectional_status_copy_is_stable()
+        public void BidirectionalStatusCopyIsStable()
         {
             CottonBidirectionalSyncRunSummary summary = CreateBidirectionalSummary(
                 new CottonCloudToDeviceSyncExecutionResult(
@@ -230,7 +230,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Device_to_cloud_status_copy_is_stable()
+        public void DeviceToCloudStatusCopyIsStable()
         {
             CottonDeviceToCloudSyncRunSummary summary = CreateDeviceSummary(
                 new CottonDeviceToCloudSyncExecutionResult(

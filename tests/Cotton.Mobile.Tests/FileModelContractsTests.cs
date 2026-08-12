@@ -22,7 +22,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("movie.mp4", "video/mp4", CottonFileKind.Video, "VID", false, false)]
         [InlineData("song.mp3", "audio/mpeg", CottonFileKind.Audio, "AUD", false, false)]
         [InlineData("archive.zip", "application/zip", CottonFileKind.File, "FILE", false, false)]
-        public void From_file_classifies_supported_file_kinds(
+        public void FromFileClassifiesSupportedFileKinds(
             string name,
             string contentType,
             CottonFileKind expectedKind,
@@ -50,7 +50,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void From_file_normalizes_content_type_and_preview_hash()
+        public void FromFileNormalizesContentTypeAndPreviewHash()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile(
@@ -68,7 +68,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void From_file_preserves_an_immutable_metadata_snapshot()
+        public void FromFilePreservesAnImmutableMetadataSnapshot()
         {
             Dictionary<string, string> sourceMetadata = new(StringComparer.Ordinal)
             {
@@ -89,7 +89,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void From_node_creates_folder_entry_with_open_action()
+        public void FromNodeCreatesFolderEntryWithOpenAction()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromNode(
                 new NodeDto
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Local_file_snapshot_marks_and_clears_entry_without_changing_identity()
+        public void LocalFileSnapshotMarksAndClearsEntryWithoutChangingIdentity()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonLocalFileSnapshot localFile = new("notes.txt", 42, UpdatedAt);
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Selection_marker_preserves_file_identity_and_local_state()
+        public void SelectionMarkerPreservesFileIdentityAndLocalState()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonLocalFileSnapshot localFile = new("notes.txt", 42, UpdatedAt);
@@ -143,7 +143,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Offline_file_availability_distinguishes_available_stale_and_missing_pins()
+        public void OfflineFileAvailabilityDistinguishesAvailableStaleAndMissingPins()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt.AddMinutes(1));
@@ -179,7 +179,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void File_entry_surfaces_offline_attention_without_overloading_on_device()
+        public void FileEntrySurfacesOfflineAttentionWithoutOverloadingOnDevice()
         {
             CottonFileBrowserEntry entry = CottonFileBrowserEntryFactory.FromFile(CreateFile("notes.txt", "text/plain", 42));
             CottonOfflineFilePinSnapshot pin = CottonOfflineFilePinSnapshot.Create(entry, UpdatedAt);

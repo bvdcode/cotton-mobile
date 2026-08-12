@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_downloads_and_refreshes_files_then_updates_manifest()
+        public async Task ExecutorDownloadsAndRefreshesFilesThenUpdatesManifest()
         {
             CottonFolderContent remote = CreateContent(
                 CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""),
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_refreshes_remote_replacement_and_replaces_manifest_path()
+        public async Task ExecutorRefreshesRemoteReplacementAndReplacesManifestPath()
         {
             CottonSyncedFileSnapshot oldLocal = new(
                 FirstFileId,
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_renames_local_file_and_updates_manifest()
+        public async Task ExecutorRenamesLocalFileAndUpdatesManifest()
         {
             CottonSyncedFileSnapshot localFile = new(
                 FirstFileId,
@@ -126,7 +126,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_removes_local_orphan_and_manifest_item()
+        public async Task ExecutorRemovesLocalOrphanAndManifestItem()
         {
             CottonSyncedFileSnapshot orphan = new(
                 ThirdFileId,
@@ -153,7 +153,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_skips_noop_and_blocked_items_without_file_operations()
+        public async Task ExecutorSkipsNoopAndBlockedItemsWithoutFileOperations()
         {
             CottonFileBrowserEntry existing = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
             CottonSyncedFileSnapshot localFile = CottonSyncedFileSnapshot.Create(existing, SyncedAt);
@@ -180,7 +180,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_rejects_plan_for_different_root_or_folder()
+        public async Task ExecutorRejectsPlanForDifferentRootOrFolder()
         {
             CottonCloudToDeviceSyncPlanSnapshot plan = CottonCloudToDeviceSyncPlanner.Create(
                 _syncRoot,
@@ -198,6 +198,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_rootDirectory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

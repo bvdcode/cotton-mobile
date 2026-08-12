@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Services
             return relativePath.Count(character => character == RelativePathSeparator);
         }
 
-        private static IReadOnlyList<string> GetParentPaths(string relativePath)
+        private static List<string> GetParentPaths(string relativePath)
         {
             List<string> paths = [];
             string currentPath = relativePath;

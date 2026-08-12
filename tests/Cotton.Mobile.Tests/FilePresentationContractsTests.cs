@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class FilePresentationContractsTests
     {
         [Fact]
-        public void Thumbnail_snapshots_expose_stable_display_flags()
+        public void ThumbnailSnapshotsExposeStableDisplayFlags()
         {
             CottonFileThumbnailSnapshot shortPlaceholder = CottonFileThumbnailSnapshot.Placeholder("JS", "cache-key-short");
             CottonFileThumbnailSnapshot placeholder = CottonFileThumbnailSnapshot.Placeholder("PDF", "cache-key");
@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Thumbnail_ready_requires_source_and_cache_key()
+        public void ThumbnailReadyRequiresSourceAndCacheKey()
         {
             Assert.Throws<ArgumentException>(() => CottonFileThumbnailSnapshot.Ready("IMG", "", "cache-key"));
             Assert.Throws<ArgumentException>(() => CottonFileThumbnailSnapshot.Placeholder("IMG", ""));
@@ -47,13 +47,13 @@ namespace Cotton.Mobile.Tests
         [InlineData(1536, "1.5 KB")]
         [InlineData(1048576, "1 MB")]
         [InlineData(1610612736, "1.5 GB")]
-        public void File_size_formatter_uses_binary_units(long sizeBytes, string expected)
+        public void FileSizeFormatterUsesBinaryUnits(long sizeBytes, string expected)
         {
             Assert.Equal(expected, CottonFileSizeFormatter.Format(sizeBytes));
         }
 
         [Fact]
-        public void Local_file_freshness_normalizes_time_and_allows_small_timestamp_drift()
+        public void LocalFileFreshnessNormalizesTimeAndAllowsSmallTimestampDrift()
         {
             DateTime remote = new(2026, 6, 18, 12, 0, 0, DateTimeKind.Utc);
             DateTime localWithinTolerance = new(2026, 6, 18, 11, 59, 59, DateTimeKind.Unspecified);
@@ -73,7 +73,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("tokenizer.cs", null, false)]
         [InlineData("photo.jpg", "image/jpeg", false)]
         [InlineData("bundle", "application/x-pkcs12; charset=binary", true)]
-        public void Sensitive_file_cache_policy_identifies_secret_material(
+        public void SensitiveFileCachePolicyIdentifiesSecretMaterial(
             string fileName,
             string? contentType,
             bool expectedSensitive)
@@ -84,7 +84,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sensitive_file_cache_policy_blocks_unpinned_reusable_local_copy()
+        public void SensitiveFileCachePolicyBlocksUnpinnedReusableLocalCopy()
         {
             CottonFileBrowserEntry sensitiveEntry = CottonFileBrowserEntryFactory.FromFile(
                 CreateFile("private-key.pem", "application/x-pem-file", 42));
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Local_file_snapshot_requires_file_name()
+        public void LocalFileSnapshotRequiresFileName()
         {
             Assert.Throws<ArgumentException>(() => new CottonLocalFileSnapshot(" ", 1, UpdatedAt));
         }

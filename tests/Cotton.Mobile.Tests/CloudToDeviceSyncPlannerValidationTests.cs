@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class CloudToDeviceSyncPlannerValidationTests
     {
         [Fact]
-        public void Planner_rejects_wrong_cloud_folder()
+        public void PlannerRejectsWrongCloudFolder()
         {
             CottonFolderContent remote = new(
                 Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc"),
@@ -19,7 +19,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_rejects_not_ready_root()
+        public void PlannerRejectsNotReadyRoot()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
 
@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_rejects_non_cloud_to_device_roots()
+        public void PlannerRejectsNonCloudToDeviceRoots()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
 
@@ -48,7 +48,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_rejects_duplicate_manifest_or_remote_file_ids()
+        public void PlannerRejectsDuplicateManifestOrRemoteFileIds()
         {
             CottonSyncedFileSnapshot first = CottonSyncedFileSnapshot.Create(
                 CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""),

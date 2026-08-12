@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_and_load_roundtrips_app_private_sync_root()
+        public async Task SaveAndLoadRoundtripsAppPrivateSyncRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
 
@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_and_load_roundtrips_upload_original_retention()
+        public async Task SaveAndLoadRoundtripsUploadOriginalRetention()
         {
             CottonSyncRootSnapshot root = new(
                 RootId,
@@ -70,7 +70,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Add_or_replace_replaces_existing_root_by_id()
+        public async Task AddOrReplaceReplacesExistingRootById()
         {
             CottonSyncRootSnapshot original = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot replacement = CreateRoot(RootId, OtherFolderId, "Archive");
@@ -84,7 +84,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Add_or_replace_replaces_existing_root_by_stable_key()
+        public async Task AddOrReplaceReplacesExistingRootByStableKey()
         {
             CottonSyncRootSnapshot original = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot replacement =
@@ -99,7 +99,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_deletes_root_by_id()
+        public async Task RemoveDeletesRootById()
         {
             await _store.SaveAsync(
                 InstanceUri,
@@ -116,7 +116,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_returns_false_when_root_is_missing()
+        public async Task RemoveReturnsFalseWhenRootIsMissing()
         {
             bool removed = await _store.RemoveAsync(InstanceUri, RootId);
 
@@ -124,7 +124,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_returns_empty_list_when_metadata_file_is_missing()
+        public async Task LoadReturnsEmptyListWhenMetadataFileIsMissing()
         {
             IReadOnlyList<CottonSyncRootSnapshot> loaded = await _store.LoadAsync(InstanceUri);
 
@@ -132,7 +132,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_deletes_corrupt_metadata_file_and_returns_empty_list()
+        public async Task LoadDeletesCorruptMetadataFileAndReturnsEmptyList()
         {
             Directory.CreateDirectory(_directory);
             string metadataPath = CreateSyncRootMetadataPath(_directory);
@@ -145,7 +145,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_filters_invalid_records_without_discarding_valid_roots()
+        public async Task LoadFiltersInvalidRecordsWithoutDiscardingValidRoots()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, FolderId, "Projects");
             Directory.CreateDirectory(_directory);
@@ -196,7 +196,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_ignores_roots_for_another_instance()
+        public async Task LoadIgnoresRootsForAnotherInstance()
         {
             CottonSyncRootSnapshot current = CreateRoot(RootId, FolderId, "Projects");
             CottonSyncRootSnapshot other = CreateRoot(
@@ -249,7 +249,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_rejects_roots_for_another_instance()
+        public async Task SaveRejectsRootsForAnotherInstance()
         {
             CottonSyncRootSnapshot other = CreateRoot(RootId, FolderId, "Projects", OtherInstanceUri);
 
@@ -258,7 +258,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_propagates_file_system_failures()
+        public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
             await File.WriteAllTextAsync(_directory, "blocked directory");
@@ -268,7 +268,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Clear_removes_metadata_file()
+        public async Task ClearRemovesMetadataFile()
         {
             await _store.SaveAsync(InstanceUri, [CreateRoot(RootId, FolderId, "Projects")]);
 
@@ -289,6 +289,8 @@ namespace Cotton.Mobile.Tests
             {
                 File.Delete(_directory);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(

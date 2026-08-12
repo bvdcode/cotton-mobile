@@ -86,8 +86,8 @@ namespace Cotton.Mobile.Services
 
         private static CottonCloudToDeviceSyncPlanItem CreateRemoteItem(
             CottonCloudToDeviceRemoteItemSnapshot remoteItem,
-            IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
-            IReadOnlyDictionary<string, CottonSyncedFileSnapshot> localByRelativePath)
+            Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
+            Dictionary<string, CottonSyncedFileSnapshot> localByRelativePath)
         {
             CottonFileBrowserEntry entry = remoteItem.Entry;
             if (entry.Type == CottonFileBrowserEntryType.Folder)
@@ -169,9 +169,9 @@ namespace Cotton.Mobile.Services
 
         private static void MarkHandledLocalFile(
             CottonCloudToDeviceRemoteItemSnapshot remoteItem,
-            IReadOnlyDictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
-            IReadOnlyDictionary<string, CottonSyncedFileSnapshot> localByRelativePath,
-            ISet<Guid> handledLocalFileIds)
+            Dictionary<Guid, CottonSyncedFileSnapshot> localByFileId,
+            Dictionary<string, CottonSyncedFileSnapshot> localByRelativePath,
+            HashSet<Guid> handledLocalFileIds)
         {
             if (localByFileId.ContainsKey(remoteItem.Entry.Id))
             {

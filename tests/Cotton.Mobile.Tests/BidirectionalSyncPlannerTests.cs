@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class BidirectionalSyncPlannerTests
     {
         [Fact]
-        public void Remote_only_change_refreshes_local_file_without_upload_conflict()
+        public void RemoteOnlyChangeRefreshesLocalFileWithoutUploadConflict()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -31,7 +31,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Local_only_change_uploads_file_with_expected_remote_revision()
+        public void LocalOnlyChangeUploadsFileWithExpectedRemoteRevision()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -60,7 +60,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Same_size_and_timestamp_content_change_uploads_file()
+        public void SameSizeAndTimestampContentChangeUploadsFile()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -84,7 +84,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_only_rename_renames_local_file_without_download()
+        public void RemoteOnlyRenameRenamesLocalFileWithoutDownload()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_deletion_carries_reviewed_local_content_hash()
+        public void RemoteDeletionCarriesReviewedLocalContentHash()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -128,7 +128,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_recreated_same_path_refreshes_unchanged_local_file()
+        public void RemoteRecreatedSamePathRefreshesUnchangedLocalFile()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -154,7 +154,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_recreated_same_path_blocks_when_local_file_changed()
+        public void RemoteRecreatedSamePathBlocksWhenLocalFileChanged()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -183,7 +183,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Remote_recreated_same_path_without_etag_requires_fresh_revision()
+        public void RemoteRecreatedSamePathWithoutEtagRequiresFreshRevision()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -205,7 +205,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Local_and_remote_change_same_file_blocks_as_conflict()
+        public void LocalAndRemoteChangeSameFileBlocksAsConflict()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -235,7 +235,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Same_size_and_timestamp_content_change_blocks_when_remote_also_changed()
+        public void SameSizeAndTimestampContentChangeBlocksWhenRemoteAlsoChanged()
         {
             CottonSyncedFileSnapshot manifest = CreateManifest("\"etag-1\"", sizeBytes: 42);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(

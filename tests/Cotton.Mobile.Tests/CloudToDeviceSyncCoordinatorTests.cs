@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class CloudToDeviceSyncCoordinatorTests : CloudToDeviceSyncCoordinatorTestContext
     {
         [Fact]
-        public async Task Run_returns_empty_summary_when_no_roots_are_saved()
+        public async Task RunReturnsEmptySummaryWhenNoRootsAreSaved()
         {
             CottonCloudToDeviceSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
 
@@ -18,7 +18,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_downloads_new_files_and_updates_manifest()
+        public async Task RunDownloadsNewFilesAndUpdatesManifest()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_downloads_only_the_requested_root()
+        public async Task RunRootDownloadsOnlyTheRequestedRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonSyncRootSnapshot secondRoot = CreateRoot(SecondSyncRootId, SecondFolderId, "Archive");
@@ -63,7 +63,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_not_ready_and_unsupported_direction_without_remote_reads()
+        public async Task RunRootSkipsNotReadyAndUnsupportedDirectionWithoutRemoteReads()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(
                 SyncRootId,
@@ -94,7 +94,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_paused_root_without_remote_reads()
+        public async Task RunRootSkipsPausedRootWithoutRemoteReads()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true);
@@ -109,7 +109,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_legacy_user_selected_document_tree_roots()
+        public async Task RunRootSkipsLegacyUserSelectedDocumentTreeRoots()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_rejects_root_from_another_instance()
+        public async Task RunRootRejectsRootFromAnotherInstance()
         {
             Uri otherInstanceUri = new("https://files.cottoncloud.dev");
             CottonSyncRootSnapshot root = new(
@@ -151,7 +151,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_keeps_existing_manifest_file_without_file_operations()
+        public async Task RunKeepsExistingManifestFileWithoutFileOperations()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
@@ -170,7 +170,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_reports_blocked_missing_remote_revision_without_download()
+        public async Task RunRootReportsBlockedMissingRemoteRevisionWithoutDownload()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", eTag: null);
@@ -191,7 +191,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_skips_not_ready_and_unsupported_direction_roots_without_remote_reads()
+        public async Task RunSkipsNotReadyAndUnsupportedDirectionRootsWithoutRemoteReads()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(
                 SyncRootId,
@@ -224,7 +224,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_skips_paused_roots_without_remote_reads()
+        public async Task RunSkipsPausedRootsWithoutRemoteReads()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _rootStore.SaveAsync(InstanceUri, [root]);

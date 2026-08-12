@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_returns_empty_set_when_metadata_is_missing()
+        public async Task LoadReturnsEmptySetWhenMetadataIsMissing()
         {
             IReadOnlySet<Guid> pausedRootIds = await _store.LoadPausedRootIdsAsync(InstanceUri);
 
@@ -32,7 +32,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Set_paused_adds_and_removes_root_id()
+        public async Task SetPausedAddsAndRemovesRootId()
         {
             bool added = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
             bool duplicateAdd = await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_filters_empty_and_duplicate_root_ids()
+        public async Task LoadFiltersEmptyAndDuplicateRootIds()
         {
             Directory.CreateDirectory(_directory);
             await File.WriteAllTextAsync(
@@ -79,7 +79,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_deletes_corrupt_metadata_and_returns_empty()
+        public async Task LoadDeletesCorruptMetadataAndReturnsEmpty()
         {
             Directory.CreateDirectory(_directory);
             await File.WriteAllTextAsync(CreateMetadataPath(), "{ not valid json");
@@ -91,7 +91,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_propagates_file_system_failures()
+        public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_directory)!);
             await File.WriteAllTextAsync(_directory, "blocked directory");
@@ -101,7 +101,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Clear_removes_pause_metadata()
+        public async Task ClearRemovesPauseMetadata()
         {
             await _store.SetPausedAsync(InstanceUri, RootId, isPaused: true);
 
@@ -122,6 +122,8 @@ namespace Cotton.Mobile.Tests
             {
                 File.Delete(_directory);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private string CreateMetadataPath()

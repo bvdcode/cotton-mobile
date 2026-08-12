@@ -147,7 +147,7 @@ namespace Cotton.Mobile.Services
             return false;
         }
 
-        private static IEnumerable<string> SplitNameParts(string value)
+        private static string[] SplitNameParts(string value)
         {
             return value.Split(
                 [' ', '.', '-', '_', '(', ')', '[', ']'],

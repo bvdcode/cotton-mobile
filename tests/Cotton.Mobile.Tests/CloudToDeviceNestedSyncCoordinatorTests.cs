@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class CloudToDeviceNestedSyncCoordinatorTests : CloudToDeviceSyncCoordinatorTestContext
     {
         [Fact]
-        public async Task Run_downloads_nested_folder_files()
+        public async Task RunDownloadsNestedFolderFiles()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonFileBrowserEntry file = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");

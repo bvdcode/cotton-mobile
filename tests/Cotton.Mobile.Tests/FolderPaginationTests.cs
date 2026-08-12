@@ -10,20 +10,20 @@ namespace Cotton.Mobile.Tests
         [InlineData(1, 1)]
         [InlineData(100, 1)]
         [InlineData(101, 2)]
-        public void Page_count_uses_declared_total_count(long totalCount, int expectedPageCount)
+        public void PageCountUsesDeclaredTotalCount(long totalCount, int expectedPageCount)
         {
             Assert.Equal(expectedPageCount, CottonFolderPagination.CreatePageCount(totalCount));
         }
 
         [Fact]
-        public void Excessive_declared_item_count_is_rejected()
+        public void ExcessiveDeclaredItemCountIsRejected()
         {
             Assert.Throws<InvalidDataException>(() =>
                 CottonFolderPagination.CreatePageCount(CottonFolderPagination.MaximumItemCount + 1L));
         }
 
         [Fact]
-        public void Loaded_item_count_must_match_declared_total_count()
+        public void LoadedItemCountMustMatchDeclaredTotalCount()
         {
             CottonFolderPagination.EnsureComplete(expectedItemCount: 2, loadedItemCount: 2);
 

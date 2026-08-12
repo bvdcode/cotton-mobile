@@ -13,6 +13,15 @@ namespace Cotton.Mobile.Services
     {
         public const string MetadataFileName = "synced-files.json";
 
+        private static readonly Action<ILogger, string, Exception?> LogLoadFailed = LoggerMessage.Define<string>(
+            LogLevel.Warning,
+            new EventId(1, nameof(LoadAsync)),
+            "Failed to load the synced-file manifest from {FilePath}; resetting the store.");
+        private static readonly Action<ILogger, string, Exception?> LogSaveFailed = LoggerMessage.Define<string>(
+            LogLevel.Error,
+            new EventId(2, nameof(SaveAsync)),
+            "Failed to save the synced-file manifest to {FilePath}.");
+
         private readonly ICottonSyncedFileManifestPathProvider _pathProvider =
             pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
         private readonly ILogger<FileSystemCottonSyncedFileManifestStore> _logger =
@@ -61,10 +70,7 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
                 when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to load the synced-file manifest from {FilePath}; resetting the store.",
-                    filePath);
+                LogLoadFailed(_logger, filePath, exception);
                 CottonAtomicJsonFile.DeleteIfExists(filePath);
                 return [];
             }
@@ -90,7 +96,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
-                _logger.LogError(exception, "Failed to save the synced-file manifest to {FilePath}.", filePath);
+                LogSaveFailed(_logger, filePath, exception);
                 throw;
             }
         }
@@ -170,7 +176,7 @@ namespace Cotton.Mobile.Services
             };
         }
 
-        private static IReadOnlyList<CottonSyncedFileSnapshot> DeduplicateItems(
+        private static List<CottonSyncedFileSnapshot> DeduplicateItems(
             IEnumerable<CottonSyncedFileSnapshot> items)
         {
             List<CottonSyncedFileSnapshot> source = [.. items];

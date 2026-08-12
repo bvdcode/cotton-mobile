@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class DeviceToCloudSyncPlannerBoundaryTests
     {
         [Fact]
-        public void Planner_includes_only_parent_folders_needed_by_pending_uploads()
+        public void PlannerIncludesOnlyParentFoldersNeededByPendingUploads()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt("Pending/alpha.txt");
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -33,7 +33,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_local_file_without_source_id()
+        public void PlannerBlocksLocalFileWithoutSourceId()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, localSourceId: null));
@@ -52,7 +52,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_ignores_remote_only_files()
+        public void PlannerIgnoresRemoteOnlyFiles()
         {
             CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent(
                 CreateRemoteFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""));
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_rejects_non_upload_only_direction()
+        public void PlannerRejectsNonUploadOnlyDirection()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));

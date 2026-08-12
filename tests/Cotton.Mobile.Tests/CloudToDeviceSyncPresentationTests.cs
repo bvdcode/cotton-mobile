@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid FolderId = Guid.Parse("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb");
 
         [Fact]
-        public void Account_scope_uses_stable_user_id()
+        public void AccountScopeUsesStableUserId()
         {
             Guid userId = Guid.Parse("cccccccc-cccc-cccc-cccc-cccccccccccc");
 
@@ -20,13 +20,13 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Account_scope_rejects_missing_user_id()
+        public void AccountScopeRejectsMissingUserId()
         {
             Assert.Throws<ArgumentException>(() => CottonAccountScopeKey.Create(Guid.Empty));
         }
 
         [Fact]
-        public void Sync_status_reports_no_roots()
+        public void SyncStatusReportsNoRoots()
         {
             CottonCloudToDeviceSyncRunSummary summary = new([]);
 
@@ -34,7 +34,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sync_status_reports_up_to_date_run()
+        public void SyncStatusReportsUpToDateRun()
         {
             CottonCloudToDeviceSyncRunSummary summary = CreateSummary(
                 new CottonCloudToDeviceSyncExecutionResult(
@@ -51,7 +51,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sync_status_reports_changed_blocked_and_skipped_counts()
+        public void SyncStatusReportsChangedBlockedAndSkippedCounts()
         {
             CottonSyncRootSnapshot skippedRoot = CreateRoot(
                 CottonSyncRootPermissionStatus.Unavailable,
@@ -72,7 +72,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sync_status_copy_is_stable()
+        public void SyncStatusCopyIsStable()
         {
             Assert.Equal("Sync to this device", CottonCloudToDeviceSyncStatusText.ActionLabel);
             Assert.Equal("Sync to folder", CottonCloudToDeviceSyncStatusText.ChooseFolderActionLabel);

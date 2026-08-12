@@ -16,7 +16,7 @@ namespace Cotton.Mobile.Tests
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
-        public void Every_font_image_source_declares_an_explicit_tint()
+        public void EveryFontImageSourceDeclaresAnExplicitTint()
         {
             IReadOnlyList<string> offenders = FindUntintedFontImageSources();
 
@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void App_card_uses_the_high_contrast_outline()
+        public void AppCardUsesTheHighContrastOutline()
         {
             XDocument document = XDocument.Parse(RepositoryPath.ReadText(AppStylesPath));
             XElement appCardStyle = document
@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Card_actions_can_grow_with_accessible_font_scaling()
+        public void CardActionsCanGrowWithAccessibleFontScaling()
         {
             XDocument document = XDocument.Parse(RepositoryPath.ReadText(AppStylesPath));
             XElement cardActionStyle = document
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Tests
             Assert.Contains("Padding", properties);
         }
 
-        private static IReadOnlyList<string> FindUntintedFontImageSources()
+        private static List<string> FindUntintedFontImageSources()
         {
             List<string> offenders = [];
 

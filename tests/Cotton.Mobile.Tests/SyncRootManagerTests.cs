@@ -40,7 +40,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_marks_root_unavailable_when_persisted_grant_was_revoked()
+        public async Task LoadMarksRootUnavailableWhenPersistedGrantWasRevoked()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
             await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
@@ -60,7 +60,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_marks_root_ready_when_persisted_grant_is_available_again()
+        public async Task LoadMarksRootReadyWhenPersistedGrantIsAvailableAgain()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Revoked);
             await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
@@ -75,7 +75,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_returns_roots_only_for_requested_account()
+        public async Task LoadReturnsRootsOnlyForRequestedAccount()
         {
             CottonSyncRootSnapshot storedRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
             await _rootStore.SaveAsync(InstanceUri, [storedRoot]);
@@ -88,7 +88,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Stop_clears_upload_receipts_for_device_to_cloud_root()
+        public async Task StopClearsUploadReceiptsForDeviceToCloudRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
             await _rootStore.SaveAsync(InstanceUri, [root]);
@@ -105,7 +105,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonSyncDirection.CloudToDevice)]
         [InlineData(CottonSyncDirection.Bidirectional)]
-        public async Task Stop_does_not_clear_upload_receipts_for_other_directions(
+        public async Task StopDoesNotClearUploadReceiptsForOtherDirections(
             CottonSyncDirection direction)
         {
             CottonSyncRootSnapshot root = CreateRoot(
@@ -126,6 +126,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonSyncRootSnapshot CreateRoot(CottonSyncRootPermissionStatus permissionStatus)

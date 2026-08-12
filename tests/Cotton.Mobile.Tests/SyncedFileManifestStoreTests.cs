@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_and_load_roundtrips_synced_file_manifest()
+        public async Task SaveAndLoadRoundtripsSyncedFileManifest()
         {
             CottonSyncedFileSnapshot file = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
 
@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Add_or_replace_updates_existing_manifest_item()
+        public async Task AddOrReplaceUpdatesExistingManifestItem()
         {
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
             CottonSyncedFileSnapshot replacement = new(
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Add_or_replace_updates_existing_manifest_item_at_same_relative_path()
+        public async Task AddOrReplaceUpdatesExistingManifestItemAtSameRelativePath()
         {
             Guid replacementFileId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
@@ -92,7 +92,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_filters_duplicate_file_ids_by_last_entry()
+        public async Task SaveFiltersDuplicateFileIdsByLastEntry()
         {
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
             CottonSyncedFileSnapshot replacement = CreateSyncedFile(FileId, "report-new.pdf", "\"etag-2\"");
@@ -105,7 +105,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_filters_duplicate_relative_paths_by_last_entry()
+        public async Task SaveFiltersDuplicateRelativePathsByLastEntry()
         {
             Guid replacementFileId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
             CottonSyncedFileSnapshot first = CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"");
@@ -120,7 +120,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_propagates_file_system_failures()
+        public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
             await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
@@ -133,7 +133,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_returns_empty_when_metadata_is_missing()
+        public async Task LoadReturnsEmptyWhenMetadataIsMissing()
         {
             IReadOnlyList<CottonSyncedFileSnapshot> loaded = await _store.LoadAsync(InstanceUri, _syncRoot);
 
@@ -141,7 +141,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_deletes_corrupt_metadata_and_returns_empty()
+        public async Task LoadDeletesCorruptMetadataAndReturnsEmpty()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -154,7 +154,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_deletes_manifest_for_wrong_sync_root()
+        public async Task LoadDeletesManifestForWrongSyncRoot()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -176,7 +176,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_filters_invalid_records_without_discarding_valid_items()
+        public async Task LoadFiltersInvalidRecordsWithoutDiscardingValidItems()
         {
             string metadataPath = CreateSyncedFileManifestPath(_rootDirectory, InstanceUri, _syncRoot);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -219,7 +219,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_deletes_single_manifest_item()
+        public async Task RemoveDeletesSingleManifestItem()
         {
             Guid otherFileId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
             await _store.SaveAsync(InstanceUri, _syncRoot, [
@@ -235,7 +235,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_returns_false_when_file_is_missing()
+        public async Task RemoveReturnsFalseWhenFileIsMissing()
         {
             await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
 
@@ -249,7 +249,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Store_isolates_manifest_by_sync_root()
+        public async Task StoreIsolatesManifestBySyncRoot()
         {
             CottonSyncRootSnapshot otherRoot = CreateManifestRoot(
                 InstanceUri,
@@ -275,7 +275,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Clear_removes_manifest_metadata()
+        public async Task ClearRemovesManifestMetadata()
         {
             await _store.SaveAsync(InstanceUri, _syncRoot, [CreateSyncedFile(FileId, "report.pdf", "\"etag-1\"")]);
 
@@ -296,6 +296,8 @@ namespace Cotton.Mobile.Tests
             {
                 File.Delete(_rootDirectory);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonSyncedFileSnapshot CreateSyncedFile(Guid fileId, string fileName, string eTag)

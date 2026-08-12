@@ -10,7 +10,7 @@ namespace Cotton.Mobile.Tests
         private static readonly Guid FolderId = Guid.Parse("11111111-1111-1111-1111-111111111111");
 
         [Fact]
-        public void Run_capability_matches_direction_and_local_root_kind()
+        public void RunCapabilityMatchesDirectionAndLocalRootKind()
         {
             CottonSyncRootSnapshot cloudAppPrivate = CreateRoot(
                 CottonSyncDirection.CloudToDevice,
@@ -63,7 +63,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Null_root_is_rejected()
+        public void NullRootIsRejected()
         {
             Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.CanRun(null!));
             Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.HasUnsupportedLocalRoot(null!));
@@ -76,7 +76,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Runnable_roots_exclude_paused_and_unsupported_roots()
+        public void RunnableRootsExcludePausedAndUnsupportedRoots()
         {
             CottonSyncRootSnapshot runnable = CreateRoot(
                 CottonSyncDirection.Bidirectional,

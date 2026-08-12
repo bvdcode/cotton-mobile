@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class DeviceToCloudSyncPlannerTests
     {
         [Fact]
-        public void Planner_uploads_new_local_file()
+        public void PlannerUploadsNewLocalFile()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_keeps_uploaded_receipt_when_remote_is_missing_or_changed()
+        public void PlannerKeepsUploadedReceiptWhenRemoteIsMissingOrChanged()
         {
             CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -54,7 +54,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_ignores_receipt_when_local_file_is_missing()
+        public void PlannerIgnoresReceiptWhenLocalFileIsMissing()
         {
             CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
 
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_deletes_local_file_only_for_uploaded_receipt_and_delete_retention()
+        public void PlannerDeletesLocalFileOnlyForUploadedReceiptAndDeleteRetention()
         {
             CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -92,7 +92,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_local_delete_when_uploaded_remote_revision_is_missing_or_changed()
+        public void PlannerBlocksLocalDeleteWhenUploadedRemoteRevisionIsMissingOrChanged()
         {
             CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_local_delete_for_legacy_receipt_without_content_hash()
+        public void PlannerBlocksLocalDeleteForLegacyReceiptWithoutContentHash()
         {
             CottonUploadReceiptSnapshot receipt = CreateUploadedReceipt(contentHash: null);
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -134,7 +134,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_retries_pending_receipt_with_same_operation_id_when_remote_is_missing()
+        public void PlannerRetriesPendingReceiptWithSameOperationIdWhenRemoteIsMissing()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -155,7 +155,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_confirms_pending_receipt_from_remote_operation_metadata()
+        public void PlannerConfirmsPendingReceiptFromRemoteOperationMetadata()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -185,7 +185,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_pending_confirmation_when_remote_size_differs()
+        public void PlannerBlocksPendingConfirmationWhenRemoteSizeDiffers()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -211,7 +211,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_pending_confirmation_when_remote_hash_differs()
+        public void PlannerBlocksPendingConfirmationWhenRemoteHashDiffers()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
@@ -236,7 +236,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_pending_receipt_when_local_version_or_path_changes()
+        public void PlannerBlocksPendingReceiptWhenLocalVersionOrPathChanges()
         {
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
             CottonDeviceToCloudLocalContentSnapshot changedVersion = CreateLocalContent(
@@ -266,7 +266,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_new_local_file_when_remote_path_exists()
+        public void PlannerBlocksNewLocalFileWhenRemotePathExists()
         {
             CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
                 CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));

@@ -12,7 +12,7 @@ namespace Cotton.Mobile.Tests
         private const int ExpectedPageSize = 50;
 
         [Fact]
-        public async Task CheckAsync_PreservesCursorWhenNotificationPermissionIsDenied()
+        public async Task CheckAsyncPreservesCursorWhenNotificationPermissionIsDenied()
         {
             CottonNotificationDto notification = CreateNotification();
             CottonNotificationCursor originalCursor = new(Guid.NewGuid(), 1);
@@ -35,7 +35,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task CheckAsync_AdvancesCursorAfterSuccessfulDelivery()
+        public async Task CheckAsyncAdvancesCursorAfterSuccessfulDelivery()
         {
             CottonNotificationDto notification = CreateNotification();
             StubCottonNotificationPageProvider pageProvider = new(
@@ -56,7 +56,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task CheckAsync_RebaselinesCursorWhenThereIsNothingToDeliver()
+        public async Task CheckAsyncRebaselinesCursorWhenThereIsNothingToDeliver()
         {
             CottonNotificationDto notification = CreateNotification();
             CottonNotificationCursor originalCursor = new(notification.Id, 1);
@@ -78,7 +78,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task CheckAsync_DoesNothingWithoutAnAuthenticatedNotificationPage()
+        public async Task CheckAsyncDoesNothingWithoutAnAuthenticatedNotificationPage()
         {
             StubCottonNotificationPageProvider pageProvider = new(page: null);
             InMemoryCottonNotificationCursorStore cursorStore = new(cursor: null);

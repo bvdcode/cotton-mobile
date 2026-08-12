@@ -12,7 +12,7 @@ namespace Cotton.Mobile.Tests
         private readonly CottonNotificationDeliveryPlanner _planner = new();
 
         [Fact]
-        public void Create_UsesSummaryForLargeInitialBacklog()
+        public void CreateUsesSummaryForLargeInitialBacklog()
         {
             CottonNotificationDto newest = CreateNotification();
 
@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_ReturnsEachNewNotificationWithinIndividualLimit()
+        public void CreateReturnsEachNewNotificationWithinIndividualLimit()
         {
             CottonNotificationDto secondNew = CreateNotification();
             CottonNotificationDto newest = CreateNotification();
@@ -44,7 +44,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_UsesServerCountWhenCursorIsOutsideNewestPage()
+        public void CreateUsesServerCountWhenCursorIsOutsideNewestPage()
         {
             CottonNotificationDto newest = CreateNotification();
             CottonNotificationCursor cursor = new(Guid.NewGuid(), 1);
@@ -57,7 +57,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_DoesNotRepeatCurrentCursor()
+        public void CreateDoesNotRepeatCurrentCursor()
         {
             CottonNotificationDto newest = CreateNotification();
             CottonNotificationCursor cursor = new(newest.Id, 8);
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_RebaselinesWithoutRepeatingWhenServerTotalDecreases()
+        public void CreateRebaselinesWithoutRepeatingWhenServerTotalDecreases()
         {
             CottonNotificationDto newest = CreateNotification();
             CottonNotificationCursor cursor = new(Guid.NewGuid(), 8);
@@ -83,7 +83,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Create_TracksAnEmptyNotificationCollection()
+        public void CreateTracksAnEmptyNotificationCollection()
         {
             CottonNotificationDeliveryPlan plan = _planner.Create([], 0, cursor: null);
 

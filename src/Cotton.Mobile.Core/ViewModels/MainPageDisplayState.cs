@@ -47,7 +47,7 @@ namespace Cotton.Mobile.ViewModels
 
         public string DefaultInstanceUrl { get; }
 
-        public string InstanceUrlPlaceholder => CoreResources.CustomServerUrl;
+        public string InstanceUrlPlaceholder { get; } = CoreResources.CustomServerUrl;
 
         public string EffectiveInstanceUrl => string.IsNullOrWhiteSpace(InstanceUrl)
             ? DefaultInstanceUrl

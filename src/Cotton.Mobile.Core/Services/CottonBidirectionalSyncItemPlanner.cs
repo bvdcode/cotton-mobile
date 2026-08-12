@@ -156,7 +156,7 @@ namespace Cotton.Mobile.Services
                 remoteItem.Entry.ContentHash);
         }
 
-        public CottonBidirectionalSyncPlanItem CreateRemoteOnlyItem(
+        public static CottonBidirectionalSyncPlanItem CreateRemoteOnlyItem(
             CottonDeviceToCloudRemoteItemSnapshot remoteItem)
         {
             if (remoteItem.Entry.Type == CottonFileBrowserEntryType.Folder)
@@ -173,7 +173,7 @@ namespace Cotton.Mobile.Services
             return CottonBidirectionalSyncPlanItemFactory.CreateRemote(action, remoteItem);
         }
 
-        private CottonBidirectionalSyncPlanItem CreateRemoteReplacementItem(
+        private static CottonBidirectionalSyncPlanItem CreateRemoteReplacementItem(
             CottonDeviceToCloudLocalItemSnapshot localItem,
             CottonDeviceToCloudRemoteItemSnapshot remoteItem,
             bool localChanged)

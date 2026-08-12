@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonUploadOriginalRetention.KeepOriginals)]
         [InlineData(CottonUploadOriginalRetention.DeleteAfterConfirmedUpload)]
-        public async Task Configure_device_to_cloud_root_creates_ready_root_with_requested_retention(
+        public async Task ConfigureDeviceToCloudRootCreatesReadyRootWithRequestedRetention(
             CottonUploadOriginalRetention retention)
         {
             CottonSyncRootConfigurationResult result = await _service.ConfigureDefaultRootAsync(
@@ -48,7 +48,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_bidirectional_root_creates_ready_keep_originals_root()
+        public async Task ConfigureBidirectionalRootCreatesReadyKeepOriginalsRoot()
         {
             CottonSyncRootConfigurationResult result = await _service.ConfigureDefaultRootAsync(
                 CottonSyncDirection.Bidirectional,
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonSyncDirection.DeviceToCloud, CottonUploadOriginalRetention.KeepOriginals)]
         [InlineData(CottonSyncDirection.DeviceToCloud, CottonUploadOriginalRetention.DeleteAfterConfirmedUpload)]
         [InlineData(CottonSyncDirection.Bidirectional, CottonUploadOriginalRetention.KeepOriginals)]
-        public async Task Configure_same_ready_configuration_is_idempotent(
+        public async Task ConfigureSameReadyConfigurationIsIdempotent(
             CottonSyncDirection direction,
             CottonUploadOriginalRetention retention)
         {
@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_same_direction_updates_retention_without_changing_id()
+        public async Task ConfigureSameDirectionUpdatesRetentionWithoutChangingId()
         {
             CottonUploadDestinationSnapshot folder = CreateFolder(FolderId, "Projects");
             CottonSyncLocalRootSnapshot localRoot = CreateDocumentTreeRoot(
@@ -114,7 +114,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonSyncDirection.DeviceToCloud)]
         [InlineData(CottonSyncDirection.Bidirectional)]
-        public async Task Configure_same_direction_updates_permission_without_changing_id(
+        public async Task ConfigureSameDirectionUpdatesPermissionWithoutChangingId(
             CottonSyncDirection direction)
         {
             CottonUploadDestinationSnapshot folder = CreateFolder(FolderId, "Projects");
@@ -141,7 +141,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_same_direction_updates_effective_names_without_changing_id()
+        public async Task ConfigureSameDirectionUpdatesEffectiveNamesWithoutChangingId()
         {
             CottonSyncRootSnapshot existingRoot = CreateRoot(
                 InstanceUri,
@@ -168,7 +168,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonSyncDirection.DeviceToCloud, CottonSyncDirection.Bidirectional)]
         [InlineData(CottonSyncDirection.Bidirectional, CottonSyncDirection.DeviceToCloud)]
         [InlineData(CottonSyncDirection.CloudToDevice, CottonSyncDirection.DeviceToCloud)]
-        public async Task Configure_existing_different_direction_reports_already_configured_without_switching(
+        public async Task ConfigureExistingDifferentDirectionReportsAlreadyConfiguredWithoutSwitching(
             CottonSyncDirection existingDirection,
             CottonSyncDirection requestedDirection)
         {
@@ -198,7 +198,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_different_stable_key_creates_another_root()
+        public async Task ConfigureDifferentStableKeyCreatesAnotherRoot()
         {
             await _service.ConfigureDefaultRootAsync(
                 CottonSyncDirection.DeviceToCloud,
@@ -223,14 +223,14 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonSyncDirection.CloudToDevice)]
         [InlineData((CottonSyncDirection)999)]
-        public async Task Configure_rejects_unsupported_direction(CottonSyncDirection direction)
+        public async Task ConfigureRejectsUnsupportedDirection(CottonSyncDirection direction)
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
                 () => _service.ConfigureDefaultRootAsync(direction, CottonUploadOriginalRetention.KeepOriginals));
         }
 
         [Fact]
-        public async Task Configure_rejects_delete_retention_for_bidirectional_root()
+        public async Task ConfigureRejectsDeleteRetentionForBidirectionalRoot()
         {
             await Assert.ThrowsAsync<ArgumentException>(
                 () => _service.ConfigureDefaultRootAsync(
@@ -239,7 +239,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_rejects_undefined_retention()
+        public async Task ConfigureRejectsUndefinedRetention()
         {
             await Assert.ThrowsAsync<ArgumentOutOfRangeException>(
                 () => _service.ConfigureDefaultRootAsync(
@@ -248,7 +248,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_rejects_missing_grant()
+        public async Task ConfigureRejectsMissingGrant()
         {
             CottonSyncLocalRootSnapshot localRoot = CreateDocumentTreeRoot(
                 "content://tree/primary%3AProjects",
@@ -266,7 +266,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_rejects_app_private_root()
+        public async Task ConfigureRejectsAppPrivateRoot()
         {
             CottonSyncLocalRootSnapshot localRoot = new(
                 CottonSyncRootStorageKind.AppPrivateDirectory,
@@ -290,6 +290,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

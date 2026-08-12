@@ -50,7 +50,7 @@ namespace Cotton.Mobile.Services
             {
                 if (!index.LocalByPath.ContainsKey(remoteItem.RelativePath))
                 {
-                    items.Add(itemPlanner.CreateRemoteOnlyItem(remoteItem));
+                    items.Add(CottonBidirectionalSyncItemPlanner.CreateRemoteOnlyItem(remoteItem));
                 }
             }
 
@@ -92,7 +92,7 @@ namespace Cotton.Mobile.Services
 
         private static void AddCloudItemId(
             CottonBidirectionalSyncPlanItem item,
-            ISet<Guid> handledRemoteIds)
+            HashSet<Guid> handledRemoteIds)
         {
             if (item.CloudItemId.HasValue)
             {

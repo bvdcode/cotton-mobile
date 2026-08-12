@@ -13,7 +13,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonSyncDirection.CloudToDevice, CottonSyncRootRunRoute.CloudToDevice)]
         [InlineData(CottonSyncDirection.DeviceToCloud, CottonSyncRootRunRoute.DeviceToCloud)]
         [InlineData(CottonSyncDirection.Bidirectional, CottonSyncRootRunRoute.Bidirectional)]
-        public void Route_matches_sync_direction(CottonSyncDirection direction, CottonSyncRootRunRoute route)
+        public void RouteMatchesSyncDirection(CottonSyncDirection direction, CottonSyncRootRunRoute route)
         {
             CottonSyncRootSnapshot root = CreateRoot(direction);
 
@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonSyncDirection.CloudToDevice, "Syncing Projects…")]
         [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading new files from Projects…")]
         [InlineData(CottonSyncDirection.Bidirectional, "Syncing Projects both ways…")]
-        public void Starting_status_matches_sync_direction(CottonSyncDirection direction, string expected)
+        public void StartingStatusMatchesSyncDirection(CottonSyncDirection direction, string expected)
         {
             CottonSyncRootSnapshot root = CreateRoot(direction);
 
@@ -36,7 +36,7 @@ namespace Cotton.Mobile.Tests
         [InlineData(CottonSyncDirection.CloudToDevice)]
         [InlineData(CottonSyncDirection.DeviceToCloud)]
         [InlineData(CottonSyncDirection.Bidirectional)]
-        public void Offline_and_failed_statuses_are_routed_by_direction(CottonSyncDirection direction)
+        public void OfflineAndFailedStatusesAreRoutedByDirection(CottonSyncDirection direction)
         {
             Assert.Equal(
                 "Offline. Sync needs internet.",
@@ -45,7 +45,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Unknown_direction_is_rejected()
+        public void UnknownDirectionIsRejected()
         {
             CottonSyncDirection direction = (CottonSyncDirection)999;
 
@@ -58,7 +58,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Null_root_is_rejected()
+        public void NullRootIsRejected()
         {
             Assert.Throws<ArgumentNullException>(
                 () => CottonSyncRootRunRouting.CreateRoute(root: null!));

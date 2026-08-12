@@ -14,6 +14,15 @@ namespace Cotton.Mobile.Services
         private const int SchemaVersion = 1;
         public const string MetadataFileName = "offline-files.json";
 
+        private static readonly Action<ILogger, string, Exception?> LogLoadFailed = LoggerMessage.Define<string>(
+            LogLevel.Warning,
+            new EventId(1, nameof(LoadAsync)),
+            "Failed to load offline-file pins from {FilePath}; resetting the store.");
+        private static readonly Action<ILogger, string, Exception?> LogSaveFailed = LoggerMessage.Define<string>(
+            LogLevel.Error,
+            new EventId(2, nameof(SaveAsync)),
+            "Failed to save offline-file pins to {FilePath}.");
+
         private readonly ICottonOfflineFileMetadataPathProvider _pathProvider =
             pathProvider ?? throw new ArgumentNullException(nameof(pathProvider));
         private readonly ILogger<FileSystemCottonOfflineFilePinStore> _logger =
@@ -61,10 +70,7 @@ namespace Cotton.Mobile.Services
             catch (Exception exception)
                 when (exception is IOException or UnauthorizedAccessException or JsonException or NotSupportedException)
             {
-                _logger.LogWarning(
-                    exception,
-                    "Failed to load offline-file pins from {FilePath}; resetting the store.",
-                    filePath);
+                LogLoadFailed(_logger, filePath, exception);
                 CottonAtomicJsonFile.DeleteIfExists(filePath);
                 return [];
             }
@@ -88,7 +94,7 @@ namespace Cotton.Mobile.Services
             }
             catch (Exception exception) when (exception is IOException or UnauthorizedAccessException or JsonException)
             {
-                _logger.LogError(exception, "Failed to save offline-file pins to {FilePath}.", filePath);
+                LogSaveFailed(_logger, filePath, exception);
                 throw;
             }
         }

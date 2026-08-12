@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_and_load_roundtrips_pending_receipt()
+        public async Task SaveAndLoadRoundtripsPendingReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot receipt = CreatePendingReceipt();
@@ -49,7 +49,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_replaces_pending_receipt_with_uploaded_revision()
+        public async Task SaveReplacesPendingReceiptWithUploadedRevision()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Mark_uploaded_rejects_a_different_remote_size()
+        public void MarkUploadedRejectsADifferentRemoteSize()
         {
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
             CottonFileBrowserEntry wrongSize = CottonFileBrowserEntryFactory.CreateFile(
@@ -98,7 +98,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_accepts_confirmation_after_device_clock_moves_backwards()
+        public async Task SaveAcceptsConfirmationAfterDeviceClockMovesBackwards()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
@@ -113,7 +113,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Receipts_are_isolated_by_sync_root()
+        public async Task ReceiptsAreIsolatedBySyncRoot()
         {
             CottonSyncRootSnapshot firstRoot = CreateRoot(RootId, "content://tree/camera");
             CottonSyncRootSnapshot secondRoot = CreateRoot(
@@ -127,7 +127,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_rejects_uploaded_receipt_without_pending_history()
+        public async Task SaveRejectsUploadedReceiptWithoutPendingHistory()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot uploaded = CreatePendingReceipt().MarkUploaded(
@@ -141,7 +141,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_rejects_downgrade_after_upload_and_preserves_uploaded_receipt()
+        public async Task SaveRejectsDowngradeAfterUploadAndPreservesUploadedReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
@@ -160,7 +160,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_rejects_confirmation_with_changed_operation_and_preserves_pending_receipt()
+        public async Task SaveRejectsConfirmationWithChangedOperationAndPreservesPendingReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             CottonUploadReceiptSnapshot pending = CreatePendingReceipt();
@@ -186,7 +186,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_fails_closed_and_preserves_corrupt_receipt()
+        public async Task LoadFailsClosedAndPreservesCorruptReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(RootId, "content://tree/camera");
             await _store.SaveAsync(InstanceUri, root, CreatePendingReceipt());
@@ -201,7 +201,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_propagates_storage_failure()
+        public async Task SavePropagatesStorageFailure()
         {
             string blockerPath = Path.Combine(_directory, "blocker");
             Directory.CreateDirectory(_directory);
@@ -217,7 +217,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Clear_removes_only_the_target_root_receipts()
+        public async Task ClearRemovesOnlyTheTargetRootReceipts()
         {
             CottonSyncRootSnapshot firstRoot = CreateRoot(RootId, "content://tree/camera");
             CottonSyncRootSnapshot secondRoot = CreateRoot(
@@ -238,6 +238,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonUploadReceiptSnapshot CreatePendingReceipt()
@@ -271,7 +273,7 @@ namespace Cotton.Mobile.Tests
                 TestContentHashes.First);
         }
 
-        private static IReadOnlyDictionary<string, string> CreateOperationMetadata()
+        private static Dictionary<string, string> CreateOperationMetadata()
         {
             return new Dictionary<string, string>(StringComparer.Ordinal)
             {

@@ -46,7 +46,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_returns_empty_summary_when_no_roots_are_saved()
+        public async Task RunReturnsEmptySummaryWhenNoRootsAreSaved()
         {
             CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunAsync(InstanceUri);
 
@@ -58,7 +58,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_uploads_new_local_file_and_records_uploaded_receipt()
+        public async Task RunUploadsNewLocalFileAndRecordsUploadedReceipt()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _rootStore.SaveAsync(InstanceUri, [root]);
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_does_not_upload_same_local_source_again_when_remote_file_disappears()
+        public async Task RunDoesNotUploadSameLocalSourceAgainWhenRemoteFileDisappears()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _rootStore.SaveAsync(InstanceUri, [root]);
@@ -122,7 +122,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_uploads_only_the_requested_root()
+        public async Task RunRootUploadsOnlyTheRequestedRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonSyncRootSnapshot secondRoot = CreateRoot(SecondSyncRootId, SecondFolderId, "Archive");
@@ -150,7 +150,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_not_ready_and_unsupported_direction_without_reads()
+        public async Task RunRootSkipsNotReadyAndUnsupportedDirectionWithoutReads()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(
                 SyncRootId,
@@ -181,7 +181,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_paused_root_without_reads()
+        public async Task RunRootSkipsPausedRootWithoutReads()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             await _pauseStore.SetPausedAsync(InstanceUri, root.Id, isPaused: true);
@@ -196,7 +196,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_app_private_root_as_unsupported_local_source()
+        public async Task RunRootSkipsAppPrivateRootAsUnsupportedLocalSource()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -216,7 +216,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_skips_bidirectional_root_without_reads()
+        public async Task RunRootSkipsBidirectionalRootWithoutReads()
         {
             CottonSyncRootSnapshot root = CreateRoot(
                 SyncRootId,
@@ -236,7 +236,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_traverses_remote_folders_before_planning()
+        public async Task RunTraversesRemoteFoldersBeforePlanning()
         {
             CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
             CottonFileBrowserEntry folder = CreateFolder(SecondFileId, "Photos");
@@ -261,7 +261,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Run_root_rejects_root_from_another_instance()
+        public async Task RunRootRejectsRootFromAnotherInstance()
         {
             Uri otherInstanceUri = new("https://files.cottoncloud.dev");
             CottonSyncRootSnapshot root = new(
@@ -287,6 +287,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

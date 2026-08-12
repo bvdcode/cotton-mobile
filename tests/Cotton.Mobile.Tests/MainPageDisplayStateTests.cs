@@ -6,7 +6,7 @@ namespace Cotton.Mobile.Tests
     public class MainPageDisplayStateTests
     {
         [Fact]
-        public void Default_instance_url_stays_effective_without_being_field_placeholder()
+        public void DefaultInstanceUrlStaysEffectiveWithoutBeingFieldPlaceholder()
         {
             MainPageDisplayState display = new(" https://app.cottoncloud.dev/ ");
 
@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Sign_in_state_exposes_only_the_authentication_surface()
+        public void SignInStateExposesOnlyTheAuthenticationSurface()
         {
             MainPageDisplayState display = new("https://app.cottoncloud.dev");
             display.ShowAuthenticated(new MainPageProfile(
@@ -47,7 +47,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Authorization_state_can_be_cancelled_once()
+        public void AuthorizationStateCanBeCancelledOnce()
         {
             MainPageDisplayState display = new("https://app.cottoncloud.dev");
 
@@ -65,7 +65,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Authenticated_state_starts_on_sync_and_exposes_profile_data()
+        public void AuthenticatedStateStartsOnSyncAndExposesProfileData()
         {
             MainPageDisplayState display = new("https://app.cottoncloud.dev");
             Uri avatarUrl = new("https://app.cottoncloud.dev/api/v1/preview/avatar.webp");
@@ -90,7 +90,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Authenticated_navigation_switches_between_two_stable_destinations()
+        public void AuthenticatedNavigationSwitchesBetweenTwoStableDestinations()
         {
             MainPageDisplayState display = new("https://app.cottoncloud.dev");
             display.ShowAuthenticated(new MainPageProfile(

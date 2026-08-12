@@ -30,7 +30,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_uploads_new_file_to_root_and_writes_manifest()
+        public async Task ExecutorUploadsNewFileToRootAndWritesManifest()
         {
             CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
                 CreateUploadNewFile("alpha.txt", "alpha.txt"));
@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_creates_nested_folder_before_uploading_nested_file()
+        public async Task ExecutorCreatesNestedFolderBeforeUploadingNestedFile()
         {
             CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
                 CreateRemoteFolder("Photos", "Photos"),
@@ -80,7 +80,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_uses_existing_nested_folder_for_upload_parent()
+        public async Task ExecutorUsesExistingNestedFolderForUploadParent()
         {
             CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
                 CreateExistingRemoteFolder(ExistingFolderId, "Photos", "Photos"),
@@ -99,7 +99,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_updates_changed_file_and_replaces_manifest_item()
+        public async Task ExecutorUpdatesChangedFileAndReplacesManifestItem()
         {
             CottonSyncedFileSnapshot oldManifest = new(
                 SecondFileId,
@@ -131,7 +131,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_deletes_remote_orphan_and_removes_manifest_item()
+        public async Task ExecutorDeletesRemoteOrphanAndRemovesManifestItem()
         {
             CottonSyncedFileSnapshot manifestItem = new(
                 ThirdFileId,
@@ -154,7 +154,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_removes_manifest_orphan_without_remote_operation()
+        public async Task ExecutorRemovesManifestOrphanWithoutRemoteOperation()
         {
             CottonSyncedFileSnapshot manifestItem = new(
                 ThirdFileId,
@@ -177,7 +177,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_counts_noop_and_blocked_items_without_mutation()
+        public async Task ExecutorCountsNoopAndBlockedItemsWithoutMutation()
         {
             CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
                 CreateExistingFile(FirstFileId, "alpha.txt", "alpha.txt", "\"etag-1\""),
@@ -203,7 +203,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Executor_rejects_plan_for_different_root_or_folder()
+        public async Task ExecutorRejectsPlanForDifferentRootOrFolder()
         {
             CottonDeviceToCloudSyncPlanSnapshot plan = CreatePlan(
                 CreateUploadNewFile("alpha.txt", "alpha.txt"));
@@ -219,6 +219,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_rootDirectory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

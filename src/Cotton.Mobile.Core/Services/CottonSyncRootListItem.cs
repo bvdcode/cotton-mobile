@@ -80,15 +80,15 @@ namespace Cotton.Mobile.Services
 
         public bool CanPauseSync { get; }
 
-        public string PauseSyncActionText => CottonSyncRootManagementText.PauseAction;
+        public string PauseSyncActionText { get; } = CottonSyncRootManagementText.PauseAction;
 
         public bool CanResumeSync { get; }
 
-        public string ResumeSyncActionText => CottonSyncRootManagementText.ResumeAction;
+        public string ResumeSyncActionText { get; } = CottonSyncRootManagementText.ResumeAction;
 
         public bool CanStopSync { get; }
 
-        public string StopSyncActionText => CottonSyncRootManagementText.StopAction;
+        public string StopSyncActionText { get; } = CottonSyncRootManagementText.StopAction;
 
         public void SetRunning(bool isRunning)
         {

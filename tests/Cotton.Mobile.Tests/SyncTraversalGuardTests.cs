@@ -6,7 +6,7 @@ namespace Cotton.Mobile.Tests
     public class SyncTraversalGuardTests
     {
         [Fact]
-        public void Duplicate_container_is_not_entered_twice()
+        public void DuplicateContainerIsNotEnteredTwice()
         {
             CottonSyncTraversalGuard<Guid> guard = new();
             Guid identifier = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
@@ -16,7 +16,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Excessive_depth_is_rejected()
+        public void ExcessiveDepthIsRejected()
         {
             CottonSyncTraversalGuard<string> guard = new(maximumDepth: 1, maximumItemCount: 10);
 
@@ -24,7 +24,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Excessive_item_count_is_rejected()
+        public void ExcessiveItemCountIsRejected()
         {
             CottonSyncTraversalGuard<string> guard = new(maximumDepth: 1, maximumItemCount: 1);
             guard.RecordItem();

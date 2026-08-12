@@ -7,7 +7,7 @@ namespace Cotton.Mobile.Tests
     public class CloudToDeviceSyncPlannerTests
     {
         [Fact]
-        public void Planner_downloads_new_remote_files()
+        public void PlannerDownloadsNewRemoteFiles()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
 
@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_keeps_matching_local_file()
+        public void PlannerKeepsMatchingLocalFile()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
             CottonSyncedFileSnapshot localFile = CottonSyncedFileSnapshot.Create(remoteFile, UpdatedAt.AddMinutes(1));
@@ -45,7 +45,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_refreshes_file_when_remote_etag_changes()
+        public void PlannerRefreshesFileWhenRemoteEtagChanges()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-2\"");
             CottonSyncedFileSnapshot localFile = new(
@@ -69,7 +69,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_refreshes_remote_replacement_at_same_relative_path_without_local_orphan_removal()
+        public void PlannerRefreshesRemoteReplacementAtSameRelativePathWithoutLocalOrphanRemoval()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(SecondFileId, "alpha.txt", "\"etag-2\"");
             CottonSyncedFileSnapshot localFile = new(
@@ -96,7 +96,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_remote_replacement_without_etag_without_local_orphan_removal()
+        public void PlannerBlocksRemoteReplacementWithoutEtagWithoutLocalOrphanRemoval()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(SecondFileId, "alpha.txt", eTag: null);
             CottonSyncedFileSnapshot localFile = new(
@@ -121,7 +121,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_remote_folder_replacement_without_local_orphan_removal()
+        public void PlannerBlocksRemoteFolderReplacementWithoutLocalOrphanRemoval()
         {
             CottonFileBrowserEntry remoteFolder = CreateFolder("alpha.txt");
             CottonSyncedFileSnapshot localFile = new(
@@ -145,7 +145,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_renames_local_file_when_etag_matches_but_name_changes()
+        public void PlannerRenamesLocalFileWhenEtagMatchesButNameChanges()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "renamed.txt", "\"etag-1\"");
             CottonSyncedFileSnapshot localFile = new(
@@ -172,7 +172,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_renames_local_file_when_relative_path_changes()
+        public void PlannerRenamesLocalFileWhenRelativePathChanges()
         {
             CottonFileBrowserEntry remoteFile = CreateFile(FirstFileId, "alpha.txt", "\"etag-1\"");
             CottonCloudToDeviceRemoteContentSnapshot remote = new(
@@ -203,7 +203,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_marks_missing_remote_etag_as_refresh_required()
+        public void PlannerMarksMissingRemoteEtagAsRefreshRequired()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", eTag: null));
 
@@ -219,7 +219,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_blocks_child_folders_until_recursive_sync_exists()
+        public void PlannerBlocksChildFoldersUntilRecursiveSyncExists()
         {
             CottonFolderContent remote = CreateContent(
                 CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""),
@@ -238,7 +238,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Planner_removes_local_orphans_from_manifest()
+        public void PlannerRemovesLocalOrphansFromManifest()
         {
             CottonFolderContent remote = CreateContent(CreateFile(FirstFileId, "alpha.txt", "\"etag-1\""));
             CottonSyncedFileSnapshot orphan = new(

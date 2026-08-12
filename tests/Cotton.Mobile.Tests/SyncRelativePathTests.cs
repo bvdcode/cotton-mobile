@@ -6,7 +6,7 @@ namespace Cotton.Mobile.Tests
     public class SyncRelativePathTests
     {
         [Fact]
-        public void Create_file_path_preserves_nested_segments()
+        public void CreateFilePathPreservesNestedSegments()
         {
             string path = CottonSyncRelativePath.CreateFilePath("Projects / Reports", " Q2.pdf ");
 
@@ -19,7 +19,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("Projects//report.pdf")]
         [InlineData("/Projects/report.pdf")]
         [InlineData("Projects/report?.pdf")]
-        public void Normalize_file_path_rejects_invalid_segments(string value)
+        public void NormalizeFilePathRejectsInvalidSegments(string value)
         {
             Assert.Throws<ArgumentException>(() =>
                 CottonSyncRelativePath.NormalizeFilePath(value, nameof(value)));

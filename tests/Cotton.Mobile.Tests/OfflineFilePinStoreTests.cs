@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_and_load_roundtrips_offline_file_pin()
+        public async Task SaveAndLoadRoundtripsOfflineFilePin()
         {
             CottonOfflineFilePinSnapshot pin = CreatePin(FileId, "report.pdf");
 
@@ -42,7 +42,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Add_or_replace_updates_existing_file_pin()
+        public async Task AddOrReplaceUpdatesExistingFilePin()
         {
             CottonOfflineFilePinSnapshot first = CreatePin(FileId, "report.pdf");
             CottonOfflineFilePinSnapshot replacement = new(
@@ -63,7 +63,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_filters_duplicate_file_ids_by_last_entry()
+        public async Task SaveFiltersDuplicateFileIdsByLastEntry()
         {
             CottonOfflineFilePinSnapshot first = CreatePin(FileId, "report.pdf");
             CottonOfflineFilePinSnapshot replacement = CreatePin(FileId, "report-new.pdf");
@@ -75,7 +75,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Save_propagates_file_system_failures()
+        public async Task SavePropagatesFileSystemFailures()
         {
             Directory.CreateDirectory(Path.GetDirectoryName(_rootDirectory)!);
             await File.WriteAllTextAsync(_rootDirectory, "blocked directory");
@@ -85,7 +85,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_returns_empty_when_metadata_is_missing()
+        public async Task LoadReturnsEmptyWhenMetadataIsMissing()
         {
             IReadOnlyList<CottonOfflineFilePinSnapshot> loaded = await _store.LoadAsync(InstanceUri);
 
@@ -93,7 +93,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_deletes_corrupt_metadata_and_returns_empty()
+        public async Task LoadDeletesCorruptMetadataAndReturnsEmpty()
         {
             string metadataPath = CreateMetadataPath(InstanceUri);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -106,7 +106,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Load_filters_invalid_records_without_discarding_valid_pins()
+        public async Task LoadFiltersInvalidRecordsWithoutDiscardingValidPins()
         {
             string metadataPath = CreateMetadataPath(InstanceUri);
             Directory.CreateDirectory(Path.GetDirectoryName(metadataPath)!);
@@ -142,7 +142,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_deletes_single_file_pin()
+        public async Task RemoveDeletesSingleFilePin()
         {
             Guid otherFileId = Guid.Parse("bbbbbbbb-cccc-dddd-eeee-ffffffffffff");
             await _store.SaveAsync(InstanceUri, [
@@ -158,7 +158,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Remove_returns_false_when_file_pin_is_missing()
+        public async Task RemoveReturnsFalseWhenFilePinIsMissing()
         {
             await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
 
@@ -171,7 +171,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Store_isolates_offline_file_pins_by_instance()
+        public async Task StoreIsolatesOfflineFilePinsByInstance()
         {
             await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
             await _store.SaveAsync(OtherInstanceUri, [
@@ -191,7 +191,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Clear_removes_offline_file_pin_metadata()
+        public async Task ClearRemovesOfflineFilePinMetadata()
         {
             await _store.SaveAsync(InstanceUri, [CreatePin(FileId, "report.pdf")]);
 
@@ -202,7 +202,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Snapshot_create_captures_file_browser_metadata()
+        public void SnapshotCreateCapturesFileBrowserMetadata()
         {
             CottonFileBrowserEntry file = CottonFileBrowserEntryFactory.CreateFile(
                 FileId,
@@ -224,7 +224,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Snapshot_create_rejects_folder_entries()
+        public void SnapshotCreateRejectsFolderEntries()
         {
             CottonFileBrowserEntry folder = CottonFileBrowserEntryFactory.CreateFolder(
                 FileId,
@@ -245,6 +245,8 @@ namespace Cotton.Mobile.Tests
             {
                 File.Delete(_rootDirectory);
             }
+
+            GC.SuppressFinalize(this);
         }
 
         private static CottonOfflineFilePinSnapshot CreatePin(Guid fileId, string fileName)

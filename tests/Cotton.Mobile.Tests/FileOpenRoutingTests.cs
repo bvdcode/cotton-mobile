@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("voice.m4a", "", 4_096, CottonFilePreviewKind.Audio, "audio/mp4")]
         [InlineData("movie.mp4", "", 16_384, CottonFilePreviewKind.Video, "video/mp4")]
         [InlineData("clip.webm", "video/webm; codecs=vp9", 16_384, CottonFilePreviewKind.Video, "video/webm")]
-        public void Known_in_app_preview_types_route_to_open(
+        public void KnownInAppPreviewTypesRouteToOpen(
             string name,
             string contentType,
             long sizeBytes,
@@ -45,7 +45,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData("large.txt", "text/plain", 524_289)]
         [InlineData("local-large.md", "", 64)]
-        public void Text_route_uses_available_local_size_when_present(
+        public void TextRouteUsesAvailableLocalSizeWhenPresent(
             string name,
             string contentType,
             long availableSizeBytes)
@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Tests
         [InlineData("slides.pptx", "", CottonSystemFileOpenKind.Document, "application/vnd.openxmlformats-officedocument.presentationml.presentation", "No document app can open this file.")]
         [InlineData("archive.zip", "", CottonSystemFileOpenKind.Archive, "application/zip", "No archive app can open this file.")]
         [InlineData("unknown.bin", "", CottonSystemFileOpenKind.File, null, "No app can open this file type.")]
-        public void Non_preview_types_route_to_system_open(
+        public void NonPreviewTypesRouteToSystemOpen(
             string name,
             string contentType,
             CottonSystemFileOpenKind expectedSystemKind,
@@ -87,7 +87,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Oversized_svg_routes_to_system_open_with_svg_copy()
+        public void OversizedSvgRoutesToSystemOpenWithSvgCopy()
         {
             CottonFileOpenRoute route = CottonFileOpenRouter.CreateRoute(
                 CreateEntry(
@@ -103,7 +103,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Required_content_type_falls_back_for_unknown_system_files()
+        public void RequiredContentTypeFallsBackForUnknownSystemFiles()
         {
             Assert.Equal(
                 "application/octet-stream",
@@ -117,7 +117,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void File_open_route_rejects_folder_entries()
+        public void FileOpenRouteRejectsFolderEntries()
         {
             CottonFileBrowserEntry folder = CottonFileBrowserEntryFactory.CreateFolder(
                 Guid.NewGuid(),

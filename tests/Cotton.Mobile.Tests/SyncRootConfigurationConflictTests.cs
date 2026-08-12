@@ -26,7 +26,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task Configure_same_local_root_for_another_cloud_folder_reports_conflict()
+        public async Task ConfigureSameLocalRootForAnotherCloudFolderReportsConflict()
         {
             CottonSyncRootConfigurationResult existing = await _service.ConfigureDefaultRootAsync(
                 CottonSyncDirection.DeviceToCloud,
@@ -52,6 +52,8 @@ namespace Cotton.Mobile.Tests
             {
                 Directory.Delete(_directory, recursive: true);
             }
+
+            GC.SuppressFinalize(this);
         }
     }
 }

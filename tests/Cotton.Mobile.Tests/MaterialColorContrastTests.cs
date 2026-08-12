@@ -6,17 +6,19 @@ namespace Cotton.Mobile.Tests
 {
     public class MaterialColorContrastTests
     {
+        private static readonly string[] ThemeNames = ["Light", "Dark"];
+
         private const string ColorsPath = "src/Cotton.Mobile/Resources/Styles/Colors.xaml";
         private const double MinimumTextContrast = 4.5;
         private const double MinimumNonTextContrast = 3.0;
         private static readonly XNamespace XamlNamespace = "http://schemas.microsoft.com/winfx/2009/xaml";
 
         [Fact]
-        public void Material_theme_text_pairings_meet_wcag_aa()
+        public void MaterialThemeTextPairingsMeetWcagAa()
         {
             IReadOnlyDictionary<string, Rgba> colors = LoadColors();
 
-            foreach (string theme in new[] { "Light", "Dark" })
+            foreach (string theme in ThemeNames)
             {
                 AssertContrast(colors, theme, "OnPrimary", "Primary", MinimumTextContrast);
                 AssertContrast(colors, theme, "OnPrimaryContainer", "PrimaryContainer", MinimumTextContrast);
@@ -40,11 +42,11 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Material_theme_actions_and_boundaries_meet_non_text_contrast()
+        public void MaterialThemeActionsAndBoundariesMeetNonTextContrast()
         {
             IReadOnlyDictionary<string, Rgba> colors = LoadColors();
 
-            foreach (string theme in new[] { "Light", "Dark" })
+            foreach (string theme in ThemeNames)
             {
                 AssertContrast(colors, theme, "Primary", "Surface", MinimumNonTextContrast);
                 AssertContrast(colors, theme, "Error", "Surface", MinimumNonTextContrast);
@@ -57,7 +59,7 @@ namespace Cotton.Mobile.Tests
             }
         }
 
-        private static IReadOnlyDictionary<string, Rgba> LoadColors()
+        private static Dictionary<string, Rgba> LoadColors()
         {
             XDocument document = XDocument.Parse(RepositoryPath.ReadText(ColorsPath));
             return document

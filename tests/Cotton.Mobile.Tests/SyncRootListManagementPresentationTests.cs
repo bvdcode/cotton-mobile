@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
         [Theory]
         [InlineData(CottonSyncDirection.DeviceToCloud, "Camera", "Files / Camera", "Upload new files · On this device")]
         [InlineData(CottonSyncDirection.Bidirectional, "Projects", "Files / Projects", "Bidirectional · On this device")]
-        public void App_private_upload_source_is_explicitly_unsupported(
+        public void AppPrivateUploadSourceIsExplicitlyUnsupported(
             CottonSyncDirection direction,
             string folderName,
             string path,
@@ -36,7 +36,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Stop_sync_management_copy_is_explicit_about_local_files()
+        public void StopSyncManagementCopyIsExplicitAboutLocalFiles()
         {
             Assert.Equal("Stop syncing Projects?", CottonSyncRootManagementText.CreateStopTitle(" Projects "));
             Assert.Equal(
@@ -53,7 +53,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public void Stop_sync_management_copy_handles_blank_folder_name()
+        public void StopSyncManagementCopyHandlesBlankFolderName()
         {
             Assert.Equal("Stop syncing this folder?", CottonSyncRootManagementText.CreateStopTitle(" "));
             Assert.Equal("Stopped syncing this folder.", CottonSyncRootManagementText.CreateStoppedStatus(string.Empty));

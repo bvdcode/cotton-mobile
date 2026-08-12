@@ -13,7 +13,7 @@ SOURCE_DIRECTORIES = (
     REPOSITORY_ROOT / ".github" / "workflows",
     REPOSITORY_ROOT / "src",
     REPOSITORY_ROOT / "tests",
-    REPOSITORY_ROOT / "scripts" / "mobile",
+    REPOSITORY_ROOT / "scripts",
 )
 SOURCE_SUFFIXES = frozenset(
     {".cs", ".css", ".py", ".sh", ".ts", ".tsx", ".xaml", ".yaml", ".yml"}

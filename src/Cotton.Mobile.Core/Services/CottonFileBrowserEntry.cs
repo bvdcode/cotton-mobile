@@ -27,7 +27,7 @@ namespace Cotton.Mobile.Services
             LocalFile = localFile;
             Thumbnail = thumbnail ?? CottonFileThumbnailSnapshot.Placeholder(
                 BadgeText,
-                CreateFallbackThumbnailCacheKey());
+                CreatePlaceholderThumbnailCacheKey());
             IsSelected = isSelected;
         }
 
@@ -169,7 +169,7 @@ namespace Cotton.Mobile.Services
                 isSelected);
         }
 
-        private string CreateFallbackThumbnailCacheKey()
+        private string CreatePlaceholderThumbnailCacheKey()
         {
             return $"{Type}:{Id:N}:placeholder";
         }

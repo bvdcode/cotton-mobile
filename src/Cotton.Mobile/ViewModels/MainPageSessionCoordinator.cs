@@ -140,7 +140,7 @@ namespace Cotton.Mobile.ViewModels
         private async Task<MainPageSessionState> CreateStateAsync(
             CottonSessionResult result,
             string unauthenticatedStatus,
-            Uri? fallbackInstanceUri)
+            Uri? rememberedInstanceUri)
         {
             if (result.IsAuthenticated && result.InstanceUri is not null && result.User is not null)
             {
@@ -149,7 +149,7 @@ namespace Cotton.Mobile.ViewModels
                 return MainPageSessionState.Authenticated(result.InstanceUri, profile, status: null);
             }
 
-            string instanceUrl = (result.InstanceUri ?? fallbackInstanceUri)?.AbsoluteUri ?? string.Empty;
+            string instanceUrl = (result.InstanceUri ?? rememberedInstanceUri)?.AbsoluteUri ?? string.Empty;
             return MainPageSessionState.SignedOut(
                 instanceUrl,
                 _presentationService.ResolveStatusMessage(result, unauthenticatedStatus));

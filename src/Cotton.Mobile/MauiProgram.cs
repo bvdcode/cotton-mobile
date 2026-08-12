@@ -91,7 +91,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonClientFactory, CottonClientFactory>();
             services.AddSingleton<ICottonAppCodeAuthorizationService, CottonAppCodeAuthorizationService>();
             services.AddSingleton<ICottonSessionService, CottonSessionService>();
-            services.AddSingleton(new CottonNotificationDeliveryPlanner(3));
+            services.AddSingleton<CottonNotificationDeliveryPlanner>();
             services.AddSingleton<ICottonNotificationPollingService, CottonNotificationPollingService>();
             services.AddSingleton<ICottonNotificationRealtimeService, CottonNotificationRealtimeService>();
             services.AddSingleton<ICottonNotificationSessionService, CottonNotificationSessionService>();

@@ -9,7 +9,7 @@ namespace Cotton.Mobile.Tests
 {
     public class NotificationDeliveryPlannerTests
     {
-        private readonly CottonNotificationDeliveryPlanner _planner = new(3);
+        private readonly CottonNotificationDeliveryPlanner _planner = new();
 
         [Fact]
         public void Create_UsesSummaryForLargeInitialBacklog()

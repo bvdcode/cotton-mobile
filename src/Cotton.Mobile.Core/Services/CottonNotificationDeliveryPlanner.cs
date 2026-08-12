@@ -7,7 +7,14 @@ namespace Cotton.Mobile.Services
 {
     public class CottonNotificationDeliveryPlanner
     {
+        private const int DefaultMaximumIndividualNotifications = 3;
+
         private readonly int _maximumIndividualNotifications;
+
+        public CottonNotificationDeliveryPlanner()
+            : this(DefaultMaximumIndividualNotifications)
+        {
+        }
 
         public CottonNotificationDeliveryPlanner(int maximumIndividualNotifications)
         {

@@ -28,15 +28,39 @@ namespace Cotton.Mobile.Services
                 return null;
             }
 
+            Uri? storedInstanceUri = TryCreateAbsoluteUri(item.InstanceUri);
+            if (storedInstanceUri is null)
+            {
+                return null;
+            }
+
+            CottonSyncRootSnapshot? root = TryCreateSnapshot(item, storedInstanceUri);
+            if (root is null || !HasValidIdentity(expectedInstanceUri, item, root))
+            {
+                return null;
+            }
+
+            return root;
+        }
+
+        private static Uri? TryCreateAbsoluteUri(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value)
+                || !Uri.TryCreate(value, UriKind.Absolute, out Uri? uri))
+            {
+                return null;
+            }
+
+            return uri;
+        }
+
+        private static CottonSyncRootSnapshot? TryCreateSnapshot(
+            CottonStoredSyncRootItem item,
+            Uri storedInstanceUri)
+        {
             try
             {
-                if (string.IsNullOrWhiteSpace(item.InstanceUri)
-                    || !Uri.TryCreate(item.InstanceUri, UriKind.Absolute, out Uri? storedInstanceUri))
-                {
-                    return null;
-                }
-
-                CottonSyncRootSnapshot root = new(
+                return new CottonSyncRootSnapshot(
                     item.Id,
                     storedInstanceUri,
                     item.AccountScopeKey ?? string.Empty,
@@ -51,20 +75,22 @@ namespace Cotton.Mobile.Services
                         item.LocalPermissionStatus),
                     item.Direction,
                     item.UploadOriginalRetention);
-                if (!IsSameInstance(root.InstanceUri, expectedInstanceUri)
-                    || string.IsNullOrWhiteSpace(item.StableKey)
-                    || !string.Equals(root.StableKey, item.StableKey.Trim(), StringComparison.Ordinal))
-                {
-                    return null;
-                }
-
-                return root;
             }
             catch (Exception exception)
                 when (exception is ArgumentException or ArgumentOutOfRangeException or UriFormatException)
             {
                 return null;
             }
+        }
+
+        private static bool HasValidIdentity(
+            Uri expectedInstanceUri,
+            CottonStoredSyncRootItem item,
+            CottonSyncRootSnapshot root)
+        {
+            return IsSameInstance(root.InstanceUri, expectedInstanceUri)
+                && !string.IsNullOrWhiteSpace(item.StableKey)
+                && string.Equals(root.StableKey, item.StableKey.Trim(), StringComparison.Ordinal);
         }
 
         public static void EnsureRootsMatchInstance(

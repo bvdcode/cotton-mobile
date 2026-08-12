@@ -23,6 +23,51 @@ namespace Cotton.Mobile.Services
             CottonUploadOriginalRetention uploadOriginalRetention,
             CancellationToken cancellationToken = default)
         {
+            ValidateConfigurationRequest(
+                instanceUri,
+                accountScopeKey,
+                cloudFolder,
+                localRoot,
+                direction,
+                uploadOriginalRetention);
+
+            CottonSyncRootSnapshot candidate = CreateRoot(
+                Guid.NewGuid(),
+                instanceUri,
+                accountScopeKey,
+                cloudFolder,
+                localRoot,
+                direction,
+                uploadOriginalRetention);
+            IReadOnlyList<CottonSyncRootSnapshot> existingRoots =
+                await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
+            CottonSyncRootSnapshot? existingRoot = existingRoots
+                .FirstOrDefault(root => string.Equals(root.StableKey, candidate.StableKey, StringComparison.Ordinal));
+            CottonSyncRootConfigurationResult? existingResult = TryCreateExistingConfigurationResult(
+                existingRoots,
+                existingRoot,
+                candidate);
+            if (existingResult is not null)
+            {
+                return existingResult;
+            }
+
+            return await SaveConfigurationAsync(
+                    instanceUri,
+                    existingRoot,
+                    candidate,
+                    cancellationToken)
+                .ConfigureAwait(false);
+        }
+
+        private static void ValidateConfigurationRequest(
+            Uri instanceUri,
+            string accountScopeKey,
+            CottonUploadDestinationSnapshot cloudFolder,
+            CottonSyncLocalRootSnapshot localRoot,
+            CottonSyncDirection direction,
+            CottonUploadOriginalRetention uploadOriginalRetention)
+        {
             ArgumentNullException.ThrowIfNull(localRoot);
             if (!localRoot.RequiresPersistedUserGrant)
             {
@@ -38,38 +83,42 @@ namespace Cotton.Mobile.Services
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
             ArgumentNullException.ThrowIfNull(cloudFolder);
             ValidateConfiguration(direction, uploadOriginalRetention);
+        }
 
-            CottonSyncRootSnapshot candidate = CreateRoot(
-                Guid.NewGuid(),
-                instanceUri,
-                accountScopeKey,
-                cloudFolder,
-                localRoot,
-                direction,
-                uploadOriginalRetention);
-            IReadOnlyList<CottonSyncRootSnapshot> existingRoots =
-                await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
-            CottonSyncRootSnapshot? existingRoot = existingRoots
-                .FirstOrDefault(root => string.Equals(root.StableKey, candidate.StableKey, StringComparison.Ordinal));
-            CottonSyncRootSnapshot? localRootOwner = existingRoots.FirstOrDefault(
-                root => HasSameAccountAndLocalRoot(root, candidate));
-
-            if (existingRoot is null && localRootOwner is not null)
+        private static CottonSyncRootConfigurationResult? TryCreateExistingConfigurationResult(
+            IReadOnlyCollection<CottonSyncRootSnapshot> existingRoots,
+            CottonSyncRootSnapshot? existingRoot,
+            CottonSyncRootSnapshot candidate)
+        {
+            if (existingRoot is null)
             {
-                return new CottonSyncRootConfigurationResult(
-                    CottonSyncRootConfigurationStatus.AlreadyConfigured,
-                    localRootOwner);
+                CottonSyncRootSnapshot? localRootOwner = existingRoots.FirstOrDefault(
+                    root => HasSameAccountAndLocalRoot(root, candidate));
+                return localRootOwner is null
+                    ? null
+                    : CreateAlreadyConfiguredResult(localRootOwner);
             }
 
-            if (existingRoot is not null
-                && (existingRoot.Direction != direction
-                    || HasSameEffectiveConfiguration(existingRoot, candidate)))
-            {
-                return new CottonSyncRootConfigurationResult(
-                    CottonSyncRootConfigurationStatus.AlreadyConfigured,
-                    existingRoot);
-            }
+            return existingRoot.Direction != candidate.Direction
+                || HasSameEffectiveConfiguration(existingRoot, candidate)
+                    ? CreateAlreadyConfiguredResult(existingRoot)
+                    : null;
+        }
 
+        private static CottonSyncRootConfigurationResult CreateAlreadyConfiguredResult(
+            CottonSyncRootSnapshot root)
+        {
+            return new CottonSyncRootConfigurationResult(
+                CottonSyncRootConfigurationStatus.AlreadyConfigured,
+                root);
+        }
+
+        private async Task<CottonSyncRootConfigurationResult> SaveConfigurationAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot? existingRoot,
+            CottonSyncRootSnapshot candidate,
+            CancellationToken cancellationToken)
+        {
             if (existingRoot is null)
             {
                 await _rootStore.AddOrReplaceAsync(instanceUri, candidate, cancellationToken).ConfigureAwait(false);
@@ -80,12 +129,12 @@ namespace Cotton.Mobile.Services
 
             CottonSyncRootSnapshot updatedRoot = CreateRoot(
                 existingRoot.Id,
-                instanceUri,
-                accountScopeKey,
-                cloudFolder,
-                localRoot,
-                direction,
-                uploadOriginalRetention);
+                candidate.InstanceUri,
+                candidate.AccountScopeKey,
+                candidate.CloudFolder,
+                candidate.LocalRoot,
+                candidate.Direction,
+                candidate.UploadOriginalRetention);
             await _rootStore.AddOrReplaceAsync(instanceUri, updatedRoot, cancellationToken).ConfigureAwait(false);
             return new CottonSyncRootConfigurationResult(
                 CottonSyncRootConfigurationStatus.Updated,

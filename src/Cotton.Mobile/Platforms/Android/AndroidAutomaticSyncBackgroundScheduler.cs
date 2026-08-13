@@ -38,6 +38,32 @@ namespace Cotton.Mobile.Platforms.Android
             return Task.CompletedTask;
         }
 
+        public Task ScheduleRootRetriesAsync(
+            IReadOnlyCollection<Guid> rootIds,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(rootIds);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            WorkManager workManager = GetWorkManager();
+            ExistingWorkPolicy policy = GetKeepPolicy();
+            foreach (Guid rootId in rootIds.Distinct().Order())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                if (rootId == Guid.Empty)
+                {
+                    throw new ArgumentException("Sync root ids cannot be empty.", nameof(rootIds));
+                }
+
+                _ = workManager.EnqueueUniqueWork(
+                    AndroidAutomaticSyncConstants.CreateRootRetryWorkName(rootId),
+                    policy,
+                    CreateRootRetryRequest(rootId));
+            }
+
+            return Task.CompletedTask;
+        }
+
         public Task CancelAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -45,6 +71,7 @@ namespace Cotton.Mobile.Platforms.Android
             WorkManager workManager = GetWorkManager();
             _ = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.PeriodicWorkName);
             _ = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.MediaStoreWorkName);
+            _ = workManager.CancelAllWorkByTag(AndroidAutomaticSyncConstants.RootRetryTag);
             return Task.CompletedTask;
         }
 
@@ -73,6 +100,23 @@ namespace Cotton.Mobile.Platforms.Android
                 .Build();
             return request
                 ?? throw new InvalidOperationException("Android MediaStore sync work request is unavailable.");
+        }
+
+        private static OneTimeWorkRequest CreateRootRetryRequest(Guid rootId)
+        {
+            Java.Lang.Class workerClass = Java.Lang.Class.FromType(typeof(AndroidSyncRootWorker))
+                ?? throw new InvalidOperationException("Android sync-root worker type is unavailable.");
+            Data inputData = new Data.Builder()
+                .PutString(AndroidAutomaticSyncConstants.RootIdInputKey, rootId.ToString("D"))
+                .Build()
+                ?? throw new InvalidOperationException("Android sync-root input data is unavailable.");
+            OneTimeWorkRequest request = new OneTimeWorkRequest.Builder(workerClass)
+                .SetInputData(inputData)
+                .SetConstraints(CreateNetworkConstraints())
+                .AddTag(AndroidAutomaticSyncConstants.RootRetryTag)
+                .Build();
+            return request
+                ?? throw new InvalidOperationException("Android sync-root work request is unavailable.");
         }
 
         private static Constraints CreateNetworkConstraints()

@@ -138,7 +138,8 @@ namespace Cotton.Mobile
                     serviceProvider.GetRequiredService<ICottonUploadReceiptStore>()));
             services.AddSingleton<CottonSyncRootExecutionLock>();
             services.AddSingleton<ICottonDeviceToCloudSyncCoordinator, CottonDeviceToCloudSyncCoordinator>();
-            services.AddSingleton<CottonAutomaticSyncRunner>();
+            services.AddSingleton<ICottonAutomaticSyncRunner, CottonAutomaticSyncRunner>();
+            services.AddSingleton<CottonAutomaticSyncDispatcher>();
             services.AddSingleton<SyncExecutionWorkflow>();
         }
 

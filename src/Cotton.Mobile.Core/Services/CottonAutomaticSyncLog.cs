@@ -21,5 +21,8 @@ namespace Cotton.Mobile.Services
 
         [LoggerMessage(EventId = 1105, Level = LogLevel.Warning, Message = "Automatic sync background cancellation failed.")]
         public static partial void BackgroundCancelFailed(ILogger logger, Exception exception);
+
+        [LoggerMessage(EventId = 1106, Level = LogLevel.Debug, Message = "Automatic sync run was canceled.")]
+        public static partial void RunCanceled(ILogger logger, Exception exception);
     }
 }

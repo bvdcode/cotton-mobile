@@ -8,7 +8,7 @@ namespace Cotton.Mobile.Services
     public class CottonAutomaticSyncSessionService(
         IApplicationForegroundService foregroundService,
         ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
-        CottonAutomaticSyncRunner runner,
+        CottonAutomaticSyncDispatcher dispatcher,
         ILogger<CottonAutomaticSyncSessionService> logger) :
         ICottonAutomaticSyncSessionService,
         IDisposable
@@ -19,8 +19,8 @@ namespace Cotton.Mobile.Services
             foregroundService ?? throw new ArgumentNullException(nameof(foregroundService));
         private readonly ICottonAutomaticSyncBackgroundScheduler _backgroundScheduler =
             backgroundScheduler ?? throw new ArgumentNullException(nameof(backgroundScheduler));
-        private readonly CottonAutomaticSyncRunner _runner =
-            runner ?? throw new ArgumentNullException(nameof(runner));
+        private readonly CottonAutomaticSyncDispatcher _dispatcher =
+            dispatcher ?? throw new ArgumentNullException(nameof(dispatcher));
         private readonly ILogger<CottonAutomaticSyncSessionService> _logger =
             logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -48,7 +48,13 @@ namespace Cotton.Mobile.Services
             await _lifecycleGate.WaitAsync(cancellationToken).ConfigureAwait(false);
             try
             {
+                Uri? previousInstanceUri = _instanceUri;
                 _instanceUri = instanceUri;
+                if (previousInstanceUri is not null && !Uri.Equals(previousInstanceUri, instanceUri))
+                {
+                    _dispatcher.Cancel(previousInstanceUri);
+                }
+
                 if (instanceUri is null)
                 {
                     await CancelBackgroundWorkBestEffortAsync(cancellationToken).ConfigureAwait(false);
@@ -58,11 +64,10 @@ namespace Cotton.Mobile.Services
                 await ScheduleBackgroundWorkBestEffortAsync(cancellationToken).ConfigureAwait(false);
                 if (_foregroundService.IsForeground)
                 {
-                    await RunBestEffortAsync(
-                            instanceUri,
-                            CottonAutomaticSyncTrigger.ApplicationResumed,
-                            cancellationToken)
-                        .ConfigureAwait(false);
+                    _ = RunBestEffortAsync(
+                        instanceUri,
+                        CottonAutomaticSyncTrigger.ApplicationResumed,
+                        CancellationToken.None);
                 }
             }
             finally
@@ -74,6 +79,11 @@ namespace Cotton.Mobile.Services
         public void Dispose()
         {
             _foregroundService.Resumed -= OnApplicationResumed;
+            if (_instanceUri is not null)
+            {
+                _dispatcher.Cancel(_instanceUri);
+            }
+
             _lifecycleGate.Dispose();
             GC.SuppressFinalize(this);
         }
@@ -92,11 +102,10 @@ namespace Cotton.Mobile.Services
                 {
                     if (_instanceUri is not null)
                     {
-                        await RunBestEffortAsync(
-                                _instanceUri,
-                                CottonAutomaticSyncTrigger.ApplicationResumed,
-                                CancellationToken.None)
-                            .ConfigureAwait(false);
+                        _ = RunBestEffortAsync(
+                            _instanceUri,
+                            CottonAutomaticSyncTrigger.ApplicationResumed,
+                            CancellationToken.None);
                     }
                 }
                 finally
@@ -117,7 +126,11 @@ namespace Cotton.Mobile.Services
         {
             try
             {
-                await _runner.RunAsync(instanceUri, trigger, cancellationToken).ConfigureAwait(false);
+                await _dispatcher.RunAsync(instanceUri, trigger, cancellationToken).ConfigureAwait(false);
+            }
+            catch (OperationCanceledException exception)
+            {
+                CottonAutomaticSyncLog.RunCanceled(_logger, exception);
             }
             catch (Exception exception) when (exception is not OperationCanceledException)
             {

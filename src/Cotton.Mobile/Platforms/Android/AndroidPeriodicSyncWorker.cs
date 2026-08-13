@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Platforms.Android
     {
         protected override CottonAutomaticSyncTrigger Trigger =>
             CottonAutomaticSyncTrigger.PeriodicReconciliation;
+
+        protected override Guid? RetryRootId => null;
     }
 }
 #endif

@@ -17,6 +17,8 @@ namespace Cotton.Mobile.Platforms.Android
     {
         protected override CottonAutomaticSyncTrigger Trigger =>
             CottonAutomaticSyncTrigger.MediaStoreChanged;
+
+        protected override Guid? RetryRootId => null;
     }
 }
 #endif

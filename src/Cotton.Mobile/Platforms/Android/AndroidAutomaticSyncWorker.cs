@@ -14,7 +14,11 @@ namespace Cotton.Mobile.Platforms.Android
         Context context,
         WorkerParameters workerParameters) : Worker(context, workerParameters)
     {
+        private readonly CancellationTokenSource _stoppingSource = new();
+
         protected abstract CottonAutomaticSyncTrigger Trigger { get; }
+
+        protected abstract Guid? RetryRootId { get; }
 
         public override ListenableWorker.Result DoWork()
         {
@@ -26,9 +30,10 @@ namespace Cotton.Mobile.Platforms.Android
 
             try
             {
+                CancellationToken cancellationToken = _stoppingSource.Token;
                 ICottonSessionService sessionService = services.GetRequiredService<ICottonSessionService>();
                 Uri? instanceUri = sessionService
-                    .GetRememberedSessionInstanceAsync()
+                    .GetRememberedSessionInstanceAsync(cancellationToken)
                     .GetAwaiter()
                     .GetResult();
                 if (instanceUri is null)
@@ -36,16 +41,40 @@ namespace Cotton.Mobile.Platforms.Android
                     return Success();
                 }
 
-                CottonAutomaticSyncRunner runner = services.GetRequiredService<CottonAutomaticSyncRunner>();
-                runner.RunAsync(instanceUri, Trigger).GetAwaiter().GetResult();
+                CottonAutomaticSyncRunResult result = RunAsync(
+                        services,
+                        instanceUri,
+                        cancellationToken)
+                    .GetAwaiter()
+                    .GetResult();
+                ICottonAutomaticSyncBackgroundScheduler scheduler = services
+                    .GetRequiredService<ICottonAutomaticSyncBackgroundScheduler>();
+                if (result.HasFailures)
+                {
+                    if (RetryRootId.HasValue)
+                    {
+                        return Retry();
+                    }
+
+                    scheduler
+                        .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
+                        .GetAwaiter()
+                        .GetResult();
+                }
+
                 if (Trigger == CottonAutomaticSyncTrigger.MediaStoreChanged)
                 {
-                    ICottonAutomaticSyncBackgroundScheduler scheduler = services
-                        .GetRequiredService<ICottonAutomaticSyncBackgroundScheduler>();
-                    scheduler.RescheduleMediaStoreTriggerAsync().GetAwaiter().GetResult();
+                    scheduler
+                        .RescheduleMediaStoreTriggerAsync(cancellationToken)
+                        .GetAwaiter()
+                        .GetResult();
                 }
 
                 return Success();
+            }
+            catch (OperationCanceledException) when (_stoppingSource.IsCancellationRequested)
+            {
+                return Retry();
             }
             catch (Exception exception)
             {
@@ -58,6 +87,28 @@ namespace Cotton.Mobile.Platforms.Android
 
                 return Retry();
             }
+        }
+
+        public override void OnStopped()
+        {
+            _stoppingSource.Cancel();
+            base.OnStopped();
+        }
+
+        private Task<CottonAutomaticSyncRunResult> RunAsync(
+            IServiceProvider services,
+            Uri instanceUri,
+            CancellationToken cancellationToken)
+        {
+            if (RetryRootId.HasValue)
+            {
+                ICottonAutomaticSyncRunner runner = services.GetRequiredService<ICottonAutomaticSyncRunner>();
+                return runner.RunRootsAsync(instanceUri, [RetryRootId.Value], cancellationToken);
+            }
+
+            CottonAutomaticSyncDispatcher dispatcher = services
+                .GetRequiredService<CottonAutomaticSyncDispatcher>();
+            return dispatcher.RunAsync(instanceUri, Trigger, cancellationToken);
         }
 
         private static ListenableWorker.Result Success()

@@ -72,12 +72,35 @@ namespace Cotton.Mobile.Tests
                 coordinator,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
-            await Assert.ThrowsAsync<AggregateException>(() => runner.RunAsync(
+            CottonAutomaticSyncRunResult result = await runner.RunAsync(
                 SyncTestRootFactory.InstanceUri,
-                CottonAutomaticSyncTrigger.PeriodicReconciliation));
+                CottonAutomaticSyncTrigger.PeriodicReconciliation);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Contains(succeedingRoot.Id, coordinator.RootIds);
+            Assert.Equal([succeedingRoot.Id], result.SucceededRootIds);
+            Assert.Equal([failingRoot.Id], result.FailedRootIds);
+        }
+
+        [Fact]
+        public async Task SelectedRootRunDoesNotRepeatOtherRoots()
+        {
+            CottonSyncRootSnapshot selectedRoot = SyncTestRootFactory.CreateDocumentTreeRoot();
+            CottonSyncRootSnapshot otherRoot = SyncTestRootFactory.CreateMediaStoreRoot();
+            await _rootStore.SaveAsync(SyncTestRootFactory.InstanceUri, [selectedRoot, otherRoot]);
+            RecordingDeviceToCloudSyncCoordinator coordinator = new();
+            CottonAutomaticSyncRunner runner = new(
+                _rootStore,
+                coordinator,
+                NullLogger<CottonAutomaticSyncRunner>.Instance);
+
+            CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(
+                SyncTestRootFactory.InstanceUri,
+                [selectedRoot.Id]);
+
+            Assert.Equal([selectedRoot.Id], coordinator.RootIds);
+            Assert.Equal([selectedRoot.Id], result.SucceededRootIds);
+            Assert.Empty(result.FailedRootIds);
         }
 
         public void Dispose()

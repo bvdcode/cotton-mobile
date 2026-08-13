@@ -9,6 +9,10 @@ namespace Cotton.Mobile.Services
 
         Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default);
 
+        Task ScheduleRootRetriesAsync(
+            IReadOnlyCollection<Guid> rootIds,
+            CancellationToken cancellationToken = default);
+
         Task CancelAsync(CancellationToken cancellationToken = default);
     }
 }

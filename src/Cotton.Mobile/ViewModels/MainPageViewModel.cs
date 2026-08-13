@@ -15,6 +15,7 @@ namespace Cotton.Mobile.ViewModels
     {
         private readonly MainPageSessionCoordinator _sessionCoordinator;
         private readonly MainPageUserInteractionService _userInteractionService;
+        private readonly ICottonInstanceResolver _instanceResolver;
         private readonly ICottonNotificationSessionService _notificationSessionService;
         private readonly ICottonAutomaticSyncSessionService _automaticSyncSessionService;
         private readonly ILogger<MainPageViewModel> _logger;
@@ -26,6 +27,7 @@ namespace Cotton.Mobile.ViewModels
         public MainPageViewModel(
             MainPageSessionCoordinator sessionCoordinator,
             MainPageUserInteractionService userInteractionService,
+            ICottonInstanceResolver instanceResolver,
             ICottonNotificationSessionService notificationSessionService,
             ICottonAutomaticSyncSessionService automaticSyncSessionService,
             ICottonMobileApplicationMetadata applicationMetadata,
@@ -34,6 +36,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(sessionCoordinator);
             ArgumentNullException.ThrowIfNull(userInteractionService);
+            ArgumentNullException.ThrowIfNull(instanceResolver);
             ArgumentNullException.ThrowIfNull(notificationSessionService);
             ArgumentNullException.ThrowIfNull(automaticSyncSessionService);
             ArgumentNullException.ThrowIfNull(applicationMetadata);
@@ -42,11 +45,12 @@ namespace Cotton.Mobile.ViewModels
 
             _sessionCoordinator = sessionCoordinator;
             _userInteractionService = userInteractionService;
+            _instanceResolver = instanceResolver;
             _notificationSessionService = notificationSessionService;
             _automaticSyncSessionService = automaticSyncSessionService;
             _logger = logger;
 
-            Display = new MainPageDisplayState(sessionCoordinator.DefaultInstanceUrl);
+            Display = new MainPageDisplayState();
             Sync = sync;
             Sync.PropertyChanged += OnSyncPropertyChanged;
             ApplicationVersionText = CreateApplicationVersionText(applicationMetadata);
@@ -107,18 +111,33 @@ namespace Cotton.Mobile.ViewModels
         private async Task SignInAsync()
         {
             string instanceUrlInput = Display.InstanceUrl;
-            Uri? instanceUri = CottonServerUrl.NormalizeOptional(Display.EffectiveInstanceUrl);
-            if (instanceUri is null || !CottonInstanceUri.IsSupported(instanceUri))
+            if (string.IsNullOrWhiteSpace(instanceUrlInput))
             {
                 Display.ShowSignIn(AppResources.InvalidServerUrl);
                 RefreshCommands();
                 return;
             }
 
-            string signInInstanceUrl = string.IsNullOrWhiteSpace(instanceUrlInput)
-                ? string.Empty
-                : instanceUri.AbsoluteUri;
+            Display.ShowLoading(AppResources.CheckingServer);
+            RefreshCommands();
+            Uri? instanceUri = await _instanceResolver.ResolveAsync(instanceUrlInput);
+            if (instanceUri is null)
+            {
+                Display.ShowSignIn(AppResources.ServerNotFound);
+                RefreshCommands();
+                return;
+            }
+
+            string signInInstanceUrl = instanceUri.AbsoluteUri;
             Display.InstanceUrl = signInInstanceUrl;
+            if (string.Equals(instanceUri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+                && !await _userInteractionService.ConfirmInsecureConnectionAsync(instanceUri))
+            {
+                Display.ShowSignIn(status: null);
+                RefreshCommands();
+                return;
+            }
+
             using CancellationTokenSource authorizationCancellation = new();
             _authorizationCancellation = authorizationCancellation;
             Display.ShowAuthorizationProgress();

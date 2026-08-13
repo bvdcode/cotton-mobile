@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Resources.Localization
         private static readonly ResourceManager ResourceManagerInstance = new(typeof(CoreResources));
 
         public static string AuthorizationInstruction => GetString(nameof(AuthorizationInstruction));
-        public static string CustomServerUrl => GetString(nameof(CustomServerUrl));
+        public static string ServerAddress => GetString(nameof(ServerAddress));
         public static string CancellingAuthorization => GetString(nameof(CancellingAuthorization));
         public static string DefaultFolderName => GetString(nameof(DefaultFolderName));
         public static string DefaultFolderNameLower => GetString(nameof(DefaultFolderNameLower));

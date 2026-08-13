@@ -41,6 +41,16 @@ namespace Cotton.Mobile.ViewModels
                 AppResources.CancelText);
         }
 
+        public Task<bool> ConfirmInsecureConnectionAsync(Uri instanceUri)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            return _dialogService.ShowConfirmationAsync(
+                AppResources.InsecureConnectionTitle,
+                AppResources.CreateInsecureConnectionMessage(instanceUri),
+                AppResources.ContinueText,
+                AppResources.ChangeServerText);
+        }
+
         public async Task OpenPrivacyPolicyAsync()
         {
             try

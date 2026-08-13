@@ -6,28 +6,26 @@ namespace Cotton.Mobile.Tests
     public class MainPageDisplayStateTests
     {
         [Fact]
-        public void DefaultInstanceUrlStaysEffectiveWithoutBeingFieldPlaceholder()
+        public void ServerAddressStartsEmptyAndHasNoHiddenDefault()
         {
-            MainPageDisplayState display = new(" https://app.cottoncloud.dev/ ");
+            MainPageDisplayState display = new();
 
             Assert.Equal(string.Empty, display.InstanceUrl);
-            Assert.Equal("https://app.cottoncloud.dev/", display.DefaultInstanceUrl);
-            Assert.Equal("Custom server URL", display.InstanceUrlPlaceholder);
-            Assert.Equal("https://app.cottoncloud.dev/", display.EffectiveInstanceUrl);
+            Assert.Equal("Server address", display.InstanceUrlPlaceholder);
 
             display.InstanceUrl = "https://files.example.test";
 
-            Assert.Equal("https://files.example.test", display.EffectiveInstanceUrl);
+            Assert.Equal("https://files.example.test", display.InstanceUrl);
 
             display.InstanceUrl = "   ";
 
-            Assert.Equal("https://app.cottoncloud.dev/", display.EffectiveInstanceUrl);
+            Assert.Equal("   ", display.InstanceUrl);
         }
 
         [Fact]
         public void SignInStateExposesOnlyTheAuthenticationSurface()
         {
-            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new();
             display.ShowAuthenticated(new MainPageProfile(
                 "Mobile Demo",
                 "demo@example.com",
@@ -49,7 +47,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void AuthorizationStateCanBeCancelledOnce()
         {
-            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new();
 
             display.ShowAuthorizationProgress();
 
@@ -67,7 +65,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void AuthenticatedStateStartsOnSyncAndExposesProfileData()
         {
-            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new();
             Uri avatarUrl = new("https://app.cottoncloud.dev/api/v1/preview/avatar.webp");
             MainPageProfile profile = new(
                 "Mobile Demo",
@@ -92,7 +90,7 @@ namespace Cotton.Mobile.Tests
         [Fact]
         public void AuthenticatedNavigationSwitchesBetweenTwoStableDestinations()
         {
-            MainPageDisplayState display = new("https://app.cottoncloud.dev");
+            MainPageDisplayState display = new();
             display.ShowAuthenticated(new MainPageProfile(
                 "Mobile Demo",
                 null,

@@ -5,7 +5,7 @@
 		android:icon="@mipmap/cotton_app_icon"
 		android:roundIcon="@mipmap/cotton_app_icon_round"
 		android:supportsRtl="true"
-		android:usesCleartextTraffic="false"></application>
+		android:usesCleartextTraffic="true"></application>
 	<queries>
 		<intent>
 			<action android:name="android.intent.action.VIEW" />

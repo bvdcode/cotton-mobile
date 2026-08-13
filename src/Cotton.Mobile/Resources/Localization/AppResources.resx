@@ -31,9 +31,7 @@
   <data name="NoSyncFoldersBody" xml:space="preserve"><value>Choose a cloud folder and a folder on this device.</value></data>
   <data name="ConnectText" xml:space="preserve"><value>Connect</value></data>
   <data name="ChangeServerText" xml:space="preserve"><value>Change server</value></data>
-  <data name="UseDefaultServerText" xml:space="preserve"><value>Use default server</value></data>
   <data name="CottonCloudAddressHint" xml:space="preserve"><value>Cotton Cloud address</value></data>
-  <data name="ServerChoiceHint" xml:space="preserve"><value>Choose the default Cotton Cloud server or enter a custom address.</value></data>
   <data name="OpenSyncDescription" xml:space="preserve"><value>Open sync</value></data>
   <data name="OpenProfileDescription" xml:space="preserve"><value>Open profile</value></data>
   <data name="PrimaryActionDescription" xml:space="preserve"><value>Primary action</value></data>
@@ -53,7 +51,12 @@
   <data name="SyncRunInstanceUnavailable" xml:space="preserve"><value>Could not run sync for this instance.</value></data>
   <data name="SyncFolderMissing" xml:space="preserve"><value>Sync folder is no longer configured.</value></data>
   <data name="SyncFolderNotReady" xml:space="preserve"><value>Sync folder is not ready.</value></data>
-  <data name="InvalidServerUrl" xml:space="preserve"><value>Enter a valid HTTPS URL.</value></data>
+  <data name="InvalidServerUrl" xml:space="preserve"><value>Enter a Cotton server address.</value></data>
+  <data name="CheckingServer" xml:space="preserve"><value>Checking server…</value></data>
+  <data name="ServerNotFound" xml:space="preserve"><value>Could not find a Cotton server at this address.</value></data>
+  <data name="InsecureConnectionTitle" xml:space="preserve"><value>Unsafe connection</value></data>
+  <data name="InsecureConnectionFormat" xml:space="preserve"><value>{0} is available only over unencrypted HTTP. Your account and files could be intercepted. Continue?</value></data>
+  <data name="ContinueText" xml:space="preserve"><value>Continue</value></data>
   <data name="SigningOut" xml:space="preserve"><value>Signing out…</value></data>
   <data name="UnexpectedError" xml:space="preserve"><value>Something went wrong. Try again.</value></data>
   <data name="SignOutQuestion" xml:space="preserve"><value>Sign out?</value></data>

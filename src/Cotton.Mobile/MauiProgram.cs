@@ -76,7 +76,6 @@ namespace Cotton.Mobile
             services.AddSingleton(
                 new CottonMobileOptions(
                     AppResources.AppTitle,
-                    new Uri("https://app.cottoncloud.dev"),
                     new Uri("https://cottoncloud.dev/privacy-policy"),
                     "cotton-play-market-support@belov.us"));
             services.AddSingleton<IApplicationForegroundService, ApplicationForegroundService>();
@@ -87,6 +86,8 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonTokenStore, SecureStorageCottonTokenStore>();
             services.AddSingleton<ICottonPendingAppCodeSessionStore, SecureStorageCottonPendingAppCodeSessionStore>();
             services.AddSingleton<ICottonInstanceStore, PreferencesCottonInstanceStore>();
+            services.AddSingleton<ICottonInstanceProbe, CottonServerInfoProbe>();
+            services.AddSingleton<ICottonInstanceResolver, CottonInstanceResolver>();
             services.AddSingleton<ICottonProfileCacheStore, PreferencesCottonProfileCacheStore>();
             services.AddSingleton<ICottonNotificationCursorStore, PreferencesCottonNotificationCursorStore>();
             services.AddSingleton<ICottonNotificationBatchProvider, CottonSdkNotificationBatchProvider>();

@@ -22,7 +22,6 @@ namespace Cotton.Mobile.ViewModels
             ICottonProfileCacheStore profileCacheStore,
             INetworkAccessService networkAccess,
             IMainPagePresentationService presentationService,
-            CottonMobileOptions options,
             ILogger<MainPageSessionCoordinator> logger)
         {
             ArgumentNullException.ThrowIfNull(sessionService);
@@ -30,7 +29,6 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(profileCacheStore);
             ArgumentNullException.ThrowIfNull(networkAccess);
             ArgumentNullException.ThrowIfNull(presentationService);
-            ArgumentNullException.ThrowIfNull(options);
             ArgumentNullException.ThrowIfNull(logger);
 
             _sessionService = sessionService;
@@ -38,11 +36,8 @@ namespace Cotton.Mobile.ViewModels
             _profileCacheStore = profileCacheStore;
             _networkAccess = networkAccess;
             _presentationService = presentationService;
-            DefaultInstanceUrl = options.DefaultInstanceUrl;
             _logger = logger;
         }
-
-        public string DefaultInstanceUrl { get; }
 
         public async Task<MainPageSessionState> RestoreAsync()
         {

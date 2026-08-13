@@ -23,35 +23,13 @@ namespace Cotton.Mobile.ViewModels
         private bool _isCancelAuthorizationEnabled;
         private bool _isLogoutEnabled;
 
-        public MainPageDisplayState(string defaultInstanceUrl)
-        {
-            if (string.IsNullOrWhiteSpace(defaultInstanceUrl))
-            {
-                throw new ArgumentException("Default instance URL is required.", nameof(defaultInstanceUrl));
-            }
-
-            DefaultInstanceUrl = defaultInstanceUrl.Trim();
-        }
-
         public string InstanceUrl
         {
             get => _instanceUrl;
-            set
-            {
-                if (SetProperty(ref _instanceUrl, value ?? string.Empty))
-                {
-                    OnPropertyChanged(nameof(EffectiveInstanceUrl));
-                }
-            }
+            set => SetProperty(ref _instanceUrl, value ?? string.Empty);
         }
 
-        public string DefaultInstanceUrl { get; }
-
-        public string InstanceUrlPlaceholder { get; } = CoreResources.CustomServerUrl;
-
-        public string EffectiveInstanceUrl => string.IsNullOrWhiteSpace(InstanceUrl)
-            ? DefaultInstanceUrl
-            : InstanceUrl;
+        public string InstanceUrlPlaceholder { get; } = CoreResources.ServerAddress;
 
         public string LoadingMessage
         {

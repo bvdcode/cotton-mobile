@@ -3,6 +3,7 @@
 
 using System.Globalization;
 using System.Resources;
+using System.Text;
 
 namespace Cotton.Mobile.Resources.Localization
 {
@@ -37,9 +38,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string NoSyncFoldersBody => GetString(nameof(NoSyncFoldersBody));
         public static string ConnectText => GetString(nameof(ConnectText));
         public static string ChangeServerText => GetString(nameof(ChangeServerText));
-        public static string UseDefaultServerText => GetString(nameof(UseDefaultServerText));
         public static string CottonCloudAddressHint => GetString(nameof(CottonCloudAddressHint));
-        public static string ServerChoiceHint => GetString(nameof(ServerChoiceHint));
         public static string OpenSyncDescription => GetString(nameof(OpenSyncDescription));
         public static string OpenProfileDescription => GetString(nameof(OpenProfileDescription));
         public static string PrimaryActionDescription => GetString(nameof(PrimaryActionDescription));
@@ -60,6 +59,10 @@ namespace Cotton.Mobile.Resources.Localization
         public static string SyncFolderMissing => GetString(nameof(SyncFolderMissing));
         public static string SyncFolderNotReady => GetString(nameof(SyncFolderNotReady));
         public static string InvalidServerUrl => GetString(nameof(InvalidServerUrl));
+        public static string CheckingServer => GetString(nameof(CheckingServer));
+        public static string ServerNotFound => GetString(nameof(ServerNotFound));
+        public static string InsecureConnectionTitle => GetString(nameof(InsecureConnectionTitle));
+        public static string ContinueText => GetString(nameof(ContinueText));
         public static string SigningOut => GetString(nameof(SigningOut));
         public static string UnexpectedError => GetString(nameof(UnexpectedError));
         public static string SignOutQuestion => GetString(nameof(SignOutQuestion));
@@ -95,6 +98,16 @@ namespace Cotton.Mobile.Resources.Localization
         public static string NotificationChannelDescription => GetString(nameof(NotificationChannelDescription));
         public static string SecurityNotificationChannelName => GetString(nameof(SecurityNotificationChannelName));
         public static string SecurityNotificationChannelDescription => GetString(nameof(SecurityNotificationChannelDescription));
+
+        public static string CreateInsecureConnectionMessage(Uri instanceUri)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            CompositeFormat format = CompositeFormat.Parse(GetString("InsecureConnectionFormat"));
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                format,
+                instanceUri.AbsoluteUri);
+        }
 
         public static string CreateNotificationSummary(string latestTitle, int additionalCount)
         {

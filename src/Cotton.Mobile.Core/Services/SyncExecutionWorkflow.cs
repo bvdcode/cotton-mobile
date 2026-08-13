@@ -12,12 +12,10 @@ namespace Cotton.Mobile.Services
         public async Task<string> RunRootAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
-            Action<string> reportStatus,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(root);
-            ArgumentNullException.ThrowIfNull(reportStatus);
             cancellationToken.ThrowIfCancellationRequested();
 
             CottonDeviceToCloudSyncRunSummary summary = await _deviceToCloudCoordinator
@@ -29,12 +27,10 @@ namespace Cotton.Mobile.Services
         public async Task<string> RunAllAsync(
             Uri instanceUri,
             IReadOnlyList<CottonSyncRootSnapshot> roots,
-            Action<string> reportStatus,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(roots);
-            ArgumentNullException.ThrowIfNull(reportStatus);
 
             List<CottonDeviceToCloudSyncRootRunResult> deviceResults = [];
             foreach (CottonSyncRootSnapshot root in roots)

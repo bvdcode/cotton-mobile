@@ -42,6 +42,5 @@ namespace Cotton.Mobile.Tests
         {
             throw new NotSupportedException("Folder creation is not used by these tests.");
         }
-
     }
 }

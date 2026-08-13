@@ -9,27 +9,31 @@ if [[ ! -f "$manifest_path" ]]; then
   exit 1
 fi
 
-blocked_permissions=(
+required_permissions=(
   "android.permission.READ_MEDIA_IMAGES"
   "android.permission.READ_MEDIA_VIDEO"
-  "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
 )
 
-for permission in "${blocked_permissions[@]}"; do
-  if grep -Fq "$permission" "$manifest_path"; then
-    printf 'Play release manifest must not declare %s.\n' "$permission" >&2
+for permission in "${required_permissions[@]}"; do
+  if ! grep -Fq "$permission" "$manifest_path"; then
+    printf 'Media backup manifest must declare %s.\n' "$permission" >&2
     exit 1
   fi
 done
 
-blocked_api_references=(
+if grep -Fq "android.permission.READ_MEDIA_VISUAL_USER_SELECTED" "$manifest_path"; then
+  printf 'Media backup manifest must not declare partial-library access.\n' >&2
+  exit 1
+fi
+
+required_api_references=(
   "Manifest.Permission.ReadMediaImages"
   "Manifest.Permission.ReadMediaVideo"
 )
 
-for api_reference in "${blocked_api_references[@]}"; do
-  if grep -R -Fq --include='*.cs' "$api_reference" "$android_source_path"; then
-    printf 'Android source must not request %s.\n' "$api_reference" >&2
+for api_reference in "${required_api_references[@]}"; do
+  if ! grep -R -Fq --include='*.cs' "$api_reference" "$android_source_path"; then
+    printf 'Android media backup must request %s.\n' "$api_reference" >&2
     exit 1
   fi
 done

@@ -19,7 +19,6 @@ namespace Cotton.Mobile.Services
             return _workflow.RunAllAsync(
                 request.InstanceUri,
                 request.Roots,
-                request.ReportStatus,
                 cancellationToken);
         }
     }

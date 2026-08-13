@@ -7,6 +7,5 @@ namespace Cotton.Mobile.Services
 {
     public record RunAllSyncRootsRequest(
         Uri InstanceUri,
-        IReadOnlyList<CottonSyncRootSnapshot> Roots,
-        Action<string> ReportStatus) : IRequest<string>;
+        IReadOnlyList<CottonSyncRootSnapshot> Roots) : IRequest<string>;
 }

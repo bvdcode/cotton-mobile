@@ -18,6 +18,5 @@ namespace Cotton.Mobile.Services
             CottonDeviceToCloudSyncPlanItem item,
             CottonFolderHandle parentFolder,
             CancellationToken cancellationToken = default);
-
     }
 }

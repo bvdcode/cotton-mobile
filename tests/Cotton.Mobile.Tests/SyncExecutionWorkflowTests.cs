@@ -13,8 +13,7 @@ namespace Cotton.Mobile.Tests
 
             string status = await workflow.RunRootAsync(
                 SyncTestRootFactory.InstanceUri,
-                SyncTestRootFactory.CreateDocumentTreeRoot(),
-                _ => { });
+                SyncTestRootFactory.CreateDocumentTreeRoot());
 
             Assert.Equal(1, coordinator.RunRootCount);
             Assert.Equal("No folders are set to sync.", status);
@@ -33,8 +32,7 @@ namespace Cotton.Mobile.Tests
 
             string status = await workflow.RunAllAsync(
                 SyncTestRootFactory.InstanceUri,
-                roots,
-                _ => { });
+                roots);
 
             Assert.Equal(2, coordinator.RunRootCount);
             Assert.Equal("No folders are set to sync.", status);

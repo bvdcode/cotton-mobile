@@ -28,7 +28,7 @@ namespace Cotton.Mobile.Services
             CanReconnect = root.NeedsUserAction;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
             PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
-            _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot, CanRunNow);
+            _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
             _runningStatusText = CreateRunningStatusText(root.Direction);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
             IsAttentionVisible = !isPaused
@@ -121,8 +121,7 @@ namespace Cotton.Mobile.Services
         private static string CreateStatusText(
             CottonSyncRootSnapshot root,
             bool isPaused,
-            bool isUnsupportedLocalRoot,
-            bool canRunNow)
+            bool isUnsupportedLocalRoot)
         {
             if (isPaused)
             {

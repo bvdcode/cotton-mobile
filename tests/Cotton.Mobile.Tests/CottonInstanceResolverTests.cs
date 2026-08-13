@@ -55,9 +55,8 @@ namespace Cotton.Mobile.Tests
             Uri? result = await resolver.ResolveAsync("cloud.example.test:8443/base");
 
             Assert.Equal("https://cloud.example.test:8443/base", result?.AbsoluteUri);
-            Assert.Collection(
-                probe.ProbedUris,
-                uri => Assert.Equal("https://cloud.example.test:8443/base", uri.AbsoluteUri));
+            Uri probedUri = Assert.Single(probe.ProbedUris);
+            Assert.Equal("https://cloud.example.test:8443/base", probedUri.AbsoluteUri);
         }
 
         [Fact]

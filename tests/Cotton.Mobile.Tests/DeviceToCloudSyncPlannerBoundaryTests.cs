@@ -67,6 +67,5 @@ namespace Cotton.Mobile.Tests
             Assert.False(plan.HasExecutableChanges);
             Assert.False(plan.HasBlockingItems);
         }
-
     }
 }

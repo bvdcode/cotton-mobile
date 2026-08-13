@@ -133,6 +133,5 @@ namespace Cotton.Mobile.Services
                 throw new InvalidOperationException("Device-to-cloud sync root is not runnable.");
             }
         }
-
     }
 }

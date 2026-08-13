@@ -51,6 +51,5 @@ namespace Cotton.Mobile.Tests
         {
             throw new InvalidOperationException("Folder creation was not expected.");
         }
-
     }
 }

@@ -83,8 +83,7 @@ namespace Cotton.Mobile.ViewModels
                 state.Status = await _mediator.Send(
                     new RunAllSyncRootsRequest(
                         instanceUri,
-                        runnableRoots,
-                        status => state.Status = status),
+                        runnableRoots),
                     cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -155,8 +154,7 @@ namespace Cotton.Mobile.ViewModels
                 state.Status = await _mediator.Send(
                     new RunSyncRootRequest(
                         instanceUri,
-                        root,
-                        status => state.Status = status),
+                        root),
                     cancellationToken);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)

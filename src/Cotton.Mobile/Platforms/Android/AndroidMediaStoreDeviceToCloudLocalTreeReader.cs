@@ -74,7 +74,7 @@ namespace Cotton.Mobile.Platforms.Android
 
             return new CottonDeviceToCloudLocalContentSnapshot(
                 root.LocalRoot.DisplayName,
-                items.Values.ToArray(),
+                [.. items.Values],
                 problems);
         }
 

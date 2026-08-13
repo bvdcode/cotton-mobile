@@ -108,7 +108,7 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                if (!root.LocalRoot.RequiresPersistedUserGrant || !root.NeedsUserAction)
+                if (!root.NeedsUserAction)
                 {
                     state.ShowRoots(collection);
                     state.Status = AppResources.LocalFolderAccessAvailable;

@@ -11,14 +11,17 @@ namespace Cotton.Mobile
 
         public App(
             Func<AppShell> appShellFactory,
-            ICottonNotificationSessionService notificationSessionService)
+            ICottonNotificationSessionService notificationSessionService,
+            ICottonAutomaticSyncSessionService automaticSyncSessionService)
         {
             ArgumentNullException.ThrowIfNull(appShellFactory);
             ArgumentNullException.ThrowIfNull(notificationSessionService);
+            ArgumentNullException.ThrowIfNull(automaticSyncSessionService);
 
             InitializeComponent();
             _appShellFactory = appShellFactory;
             notificationSessionService.Initialize();
+            automaticSyncSessionService.Initialize();
         }
 
         protected override Window CreateWindow(IActivationState? activationState)

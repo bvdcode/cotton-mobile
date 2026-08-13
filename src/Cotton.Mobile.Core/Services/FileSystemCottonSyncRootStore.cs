@@ -11,7 +11,8 @@ namespace Cotton.Mobile.Services
         ILogger<FileSystemCottonSyncRootStore> logger,
         TimeProvider timeProvider) : ICottonSyncRootStore
     {
-        private const int SchemaVersion = 1;
+        private const int LegacySchemaVersion = 1;
+        private const int SchemaVersion = 2;
         public const string MetadataFileName = "sync-roots.json";
 
         private static readonly Action<ILogger, string, Exception?> LogLoadFailed = LoggerMessage.Define<string>(
@@ -49,14 +50,23 @@ namespace Cotton.Mobile.Services
                         .ReadAsync<CottonStoredSyncRootCollection>(filePath, cancellationToken)
                         .ConfigureAwait(false);
                 if (stored is null
-                    || stored.SchemaVersion != SchemaVersion
+                    || stored.SchemaVersion is not LegacySchemaVersion and not SchemaVersion
                     || stored.Items is null)
                 {
                     throw new InvalidDataException("The sync-root metadata is invalid.");
                 }
 
-                return CottonSyncRootStoreMapper.Deduplicate([.. stored.Items
-                    .Select(item => CottonSyncRootStoreMapper.CreateSyncRoot(instanceUri, item))]);
+                IReadOnlyList<CottonStoredSyncRootItem?> supportedItems = stored.SchemaVersion == LegacySchemaVersion
+                    ? [.. stored.Items.Where(IsSupportedLegacyItem)]
+                    : stored.Items;
+                IReadOnlyList<CottonSyncRootSnapshot> roots = CottonSyncRootStoreMapper.Deduplicate(
+                    [.. supportedItems.Select(item => CottonSyncRootStoreMapper.CreateSyncRoot(instanceUri, item))]);
+                if (stored.SchemaVersion == LegacySchemaVersion)
+                {
+                    await SaveAsync(instanceUri, roots, cancellationToken).ConfigureAwait(false);
+                }
+
+                return roots;
             }
             catch (OperationCanceledException)
             {
@@ -156,6 +166,11 @@ namespace Cotton.Mobile.Services
         private string CreateMetadataFilePath(Uri instanceUri)
         {
             return Path.Combine(_pathProvider.CreateSyncRootMetadataDirectory(instanceUri), MetadataFileName);
+        }
+
+        private static bool IsSupportedLegacyItem(CottonStoredSyncRootItem? item)
+        {
+            return item is null || item.Direction == CottonSyncDirection.DeviceToCloud;
         }
     }
 }

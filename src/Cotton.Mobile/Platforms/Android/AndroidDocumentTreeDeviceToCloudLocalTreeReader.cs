@@ -277,7 +277,7 @@ namespace Cotton.Mobile.Platforms.Android
                 throw new InvalidOperationException("Device-to-cloud local tree reading only supports user-selected folders.");
             }
 
-            if (root.Direction == CottonSyncDirection.CloudToDevice)
+            if (root.Direction != CottonSyncDirection.DeviceToCloud)
             {
                 throw new InvalidOperationException("Device-to-cloud local tree reading requires device-to-cloud sync direction.");
             }

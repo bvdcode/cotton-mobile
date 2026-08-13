@@ -42,16 +42,6 @@ namespace Cotton.Mobile.Tests
             return Task.FromResult(uploaded);
         }
 
-        public Task<CottonFileBrowserEntry> UploadChangedFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CottonFolderHandle parentFolder,
-            CancellationToken cancellationToken = default)
-        {
-            throw new InvalidOperationException("Changed upload was not expected.");
-        }
-
         public Task<CottonFileBrowserEntry> CreateFolderAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
@@ -62,13 +52,5 @@ namespace Cotton.Mobile.Tests
             throw new InvalidOperationException("Folder creation was not expected.");
         }
 
-        public Task DeleteRemoteFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CancellationToken cancellationToken = default)
-        {
-            throw new InvalidOperationException("Remote delete was not expected.");
-        }
     }
 }

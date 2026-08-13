@@ -5,7 +5,8 @@ namespace Cotton.Mobile.Services
 {
     public enum CottonSyncRootStorageKind
     {
-        AppPrivateDirectory,
-        UserSelectedDocumentTree,
+        AppPrivateDirectory = 0,
+        UserSelectedDocumentTree = 1,
+        MediaStore = 2,
     }
 }

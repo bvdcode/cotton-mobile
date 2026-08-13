@@ -23,7 +23,7 @@ namespace Cotton.Mobile.Tests
                     localRootKey,
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice,
+                CottonSyncDirection.DeviceToCloud,
                 CottonUploadOriginalRetention.KeepOriginals);
         }
     }

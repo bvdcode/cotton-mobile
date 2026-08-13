@@ -5,121 +5,40 @@ namespace Cotton.Mobile.Tests
 {
     public class SyncRootRunCapabilityTests
     {
-        private static readonly Uri InstanceUri = new("https://app.cottoncloud.dev");
-        private static readonly Guid RootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        private static readonly Guid FolderId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
         [Fact]
-        public void RunCapabilityMatchesDirectionAndLocalRootKind()
+        public void ReadyDocumentTreeAndMediaStoreRootsCanRun()
         {
-            CottonSyncRootSnapshot cloudAppPrivate = CreateRoot(
-                CottonSyncDirection.CloudToDevice,
-                CottonSyncRootStorageKind.AppPrivateDirectory);
-            CottonSyncRootSnapshot cloudDocumentTree = CreateRoot(
-                CottonSyncDirection.CloudToDevice,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree);
-            CottonSyncRootSnapshot cloudNeedsGrant = CreateRoot(
-                CottonSyncDirection.CloudToDevice,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                CottonSyncRootPermissionStatus.NeedsUserGrant);
-            CottonSyncRootSnapshot deviceDocumentTree = CreateRoot(
-                CottonSyncDirection.DeviceToCloud,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree);
-            CottonSyncRootSnapshot deviceAppPrivate = CreateRoot(
-                CottonSyncDirection.DeviceToCloud,
-                CottonSyncRootStorageKind.AppPrivateDirectory);
-            CottonSyncRootSnapshot bidirectionalDocumentTree = CreateRoot(
-                CottonSyncDirection.Bidirectional,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree);
-            CottonSyncRootSnapshot bidirectionalAppPrivate = CreateRoot(
-                CottonSyncDirection.Bidirectional,
-                CottonSyncRootStorageKind.AppPrivateDirectory);
-
-            Assert.True(CottonSyncRootRunCapability.CanRun(cloudAppPrivate));
-            Assert.False(CottonSyncRootRunCapability.CanRun(cloudDocumentTree));
-            Assert.False(CottonSyncRootRunCapability.CanRun(cloudNeedsGrant));
-            Assert.True(CottonSyncRootRunCapability.CanRun(deviceDocumentTree));
-            Assert.False(CottonSyncRootRunCapability.CanRun(deviceAppPrivate));
-            Assert.True(CottonSyncRootRunCapability.CanRun(bidirectionalDocumentTree));
-            Assert.False(CottonSyncRootRunCapability.CanRun(bidirectionalAppPrivate));
-
-            Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudAppPrivate));
-            Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudDocumentTree));
-            Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(cloudNeedsGrant));
-            Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(deviceDocumentTree));
-            Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(deviceAppPrivate));
-            Assert.False(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(bidirectionalDocumentTree));
-            Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(bidirectionalAppPrivate));
-
-            Assert.Equal(
-                "Local sync target unsupported",
-                CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(cloudAppPrivate));
-            Assert.Equal(
-                "Local sync source unsupported",
-                CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(deviceAppPrivate));
-            Assert.Equal(
-                "Local sync source unsupported",
-                CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(bidirectionalAppPrivate));
+            Assert.True(CottonSyncRootRunCapability.CanRun(
+                SyncTestRootFactory.CreateDocumentTreeRoot()));
+            Assert.True(CottonSyncRootRunCapability.CanRun(
+                SyncTestRootFactory.CreateMediaStoreRoot()));
         }
 
         [Fact]
-        public void NullRootIsRejected()
+        public void RevokedRootCannotRun()
         {
-            Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.CanRun(null!));
-            Assert.Throws<ArgumentNullException>(() => CottonSyncRootRunCapability.HasUnsupportedLocalRoot(null!));
-            Assert.Throws<ArgumentNullException>(
-                () => CottonSyncRootRunCapability.GetRunnableRoots(null!, new HashSet<Guid>()));
-            Assert.Throws<ArgumentNullException>(
-                () => CottonSyncRootRunCapability.GetRunnableRoots([], null!));
-            Assert.Throws<ArgumentNullException>(
-                () => CottonSyncRootRunCapability.CreateUnsupportedLocalRootStatusText(null!));
+            Assert.False(CottonSyncRootRunCapability.CanRun(
+                SyncTestRootFactory.CreateMediaStoreRoot(CottonSyncRootPermissionStatus.Revoked)));
         }
 
         [Fact]
-        public void RunnableRootsExcludePausedAndUnsupportedRoots()
+        public void AppPrivateStorageIsNotAnUploadSource()
         {
-            CottonSyncRootSnapshot runnable = CreateRoot(
-                CottonSyncDirection.Bidirectional,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa1"));
-            CottonSyncRootSnapshot paused = CreateRoot(
-                CottonSyncDirection.CloudToDevice,
-                CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa2"));
-            CottonSyncRootSnapshot unsupported = CreateRoot(
-                CottonSyncDirection.DeviceToCloud,
-                CottonSyncRootStorageKind.AppPrivateDirectory,
-                rootId: Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaa3"));
-
-            IReadOnlyList<CottonSyncRootSnapshot> result = CottonSyncRootRunCapability.GetRunnableRoots(
-                [runnable, paused, unsupported],
-                new HashSet<Guid> { paused.Id });
-
-            Assert.Equal([runnable], result);
-        }
-
-        private static CottonSyncRootSnapshot CreateRoot(
-            CottonSyncDirection direction,
-            CottonSyncRootStorageKind storageKind,
-            CottonSyncRootPermissionStatus permissionStatus = CottonSyncRootPermissionStatus.Available,
-            Guid? rootId = null)
-        {
-            return new CottonSyncRootSnapshot(
-                rootId ?? RootId,
-                InstanceUri,
+            CottonSyncRootSnapshot root = new(
+                Guid.NewGuid(),
+                SyncTestRootFactory.InstanceUri,
                 "account-1",
-                new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
+                new CottonUploadDestinationSnapshot(Guid.NewGuid(), "Files", "Files"),
                 new CottonSyncLocalRootSnapshot(
-                    storageKind,
-                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
-                        ? $"app-private-sync-root-{FolderId:N}"
-                        : "content://tree/projects",
-                    storageKind == CottonSyncRootStorageKind.AppPrivateDirectory
-                        ? "On this device"
-                        : "Projects",
-                    permissionStatus),
-                direction,
+                    CottonSyncRootStorageKind.AppPrivateDirectory,
+                    "app-private",
+                    "On this device",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.DeviceToCloud,
                 CottonUploadOriginalRetention.KeepOriginals);
+
+            Assert.False(CottonSyncRootRunCapability.CanRun(root));
+            Assert.True(CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root));
         }
     }
 }

@@ -9,33 +9,14 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return root.Direction switch
-            {
-                CottonSyncDirection.CloudToDevice => CottonCloudToDeviceSyncRootCapability.CanRun(root),
-                CottonSyncDirection.DeviceToCloud => CottonDeviceToCloudSyncRootCapability.CanRun(root),
-                CottonSyncDirection.Bidirectional => CottonDeviceToCloudSyncRootCapability.CanRun(root),
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(root),
-                    "Sync direction is not supported."),
-            };
+            return CottonDeviceToCloudSyncRootCapability.CanRun(root);
         }
 
         public static bool HasUnsupportedLocalRoot(CottonSyncRootSnapshot root)
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return root.Direction switch
-            {
-                CottonSyncDirection.CloudToDevice =>
-                    CottonCloudToDeviceSyncRootCapability.HasUnsupportedLocalRoot(root),
-                CottonSyncDirection.DeviceToCloud =>
-                    CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root),
-                CottonSyncDirection.Bidirectional =>
-                    CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root),
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(root),
-                    "Sync direction is not supported."),
-            };
+            return CottonDeviceToCloudSyncRootCapability.HasUnsupportedLocalRoot(root);
         }
 
         public static IReadOnlyList<CottonSyncRootSnapshot> GetRunnableRoots(
@@ -52,18 +33,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return root.Direction switch
-            {
-                CottonSyncDirection.CloudToDevice =>
-                    CottonCloudToDeviceSyncRootCapability.UnsupportedLocalRootStatusText,
-                CottonSyncDirection.DeviceToCloud =>
-                    CottonDeviceToCloudSyncRootCapability.UnsupportedLocalRootStatusText,
-                CottonSyncDirection.Bidirectional =>
-                    CottonDeviceToCloudSyncRootCapability.UnsupportedLocalRootStatusText,
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(root),
-                    "Sync direction is not supported."),
-            };
+            return CottonDeviceToCloudSyncRootCapability.UnsupportedLocalRootStatusText;
         }
     }
 }

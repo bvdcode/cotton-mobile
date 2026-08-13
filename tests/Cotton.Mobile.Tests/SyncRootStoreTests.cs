@@ -168,7 +168,7 @@ namespace Cotton.Mobile.Tests
                       "localRootKey": "app-private-sync-root",
                       "localRootDisplayName": "On this device",
                       "localPermissionStatus": 0,
-                      "direction": 0,
+                      "direction": 1,
                       "stableKey": "invalid"
                     },
                     {
@@ -182,7 +182,7 @@ namespace Cotton.Mobile.Tests
                       "localRootKey": "{{root.LocalRoot.RootKey}}",
                       "localRootDisplayName": "{{root.LocalRoot.DisplayName}}",
                       "localPermissionStatus": 0,
-                      "direction": 0,
+                      "direction": 1,
                       "stableKey": "{{root.StableKey}}"
                     }
                   ]
@@ -221,7 +221,7 @@ namespace Cotton.Mobile.Tests
                       "localRootKey": "{{other.LocalRoot.RootKey}}",
                       "localRootDisplayName": "{{other.LocalRoot.DisplayName}}",
                       "localPermissionStatus": 0,
-                      "direction": 0,
+                      "direction": 1,
                       "stableKey": "{{other.StableKey}}"
                     },
                     {
@@ -235,7 +235,7 @@ namespace Cotton.Mobile.Tests
                       "localRootKey": "{{current.LocalRoot.RootKey}}",
                       "localRootDisplayName": "{{current.LocalRoot.DisplayName}}",
                       "localPermissionStatus": 0,
-                      "direction": 0,
+                      "direction": 1,
                       "stableKey": "{{current.StableKey}}"
                     }
                   ]
@@ -309,7 +309,7 @@ namespace Cotton.Mobile.Tests
                     "app-private-sync-root",
                     "On this device",
                     CottonSyncRootPermissionStatus.Available),
-                CottonSyncDirection.CloudToDevice,
+                CottonSyncDirection.DeviceToCloud,
                 CottonUploadOriginalRetention.KeepOriginals);
         }
     }

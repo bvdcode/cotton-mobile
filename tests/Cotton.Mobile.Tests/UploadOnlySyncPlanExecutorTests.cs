@@ -221,35 +221,6 @@ namespace Cotton.Mobile.Tests
         }
 
         [Theory]
-        [InlineData(CottonDeviceToCloudSyncActionKind.UploadChangedFile)]
-        [InlineData(CottonDeviceToCloudSyncActionKind.DeleteRemoteFile)]
-        [InlineData(CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan)]
-        public async Task ExecuteRejectsTwoWayMirrorActions(CottonDeviceToCloudSyncActionKind action)
-        {
-            ExecutionHarness harness = new(CottonUploadOriginalRetention.KeepOriginals);
-            CottonDeviceToCloudSyncPlanItem item = new(
-                action,
-                CottonFileBrowserEntryType.File,
-                "photo.jpg",
-                "photo.jpg",
-                RemoteFileId,
-                "etag-remote",
-                LocalUpdatedAt,
-                42,
-                "image/jpeg",
-                "primary:DCIM/Camera/photo.jpg",
-                uploadOperationId: null,
-                TestContentHashes.First);
-
-            await Assert.ThrowsAsync<InvalidOperationException>(() => harness.Executor.ExecuteAsync(
-                InstanceUri,
-                harness.Root,
-                CreatePlan(item)));
-
-            Assert.Empty(harness.Events);
-        }
-
-        [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public async Task ExecuteRejectsPlanWithDifferentRootOrFolder(bool changesRootId)

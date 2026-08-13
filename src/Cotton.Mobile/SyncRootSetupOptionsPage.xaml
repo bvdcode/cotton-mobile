@@ -48,8 +48,8 @@
                            Style="{StaticResource AppBodyText}" />
                 </VerticalStackLayout>
 
-                <material:ButtonView TappedCommand="{Binding SelectUploadOnlyCommand}"
-                                     SemanticProperties.Description="{Binding UploadOnlyDescription}"
+                <material:ButtonView TappedCommand="{Binding SelectFolderCommand}"
+                                     SemanticProperties.Description="{Binding FolderDescription}"
                                      Padding="16"
                                      Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                                      StrokeThickness="1"
@@ -57,7 +57,7 @@
                                      StrokeShape="RoundRectangle 20">
                     <material:ButtonView.Triggers>
                         <DataTrigger TargetType="material:ButtonView"
-                                     Binding="{Binding IsUploadOnlySelected}"
+                                     Binding="{Binding IsFolderSelected}"
                                      Value="True">
                             <Setter Property="Stroke"
                                     Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
@@ -70,25 +70,25 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Upload}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Folder}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
                                              VerticalOptions="Center">
-                            <Label Text="{x:Static localization:SyncRootSetupResources.UploadOnlyTitle}"
+                            <Label Text="{x:Static localization:SyncRootSetupResources.FolderTitle}"
                                    FontAttributes="Bold" />
-                            <Label Text="{x:Static localization:SyncRootSetupResources.UploadOnlySupportingText}"
+                            <Label Text="{x:Static localization:SyncRootSetupResources.FolderSupportingText}"
                                    Style="{StaticResource AppBodyText}" />
                         </VerticalStackLayout>
                         <Image Grid.Column="2"
                                Style="{StaticResource AppIcon}"
                                Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
-                               IsVisible="{Binding IsUploadOnlySelected}" />
+                               IsVisible="{Binding IsFolderSelected}" />
                     </Grid>
                 </material:ButtonView>
 
-                <material:ButtonView TappedCommand="{Binding SelectBidirectionalCommand}"
-                                     SemanticProperties.Description="{Binding BidirectionalDescription}"
+                <material:ButtonView TappedCommand="{Binding SelectMediaCommand}"
+                                     SemanticProperties.Description="{Binding MediaDescription}"
                                      Padding="16"
                                      Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
                                      StrokeThickness="1"
@@ -96,7 +96,7 @@
                                      StrokeShape="RoundRectangle 20">
                     <material:ButtonView.Triggers>
                         <DataTrigger TargetType="material:ButtonView"
-                                     Binding="{Binding IsBidirectionalSelected}"
+                                     Binding="{Binding IsMediaSelected}"
                                      Value="True">
                             <Setter Property="Stroke"
                                     Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
@@ -109,20 +109,20 @@
                           ColumnSpacing="12">
                         <Border Style="{StaticResource AppIconFrame}">
                             <Image Style="{StaticResource AppIcon}"
-                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Sync_alt}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                                   Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
                         </Border>
                         <VerticalStackLayout Grid.Column="1"
                                              Spacing="3"
                                              VerticalOptions="Center">
-                            <Label Text="{x:Static localization:SyncRootSetupResources.BidirectionalTitle}"
+                            <Label Text="{x:Static localization:SyncRootSetupResources.MediaTitle}"
                                    FontAttributes="Bold" />
-                            <Label Text="{x:Static localization:SyncRootSetupResources.BidirectionalSupportingText}"
+                            <Label Text="{x:Static localization:SyncRootSetupResources.MediaSupportingText}"
                                    Style="{StaticResource AppBodyText}" />
                         </VerticalStackLayout>
                         <Image Grid.Column="2"
                                Style="{StaticResource AppIcon}"
                                Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Check}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}"
-                               IsVisible="{Binding IsBidirectionalSelected}" />
+                               IsVisible="{Binding IsMediaSelected}" />
                     </Grid>
                 </material:ButtonView>
 

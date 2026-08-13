@@ -111,11 +111,6 @@ namespace Cotton.Mobile.Services
                         blockedCount++;
                         break;
 
-                    case CottonDeviceToCloudSyncActionKind.UploadChangedFile:
-                    case CottonDeviceToCloudSyncActionKind.DeleteRemoteFile:
-                    case CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan:
-                        throw new InvalidOperationException("Two-way action cannot run through the upload-only executor.");
-
                     default:
                         throw new ArgumentOutOfRangeException(nameof(plan), "Upload-only sync action is not supported.");
                 }
@@ -124,11 +119,8 @@ namespace Cotton.Mobile.Services
             return new CottonDeviceToCloudSyncExecutionResult(
                 uploadedCount,
                 confirmedUploadCount,
-                refreshedCount: 0,
                 createdFolderCount,
                 deletedLocalFileCount,
-                deletedRemoteFileCount: 0,
-                removedManifestCount: 0,
                 skippedCount,
                 blockedCount);
         }

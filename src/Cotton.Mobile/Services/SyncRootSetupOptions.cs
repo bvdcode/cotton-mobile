@@ -4,6 +4,6 @@
 namespace Cotton.Mobile.Services
 {
     public record SyncRootSetupOptions(
-        CottonSyncDirection Direction,
+        CottonSyncRootStorageKind SourceStorageKind,
         CottonUploadOriginalRetention UploadOriginalRetention);
 }

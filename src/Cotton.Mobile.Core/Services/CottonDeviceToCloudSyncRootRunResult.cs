@@ -135,18 +135,5 @@ namespace Cotton.Mobile.Services
                 null);
         }
 
-        public static CottonDeviceToCloudSyncRootRunResult SkippedUnsupportedDirection(CottonSyncRootSnapshot root)
-        {
-            ArgumentNullException.ThrowIfNull(root);
-
-            return new CottonDeviceToCloudSyncRootRunResult(
-                root.Id,
-                root.CloudFolder.FolderId,
-                root.CloudFolder.FolderName,
-                CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection,
-                CottonDeviceToCloudSyncStatusText.UnsupportedDirectionStatus,
-                null,
-                null);
-        }
     }
 }

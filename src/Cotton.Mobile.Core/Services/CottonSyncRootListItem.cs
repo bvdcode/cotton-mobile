@@ -25,7 +25,7 @@ namespace Cotton.Mobile.Services
             IsPaused = isPaused;
             IsUnsupportedLocalRoot = !isPaused && CottonSyncRootRunCapability.HasUnsupportedLocalRoot(root);
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
-            CanReconnect = root.LocalRoot.RequiresPersistedUserGrant && root.NeedsUserAction;
+            CanReconnect = root.NeedsUserAction;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
             PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
             _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot, CanRunNow);
@@ -134,11 +134,6 @@ namespace Cotton.Mobile.Services
                 return CoreResources.UnsupportedStatus;
             }
 
-            if (!canRunNow && root.Direction == CottonSyncDirection.Bidirectional && root.CanRunSync)
-            {
-                return CoreResources.UnavailableStatus;
-            }
-
             CottonSyncRootReadinessStatus readinessStatus = root.ReadinessStatus;
             return readinessStatus switch
             {
@@ -155,26 +150,22 @@ namespace Cotton.Mobile.Services
 
         private static string CreateRunningStatusText(CottonSyncDirection direction)
         {
-            return direction switch
-            {
-                CottonSyncDirection.CloudToDevice => CoreResources.SyncingStatus,
-                CottonSyncDirection.DeviceToCloud => CoreResources.UploadingStatus,
-                CottonSyncDirection.Bidirectional => CoreResources.SyncingStatus,
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(direction),
-                    "Sync direction is not supported."),
-            };
+            EnsureSupportedDirection(direction);
+            return CoreResources.UploadingStatus;
         }
 
         private static string CreateDirectionText(CottonSyncDirection direction)
         {
-            return direction switch
+            EnsureSupportedDirection(direction);
+            return CoreResources.UploadNewFilesAction;
+        }
+
+        private static void EnsureSupportedDirection(CottonSyncDirection direction)
+        {
+            if (direction != CottonSyncDirection.DeviceToCloud)
             {
-                CottonSyncDirection.CloudToDevice => CoreResources.CloudToDeviceDirection,
-                CottonSyncDirection.DeviceToCloud => CoreResources.UploadNewFilesAction,
-                CottonSyncDirection.Bidirectional => CoreResources.BidirectionalDirection,
-                _ => throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported."),
-            };
+                throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+            }
         }
     }
 }

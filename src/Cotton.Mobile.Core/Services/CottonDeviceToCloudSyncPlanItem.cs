@@ -89,9 +89,7 @@ namespace Cotton.Mobile.Services
 
         public string? ContentHash { get; }
 
-        public bool RequiresUpload =>
-            Action is CottonDeviceToCloudSyncActionKind.UploadNewFile
-                or CottonDeviceToCloudSyncActionKind.UploadChangedFile;
+        public bool RequiresUpload => Action == CottonDeviceToCloudSyncActionKind.UploadNewFile;
 
         public bool RequiresRemoteFolderCreate => Action == CottonDeviceToCloudSyncActionKind.CreateRemoteFolder;
 
@@ -99,11 +97,7 @@ namespace Cotton.Mobile.Services
 
         public bool RequiresLocalDelete => Action == CottonDeviceToCloudSyncActionKind.DeleteUploadedLocalFile;
 
-        public bool RequiresRemoteDelete => Action == CottonDeviceToCloudSyncActionKind.DeleteRemoteFile;
-
-        public bool RemovesManifestOnly => Action == CottonDeviceToCloudSyncActionKind.RemoveManifestOrphan;
-
-        public bool RequiresServerMutation => RequiresUpload || RequiresRemoteFolderCreate || RequiresRemoteDelete;
+        public bool RequiresServerMutation => RequiresUpload || RequiresRemoteFolderCreate;
 
         public bool RequiresLocalMutation => ConfirmsPendingUpload || RequiresLocalDelete;
 
@@ -119,57 +113,6 @@ namespace Cotton.Mobile.Services
                 or CottonDeviceToCloudSyncActionKind.PendingLocalVersionChanged;
 
         public bool IsLocalProblem => Action == CottonDeviceToCloudSyncActionKind.BlockedLocalItemName;
-
-        public CottonSyncedFileSnapshot CreateManifestItem(
-            CottonFileBrowserEntry uploadedFile,
-            DateTime syncedAtUtc)
-        {
-            ArgumentNullException.ThrowIfNull(uploadedFile);
-            if (!RequiresUpload)
-            {
-                throw new InvalidOperationException("Only upload sync plan items can create synced-file metadata.");
-            }
-
-            if (uploadedFile.Type != CottonFileBrowserEntryType.File)
-            {
-                throw new InvalidOperationException("Synced-file metadata requires an uploaded file item.");
-            }
-
-            if (!string.Equals(uploadedFile.Name, DisplayName, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("Synced-file metadata requires the uploaded file name to match the plan item.");
-            }
-
-            if (Action == CottonDeviceToCloudSyncActionKind.UploadChangedFile
-                && CloudItemId.HasValue
-                && uploadedFile.Id != CloudItemId.Value)
-            {
-                throw new InvalidOperationException("Changed upload returned a different cloud file id.");
-            }
-
-            if (string.IsNullOrWhiteSpace(uploadedFile.ETag))
-            {
-                throw new InvalidOperationException("Synced-file metadata requires an uploaded file ETag.");
-            }
-
-            string uploadedContentHash = uploadedFile.ContentHash
-                ?? throw new InvalidOperationException("Synced-file metadata requires an uploaded file content hash.");
-            if (ContentHash is null || !string.Equals(uploadedContentHash, ContentHash, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException("Uploaded file content hash does not match the local file.");
-            }
-
-            return new CottonSyncedFileSnapshot(
-                uploadedFile.Id,
-                uploadedFile.Name,
-                uploadedFile.ETag,
-                uploadedFile.UpdatedAtUtc,
-                uploadedFile.SizeBytes,
-                uploadedFile.ContentType,
-                syncedAtUtc,
-                RelativePath,
-                uploadedContentHash);
-        }
 
         public CottonDeviceToCloudSyncPlanItem WithUploadOperationId(Guid uploadOperationId)
         {

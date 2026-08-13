@@ -9,14 +9,9 @@ namespace Cotton.Mobile.Services
     {
         public static string ActionLabel => CoreResources.UploadNewFilesAction;
 
-        public static string OfflineUnavailableStatus { get; } =
-            CottonCloudToDeviceSyncStatusText.OfflineUnavailableStatus;
+        public static string OfflineUnavailableStatus => CoreResources.SyncOffline;
 
-        public static string FailedStatus { get; } =
-            CottonCloudToDeviceSyncStatusText.FailedStatus;
-
-        public static string UnsupportedDirectionStatus { get; } =
-            CoreResources.UploadDirectionUnsupported;
+        public static string FailedStatus => CoreResources.SyncFailed;
 
         public static string CreateStartingStatus(string folderName)
         {
@@ -29,9 +24,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(summary);
 
-            return CottonSyncSettingsRunStatusText.CreateCompletedStatus(
-                new CottonCloudToDeviceSyncRunSummary([]),
-                summary);
+            return CottonSyncSettingsRunStatusText.CreateCompletedStatus(summary);
         }
 
         private static string NormalizeFolderName(string folderName)

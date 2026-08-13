@@ -66,7 +66,7 @@ namespace Cotton.Mobile.Services
             }
 
             CottonSyncLocalRootSnapshot? localRoot = await _localRootPicker
-                .PickUserSelectedDocumentTreeAsync(cancellationToken)
+                .PickAsync(options.SourceStorageKind, cancellationToken)
                 .ConfigureAwait(false);
             if (localRoot is null)
             {
@@ -74,12 +74,11 @@ namespace Cotton.Mobile.Services
             }
 
             CottonSyncRootConfigurationResult result = await _configurationService
-                .ConfigureUserSelectedDocumentTreeRootAsync(
+                .ConfigureRootAsync(
                     instanceUri,
                     accountScopeKey,
                     cloudFolder,
                     localRoot,
-                    options.Direction,
                     options.UploadOriginalRetention,
                     cancellationToken)
                 .ConfigureAwait(false);
@@ -87,10 +86,10 @@ namespace Cotton.Mobile.Services
             {
                 CottonSyncRootConfigurationStatus.Created => new SyncRootSetupResult(
                     SyncRootSetupStatus.Created,
-                    SyncRootSetupResources.CreateCreatedMessage(options.Direction, cloudFolder.Path)),
+                    SyncRootSetupResources.CreateCreatedMessage(cloudFolder.Path)),
                 CottonSyncRootConfigurationStatus.Updated => new SyncRootSetupResult(
                     SyncRootSetupStatus.Updated,
-                    SyncRootSetupResources.CreateUpdatedMessage(options.Direction, cloudFolder.Path)),
+                    SyncRootSetupResources.CreateUpdatedMessage(cloudFolder.Path)),
                 CottonSyncRootConfigurationStatus.AlreadyConfigured => new SyncRootSetupResult(
                     SyncRootSetupStatus.AlreadyConfigured,
                     ResolveAlreadyConfiguredMessage(result.Root, options)),
@@ -112,7 +111,7 @@ namespace Cotton.Mobile.Services
             }
 
             CottonSyncLocalRootSnapshot? localRoot = await _localRootPicker
-                .PickUserSelectedDocumentTreeAsync(cancellationToken)
+                .PickAsync(root.LocalRoot.StorageKind, cancellationToken)
                 .ConfigureAwait(false);
             if (localRoot is null)
             {
@@ -120,7 +119,7 @@ namespace Cotton.Mobile.Services
             }
 
             CottonSyncRootSnapshot reconnectedRoot = await _reconnectService
-                .ReconnectUserSelectedDocumentTreeAsync(root, localRoot, cancellationToken)
+                .ReconnectAsync(root, localRoot, cancellationToken)
                 .ConfigureAwait(false);
             return new SyncRootSetupResult(
                 SyncRootSetupStatus.Updated,
@@ -136,12 +135,12 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot root,
             SyncRootSetupOptions options)
         {
-            if (root.Direction == options.Direction)
+            if (root.LocalRoot.StorageKind == options.SourceStorageKind)
             {
                 return SyncRootSetupResources.AlreadyConfiguredMessage;
             }
 
-            return SyncRootSetupResources.DirectionConflictMessage;
+            return SyncRootSetupResources.SourceConflictMessage;
         }
     }
 }

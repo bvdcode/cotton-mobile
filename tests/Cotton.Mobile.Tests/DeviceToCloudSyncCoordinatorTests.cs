@@ -42,7 +42,8 @@ namespace Cotton.Mobile.Tests
                 _uploadReceiptStore,
                 _localTreeReader,
                 new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
-                executor);
+                executor,
+                new CottonSyncRootExecutionLock());
         }
 
         [Fact]
@@ -150,7 +151,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task RunRootSkipsNotReadyAndUnsupportedDirectionWithoutReads()
+        public async Task RunRootSkipsNotReadyRootWithoutReads()
         {
             CottonSyncRootSnapshot notReady = CreateRoot(
                 SyncRootId,
@@ -158,24 +159,12 @@ namespace Cotton.Mobile.Tests
                 "Projects",
                 CottonSyncRootPermissionStatus.Unavailable,
                 CottonSyncDirection.DeviceToCloud);
-            CottonSyncRootSnapshot cloudToDevice = CreateRoot(
-                SecondSyncRootId,
-                SecondFolderId,
-                "Archive",
-                CottonSyncRootPermissionStatus.Available,
-                CottonSyncDirection.CloudToDevice);
-
             CottonDeviceToCloudSyncRunSummary notReadySummary =
                 await _coordinator.RunRootAsync(InstanceUri, notReady);
-            CottonDeviceToCloudSyncRunSummary cloudToDeviceSummary =
-                await _coordinator.RunRootAsync(InstanceUri, cloudToDevice);
 
             Assert.Equal(
                 CottonDeviceToCloudSyncRootRunStatus.SkippedNotReady,
                 Assert.Single(notReadySummary.RootResults).Status);
-            Assert.Equal(
-                CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection,
-                Assert.Single(cloudToDeviceSummary.RootResults).Status);
             Assert.Empty(_localTreeReader.ReadRootIds);
             Assert.Empty(_remoteFolderContentSource.RequestedFolderIds);
         }
@@ -213,26 +202,6 @@ namespace Cotton.Mobile.Tests
             Assert.Equal(CottonDeviceToCloudSyncRootCapability.UnsupportedLocalRootStatusText, result.StatusText);
             Assert.Empty(_localTreeReader.ReadRootIds);
             Assert.Empty(_remoteFolderContentSource.RequestedFolderIds);
-        }
-
-        [Fact]
-        public async Task RunRootSkipsBidirectionalRootWithoutReads()
-        {
-            CottonSyncRootSnapshot root = CreateRoot(
-                SyncRootId,
-                FolderId,
-                "Projects",
-                CottonSyncRootPermissionStatus.Available,
-                CottonSyncDirection.Bidirectional);
-
-            CottonDeviceToCloudSyncRunSummary summary = await _coordinator.RunRootAsync(InstanceUri, root);
-
-            CottonDeviceToCloudSyncRootRunResult result = Assert.Single(summary.RootResults);
-            Assert.Equal(CottonDeviceToCloudSyncRootRunStatus.SkippedUnsupportedDirection, result.Status);
-            Assert.Equal(CottonDeviceToCloudSyncStatusText.UnsupportedDirectionStatus, result.StatusText);
-            Assert.Empty(_localTreeReader.ReadRootIds);
-            Assert.Empty(_remoteFolderContentSource.RequestedFolderIds);
-            Assert.Empty(_fileOperator.UploadedItems);
         }
 
         [Fact]

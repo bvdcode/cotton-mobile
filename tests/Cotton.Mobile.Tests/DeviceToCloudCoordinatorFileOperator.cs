@@ -33,16 +33,6 @@ namespace Cotton.Mobile.Tests
             return Task.FromResult(CreateFile(fileId, item.DisplayName, eTag, metadata));
         }
 
-        public Task<CottonFileBrowserEntry> UploadChangedFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CottonFolderHandle parentFolder,
-            CancellationToken cancellationToken = default)
-        {
-            throw new NotSupportedException("Changed uploads are not used by upload-only sync.");
-        }
-
         public Task<CottonFileBrowserEntry> CreateFolderAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
@@ -53,13 +43,5 @@ namespace Cotton.Mobile.Tests
             throw new NotSupportedException("Folder creation is not used by these tests.");
         }
 
-        public Task DeleteRemoteFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CancellationToken cancellationToken = default)
-        {
-            throw new NotSupportedException("Remote deletes are not supported by upload-only sync.");
-        }
     }
 }

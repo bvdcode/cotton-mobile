@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly MainPageSessionCoordinator _sessionCoordinator;
         private readonly MainPageUserInteractionService _userInteractionService;
         private readonly ICottonNotificationSessionService _notificationSessionService;
+        private readonly ICottonAutomaticSyncSessionService _automaticSyncSessionService;
         private readonly ILogger<MainPageViewModel> _logger;
 
         private CancellationTokenSource? _authorizationCancellation;
@@ -26,6 +27,7 @@ namespace Cotton.Mobile.ViewModels
             MainPageSessionCoordinator sessionCoordinator,
             MainPageUserInteractionService userInteractionService,
             ICottonNotificationSessionService notificationSessionService,
+            ICottonAutomaticSyncSessionService automaticSyncSessionService,
             ICottonMobileApplicationMetadata applicationMetadata,
             SyncSettingsViewModel sync,
             ILogger<MainPageViewModel> logger)
@@ -33,6 +35,7 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(sessionCoordinator);
             ArgumentNullException.ThrowIfNull(userInteractionService);
             ArgumentNullException.ThrowIfNull(notificationSessionService);
+            ArgumentNullException.ThrowIfNull(automaticSyncSessionService);
             ArgumentNullException.ThrowIfNull(applicationMetadata);
             ArgumentNullException.ThrowIfNull(sync);
             ArgumentNullException.ThrowIfNull(logger);
@@ -40,6 +43,7 @@ namespace Cotton.Mobile.ViewModels
             _sessionCoordinator = sessionCoordinator;
             _userInteractionService = userInteractionService;
             _notificationSessionService = notificationSessionService;
+            _automaticSyncSessionService = automaticSyncSessionService;
             _logger = logger;
 
             Display = new MainPageDisplayState(sessionCoordinator.DefaultInstanceUrl);
@@ -182,11 +186,13 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 await _notificationSessionService.SetSessionAsync(state.InstanceUriValue);
+                await _automaticSyncSessionService.SetSessionAsync(state.InstanceUriValue);
 
                 return;
             }
 
             await _notificationSessionService.SetSessionAsync(instanceUri: null);
+            await _automaticSyncSessionService.SetSessionAsync(instanceUri: null);
             Sync.Clear();
             Display.ShowSignIn(state.Status);
             RefreshCommands();

@@ -102,24 +102,6 @@ namespace Cotton.Mobile.Tests
             Assert.Equal([root.Id], _uploadReceiptStore.ClearedRootIds);
         }
 
-        [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice)]
-        [InlineData(CottonSyncDirection.Bidirectional)]
-        public async Task StopDoesNotClearUploadReceiptsForOtherDirections(
-            CottonSyncDirection direction)
-        {
-            CottonSyncRootSnapshot root = CreateRoot(
-                CottonSyncRootPermissionStatus.Available,
-                direction,
-                CottonUploadOriginalRetention.KeepOriginals);
-            await _rootStore.SaveAsync(InstanceUri, [root]);
-
-            bool removed = await _manager.StopAsync(InstanceUri, root);
-
-            Assert.True(removed);
-            Assert.Empty(_uploadReceiptStore.ClearedRootIds);
-        }
-
         public void Dispose()
         {
             if (Directory.Exists(_directory))

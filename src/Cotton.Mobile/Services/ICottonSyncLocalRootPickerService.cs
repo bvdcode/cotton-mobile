@@ -7,7 +7,8 @@ namespace Cotton.Mobile.Services
     {
         bool IsAvailable { get; }
 
-        Task<CottonSyncLocalRootSnapshot?> PickUserSelectedDocumentTreeAsync(
+        Task<CottonSyncLocalRootSnapshot?> PickAsync(
+            CottonSyncRootStorageKind storageKind,
             CancellationToken cancellationToken = default);
     }
 }

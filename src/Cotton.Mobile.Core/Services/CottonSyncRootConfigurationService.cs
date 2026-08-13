@@ -3,23 +3,16 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSyncRootConfigurationService
+    public class CottonSyncRootConfigurationService(ICottonSyncRootStore rootStore)
     {
-        private readonly ICottonSyncRootStore _rootStore;
+        private readonly ICottonSyncRootStore _rootStore =
+            rootStore ?? throw new ArgumentNullException(nameof(rootStore));
 
-        public CottonSyncRootConfigurationService(ICottonSyncRootStore rootStore)
-        {
-            ArgumentNullException.ThrowIfNull(rootStore);
-
-            _rootStore = rootStore;
-        }
-
-        public async Task<CottonSyncRootConfigurationResult> ConfigureUserSelectedDocumentTreeRootAsync(
+        public async Task<CottonSyncRootConfigurationResult> ConfigureRootAsync(
             Uri instanceUri,
             string accountScopeKey,
             CottonUploadDestinationSnapshot cloudFolder,
             CottonSyncLocalRootSnapshot localRoot,
-            CottonSyncDirection direction,
             CottonUploadOriginalRetention uploadOriginalRetention,
             CancellationToken cancellationToken = default)
         {
@@ -28,7 +21,6 @@ namespace Cotton.Mobile.Services
                 accountScopeKey,
                 cloudFolder,
                 localRoot,
-                direction,
                 uploadOriginalRetention);
 
             CottonSyncRootSnapshot candidate = CreateRoot(
@@ -37,7 +29,6 @@ namespace Cotton.Mobile.Services
                 accountScopeKey,
                 cloudFolder,
                 localRoot,
-                direction,
                 uploadOriginalRetention);
             IReadOnlyList<CottonSyncRootSnapshot> existingRoots =
                 await _rootStore.LoadAsync(instanceUri, cancellationToken).ConfigureAwait(false);
@@ -65,24 +56,24 @@ namespace Cotton.Mobile.Services
             string accountScopeKey,
             CottonUploadDestinationSnapshot cloudFolder,
             CottonSyncLocalRootSnapshot localRoot,
-            CottonSyncDirection direction,
             CottonUploadOriginalRetention uploadOriginalRetention)
         {
             ArgumentNullException.ThrowIfNull(localRoot);
-            if (!localRoot.RequiresPersistedUserGrant)
+            if (localRoot.StorageKind is not CottonSyncRootStorageKind.UserSelectedDocumentTree
+                and not CottonSyncRootStorageKind.MediaStore)
             {
-                throw new ArgumentException("Sync roots require a document tree local root.", nameof(localRoot));
+                throw new ArgumentException("Sync roots require a supported local source.", nameof(localRoot));
             }
 
             if (!localRoot.CanReadWrite)
             {
-                throw new ArgumentException("Sync roots require an available folder grant.", nameof(localRoot));
+                throw new ArgumentException("Sync roots require available source access.", nameof(localRoot));
             }
 
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
             ArgumentNullException.ThrowIfNull(cloudFolder);
-            ValidateConfiguration(direction, uploadOriginalRetention);
+            ValidateConfiguration(localRoot.StorageKind, uploadOriginalRetention);
         }
 
         private static CottonSyncRootConfigurationResult? TryCreateExistingConfigurationResult(
@@ -99,8 +90,7 @@ namespace Cotton.Mobile.Services
                     : CreateAlreadyConfiguredResult(localRootOwner);
             }
 
-            return existingRoot.Direction != candidate.Direction
-                || HasSameEffectiveConfiguration(existingRoot, candidate)
+            return HasSameEffectiveConfiguration(existingRoot, candidate)
                     ? CreateAlreadyConfiguredResult(existingRoot)
                     : null;
         }
@@ -133,7 +123,6 @@ namespace Cotton.Mobile.Services
                 candidate.AccountScopeKey,
                 candidate.CloudFolder,
                 candidate.LocalRoot,
-                candidate.Direction,
                 candidate.UploadOriginalRetention);
             await _rootStore.AddOrReplaceAsync(instanceUri, updatedRoot, cancellationToken).ConfigureAwait(false);
             return new CottonSyncRootConfigurationResult(
@@ -142,12 +131,12 @@ namespace Cotton.Mobile.Services
         }
 
         private static void ValidateConfiguration(
-            CottonSyncDirection direction,
+            CottonSyncRootStorageKind storageKind,
             CottonUploadOriginalRetention uploadOriginalRetention)
         {
-            if (!Enum.IsDefined(direction))
+            if (!Enum.IsDefined(storageKind))
             {
-                throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+                throw new ArgumentOutOfRangeException(nameof(storageKind), "Sync root storage kind is not supported.");
             }
 
             if (!Enum.IsDefined(uploadOriginalRetention))
@@ -157,28 +146,12 @@ namespace Cotton.Mobile.Services
                     "Upload original retention is not supported.");
             }
 
-            switch (direction)
+            if (storageKind == CottonSyncRootStorageKind.MediaStore
+                && uploadOriginalRetention != CottonUploadOriginalRetention.KeepOriginals)
             {
-                case CottonSyncDirection.DeviceToCloud:
-                    return;
-
-                case CottonSyncDirection.Bidirectional:
-                    if (uploadOriginalRetention != CottonUploadOriginalRetention.KeepOriginals)
-                    {
-                        throw new ArgumentException(
-                            "Bidirectional sync roots must keep local originals.",
-                            nameof(uploadOriginalRetention));
-                    }
-
-                    return;
-
-                case CottonSyncDirection.CloudToDevice:
-                    throw new ArgumentOutOfRangeException(
-                        nameof(direction),
-                        "Cloud-to-device roots are not configured from a user-selected document tree.");
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+                throw new ArgumentException(
+                    "MediaStore sync roots must keep device originals.",
+                    nameof(uploadOriginalRetention));
             }
         }
 
@@ -186,8 +159,7 @@ namespace Cotton.Mobile.Services
             CottonSyncRootSnapshot existingRoot,
             CottonSyncRootSnapshot candidate)
         {
-            return existingRoot.Direction == candidate.Direction
-                && existingRoot.UploadOriginalRetention == candidate.UploadOriginalRetention
+            return existingRoot.UploadOriginalRetention == candidate.UploadOriginalRetention
                 && existingRoot.CloudFolder.FolderId == candidate.CloudFolder.FolderId
                 && string.Equals(
                     existingRoot.CloudFolder.FolderName,
@@ -224,7 +196,6 @@ namespace Cotton.Mobile.Services
             string accountScopeKey,
             CottonUploadDestinationSnapshot cloudFolder,
             CottonSyncLocalRootSnapshot localRoot,
-            CottonSyncDirection direction,
             CottonUploadOriginalRetention uploadOriginalRetention)
         {
             return new CottonSyncRootSnapshot(
@@ -233,7 +204,7 @@ namespace Cotton.Mobile.Services
                 accountScopeKey,
                 cloudFolder,
                 localRoot,
-                direction,
+                CottonSyncDirection.DeviceToCloud,
                 uploadOriginalRetention);
         }
     }

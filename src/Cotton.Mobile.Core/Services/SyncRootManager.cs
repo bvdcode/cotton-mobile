@@ -69,19 +69,7 @@ namespace Cotton.Mobile.Services
                 .SetPausedAsync(instanceUri, root.Id, isPaused: false, cancellationToken)
                 .ConfigureAwait(false);
             await _manifestStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
-            switch (root.Direction)
-            {
-                case CottonSyncDirection.DeviceToCloud:
-                    await _uploadReceiptStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
-                    break;
-
-                case CottonSyncDirection.CloudToDevice:
-                case CottonSyncDirection.Bidirectional:
-                    break;
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(root), "Sync direction is not supported.");
-            }
+            await _uploadReceiptStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
 
             return removed;
         }

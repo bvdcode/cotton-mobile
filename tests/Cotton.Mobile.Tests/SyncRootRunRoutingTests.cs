@@ -5,81 +5,28 @@ namespace Cotton.Mobile.Tests
 {
     public class SyncRootRunRoutingTests
     {
-        private static readonly Uri InstanceUri = new("https://app.cottoncloud.dev");
-        private static readonly Guid RootId = Guid.Parse("aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa");
-        private static readonly Guid FolderId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
-        [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice, CottonSyncRootRunRoute.CloudToDevice)]
-        [InlineData(CottonSyncDirection.DeviceToCloud, CottonSyncRootRunRoute.DeviceToCloud)]
-        [InlineData(CottonSyncDirection.Bidirectional, CottonSyncRootRunRoute.Bidirectional)]
-        public void RouteMatchesSyncDirection(CottonSyncDirection direction, CottonSyncRootRunRoute route)
+        [Fact]
+        public void StartingStatusUsesUploadCopy()
         {
-            CottonSyncRootSnapshot root = CreateRoot(direction);
+            string status = CottonSyncRootRunRouting.CreateStartingStatus(
+                SyncTestRootFactory.CreateDocumentTreeRoot());
 
-            Assert.Equal(route, CottonSyncRootRunRouting.CreateRoute(direction));
-            Assert.Equal(route, CottonSyncRootRunRouting.CreateRoute(root));
+            Assert.Equal("Uploading new files from Projects…", status);
         }
 
-        [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice, "Syncing Projects…")]
-        [InlineData(CottonSyncDirection.DeviceToCloud, "Uploading new files from Projects…")]
-        [InlineData(CottonSyncDirection.Bidirectional, "Syncing Projects both ways…")]
-        public void StartingStatusMatchesSyncDirection(CottonSyncDirection direction, string expected)
-        {
-            CottonSyncRootSnapshot root = CreateRoot(direction);
-
-            Assert.Equal(expected, CottonSyncRootRunRouting.CreateStartingStatus(root));
-        }
-
-        [Theory]
-        [InlineData(CottonSyncDirection.CloudToDevice)]
-        [InlineData(CottonSyncDirection.DeviceToCloud)]
-        [InlineData(CottonSyncDirection.Bidirectional)]
-        public void OfflineAndFailedStatusesAreRoutedByDirection(CottonSyncDirection direction)
+        [Fact]
+        public void OfflineStatusUsesUploadCopy()
         {
             Assert.Equal(
                 "Offline. Sync needs internet.",
-                CottonSyncRootRunRouting.CreateOfflineUnavailableStatus(direction));
-            Assert.Equal("Sync failed.", CottonSyncRootRunRouting.CreateFailedStatus(direction));
+                CottonSyncRootRunRouting.CreateOfflineUnavailableStatus(CottonSyncDirection.DeviceToCloud));
         }
 
         [Fact]
-        public void UnknownDirectionIsRejected()
+        public void UndefinedDirectionIsRejected()
         {
-            CottonSyncDirection direction = (CottonSyncDirection)999;
-
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => CottonSyncRootRunRouting.CreateRoute(direction));
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => CottonSyncRootRunRouting.CreateOfflineUnavailableStatus(direction));
-            Assert.Throws<ArgumentOutOfRangeException>(
-                () => CottonSyncRootRunRouting.CreateFailedStatus(direction));
-        }
-
-        [Fact]
-        public void NullRootIsRejected()
-        {
-            Assert.Throws<ArgumentNullException>(
-                () => CottonSyncRootRunRouting.CreateRoute(root: null!));
-            Assert.Throws<ArgumentNullException>(
-                () => CottonSyncRootRunRouting.CreateStartingStatus(root: null!));
-        }
-
-        private static CottonSyncRootSnapshot CreateRoot(CottonSyncDirection direction)
-        {
-            return new CottonSyncRootSnapshot(
-                RootId,
-                InstanceUri,
-                "user:mobile-demo",
-                new CottonUploadDestinationSnapshot(FolderId, "Projects", "Files / Projects"),
-                new CottonSyncLocalRootSnapshot(
-                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
-                    "content://tree/projects",
-                    "Projects",
-                    CottonSyncRootPermissionStatus.Available),
-                direction,
-                CottonUploadOriginalRetention.KeepOriginals);
+            Assert.Throws<ArgumentOutOfRangeException>(() =>
+                CottonSyncRootRunRouting.CreateFailedStatus((CottonSyncDirection)42));
         }
     }
 }

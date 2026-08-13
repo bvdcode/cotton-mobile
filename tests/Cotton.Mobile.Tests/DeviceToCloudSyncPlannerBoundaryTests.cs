@@ -68,23 +68,5 @@ namespace Cotton.Mobile.Tests
             Assert.False(plan.HasBlockingItems);
         }
 
-        [Fact]
-        public void PlannerRejectsNonUploadOnlyDirection()
-        {
-            CottonDeviceToCloudLocalContentSnapshot local = CreateLocalContent(
-                CreateLocalFile("alpha.txt", "alpha.txt", SyncedAt, 42, "document-alpha"));
-            CottonDeviceToCloudRemoteContentSnapshot remote = CreateRemoteContent();
-
-            Assert.Throws<InvalidOperationException>(() => CottonDeviceToCloudSyncPlanner.Create(
-                CreateRoot(CottonSyncDirection.CloudToDevice),
-                local,
-                remote,
-                []));
-            Assert.Throws<InvalidOperationException>(() => CottonDeviceToCloudSyncPlanner.Create(
-                CreateRoot(CottonSyncDirection.Bidirectional),
-                local,
-                remote,
-                []));
-        }
     }
 }

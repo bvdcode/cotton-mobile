@@ -13,7 +13,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return IsDeviceToCloudDirection(root)
+            return root.Direction == CottonSyncDirection.DeviceToCloud
                 && root.CanRunSync
                 && HasSupportedLocalRoot(root);
         }
@@ -22,19 +22,15 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(root);
 
-            return IsDeviceToCloudDirection(root)
+            return root.Direction == CottonSyncDirection.DeviceToCloud
                 && root.CanRunSync
                 && !HasSupportedLocalRoot(root);
         }
 
-        private static bool IsDeviceToCloudDirection(CottonSyncRootSnapshot root)
-        {
-            return root.Direction is CottonSyncDirection.DeviceToCloud or CottonSyncDirection.Bidirectional;
-        }
-
         private static bool HasSupportedLocalRoot(CottonSyncRootSnapshot root)
         {
-            return root.LocalRoot.RequiresPersistedUserGrant;
+            return root.LocalRoot.StorageKind is CottonSyncRootStorageKind.UserSelectedDocumentTree
+                or CottonSyncRootStorageKind.MediaStore;
         }
     }
 }

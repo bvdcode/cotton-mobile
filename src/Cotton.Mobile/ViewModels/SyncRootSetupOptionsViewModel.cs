@@ -10,7 +10,7 @@ namespace Cotton.Mobile.ViewModels
     public class SyncRootSetupOptionsViewModel : ObservableObject
     {
         private readonly Action<SyncRootSetupOptions?> _complete;
-        private CottonSyncDirection _direction = CottonSyncDirection.DeviceToCloud;
+        private CottonSyncRootStorageKind _storageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree;
         private bool _deleteOriginalsAfterUpload;
         private bool _didComplete;
 
@@ -19,42 +19,42 @@ namespace Cotton.Mobile.ViewModels
             ArgumentNullException.ThrowIfNull(complete);
 
             _complete = complete;
-            SelectUploadOnlyCommand = new Command(
-                () => SelectDirection(CottonSyncDirection.DeviceToCloud));
-            SelectBidirectionalCommand = new Command(
-                () => SelectDirection(CottonSyncDirection.Bidirectional));
+            SelectFolderCommand = new Command(
+                () => SelectStorageKind(CottonSyncRootStorageKind.UserSelectedDocumentTree));
+            SelectMediaCommand = new Command(
+                () => SelectStorageKind(CottonSyncRootStorageKind.MediaStore));
             ContinueCommand = new Command(Continue);
             CancelCommand = new Command(Cancel);
         }
 
-        public Command SelectUploadOnlyCommand { get; }
+        public Command SelectFolderCommand { get; }
 
-        public Command SelectBidirectionalCommand { get; }
+        public Command SelectMediaCommand { get; }
 
         public Command ContinueCommand { get; }
 
         public Command CancelCommand { get; }
 
-        public bool IsUploadOnlySelected => _direction == CottonSyncDirection.DeviceToCloud;
+        public bool IsFolderSelected => _storageKind == CottonSyncRootStorageKind.UserSelectedDocumentTree;
 
-        public bool IsBidirectionalSelected => _direction == CottonSyncDirection.Bidirectional;
+        public bool IsMediaSelected => _storageKind == CottonSyncRootStorageKind.MediaStore;
 
-        public bool IsDeleteOptionVisible => IsUploadOnlySelected;
+        public bool IsDeleteOptionVisible => IsFolderSelected;
 
-        public string UploadOnlyDescription => SyncRootSetupResources.CreateModeDescription(
-            SyncRootSetupResources.UploadOnlyTitle,
-            IsUploadOnlySelected);
+        public string FolderDescription => SyncRootSetupResources.CreateSourceDescription(
+            SyncRootSetupResources.FolderTitle,
+            IsFolderSelected);
 
-        public string BidirectionalDescription => SyncRootSetupResources.CreateModeDescription(
-            SyncRootSetupResources.BidirectionalTitle,
-            IsBidirectionalSelected);
+        public string MediaDescription => SyncRootSetupResources.CreateSourceDescription(
+            SyncRootSetupResources.MediaTitle,
+            IsMediaSelected);
 
         public bool IsInteractionLocked => _didComplete;
 
         public bool DeleteOriginalsAfterUpload
         {
             get => _deleteOriginalsAfterUpload;
-            set => SetProperty(ref _deleteOriginalsAfterUpload, value && IsUploadOnlySelected);
+            set => SetProperty(ref _deleteOriginalsAfterUpload, value && IsFolderSelected);
         }
 
         public void Cancel()
@@ -62,55 +62,40 @@ namespace Cotton.Mobile.ViewModels
             CompleteOnce(options: null);
         }
 
-        private void SelectDirection(CottonSyncDirection direction)
+        private void SelectStorageKind(CottonSyncRootStorageKind storageKind)
         {
-            switch (direction)
+            switch (storageKind)
             {
-                case CottonSyncDirection.DeviceToCloud:
+                case CottonSyncRootStorageKind.UserSelectedDocumentTree:
                     break;
 
-                case CottonSyncDirection.Bidirectional:
+                case CottonSyncRootStorageKind.MediaStore:
                     DeleteOriginalsAfterUpload = false;
                     break;
 
-                case CottonSyncDirection.CloudToDevice:
-                    throw new ArgumentException(
-                        "Cloud-to-device sync cannot be selected during setup.",
-                        nameof(direction));
-
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+                    throw new ArgumentOutOfRangeException(nameof(storageKind), "Sync source is not supported.");
             }
 
-            if (_direction == direction)
+            if (_storageKind == storageKind)
             {
                 return;
             }
 
-            _direction = direction;
-            OnPropertyChanged(nameof(IsUploadOnlySelected));
-            OnPropertyChanged(nameof(IsBidirectionalSelected));
+            _storageKind = storageKind;
+            OnPropertyChanged(nameof(IsFolderSelected));
+            OnPropertyChanged(nameof(IsMediaSelected));
             OnPropertyChanged(nameof(IsDeleteOptionVisible));
-            OnPropertyChanged(nameof(UploadOnlyDescription));
-            OnPropertyChanged(nameof(BidirectionalDescription));
+            OnPropertyChanged(nameof(FolderDescription));
+            OnPropertyChanged(nameof(MediaDescription));
         }
 
         private void Continue()
         {
-            CottonUploadOriginalRetention retention = _direction switch
-            {
-                CottonSyncDirection.DeviceToCloud => DeleteOriginalsAfterUpload
-                    ? CottonUploadOriginalRetention.DeleteAfterConfirmedUpload
-                    : CottonUploadOriginalRetention.KeepOriginals,
-                CottonSyncDirection.Bidirectional => CottonUploadOriginalRetention.KeepOriginals,
-                CottonSyncDirection.CloudToDevice => throw new InvalidOperationException(
-                    "Cloud-to-device sync cannot be completed during setup."),
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(_direction),
-                    "Sync direction is not supported."),
-            };
-
-            CompleteOnce(new SyncRootSetupOptions(_direction, retention));
+            CottonUploadOriginalRetention retention = DeleteOriginalsAfterUpload
+                ? CottonUploadOriginalRetention.DeleteAfterConfirmedUpload
+                : CottonUploadOriginalRetention.KeepOriginals;
+            CompleteOnce(new SyncRootSetupOptions(_storageKind, retention));
         }
 
         private void CompleteOnce(SyncRootSetupOptions? options)

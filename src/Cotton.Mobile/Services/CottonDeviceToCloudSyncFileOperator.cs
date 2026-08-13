@@ -2,35 +2,23 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using System.Globalization;
-using Cotton.Sdk;
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonDeviceToCloudSyncFileOperator : ICottonDeviceToCloudSyncFileOperator
+    public class CottonDeviceToCloudSyncFileOperator(
+        ICottonFileUploadService uploadService,
+        ICottonDeviceToCloudLocalFileContentSource localContentSource,
+        ICottonFileBrowserService fileBrowserService) :
+        ICottonDeviceToCloudSyncFileOperator
     {
         private const string MetadataSourceValue = "device-to-cloud-sync";
 
-        private readonly ICottonFileUploadService _uploadService;
-        private readonly ICottonDeviceToCloudLocalFileContentSource _localContentSource;
-        private readonly ICottonFileBrowserService _fileBrowserService;
-        private readonly ICottonClientFactory _clientFactory;
-
-        public CottonDeviceToCloudSyncFileOperator(
-            ICottonFileUploadService uploadService,
-            ICottonDeviceToCloudLocalFileContentSource localContentSource,
-            ICottonFileBrowserService fileBrowserService,
-            ICottonClientFactory clientFactory)
-        {
-            ArgumentNullException.ThrowIfNull(uploadService);
-            ArgumentNullException.ThrowIfNull(localContentSource);
-            ArgumentNullException.ThrowIfNull(fileBrowserService);
-            ArgumentNullException.ThrowIfNull(clientFactory);
-
-            _uploadService = uploadService;
-            _localContentSource = localContentSource;
-            _fileBrowserService = fileBrowserService;
-            _clientFactory = clientFactory;
-        }
+        private readonly ICottonFileUploadService _uploadService =
+            uploadService ?? throw new ArgumentNullException(nameof(uploadService));
+        private readonly ICottonDeviceToCloudLocalFileContentSource _localContentSource =
+            localContentSource ?? throw new ArgumentNullException(nameof(localContentSource));
+        private readonly ICottonFileBrowserService _fileBrowserService =
+            fileBrowserService ?? throw new ArgumentNullException(nameof(fileBrowserService));
 
         public Task<CottonFileBrowserEntry> UploadNewFileAsync(
             Uri instanceUri,
@@ -45,26 +33,6 @@ namespace Cotton.Mobile.Services
             return _uploadService.UploadAsync(
                 instanceUri,
                 parentFolder,
-                CreateUploadSource(instanceUri, root, item),
-                progress: null,
-                cancellationToken);
-        }
-
-        public Task<CottonFileBrowserEntry> UploadChangedFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CottonFolderHandle parentFolder,
-            CancellationToken cancellationToken = default)
-        {
-            EnsureUploadItem(instanceUri, root, item);
-            ArgumentNullException.ThrowIfNull(parentFolder);
-
-            return _uploadService.UpdateContentAsync(
-                instanceUri,
-                GetRequiredCloudItemId(item),
-                parentFolder,
-                GetRequiredExpectedETag(item),
                 CreateUploadSource(instanceUri, root, item),
                 progress: null,
                 cancellationToken);
@@ -90,29 +58,6 @@ namespace Cotton.Mobile.Services
                 parentFolder,
                 item.DisplayName,
                 cancellationToken);
-        }
-
-        public async Task DeleteRemoteFileAsync(
-            Uri instanceUri,
-            CottonSyncRootSnapshot root,
-            CottonDeviceToCloudSyncPlanItem item,
-            CancellationToken cancellationToken = default)
-        {
-            EnsureRoot(instanceUri, root);
-            ArgumentNullException.ThrowIfNull(item);
-            if (!item.RequiresRemoteDelete || item.TargetType != CottonFileBrowserEntryType.File)
-            {
-                throw new InvalidOperationException("Only device-to-cloud remote-delete file items can delete files.");
-            }
-
-            await using ICottonCloudClient client = _clientFactory.Create(instanceUri);
-            await client.Files
-                .DeleteAsync(
-                    GetRequiredCloudItemId(item),
-                    skipTrash: false,
-                    GetRequiredExpectedETag(item),
-                    cancellationToken)
-                .ConfigureAwait(false);
         }
 
         private CottonFileUploadSource CreateUploadSource(
@@ -189,17 +134,5 @@ namespace Cotton.Mobile.Services
             }
         }
 
-        private static Guid GetRequiredCloudItemId(CottonDeviceToCloudSyncPlanItem item)
-        {
-            return item.CloudItemId
-                ?? throw new InvalidOperationException("Device-to-cloud sync item requires a cloud item id.");
-        }
-
-        private static string GetRequiredExpectedETag(CottonDeviceToCloudSyncPlanItem item)
-        {
-            return string.IsNullOrWhiteSpace(item.ExpectedRemoteETag)
-                ? throw new InvalidOperationException("Device-to-cloud sync item requires an expected remote ETag.")
-                : item.ExpectedRemoteETag;
-        }
     }
 }

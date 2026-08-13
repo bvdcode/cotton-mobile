@@ -53,15 +53,20 @@ namespace Cotton.Mobile
             services.AddSingleton(TimeProvider.System);
 
             services.AddSingleton<IAndroidDocumentTreeActivityResultBridge, AndroidDocumentTreeActivityResultBridge>();
-            services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidDocumentTreeSyncLocalRootPickerService>();
-            services.AddSingleton<ICottonSyncLocalRootPermissionResolver, AndroidDocumentTreeSyncLocalRootPermissionResolver>();
-            services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
-            services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
-            services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
-            services.AddSingleton<ICottonUserSelectedDocumentTreeCloudToDeviceSyncFileOperator, AndroidDocumentTreeCloudToDeviceSyncFileOperator>();
+            services.AddSingleton<ICottonSyncLocalRootPickerService, AndroidSyncLocalRootPickerService>();
+            services.AddSingleton<ICottonSyncLocalRootPermissionResolver, AndroidSyncLocalRootPermissionResolver>();
+            services.AddSingleton<AndroidDocumentTreeDeviceToCloudLocalTreeReader>();
+            services.AddSingleton<AndroidMediaStoreDeviceToCloudLocalTreeReader>();
+            services.AddSingleton<ICottonDeviceToCloudLocalTreeReader, AndroidDeviceToCloudLocalTreeReaderRouter>();
+            services.AddSingleton<AndroidDocumentTreeDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<AndroidMediaStoreDeviceToCloudLocalFileContentSource>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileContentSource, AndroidDeviceToCloudLocalFileContentSourceRouter>();
+            services.AddSingleton<AndroidDocumentTreeDeviceToCloudLocalFileOperator>();
+            services.AddSingleton<ICottonDeviceToCloudLocalFileOperator, AndroidDeviceToCloudLocalFileOperatorRouter>();
             services.AddSingleton<ICottonNotificationPermissionService, AndroidNotificationPermissionService>();
             services.AddSingleton<ICottonLocalNotificationService, AndroidLocalNotificationService>();
             services.AddSingleton<ICottonNotificationBackgroundScheduler, AndroidNotificationBackgroundScheduler>();
+            services.AddSingleton<ICottonAutomaticSyncBackgroundScheduler, AndroidAutomaticSyncBackgroundScheduler>();
         }
 
         private static void RegisterApplicationServices(IServiceCollection services)
@@ -92,6 +97,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonNotificationPollingService, CottonNotificationPollingService>();
             services.AddSingleton<ICottonNotificationRealtimeService, CottonNotificationRealtimeService>();
             services.AddSingleton<ICottonNotificationSessionService, CottonNotificationSessionService>();
+            services.AddSingleton<ICottonAutomaticSyncSessionService, CottonAutomaticSyncSessionService>();
         }
 
         private static void RegisterSyncServices(IServiceCollection services)
@@ -118,29 +124,18 @@ namespace Cotton.Mobile
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
             services.AddSingleton<ISyncRootSetupOptionsPickerService, SyncRootSetupOptionsPickerService>();
             services.AddSingleton<SyncRootSetupCoordinator>();
-            services.AddSingleton<ICottonCloudToDeviceSyncFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
-            services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserCloudToDeviceSyncFolderContentSource>();
+            services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserRemoteFolderContentSource>();
             services.AddSingleton<CottonRecursiveRemoteContentLoader>();
 
-            services.AddSingleton<CottonAppPrivateCloudToDeviceSyncFileOperator>();
-            services.AddSingleton<ICottonCloudToDeviceSyncFileOperator, CottonCloudToDeviceSyncFileOperatorRouter>();
             services.AddSingleton<ICottonDeviceToCloudSyncFileOperator, CottonDeviceToCloudSyncFileOperator>();
-            services.AddSingleton(serviceProvider =>
-                new CottonCloudToDeviceSyncPlanExecutor(
-                    serviceProvider.GetRequiredService<ICottonCloudToDeviceSyncFileOperator>(),
-                    serviceProvider.GetRequiredService<ICottonSyncedFileManifestStore>()));
-            services.AddSingleton(serviceProvider =>
-                new CottonDeviceToCloudSyncPlanExecutor(
-                    serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
-                    serviceProvider.GetRequiredService<ICottonSyncedFileManifestStore>()));
             services.AddSingleton(serviceProvider =>
                 new CottonUploadOnlySyncPlanExecutor(
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudLocalFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonUploadReceiptStore>()));
-            services.AddSingleton<ICottonCloudToDeviceSyncCoordinator, CottonCloudToDeviceSyncCoordinator>();
+            services.AddSingleton<CottonSyncRootExecutionLock>();
             services.AddSingleton<ICottonDeviceToCloudSyncCoordinator, CottonDeviceToCloudSyncCoordinator>();
-            services.AddSingleton<ICottonBidirectionalSyncCoordinator, CottonBidirectionalSyncCoordinator>();
+            services.AddSingleton<CottonAutomaticSyncRunner>();
             services.AddSingleton<SyncExecutionWorkflow>();
         }
 

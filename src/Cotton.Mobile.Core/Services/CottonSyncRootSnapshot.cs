@@ -48,11 +48,16 @@ namespace Cotton.Mobile.Services
                     "Upload original retention is not supported.");
             }
 
-            if (direction != CottonSyncDirection.DeviceToCloud
+            if (direction != CottonSyncDirection.DeviceToCloud)
+            {
+                throw new ArgumentOutOfRangeException(nameof(direction), "Sync direction is not supported.");
+            }
+
+            if (localRoot.UsesMediaStore
                 && uploadOriginalRetention != CottonUploadOriginalRetention.KeepOriginals)
             {
                 throw new ArgumentException(
-                    "Only device-to-cloud sync roots can delete originals after upload.",
+                    "MediaStore sync roots must retain original media.",
                     nameof(uploadOriginalRetention));
             }
 
@@ -89,8 +94,6 @@ namespace Cotton.Mobile.Services
         public string StatusText { get; }
 
         public bool CanRunSync => ReadinessStatus == CottonSyncRootReadinessStatus.Ready;
-
-        public bool IsBidirectional => Direction == CottonSyncDirection.Bidirectional;
 
         public bool DeletesOriginalsAfterUpload =>
             UploadOriginalRetention == CottonUploadOriginalRetention.DeleteAfterConfirmedUpload;

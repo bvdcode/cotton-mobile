@@ -3,35 +3,30 @@
 
 namespace Cotton.Mobile.Services
 {
-    public class CottonSyncRootReconnectService
+    public class CottonSyncRootReconnectService(ICottonSyncRootStore rootStore)
     {
-        private readonly ICottonSyncRootStore _rootStore;
+        private readonly ICottonSyncRootStore _rootStore =
+            rootStore ?? throw new ArgumentNullException(nameof(rootStore));
 
-        public CottonSyncRootReconnectService(ICottonSyncRootStore rootStore)
-        {
-            ArgumentNullException.ThrowIfNull(rootStore);
-
-            _rootStore = rootStore;
-        }
-
-        public async Task<CottonSyncRootSnapshot> ReconnectUserSelectedDocumentTreeAsync(
+        public async Task<CottonSyncRootSnapshot> ReconnectAsync(
             CottonSyncRootSnapshot root,
             CottonSyncLocalRootSnapshot localRoot,
             CancellationToken cancellationToken = default)
         {
             ArgumentNullException.ThrowIfNull(root);
             ArgumentNullException.ThrowIfNull(localRoot);
-            if (!root.LocalRoot.RequiresPersistedUserGrant || !root.NeedsUserAction)
+            if (!root.NeedsUserAction)
             {
                 throw new ArgumentException(
-                    "Sync root does not need a user-selected folder grant.",
+                    "Sync root does not need local source access.",
                     nameof(root));
             }
 
-            if (!localRoot.RequiresPersistedUserGrant || !localRoot.CanReadWrite)
+            if (!localRoot.CanReadWrite
+                || localRoot.StorageKind != root.LocalRoot.StorageKind)
             {
                 throw new ArgumentException(
-                    "Replacement local root must have an available document tree grant.",
+                    "Replacement local source must have available access and match the configured source kind.",
                     nameof(localRoot));
             }
 

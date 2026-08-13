@@ -59,6 +59,8 @@ namespace Cotton.Mobile.Services
 
         public bool RequiresPersistedUserGrant => StorageKind == CottonSyncRootStorageKind.UserSelectedDocumentTree;
 
+        public bool UsesMediaStore => StorageKind == CottonSyncRootStorageKind.MediaStore;
+
         public bool CanReadWrite => PermissionStatus == CottonSyncRootPermissionStatus.Available;
 
         public bool NeedsUserAction =>

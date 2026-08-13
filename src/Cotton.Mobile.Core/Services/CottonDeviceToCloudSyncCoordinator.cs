@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonDeviceToCloudLocalTreeReader _localTreeReader;
         private readonly CottonRecursiveRemoteContentLoader _remoteContentLoader;
         private readonly CottonUploadOnlySyncPlanExecutor _planExecutor;
+        private readonly CottonSyncRootExecutionLock _executionLock;
 
         public CottonDeviceToCloudSyncCoordinator(
             ICottonSyncRootStore rootStore,
@@ -18,7 +19,8 @@ namespace Cotton.Mobile.Services
             ICottonUploadReceiptStore uploadReceiptStore,
             ICottonDeviceToCloudLocalTreeReader localTreeReader,
             CottonRecursiveRemoteContentLoader remoteContentLoader,
-            CottonUploadOnlySyncPlanExecutor planExecutor)
+            CottonUploadOnlySyncPlanExecutor planExecutor,
+            CottonSyncRootExecutionLock executionLock)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
             ArgumentNullException.ThrowIfNull(pauseStore);
@@ -26,6 +28,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(localTreeReader);
             ArgumentNullException.ThrowIfNull(remoteContentLoader);
             ArgumentNullException.ThrowIfNull(planExecutor);
+            ArgumentNullException.ThrowIfNull(executionLock);
 
             _rootStore = rootStore;
             _pauseStore = pauseStore;
@@ -33,6 +36,7 @@ namespace Cotton.Mobile.Services
             _localTreeReader = localTreeReader;
             _remoteContentLoader = remoteContentLoader;
             _planExecutor = planExecutor;
+            _executionLock = executionLock;
         }
 
         public async Task<CottonDeviceToCloudSyncRunSummary> RunAsync(
@@ -83,11 +87,6 @@ namespace Cotton.Mobile.Services
             IReadOnlySet<Guid> pausedRootIds,
             CancellationToken cancellationToken)
         {
-            if (root.Direction != CottonSyncDirection.DeviceToCloud)
-            {
-                return CottonDeviceToCloudSyncRootRunResult.SkippedUnsupportedDirection(root);
-            }
-
             if (pausedRootIds.Contains(root.Id))
             {
                 return CottonDeviceToCloudSyncRootRunResult.SkippedPaused(root);
@@ -103,7 +102,11 @@ namespace Cotton.Mobile.Services
                 return CottonDeviceToCloudSyncRootRunResult.SkippedNotReady(root);
             }
 
-            return await ExecuteRootAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
+            return await _executionLock.ExecuteAsync(
+                    root,
+                    token => ExecuteRootAsync(instanceUri, root, token),
+                    cancellationToken)
+                .ConfigureAwait(false);
         }
 
         private async Task<CottonDeviceToCloudSyncRootRunResult> ExecuteRootAsync(

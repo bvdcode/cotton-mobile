@@ -8,22 +8,14 @@ namespace Cotton.Mobile.Services
         public CottonDeviceToCloudSyncExecutionResult(
             int uploadedCount,
             int confirmedUploadCount,
-            int refreshedCount,
             int createdFolderCount,
             int deletedLocalFileCount,
-            int deletedRemoteFileCount,
-            int removedManifestCount,
             int skippedCount,
             int blockedCount)
         {
             if (uploadedCount < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(uploadedCount), "Uploaded count cannot be negative.");
-            }
-
-            if (refreshedCount < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(refreshedCount), "Refreshed count cannot be negative.");
             }
 
             if (confirmedUploadCount < 0)
@@ -38,21 +30,11 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(createdFolderCount), "Created folder count cannot be negative.");
             }
 
-            if (deletedRemoteFileCount < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(deletedRemoteFileCount), "Deleted remote file count cannot be negative.");
-            }
-
             if (deletedLocalFileCount < 0)
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(deletedLocalFileCount),
                     "Deleted local file count cannot be negative.");
-            }
-
-            if (removedManifestCount < 0)
-            {
-                throw new ArgumentOutOfRangeException(nameof(removedManifestCount), "Removed manifest count cannot be negative.");
             }
 
             if (skippedCount < 0)
@@ -67,11 +49,8 @@ namespace Cotton.Mobile.Services
 
             UploadedCount = uploadedCount;
             ConfirmedUploadCount = confirmedUploadCount;
-            RefreshedCount = refreshedCount;
             CreatedFolderCount = createdFolderCount;
             DeletedLocalFileCount = deletedLocalFileCount;
-            DeletedRemoteFileCount = deletedRemoteFileCount;
-            RemovedManifestCount = removedManifestCount;
             SkippedCount = skippedCount;
             BlockedCount = blockedCount;
         }
@@ -80,15 +59,9 @@ namespace Cotton.Mobile.Services
 
         public int ConfirmedUploadCount { get; }
 
-        public int RefreshedCount { get; }
-
         public int CreatedFolderCount { get; }
 
         public int DeletedLocalFileCount { get; }
-
-        public int DeletedRemoteFileCount { get; }
-
-        public int RemovedManifestCount { get; }
 
         public int SkippedCount { get; }
 
@@ -97,11 +70,8 @@ namespace Cotton.Mobile.Services
         public bool HasAppliedChanges =>
             UploadedCount > 0
             || ConfirmedUploadCount > 0
-            || RefreshedCount > 0
             || CreatedFolderCount > 0
-            || DeletedLocalFileCount > 0
-            || DeletedRemoteFileCount > 0
-            || RemovedManifestCount > 0;
+            || DeletedLocalFileCount > 0;
 
         public bool HasBlockedItems => BlockedCount > 0;
     }

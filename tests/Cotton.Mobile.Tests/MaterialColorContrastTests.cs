@@ -155,6 +155,5 @@ namespace Cotton.Mobile.Tests
                 ? channel / 12.92d
                 : Math.Pow((channel + 0.055d) / 1.055d, 2.4d);
         }
-
     }
 }

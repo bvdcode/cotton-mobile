@@ -199,6 +199,5 @@ namespace Cotton.Mobile.Services
                 return null;
             }
         }
-
     }
 }

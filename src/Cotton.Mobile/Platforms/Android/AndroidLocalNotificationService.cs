@@ -139,6 +139,5 @@ namespace Cotton.Mobile.Platforms.Android
                 _ => throw new ArgumentOutOfRangeException(nameof(priority), priority, "Unknown notification priority."),
             };
         }
-
     }
 }

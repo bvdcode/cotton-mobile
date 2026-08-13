@@ -110,6 +110,22 @@ def validate_csharp(path: Path, content: str) -> list[str]:
             violations.append(
                 f"{relative_path(path)}:{line_number(content, match.start())} contains {label}."
             )
+    violations.extend(validate_csharp_brace_spacing(path, content))
+    return violations
+
+
+def validate_csharp_brace_spacing(path: Path, content: str) -> list[str]:
+    violations: list[str] = []
+    lines = content.splitlines()
+    for index, line in enumerate(lines):
+        if line.strip() == "{" and index + 1 < len(lines) and not lines[index + 1].strip():
+            violations.append(
+                f"{relative_path(path)}:{index + 2} contains an empty line after an opening brace."
+            )
+        if line.strip() == "}" and index > 0 and not lines[index - 1].strip():
+            violations.append(
+                f"{relative_path(path)}:{index + 1} contains an empty line before a closing brace."
+            )
     return violations
 
 

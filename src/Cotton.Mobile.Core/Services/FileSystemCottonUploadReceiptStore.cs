@@ -227,6 +227,5 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentException("Upload receipts require an upload-only sync root.", nameof(root));
             }
         }
-
     }
 }

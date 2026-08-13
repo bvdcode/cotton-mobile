@@ -155,6 +155,5 @@ namespace Cotton.Mobile.Services
                 RootIds = [.. rootIds],
             };
         }
-
     }
 }

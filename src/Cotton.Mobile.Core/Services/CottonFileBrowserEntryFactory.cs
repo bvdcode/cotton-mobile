@@ -21,7 +21,6 @@ namespace Cotton.Mobile.Services
             string name,
             DateTime updatedAt)
         {
-
             CottonFileDescriptor descriptor = new(
                 id,
                 CottonFileBrowserEntryType.Folder,

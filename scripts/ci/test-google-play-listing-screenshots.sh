@@ -5,8 +5,8 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 screenshots_dir="$repo_root/store/google-play/default-listing/graphics/phone-screenshots"
 
 expected_screenshots=(
-  "01-sign-in.png"
-  "02-sign-in-light.png"
+  "01-sync-overview.png"
+  "02-sync-mode.png"
 )
 
 if [[ ! -d "$screenshots_dir" ]]; then

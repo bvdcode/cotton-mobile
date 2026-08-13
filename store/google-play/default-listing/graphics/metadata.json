@@ -9,12 +9,12 @@
   },
   "phoneScreenshots": [
     {
-      "path": "phone-screenshots/01-sign-in.png",
-      "altText": "Cotton Cloud dark sign-in screen."
+      "path": "phone-screenshots/01-sync-overview.png",
+      "altText": "Cotton Cloud sync overview with an action to add a sync folder."
     },
     {
-      "path": "phone-screenshots/02-sign-in-light.png",
-      "altText": "Cotton Cloud light sign-in screen."
+      "path": "phone-screenshots/02-sync-mode.png",
+      "altText": "Cotton Cloud sync mode selection with upload and two-way sync options."
     }
   ]
 }

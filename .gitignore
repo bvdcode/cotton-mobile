@@ -10,6 +10,7 @@ __pycache__/
 
 # IDE/user files
 .idea/
+.vs/
 .vscode/
 !.vscode/
 !.vscode/settings.json

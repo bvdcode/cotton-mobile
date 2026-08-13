@@ -42,15 +42,28 @@ namespace Cotton.Mobile.Platforms.Android
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)
         {
+            AndroidMediaStoreScanResult result = await ReadWithDiagnosticsAsync(
+                    instanceUri,
+                    root,
+                    cancellationToken)
+                .ConfigureAwait(false);
+            return result.Content;
+        }
+
+        internal async Task<AndroidMediaStoreScanResult> ReadWithDiagnosticsAsync(
+            Uri instanceUri,
+            CottonSyncRootSnapshot root,
+            CancellationToken cancellationToken = default)
+        {
             EnsureSupportedRoot(instanceUri, root);
 
             if (!OperatingSystem.IsAndroidVersionAtLeast(30))
             {
                 AndroidMediaStoreScanResult legacyResult = await Task.Run(
                         () => ReadMedia(root, sourceVersion: null, previousIndex: null, cancellationToken),
-                        cancellationToken)
+                    cancellationToken)
                     .ConfigureAwait(false);
-                return legacyResult.Content;
+                return legacyResult;
             }
 
             string sourceVersion = ReadSourceVersion();
@@ -74,7 +87,7 @@ namespace Cotton.Mobile.Platforms.Android
                     .ConfigureAwait(false);
             }
 
-            return result.Content;
+            return result;
         }
 
         private AndroidMediaStoreScanResult ReadMedia(
@@ -88,6 +101,7 @@ namespace Cotton.Mobile.Platforms.Android
                 new(StringComparer.OrdinalIgnoreCase);
             List<CottonDeviceToCloudLocalProblemSnapshot> problems = [];
             List<CottonContentRevisionSnapshot>? revisions = sourceVersion is null ? null : [];
+            AndroidMediaStoreScanStatistics statistics = new();
             DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
 
             ReadCollection(
@@ -97,6 +111,7 @@ namespace Cotton.Mobile.Platforms.Android
                 problems,
                 previousIndex,
                 revisions,
+                statistics,
                 scanStartedAtUtc,
                 cancellationToken);
             ReadCollection(
@@ -106,6 +121,7 @@ namespace Cotton.Mobile.Platforms.Android
                 problems,
                 previousIndex,
                 revisions,
+                statistics,
                 scanStartedAtUtc,
                 cancellationToken);
 
@@ -116,7 +132,7 @@ namespace Cotton.Mobile.Platforms.Android
             CottonContentRevisionIndexSnapshot? revisionIndex = sourceVersion is null
                 ? null
                 : new CottonContentRevisionIndexSnapshot(sourceVersion, revisions!);
-            return new AndroidMediaStoreScanResult(content, revisionIndex);
+            return new AndroidMediaStoreScanResult(content, revisionIndex, statistics);
         }
 
         private static void ReadCollection(
@@ -126,6 +142,7 @@ namespace Cotton.Mobile.Platforms.Android
             List<CottonDeviceToCloudLocalProblemSnapshot> problems,
             CottonContentRevisionIndexSnapshot? previousIndex,
             List<CottonContentRevisionSnapshot>? revisions,
+            AndroidMediaStoreScanStatistics statistics,
             DateTime scanStartedAtUtc,
             CancellationToken cancellationToken)
         {
@@ -175,6 +192,7 @@ namespace Cotton.Mobile.Platforms.Android
                     localSourceId,
                     previousIndex,
                     revisions,
+                    statistics,
                     cancellationToken);
                 CottonDeviceToCloudLocalItemSnapshot file = CottonDeviceToCloudLocalItemSnapshot.CreateFile(
                     displayName,

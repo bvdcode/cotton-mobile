@@ -199,11 +199,13 @@ jobs:
     needs:
       - workflow-dispatch-guards
       - android-release-changes
+      - android-debug
       - quality
     if: >-
       ${{
         always() &&
         needs.quality.result == 'success' &&
+        needs.android-debug.result == 'success' &&
         (
           (
             github.event_name == 'push' &&

@@ -1,7 +1,9 @@
-name: Mobile Debug Build
+name: Mobile Android Runtime
 
 on:
-  workflow_call:
+  schedule:
+    - cron: "17 9 * * *"
+  workflow_dispatch:
 
 defaults:
   run:
@@ -15,11 +17,17 @@ env:
   ANDROID_BUILD_TOOLS: "build-tools;36.0.0"
 
 jobs:
-  android-debug:
-    name: Build Debug APK
+  android-runtime:
+    name: Android ${{ matrix.api }} Runtime
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        api:
+          - 29
+          - 35
     steps:
       - name: Check repository
         uses: actions/checkout@v5
@@ -41,9 +49,6 @@ jobs:
       - name: Restore mobile project
         run: dotnet restore "$PROJECT_PATH"
 
-      - name: Verify mobile formatting
-        run: dotnet format "$PROJECT_PATH" --no-restore --verify-no-changes --severity info
-
       - name: Build debug APK
         run: |
           dotnet build "$PROJECT_PATH" \
@@ -59,15 +64,9 @@ jobs:
           fi
 
       - name: Test Android runtime behavior
+        env:
+          COTTON_ANDROID_RUNTIME_API: ${{ matrix.api }}
         run: |
           scripts/mobile/test-android-runtime.sh \
             src/Cotton.Mobile/bin/Debug/net10.0-android/dev.cottoncloud.app.debug-Signed.apk \
             store/google-play/default-listing/graphics/icon.png
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@v7.0.1
-        with:
-          name: cotton-mobile-debug-apk
-          path: src/Cotton.Mobile/bin/Debug/net10.0-android/**/*Signed.apk
-          if-no-files-found: error
-          retention-days: 14

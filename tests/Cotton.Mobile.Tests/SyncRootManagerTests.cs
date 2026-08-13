@@ -11,6 +11,7 @@ namespace Cotton.Mobile.Tests
 
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
+        private readonly FileSystemCottonContentRevisionStore _contentRevisionStore;
         private readonly TestUploadReceiptStore _uploadReceiptStore;
         private readonly TestPermissionResolver _permissionResolver;
         private readonly SyncRootManager _manager;
@@ -27,13 +28,14 @@ namespace Cotton.Mobile.Tests
                 NullLogger<FileSystemCottonSyncRootStore>.Instance, TimeProvider.System);
             _uploadReceiptStore = new TestUploadReceiptStore();
             _permissionResolver = new TestPermissionResolver();
+            _contentRevisionStore = new FileSystemCottonContentRevisionStore(
+                new FixedContentRevisionPathProvider(_directory));
             _manager = new SyncRootManager(
                 _rootStore,
                 new FileSystemCottonSyncRootPauseStore(
                     metadataPathProvider,
                     NullLogger<FileSystemCottonSyncRootPauseStore>.Instance, TimeProvider.System),
-                new FileSystemCottonContentRevisionStore(
-                    new FixedContentRevisionPathProvider(_directory)),
+                _contentRevisionStore,
                 new FileSystemCottonSyncedFileManifestStore(
                     new TestSyncedFileManifestPathProvider(_directory),
                     NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System),
@@ -95,17 +97,25 @@ namespace Cotton.Mobile.Tests
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
             await _rootStore.SaveAsync(InstanceUri, [root]);
             await _uploadReceiptStore.SaveAsync(InstanceUri, root, CreatePendingReceipt());
+            await _contentRevisionStore.SaveAsync(
+                InstanceUri,
+                root,
+                new CottonContentRevisionIndexSnapshot(
+                    "version-1",
+                    [new CottonContentRevisionSnapshot("content://media/1", 1, TestContentHashes.First)]));
 
             bool removed = await _manager.StopAsync(InstanceUri, root);
 
             Assert.True(removed);
             Assert.Empty(await _rootStore.LoadAsync(InstanceUri));
             Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
+            Assert.Null(await _contentRevisionStore.LoadAsync(InstanceUri, root));
             Assert.Equal([root.Id], _uploadReceiptStore.ClearedRootIds);
         }
 
         public void Dispose()
         {
+            _contentRevisionStore.Dispose();
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);

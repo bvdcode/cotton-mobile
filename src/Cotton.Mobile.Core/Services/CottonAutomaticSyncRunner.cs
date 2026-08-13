@@ -41,7 +41,7 @@ namespace Cotton.Mobile.Services
         {
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentNullException.ThrowIfNull(rootIds);
-            HashSet<Guid> selectedRootIds = new(rootIds);
+            HashSet<Guid> selectedRootIds = [.. rootIds];
             if (selectedRootIds.Contains(Guid.Empty))
             {
                 throw new ArgumentException("Automatic sync root ids cannot be empty.", nameof(rootIds));

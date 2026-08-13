@@ -57,10 +57,12 @@ namespace Cotton.Mobile.Platforms.Android
             string localSourceId,
             CottonContentRevisionIndexSnapshot? previousIndex,
             List<CottonContentRevisionSnapshot>? revisions,
+            AndroidMediaStoreScanStatistics statistics,
             CancellationToken cancellationToken)
         {
             if (revisions is null)
             {
+                statistics.RecordHashedFile();
                 return ComputeContentHash(resolver, contentUri, cancellationToken);
             }
 
@@ -69,10 +71,12 @@ namespace Cotton.Mobile.Platforms.Android
                 && previousIndex is not null
                 && previousIndex.TryGetContentHash(localSourceId, generation.Value, out string? cachedHash))
             {
+                statistics.RecordReusedHash();
                 revisions.Add(new CottonContentRevisionSnapshot(localSourceId, generation.Value, cachedHash!));
                 return cachedHash!;
             }
 
+            statistics.RecordHashedFile();
             string contentHash = ComputeContentHash(resolver, contentUri, cancellationToken);
             if (generation.HasValue)
             {

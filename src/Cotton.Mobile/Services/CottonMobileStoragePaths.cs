@@ -14,6 +14,8 @@ namespace Cotton.Mobile.Services
         private const int MaxSafeFileExtensionLength = 24;
         private const string DefaultDownloadFileName = "download";
         private const string OfflineFileMetadataDirectoryName = "CottonOfflineFiles";
+        private const string ContentRevisionDirectoryName = "CottonContentRevisions";
+        private const string ContentRevisionFileName = "content-revisions.json";
         private const string SyncedFileManifestDirectoryName = "CottonSyncedFiles";
         private const string UploadReceiptDirectoryName = "CottonUploadReceipts";
         private const string SyncRootMetadataDirectoryName = "CottonSyncRoots";
@@ -47,6 +49,19 @@ namespace Cotton.Mobile.Services
         public static string CreateSyncedFileManifestRootDirectory()
         {
             return Path.Combine(FileSystem.AppDataDirectory, SyncedFileManifestDirectoryName);
+        }
+
+        public static string CreateContentRevisionFilePath(Uri instanceUri, CottonSyncRootSnapshot root)
+        {
+            ArgumentNullException.ThrowIfNull(instanceUri);
+            ArgumentNullException.ThrowIfNull(root);
+
+            return Path.Combine(
+                FileSystem.AppDataDirectory,
+                ContentRevisionDirectoryName,
+                CreateInstanceStorageKey(instanceUri),
+                root.StableKey,
+                ContentRevisionFileName);
         }
 
         public static string CreateSyncedFileManifestDirectory(Uri instanceUri, CottonSyncRootSnapshot root)

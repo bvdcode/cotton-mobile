@@ -7,6 +7,7 @@ namespace Cotton.Mobile.Services
     {
         private readonly ICottonSyncRootStore _rootStore;
         private readonly ICottonSyncRootPauseStore _pauseStore;
+        private readonly ICottonContentRevisionStore _contentRevisionStore;
         private readonly ICottonSyncedFileManifestStore _manifestStore;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
         private readonly ICottonSyncLocalRootPermissionResolver _permissionResolver;
@@ -14,18 +15,21 @@ namespace Cotton.Mobile.Services
         public SyncRootManager(
             ICottonSyncRootStore rootStore,
             ICottonSyncRootPauseStore pauseStore,
+            ICottonContentRevisionStore contentRevisionStore,
             ICottonSyncedFileManifestStore manifestStore,
             ICottonUploadReceiptStore uploadReceiptStore,
             ICottonSyncLocalRootPermissionResolver permissionResolver)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
             ArgumentNullException.ThrowIfNull(pauseStore);
+            ArgumentNullException.ThrowIfNull(contentRevisionStore);
             ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
             ArgumentNullException.ThrowIfNull(permissionResolver);
 
             _rootStore = rootStore;
             _pauseStore = pauseStore;
+            _contentRevisionStore = contentRevisionStore;
             _manifestStore = manifestStore;
             _uploadReceiptStore = uploadReceiptStore;
             _permissionResolver = permissionResolver;
@@ -68,6 +72,7 @@ namespace Cotton.Mobile.Services
             await _pauseStore
                 .SetPausedAsync(instanceUri, root.Id, isPaused: false, cancellationToken)
                 .ConfigureAwait(false);
+            await _contentRevisionStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             await _manifestStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
             await _uploadReceiptStore.ClearAsync(instanceUri, root, cancellationToken).ConfigureAwait(false);
 

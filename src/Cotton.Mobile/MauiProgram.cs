@@ -106,6 +106,8 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncRootMetadataPathProvider, CottonSyncRootMetadataPathProvider>();
             services.AddSingleton<ICottonSyncRootStore, FileSystemCottonSyncRootStore>();
             services.AddSingleton<ICottonSyncRootPauseStore, FileSystemCottonSyncRootPauseStore>();
+            services.AddSingleton<ICottonContentRevisionPathProvider, CottonContentRevisionPathProvider>();
+            services.AddSingleton<ICottonContentRevisionStore, FileSystemCottonContentRevisionStore>();
             services.AddSingleton<ICottonSyncedFileManifestPathProvider, CottonSyncedFileManifestPathProvider>();
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
             services.AddSingleton<ICottonUploadReceiptPathProvider, CottonUploadReceiptPathProvider>();

@@ -32,6 +32,8 @@ namespace Cotton.Mobile.Tests
                 new FileSystemCottonSyncRootPauseStore(
                     metadataPathProvider,
                     NullLogger<FileSystemCottonSyncRootPauseStore>.Instance, TimeProvider.System),
+                new FileSystemCottonContentRevisionStore(
+                    new FixedContentRevisionPathProvider(_directory)),
                 new FileSystemCottonSyncedFileManifestStore(
                     new TestSyncedFileManifestPathProvider(_directory),
                     NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System),

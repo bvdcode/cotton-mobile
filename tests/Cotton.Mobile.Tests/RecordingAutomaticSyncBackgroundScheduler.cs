@@ -4,6 +4,9 @@ namespace Cotton.Mobile.Tests
 {
     internal class RecordingAutomaticSyncBackgroundScheduler : ICottonAutomaticSyncBackgroundScheduler
     {
+        private readonly TaskCompletionSource _rootRetryScheduled = new(
+            TaskCreationOptions.RunContinuationsAsynchronously);
+
         public int ScheduleCount { get; private set; }
 
         public int RescheduleMediaStoreCount { get; private set; }
@@ -32,7 +35,13 @@ namespace Cotton.Mobile.Tests
         {
             cancellationToken.ThrowIfCancellationRequested();
             RootRetryIds.AddRange(rootIds);
+            _rootRetryScheduled.TrySetResult();
             return Task.CompletedTask;
+        }
+
+        public Task WaitForRootRetryAsync()
+        {
+            return _rootRetryScheduled.Task.WaitAsync(TimeSpan.FromSeconds(5));
         }
 
         public Task CancelAsync(CancellationToken cancellationToken = default)

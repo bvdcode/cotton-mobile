@@ -126,7 +126,15 @@ namespace Cotton.Mobile.Services
         {
             try
             {
-                await _dispatcher.RunAsync(instanceUri, trigger, cancellationToken).ConfigureAwait(false);
+                CottonAutomaticSyncRunResult result = await _dispatcher
+                    .RunAsync(instanceUri, trigger, cancellationToken)
+                    .ConfigureAwait(false);
+                if (result.HasFailures)
+                {
+                    await _backgroundScheduler
+                        .ScheduleRootRetriesAsync(result.FailedRootIds, cancellationToken)
+                        .ConfigureAwait(false);
+                }
             }
             catch (OperationCanceledException exception)
             {

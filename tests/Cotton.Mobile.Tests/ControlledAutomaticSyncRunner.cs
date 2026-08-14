@@ -12,6 +12,8 @@ namespace Cotton.Mobile.Tests
 
         public List<IReadOnlyList<Guid>> RootSelections { get; } = [];
 
+        public CottonAutomaticSyncRunResult Result { get; set; } = CottonAutomaticSyncRunResult.Empty;
+
         public Task<CottonAutomaticSyncRunResult> RunAsync(
             Uri instanceUri,
             CottonAutomaticSyncTrigger trigger,
@@ -64,7 +66,7 @@ namespace Cotton.Mobile.Tests
         {
             _started.Release();
             await _release.WaitAsync(cancellationToken);
-            return CottonAutomaticSyncRunResult.Empty;
+            return Result;
         }
     }
 }

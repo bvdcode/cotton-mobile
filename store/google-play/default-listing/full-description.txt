@@ -1,15 +1,13 @@
-Cotton Cloud for Android is a focused folder-sync client for your Cotton Cloud instance.
+Keep your Android folders connected to your Cotton Cloud — securely and on your terms.
 
-Current features:
+Choose a cloud folder, pair it with a folder on your device, and decide how files should move.
 
-- Connect to a Cotton Cloud instance by entering its URL.
-- Approve access in the browser through the Cotton app-code authorization flow.
-- Restore your secure session when the app starts again.
-- Choose a cloud folder and a folder on your Android device.
-- Upload new and changed files from the selected device folder.
-- Keep local originals or delete them only after a confirmed upload.
-- Synchronize changes in both directions with an explicit review before destructive actions.
-- Run, pause, resume, refresh, and stop each configured sync root.
-- Sign out and clear local session data when needed.
+• Upload new and changed files from Android.
+• Sync changes in both directions.
+• Review destructive actions before anything is removed.
+• Keep local originals, or remove them only after a confirmed upload.
+• Run, pause, resume, refresh, or stop each sync folder independently.
 
-Cotton Cloud mobile is currently distributed through testing tracks while the sync experience is refined.
+Connect by entering your Cotton Cloud URL and approve access securely in your browser. Cotton Cloud restores your session on the next launch, while sign-out clears local session data when you need it.
+
+Cotton Cloud for Android is currently available through testing tracks while we continue refining the sync experience.

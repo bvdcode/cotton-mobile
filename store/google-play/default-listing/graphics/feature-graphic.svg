@@ -25,30 +25,29 @@
       </g>
     </svg>
     <text x="0" y="176" fill="#ffffff" font-family="Arial, sans-serif" font-size="64" font-weight="700">Cotton Cloud</text>
-    <text x="0" y="224" fill="#c7d1d6" font-family="Arial, sans-serif" font-size="28">Browse, preview, and share files</text>
+    <text x="0" y="224" fill="#c7d1d6" font-family="Arial, sans-serif" font-size="28">Folder sync for Android</text>
   </g>
 
   <g transform="translate(628 74)" filter="url(#softShadow)">
     <rect x="0" y="0" width="300" height="344" rx="32" fill="#f7faf8"/>
-    <text x="34" y="64" fill="#181c1a" font-family="Arial, sans-serif" font-size="32" font-weight="700">Files</text>
+    <text x="34" y="64" fill="#181c1a" font-family="Arial, sans-serif" font-size="32" font-weight="700">Sync</text>
     <rect x="218" y="34" width="48" height="48" rx="18" fill="#e1e4e2"/>
-    <circle cx="239" cy="55" r="8" fill="none" stroke="#424947" stroke-width="4"/>
-    <path d="M245 61 L253 69" fill="none" stroke="#424947" stroke-width="4" stroke-linecap="round"/>
+    <path d="M231 53 A10 10 0 0 1 248 47" fill="none" stroke="#424947" stroke-width="4" stroke-linecap="round"/>
+    <path d="M248 47 L247 39 M248 47 L256 46" fill="none" stroke="#424947" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M253 61 A10 10 0 0 1 236 67" fill="none" stroke="#424947" stroke-width="4" stroke-linecap="round"/>
+    <path d="M236 67 L237 75 M236 67 L228 68" fill="none" stroke="#424947" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 
-    <rect x="34" y="104" width="232" height="62" rx="18" fill="#eaf5e8"/>
-    <rect x="52" y="122" width="36" height="28" rx="8" fill="#bfece3"/>
-    <path d="M56 128 H68 L72 134 H84 V148 H56 Z" fill="#3d665f"/>
-    <rect x="106" y="122" width="112" height="12" rx="6" fill="#181c1a"/>
-    <rect x="106" y="145" width="74" height="9" rx="4.5" fill="#3d665f" opacity="0.64"/>
-
-    <rect x="34" y="184" width="232" height="62" rx="18" fill="#f0f2f0"/>
-    <rect x="52" y="202" width="36" height="28" rx="8" fill="#e1e4e2"/>
-    <path d="M58 224 L68 212 L76 220 L82 214 L88 224 Z" fill="#424947"/>
-    <rect x="106" y="202" width="128" height="12" rx="6" fill="#181c1a"/>
-    <rect x="106" y="225" width="84" height="9" rx="4.5" fill="#424947" opacity="0.58"/>
-    <rect x="196" y="220" width="52" height="16" rx="8" fill="#dde7b2"/>
+    <text x="34" y="104" fill="#64706c" font-family="Arial, sans-serif" font-size="15">1 folder set to sync</text>
+    <rect x="34" y="122" width="232" height="122" rx="18" fill="#eaf5e8"/>
+    <rect x="52" y="145" width="42" height="38" rx="10" fill="#dce8d9"/>
+    <path d="M59 155 H72 L77 161 H88 V177 H59 Z" fill="none" stroke="#3d665f" stroke-width="4" stroke-linejoin="round"/>
+    <text x="108" y="157" fill="#181c1a" font-family="Arial, sans-serif" font-size="18" font-weight="700">Project Files</text>
+    <text x="108" y="181" fill="#64706c" font-family="Arial, sans-serif" font-size="14">Cloud to device</text>
+    <circle cx="59" cy="216" r="5" fill="#9bd200"/>
+    <text x="72" y="221" fill="#3d665f" font-family="Arial, sans-serif" font-size="14" font-weight="700">Ready to sync</text>
+    <text x="244" y="221" fill="#64706c" text-anchor="end" font-family="Arial, sans-serif" font-size="14">Ready</text>
 
     <rect x="34" y="268" width="232" height="50" rx="18" fill="url(#lime)"/>
-    <text x="150" y="300" fill="#151900" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700">Share</text>
+    <text x="150" y="300" fill="#151900" text-anchor="middle" font-family="Arial, sans-serif" font-size="21" font-weight="700">Run now</text>
   </g>
 </svg>

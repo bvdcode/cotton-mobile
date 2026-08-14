@@ -14,8 +14,8 @@ readonly diagnostics_tag="CottonSyncDiagnostics"
 readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
 readonly avd_name="cotton-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
-readonly remote_media_directory="/sdcard/Pictures/CottonRuntime"
-readonly remote_media_path="$remote_media_directory/cotton-runtime.png"
+readonly media_collection_uri="content://media/external_primary/images/media"
+readonly remote_media_path="/data/local/tmp/cotton-runtime.png"
 
 sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
 avdmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/avdmanager"
@@ -24,11 +24,16 @@ adb_bin="${ANDROID_HOME:-}/platform-tools/adb"
 emulator_log="${RUNNER_TEMP:-/tmp}/cotton-android-emulator.log"
 avd_home="${RUNNER_TEMP:-/tmp}/cotton-android-avd"
 emulator_pid=""
+remote_media_uri=""
 
 export ANDROID_AVD_HOME="$avd_home"
 
 cleanup() {
   if [[ -x "$adb_bin" ]]; then
+    if [[ -n "$remote_media_uri" ]]; then
+      "$adb_bin" shell content delete --uri "$remote_media_uri" >/dev/null 2>&1 || true
+    fi
+
     "$adb_bin" emu kill >/dev/null 2>&1 || true
   fi
 
@@ -123,6 +128,39 @@ read_metric() {
   printf '%s\n' "$value"
 }
 
+create_media_fixture() {
+  local insert_output
+
+  "$adb_bin" push "$media_file" "$remote_media_path" >/dev/null
+  insert_output="$("$adb_bin" shell content insert \
+    --uri "$media_collection_uri" \
+    --bind _display_name:s:cotton-runtime.png \
+    --bind mime_type:s:image/png \
+    --bind relative_path:s:Pictures/CottonRuntime/ \
+    --bind is_pending:i:1 | tr -d '\r')"
+  remote_media_uri="$(printf '%s\n' "$insert_output" | sed -n 's/^Inserted //p')"
+  if [[ -z "$remote_media_uri" ]]; then
+    printf 'Could not create Android MediaStore fixture: %s\n' "$insert_output" >&2
+    exit 1
+  fi
+
+  "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
+  "$adb_bin" shell content update \
+    --uri "$remote_media_uri" \
+    --bind is_pending:i:0 >/dev/null
+}
+
+update_media_fixture() {
+  local modified_at
+
+  modified_at="$(($(date +%s) + 60))"
+  "$adb_bin" shell "printf x >> '$remote_media_path'"
+  "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
+  "$adb_bin" shell content update \
+    --uri "$remote_media_uri" \
+    --bind date_modified:l:"$modified_at" >/dev/null
+}
+
 timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
 mkdir -p "$ANDROID_AVD_HOME"
 printf 'no\n' | "$avdmanager_bin" create avd \
@@ -152,12 +190,7 @@ wait_for_device
 wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
-"$adb_bin" shell mkdir -p "$remote_media_directory"
-"$adb_bin" push "$media_file" "$remote_media_path" >/dev/null
-"$adb_bin" shell am broadcast \
-  -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
-  -d "file://$remote_media_path" >/dev/null
-sleep 2
+create_media_fixture
 
 denied_output="$(run_diagnostic scan-media denied)"
 if [[ "$denied_output" != *":failed:"* ]]; then
@@ -197,11 +230,7 @@ elif [[ "$second_output" == *":failed:"* || "$second_hashed" -lt 1 || "$second_r
   exit 1
 fi
 
-"$adb_bin" shell "printf x >> $remote_media_path"
-"$adb_bin" shell am broadcast \
-  -a android.intent.action.MEDIA_SCANNER_SCAN_FILE \
-  -d "file://$remote_media_path" >/dev/null
-sleep 2
+update_media_fixture
 
 changed_output="$(run_diagnostic scan-media changed)"
 changed_hashed="$(read_metric "$changed_output" hashed)"

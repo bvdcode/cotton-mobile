@@ -129,21 +129,27 @@ read_metric() {
 }
 
 create_media_fixture() {
-  local insert_output
+  local media_id
+  local query_output
 
   "$adb_bin" push "$media_file" "$remote_media_path" >/dev/null
-  insert_output="$("$adb_bin" shell content insert \
+  "$adb_bin" shell content insert \
     --uri "$media_collection_uri" \
     --bind _display_name:s:cotton-runtime.png \
     --bind mime_type:s:image/png \
     --bind relative_path:s:Pictures/CottonRuntime/ \
-    --bind is_pending:i:1 | tr -d '\r')"
-  remote_media_uri="$(printf '%s\n' "$insert_output" | sed -n 's/^Inserted //p')"
-  if [[ -z "$remote_media_uri" ]]; then
-    printf 'Could not create Android MediaStore fixture: %s\n' "$insert_output" >&2
+    --bind is_pending:i:1
+  query_output="$("$adb_bin" shell content query \
+    --uri "$media_collection_uri" \
+    --projection _id \
+    --where "_display_name='cotton-runtime.png'" | tr -d '\r')"
+  media_id="$(printf '%s\n' "$query_output" | sed -n 's/.*_id=\([0-9][0-9]*\).*/\1/p' | head -1)"
+  if [[ -z "$media_id" ]]; then
+    printf 'Could not locate Android MediaStore fixture: %s\n' "$query_output" >&2
     exit 1
   fi
 
+  remote_media_uri="$media_collection_uri/$media_id"
   "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
   "$adb_bin" shell content update \
     --uri "$remote_media_uri" \

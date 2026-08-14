@@ -59,6 +59,7 @@ jobs:
           fi
 
       - name: Test Android runtime behavior
+        timeout-minutes: 20
         run: |
           scripts/mobile/test-android-runtime.sh \
             src/Cotton.Mobile/bin/Debug/net10.0-android/dev.cottoncloud.app.debug-Signed.apk \

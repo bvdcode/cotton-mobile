@@ -64,6 +64,7 @@ jobs:
           fi
 
       - name: Test Android runtime behavior
+        timeout-minutes: 20
         env:
           COTTON_ANDROID_RUNTIME_API: ${{ matrix.api }}
         run: |

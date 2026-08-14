@@ -52,6 +52,16 @@ wait_for_boot() {
   exit 1
 }
 
+wait_for_device() {
+  if timeout 120 "$adb_bin" wait-for-device; then
+    return
+  fi
+
+  printf 'Android emulator did not register with ADB.\n' >&2
+  tail -100 "$emulator_log" >&2 || true
+  exit 1
+}
+
 wait_for_jobs() {
   local attempt
   for attempt in {1..60}; do
@@ -109,7 +119,7 @@ read_metric() {
   printf '%s\n' "$value"
 }
 
-"$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
+timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
 printf 'no\n' | "$avdmanager_bin" create avd \
   --force \
   --name "$avd_name" \
@@ -128,7 +138,7 @@ printf 'no\n' | "$avdmanager_bin" create avd \
   -camera-front none >"$emulator_log" 2>&1 &
 emulator_pid="$!"
 
-"$adb_bin" wait-for-device
+wait_for_device
 wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
@@ -228,7 +238,7 @@ wait_for_jobs
 "$adb_bin" shell am kill "$package_name"
 wait_for_jobs
 "$adb_bin" reboot
-"$adb_bin" wait-for-device
+wait_for_device
 wait_for_boot
 wait_for_jobs
 

@@ -38,12 +38,34 @@ wait_for_device() {
   exit 1
 }
 
+wait_for_disconnect() {
+  local attempt
+  for attempt in {1..60}; do
+    if ! "$adb_bin" get-state >/dev/null 2>&1; then
+      return
+    fi
+
+    sleep 1
+  done
+
+  printf 'Android emulator did not disconnect for reboot.\n' >&2
+  exit 1
+}
+
+launch_application() {
+  "$adb_bin" shell monkey \
+    -p "$package_name" \
+    -c android.intent.category.LAUNCHER \
+    1 >/dev/null
+  "$adb_bin" shell input keyevent 3 >/dev/null
+}
+
 wait_for_jobs() {
   local phase="$1"
   local maximum_attempts="${2:-60}"
   local attempt
   for ((attempt = 1; attempt <= maximum_attempts; attempt++)); do
-    if "$adb_bin" shell dumpsys jobscheduler | grep -Fq "$package_name"; then
+    if has_scheduled_job; then
       return
     fi
 
@@ -53,6 +75,17 @@ wait_for_jobs() {
   printf 'WorkManager jobs were not registered for %s %s.\n' "$package_name" "$phase" >&2
   "$adb_bin" shell dumpsys jobscheduler >&2
   exit 1
+}
+
+has_scheduled_job() {
+  local line
+  while IFS= read -r line; do
+    if [[ "$line" == *"JOB "* && "$line" == *"$package_name/"* ]]; then
+      return 0
+    fi
+  done < <("$adb_bin" shell dumpsys jobscheduler | tr -d '\r')
+
+  return 1
 }
 
 find_media_id() {

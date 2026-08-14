@@ -107,6 +107,7 @@ wait_for_device
 wait_for_boot
 "$adb_bin" install -r "$apk_path" >/dev/null
 "$adb_bin" shell pm clear "$package_name" >/dev/null
+launch_application
 create_media_fixture
 
 denied_output="$(run_diagnostic scan-media denied)"
@@ -194,6 +195,7 @@ wait_for_jobs "after scheduling"
 "$adb_bin" shell am kill "$package_name"
 wait_for_jobs "after process death"
 "$adb_bin" reboot
+wait_for_disconnect
 wait_for_device
 wait_for_boot
 wait_for_jobs "after reboot" 120

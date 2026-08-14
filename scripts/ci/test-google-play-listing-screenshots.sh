@@ -7,6 +7,8 @@ screenshots_dir="$repo_root/store/google-play/default-listing/graphics/phone-scr
 expected_screenshots=(
   "01-sync-overview.png"
   "02-sync-mode.png"
+  "03-sync-folder-ready.png"
+  "04-sync-folder-active.png"
 )
 
 if [[ ! -d "$screenshots_dir" ]]; then

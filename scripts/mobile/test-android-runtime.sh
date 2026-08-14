@@ -22,7 +22,10 @@ avdmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/avdmanager"
 emulator_bin="${ANDROID_HOME:-}/emulator/emulator"
 adb_bin="${ANDROID_HOME:-}/platform-tools/adb"
 emulator_log="${RUNNER_TEMP:-/tmp}/cotton-android-emulator.log"
+avd_home="${RUNNER_TEMP:-/tmp}/cotton-android-avd"
 emulator_pid=""
+
+export ANDROID_AVD_HOME="$avd_home"
 
 cleanup() {
   if [[ -x "$adb_bin" ]]; then
@@ -120,11 +123,17 @@ read_metric() {
 }
 
 timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
+mkdir -p "$ANDROID_AVD_HOME"
 printf 'no\n' | "$avdmanager_bin" create avd \
   --force \
   --name "$avd_name" \
   --package "$system_image" \
   --device pixel_6 >/dev/null
+
+if ! "$emulator_bin" -list-avds | grep -Fxq "$avd_name"; then
+  printf 'Android virtual device %s was not created in %s.\n' "$avd_name" "$ANDROID_AVD_HOME" >&2
+  exit 1
+fi
 
 "$emulator_bin" \
   -avd "$avd_name" \

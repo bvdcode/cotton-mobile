@@ -53,6 +53,7 @@
   <data name="SyncFolderNotReady" xml:space="preserve"><value>Sync folder is not ready.</value></data>
   <data name="InvalidServerUrl" xml:space="preserve"><value>Enter a Cotton server address.</value></data>
   <data name="CheckingServer" xml:space="preserve"><value>Checking server…</value></data>
+  <data name="CheckingSession" xml:space="preserve"><value>Checking your session…</value></data>
   <data name="ServerNotFound" xml:space="preserve"><value>Could not find a Cotton server at this address.</value></data>
   <data name="InsecureConnectionTitle" xml:space="preserve"><value>Unsafe connection</value></data>
   <data name="InsecureConnectionFormat" xml:space="preserve"><value>{0} is available only over unencrypted HTTP. Your account and files could be intercepted. Continue?</value></data>

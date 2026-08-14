@@ -36,15 +36,16 @@
                            HorizontalTextAlignment="Center" />
                 </VerticalStackLayout>
 
-                <Border IsVisible="{Binding Display.IsLoadingVisible}"
-                        Style="{StaticResource AppStatusCard}">
-                    <HorizontalStackLayout Spacing="12">
-                        <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
-                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                        <Label Text="{Binding Display.LoadingMessage}"
-                               VerticalOptions="Center" />
-                    </HorizontalStackLayout>
-                </Border>
+                <VerticalStackLayout IsVisible="{Binding Display.IsLoadingVisible}"
+                                     Spacing="12"
+                                     HorizontalOptions="Center">
+                    <ActivityIndicator IsRunning="{Binding Display.IsLoadingIndicatorRunning}"
+                                       IsVisible="{Binding Display.IsLoadingIndicatorRunning}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                    <Label Text="{Binding Display.LoadingMessage}"
+                           Style="{StaticResource AppBodyText}"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
 
                 <Border IsVisible="{Binding Display.IsSignInVisible}"
                         Style="{StaticResource AppCard}">

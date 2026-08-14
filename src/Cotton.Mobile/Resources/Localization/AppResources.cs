@@ -60,6 +60,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string SyncFolderNotReady => GetString(nameof(SyncFolderNotReady));
         public static string InvalidServerUrl => GetString(nameof(InvalidServerUrl));
         public static string CheckingServer => GetString(nameof(CheckingServer));
+        public static string CheckingSession => GetString(nameof(CheckingSession));
         public static string ServerNotFound => GetString(nameof(ServerNotFound));
         public static string InsecureConnectionTitle => GetString(nameof(InsecureConnectionTitle));
         public static string ContinueText => GetString(nameof(ContinueText));

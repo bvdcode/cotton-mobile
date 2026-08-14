@@ -45,6 +45,30 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public void SessionRestoreExplainsTheWaitWithoutRunningAnotherIndicator()
+        {
+            MainPageDisplayState display = new();
+
+            display.ShowSessionRestore("Checking your session…");
+
+            Assert.True(display.IsLoadingVisible);
+            Assert.False(display.IsLoadingIndicatorRunning);
+            Assert.Equal("Checking your session…", display.LoadingMessage);
+        }
+
+        [Fact]
+        public void ExplicitOperationRunsTheLoadingIndicator()
+        {
+            MainPageDisplayState display = new();
+
+            display.ShowLoading("Signing out…");
+
+            Assert.True(display.IsLoadingVisible);
+            Assert.True(display.IsLoadingIndicatorRunning);
+            Assert.Equal("Signing out…", display.LoadingMessage);
+        }
+
+        [Fact]
         public void AuthorizationStateCanBeCancelledOnce()
         {
             MainPageDisplayState display = new();

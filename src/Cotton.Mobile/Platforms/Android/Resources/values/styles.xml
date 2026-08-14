@@ -11,11 +11,11 @@
         <item name="android:windowBackground">@drawable/cotton_splash_screen</item>
         <item name="android:windowSplashScreenBackground">@color/cotton_splash_background</item>
         <item name="android:windowSplashScreenAnimatedIcon">@drawable/cotton_splash_mark</item>
-        <item name="android:statusBarColor">@color/cotton_system_bar_background</item>
-        <item name="android:navigationBarColor">@color/cotton_system_bar_background</item>
-        <item name="android:navigationBarDividerColor">@color/cotton_system_bar_background</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:statusBarColor">@color/cotton_splash_background</item>
+        <item name="android:navigationBarColor">@color/cotton_splash_background</item>
+        <item name="android:navigationBarDividerColor">@color/cotton_splash_background</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:enforceStatusBarContrast">false</item>
         <item name="android:enforceNavigationBarContrast">false</item>
         <item name="android:forceDarkAllowed">false</item>

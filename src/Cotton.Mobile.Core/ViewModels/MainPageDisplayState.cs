@@ -19,6 +19,7 @@ namespace Cotton.Mobile.ViewModels
         private string _profileInstance = string.Empty;
         private string? _profileStatus;
         private string? _profileAvatarUrl;
+        private bool _showLoadingIndicator;
         private bool _isInputEnabled = true;
         private bool _isCancelAuthorizationEnabled;
         private bool _isLogoutEnabled;
@@ -136,7 +137,7 @@ namespace Cotton.Mobile.ViewModels
 
         public bool IsLoadingVisible => _state == MainPageViewState.Loading;
 
-        public bool IsLoadingIndicatorRunning => IsLoadingVisible;
+        public bool IsLoadingIndicatorRunning => IsLoadingVisible && _showLoadingIndicator;
 
         public bool IsSignInVisible => _state == MainPageViewState.SignIn;
 
@@ -157,14 +158,14 @@ namespace Cotton.Mobile.ViewModels
         public bool IsProfileDestinationVisible =>
             IsAuthenticatedVisible && SelectedDestination == AppNavigationDestination.Profile;
 
+        public void ShowSessionRestore(string message)
+        {
+            ShowLoading(message, showIndicator: false);
+        }
+
         public void ShowLoading(string message)
         {
-            LoadingMessage = message ?? string.Empty;
-            Status = null;
-            IsInputEnabled = false;
-            IsCancelAuthorizationEnabled = false;
-            IsLogoutEnabled = false;
-            SetState(MainPageViewState.Loading);
+            ShowLoading(message, showIndicator: true);
         }
 
         public void ShowSignIn(string? status)
@@ -176,6 +177,7 @@ namespace Cotton.Mobile.ViewModels
             IsInputEnabled = true;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = false;
+            SetLoadingIndicatorVisibility(isVisible: false);
             SetState(MainPageViewState.SignIn);
         }
 
@@ -187,6 +189,7 @@ namespace Cotton.Mobile.ViewModels
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = true;
             IsLogoutEnabled = false;
+            SetLoadingIndicatorVisibility(isVisible: false);
             SetState(MainPageViewState.AuthorizationProgress);
         }
 
@@ -210,6 +213,7 @@ namespace Cotton.Mobile.ViewModels
             IsInputEnabled = false;
             IsCancelAuthorizationEnabled = false;
             IsLogoutEnabled = true;
+            SetLoadingIndicatorVisibility(isVisible: false);
             SelectedDestination = AppNavigationDestination.Sync;
             SetState(MainPageViewState.Authenticated);
         }
@@ -252,6 +256,28 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsLegalFooterVisible));
             OnPropertyChanged(nameof(IsSyncDestinationVisible));
             OnPropertyChanged(nameof(IsProfileDestinationVisible));
+        }
+
+        private void ShowLoading(string message, bool showIndicator)
+        {
+            LoadingMessage = message ?? string.Empty;
+            Status = null;
+            IsInputEnabled = false;
+            IsCancelAuthorizationEnabled = false;
+            IsLogoutEnabled = false;
+            SetLoadingIndicatorVisibility(showIndicator);
+            SetState(MainPageViewState.Loading);
+        }
+
+        private void SetLoadingIndicatorVisibility(bool isVisible)
+        {
+            if (_showLoadingIndicator == isVisible)
+            {
+                return;
+            }
+
+            _showLoadingIndicator = isVisible;
+            OnPropertyChanged(nameof(IsLoadingIndicatorRunning));
         }
     }
 }

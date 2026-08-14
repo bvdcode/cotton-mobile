@@ -102,7 +102,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             _didRestoreSession = true;
-            Display.ShowLoading(string.Empty);
+            Display.ShowSessionRestore(AppResources.CheckingSession);
             RefreshCommands();
             MainPageSessionState state = await _sessionCoordinator.RestoreAsync();
             await ApplySessionStateAsync(state);
@@ -197,13 +197,13 @@ namespace Cotton.Mobile.ViewModels
             {
                 MainPageProfile profile = state.Profile
                     ?? throw new InvalidOperationException("Authenticated session requires a profile.");
-                Display.ShowAuthenticated(profile, state.Status);
-                RefreshCommands();
                 if (state.ReloadSync)
                 {
                     await Sync.LoadForInstanceAsync(state.InstanceUriValue, profile.AccountScopeKey);
                 }
 
+                Display.ShowAuthenticated(profile, state.Status);
+                RefreshCommands();
                 await _notificationSessionService.SetSessionAsync(state.InstanceUriValue);
                 await _automaticSyncSessionService.SetSessionAsync(state.InstanceUriValue);
 

@@ -29,6 +29,7 @@ namespace Cotton.Mobile.Platforms.Android
             Task periodicTask = AndroidWorkOperation.WaitAsync(periodicOperation, cancellationToken);
             Task mediaStoreTask = AndroidWorkOperation.WaitAsync(mediaStoreOperation, cancellationToken);
             await Task.WhenAll(periodicTask, mediaStoreTask).ConfigureAwait(false);
+            await AndroidWorkOperation.WaitForRescheduleReceiverAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default)
@@ -39,6 +40,7 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new InvalidOperationException("Android APPEND_OR_REPLACE policy is unavailable.");
             IOperation operation = EnqueueMediaStoreTrigger(GetWorkManager(), policy);
             await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
+            await AndroidWorkOperation.WaitForRescheduleReceiverAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task ScheduleRootRetriesAsync(
@@ -67,7 +69,13 @@ namespace Cotton.Mobile.Platforms.Android
                 operationTasks.Add(AndroidWorkOperation.WaitAsync(operation, cancellationToken));
             }
 
+            if (operationTasks.Count == 0)
+            {
+                return;
+            }
+
             await Task.WhenAll(operationTasks).ConfigureAwait(false);
+            await AndroidWorkOperation.WaitForRescheduleReceiverAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task CancelAsync(CancellationToken cancellationToken = default)

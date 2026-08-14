@@ -11,7 +11,7 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidNotificationBackgroundScheduler : ICottonNotificationBackgroundScheduler
     {
-        public Task ScheduleAsync(CancellationToken cancellationToken = default)
+        public async Task ScheduleAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -21,22 +21,24 @@ namespace Cotton.Mobile.Platforms.Android
             PeriodicWorkRequest request = CreateRequest();
             ExistingPeriodicWorkPolicy policy = ExistingPeriodicWorkPolicy.Keep
                 ?? throw new InvalidOperationException("Android periodic KEEP policy is unavailable.");
-            _ = workManager.EnqueueUniquePeriodicWork(
+            IOperation operation = workManager.EnqueueUniquePeriodicWork(
                 AndroidNotificationConstants.PeriodicWorkName,
                 policy,
-                request);
-            return Task.CompletedTask;
+                request)
+                ?? throw new InvalidOperationException("Android notification polling operation is unavailable.");
+            await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task CancelAsync(CancellationToken cancellationToken = default)
+        public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             Context context = global::Android.App.Application.Context;
             WorkManager workManager = WorkManager.GetInstance(context)
                 ?? throw new InvalidOperationException("Android WorkManager is unavailable.");
-            _ = workManager.CancelUniqueWork(AndroidNotificationConstants.PeriodicWorkName);
-            return Task.CompletedTask;
+            IOperation operation = workManager.CancelUniqueWork(AndroidNotificationConstants.PeriodicWorkName)
+                ?? throw new InvalidOperationException("Android notification polling cancellation is unavailable.");
+            await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
         }
 
         private static PeriodicWorkRequest CreateRequest()

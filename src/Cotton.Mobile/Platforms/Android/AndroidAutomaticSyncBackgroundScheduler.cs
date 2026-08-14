@@ -13,32 +13,35 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidAutomaticSyncBackgroundScheduler : ICottonAutomaticSyncBackgroundScheduler
     {
-        public Task ScheduleAsync(CancellationToken cancellationToken = default)
+        public async Task ScheduleAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             WorkManager workManager = GetWorkManager();
             ExistingPeriodicWorkPolicy periodicPolicy = ExistingPeriodicWorkPolicy.Keep
                 ?? throw new InvalidOperationException("Android periodic KEEP policy is unavailable.");
-            _ = workManager.EnqueueUniquePeriodicWork(
+            IOperation periodicOperation = workManager.EnqueueUniquePeriodicWork(
                 AndroidAutomaticSyncConstants.PeriodicWorkName,
                 periodicPolicy,
-                CreatePeriodicRequest());
-            EnqueueMediaStoreTrigger(workManager, GetKeepPolicy());
-            return Task.CompletedTask;
+                CreatePeriodicRequest())
+                ?? throw new InvalidOperationException("Android periodic sync operation is unavailable.");
+            IOperation mediaStoreOperation = EnqueueMediaStoreTrigger(workManager, GetKeepPolicy());
+            Task periodicTask = AndroidWorkOperation.WaitAsync(periodicOperation, cancellationToken);
+            Task mediaStoreTask = AndroidWorkOperation.WaitAsync(mediaStoreOperation, cancellationToken);
+            await Task.WhenAll(periodicTask, mediaStoreTask).ConfigureAwait(false);
         }
 
-        public Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default)
+        public async Task RescheduleMediaStoreTriggerAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             ExistingWorkPolicy policy = ExistingWorkPolicy.AppendOrReplace
                 ?? throw new InvalidOperationException("Android APPEND_OR_REPLACE policy is unavailable.");
-            EnqueueMediaStoreTrigger(GetWorkManager(), policy);
-            return Task.CompletedTask;
+            IOperation operation = EnqueueMediaStoreTrigger(GetWorkManager(), policy);
+            await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
         }
 
-        public Task ScheduleRootRetriesAsync(
+        public async Task ScheduleRootRetriesAsync(
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {
@@ -47,6 +50,7 @@ namespace Cotton.Mobile.Platforms.Android
 
             WorkManager workManager = GetWorkManager();
             ExistingWorkPolicy policy = GetKeepPolicy();
+            List<Task> operationTasks = [];
             foreach (Guid rootId in rootIds.Distinct().Order())
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -55,24 +59,32 @@ namespace Cotton.Mobile.Platforms.Android
                     throw new ArgumentException("Sync root ids cannot be empty.", nameof(rootIds));
                 }
 
-                _ = workManager.EnqueueUniqueWork(
+                IOperation operation = workManager.EnqueueUniqueWork(
                     AndroidAutomaticSyncConstants.CreateRootRetryWorkName(rootId),
                     policy,
-                    CreateRootRetryRequest(rootId));
+                    CreateRootRetryRequest(rootId))
+                    ?? throw new InvalidOperationException("Android sync-root retry operation is unavailable.");
+                operationTasks.Add(AndroidWorkOperation.WaitAsync(operation, cancellationToken));
             }
 
-            return Task.CompletedTask;
+            await Task.WhenAll(operationTasks).ConfigureAwait(false);
         }
 
-        public Task CancelAsync(CancellationToken cancellationToken = default)
+        public async Task CancelAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             WorkManager workManager = GetWorkManager();
-            _ = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.PeriodicWorkName);
-            _ = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.MediaStoreWorkName);
-            _ = workManager.CancelAllWorkByTag(AndroidAutomaticSyncConstants.RootRetryTag);
-            return Task.CompletedTask;
+            IOperation periodicOperation = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.PeriodicWorkName)
+                ?? throw new InvalidOperationException("Android periodic sync cancellation is unavailable.");
+            IOperation mediaStoreOperation = workManager.CancelUniqueWork(AndroidAutomaticSyncConstants.MediaStoreWorkName)
+                ?? throw new InvalidOperationException("Android MediaStore sync cancellation is unavailable.");
+            IOperation retryOperation = workManager.CancelAllWorkByTag(AndroidAutomaticSyncConstants.RootRetryTag)
+                ?? throw new InvalidOperationException("Android sync-root retry cancellation is unavailable.");
+            Task periodicTask = AndroidWorkOperation.WaitAsync(periodicOperation, cancellationToken);
+            Task mediaStoreTask = AndroidWorkOperation.WaitAsync(mediaStoreOperation, cancellationToken);
+            Task retryTask = AndroidWorkOperation.WaitAsync(retryOperation, cancellationToken);
+            await Task.WhenAll(periodicTask, mediaStoreTask, retryTask).ConfigureAwait(false);
         }
 
         private static PeriodicWorkRequest CreatePeriodicRequest()
@@ -143,14 +155,15 @@ namespace Cotton.Mobile.Platforms.Android
                 ?? throw new InvalidOperationException("Android MediaStore sync work constraints are unavailable.");
         }
 
-        private static void EnqueueMediaStoreTrigger(
+        private static IOperation EnqueueMediaStoreTrigger(
             WorkManager workManager,
             ExistingWorkPolicy policy)
         {
-            _ = workManager.EnqueueUniqueWork(
+            return workManager.EnqueueUniqueWork(
                 AndroidAutomaticSyncConstants.MediaStoreWorkName,
                 policy,
-                CreateMediaStoreRequest());
+                CreateMediaStoreRequest())
+                ?? throw new InvalidOperationException("Android MediaStore sync operation is unavailable.");
         }
 
         private static ExistingWorkPolicy GetKeepPolicy()

@@ -12,6 +12,7 @@ readonly package_name="dev.cottoncloud.app.debug"
 readonly diagnostics_receiver="$package_name.SyncDiagnosticsReceiver"
 readonly diagnostics_action="dev.cottoncloud.app.debug.SYNC_DIAGNOSTICS"
 readonly diagnostics_tag="CottonSyncDiagnostics"
+readonly workmanager_reschedule_receiver="androidx.work.impl.background.systemalarm.RescheduleReceiver"
 readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
 readonly avd_name="cotton-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
@@ -21,6 +22,8 @@ readonly remote_media_path="/data/local/tmp/cotton-runtime.png"
 readonly legacy_media_collection_uri="content://media/external/images/media"
 readonly legacy_media_directory="/sdcard/Pictures/CottonRuntime"
 readonly legacy_media_path="$legacy_media_directory/cotton-runtime.png"
+# PackageManager coalesces component-state writes for ten seconds.
+readonly package_state_persistence_delay_seconds=15
 
 sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
 avdmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/avdmanager"
@@ -193,8 +196,10 @@ if [[ "$schedule_output" == *":failed:"* ]]; then
 fi
 
 wait_for_jobs "after scheduling"
+wait_for_enabled_component "$workmanager_reschedule_receiver"
 "$adb_bin" shell am kill "$package_name"
 wait_for_jobs "after process death"
+sleep "$package_state_persistence_delay_seconds"
 "$adb_bin" reboot
 wait_for_disconnect
 wait_for_device

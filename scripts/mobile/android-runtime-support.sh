@@ -84,6 +84,31 @@ wait_for_jobs() {
   exit 1
 }
 
+wait_for_enabled_component() {
+  local component_name="$1"
+  local attempt
+  local enabled_components
+  local package_dump
+  for attempt in {1..60}; do
+    package_dump="$("$adb_bin" shell dumpsys package "$package_name" | tr -d '\r')"
+    enabled_components="$(printf '%s\n' "$package_dump" \
+      | sed -n '/enabledComponents:/,/disabledComponents:/p')"
+    if [[ "$enabled_components" == *"$component_name"* ]]; then
+      return
+    fi
+
+    sleep 1
+  done
+
+  printf 'Android component %s was not enabled for %s.\n' \
+    "$component_name" \
+    "$package_name" >&2
+  printf '%s\n' "$package_dump" \
+    | grep -E 'RescheduleReceiver|enabledComponents:|disabledComponents:' >&2 \
+    || true
+  exit 1
+}
+
 has_scheduled_job() {
   local line
   while IFS= read -r line; do

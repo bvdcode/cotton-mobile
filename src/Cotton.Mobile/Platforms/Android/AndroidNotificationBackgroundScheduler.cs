@@ -27,7 +27,6 @@ namespace Cotton.Mobile.Platforms.Android
                 request)
                 ?? throw new InvalidOperationException("Android notification polling operation is unavailable.");
             await AndroidWorkOperation.WaitAsync(operation, cancellationToken).ConfigureAwait(false);
-            await AndroidWorkOperation.WaitForRescheduleReceiverAsync(cancellationToken).ConfigureAwait(false);
         }
 
         public async Task CancelAsync(CancellationToken cancellationToken = default)

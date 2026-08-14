@@ -141,9 +141,10 @@ create_media_fixture() {
     --bind is_pending:i:1
   query_output="$("$adb_bin" shell content query \
     --uri "$media_collection_uri" \
-    --projection _id \
-    --where "_display_name='cotton-runtime.png'" | tr -d '\r')"
-  media_id="$(printf '%s\n' "$query_output" | sed -n 's/.*_id=\([0-9][0-9]*\).*/\1/p' | head -1)"
+    --projection _id:_display_name | tr -d '\r')"
+  media_id="$(printf '%s\n' "$query_output" \
+    | sed -n '/_display_name=cotton-runtime\.png/s/.*_id=\([0-9][0-9]*\).*/\1/p' \
+    | head -1)"
   if [[ -z "$media_id" ]]; then
     printf 'Could not locate Android MediaStore fixture: %s\n' "$query_output" >&2
     exit 1

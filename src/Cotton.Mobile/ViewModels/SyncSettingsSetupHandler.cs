@@ -12,22 +12,30 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncSettingsRootProvider _rootProvider;
         private readonly SyncRootSetupCoordinator _rootSetupCoordinator;
         private readonly INetworkAccessService _networkAccess;
+        private readonly CottonAutomaticSyncDispatcher _automaticSyncDispatcher;
+        private readonly ICottonAutomaticSyncBackgroundScheduler _backgroundScheduler;
         private readonly ILogger<SyncSettingsSetupHandler> _logger;
 
         public SyncSettingsSetupHandler(
             SyncSettingsRootProvider rootProvider,
             SyncRootSetupCoordinator rootSetupCoordinator,
             INetworkAccessService networkAccess,
+            CottonAutomaticSyncDispatcher automaticSyncDispatcher,
+            ICottonAutomaticSyncBackgroundScheduler backgroundScheduler,
             ILogger<SyncSettingsSetupHandler> logger)
         {
             ArgumentNullException.ThrowIfNull(rootProvider);
             ArgumentNullException.ThrowIfNull(rootSetupCoordinator);
             ArgumentNullException.ThrowIfNull(networkAccess);
+            ArgumentNullException.ThrowIfNull(automaticSyncDispatcher);
+            ArgumentNullException.ThrowIfNull(backgroundScheduler);
             ArgumentNullException.ThrowIfNull(logger);
 
             _rootProvider = rootProvider;
             _rootSetupCoordinator = rootSetupCoordinator;
             _networkAccess = networkAccess;
+            _automaticSyncDispatcher = automaticSyncDispatcher;
+            _backgroundScheduler = backgroundScheduler;
             _logger = logger;
         }
 
@@ -65,6 +73,7 @@ namespace Cotton.Mobile.ViewModels
 
                 state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
                 state.Status = result.Message;
+                QueueChangedRoot(state, instanceUri, accountScopeKey, result);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -129,6 +138,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = result.Message;
+                QueueChangedRoot(state, instanceUri, state.AccountScopeKey, result);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -144,6 +154,67 @@ namespace Cotton.Mobile.ViewModels
             {
                 state.IsBusy = false;
             }
+        }
+
+        private void QueueChangedRoot(
+            ISyncSettingsViewState state,
+            Uri instanceUri,
+            string? accountScopeKey,
+            SyncRootSetupResult setupResult)
+        {
+            if (!setupResult.DidChangeRoots)
+            {
+                return;
+            }
+
+            CottonSyncRootSnapshot root = setupResult.Root
+                ?? throw new InvalidOperationException("Changed sync setup did not return its root.");
+            _ = RunChangedRootAsync(state, instanceUri, accountScopeKey, root.Id);
+        }
+
+        private async Task RunChangedRootAsync(
+            ISyncSettingsViewState state,
+            Uri instanceUri,
+            string? accountScopeKey,
+            Guid rootId)
+        {
+            try
+            {
+                CottonAutomaticSyncRunResult result = await _automaticSyncDispatcher
+                    .RunRootsAsync(instanceUri, [rootId], CancellationToken.None);
+                if (result.HasFailures)
+                {
+                    await _backgroundScheduler.ScheduleRootRetriesAsync(
+                        result.FailedRootIds,
+                        CancellationToken.None);
+                }
+
+                if (IsCurrentAccount(state, instanceUri, accountScopeKey))
+                {
+                    state.Status = null;
+                }
+            }
+            catch (OperationCanceledException exception)
+            {
+                CottonLog.Debug(_logger, "Automatic sync for a changed root was canceled.", exception);
+            }
+            catch (Exception exception) when (exception is not OperationCanceledException)
+            {
+                CottonLog.Warning(_logger, "Failed to start automatic sync for a changed root.", exception);
+                if (IsCurrentAccount(state, instanceUri, accountScopeKey))
+                {
+                    state.Status = AppResources.SyncInitialRunFailed;
+                }
+            }
+        }
+
+        private static bool IsCurrentAccount(
+            ISyncSettingsViewState state,
+            Uri instanceUri,
+            string? accountScopeKey)
+        {
+            return Uri.Equals(state.InstanceUri, instanceUri)
+                && string.Equals(state.AccountScopeKey, accountScopeKey, StringComparison.Ordinal);
         }
     }
 }

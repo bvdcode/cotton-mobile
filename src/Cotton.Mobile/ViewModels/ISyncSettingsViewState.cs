@@ -15,6 +15,8 @@ namespace Cotton.Mobile.ViewModels
 
         string? Status { get; set; }
 
+        string? AutomaticStatus { get; set; }
+
         IReadOnlyList<CottonSyncRootListItem> Roots { get; }
 
         void ShowRoots(SyncRootCollectionSnapshot collection);

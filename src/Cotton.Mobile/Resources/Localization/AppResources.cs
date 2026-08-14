@@ -53,6 +53,7 @@ namespace Cotton.Mobile.Resources.Localization
         public static string SyncFolderAccountUnavailable => GetString(nameof(SyncFolderAccountUnavailable));
         public static string SyncFolderAddOffline => GetString(nameof(SyncFolderAddOffline));
         public static string SyncFolderAddFailed => GetString(nameof(SyncFolderAddFailed));
+        public static string SyncInitialRunFailed => GetString(nameof(SyncInitialRunFailed));
         public static string LocalFolderReconnectFailed => GetString(nameof(LocalFolderReconnectFailed));
         public static string LocalFolderAccessAvailable => GetString(nameof(LocalFolderAccessAvailable));
         public static string SyncRunInstanceUnavailable => GetString(nameof(SyncRunInstanceUnavailable));

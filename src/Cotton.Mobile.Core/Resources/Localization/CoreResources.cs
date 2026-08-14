@@ -53,6 +53,9 @@ namespace Cotton.Mobile.Resources.Localization
         public static string ReconnectStatus => GetString(nameof(ReconnectStatus));
         public static string SyncingStatus => GetString(nameof(SyncingStatus));
         public static string UploadingStatus => GetString(nameof(UploadingStatus));
+        public static string LastSyncSucceededFormat => GetString(nameof(LastSyncSucceededFormat));
+        public static string LastSyncFailedFormat => GetString(nameof(LastSyncFailedFormat));
+        public static string SyncFailuresFormat => GetString(nameof(SyncFailuresFormat));
         public static string SyncRootReady => GetString(nameof(SyncRootReady));
         public static string ChooseLocalFolder => GetString(nameof(ChooseLocalFolder));
         public static string ReconnectLocalFolder => GetString(nameof(ReconnectLocalFolder));

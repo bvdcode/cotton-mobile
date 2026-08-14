@@ -45,7 +45,8 @@ namespace Cotton.Mobile.Services
             {
                 return new SyncRootSetupResult(
                     SyncRootSetupStatus.Unavailable,
-                    SyncRootSetupResources.UnavailableMessage);
+                    SyncRootSetupResources.UnavailableMessage,
+                    null);
             }
 
             await using SyncRootSetupOptionsSession? optionsSession = await _optionsPicker
@@ -86,13 +87,16 @@ namespace Cotton.Mobile.Services
             {
                 CottonSyncRootConfigurationStatus.Created => new SyncRootSetupResult(
                     SyncRootSetupStatus.Created,
-                    SyncRootSetupResources.CreateCreatedMessage(cloudFolder.Path)),
+                    SyncRootSetupResources.CreateCreatedMessage(cloudFolder.Path),
+                    result.Root),
                 CottonSyncRootConfigurationStatus.Updated => new SyncRootSetupResult(
                     SyncRootSetupStatus.Updated,
-                    SyncRootSetupResources.CreateUpdatedMessage(cloudFolder.Path)),
+                    SyncRootSetupResources.CreateUpdatedMessage(cloudFolder.Path),
+                    result.Root),
                 CottonSyncRootConfigurationStatus.AlreadyConfigured => new SyncRootSetupResult(
                     SyncRootSetupStatus.AlreadyConfigured,
-                    ResolveAlreadyConfiguredMessage(result.Root, options)),
+                    ResolveAlreadyConfiguredMessage(result.Root, options),
+                    result.Root),
                 _ => throw new InvalidOperationException("Sync root setup status is not supported."),
             };
         }
@@ -107,7 +111,8 @@ namespace Cotton.Mobile.Services
             {
                 return new SyncRootSetupResult(
                     SyncRootSetupStatus.Unavailable,
-                    SyncRootSetupResources.UnavailableMessage);
+                    SyncRootSetupResources.UnavailableMessage,
+                    null);
             }
 
             CottonSyncLocalRootSnapshot? localRoot = await _localRootPicker
@@ -123,12 +128,13 @@ namespace Cotton.Mobile.Services
                 .ConfigureAwait(false);
             return new SyncRootSetupResult(
                 SyncRootSetupStatus.Updated,
-                SyncRootSetupResources.CreateReconnectedMessage(reconnectedRoot.CloudFolder.Path));
+                SyncRootSetupResources.CreateReconnectedMessage(reconnectedRoot.CloudFolder.Path),
+                reconnectedRoot);
         }
 
         private static SyncRootSetupResult Cancelled()
         {
-            return new SyncRootSetupResult(SyncRootSetupStatus.Cancelled, string.Empty);
+            return new SyncRootSetupResult(SyncRootSetupStatus.Cancelled, string.Empty, null);
         }
 
         private static string ResolveAlreadyConfiguredMessage(

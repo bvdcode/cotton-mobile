@@ -47,6 +47,9 @@
   <data name="ReconnectStatus" xml:space="preserve"><value>Reconnect</value></data>
   <data name="SyncingStatus" xml:space="preserve"><value>Syncing</value></data>
   <data name="UploadingStatus" xml:space="preserve"><value>Uploading</value></data>
+  <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
+  <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last sync failed {0:g}. Retry is automatic.</value></data>
+  <data name="SyncFailuresFormat" xml:space="preserve"><value>{0} folders could not sync. Last attempt {1:g}; retry is automatic.</value></data>
   <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
   <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>
   <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>

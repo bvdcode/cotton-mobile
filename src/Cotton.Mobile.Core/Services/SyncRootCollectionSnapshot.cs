@@ -5,5 +5,6 @@ namespace Cotton.Mobile.Services
 {
     public record SyncRootCollectionSnapshot(
         IReadOnlyList<CottonSyncRootSnapshot> Roots,
-        IReadOnlySet<Guid> PausedRootIds);
+        IReadOnlySet<Guid> PausedRootIds,
+        IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> AutomaticSyncStatuses);
 }

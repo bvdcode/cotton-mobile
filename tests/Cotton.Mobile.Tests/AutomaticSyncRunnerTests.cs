@@ -7,6 +7,8 @@ namespace Cotton.Mobile.Tests
     {
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
+        private readonly FileSystemCottonAutomaticSyncStatusStore _statusStore;
+        private readonly FixedTimeProvider _timeProvider;
 
         public AutomaticSyncRunnerTests()
         {
@@ -15,6 +17,11 @@ namespace Cotton.Mobile.Tests
                 new FixedSyncRootMetadataPathProvider(_directory),
                 NullLogger<FileSystemCottonSyncRootStore>.Instance,
                 TimeProvider.System);
+            _timeProvider = new FixedTimeProvider(new DateTime(2026, 8, 14, 18, 0, 0, DateTimeKind.Utc));
+            _statusStore = new FileSystemCottonAutomaticSyncStatusStore(
+                new FixedSyncRootMetadataPathProvider(_directory),
+                NullLogger<FileSystemCottonAutomaticSyncStatusStore>.Instance,
+                _timeProvider);
         }
 
         [Fact]
@@ -27,6 +34,8 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
                 coordinator,
+                _statusStore,
+                _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(
@@ -46,6 +55,8 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
                 coordinator,
+                _statusStore,
+                _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             await runner.RunAsync(
@@ -70,6 +81,8 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
                 coordinator,
+                _statusStore,
+                _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunAsync(
@@ -80,6 +93,10 @@ namespace Cotton.Mobile.Tests
             Assert.Contains(succeedingRoot.Id, coordinator.RootIds);
             Assert.Equal([succeedingRoot.Id], result.SucceededRootIds);
             Assert.Equal([failingRoot.Id], result.FailedRootIds);
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> statuses =
+                await _statusStore.LoadAsync(SyncTestRootFactory.InstanceUri);
+            Assert.Equal(CottonAutomaticSyncOutcome.Failed, statuses[failingRoot.Id].Outcome);
+            Assert.Equal(CottonAutomaticSyncOutcome.Succeeded, statuses[succeedingRoot.Id].Outcome);
         }
 
         [Fact]
@@ -92,6 +109,8 @@ namespace Cotton.Mobile.Tests
             CottonAutomaticSyncRunner runner = new(
                 _rootStore,
                 coordinator,
+                _statusStore,
+                _timeProvider,
                 NullLogger<CottonAutomaticSyncRunner>.Instance);
 
             CottonAutomaticSyncRunResult result = await runner.RunRootsAsync(
@@ -105,6 +124,7 @@ namespace Cotton.Mobile.Tests
 
         public void Dispose()
         {
+            _statusStore.Dispose();
             if (Directory.Exists(_directory))
             {
                 Directory.Delete(_directory, recursive: true);

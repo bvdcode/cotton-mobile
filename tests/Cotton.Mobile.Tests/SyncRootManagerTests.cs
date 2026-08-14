@@ -12,6 +12,7 @@ namespace Cotton.Mobile.Tests
         private readonly string _directory;
         private readonly FileSystemCottonSyncRootStore _rootStore;
         private readonly FileSystemCottonContentRevisionStore _contentRevisionStore;
+        private readonly FileSystemCottonAutomaticSyncStatusStore _automaticSyncStatusStore;
         private readonly TestUploadReceiptStore _uploadReceiptStore;
         private readonly TestPermissionResolver _permissionResolver;
         private readonly SyncRootManager _manager;
@@ -30,6 +31,10 @@ namespace Cotton.Mobile.Tests
             _permissionResolver = new TestPermissionResolver();
             _contentRevisionStore = new FileSystemCottonContentRevisionStore(
                 new FixedContentRevisionPathProvider(_directory));
+            _automaticSyncStatusStore = new FileSystemCottonAutomaticSyncStatusStore(
+                metadataPathProvider,
+                NullLogger<FileSystemCottonAutomaticSyncStatusStore>.Instance,
+                TimeProvider.System);
             _manager = new SyncRootManager(
                 _rootStore,
                 new FileSystemCottonSyncRootPauseStore(
@@ -40,6 +45,7 @@ namespace Cotton.Mobile.Tests
                     new TestSyncedFileManifestPathProvider(_directory),
                     NullLogger<FileSystemCottonSyncedFileManifestStore>.Instance, TimeProvider.System),
                 _uploadReceiptStore,
+                _automaticSyncStatusStore,
                 _permissionResolver);
         }
 
@@ -92,6 +98,33 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task LoadReturnsAutomaticStatusesOnlyForRequestedAccount()
+        {
+            Guid otherRootId = Guid.Parse("dddddddd-dddd-dddd-dddd-dddddddddddd");
+            CottonSyncRootSnapshot currentRoot = CreateRoot(CottonSyncRootPermissionStatus.Available);
+            CottonSyncRootSnapshot otherRoot = CreateRootForAccount(otherRootId, "account-2");
+            await _rootStore.SaveAsync(InstanceUri, [currentRoot, otherRoot]);
+            DateTime completedAt = new(2026, 8, 14, 18, 0, 0, DateTimeKind.Utc);
+            await _automaticSyncStatusStore.UpdateAsync(
+                InstanceUri,
+                new HashSet<Guid> { currentRoot.Id, otherRoot.Id },
+                [
+                    new CottonAutomaticSyncRootStatusSnapshot(
+                        currentRoot.Id,
+                        CottonAutomaticSyncOutcome.Succeeded,
+                        completedAt),
+                    new CottonAutomaticSyncRootStatusSnapshot(
+                        otherRoot.Id,
+                        CottonAutomaticSyncOutcome.Failed,
+                        completedAt),
+                ]);
+
+            SyncRootCollectionSnapshot collection = await _manager.LoadAsync(InstanceUri, "account-1");
+
+            Assert.Equal([currentRoot.Id], collection.AutomaticSyncStatuses.Keys);
+        }
+
+        [Fact]
         public async Task StopClearsUploadReceiptsForDeviceToCloudRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
@@ -115,6 +148,7 @@ namespace Cotton.Mobile.Tests
 
         public void Dispose()
         {
+            _automaticSyncStatusStore.Dispose();
             _contentRevisionStore.Dispose();
             if (Directory.Exists(_directory))
             {
@@ -149,6 +183,22 @@ namespace Cotton.Mobile.Tests
                     permissionStatus),
                 direction,
                 uploadOriginalRetention);
+        }
+
+        private static CottonSyncRootSnapshot CreateRootForAccount(Guid rootId, string accountScopeKey)
+        {
+            return new CottonSyncRootSnapshot(
+                rootId,
+                InstanceUri,
+                accountScopeKey,
+                new CottonUploadDestinationSnapshot(Guid.NewGuid(), "Archive", "Files / Archive"),
+                new CottonSyncLocalRootSnapshot(
+                    CottonSyncRootStorageKind.UserSelectedDocumentTree,
+                    $"content://com.android.externalstorage.documents/tree/primary%3A{rootId:N}",
+                    "Archive",
+                    CottonSyncRootPermissionStatus.Available),
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.KeepOriginals);
         }
 
         private static CottonUploadReceiptSnapshot CreatePendingReceipt()

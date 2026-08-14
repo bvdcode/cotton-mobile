@@ -10,6 +10,7 @@ namespace Cotton.Mobile.Services
         private readonly ICottonContentRevisionStore _contentRevisionStore;
         private readonly ICottonSyncedFileManifestStore _manifestStore;
         private readonly ICottonUploadReceiptStore _uploadReceiptStore;
+        private readonly ICottonAutomaticSyncStatusStore _automaticSyncStatusStore;
         private readonly ICottonSyncLocalRootPermissionResolver _permissionResolver;
 
         public SyncRootManager(
@@ -18,6 +19,7 @@ namespace Cotton.Mobile.Services
             ICottonContentRevisionStore contentRevisionStore,
             ICottonSyncedFileManifestStore manifestStore,
             ICottonUploadReceiptStore uploadReceiptStore,
+            ICottonAutomaticSyncStatusStore automaticSyncStatusStore,
             ICottonSyncLocalRootPermissionResolver permissionResolver)
         {
             ArgumentNullException.ThrowIfNull(rootStore);
@@ -25,6 +27,7 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(contentRevisionStore);
             ArgumentNullException.ThrowIfNull(manifestStore);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
+            ArgumentNullException.ThrowIfNull(automaticSyncStatusStore);
             ArgumentNullException.ThrowIfNull(permissionResolver);
 
             _rootStore = rootStore;
@@ -32,6 +35,7 @@ namespace Cotton.Mobile.Services
             _contentRevisionStore = contentRevisionStore;
             _manifestStore = manifestStore;
             _uploadReceiptStore = uploadReceiptStore;
+            _automaticSyncStatusStore = automaticSyncStatusStore;
             _permissionResolver = permissionResolver;
         }
 
@@ -43,19 +47,29 @@ namespace Cotton.Mobile.Services
             ArgumentNullException.ThrowIfNull(instanceUri);
             ArgumentException.ThrowIfNullOrWhiteSpace(accountScopeKey);
 
-            IReadOnlyList<CottonSyncRootSnapshot> storedRoots = await _rootStore
-                .LoadAsync(instanceUri, cancellationToken)
-                .ConfigureAwait(false);
+            Task<IReadOnlyList<CottonSyncRootSnapshot>> rootsTask =
+                _rootStore.LoadAsync(instanceUri, cancellationToken);
+            Task<IReadOnlySet<Guid>> pausedRootsTask =
+                _pauseStore.LoadPausedRootIdsAsync(instanceUri, cancellationToken);
+            Task<IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot>> statusesTask =
+                _automaticSyncStatusStore.LoadAsync(instanceUri, cancellationToken);
+            await Task.WhenAll(rootsTask, pausedRootsTask, statusesTask).ConfigureAwait(false);
+
+            IReadOnlyList<CottonSyncRootSnapshot> storedRoots = await rootsTask.ConfigureAwait(false);
             IReadOnlyList<CottonSyncRootSnapshot> accountRoots = [.. storedRoots
                 .Where(root => string.Equals(
                     root.AccountScopeKey,
                     accountScopeKey,
                     StringComparison.Ordinal))
                 .Select(ResolvePermission)];
-            IReadOnlySet<Guid> pausedRootIds = await _pauseStore
-                .LoadPausedRootIdsAsync(instanceUri, cancellationToken)
-                .ConfigureAwait(false);
-            return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds);
+            IReadOnlySet<Guid> pausedRootIds = await pausedRootsTask.ConfigureAwait(false);
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> storedStatuses =
+                await statusesTask.ConfigureAwait(false);
+            HashSet<Guid> accountRootIds = [.. accountRoots.Select(root => root.Id)];
+            Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> accountStatuses = storedStatuses
+                .Where(item => accountRootIds.Contains(item.Key))
+                .ToDictionary();
+            return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds, accountStatuses);
         }
 
         public async Task<bool> StopAsync(

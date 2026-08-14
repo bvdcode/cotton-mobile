@@ -23,6 +23,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _canRunAll;
         private string _summaryText = AppResources.NoFoldersSyncing;
         private string? _status;
+        private string? _automaticStatus;
         private bool _isEmptyVisible = true;
 
         public SyncSettingsViewModel(
@@ -30,12 +31,14 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsExecutionHandler executionHandler,
             SyncSettingsSetupHandler setupHandler,
             SyncSettingsManagementHandler managementHandler,
+            SyncSettingsAutomaticStatusObserver automaticStatusObserver,
             ILogger<SyncSettingsViewModel> logger)
         {
             ArgumentNullException.ThrowIfNull(loadingHandler);
             ArgumentNullException.ThrowIfNull(executionHandler);
             ArgumentNullException.ThrowIfNull(setupHandler);
             ArgumentNullException.ThrowIfNull(managementHandler);
+            ArgumentNullException.ThrowIfNull(automaticStatusObserver);
             ArgumentNullException.ThrowIfNull(logger);
 
             _loadingHandler = loadingHandler;
@@ -43,6 +46,7 @@ namespace Cotton.Mobile.ViewModels
             _setupHandler = setupHandler;
             _managementHandler = managementHandler;
             _logger = logger;
+            automaticStatusObserver.Attach(this);
             LoadCommand = CreateLoadCommand();
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
@@ -168,18 +172,6 @@ namespace Cotton.Mobile.ViewModels
             }
         }
 
-        public string SummaryText
-        {
-            get => _summaryText;
-            private set
-            {
-                if (SetProperty(ref _summaryText, value))
-                {
-                    OnPropertyChanged(nameof(HeaderSupportingText));
-                }
-            }
-        }
-
         public string? Status
         {
             get => _status;
@@ -187,25 +179,28 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _status, value))
                 {
-                    OnPropertyChanged(nameof(IsStatusVisible));
                     OnPropertyChanged(nameof(HeaderSupportingText));
                     OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
 
-        public bool IsStatusVisible => !string.IsNullOrWhiteSpace(Status);
-
         public string HeaderSupportingText
         {
             get
             {
                 string? status = Status;
-                return string.IsNullOrWhiteSpace(status) ? SummaryText : status;
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    return status;
+                }
+
+                return string.IsNullOrWhiteSpace(_automaticStatus) ? _summaryText : _automaticStatus;
             }
         }
 
-        public bool IsHeaderSupportingTextVisible => IsStatusVisible || IsSummaryVisible;
+        public bool IsHeaderSupportingTextVisible =>
+            !IsEmptyVisible || !string.IsNullOrWhiteSpace(Status) || !string.IsNullOrWhiteSpace(_automaticStatus);
 
         public bool IsEmptyVisible
         {
@@ -214,14 +209,11 @@ namespace Cotton.Mobile.ViewModels
             {
                 if (SetProperty(ref _isEmptyVisible, value))
                 {
-                    OnPropertyChanged(nameof(IsSummaryVisible));
                     OnPropertyChanged(nameof(IsListVisible));
                     OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
                 }
             }
         }
-
-        public bool IsSummaryVisible => !IsEmptyVisible;
 
         public bool IsListVisible => !IsEmptyVisible;
 
@@ -251,8 +243,9 @@ namespace Cotton.Mobile.ViewModels
             _instanceUri = null;
             _accountScopeKey = null;
             Roots.ReplaceWith([]);
-            SummaryText = AppResources.NoFoldersSyncing;
+            _summaryText = AppResources.NoFoldersSyncing;
             Status = null;
+            SetAutomaticStatus(null);
             IsEmptyVisible = true;
             _canRunAll = false;
             OnPropertyChanged(nameof(IsRunAllVisible));
@@ -267,7 +260,9 @@ namespace Cotton.Mobile.ViewModels
                 collection.PausedRootIds);
             Roots.ReplaceWith(state.Items);
 
-            SummaryText = state.SummaryText;
+            _summaryText = state.SummaryText;
+            OnPropertyChanged(nameof(HeaderSupportingText));
+            SetAutomaticStatus(CottonAutomaticSyncStatusText.Create([.. collection.AutomaticSyncStatuses.Values]));
             IsEmptyVisible = state.IsEmptyVisible;
             bool canRunAllChanged = _canRunAll != state.CanRunAny;
             _canRunAll = state.CanRunAny;
@@ -308,6 +303,18 @@ namespace Cotton.Mobile.ViewModels
             Status = AppResources.SyncSettingsUpdateFailed;
         }
 
+        private void SetAutomaticStatus(string? status)
+        {
+            if (string.Equals(_automaticStatus, status, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _automaticStatus = status;
+            OnPropertyChanged(nameof(HeaderSupportingText));
+            OnPropertyChanged(nameof(IsHeaderSupportingTextVisible));
+        }
+
         Uri? ISyncSettingsViewState.InstanceUri => _instanceUri;
 
         string? ISyncSettingsViewState.AccountScopeKey => _accountScopeKey;
@@ -322,6 +329,12 @@ namespace Cotton.Mobile.ViewModels
         {
             get => Status;
             set => Status = value;
+        }
+
+        string? ISyncSettingsViewState.AutomaticStatus
+        {
+            get => _automaticStatus;
+            set => SetAutomaticStatus(value);
         }
 
         IReadOnlyList<CottonSyncRootListItem> ISyncSettingsViewState.Roots => Roots;

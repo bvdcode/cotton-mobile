@@ -9,6 +9,7 @@ fi
 readonly apk_path="$1"
 readonly media_file="$2"
 readonly package_name="dev.cottoncloud.app.debug"
+readonly diagnostics_receiver="$package_name.SyncDiagnosticsReceiver"
 readonly diagnostics_action="dev.cottoncloud.app.debug.SYNC_DIAGNOSTICS"
 readonly diagnostics_tag="CottonSyncDiagnostics"
 readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
@@ -44,8 +45,8 @@ run_diagnostic() {
   "$adb_bin" logcat -c
   "$adb_bin" shell am broadcast \
     --include-stopped-packages \
+    -n "$package_name/$diagnostics_receiver" \
     -a "$diagnostics_action" \
-    -p "$package_name" \
     --es operation "$operation" \
     --es request-id "$request_id" >/dev/null
 

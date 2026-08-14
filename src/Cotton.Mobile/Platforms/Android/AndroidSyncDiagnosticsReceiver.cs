@@ -9,10 +9,11 @@ using AndroidIntentFilter = Android.App.IntentFilterAttribute;
 
 namespace Cotton.Mobile.Platforms.Android
 {
-    [BroadcastReceiver(Enabled = true, Exported = true)]
+    [BroadcastReceiver(Name = ComponentName, Enabled = true, Exported = true)]
     [AndroidIntentFilter([Action])]
     public class AndroidSyncDiagnosticsReceiver : BroadcastReceiver
     {
+        public const string ComponentName = "dev.cottoncloud.app.debug.SyncDiagnosticsReceiver";
         public const string Action = "dev.cottoncloud.app.debug.SYNC_DIAGNOSTICS";
         public const string OperationExtra = "operation";
         public const string RequestIdExtra = "request-id";

@@ -74,6 +74,13 @@ wait_for_jobs() {
 
   printf 'WorkManager jobs were not registered for %s %s.\n' "$package_name" "$phase" >&2
   "$adb_bin" shell dumpsys jobscheduler >&2
+  "$adb_bin" shell dumpsys package "$package_name" \
+    | grep -E 'RescheduleReceiver|enabledComponents:|disabledComponents:|stopped=' >&2 \
+    || true
+  "$adb_bin" logcat -d \
+    | grep -E "WM-|$package_name|BOOT_COMPLETED" \
+    | tail -300 >&2 \
+    || true
   exit 1
 }
 

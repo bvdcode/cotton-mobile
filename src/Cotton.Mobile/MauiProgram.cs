@@ -11,6 +11,7 @@ using Cotton.Sdk.Auth;
 using EasyExtensions.Mediator;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.ApplicationModel;
+using Microsoft.Maui.Handlers;
 using Microsoft.Maui.Networking;
 using Microsoft.Maui.Storage;
 using UraniumUI;
@@ -27,6 +28,10 @@ namespace Cotton.Mobile
                 .UseMauiApp<App>()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
+                .ConfigureMauiHandlers(handlers =>
+                {
+                    handlers.AddHandler<Button, ButtonHandler>();
+                })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddMaterialSymbolsFonts();

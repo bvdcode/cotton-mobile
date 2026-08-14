@@ -89,8 +89,9 @@ namespace Cotton.Mobile.Platforms.Android
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            PermissionStatus status = await Permissions
-                .RequestAsync<CottonMediaReadPermissionRequest>()
+            PermissionStatus status = await MainThread
+                .InvokeOnMainThreadAsync(
+                    () => Permissions.RequestAsync<CottonMediaReadPermissionRequest>())
                 .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             if (status != PermissionStatus.Granted)

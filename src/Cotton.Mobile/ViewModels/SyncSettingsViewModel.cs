@@ -23,6 +23,7 @@ namespace Cotton.Mobile.ViewModels
         private bool _canRunAll;
         private string _summaryText = AppResources.NoFoldersSyncing;
         private string? _status;
+        private long _statusRevision;
         private string? _automaticStatus;
         private bool _isEmptyVisible = true;
 
@@ -34,18 +35,13 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsAutomaticStatusObserver automaticStatusObserver,
             ILogger<SyncSettingsViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(loadingHandler);
-            ArgumentNullException.ThrowIfNull(executionHandler);
-            ArgumentNullException.ThrowIfNull(setupHandler);
-            ArgumentNullException.ThrowIfNull(managementHandler);
             ArgumentNullException.ThrowIfNull(automaticStatusObserver);
-            ArgumentNullException.ThrowIfNull(logger);
 
-            _loadingHandler = loadingHandler;
-            _executionHandler = executionHandler;
-            _setupHandler = setupHandler;
-            _managementHandler = managementHandler;
-            _logger = logger;
+            _loadingHandler = loadingHandler ?? throw new ArgumentNullException(nameof(loadingHandler));
+            _executionHandler = executionHandler ?? throw new ArgumentNullException(nameof(executionHandler));
+            _setupHandler = setupHandler ?? throw new ArgumentNullException(nameof(setupHandler));
+            _managementHandler = managementHandler ?? throw new ArgumentNullException(nameof(managementHandler));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             automaticStatusObserver.Attach(this);
             LoadCommand = CreateLoadCommand();
             AddRootCommand = CreateAddRootCommand();
@@ -177,6 +173,7 @@ namespace Cotton.Mobile.ViewModels
             get => _status;
             private set
             {
+                _ = Interlocked.Increment(ref _statusRevision);
                 if (SetProperty(ref _status, value))
                 {
                     OnPropertyChanged(nameof(HeaderSupportingText));
@@ -330,6 +327,8 @@ namespace Cotton.Mobile.ViewModels
             get => Status;
             set => Status = value;
         }
+
+        long ISyncSettingsViewState.StatusRevision => Interlocked.Read(ref _statusRevision);
 
         string? ISyncSettingsViewState.AutomaticStatus
         {

@@ -73,7 +73,7 @@ namespace Cotton.Mobile.ViewModels
 
                 state.ShowRoots(await _rootProvider.LoadAsync(instanceUri, accountScopeKey, cancellationToken));
                 state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, accountScopeKey, result);
+                QueueChangedRoot(state, instanceUri, accountScopeKey, result, state.StatusRevision);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -138,7 +138,7 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = result.Message;
-                QueueChangedRoot(state, instanceUri, state.AccountScopeKey, result);
+                QueueChangedRoot(state, instanceUri, state.AccountScopeKey, result, state.StatusRevision);
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
             {
@@ -160,7 +160,8 @@ namespace Cotton.Mobile.ViewModels
             ISyncSettingsViewState state,
             Uri instanceUri,
             string? accountScopeKey,
-            SyncRootSetupResult setupResult)
+            SyncRootSetupResult setupResult,
+            long statusRevision)
         {
             if (!setupResult.DidChangeRoots)
             {
@@ -169,14 +170,15 @@ namespace Cotton.Mobile.ViewModels
 
             CottonSyncRootSnapshot root = setupResult.Root
                 ?? throw new InvalidOperationException("Changed sync setup did not return its root.");
-            _ = RunChangedRootAsync(state, instanceUri, accountScopeKey, root.Id);
+            _ = RunChangedRootAsync(state, instanceUri, accountScopeKey, root.Id, statusRevision);
         }
 
         private async Task RunChangedRootAsync(
             ISyncSettingsViewState state,
             Uri instanceUri,
             string? accountScopeKey,
-            Guid rootId)
+            Guid rootId,
+            long statusRevision)
         {
             try
             {
@@ -189,7 +191,7 @@ namespace Cotton.Mobile.ViewModels
                         CancellationToken.None);
                 }
 
-                if (IsCurrentAccount(state, instanceUri, accountScopeKey))
+                if (HasExpectedStatus(state, instanceUri, accountScopeKey, statusRevision))
                 {
                     state.Status = null;
                 }
@@ -201,7 +203,7 @@ namespace Cotton.Mobile.ViewModels
             catch (Exception exception) when (exception is not OperationCanceledException)
             {
                 CottonLog.Warning(_logger, "Failed to start automatic sync for a changed root.", exception);
-                if (IsCurrentAccount(state, instanceUri, accountScopeKey))
+                if (HasExpectedStatus(state, instanceUri, accountScopeKey, statusRevision))
                 {
                     state.Status = AppResources.SyncInitialRunFailed;
                 }
@@ -215,6 +217,16 @@ namespace Cotton.Mobile.ViewModels
         {
             return Uri.Equals(state.InstanceUri, instanceUri)
                 && string.Equals(state.AccountScopeKey, accountScopeKey, StringComparison.Ordinal);
+        }
+
+        private static bool HasExpectedStatus(
+            ISyncSettingsViewState state,
+            Uri instanceUri,
+            string? accountScopeKey,
+            long statusRevision)
+        {
+            return IsCurrentAccount(state, instanceUri, accountScopeKey)
+                && state.StatusRevision == statusRevision;
         }
     }
 }

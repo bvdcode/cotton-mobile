@@ -7,11 +7,12 @@ namespace Cotton.Mobile.Services
     {
         private readonly Lock _cancellationGate = new();
         private readonly CancellationTokenSource _cancellationSource = new();
+        private readonly HashSet<Guid> _pendingRootIds = [];
         private bool _disposed;
 
-        public bool HasPendingTrigger { get; private set; }
+        public bool HasPendingRequest => PendingTrigger.HasValue || _pendingRootIds.Count > 0;
 
-        public CottonAutomaticSyncTrigger PendingTrigger { get; private set; }
+        public CottonAutomaticSyncTrigger? PendingTrigger { get; private set; }
 
         public Task<CottonAutomaticSyncRunResult>? ExecutionTask { get; set; }
 
@@ -19,22 +20,46 @@ namespace Cotton.Mobile.Services
 
         public void Queue(CottonAutomaticSyncTrigger trigger)
         {
-            PendingTrigger = HasPendingTrigger
-                ? Merge(PendingTrigger, trigger)
+            PendingTrigger = PendingTrigger.HasValue
+                ? Merge(PendingTrigger.Value, trigger)
                 : trigger;
-            HasPendingTrigger = true;
+            _pendingRootIds.Clear();
         }
 
-        public CottonAutomaticSyncTrigger TakePendingTrigger()
+        public void QueueRoots(IReadOnlyCollection<Guid> rootIds)
         {
-            if (!HasPendingTrigger)
+            ArgumentNullException.ThrowIfNull(rootIds);
+            if (rootIds.Count == 0 || rootIds.Contains(Guid.Empty))
             {
-                throw new InvalidOperationException("Automatic sync dispatch state has no pending trigger.");
+                throw new ArgumentException("Automatic sync root ids are required.", nameof(rootIds));
             }
 
-            CottonAutomaticSyncTrigger trigger = PendingTrigger;
-            HasPendingTrigger = false;
-            return trigger;
+            if (PendingTrigger.HasValue)
+            {
+                return;
+            }
+
+            _pendingRootIds.UnionWith(rootIds);
+        }
+
+        public CottonAutomaticSyncDispatchRequest TakePendingRequest()
+        {
+            if (PendingTrigger.HasValue)
+            {
+                CottonAutomaticSyncTrigger trigger = PendingTrigger.Value;
+                PendingTrigger = null;
+                return CottonAutomaticSyncDispatchRequest.ForTrigger(trigger);
+            }
+
+            if (_pendingRootIds.Count == 0)
+            {
+                throw new InvalidOperationException("Automatic sync dispatch state has no pending request.");
+            }
+
+            CottonAutomaticSyncDispatchRequest request =
+                CottonAutomaticSyncDispatchRequest.ForRoots(_pendingRootIds);
+            _pendingRootIds.Clear();
+            return request;
         }
 
         public void Cancel()

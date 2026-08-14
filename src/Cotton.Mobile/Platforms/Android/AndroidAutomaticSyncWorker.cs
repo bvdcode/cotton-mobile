@@ -102,8 +102,9 @@ namespace Cotton.Mobile.Platforms.Android
         {
             if (RetryRootId.HasValue)
             {
-                ICottonAutomaticSyncRunner runner = services.GetRequiredService<ICottonAutomaticSyncRunner>();
-                return runner.RunRootsAsync(instanceUri, [RetryRootId.Value], cancellationToken);
+                CottonAutomaticSyncDispatcher retryDispatcher = services
+                    .GetRequiredService<CottonAutomaticSyncDispatcher>();
+                return retryDispatcher.RunRootsAsync(instanceUri, [RetryRootId.Value], cancellationToken);
             }
 
             CottonAutomaticSyncDispatcher dispatcher = services

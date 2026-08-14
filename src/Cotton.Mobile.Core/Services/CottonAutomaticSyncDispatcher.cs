@@ -22,24 +22,29 @@ namespace Cotton.Mobile.Services
                 throw new ArgumentOutOfRangeException(nameof(trigger), "Automatic sync trigger is not supported.");
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-            string key = instanceUri.AbsoluteUri;
-            CottonAutomaticSyncDispatchState state;
-            Task<CottonAutomaticSyncRunResult> executionTask;
-            lock (_gate)
-            {
-                if (!_states.TryGetValue(key, out state!))
-                {
-                    state = new CottonAutomaticSyncDispatchState();
-                    _states.Add(key, state);
-                }
+            return QueueAsync(
+                instanceUri,
+                state => state.Queue(trigger),
+                cancellationToken);
+        }
 
-                state.Queue(trigger);
-                state.ExecutionTask ??= ExecuteAsync(key, instanceUri, state);
-                executionTask = state.ExecutionTask;
+        public Task<CottonAutomaticSyncRunResult> RunRootsAsync(
+            Uri instanceUri,
+            IReadOnlyCollection<Guid> rootIds,
+            CancellationToken cancellationToken = default)
+        {
+            CottonInstanceUri.EnsureSupported(instanceUri, nameof(instanceUri));
+            ArgumentNullException.ThrowIfNull(rootIds);
+            Guid[] selectedRootIds = [.. rootIds.Distinct().Order()];
+            if (selectedRootIds.Length == 0 || selectedRootIds.Contains(Guid.Empty))
+            {
+                throw new ArgumentException("Automatic sync root ids are required.", nameof(rootIds));
             }
 
-            return WaitForCompletionAsync(executionTask, state, cancellationToken);
+            return QueueAsync(
+                instanceUri,
+                state => state.QueueRoots(selectedRootIds),
+                cancellationToken);
         }
 
         public void Cancel(Uri instanceUri)
@@ -54,6 +59,31 @@ namespace Cotton.Mobile.Services
             state?.Cancel();
         }
 
+        private Task<CottonAutomaticSyncRunResult> QueueAsync(
+            Uri instanceUri,
+            Action<CottonAutomaticSyncDispatchState> queue,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            string key = instanceUri.AbsoluteUri;
+            CottonAutomaticSyncDispatchState state;
+            Task<CottonAutomaticSyncRunResult> executionTask;
+            lock (_gate)
+            {
+                if (!_states.TryGetValue(key, out state!))
+                {
+                    state = new CottonAutomaticSyncDispatchState();
+                    _states.Add(key, state);
+                }
+
+                queue(state);
+                state.ExecutionTask ??= ExecuteAsync(key, instanceUri, state);
+                executionTask = state.ExecutionTask;
+            }
+
+            return WaitForCompletionAsync(executionTask, state, cancellationToken);
+        }
+
         private async Task<CottonAutomaticSyncRunResult> ExecuteAsync(
             string key,
             Uri instanceUri,
@@ -64,21 +94,32 @@ namespace Cotton.Mobile.Services
             {
                 while (true)
                 {
-                    CottonAutomaticSyncTrigger trigger;
+                    CottonAutomaticSyncDispatchRequest request;
                     lock (_gate)
                     {
-                        if (!state.HasPendingTrigger)
+                        if (!state.HasPendingRequest)
                         {
                             _states.Remove(key);
                             return result;
                         }
 
-                        trigger = state.TakePendingTrigger();
+                        request = state.TakePendingRequest();
                     }
 
-                    CottonAutomaticSyncRunResult next = await _runner
-                        .RunAsync(instanceUri, trigger, state.CancellationToken)
-                        .ConfigureAwait(false);
+                    CottonAutomaticSyncRunResult next;
+                    if (request.Trigger.HasValue)
+                    {
+                        next = await _runner
+                            .RunAsync(instanceUri, request.Trigger.Value, state.CancellationToken)
+                            .ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        next = await _runner
+                            .RunRootsAsync(instanceUri, request.RootIds, state.CancellationToken)
+                            .ConfigureAwait(false);
+                    }
+
                     result = result.Merge(next);
                 }
             }

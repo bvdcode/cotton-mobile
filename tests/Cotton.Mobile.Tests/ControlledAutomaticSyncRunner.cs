@@ -10,6 +10,8 @@ namespace Cotton.Mobile.Tests
 
         public List<CottonAutomaticSyncTrigger> Triggers { get; } = [];
 
+        public List<IReadOnlyList<Guid>> RootSelections { get; } = [];
+
         public Task<CottonAutomaticSyncRunResult> RunAsync(
             Uri instanceUri,
             CottonAutomaticSyncTrigger trigger,
@@ -28,6 +30,11 @@ namespace Cotton.Mobile.Tests
             IReadOnlyCollection<Guid> rootIds,
             CancellationToken cancellationToken = default)
         {
+            lock (_gate)
+            {
+                RootSelections.Add([.. rootIds.Order()]);
+            }
+
             return RunControlledAsync(cancellationToken);
         }
 

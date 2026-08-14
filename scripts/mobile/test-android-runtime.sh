@@ -17,6 +17,9 @@ readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
 readonly media_collection_uri="content://media/external_primary/images/media"
 readonly pending_media_collection_uri="$media_collection_uri?includePending=1"
 readonly remote_media_path="/data/local/tmp/cotton-runtime.png"
+readonly legacy_media_collection_uri="content://media/external/images/media"
+readonly legacy_media_directory="/sdcard/Pictures/CottonRuntime"
+readonly legacy_media_path="$legacy_media_directory/cotton-runtime.png"
 
 sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
 avdmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/avdmanager"
@@ -29,62 +32,8 @@ remote_media_uri=""
 
 export ANDROID_AVD_HOME="$avd_home"
 
-cleanup() {
-  if [[ -x "$adb_bin" ]]; then
-    if [[ -n "$remote_media_uri" ]]; then
-      "$adb_bin" shell content delete --uri "$remote_media_uri" >/dev/null 2>&1 || true
-    fi
-
-    "$adb_bin" emu kill >/dev/null 2>&1 || true
-  fi
-
-  if [[ -n "$emulator_pid" ]]; then
-    wait "$emulator_pid" >/dev/null 2>&1 || true
-  fi
-}
-
+source "$(dirname "$0")/android-runtime-support.sh"
 trap cleanup EXIT
-
-wait_for_boot() {
-  local attempt
-  for attempt in {1..120}; do
-    if [[ "$("$adb_bin" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]]; then
-      "$adb_bin" shell input keyevent 82 >/dev/null 2>&1 || true
-      return
-    fi
-
-    sleep 2
-  done
-
-  printf 'Android emulator did not finish booting.\n' >&2
-  tail -100 "$emulator_log" >&2 || true
-  exit 1
-}
-
-wait_for_device() {
-  if timeout 120 "$adb_bin" wait-for-device; then
-    return
-  fi
-
-  printf 'Android emulator did not register with ADB.\n' >&2
-  tail -100 "$emulator_log" >&2 || true
-  exit 1
-}
-
-wait_for_jobs() {
-  local attempt
-  for attempt in {1..60}; do
-    if "$adb_bin" shell dumpsys jobscheduler | grep -Fq "$package_name"; then
-      return
-    fi
-
-    sleep 1
-  done
-
-  printf 'WorkManager jobs were not registered for %s.\n' "$package_name" >&2
-  "$adb_bin" shell dumpsys jobscheduler >&2
-  exit 1
-}
 
 run_diagnostic() {
   local operation="$1"
@@ -127,46 +76,6 @@ read_metric() {
   fi
 
   printf '%s\n' "$value"
-}
-
-create_media_fixture() {
-  local media_id
-  local query_output
-
-  "$adb_bin" push "$media_file" "$remote_media_path" >/dev/null
-  "$adb_bin" shell content insert \
-    --uri "$media_collection_uri" \
-    --bind _display_name:s:cotton-runtime.png \
-    --bind mime_type:s:image/png \
-    --bind relative_path:s:Pictures/CottonRuntime/ \
-    --bind is_pending:i:1
-  query_output="$("$adb_bin" shell content query \
-    --uri "$pending_media_collection_uri" \
-    --projection _id:_display_name | tr -d '\r')"
-  media_id="$(printf '%s\n' "$query_output" \
-    | sed -n '/_display_name=cotton-runtime\.png/s/.*_id=\([0-9][0-9]*\).*/\1/p' \
-    | head -1)"
-  if [[ -z "$media_id" ]]; then
-    printf 'Could not locate Android MediaStore fixture: %s\n' "$query_output" >&2
-    exit 1
-  fi
-
-  remote_media_uri="$media_collection_uri/$media_id"
-  "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
-  "$adb_bin" shell content update \
-    --uri "$remote_media_uri" \
-    --bind is_pending:i:0 >/dev/null
-}
-
-update_media_fixture() {
-  local modified_at
-
-  modified_at="$(($(date +%s) + 60))"
-  "$adb_bin" shell "printf x >> '$remote_media_path'"
-  "$adb_bin" shell "content write --uri '$remote_media_uri' < '$remote_media_path'"
-  "$adb_bin" shell content update \
-    --uri "$remote_media_uri" \
-    --bind date_modified:l:"$modified_at" >/dev/null
 }
 
 timeout 300 "$sdkmanager_bin" --install emulator platform-tools "$system_image" >/dev/null
@@ -281,12 +190,12 @@ if [[ "$schedule_output" == *":failed:"* ]]; then
   exit 1
 fi
 
-wait_for_jobs
+wait_for_jobs "after scheduling"
 "$adb_bin" shell am kill "$package_name"
-wait_for_jobs
+wait_for_jobs "after process death"
 "$adb_bin" reboot
 wait_for_device
 wait_for_boot
-wait_for_jobs
+wait_for_jobs "after reboot" 120
 
 printf 'Android runtime smoke passed.\n'

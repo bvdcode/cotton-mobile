@@ -15,6 +15,7 @@ readonly runtime_api="${COTTON_ANDROID_RUNTIME_API:-35}"
 readonly avd_name="cotton-runtime-$runtime_api"
 readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
 readonly media_collection_uri="content://media/external_primary/images/media"
+readonly pending_media_collection_uri="$media_collection_uri?includePending=1"
 readonly remote_media_path="/data/local/tmp/cotton-runtime.png"
 
 sdkmanager_bin="${ANDROID_HOME:-}/cmdline-tools/latest/bin/sdkmanager"
@@ -140,7 +141,7 @@ create_media_fixture() {
     --bind relative_path:s:Pictures/CottonRuntime/ \
     --bind is_pending:i:1
   query_output="$("$adb_bin" shell content query \
-    --uri "$media_collection_uri" \
+    --uri "$pending_media_collection_uri" \
     --projection _id:_display_name | tr -d '\r')"
   media_id="$(printf '%s\n' "$query_output" \
     | sed -n '/_display_name=cotton-runtime\.png/s/.*_id=\([0-9][0-9]*\).*/\1/p' \

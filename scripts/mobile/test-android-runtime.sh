@@ -88,6 +88,7 @@ run_diagnostic() {
 
   "$adb_bin" logcat -c
   "$adb_bin" shell am broadcast \
+    --include-stopped-packages \
     -a "$diagnostics_action" \
     -p "$package_name" \
     --es operation "$operation" \

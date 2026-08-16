@@ -118,6 +118,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonSyncedFileManifestStore, FileSystemCottonSyncedFileManifestStore>();
             services.AddSingleton<ICottonUploadReceiptPathProvider, CottonUploadReceiptPathProvider>();
             services.AddSingleton<ICottonUploadReceiptStore, FileSystemCottonUploadReceiptStore>();
+            services.AddSingleton<CottonSyncProgressHub>();
             services.AddSingleton<SyncRootManager>();
             services.AddSingleton<CottonSyncRootConfigurationService>();
             services.AddSingleton<CottonSyncRootReconnectService>();
@@ -131,6 +132,7 @@ namespace Cotton.Mobile
             services.AddSingleton<ICottonFileBrowserService, CottonFileBrowserService>();
             services.AddSingleton<ICottonFileUploadService, CottonFileUploadService>();
             services.AddSingleton<ICloudFolderPickerService, CloudFolderPickerService>();
+            services.AddSingleton<ICottonMediaAlbumPickerService, CottonMediaAlbumPickerService>();
             services.AddSingleton<ISyncRootSetupOptionsPickerService, SyncRootSetupOptionsPickerService>();
             services.AddSingleton<SyncRootSetupCoordinator>();
             services.AddSingleton<ICottonDeviceToCloudRemoteFolderContentSource, CottonFileBrowserRemoteFolderContentSource>();
@@ -141,7 +143,8 @@ namespace Cotton.Mobile
                 new CottonUploadOnlySyncPlanExecutor(
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudSyncFileOperator>(),
                     serviceProvider.GetRequiredService<ICottonDeviceToCloudLocalFileOperator>(),
-                    serviceProvider.GetRequiredService<ICottonUploadReceiptStore>()));
+                    serviceProvider.GetRequiredService<ICottonUploadReceiptStore>(),
+                    serviceProvider.GetRequiredService<CottonSyncProgressHub>()));
             services.AddSingleton<CottonSyncRootExecutionLock>();
             services.AddSingleton<ICottonDeviceToCloudSyncCoordinator, CottonDeviceToCloudSyncCoordinator>();
             services.AddSingleton<ICottonAutomaticSyncRunner, CottonAutomaticSyncRunner>();
@@ -155,7 +158,7 @@ namespace Cotton.Mobile
             services.AddSingleton<MainPageSessionCoordinator>();
             services.AddSingleton<MainPageUserInteractionService>();
             services.AddSingleton<SyncSettingsRootProvider>();
-            services.AddSingleton<SyncSettingsAutomaticStatusObserver>();
+            services.AddSingleton<SyncSettingsStatusObserver>();
             services.AddSingleton<SyncSettingsLoadingHandler>();
             services.AddSingleton<SyncSettingsExecutionHandler>();
             services.AddSingleton<SyncSettingsSetupHandler>();

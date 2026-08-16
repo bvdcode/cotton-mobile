@@ -46,13 +46,16 @@ namespace Cotton.Mobile.Tests
             CottonSyncLocalRootSnapshot replacement = new(
                 CottonSyncRootStorageKind.MediaStore,
                 root.LocalRoot.RootKey,
-                root.LocalRoot.DisplayName,
-                CottonSyncRootPermissionStatus.Available);
+                "Camera and Screenshots",
+                CottonSyncRootPermissionStatus.Available,
+                "buckets:1,2");
 
             CottonSyncRootSnapshot result = await _service.ReconnectAsync(root, replacement);
 
             Assert.True(result.CanRunSync);
             Assert.True(result.LocalRoot.UsesMediaStore);
+            Assert.Equal("buckets:1,2", result.LocalRoot.ScopeKey);
+            Assert.Equal(root.StableKey, result.StableKey);
         }
 
         [Fact]

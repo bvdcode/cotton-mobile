@@ -10,7 +10,7 @@ namespace Cotton.Mobile.ViewModels
     public class SyncRootSetupOptionsViewModel : ObservableObject
     {
         private readonly Action<SyncRootSetupOptions?> _complete;
-        private CottonSyncRootStorageKind _storageKind = CottonSyncRootStorageKind.UserSelectedDocumentTree;
+        private CottonSyncRootStorageKind? _storageKind;
         private bool _deleteOriginalsAfterUpload;
         private bool _didComplete;
 
@@ -23,7 +23,7 @@ namespace Cotton.Mobile.ViewModels
                 () => SelectStorageKind(CottonSyncRootStorageKind.UserSelectedDocumentTree));
             SelectMediaCommand = new Command(
                 () => SelectStorageKind(CottonSyncRootStorageKind.MediaStore));
-            ContinueCommand = new Command(Continue);
+            ContinueCommand = new Command(Continue, () => _storageKind.HasValue && !_didComplete);
             CancelCommand = new Command(Cancel);
         }
 
@@ -88,14 +88,17 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsDeleteOptionVisible));
             OnPropertyChanged(nameof(FolderDescription));
             OnPropertyChanged(nameof(MediaDescription));
+            ContinueCommand.ChangeCanExecute();
         }
 
         private void Continue()
         {
+            CottonSyncRootStorageKind storageKind = _storageKind
+                ?? throw new InvalidOperationException("A sync source must be selected before continuing.");
             CottonUploadOriginalRetention retention = DeleteOriginalsAfterUpload
                 ? CottonUploadOriginalRetention.DeleteAfterConfirmedUpload
                 : CottonUploadOriginalRetention.KeepOriginals;
-            CompleteOnce(new SyncRootSetupOptions(_storageKind, retention));
+            CompleteOnce(new SyncRootSetupOptions(storageKind, retention));
         }
 
         private void CompleteOnce(SyncRootSetupOptions? options)
@@ -107,6 +110,7 @@ namespace Cotton.Mobile.ViewModels
 
             _didComplete = true;
             OnPropertyChanged(nameof(IsInteractionLocked));
+            ContinueCommand.ChangeCanExecute();
             _complete(options);
         }
     }

@@ -13,6 +13,7 @@ namespace Cotton.Mobile.Tests
         private readonly DeviceToCloudCoordinatorLocalTreeReader _localTreeReader;
         private readonly DeviceToCloudCoordinatorRemoteFolderContentSource _remoteFolderContentSource;
         private readonly DeviceToCloudCoordinatorFileOperator _fileOperator;
+        private readonly CottonSyncProgressHub _progressHub;
         private readonly CottonDeviceToCloudSyncCoordinator _coordinator;
 
         public DeviceToCloudSyncCoordinatorTests()
@@ -31,10 +32,12 @@ namespace Cotton.Mobile.Tests
             _localTreeReader = new DeviceToCloudCoordinatorLocalTreeReader();
             _remoteFolderContentSource = new DeviceToCloudCoordinatorRemoteFolderContentSource();
             _fileOperator = new DeviceToCloudCoordinatorFileOperator();
+            _progressHub = new CottonSyncProgressHub();
             CottonUploadOnlySyncPlanExecutor executor = new(
                 _fileOperator,
                 new DeviceToCloudCoordinatorLocalFileOperator(),
                 _uploadReceiptStore,
+                _progressHub,
                 new FixedTimeProvider(SyncedAt));
             _coordinator = new CottonDeviceToCloudSyncCoordinator(
                 _rootStore,
@@ -43,7 +46,8 @@ namespace Cotton.Mobile.Tests
                 _localTreeReader,
                 new CottonRecursiveRemoteContentLoader(_remoteFolderContentSource),
                 executor,
-                new CottonSyncRootExecutionLock());
+                new CottonSyncRootExecutionLock(),
+                _progressHub);
         }
 
         [Fact]
@@ -148,6 +152,29 @@ namespace Cotton.Mobile.Tests
             Assert.Equal("alpha.txt", Assert.Single(_fileOperator.UploadedItems).RelativePath);
             Assert.Single(await _uploadReceiptStore.LoadAsync(InstanceUri, root));
             Assert.Empty(await _uploadReceiptStore.LoadAsync(InstanceUri, secondRoot));
+        }
+
+        [Fact]
+        public async Task RunRootReportsScanningCloudAndAppliedChanges()
+        {
+            CottonSyncRootSnapshot root = CreateRoot(SyncRootId, FolderId, "Projects");
+            _localTreeReader.SetContent(
+                root.Id,
+                CreateLocalContent(CreateLocalFile("alpha.txt", "alpha.txt", "document:alpha")));
+            _remoteFolderContentSource.SetContent(root.CloudFolder.FolderId, CreateContent(root));
+            _fileOperator.SetUploadResult("alpha.txt", FirstFileId, "\"etag-1\"");
+            List<CottonSyncProgressSnapshot?> progress = [];
+            _progressHub.ProgressChanged += (_, eventArgs) => progress.Add(eventArgs.Progress);
+
+            _ = await _coordinator.RunRootAsync(InstanceUri, root);
+
+            Assert.Collection(
+                progress,
+                item => Assert.Equal(CottonSyncProgressStage.ScanningDevice, item?.Stage),
+                item => Assert.Equal(CottonSyncProgressStage.CheckingCloud, item?.Stage),
+                item => AssertProgress(item, completedItemCount: 0, totalItemCount: 1),
+                item => AssertProgress(item, completedItemCount: 1, totalItemCount: 1),
+                Assert.Null);
         }
 
         [Fact]
@@ -258,6 +285,17 @@ namespace Cotton.Mobile.Tests
             }
 
             GC.SuppressFinalize(this);
+        }
+
+        private static void AssertProgress(
+            CottonSyncProgressSnapshot? progress,
+            int completedItemCount,
+            int totalItemCount)
+        {
+            Assert.NotNull(progress);
+            Assert.Equal(CottonSyncProgressStage.ApplyingChanges, progress.Stage);
+            Assert.Equal(completedItemCount, progress.CompletedItemCount);
+            Assert.Equal(totalItemCount, progress.TotalItemCount);
         }
     }
 }

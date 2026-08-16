@@ -28,6 +28,54 @@ namespace Cotton.Mobile.Resources.Localization
 
         public static string MediaSupportingText => GetString(nameof(MediaSupportingText));
 
+        public static string MediaAlbumPageTitle => GetString(nameof(MediaAlbumPageTitle));
+
+        public static string MediaAlbumAppBarTitle => GetString(nameof(MediaAlbumAppBarTitle));
+
+        public static string MediaAlbumHeading => GetString(nameof(MediaAlbumHeading));
+
+        public static string MediaAlbumSupportingText => GetString(nameof(MediaAlbumSupportingText));
+
+        public static string MediaAlbumItemCountFormat => GetString(nameof(MediaAlbumItemCountFormat));
+
+        public static string MediaAlbumSingleItem => GetString(nameof(MediaAlbumSingleItem));
+
+        public static string MediaAlbumsDisplayNameFormat => GetString(nameof(MediaAlbumsDisplayNameFormat));
+
+        public static string UnnamedMediaAlbum => GetString(nameof(UnnamedMediaAlbum));
+
+        public static string NoMediaAlbumsTitle => GetString(nameof(NoMediaAlbumsTitle));
+
+        public static string NoMediaAlbumsSupportingText => GetString(nameof(NoMediaAlbumsSupportingText));
+
+        public static string CreateMediaAlbumItemCount(int itemCount)
+        {
+            if (itemCount <= 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(itemCount), "Media album item count must be positive.");
+            }
+
+            return itemCount == 1
+                ? GetString(nameof(MediaAlbumSingleItem))
+                : string.Format(
+                    CultureInfo.CurrentCulture,
+                    GetString(nameof(MediaAlbumItemCountFormat)),
+                    itemCount);
+        }
+
+        public static string CreateMediaAlbumsDisplayName(int albumCount)
+        {
+            if (albumCount <= 1)
+            {
+                throw new ArgumentOutOfRangeException(nameof(albumCount), "Multiple media albums are required.");
+            }
+
+            return string.Format(
+                CultureInfo.CurrentCulture,
+                GetString(nameof(MediaAlbumsDisplayNameFormat)),
+                albumCount);
+        }
+
         public static string CreateSourceDescription(string title, bool isSelected)
         {
             string format = isSelected

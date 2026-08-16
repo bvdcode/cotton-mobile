@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
+             xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
+             x:Class="Cotton.Mobile.CottonMediaAlbumPickerPage"
+             x:DataType="viewModels:CottonMediaAlbumPickerViewModel"
+             Shell.NavBarIsVisible="False"
+             Title="{x:Static localization:SyncRootSetupResources.MediaAlbumPageTitle}">
+
+    <Grid RowDefinitions="Auto,*"
+          Style="{StaticResource AppScreen}"
+          InputTransparent="{Binding IsInteractionLocked}">
+        <Grid ColumnDefinitions="Auto,*,Auto"
+              Style="{StaticResource AppTopBar}">
+            <Button Command="{Binding CancelCommand}"
+                    SemanticProperties.Description="{x:Static localization:AppResources.BackDescription}"
+                    StyleClass="TextButton, TouchTarget">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Arrow_back}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+            <Label Grid.Column="1"
+                   Text="{x:Static localization:SyncRootSetupResources.MediaAlbumAppBarTitle}"
+                   Style="{StaticResource AppTopBarTitle}" />
+            <Button Grid.Column="2"
+                    Command="{Binding ContinueCommand}"
+                    SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.ContinueDescription}"
+                    StyleClass="TextButton, TouchTarget, DisabledOpacity">
+                <Button.ImageSource>
+                    <FontImageSource FontFamily="MaterialOutlined"
+                                     Glyph="{x:Static symbols:MaterialOutlined.Check}"
+                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                </Button.ImageSource>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="1"
+              RowDefinitions="Auto,*"
+              Padding="{StaticResource AppPagePadding}"
+              RowSpacing="16"
+              MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
+              HorizontalOptions="Fill">
+            <VerticalStackLayout Spacing="6">
+                <Label Text="{x:Static localization:SyncRootSetupResources.MediaAlbumHeading}"
+                       Style="{StaticResource AppScreenTitle}" />
+                <Label Text="{x:Static localization:SyncRootSetupResources.MediaAlbumSupportingText}"
+                       Style="{StaticResource AppBodyText}" />
+            </VerticalStackLayout>
+
+            <VerticalStackLayout Grid.Row="1"
+                                 Spacing="16"
+                                 HorizontalOptions="Center"
+                                 VerticalOptions="Center"
+                                 IsVisible="{Binding IsEmptyVisible}">
+                <Border Style="{StaticResource AppIconFrame}"
+                        HorizontalOptions="Center">
+                    <Image Style="{StaticResource AppIcon}"
+                           Source="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Photo_library}, Color={AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}}" />
+                </Border>
+                <Label Text="{x:Static localization:SyncRootSetupResources.NoMediaAlbumsTitle}"
+                       Style="{StaticResource AppSectionTitle}"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="{x:Static localization:SyncRootSetupResources.NoMediaAlbumsSupportingText}"
+                       Style="{StaticResource AppBodyText}"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <CollectionView Grid.Row="1"
+                            IsVisible="{Binding IsListVisible}"
+                            ItemsSource="{Binding Albums}"
+                            ItemSizingStrategy="MeasureAllItems">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="viewModels:CottonMediaAlbumListItem">
+                        <Grid ColumnDefinitions="Auto,*"
+                              ColumnSpacing="12"
+                              Padding="4,10">
+                            <CheckBox IsChecked="{Binding IsSelected}"
+                                      VerticalOptions="Center" />
+                            <VerticalStackLayout Grid.Column="1"
+                                                 Spacing="3"
+                                                 VerticalOptions="Center">
+                                <Label Text="{Binding DisplayName}"
+                                       FontAttributes="Bold"
+                                       LineBreakMode="TailTruncation" />
+                                <Label Text="{Binding ItemCountText}"
+                                       Style="{StaticResource AppCaptionText}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </Grid>
+    </Grid>
+</ContentPage>

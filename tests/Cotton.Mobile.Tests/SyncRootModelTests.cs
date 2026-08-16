@@ -59,5 +59,49 @@ namespace Cotton.Mobile.Tests
             Assert.False(root.CanRunSync);
             Assert.True(root.NeedsUserAction);
         }
+
+        [Fact]
+        public void LegacyUnscopedMediaStoreRootRequiresFolderSelection()
+        {
+            CottonSyncLocalRootSnapshot localRoot = new(
+                CottonSyncRootStorageKind.MediaStore,
+                "content://media/external/file",
+                "Photos and videos",
+                CottonSyncRootPermissionStatus.Available);
+            CottonSyncRootSnapshot root = new(
+                Guid.NewGuid(),
+                SyncTestRootFactory.InstanceUri,
+                "account-1",
+                new CottonUploadDestinationSnapshot(Guid.NewGuid(), "Media", "Files / Media"),
+                localRoot,
+                CottonSyncDirection.DeviceToCloud,
+                CottonUploadOriginalRetention.KeepOriginals);
+
+            Assert.False(root.CanRunSync);
+            Assert.True(root.NeedsUserAction);
+            Assert.Equal(CottonSyncRootReadinessStatus.NeedsUserGrant, root.ReadinessStatus);
+        }
+
+        [Fact]
+        public void MediaStoreScopeDoesNotChangeRootIdentity()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateMediaStoreRoot();
+            CottonSyncLocalRootSnapshot changedScope = new(
+                root.LocalRoot.StorageKind,
+                root.LocalRoot.RootKey,
+                "Camera and Screenshots",
+                root.LocalRoot.PermissionStatus,
+                "buckets:1,2");
+            CottonSyncRootSnapshot updated = new(
+                root.Id,
+                root.InstanceUri,
+                root.AccountScopeKey,
+                root.CloudFolder,
+                changedScope,
+                root.Direction,
+                root.UploadOriginalRetention);
+
+            Assert.Equal(root.StableKey, updated.StableKey);
+        }
     }
 }

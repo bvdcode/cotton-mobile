@@ -12,6 +12,16 @@ namespace Cotton.Mobile.Platforms.Android
         {
             get
             {
+                if (OperatingSystem.IsAndroidVersionAtLeast(34))
+                {
+                    return
+                    [
+                        (Manifest.Permission.ReadMediaImages, true),
+                        (Manifest.Permission.ReadMediaVideo, true),
+                        (Manifest.Permission.ReadMediaVisualUserSelected, true),
+                    ];
+                }
+
                 if (OperatingSystem.IsAndroidVersionAtLeast(33))
                 {
                     return

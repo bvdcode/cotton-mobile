@@ -110,7 +110,8 @@ namespace Cotton.Mobile.Tests
                 CottonSyncRootStorageKind.MediaStore,
                 "content://media/external/file",
                 "Photos and videos",
-                CottonSyncRootPermissionStatus.Available);
+                CottonSyncRootPermissionStatus.Available,
+                "buckets:1");
         }
     }
 }

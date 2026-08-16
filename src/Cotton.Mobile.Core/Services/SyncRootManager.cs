@@ -119,7 +119,8 @@ namespace Cotton.Mobile.Services
                 root.LocalRoot.StorageKind,
                 root.LocalRoot.RootKey,
                 root.LocalRoot.DisplayName,
-                permissionStatus);
+                permissionStatus,
+                root.LocalRoot.ScopeKey);
             return new CottonSyncRootSnapshot(
                 root.Id,
                 root.InstanceUri,

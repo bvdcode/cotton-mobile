@@ -16,6 +16,7 @@ namespace Cotton.Mobile.ViewModels
         private readonly SyncSettingsExecutionHandler _executionHandler;
         private readonly SyncSettingsSetupHandler _setupHandler;
         private readonly SyncSettingsManagementHandler _managementHandler;
+        private readonly SyncSettingsStatusObserver _statusObserver;
         private readonly ILogger<SyncSettingsViewModel> _logger;
         private Uri? _instanceUri;
         private string? _accountScopeKey;
@@ -32,17 +33,18 @@ namespace Cotton.Mobile.ViewModels
             SyncSettingsExecutionHandler executionHandler,
             SyncSettingsSetupHandler setupHandler,
             SyncSettingsManagementHandler managementHandler,
-            SyncSettingsAutomaticStatusObserver automaticStatusObserver,
+            SyncSettingsStatusObserver statusObserver,
             ILogger<SyncSettingsViewModel> logger)
         {
-            ArgumentNullException.ThrowIfNull(automaticStatusObserver);
+            ArgumentNullException.ThrowIfNull(statusObserver);
 
             _loadingHandler = loadingHandler ?? throw new ArgumentNullException(nameof(loadingHandler));
             _executionHandler = executionHandler ?? throw new ArgumentNullException(nameof(executionHandler));
             _setupHandler = setupHandler ?? throw new ArgumentNullException(nameof(setupHandler));
             _managementHandler = managementHandler ?? throw new ArgumentNullException(nameof(managementHandler));
+            _statusObserver = statusObserver;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            automaticStatusObserver.Attach(this);
+            _statusObserver.Attach(this);
             LoadCommand = CreateLoadCommand();
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
@@ -254,8 +256,10 @@ namespace Cotton.Mobile.ViewModels
         {
             CottonSyncRootListDisplayState state = CottonSyncRootListDisplayState.Create(
                 collection.Roots,
-                collection.PausedRootIds);
+                collection.PausedRootIds,
+                collection.AutomaticSyncStatuses);
             Roots.ReplaceWith(state.Items);
+            _statusObserver.RefreshProgress();
 
             _summaryText = state.SummaryText;
             OnPropertyChanged(nameof(HeaderSupportingText));

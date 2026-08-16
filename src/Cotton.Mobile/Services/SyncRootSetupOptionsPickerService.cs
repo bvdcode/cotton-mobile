@@ -2,8 +2,6 @@
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
 using Cotton.Mobile.ViewModels;
-using Microsoft.Maui.ApplicationModel;
-
 namespace Cotton.Mobile.Services
 {
     public class SyncRootSetupOptionsPickerService : ISyncRootSetupOptionsPickerService
@@ -18,10 +16,7 @@ namespace Cotton.Mobile.Services
             SyncRootSetupOptionsViewModel viewModel = new(
                 options => completion.TrySetResult(options));
             SyncRootSetupOptionsPage page = new(viewModel);
-            INavigation navigation = await MainThread.InvokeOnMainThreadAsync(GetNavigation);
-
-            await MainThread.InvokeOnMainThreadAsync(
-                () => navigation.PushModalAsync(page, animated: false));
+            INavigation navigation = await ModalPageNavigation.ShowAsync(page);
             using CancellationTokenRegistration registration = cancellationToken.Register(
                 () => completion.TrySetCanceled(cancellationToken));
             bool keepPageOpen = false;
@@ -33,7 +28,10 @@ namespace Cotton.Mobile.Services
                     return null;
                 }
 
-                SyncRootSetupOptionsSession session = new(options, navigation, page);
+                SyncRootSetupOptionsSession session = new(
+                    options,
+                    navigation,
+                    page);
                 keepPageOpen = true;
                 return session;
             }
@@ -41,23 +39,9 @@ namespace Cotton.Mobile.Services
             {
                 if (!keepPageOpen)
                 {
-                    await SyncRootSetupOptionsSession
-                        .DismissAsync(navigation, page)
-                        .ConfigureAwait(false);
+                    await ModalPageNavigation.DismissAsync(navigation, page).ConfigureAwait(false);
                 }
             }
-        }
-
-        private static INavigation GetNavigation()
-        {
-            Application? application = Application.Current;
-            if (application is null || application.Windows.Count == 0)
-            {
-                throw new InvalidOperationException("Sync setup options need an active page.");
-            }
-
-            return application.Windows[0].Page?.Navigation
-                ?? throw new InvalidOperationException("Sync setup options need an active page.");
         }
     }
 }

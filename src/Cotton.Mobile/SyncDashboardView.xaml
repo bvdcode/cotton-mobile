@@ -57,17 +57,10 @@
               RowSpacing="16"
               MaximumWidthRequest="{StaticResource AppContentMaximumWidth}"
               HorizontalOptions="Fill">
-            <Grid ColumnDefinitions="*,Auto"
-                  ColumnSpacing="12">
-                <Label Text="{Binding HeaderSupportingText}"
-                       IsVisible="{Binding IsHeaderSupportingTextVisible}"
-                       Style="{StaticResource AppBodyText}"
-                       VerticalOptions="Center" />
-                <ActivityIndicator Grid.Column="1"
-                                   IsRunning="{Binding IsBusy}"
-                                   IsVisible="{Binding IsBusy}"
-                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-            </Grid>
+            <Label Text="{Binding HeaderSupportingText}"
+                   IsVisible="{Binding IsHeaderSupportingTextVisible}"
+                   Style="{StaticResource AppBodyText}"
+                   VerticalOptions="Center" />
 
             <VerticalStackLayout Grid.Row="1"
                                  Spacing="16"
@@ -93,13 +86,17 @@
             <CollectionView Grid.Row="1"
                             IsVisible="{Binding IsListVisible}"
                             ItemsSource="{Binding Roots}"
-                            ItemSizingStrategy="MeasureAllItems"
-                            ItemsLayout="{StaticResource AppVerticalCardList}">
+                            ItemSizingStrategy="MeasureAllItems">
+                <CollectionView.ItemsLayout>
+                    <LinearItemsLayout Orientation="Vertical"
+                                       ItemSpacing="0" />
+                </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Border Style="{StaticResource AppCard}">
-                            <VerticalStackLayout Spacing="12">
-                                <Grid ColumnDefinitions="Auto,*,Auto"
+                        <Grid RowDefinitions="Auto,Auto">
+                            <VerticalStackLayout Padding="4,12"
+                                                 Spacing="10">
+                                <Grid ColumnDefinitions="Auto,*"
                                       ColumnSpacing="12">
                                     <Border Style="{StaticResource AppIconFrame}">
                                         <Image Style="{StaticResource AppIcon}">
@@ -129,13 +126,22 @@
                                                LineBreakMode="TailTruncation" />
                                         <Label Text="{Binding DetailText}"
                                                Style="{StaticResource AppCaptionText}" />
+                                        <HorizontalStackLayout Spacing="6">
+                                            <ActivityIndicator IsRunning="{Binding IsRunning}"
+                                                               IsVisible="{Binding IsRunning}"
+                                                               WidthRequest="18"
+                                                               HeightRequest="18"
+                                                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                            <Label Text="{Binding StatusText}"
+                                                   Style="{StaticResource AppCaptionText}"
+                                                   VerticalOptions="Center" />
+                                        </HorizontalStackLayout>
                                     </VerticalStackLayout>
-
-                                    <Label Grid.Column="2"
-                                           Text="{Binding StatusText}"
-                                           Style="{StaticResource AppCaptionText}"
-                                           VerticalOptions="Center" />
                                 </Grid>
+
+                                <ProgressBar Progress="{Binding ProgressValue}"
+                                             IsVisible="{Binding IsProgressDeterminate}"
+                                             ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
 
                                 <FlexLayout Direction="Row"
                                             Wrap="Wrap"
@@ -168,7 +174,12 @@
                                             StyleClass="TextButton, TouchTarget, CardAction" />
                                 </FlexLayout>
                             </VerticalStackLayout>
-                        </Border>
+                            <BoxView Grid.Row="1"
+                                     HeightRequest="1"
+                                     Margin="4,0"
+                                     IsVisible="{Binding IsDividerVisible}"
+                                     Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+                        </Grid>
                     </DataTemplate>
                 </CollectionView.ItemTemplate>
             </CollectionView>

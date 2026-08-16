@@ -45,7 +45,8 @@ namespace Cotton.Mobile.Services
                     item.LocalStorageKind,
                     item.LocalRootKey ?? string.Empty,
                     item.LocalRootDisplayName ?? string.Empty,
-                    item.LocalPermissionStatus),
+                    item.LocalPermissionStatus,
+                    item.LocalScopeKey),
                 item.Direction,
                 item.UploadOriginalRetention);
             if (!HasValidIdentity(expectedInstanceUri, item, root))
@@ -102,6 +103,7 @@ namespace Cotton.Mobile.Services
                 LocalStorageKind = root.LocalRoot.StorageKind,
                 LocalRootKey = root.LocalRoot.RootKey,
                 LocalRootDisplayName = root.LocalRoot.DisplayName,
+                LocalScopeKey = root.LocalRoot.ScopeKey,
                 LocalPermissionStatus = root.LocalRoot.PermissionStatus,
                 Direction = root.Direction,
                 UploadOriginalRetention = root.UploadOriginalRetention,

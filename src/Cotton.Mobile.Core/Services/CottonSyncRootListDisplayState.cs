@@ -27,21 +27,41 @@ namespace Cotton.Mobile.Services
 
         public static CottonSyncRootListDisplayState Create(IReadOnlyList<CottonSyncRootSnapshot> roots)
         {
-            return Create(roots, new HashSet<Guid>());
+            return Create(
+                roots,
+                new HashSet<Guid>(),
+                new Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot>());
         }
 
         public static CottonSyncRootListDisplayState Create(
             IReadOnlyList<CottonSyncRootSnapshot> roots,
             IReadOnlySet<Guid> pausedRootIds)
         {
+            return Create(
+                roots,
+                pausedRootIds,
+                new Dictionary<Guid, CottonAutomaticSyncRootStatusSnapshot>());
+        }
+
+        public static CottonSyncRootListDisplayState Create(
+            IReadOnlyList<CottonSyncRootSnapshot> roots,
+            IReadOnlySet<Guid> pausedRootIds,
+            IReadOnlyDictionary<Guid, CottonAutomaticSyncRootStatusSnapshot> automaticStatuses)
+        {
             ArgumentNullException.ThrowIfNull(roots);
             ArgumentNullException.ThrowIfNull(pausedRootIds);
+            ArgumentNullException.ThrowIfNull(automaticStatuses);
 
-            return new CottonSyncRootListDisplayState(
-                [.. roots
-                    .OrderBy(root => root.CloudFolder.Path, StringComparer.OrdinalIgnoreCase)
-                    .ThenBy(root => root.CloudFolder.FolderName, StringComparer.OrdinalIgnoreCase)
-                    .Select(root => new CottonSyncRootListItem(root, pausedRootIds.Contains(root.Id)))]);
+            CottonSyncRootSnapshot[] orderedRoots = [.. roots
+                .OrderBy(root => root.CloudFolder.Path, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(root => root.CloudFolder.FolderName, StringComparer.OrdinalIgnoreCase)];
+            CottonSyncRootListItem[] items = [.. orderedRoots.Select((root, index) =>
+                new CottonSyncRootListItem(
+                    root,
+                    pausedRootIds.Contains(root.Id),
+                    automaticStatuses.GetValueOrDefault(root.Id),
+                    isDividerVisible: index < orderedRoots.Length - 1))];
+            return new CottonSyncRootListDisplayState(items);
         }
 
         private static string CreateSummaryText(int count)

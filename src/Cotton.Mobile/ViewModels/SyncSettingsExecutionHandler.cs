@@ -66,7 +66,6 @@ namespace Cotton.Mobile.ViewModels
                 return;
             }
 
-            IReadOnlyList<CottonSyncRootListItem> runningItems = [];
             state.IsBusy = true;
             try
             {
@@ -75,10 +74,6 @@ namespace Cotton.Mobile.ViewModels
                     CottonSyncRootRunCapability.GetRunnableRoots(
                         collection.Roots,
                         collection.PausedRootIds);
-                HashSet<Guid> runnableRootIds = [.. runnableRoots.Select(root => root.Id)];
-                runningItems = [.. state.Roots.Where(item => runnableRootIds.Contains(item.Id))];
-                SetRunning(runningItems, isRunning: true);
-
                 state.Status = CottonSyncSettingsRunStatusText.StartingAllStatus;
                 state.Status = await _mediator.Send(
                     new RunAllSyncRootsRequest(
@@ -98,7 +93,6 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                SetRunning(runningItems, isRunning: false);
                 state.IsBusy = false;
             }
         }
@@ -150,7 +144,6 @@ namespace Cotton.Mobile.ViewModels
                 }
 
                 state.Status = CottonSyncRootRunRouting.CreateStartingStatus(root);
-                item.SetRunning(isRunning: true);
                 state.Status = await _mediator.Send(
                     new RunSyncRootRequest(
                         instanceUri,
@@ -169,18 +162,7 @@ namespace Cotton.Mobile.ViewModels
             }
             finally
             {
-                item.SetRunning(isRunning: false);
                 state.IsBusy = false;
-            }
-        }
-
-        private static void SetRunning(
-            IReadOnlyList<CottonSyncRootListItem> items,
-            bool isRunning)
-        {
-            foreach (CottonSyncRootListItem item in items)
-            {
-                item.SetRunning(isRunning);
             }
         }
     }

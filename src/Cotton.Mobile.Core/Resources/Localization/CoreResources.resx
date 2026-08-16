@@ -44,16 +44,25 @@
   <data name="UnavailableStatus" xml:space="preserve"><value>Unavailable</value></data>
   <data name="ReadyStatus" xml:space="preserve"><value>Ready</value></data>
   <data name="ChooseFolderStatus" xml:space="preserve"><value>Choose folder</value></data>
+  <data name="ChooseMediaStatus" xml:space="preserve"><value>Choose media</value></data>
   <data name="ReconnectStatus" xml:space="preserve"><value>Reconnect</value></data>
+  <data name="ReconnectMediaStatus" xml:space="preserve"><value>Reconnect media</value></data>
   <data name="SyncingStatus" xml:space="preserve"><value>Syncing</value></data>
   <data name="UploadingStatus" xml:space="preserve"><value>Uploading</value></data>
+  <data name="ScanningDeviceStatus" xml:space="preserve"><value>Scanning device…</value></data>
+  <data name="CheckingCloudStatus" xml:space="preserve"><value>Checking cloud…</value></data>
+  <data name="ApplyingChangesFormat" xml:space="preserve"><value>Syncing {0} of {1} changes…</value></data>
+  <data name="FinishingSyncStatus" xml:space="preserve"><value>Finishing sync…</value></data>
   <data name="LastSyncSucceededFormat" xml:space="preserve"><value>Last synced {0:g}.</value></data>
   <data name="LastSyncFailedFormat" xml:space="preserve"><value>Last sync failed {0:g}. Retry is automatic.</value></data>
   <data name="SyncFailuresFormat" xml:space="preserve"><value>{0} folders could not sync. Last attempt {1:g}; retry is automatic.</value></data>
   <data name="SyncRootReady" xml:space="preserve"><value>Sync root ready</value></data>
   <data name="ChooseLocalFolder" xml:space="preserve"><value>Choose local folder</value></data>
+  <data name="ChooseMediaFolders" xml:space="preserve"><value>Choose media folders</value></data>
   <data name="ReconnectLocalFolder" xml:space="preserve"><value>Reconnect local folder</value></data>
+  <data name="ReconnectMediaFolders" xml:space="preserve"><value>Reconnect media folders</value></data>
   <data name="LocalFolderUnavailable" xml:space="preserve"><value>Local folder unavailable</value></data>
+  <data name="MediaFoldersUnavailable" xml:space="preserve"><value>Media folders unavailable</value></data>
   <data name="LocalSyncTargetUnsupported" xml:space="preserve"><value>Local sync target unsupported</value></data>
   <data name="LocalSyncSourceUnsupported" xml:space="preserve"><value>Local sync source unsupported</value></data>
   <data name="OnDeviceStatus" xml:space="preserve"><value>On device</value></data>

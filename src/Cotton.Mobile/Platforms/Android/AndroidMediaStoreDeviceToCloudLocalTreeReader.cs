@@ -3,8 +3,6 @@
 
 #if ANDROID
 using Android.Content;
-using Android.Database;
-using Android.OS;
 using Android.Provider;
 using Cotton.Mobile.Services;
 using AndroidUri = Android.Net.Uri;
@@ -56,11 +54,29 @@ namespace Cotton.Mobile.Platforms.Android
             CancellationToken cancellationToken = default)
         {
             EnsureSupportedRoot(instanceUri, root);
+            if (!AndroidMediaStoreScopeKey.TryParse(root.LocalRoot.ScopeKey, out AndroidMediaStoreScope? scope))
+            {
+                throw new InvalidOperationException("Android media sync root does not have a selected scope.");
+            }
+
+            AndroidMediaStoreScope selectedScope = scope
+                ?? throw new InvalidOperationException("Android media sync root scope is unavailable.");
+            AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
+            if (!access.HasAccess)
+            {
+                throw new UnauthorizedAccessException("Android media access is not available.");
+            }
 
             if (!OperatingSystem.IsAndroidVersionAtLeast(30))
             {
                 AndroidMediaStoreScanResult legacyResult = await Task.Run(
-                        () => ReadMedia(root, sourceVersion: null, previousIndex: null, cancellationToken),
+                        () => ReadMedia(
+                            root,
+                            selectedScope,
+                            access,
+                            sourceVersion: null,
+                            previousIndex: null,
+                            cancellationToken),
                     cancellationToken)
                     .ConfigureAwait(false);
                 return legacyResult;
@@ -75,7 +91,7 @@ namespace Cotton.Mobile.Platforms.Android
                     ? storedIndex
                     : null;
             AndroidMediaStoreScanResult result = await Task.Run(
-                    () => ReadMedia(root, sourceVersion, previousIndex, cancellationToken),
+                    () => ReadMedia(root, selectedScope, access, sourceVersion, previousIndex, cancellationToken),
                     cancellationToken)
                 .ConfigureAwait(false);
             CottonContentRevisionIndexSnapshot revisionIndex = result.RevisionIndex
@@ -92,6 +108,8 @@ namespace Cotton.Mobile.Platforms.Android
 
         private AndroidMediaStoreScanResult ReadMedia(
             CottonSyncRootSnapshot root,
+            AndroidMediaStoreScope scope,
+            AndroidMediaReadAccessSnapshot access,
             string? sourceVersion,
             CottonContentRevisionIndexSnapshot? previousIndex,
             CancellationToken cancellationToken)
@@ -104,153 +122,58 @@ namespace Cotton.Mobile.Platforms.Android
             AndroidMediaStoreScanStatistics statistics = new();
             DateTime scanStartedAtUtc = _timeProvider.GetUtcNow().UtcDateTime;
 
-            ReadCollection(
-                resolver,
-                AndroidMediaStoreCollectionKind.Images,
-                items,
-                problems,
-                previousIndex,
-                revisions,
-                statistics,
-                scanStartedAtUtc,
-                cancellationToken);
-            ReadCollection(
-                resolver,
-                AndroidMediaStoreCollectionKind.Videos,
-                items,
-                problems,
-                previousIndex,
-                revisions,
-                statistics,
-                scanStartedAtUtc,
-                cancellationToken);
+            if (access.CanReadImages)
+            {
+                ReadCollection(
+                    resolver,
+                    AndroidMediaStoreCollectionKind.Images,
+                    scope,
+                    items,
+                    problems,
+                    previousIndex,
+                    revisions,
+                    statistics,
+                    scanStartedAtUtc,
+                    cancellationToken);
+            }
+
+            if (access.CanReadVideos)
+            {
+                ReadCollection(
+                    resolver,
+                    AndroidMediaStoreCollectionKind.Videos,
+                    scope,
+                    items,
+                    problems,
+                    previousIndex,
+                    revisions,
+                    statistics,
+                    scanStartedAtUtc,
+                    cancellationToken);
+            }
 
             CottonDeviceToCloudLocalContentSnapshot content = new(
                 root.LocalRoot.DisplayName,
                 [.. items.Values],
                 problems);
-            CottonContentRevisionIndexSnapshot? revisionIndex = sourceVersion is null
-                ? null
-                : new CottonContentRevisionIndexSnapshot(sourceVersion, revisions!);
+            CottonContentRevisionIndexSnapshot? revisionIndex = CreateRevisionIndex(
+                sourceVersion,
+                revisions);
             return new AndroidMediaStoreScanResult(content, revisionIndex, statistics);
         }
 
-        private static void ReadCollection(
-            ContentResolver resolver,
-            AndroidMediaStoreCollectionKind collectionKind,
-            Dictionary<string, CottonDeviceToCloudLocalItemSnapshot> items,
-            List<CottonDeviceToCloudLocalProblemSnapshot> problems,
-            CottonContentRevisionIndexSnapshot? previousIndex,
-            List<CottonContentRevisionSnapshot>? revisions,
-            AndroidMediaStoreScanStatistics statistics,
-            DateTime scanStartedAtUtc,
-            CancellationToken cancellationToken)
+        private static CottonContentRevisionIndexSnapshot? CreateRevisionIndex(
+            string? sourceVersion,
+            List<CottonContentRevisionSnapshot>? revisions)
         {
-            AndroidUri collectionUri = GetCollectionUri(collectionKind);
-            string[] projection = CreateProjection();
-            string? selection = OperatingSystem.IsAndroidVersionAtLeast(29)
-                ? $"{MediaStore.IMediaColumns.IsPending} = 0"
-                : null;
-            using ICursor cursor = resolver.Query(collectionUri, projection, selection, null, null)
-                ?? throw new IOException("Could not read Android media collection.");
-
-            while (cursor.MoveToNext())
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                long mediaId = cursor.GetLong(IdColumnIndex);
-                string displayName = cursor.GetString(DisplayNameColumnIndex) ?? string.Empty;
-                string? scopedStorageRelativePath = OperatingSystem.IsAndroidVersionAtLeast(29)
-                    ? cursor.GetString(RelativePathColumnIndex)
-                    : null;
-                string rawParentPath = AndroidMediaStorePathMapper.CreateParentPath(
-                    collectionKind,
-                    mediaId,
-                    scopedStorageRelativePath);
-                string rawRelativePath = AndroidMediaStorePathMapper.CreateRawFilePath(
-                    rawParentPath,
-                    displayName);
-                if (!AndroidMediaStorePathMapper.TryCreateFilePath(
-                        rawParentPath,
-                        displayName,
-                        out string? relativePath))
-                {
-                    problems.Add(AndroidMediaStorePathMapper.CreateInvalidNameProblem(
-                        displayName,
-                        rawRelativePath));
-                    continue;
-                }
-
-                AndroidMediaStorePathMapper.AddParentFolders(items, relativePath!, scanStartedAtUtc);
-                AndroidUri contentUri = ContentUris.WithAppendedId(collectionUri, mediaId)
-                    ?? throw new IOException("Could not create Android media content URI.");
-                string localSourceId = contentUri.ToString()
-                    ?? throw new IOException("Could not create Android media source id.");
-                string contentHash = ResolveContentHash(
-                    resolver,
-                    cursor,
-                    contentUri,
-                    localSourceId,
-                    previousIndex,
-                    revisions,
-                    statistics,
-                    cancellationToken);
-                CottonDeviceToCloudLocalItemSnapshot file = CottonDeviceToCloudLocalItemSnapshot.CreateFile(
-                    displayName,
-                    relativePath!,
-                    ReadLastModifiedUtc(cursor, scanStartedAtUtc),
-                    ReadSizeBytes(cursor),
-                    ReadOptionalString(cursor, MimeTypeColumnIndex),
-                    localSourceId,
-                    contentHash);
-                if (!items.TryAdd(file.RelativePath, file))
-                {
-                    throw new IOException($"Android media collection contains a duplicate path: {file.RelativePath}.");
-                }
-            }
-        }
-
-        private static AndroidUri GetCollectionUri(AndroidMediaStoreCollectionKind collectionKind)
-        {
-            AndroidUri? collectionUri = collectionKind switch
-            {
-                AndroidMediaStoreCollectionKind.Images => MediaStore.Images.Media.ExternalContentUri,
-                AndroidMediaStoreCollectionKind.Videos => MediaStore.Video.Media.ExternalContentUri,
-                _ => throw new ArgumentOutOfRangeException(
-                    nameof(collectionKind),
-                    collectionKind,
-                    "Android media collection is not supported."),
-            };
-            return collectionUri
-                ?? throw new InvalidOperationException("Android media collection URI is unavailable.");
-        }
-
-        private static DateTime ReadLastModifiedUtc(ICursor cursor, DateTime scanStartedAtUtc)
-        {
-            if (cursor.IsNull(DateModifiedColumnIndex))
-            {
-                return scanStartedAtUtc;
-            }
-
-            long seconds = cursor.GetLong(DateModifiedColumnIndex);
-            return seconds <= 0
-                ? scanStartedAtUtc
-                : DateTimeOffset.FromUnixTimeSeconds(seconds).UtcDateTime;
-        }
-
-        private static long? ReadSizeBytes(ICursor cursor)
-        {
-            if (cursor.IsNull(SizeColumnIndex))
+            if (sourceVersion is null)
             {
                 return null;
             }
 
-            long sizeBytes = cursor.GetLong(SizeColumnIndex);
-            return sizeBytes < 0 ? null : sizeBytes;
-        }
-
-        private static string? ReadOptionalString(ICursor cursor, int columnIndex)
-        {
-            return cursor.IsNull(columnIndex) ? null : cursor.GetString(columnIndex);
+            return new CottonContentRevisionIndexSnapshot(
+                sourceVersion,
+                revisions ?? throw new InvalidOperationException("Android media revisions are unavailable."));
         }
 
         private static string ComputeContentHash(

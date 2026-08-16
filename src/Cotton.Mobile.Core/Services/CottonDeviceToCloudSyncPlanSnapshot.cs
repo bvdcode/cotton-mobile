@@ -56,8 +56,10 @@ namespace Cotton.Mobile.Services
 
         public int NoOpCount => Items.Count(item => item.IsNoOp);
 
-        public bool HasExecutableChanges => Items.Any(item =>
+        public int ExecutableChangeCount => Items.Count(item =>
             item.RequiresServerMutation || item.RequiresLocalMutation);
+
+        public bool HasExecutableChanges => ExecutableChangeCount > 0;
 
         public bool HasBlockingItems => BlockedCount > 0;
     }

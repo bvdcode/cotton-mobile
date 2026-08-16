@@ -30,7 +30,10 @@ namespace Cotton.Mobile.Services
                     nameof(localRoot));
             }
 
-            if (!string.Equals(root.LocalRoot.RootKey, localRoot.RootKey, StringComparison.Ordinal))
+            if (!string.Equals(
+                    root.LocalRoot.RootKey,
+                    localRoot.RootKey,
+                    StringComparison.Ordinal))
             {
                 throw new ArgumentException(
                     "Reconnect requires the originally configured local folder.",

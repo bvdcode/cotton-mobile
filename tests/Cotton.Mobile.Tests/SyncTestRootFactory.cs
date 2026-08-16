@@ -31,7 +31,8 @@ namespace Cotton.Mobile.Tests
                     CottonSyncRootStorageKind.MediaStore,
                     "content://media/external/file",
                     "Photos and videos",
-                    permissionStatus),
+                    permissionStatus,
+                    "buckets:1"),
                 CottonUploadOriginalRetention.KeepOriginals,
                 rootId);
         }

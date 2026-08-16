@@ -7,18 +7,22 @@ namespace Cotton.Mobile.Services
     {
         private readonly ICottonDeviceToCloudSyncFileOperator _fileOperator;
         private readonly CottonUploadOnlyFileWorkflow _fileWorkflow;
+        private readonly CottonSyncProgressHub _progressHub;
 
         public CottonUploadOnlySyncPlanExecutor(
             ICottonDeviceToCloudSyncFileOperator fileOperator,
             ICottonDeviceToCloudLocalFileOperator localFileOperator,
             ICottonUploadReceiptStore uploadReceiptStore,
+            CottonSyncProgressHub progressHub,
             TimeProvider? timeProvider = null)
         {
             ArgumentNullException.ThrowIfNull(fileOperator);
             ArgumentNullException.ThrowIfNull(localFileOperator);
             ArgumentNullException.ThrowIfNull(uploadReceiptStore);
+            ArgumentNullException.ThrowIfNull(progressHub);
 
             _fileOperator = fileOperator;
+            _progressHub = progressHub;
             _fileWorkflow = new CottonUploadOnlyFileWorkflow(
                 fileOperator,
                 localFileOperator,
@@ -41,6 +45,9 @@ namespace Cotton.Mobile.Services
             int deletedLocalFileCount = 0;
             int skippedCount = 0;
             int blockedCount = 0;
+            int totalChangeCount = plan.ExecutableChangeCount;
+            int completedChangeCount = 0;
+            ReportProgress(root.Id, completedChangeCount, totalChangeCount);
 
             foreach (CottonDeviceToCloudSyncPlanItem item in plan.Items)
             {
@@ -114,6 +121,12 @@ namespace Cotton.Mobile.Services
                     default:
                         throw new ArgumentOutOfRangeException(nameof(plan), "Upload-only sync action is not supported.");
                 }
+
+                if (item.RequiresServerMutation || item.RequiresLocalMutation)
+                {
+                    completedChangeCount++;
+                    ReportProgress(root.Id, completedChangeCount, totalChangeCount);
+                }
             }
 
             return new CottonDeviceToCloudSyncExecutionResult(
@@ -123,6 +136,14 @@ namespace Cotton.Mobile.Services
                 deletedLocalFileCount,
                 skippedCount,
                 blockedCount);
+        }
+
+        private void ReportProgress(Guid rootId, int completedItemCount, int totalItemCount)
+        {
+            _progressHub.Report(CottonSyncProgressSnapshot.ApplyingChanges(
+                rootId,
+                completedItemCount,
+                totalItemCount));
         }
 
         private async Task CreateRemoteFolderAsync(

@@ -80,10 +80,40 @@
     <value>Scan a folder periodically and upload each file once.</value>
   </data>
   <data name="MediaTitle" xml:space="preserve">
-    <value>Photos and videos</value>
+    <value>Media folders</value>
   </data>
   <data name="MediaSupportingText" xml:space="preserve">
-    <value>Upload new media soon after Android adds it to your library.</value>
+    <value>Choose the camera or other media folders. Only those folders upload automatically.</value>
+  </data>
+  <data name="MediaAlbumPageTitle" xml:space="preserve">
+    <value>Choose media folders</value>
+  </data>
+  <data name="MediaAlbumAppBarTitle" xml:space="preserve">
+    <value>Media folders</value>
+  </data>
+  <data name="MediaAlbumHeading" xml:space="preserve">
+    <value>Which media should Cotton upload?</value>
+  </data>
+  <data name="MediaAlbumSupportingText" xml:space="preserve">
+    <value>Select one or more folders. Cotton uploads the media Android allows it to access there.</value>
+  </data>
+  <data name="MediaAlbumItemCountFormat" xml:space="preserve">
+    <value>{0} items</value>
+  </data>
+  <data name="MediaAlbumSingleItem" xml:space="preserve">
+    <value>1 item</value>
+  </data>
+  <data name="MediaAlbumsDisplayNameFormat" xml:space="preserve">
+    <value>{0} media folders</value>
+  </data>
+  <data name="UnnamedMediaAlbum" xml:space="preserve">
+    <value>Unnamed media folder</value>
+  </data>
+  <data name="NoMediaAlbumsTitle" xml:space="preserve">
+    <value>No media folders available</value>
+  </data>
+  <data name="NoMediaAlbumsSupportingText" xml:space="preserve">
+    <value>Allow access to at least one photo or video, then try again.</value>
   </data>
   <data name="SelectedSourceDescriptionFormat" xml:space="preserve">
     <value>{0}, selected.</value>

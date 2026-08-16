@@ -14,8 +14,6 @@ namespace Cotton.Mobile.Platforms.Android
 {
     public class AndroidSyncLocalRootPickerService : ICottonSyncLocalRootPickerService
     {
-        private const string ExternalMediaStoreVolume = "external";
-
         private static readonly ActivityFlags PersistableGrantFlags =
             ActivityFlags.GrantReadUriPermission | ActivityFlags.GrantWriteUriPermission;
 
@@ -25,13 +23,17 @@ namespace Cotton.Mobile.Platforms.Android
             | ActivityFlags.GrantPrefixUriPermission;
 
         private readonly IAndroidDocumentTreeActivityResultBridge _activityResultBridge;
+        private readonly ICottonMediaAlbumPickerService _mediaAlbumPicker;
 
         public AndroidSyncLocalRootPickerService(
-            IAndroidDocumentTreeActivityResultBridge activityResultBridge)
+            IAndroidDocumentTreeActivityResultBridge activityResultBridge,
+            ICottonMediaAlbumPickerService mediaAlbumPicker)
         {
             ArgumentNullException.ThrowIfNull(activityResultBridge);
+            ArgumentNullException.ThrowIfNull(mediaAlbumPicker);
 
             _activityResultBridge = activityResultBridge;
+            _mediaAlbumPicker = mediaAlbumPicker;
         }
 
         public bool IsAvailable => true;
@@ -85,27 +87,45 @@ namespace Cotton.Mobile.Platforms.Android
                 CottonSyncRootPermissionStatus.Available);
         }
 
-        private static async Task<CottonSyncLocalRootSnapshot?> PickMediaStoreAsync(
+        private async Task<CottonSyncLocalRootSnapshot?> PickMediaStoreAsync(
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            PermissionStatus status = await MainThread
+            _ = await MainThread
                 .InvokeOnMainThreadAsync(
                     () => Permissions.RequestAsync<CottonMediaReadPermissionRequest>())
                 .ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            if (status != PermissionStatus.Granted)
+            AndroidMediaReadAccessSnapshot access = AndroidMediaReadAccessResolver.Resolve();
+            if (!access.HasAccess)
             {
                 return null;
             }
 
-            AndroidUri contentUri = MediaStore.Files.GetContentUri(ExternalMediaStoreVolume)
-                ?? throw new InvalidOperationException("Android external MediaStore URI is unavailable.");
+            IReadOnlyList<CottonMediaAlbumSnapshot> albums = await AndroidMediaStoreAlbumProvider
+                .LoadAsync(access, cancellationToken)
+                .ConfigureAwait(false);
+            IReadOnlyList<CottonMediaAlbumSnapshot>? selectedAlbums = await _mediaAlbumPicker
+                .PickAsync(albums, cancellationToken)
+                .ConfigureAwait(false);
+            if (selectedAlbums is null || selectedAlbums.Count == 0)
+            {
+                return null;
+            }
+
             return new CottonSyncLocalRootSnapshot(
                 CottonSyncRootStorageKind.MediaStore,
-                contentUri.ToString() ?? throw new InvalidOperationException("Android MediaStore URI is empty."),
-                SyncRootSetupResources.MediaTitle,
-                CottonSyncRootPermissionStatus.Available);
+                AndroidMediaStoreRootKey.Value,
+                CreateMediaDisplayName(selectedAlbums),
+                CottonSyncRootPermissionStatus.Available,
+                AndroidMediaStoreScopeKey.Create(selectedAlbums.Select(album => album.Id)));
+        }
+
+        private static string CreateMediaDisplayName(IReadOnlyList<CottonMediaAlbumSnapshot> albums)
+        {
+            return albums.Count == 1
+                ? albums[0].DisplayName
+                : SyncRootSetupResources.CreateMediaAlbumsDisplayName(albums.Count);
         }
 
         private static void PersistGrant(ContentResolver contentResolver, Intent resultIntent, AndroidUri uri)

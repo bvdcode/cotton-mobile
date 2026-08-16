@@ -18,6 +18,7 @@ namespace Cotton.Mobile.Tests
                 FileOperator,
                 LocalFileOperator,
                 ReceiptStore,
+                new CottonSyncProgressHub(),
                 new FixedTimeProvider(RecordedAt));
         }
 

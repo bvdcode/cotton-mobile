@@ -72,8 +72,8 @@ namespace Cotton.Mobile.Platforms.Android
                 && previousIndex.TryGetContentHash(localSourceId, generation.Value, out string? cachedHash))
             {
                 statistics.RecordReusedHash();
-                revisions.Add(new CottonContentRevisionSnapshot(localSourceId, generation.Value, cachedHash!));
-                return cachedHash!;
+                revisions.Add(new CottonContentRevisionSnapshot(localSourceId, generation.Value, cachedHash));
+                return cachedHash;
             }
 
             statistics.RecordHashedFile();

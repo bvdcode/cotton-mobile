@@ -30,7 +30,7 @@
             <Button Grid.Column="2"
                     Command="{Binding ContinueCommand}"
                     SemanticProperties.Description="{x:Static localization:SyncRootSetupResources.ContinueDescription}"
-                    StyleClass="TextButton, TouchTarget">
+                    StyleClass="TextButton, TouchTarget, DisabledOpacity">
                 <Button.ImageSource>
                     <FontImageSource FontFamily="MaterialOutlined"
                                      Glyph="{x:Static symbols:MaterialOutlined.Check}"

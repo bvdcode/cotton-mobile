@@ -71,6 +71,18 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
+        public async Task SaveAndLoadRoundtripsLocalScope()
+        {
+            CottonSyncRootSnapshot root = SyncTestRootFactory.CreateMediaStoreRoot(rootId: RootId);
+
+            await _store.SaveAsync(InstanceUri, [root]);
+
+            CottonSyncRootSnapshot loaded = Assert.Single(await _store.LoadAsync(InstanceUri));
+            Assert.Equal(root.LocalRoot.ScopeKey, loaded.LocalRoot.ScopeKey);
+            Assert.Equal(root.StableKey, loaded.StableKey);
+        }
+
+        [Fact]
         public async Task AddOrReplaceReplacesExistingRootById()
         {
             CottonSyncRootSnapshot original = CreateRoot(RootId, FolderId, "Projects");

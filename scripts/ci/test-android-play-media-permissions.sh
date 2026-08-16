@@ -12,6 +12,7 @@ fi
 required_permissions=(
   "android.permission.READ_MEDIA_IMAGES"
   "android.permission.READ_MEDIA_VIDEO"
+  "android.permission.READ_MEDIA_VISUAL_USER_SELECTED"
 )
 
 for permission in "${required_permissions[@]}"; do
@@ -21,14 +22,10 @@ for permission in "${required_permissions[@]}"; do
   fi
 done
 
-if grep -Fq "android.permission.READ_MEDIA_VISUAL_USER_SELECTED" "$manifest_path"; then
-  printf 'Media backup manifest must not declare partial-library access.\n' >&2
-  exit 1
-fi
-
 required_api_references=(
   "Manifest.Permission.ReadMediaImages"
   "Manifest.Permission.ReadMediaVideo"
+  "Manifest.Permission.ReadMediaVisualUserSelected"
 )
 
 for api_reference in "${required_api_references[@]}"; do

@@ -19,9 +19,12 @@ readonly system_image="system-images;android-$runtime_api;google_apis;x86_64"
 readonly media_collection_uri="content://media/external_primary/images/media"
 readonly pending_media_collection_uri="$media_collection_uri?includePending=1"
 readonly remote_media_path="/data/local/tmp/cotton-runtime.png"
+readonly excluded_remote_media_path="/data/local/tmp/cotton-excluded.png"
 readonly legacy_media_collection_uri="content://media/external/images/media"
 readonly legacy_media_directory="/sdcard/Pictures/CottonRuntime"
 readonly legacy_media_path="$legacy_media_directory/cotton-runtime.png"
+readonly excluded_legacy_media_directory="/sdcard/Pictures/CottonExcluded"
+readonly excluded_legacy_media_path="$excluded_legacy_media_directory/cotton-excluded.png"
 # PackageManager coalesces component-state writes for ten seconds.
 readonly package_state_persistence_delay_seconds=15
 
@@ -33,6 +36,7 @@ emulator_log="${RUNNER_TEMP:-/tmp}/cotton-android-emulator.log"
 avd_home="${RUNNER_TEMP:-/tmp}/cotton-android-avd"
 emulator_pid=""
 remote_media_uri=""
+excluded_media_uri=""
 
 export ANDROID_AVD_HOME="$avd_home"
 
@@ -134,8 +138,8 @@ fi
 first_output="$(run_diagnostic scan-media first)"
 first_files="$(read_metric "$first_output" files)"
 first_hashed="$(read_metric "$first_output" hashed)"
-if [[ "$first_output" == *":failed:"* || "$first_files" -lt 1 || "$first_hashed" -lt 1 ]]; then
-  printf 'Initial MediaStore scan did not hash the test media: %s\n' "$first_output" >&2
+if [[ "$first_output" == *":failed:"* || "$first_files" -ne 1 || "$first_hashed" -ne 1 ]]; then
+  printf 'Scoped MediaStore scan did not isolate and hash the test folder: %s\n' "$first_output" >&2
   exit 1
 fi
 

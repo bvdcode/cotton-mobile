@@ -58,3 +58,17 @@ cotton_tap_clickable_from_xml() {
   read -r tap_x tap_y < "$point_file"
   cotton_adb shell input tap "$tap_x" "$tap_y"
 }
+
+cotton_long_press_from_xml() {
+  local xml_file="$1"
+  local needle="$2"
+  local point_file="$evidence_dir/long-press-point.txt"
+  local press_x
+  local press_y
+
+  "$SCRIPT_DIR/smoke-support.py" node-center "$xml_file" "$needle" \
+    --mode exact \
+    > "$point_file"
+  read -r press_x press_y < "$point_file"
+  cotton_adb shell input touchscreen swipe "$press_x" "$press_y" "$press_x" "$press_y" 1000
+}

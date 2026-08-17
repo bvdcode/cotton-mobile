@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 // Copyright (c) 2025–2026 Vadim Belov <https://belov.us>
 
+using CommunityToolkit.Maui;
 using Cotton.Mobile.Resources.Localization;
 using Cotton.Mobile.Services;
 using Cotton.Mobile.ViewModels;
@@ -26,6 +27,7 @@ namespace Cotton.Mobile
             MauiAppBuilder builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseMauiCommunityToolkit()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .ConfigureMauiHandlers(handlers =>

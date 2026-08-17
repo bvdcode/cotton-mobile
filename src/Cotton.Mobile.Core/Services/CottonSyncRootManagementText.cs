@@ -7,22 +7,22 @@ namespace Cotton.Mobile.Services
 {
     public static class CottonSyncRootManagementText
     {
-        public static string StopAction => CoreResources.StopSyncingAction;
+        public static string DeleteAction => CoreResources.DeleteSyncAction;
         public static string PauseAction => CoreResources.PauseAction;
         public static string ResumeAction => CoreResources.ResumeAction;
         public static string CancelAction => CoreResources.CancelAction;
         public static string CloseAction => CoreResources.CloseAction;
-        public static string StopMessage => CoreResources.StopSyncingMessage;
+        public static string DeleteMessage => CoreResources.DeleteSyncMessage;
         public static string PausedStatusText => CoreResources.PausedStatus;
         public static string RootPausedStatus => CoreResources.RootPausedStatus;
         public static string RootMissingStatus => CoreResources.RootMissingStatus;
         public static string PauseFailedStatus => CoreResources.PauseFailedStatus;
         public static string ResumeFailedStatus => CoreResources.ResumeFailedStatus;
-        public static string StopFailedStatus => CoreResources.StopFailedStatus;
+        public static string DeleteFailedStatus => CoreResources.DeleteFailedStatus;
 
-        public static string CreateStopTitle(string folderName)
+        public static string CreateDeleteTitle(string folderName)
         {
-            return CoreResources.Format(CoreResources.StopSyncingTitleFormat, NormalizeFolderName(folderName));
+            return CoreResources.Format(CoreResources.DeleteSyncTitleFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreateFailureDetailsTitle(string folderName)
@@ -32,9 +32,9 @@ namespace Cotton.Mobile.Services
                 NormalizeFolderName(folderName));
         }
 
-        public static string CreateStoppedStatus(string folderName)
+        public static string CreateDeletedStatus(string folderName)
         {
-            return CoreResources.Format(CoreResources.StoppedSyncingFormat, NormalizeFolderName(folderName));
+            return CoreResources.Format(CoreResources.DeletedSyncFormat, NormalizeFolderName(folderName));
         }
 
         public static string CreatePausedStatus(string folderName)

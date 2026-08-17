@@ -52,6 +52,40 @@ namespace Cotton.Mobile.Tests
 
             Assert.False(item.CanRunNow);
             Assert.True(item.IsPaused);
+            Assert.Equal(CottonSyncRootAction.Resume, item.ContextAction.Action);
+            Assert.Equal("Resume", item.ContextActionText);
+        }
+
+        [Fact]
+        public void LongPressModeReplacesPauseWithDeleteAction()
+        {
+            CottonSyncRootListItem item = new(
+                SyncTestRootFactory.CreateDocumentTreeRoot(),
+                isPaused: false);
+
+            Assert.Equal(CottonSyncRootAction.Pause, item.ContextAction.Action);
+            Assert.Equal("Pause", item.ContextActionText);
+
+            item.SetDeleteMode(true);
+
+            Assert.True(item.IsDeleteMode);
+            Assert.Equal(CottonSyncRootAction.Delete, item.ContextAction.Action);
+            Assert.Equal("Delete sync", item.ContextActionText);
+
+            item.SetDeleteMode(false);
+
+            Assert.False(item.IsDeleteMode);
+            Assert.Equal(CottonSyncRootAction.Pause, item.ContextAction.Action);
+        }
+
+        [Fact]
+        public void ReconnectStatusRetainsItsActionWithoutOverflowMenu()
+        {
+            CottonSyncRootListItem item = new(
+                SyncTestRootFactory.CreateDocumentTreeRoot(CottonSyncRootPermissionStatus.Revoked));
+
+            Assert.True(item.CanUseStatusAction);
+            Assert.Same(item.PrimaryAction, item.StatusAction);
         }
 
         [Fact]

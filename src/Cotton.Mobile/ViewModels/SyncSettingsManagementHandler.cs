@@ -30,7 +30,7 @@ namespace Cotton.Mobile.ViewModels
             _logger = logger;
         }
 
-        public async Task StopRootAsync(
+        public async Task DeleteRootAsync(
             ISyncSettingsViewState state,
             CottonSyncRootListItem item,
             CancellationToken cancellationToken = default)
@@ -40,7 +40,7 @@ namespace Cotton.Mobile.ViewModels
             Uri? instanceUri = state.InstanceUri;
             if (instanceUri is null)
             {
-                state.Status = CottonSyncRootManagementText.StopFailedStatus;
+                state.Status = CottonSyncRootManagementText.DeleteFailedStatus;
                 return;
             }
 
@@ -58,9 +58,9 @@ namespace Cotton.Mobile.ViewModels
 
                 cancellationToken.ThrowIfCancellationRequested();
                 bool confirmed = await _dialogService.ShowConfirmationAsync(
-                    CottonSyncRootManagementText.CreateStopTitle(root.CloudFolder.FolderName),
-                    CottonSyncRootManagementText.StopMessage,
-                    CottonSyncRootManagementText.StopAction,
+                    CottonSyncRootManagementText.CreateDeleteTitle(root.CloudFolder.FolderName),
+                    CottonSyncRootManagementText.DeleteMessage,
+                    CottonSyncRootManagementText.DeleteAction,
                     CottonSyncRootManagementText.CancelAction);
                 cancellationToken.ThrowIfCancellationRequested();
                 if (!confirmed)
@@ -69,10 +69,10 @@ namespace Cotton.Mobile.ViewModels
                     return;
                 }
 
-                bool removed = await _rootManager.StopAsync(instanceUri, root, cancellationToken);
+                bool removed = await _rootManager.DeleteAsync(instanceUri, root, cancellationToken);
                 state.ShowRoots(await _rootProvider.LoadAsync(state, cancellationToken));
                 state.Status = removed
-                    ? CottonSyncRootManagementText.CreateStoppedStatus(root.CloudFolder.FolderName)
+                    ? CottonSyncRootManagementText.CreateDeletedStatus(root.CloudFolder.FolderName)
                     : CottonSyncRootManagementText.RootMissingStatus;
             }
             catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -82,8 +82,8 @@ namespace Cotton.Mobile.ViewModels
             }
             catch (Exception exception)
             {
-                CottonLog.Warning(_logger, "Failed to stop Cotton mobile sync root.", exception);
-                state.Status = CottonSyncRootManagementText.StopFailedStatus;
+                CottonLog.Warning(_logger, "Failed to delete Cotton mobile sync root.", exception);
+                state.Status = CottonSyncRootManagementText.DeleteFailedStatus;
             }
             finally
             {

@@ -21,21 +21,21 @@
   <data name="SyncCompletedFormat" xml:space="preserve"><value>Sync complete. {0}.</value></data>
   <data name="UploadNewFilesAction" xml:space="preserve"><value>Upload new files</value></data>
   <data name="UploadingFolderFormat" xml:space="preserve"><value>Uploading new files from {0}…</value></data>
-  <data name="StopSyncingAction" xml:space="preserve"><value>Stop syncing</value></data>
+  <data name="DeleteSyncAction" xml:space="preserve"><value>Delete sync</value></data>
   <data name="PauseAction" xml:space="preserve"><value>Pause</value></data>
   <data name="ResumeAction" xml:space="preserve"><value>Resume</value></data>
   <data name="CancelAction" xml:space="preserve"><value>Cancel</value></data>
   <data name="FailureDetailsTitleFormat" xml:space="preserve"><value>Why {0} failed</value></data>
   <data name="CloseAction" xml:space="preserve"><value>Close</value></data>
-  <data name="StopSyncingMessage" xml:space="preserve"><value>This stops future sync for this folder. Files already on this device are not deleted.</value></data>
+  <data name="DeleteSyncMessage" xml:space="preserve"><value>This deletes the sync setup. Files on this device and in Cotton Cloud are not deleted.</value></data>
   <data name="PausedStatus" xml:space="preserve"><value>Paused</value></data>
   <data name="RootPausedStatus" xml:space="preserve"><value>Sync paused. Resume this folder first.</value></data>
   <data name="RootMissingStatus" xml:space="preserve"><value>Sync folder is no longer configured.</value></data>
   <data name="PauseFailedStatus" xml:space="preserve"><value>Could not pause syncing this folder.</value></data>
   <data name="ResumeFailedStatus" xml:space="preserve"><value>Could not resume syncing this folder.</value></data>
-  <data name="StopFailedStatus" xml:space="preserve"><value>Could not stop syncing this folder.</value></data>
-  <data name="StopSyncingTitleFormat" xml:space="preserve"><value>Stop syncing {0}?</value></data>
-  <data name="StoppedSyncingFormat" xml:space="preserve"><value>Stopped syncing {0}.</value></data>
+  <data name="DeleteFailedStatus" xml:space="preserve"><value>Could not delete sync for this folder.</value></data>
+  <data name="DeleteSyncTitleFormat" xml:space="preserve"><value>Delete sync for {0}?</value></data>
+  <data name="DeletedSyncFormat" xml:space="preserve"><value>Deleted sync for {0}.</value></data>
   <data name="PausedSyncingFormat" xml:space="preserve"><value>Paused syncing {0}.</value></data>
   <data name="ResumedSyncingFormat" xml:space="preserve"><value>Resumed syncing {0}.</value></data>
   <data name="RunNowAction" xml:space="preserve"><value>Run now</value></data>

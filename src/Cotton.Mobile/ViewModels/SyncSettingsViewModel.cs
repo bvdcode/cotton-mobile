@@ -47,6 +47,9 @@ namespace Cotton.Mobile.ViewModels
             AddRootCommand = CreateAddRootCommand();
             RunAllCommand = CreateRunAllCommand();
             RootActionCommand = CreateRootActionCommand();
+            ToggleRootDeleteModeCommand = new RelayCommand<CottonSyncRootListItem>(
+                ToggleRootDeleteMode,
+                CanToggleRootDeleteMode);
         }
 
         private AsyncRelayCommand CreateLoadCommand()
@@ -98,6 +101,8 @@ namespace Cotton.Mobile.ViewModels
 
         public IAsyncRelayCommand<CottonSyncRootActionRequest> RootActionCommand { get; }
 
+        public IRelayCommand<CottonSyncRootListItem> ToggleRootDeleteModeCommand { get; }
+
         public RangeObservableCollection<CottonSyncRootListItem> Roots { get; } = [];
 
         public bool IsBusy
@@ -111,6 +116,7 @@ namespace Cotton.Mobile.ViewModels
                     AddRootCommand.NotifyCanExecuteChanged();
                     RunAllCommand.NotifyCanExecuteChanged();
                     RootActionCommand.NotifyCanExecuteChanged();
+                    ToggleRootDeleteModeCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -179,6 +185,7 @@ namespace Cotton.Mobile.ViewModels
             OnPropertyChanged(nameof(IsRunAllVisible));
             RunAllCommand.NotifyCanExecuteChanged();
             AddRootCommand.NotifyCanExecuteChanged();
+            ToggleRootDeleteModeCommand.NotifyCanExecuteChanged();
         }
 
         private void ShowRoots(SyncRootCollectionSnapshot collection)
@@ -199,6 +206,7 @@ namespace Cotton.Mobile.ViewModels
             }
 
             RunAllCommand.NotifyCanExecuteChanged();
+            ToggleRootDeleteModeCommand.NotifyCanExecuteChanged();
         }
 
         private bool CanRunAll()
@@ -219,7 +227,7 @@ namespace Cotton.Mobile.ViewModels
                 CottonSyncRootAction.UsePrimaryAction => request.Item.CanUsePrimaryAction,
                 CottonSyncRootAction.Pause => request.Item.CanPauseSync,
                 CottonSyncRootAction.Resume => request.Item.CanResumeSync,
-                CottonSyncRootAction.Stop => request.Item.CanStopSync,
+                CottonSyncRootAction.Delete => request.Item.CanDeleteSync,
                 _ => throw new ArgumentOutOfRangeException(
                     nameof(request),
                     request.Action,
@@ -233,6 +241,7 @@ namespace Cotton.Mobile.ViewModels
         {
             ArgumentNullException.ThrowIfNull(request);
             CottonSyncRootListItem item = request.Item;
+            ClearRootDeleteModes();
             switch (request.Action)
             {
                 case CottonSyncRootAction.ShowFailureDetails:
@@ -255,12 +264,35 @@ namespace Cotton.Mobile.ViewModels
                     await _managementHandler.SetRootPausedAsync(this, item, isPaused: false, cancellationToken);
                     break;
 
-                case CottonSyncRootAction.Stop:
-                    await _managementHandler.StopRootAsync(this, item, cancellationToken);
+                case CottonSyncRootAction.Delete:
+                    await _managementHandler.DeleteRootAsync(this, item, cancellationToken);
                     break;
 
                 default:
                     throw new InvalidOperationException("Sync-root action is not supported.");
+            }
+        }
+
+        private bool CanToggleRootDeleteMode(CottonSyncRootListItem? item)
+        {
+            return !IsBusy && item is not null && Roots.Contains(item);
+        }
+
+        private void ToggleRootDeleteMode(CottonSyncRootListItem? item)
+        {
+            ArgumentNullException.ThrowIfNull(item);
+            bool enableDeleteMode = !item.IsDeleteMode;
+            foreach (CottonSyncRootListItem root in Roots)
+            {
+                root.SetDeleteMode(enableDeleteMode && ReferenceEquals(root, item));
+            }
+        }
+
+        private void ClearRootDeleteModes()
+        {
+            foreach (CottonSyncRootListItem root in Roots)
+            {
+                root.SetDeleteMode(false);
             }
         }
 

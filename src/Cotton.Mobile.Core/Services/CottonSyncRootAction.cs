@@ -9,6 +9,6 @@ namespace Cotton.Mobile.Services
         UsePrimaryAction,
         Pause,
         Resume,
-        Stop,
+        Delete,
     }
 }

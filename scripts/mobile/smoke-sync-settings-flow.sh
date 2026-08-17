@@ -46,12 +46,8 @@ verify_sync_dashboard() {
     "Seeded sync-root path is not compact."
   cotton_require_xml_text "$sync_dashboard_xml" "Reconnect" \
     "Seeded root does not expose its local-access status."
-  cotton_require_xml_text "$sync_dashboard_xml" "Reconnect local folder" \
-    "Seeded root does not expose reconnect."
   cotton_require_xml_text "$sync_dashboard_xml" "Pause" \
     "Seeded root does not expose pause."
-  cotton_require_xml_text "$sync_dashboard_xml" "Stop syncing" \
-    "Seeded root does not expose stop."
 
   if ! cotton_xml_has_text "$sync_dashboard_xml" "Archive → Pictures / Archive"; then
     capture_scrolled_sync_dashboard "$scrolled_prefix"
@@ -65,6 +61,44 @@ verify_sync_dashboard() {
     "Paused seeded sync-root status is not visible."
   cotton_require_xml_text "$sync_dashboard_scrolled_xml" "Resume" \
     "Paused root does not expose resume."
+}
+
+verify_pause_resume_actions() {
+  cotton_tap_clickable_from_xml "$sync_dashboard_xml" "Pause"
+  sleep 1
+  wait_for_sync_dashboard
+  cotton_require_xml_text "$sync_dashboard_xml" "Paused syncing 2026." \
+    "Pause action did not update the selected sync root."
+
+  cotton_tap_clickable_from_xml "$sync_dashboard_xml" "Resume"
+  sleep 1
+  wait_for_sync_dashboard
+  cotton_require_xml_text "$sync_dashboard_xml" "Resumed syncing 2026." \
+    "Resume action did not update the selected sync root."
+  cotton_require_xml_text "$sync_dashboard_xml" "Pause" \
+    "Resumed sync root did not restore the pause action."
+}
+
+verify_delete_action() {
+  local delete_mode_xml="$evidence_dir/50-sync-dashboard-delete-mode.xml"
+  local confirmation_xml="$evidence_dir/51-sync-dashboard-delete-confirmation.xml"
+
+  cotton_long_press_from_xml "$sync_dashboard_xml" "2026 → Pictures / 2026"
+  sleep 1
+  cotton_capture_screen "50-sync-dashboard-delete-mode"
+  cotton_require_xml_text "$delete_mode_xml" "Delete sync" \
+    "Long press did not expose the delete action."
+
+  cotton_tap_clickable_from_xml "$delete_mode_xml" "Delete sync"
+  sleep 1
+  cotton_capture_screen "51-sync-dashboard-delete-confirmation"
+  cotton_require_xml_text "$confirmation_xml" "Delete sync for 2026?" \
+    "Delete action did not ask for confirmation."
+  cotton_require_xml_text "$confirmation_xml" \
+    "This deletes the sync setup. Files on this device and in Cotton Cloud are not deleted." \
+    "Delete confirmation does not explain its scope."
+  cotton_tap_clickable_from_xml "$confirmation_xml" "Cancel"
+  sleep 1
 }
 
 verify_refresh_action() {

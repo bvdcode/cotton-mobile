@@ -49,6 +49,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Cotton.Mobile.Core\Cotton.Mobile.Core.csproj" />
+		<PackageReference Include="CommunityToolkit.Maui" Version="15.0.0" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
 		<PackageReference Include="Cotton.Sdk" Version="$(CottonSdkVersion)" />
 		<PackageReference Include="Microsoft.Maui.Controls" Version="10.0.90" />

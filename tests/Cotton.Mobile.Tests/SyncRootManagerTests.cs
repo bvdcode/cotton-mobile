@@ -124,7 +124,7 @@ namespace Cotton.Mobile.Tests
         }
 
         [Fact]
-        public async Task StopClearsUploadReceiptsForDeviceToCloudRoot()
+        public async Task DeleteClearsUploadReceiptsForDeviceToCloudRoot()
         {
             CottonSyncRootSnapshot root = CreateRoot(CottonSyncRootPermissionStatus.Available);
             await _rootStore.SaveAsync(InstanceUri, [root]);
@@ -136,7 +136,7 @@ namespace Cotton.Mobile.Tests
                     "version-1",
                     [new CottonContentRevisionSnapshot("content://media/1", 1, TestContentHashes.First)]));
 
-            bool removed = await _manager.StopAsync(InstanceUri, root);
+            bool removed = await _manager.DeleteAsync(InstanceUri, root);
 
             Assert.True(removed);
             Assert.Empty(await _rootStore.LoadAsync(InstanceUri));

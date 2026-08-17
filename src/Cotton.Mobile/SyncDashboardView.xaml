@@ -4,6 +4,7 @@
              xmlns:localization="clr-namespace:Cotton.Mobile.Resources.Localization"
              xmlns:services="clr-namespace:Cotton.Mobile.Services;assembly=Cotton.Mobile.Core"
              xmlns:symbols="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+             xmlns:toolkit="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
              xmlns:viewModels="clr-namespace:Cotton.Mobile.ViewModels"
              x:Class="Cotton.Mobile.SyncDashboardView"
              x:Name="SyncViewRoot"
@@ -93,7 +94,16 @@
                 </CollectionView.ItemsLayout>
                 <CollectionView.ItemTemplate>
                     <DataTemplate x:DataType="services:CottonSyncRootListItem">
-                        <Grid RowDefinitions="Auto,Auto">
+                        <Grid x:Name="SyncRootRow"
+                              RowDefinitions="Auto,Auto"
+                              SemanticProperties.Hint="{x:Static localization:AppResources.DeleteSyncHint}">
+                            <Grid.Behaviors>
+                                <toolkit:TouchBehavior
+                                    BindingContext="{Binding Source={x:Reference SyncViewRoot}, Path=BindingContext, x:DataType=ContentView}"
+                                    LongPressCommand="{Binding ToggleRootDeleteModeCommand, x:DataType=viewModels:SyncSettingsViewModel}"
+                                    LongPressCommandParameter="{Binding Source={x:Reference SyncRootRow}, Path=BindingContext, x:DataType=Grid}"
+                                    ShouldMakeChildrenInputTransparent="False" />
+                            </Grid.Behaviors>
                             <VerticalStackLayout Padding="4,10"
                                                  Spacing="8">
                                 <Grid ColumnDefinitions="Auto,*,Auto"
@@ -126,7 +136,7 @@
                                         <HorizontalStackLayout Spacing="6">
                                             <HorizontalStackLayout.GestureRecognizers>
                                                 <TapGestureRecognizer Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
-                                                                      CommandParameter="{Binding FailureDetailsAction}" />
+                                                                      CommandParameter="{Binding StatusAction}" />
                                             </HorizontalStackLayout.GestureRecognizers>
                                             <ActivityIndicator IsRunning="{Binding IsRunning}"
                                                                IsVisible="{Binding IsRunning}"
@@ -138,7 +148,7 @@
                                                    VerticalOptions="Center">
                                                 <Label.Triggers>
                                                     <DataTrigger TargetType="Label"
-                                                                 Binding="{Binding CanShowFailureDetails}"
+                                                                 Binding="{Binding CanUseStatusAction}"
                                                                  Value="True">
                                                         <Setter Property="TextDecorations"
                                                                 Value="Underline" />
@@ -149,14 +159,29 @@
                                     </VerticalStackLayout>
 
                                     <Button Grid.Column="2"
-                                            Clicked="ShowRootActions"
-                                            SemanticProperties.Description="{x:Static localization:AppResources.MoreActionsDescription}"
+                                            Command="{Binding BindingContext.RootActionCommand, Source={x:Reference SyncViewRoot}}"
+                                            CommandParameter="{Binding ContextAction}"
+                                            SemanticProperties.Description="{Binding ContextActionText}"
                                             StyleClass="TextButton, TouchTarget">
                                         <Button.ImageSource>
                                             <FontImageSource FontFamily="MaterialOutlined"
-                                                             Glyph="{x:Static symbols:MaterialOutlined.More_vert}"
+                                                             Glyph="{x:Static symbols:MaterialOutlined.Pause}"
                                                              Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                                         </Button.ImageSource>
+                                        <Button.Triggers>
+                                            <DataTrigger TargetType="Button"
+                                                         Binding="{Binding ContextAction.Action}"
+                                                         Value="{x:Static services:CottonSyncRootAction.Resume}">
+                                                <Setter Property="ImageSource"
+                                                        Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Play_arrow}, Color={AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}}" />
+                                            </DataTrigger>
+                                            <DataTrigger TargetType="Button"
+                                                         Binding="{Binding ContextAction.Action}"
+                                                         Value="{x:Static services:CottonSyncRootAction.Delete}">
+                                                <Setter Property="ImageSource"
+                                                        Value="{FontImageSource FontFamily=MaterialOutlined, Glyph={x:Static symbols:MaterialOutlined.Delete}, Color={AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}}" />
+                                            </DataTrigger>
+                                        </Button.Triggers>
                                     </Button>
                                 </Grid>
 

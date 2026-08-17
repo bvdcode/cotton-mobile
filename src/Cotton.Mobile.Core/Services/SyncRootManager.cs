@@ -72,7 +72,7 @@ namespace Cotton.Mobile.Services
             return new SyncRootCollectionSnapshot(accountRoots, pausedRootIds, accountStatuses);
         }
 
-        public async Task<bool> StopAsync(
+        public async Task<bool> DeleteAsync(
             Uri instanceUri,
             CottonSyncRootSnapshot root,
             CancellationToken cancellationToken = default)

@@ -14,6 +14,7 @@ namespace Cotton.Mobile.Services
         private CottonSyncProgressSnapshot? _progress;
         private string? _lastSyncStatusText;
         private string? _failureDetails;
+        private bool _isDeleteMode;
 
         public CottonSyncRootListItem(
             CottonSyncRootSnapshot root,
@@ -38,14 +39,13 @@ namespace Cotton.Mobile.Services
             CanRunNow = !isPaused && CottonSyncRootRunCapability.CanRun(root);
             CanReconnect = root.NeedsUserAction;
             CanUsePrimaryAction = CanReconnect || CanRunNow;
-            PrimaryActionText = CreatePrimaryActionText(root, CanReconnect, CanRunNow);
             _idleStatusText = CreateStatusText(root, isPaused, IsUnsupportedLocalRoot);
             IsReady = !isPaused && !IsUnsupportedLocalRoot && CanRunNow;
             _requiresAttention = !isPaused
                 && (IsUnsupportedLocalRoot || root.NeedsUserAction || !root.CanRunSync || !CanRunNow);
             CanPauseSync = !isPaused;
             CanResumeSync = isPaused;
-            CanStopSync = true;
+            CanDeleteSync = true;
             IsDividerVisible = isDividerVisible;
             FailureDetailsAction = new CottonSyncRootActionRequest(
                 this,
@@ -55,7 +55,7 @@ namespace Cotton.Mobile.Services
                 CottonSyncRootAction.UsePrimaryAction);
             PauseAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Pause);
             ResumeAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Resume);
-            StopAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Stop);
+            DeleteAction = new CottonSyncRootActionRequest(this, CottonSyncRootAction.Delete);
             SetAutomaticStatus(automaticStatus);
         }
 
@@ -78,6 +78,14 @@ namespace Cotton.Mobile.Services
         public string FailureDetails => _failureDetails ?? string.Empty;
 
         public CottonSyncRootActionRequest FailureDetailsAction { get; }
+
+        public CottonSyncRootActionRequest? StatusAction => CanShowFailureDetails
+            ? FailureDetailsAction
+            : CanReconnect
+                ? PrimaryAction
+                : null;
+
+        public bool CanUseStatusAction => StatusAction is not null;
 
         public bool IsProgressDeterminate =>
             (_progress?.Stage == CottonSyncProgressStage.ApplyingChanges
@@ -120,8 +128,6 @@ namespace Cotton.Mobile.Services
 
         public bool CanUsePrimaryAction { get; }
 
-        public string PrimaryActionText { get; }
-
         public CottonSyncRootActionRequest PrimaryAction { get; }
 
         public bool IsPaused { get; }
@@ -140,13 +146,43 @@ namespace Cotton.Mobile.Services
 
         public CottonSyncRootActionRequest ResumeAction { get; }
 
-        public bool CanStopSync { get; }
+        public bool CanDeleteSync { get; }
 
-        public string StopSyncActionText { get; } = CottonSyncRootManagementText.StopAction;
+        public string DeleteSyncActionText { get; } = CottonSyncRootManagementText.DeleteAction;
 
-        public CottonSyncRootActionRequest StopAction { get; }
+        public CottonSyncRootActionRequest DeleteAction { get; }
+
+        public bool IsDeleteMode
+        {
+            get => _isDeleteMode;
+            private set
+            {
+                if (SetProperty(ref _isDeleteMode, value))
+                {
+                    OnPropertyChanged(nameof(ContextAction));
+                    OnPropertyChanged(nameof(ContextActionText));
+                }
+            }
+        }
+
+        public CottonSyncRootActionRequest ContextAction => IsDeleteMode
+            ? DeleteAction
+            : IsPaused
+                ? ResumeAction
+                : PauseAction;
+
+        public string ContextActionText => IsDeleteMode
+            ? DeleteSyncActionText
+            : IsPaused
+                ? ResumeSyncActionText
+                : PauseSyncActionText;
 
         public bool IsDividerVisible { get; }
+
+        public void SetDeleteMode(bool isDeleteMode)
+        {
+            IsDeleteMode = isDeleteMode;
+        }
 
         public void ApplyProgress(CottonSyncProgressSnapshot progress)
         {
@@ -209,25 +245,9 @@ namespace Cotton.Mobile.Services
                 OnPropertyChanged(nameof(CanShowFailureDetails));
                 OnPropertyChanged(nameof(FailureDetails));
                 OnPropertyChanged(nameof(IsAttentionVisible));
+                OnPropertyChanged(nameof(StatusAction));
+                OnPropertyChanged(nameof(CanUseStatusAction));
             }
-        }
-
-        private static string CreatePrimaryActionText(
-            CottonSyncRootSnapshot root,
-            bool canReconnect,
-            bool canRunNow)
-        {
-            if (canReconnect)
-            {
-                return root.StatusText;
-            }
-
-            if (canRunNow)
-            {
-                return CoreResources.RunNowAction;
-            }
-
-            return string.Empty;
         }
 
         private static string CreateStatusText(

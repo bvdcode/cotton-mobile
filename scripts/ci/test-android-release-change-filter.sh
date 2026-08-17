@@ -56,9 +56,19 @@ upload_script_head="$(commit_all "upload script")"
 output="$("$detect_script" "$workflow_head" "$upload_script_head")"
 assert_contains "$output" "Android release required: true"
 
+printf '#!/usr/bin/env bash\n' > scripts/mobile/test-android-runtime.sh
+runtime_test_head="$(commit_all "runtime test")"
+output="$("$detect_script" "$upload_script_head" "$runtime_test_head")"
+assert_contains "$output" "Android release required: true"
+
+printf '#!/usr/bin/env bash\n' > scripts/mobile/android-runtime-support.sh
+runtime_support_head="$(commit_all "runtime support")"
+output="$("$detect_script" "$runtime_test_head" "$runtime_support_head")"
+assert_contains "$output" "Android release required: true"
+
 printf '#!/usr/bin/env bash\n' > scripts/mobile/detect-android-release-changes.sh
 detector_head="$(commit_all "detector")"
-output="$("$detect_script" "$upload_script_head" "$detector_head")"
+output="$("$detect_script" "$runtime_support_head" "$detector_head")"
 assert_contains "$output" "Android release required: true"
 
 printf '#!/usr/bin/env bash\n' > scripts/mobile/resolve-android-release-policy.sh

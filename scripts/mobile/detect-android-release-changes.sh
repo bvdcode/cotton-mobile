@@ -20,6 +20,9 @@ requires_android_release() {
     scripts/mobile/compute-android-release-version.sh|scripts/mobile/create-android-release-notes.sh)
       return 0
       ;;
+    scripts/mobile/test-android-runtime.sh|scripts/mobile/android-runtime-*.sh)
+      return 0
+      ;;
     scripts/mobile/detect-android-release-changes.sh|scripts/mobile/resolve-android-release-policy.sh|scripts/mobile/upload-google-play.py)
       return 0
       ;;
